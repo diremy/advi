@@ -30,7 +30,35 @@ Lyon -- May $22$ 2002
 1985: first V1.17 Caml compiler (Ascander Suarez)\\
 1990: Caml V3.1, ultimate version based on JIT (Pierre Weis)\\
 
-\newslide{Past}
+
+\newslide{Caml V3.1}
+
+- general ``or'' patterns (binding variables), \\
+- general ``alias'' patterns (pat as pat),  \\
+- guarded patterns (when construct), \\
+- lazy values (for sum and product types) with
+automatic forcing at access time during pattern matching, \\
+- declared mutable constructors and labels, with proper contents
+binding during pattern matching, \\
+- dynamic values with coercion via pattern matching, \\
+- parsing facilities included in the language (grammars), \\
+- pretty-printing facilities (printf and format).
+
+
+\newslide{Caml V3.1 extensions}
+
+- extensible sum types (new constructors can be added after
+the initial definition of the type), \\
+- polymorphic overloading with static resolution
+(overloading accepted iff there is only one acceptable solution in the
+context), \\
+- fully typechecked forward declarations for inter-modules
+recursion (polymorphic forwards used type scheme unification), \\
+- introspection facilities (lexical and syntactic macro generation), \\
+- generalized looping construct, \\
+- a polymorphic ``print'' primitive.
+
+\newslide{Past of Objective Caml}
 
 1991: Caml Light compiler on PC (Xavier Leroy, Damien Doligez)\\
 1996: modules, functors, native code compiler (Xavier Leroy)\\
@@ -100,7 +128,8 @@ discriminating hackers!''
 {\bf ICFP programming contest}:\\
 1999: 2nd (after a specialized C program)\\
 2000: 1st and 2nd\\
-2001: 2nd (after a Haskell program)
+2001: 2nd (after a Haskell program) \\
+2002: 1st
 
 {\bf Benchmarks}: consistantly faster than any other functionnal programming
 languages, between C++ and C-O2
@@ -271,8 +300,10 @@ val insert : 'a -> 'a list -> 'a list = <fun>
 
 Exists in Caml from the very beginning.
 
--- No counterparts in typing.\\
--- Raised with {\tt raise}, handled via pattern matching.
+-- Fully type-checked.\\
+-- No counterparts in function types.\\
+-- Raised using {\tt raise}, caught with {\tt try}.\\
+-- Selection via pattern matching.
 \begin{small}\begin{alltt}
 try
   let oc = open_out "/tmp/foo" in
@@ -281,7 +312,7 @@ with
 | System_error s -> eprintf ("System error " ^ s)
 | x -> eprintf "Spurious exception"; raise x
 \end{alltt}\end{small}
-Exceptions are first class citizens!
+In addition, exceptions are first class citizens!
 
 \newslide{Code safety}
 
