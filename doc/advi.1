@@ -2,7 +2,7 @@
 .\" First parameter, NAME, should be all caps
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
-.TH ADVI SECTION "September 20, 2003"
+.TH ADVI SECTION "September 01, 2004"
 .\" Please adjust this date whenever revising the manpage.
 .\"
 .\" Some roff macros, for reference:
@@ -38,7 +38,7 @@ companion advi.sty LaTeX package.
 
 .P
 .B advi
-is also a full-fledge graphical presenter that provides a wealth of
+is also a full-fledged graphical presenter that provides a wealth of
 effects via
 .B embedded
 applications. Embedded applications are arbitrary Unix programs that
@@ -91,6 +91,8 @@ table of contents or as small images set up on a page)
 \- Transitions (slide animations when changing pages)
 
 \- Text movements
+
+\- Integrated ``Laser pointer'' feature to point to the slide
 
 Notice that advi needs the `kpsewhich' tool in order to find and
 recompile PK fonts.  (This program is part of the `kpathsea' library
@@ -485,6 +487,10 @@ This program is distributed under the GNU LGPL.
 .SH SEE ALSO
 .BR latex (1),
 .BR kpsewhich (1),
+.BR The Active-DVI user's manual
+.UR http://caml.inria.fr/advi/manual.dvi
+and the FAQ
+.UR http://caml.inria.fr/advi/faq.html
 .SH AUTHORS
 Jun Furuse <Jun.Furuse@inria.fr>
 Pierre Weis <Pierre.Weis@inria.fr>

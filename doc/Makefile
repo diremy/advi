@@ -44,11 +44,13 @@ clean::
 	$(RM) *.pdf *.pdfm
 	$(RM) *.haux *.htoc *.ima
 	$(MAKE) -f MakeHTML clean
+	$(MAKE) -f MakeMan clean
 
 distribute: clean all web
 
 web:
 	$(MAKE) -f MakeHTML all
+	$(MAKE) -f MakeMan all
 
 manual.dvi: manual.sty splash_contents.tex \
        scratch_write_splash_contents.tex scratch_draw_splash_contents.tex

@@ -1,21 +1,20 @@
 #*********************************************************************#
 #                                                                     #
-#                                Advi
-##
+#                             Active-DVI                              #
 #                                                                     #
-#            Pierre Weis, projet Cristal, INRIA Rocquencourt
-##
+#                   Projet Cristal, INRIA Rocquencourt                #
 #                                                                     #
-#  Copyright 2003 Institut National de Recherche en Informatique et
-##
-#  en Automatique.  Distributed only by permission.
-##
+#  Copyright 2004 Institut National de Recherche en Informatique et   #
+#  en Automatique.  All rights reserved.  This file is distributed    #
+#  under the terms of the GNU Lesser General Public License.          #
+#                                                                     #
+#  Pierre Weis.                                                       #
 #                                                                     #
 #*********************************************************************#
 
 # $Id$
 
-# Makefile for and man files generation.
+# The makefile for man files generation.
 
 include ../Makefile.config
 
@@ -38,7 +37,7 @@ clean:
 	$(RM) $(FILES)
 
 manpages:
-        for i in $(SRC)/*.m; do \
+	for i in $(SRC)/*.m; do \
 	    cp $$i ./`basename $$i .m`.$(MANEXT); \
 	done
 
