@@ -35,6 +35,7 @@ Options.add
 type busy =
    | Free | Busy | Pause | Disk | Question | Selection | Move
    | Resize | Resize_w | Resize_h | Resize_d
+   | Change_Keymap
 ;;
 
 let free_cursor = GraphicsY11.Cursor_left_ptr;;
@@ -48,6 +49,7 @@ let resize_cursor = GraphicsY11.Cursor_diamond_cross;;
 let resize_cursor_w = GraphicsY11.Cursor_sb_right_arrow;;
 let resize_cursor_h = GraphicsY11.Cursor_sb_up_arrow;;
 let resize_cursor_d = GraphicsY11.Cursor_sb_down_arrow;;
+let change_keymap_cursor = GraphicsY11.Cursor_plus;;
 
 let set_cursor, restore_cursor, last_cursor =
   let last_cursor = ref free_cursor in
@@ -90,7 +92,8 @@ let set = function
   | Resize -> set_cursor resize_cursor
   | Resize_w -> set_cursor resize_cursor_w
   | Resize_h -> set_cursor resize_cursor_h
-  | Resize_d -> set_cursor resize_cursor_d;;
+  | Resize_d -> set_cursor resize_cursor_d
+  | Change_Keymap -> set_cursor change_keymap_cursor;;
 
 let temp_set c =
   stop_busy ();
@@ -107,9 +110,14 @@ let temp_set c =
     | Resize_w -> resize_cursor_w
     | Resize_h -> resize_cursor_h
     | Resize_d -> resize_cursor_d
+    | Change_Keymap -> change_keymap_cursor
   in
   GraphicsY11.set_cursor c;;
 
 let stop () =
  non_busy (last_cursor ());;
 
+let busy_exec f () =
+ set Busy;
+ f ();
+ stop ();;
