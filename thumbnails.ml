@@ -44,11 +44,19 @@ Options.add
  "STRING\tFix thumbnails size (default 24x32).";;
 
 let save n =
- if !thumbnails then
- let fname =
-   Filename.concat (Userfile.get_cache_dir ())
-    (Printf.sprintf "shot%d.jpg" n) in
- save_gr_image fname 0 0 !thumbnails_size_w !thumbnails_size_h;;
+  if !thumbnails then
+    let jpegfname =
+      Filename.concat (Userfile.get_cache_dir ())
+	(Printf.sprintf "shot%d.jpg" n) in
+    let bbfname =
+      Filename.concat (Userfile.get_cache_dir ())
+	(Printf.sprintf "shot%d.bb" n) in
+      save_gr_image jpegfname 0 0 !thumbnails_size_w !thumbnails_size_h;
+      let bboc = open_out bbfname in
+      let s = Printf.sprintf "%%%%BoundingBox: 0 0 %d %d\n" !thumbnails_size_w !thumbnails_size_h in
+	output_string bboc s;
+	flush bboc;
+	close_out bboc;;
 
 
 
