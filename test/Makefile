@@ -31,3 +31,6 @@ endif
 clean:
 	$(RM) a.out *.aux *.log demo.dvi trans.dvi background.dvi *~
 	$(RM) $(MLPROG) *.cmi *.cmo
+
+test_subwindow:
+	ocamlc -custom -I .. unix.cma graphics.cma -ccopt -L.. ../grY11.o ../events.o ../graphicsY11.cmo test_subwindow.ml 
