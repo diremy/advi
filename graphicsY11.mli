@@ -213,6 +213,11 @@ external wait_next_event : event list -> status = "gry_wait_event"
            outside the range [0..size_x()-1, 0..size_y()-1]. Keypresses
            are queued, and dequeued one by one when the [Key_pressed]
            event is specified. *)
+val retrieve_events : unit -> unit
+        (* Instead of having the event retrieving periodically called by
+	   the interval timer like Graphics, we have this manual event 
+	   retrieving function. Call [initalize] first to disable 
+	   the original Graphics's interval timer call. *)
 
 (*** Mouse and keyboard polling *)
 
@@ -241,3 +246,6 @@ val display_mode : bool -> unit
 (** As [point_color] but according to values of [global_display_mode] *)
 val point_color : int -> int -> int
 
+val init : unit -> unit
+(** We have to call this function to disable the original Graphics
+   event retrieving facility. *)

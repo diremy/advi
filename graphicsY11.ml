@@ -326,6 +326,7 @@ type event =
   | Poll
 
 external wait_next_event : event list -> status = "gry_wait_event"
+external retrieve_events : unit -> unit = "gry_retrieve_events"
 
 let mouse_pos () =
   let e = wait_next_event [Poll] in (e.mouse_x, e.mouse_y)
@@ -358,4 +359,10 @@ let point_color x y =
   if !global_display_mode_status then window_color x y
   else Graphics.point_color x y 
 
+(* Graphics.sigio_signal is not exported. We declare it here again. *)
+external sigio_signal: unit -> int = "gr_sigio_signal"
+let init () =
+  (* we disable the original Graphics event retrieveing system *)
+  Sys.set_signal (sigio_signal ()) Sys.Signal_ignore
+;;
 
