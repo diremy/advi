@@ -19,13 +19,18 @@
 
 (* A simple terminal to handle simple editions and user's interaction. *)
 
-type term = private {
+type x = int
+and y = int
+and w = int
+and h = int;;
+ 
+type term;; (* = private {
  (* Character contents of the terminal. *)
  mutable lines : string array;
  (* Height in lines. *)
- mutable height : int;
+ mutable height : h;
  (* Width in characters. *)
- mutable width : int;
+ mutable width : w;
  (* Height in pixels. *)
  mutable gheight : int;
  (* Width in pixels. *)
@@ -34,8 +39,8 @@ type term = private {
  mutable gx : int;
  mutable gy : int;
  (* Coordinates of the cursor in the char array. *)
- mutable cursor_x : int;
- mutable cursor_y : int;
+ mutable cursor_x : x;
+ mutable cursor_y : y;
  (* Colors *)
  mutable cursor_color : Graphics.color;
  mutable foreground_color : Graphics.color;
@@ -43,16 +48,16 @@ type term = private {
  mutable border_width_color : Graphics.color;
  mutable title_color : Graphics.color;
  (* Decorations *)
- mutable border_width : int;
+ mutable border_width : w;
  mutable title : string;
  (* Font *)
  mutable font : string;
  mutable font_size_x : int;
  mutable font_size_y : int;
-};;
+};;*)
 
-val htab : term -> int -> unit;;
-val vtab : term -> int -> unit;;
+val htab : term -> x -> unit;;
+val vtab : term -> y -> unit;;
 
 type prompt = string;;
 type prefill = string;;
@@ -64,20 +69,21 @@ val ask : term -> prompt -> string;;
 val print_str : term -> string -> unit;;
 val print_chr : term -> char -> unit;;
 
-val make_term : int -> int -> int -> int -> term;;
- (** [make_term x y nl ncol] build a terminal at position [x, y] with
+val make_term : x -> y -> w -> h -> term;;
+ (** [make_term x y ncol nl] build a terminal at position [x, y] with
   [nl] lines and [ncol] columns. *)
 val draw_term : term -> unit;;
 val set_title : term -> string -> unit;;
+val set_excursion : term -> x -> y -> h -> w -> unit;;
 val edit : term -> unit;;
 
 val make_term_gen :
  Graphics.color -> Graphics.color ->
  int -> Graphics.color ->
  Graphics.color -> Graphics.color ->
- int -> int -> int -> int -> term;;
+ x -> y -> w -> h -> term;;
 
- (** [make_term_gen fg bg bw bc tc cc x y nl ncol] build a terminal at
+ (** [make_term_gen fg bg bw bc tc cc x y ncol nl] build a terminal at
   position [x, y] with [nl] lines and [ncol] columns. Colors [fg],
   [bg], [bc], [tc], and [cc] are respectively the background, foreground,
   border, title, and cursor colors. [bw] is the width of the border width. *)
