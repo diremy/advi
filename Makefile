@@ -59,15 +59,13 @@ DVI	  = input dvicolor table pkfont ttfont jfm search \
 	    font glyph devfont \
 	    units dimension
 EFFECTS	  = drawimage gs transimpl embed
-GUI	  = scratch driver thumbnails dviview
-UNUSED	  = shot
+GUI	  = scratch driver thumbnails shot dviview
 
 MODULES	  = $(MISC) $(OPTIONS) $(GRAPHICS) \
             $(SYMBOL) $(DVI) \
             $(EFFECTS) grdev addons \
 	    dvi \
-	    $(GUI) main \
-	    $(UNUSED)
+	    $(GUI) main
 
 LIBRARIES = graphics unix str $(CAMLIMAGESLIBS)
 CLIBS	  = graphics unix str
