@@ -995,6 +995,7 @@ let mouse_y = ref 0;;
 let button = ref false;;
 
 let reposition ~x ~y ~w ~h =
+  Gs.flush ();
   Gs.kill ();
   GraphicsY11.reposition x y w h;
   let x = Graphics.size_x ()
