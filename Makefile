@@ -47,9 +47,11 @@ CMX_OBJS  = $(addsuffix .cmx, $(MODULES))
 ifeq ($(HAVE_CDK),true)
 CMA_OBJS  = `cdk_config $(LIBRARIES)` 
 CMXA_OBJS = `cdk_config -opt $(LIBRARIES)`
+CAMLP4_FLAG = `cdk_config -c camlp4`
 else
 CMA_OBJS  = $(addsuffix .cma, $(LIBRARIES))
 CMXA_OBJS = $(addsuffix .cmxa, $(LIBRARIES))
+CAMLP4_FLAG = -I +camlp4
 endif
 
 BYTE_OBJS = $(COBJS) $(CMA_OBJS) $(CMO_OBJS)
@@ -89,7 +91,7 @@ ttfont.ml: Makefile.config ttfont.mlp ifdef.cmo
 	camlp4o pa_ifdef.cmo ./ifdef.cmo -impl ttfont.mlp > $@
 
 ifdef.cmo: ifdef.ml
-	$(OCAMLC) -c -I +camlp4 $<
+	$(OCAMLC) -c $(CAMLP4_FLAG) $<
 
 grY11.o : grY11.c
 	$(OCAMLC) -ccopt "$(CFLAGS)" -c $<
