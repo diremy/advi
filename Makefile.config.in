@@ -1,5 +1,7 @@
-RM=rm -f
+RM=rm -fR
 MV=mv -f
+CP=cp -pfR
+
 MANEXT=1
 MANDIR=@mandir@
 CAML=@CAML@

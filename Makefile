@@ -4,9 +4,10 @@
 #                                                                     #
 #                   Projet Cristal, INRIA Rocquencourt                #
 #                                                                     #
-#  Copyright 2002 Institut National de Recherche en Informatique et   #
-#  en Automatique.  All rights reserved.  This file is distributed    #
-#  under the terms of the GNU Lesser General Public License.          #
+#  Copyright 2002-2004,                                               #
+#  Institut National de Recherche en Informatique et en Automatique.  #
+#  All rights reserved. This file is distributed under the terms of   #
+#  the GNU Lesser General Public License.                             #
 #                                                                     #
 #  Jun Furuse, Didier Rémy and Pierre Weis.                           #
 #  Contributions by Roberto Di Cosmo, Didier Le Botlan,               #
@@ -28,6 +29,8 @@ PATCHLEVEL=0
 VERSION=$(MAINVERSION).$(SUBVERSION)
 FULLVERSION=$(VERSION).$(PATCHLEVEL)
 OLDVERSION=1.5
+
+PACKAGEFULLNAME=$(PACKAGE)-$(FULLVERSION)
 
 CVSRELEASETAG=$(PACKAGE)-$(MAINVERSION)_$(SUBVERSION)_$(PATCHLEVEL)
 ANNOUNCEFILE=Announce-$(FULLVERSION)
@@ -112,9 +115,9 @@ CFLAGS=$(EXTRA_X11) $(X11_INCLUDES) -O $(BYTCCCOMPOPTS)
 
 default: Makefile.config $(INSTALLTARGET) $(HELPFILES)
 
-all: byt opt documentation
-allopt: opt documentation
-allbyt: byt documentation
+all: byt opt doc
+allopt: opt doc
+allbyt: byt doc
 
 i_want_opt:
 	@echo "************************** Warning ***************************"
@@ -140,40 +143,15 @@ opt: $(EXEC).opt
 $(EXEC).opt: $(COBJS) $(CMX_OBJS)
 	$(OCAMLOPT) $(INCLUDES) $(OPT_OBJS) $(LINK_OPTS) -o $(EXEC).opt
 
+documentation:
+	cd doc; $(MAKE) all
+
+doc:
+	if test $(HAVE_HEVEA) = "true"; then ($(MAKE) documentation); fi
+
 config.ml: config.ml.in configure
 	./configure
 
-# Automatic handling of versionning
-version:
-	for i in $(PACKAGEVERSIONFILES) $(DOCVERSIONFILES); do \
-	echo $$i; \
-	$(MV) $$i $$i~; \
-	sed -e '/ersion/s/$(OLDVERSION)/$(VERSION)/' $$i~ | \
-	sed -e '/year/s/$(OLDYEAR)/$(YEAR)/' > $$i; \
-	done
-
-.c.o:
-	$(OCAMLC) -ccopt "$(CFLAGS)" -c $<
-
-.SUFFIXES: .ml .mli .cmo .cmi .cmx
-
-.mli.cmi:
-	$(OCAMLC) $(INCLUDES) -c $<
-
-.ml.cmo:
-	$(OCAMLC) $(INCLUDES) -c $<
-
-.ml.cmx:
-	$(OCAMLOPT) $(INCLUDES) -c $<
-
-count:
-	wc -l *.ml *.mli | sort -n
-
-clean::
-	rm -f *.cm[oix] *.o $(EXEC).opt $(EXEC).byt *~ .depend *.log *.aux
-	cd test && $(MAKE) clean
-	cd doc && $(MAKE) clean
-	cd examples && $(MAKE) clean
 
 veryclean: clean
 	rm -f Makefile.config config.cache config.log \
@@ -211,6 +189,12 @@ MLFILES = $(addsuffix .ml, $(MODULES))
 Makefile.config: Makefile.config.in
 	./configure_FreeBSD
 
+clean::
+	$(RM) $(EXEC).opt $(EXEC).byt
+	cd test && $(MAKE) clean
+	cd doc && $(MAKE) clean
+	cd examples && $(MAKE) clean
+
 .depend:: Makefile
 	$(OCAMLDEP) *.mli $(MLFILES) > .depend
 	gcc -MM -I$(CAMLDIR) $(CFLAGS) $(COBJS:.o=.c) \
@@ -218,70 +202,15 @@ Makefile.config: Makefile.config.in
 	chmod a+w .depend
 
 # Just for the authors
-ADVI=advi-$(VERSION)
-WEBSITEDIR=/net/pauillac/infosystems/www/advi
-FTPSITEDIR=/net/pauillac/infosystems/ftp/cristal/advi
 
-# make splash builds splash.dvi
-doc/splash.dvi:
-	(cd doc; $(MAKE) splash.dvi)
-
-doc/scratch_draw_splash.dvi:
-	(cd doc; $(MAKE) scratch_draw_splash.dvi)
-
-doc/scratch_write_splash.dvi:
-	(cd doc; $(MAKE) scratch_write_splash.dvi)
-
-documentation:
-	if test $(HAVE_HEVEA) = "true"; then (cd doc; $(MAKE) all); fi
-
-distribute: tar_and_web
-
-tar_and_web:
-	$(MAKE) web_site;
-	cp -pr release/bazar-ocaml/advi/LGPL \
-		release/bazar-ocaml/advi/README \
-		release/bazar-ocaml/advi/INDEX $(FTPSITEDIR)
-	cd release; mv bazar-ocaml/advi $(ADVI); \
-	tar cvf $(ADVI).tar $(ADVI); \
-	gzip $(ADVI).tar; \
-	mv -f $(ADVI).tar.gz $(FTPSITEDIR)
-	$(MAKE) clean_release
-	cd advi-development-kit; $(MAKE) distribute
-
-web:
-	$(MAKE) web_site
-	$(MAKE) clean_release
-
-web_site:
-	$(MAKE) clean_release
-	(cd test; $(MAKE) all jpdemo.dvi)
-	(cd doc; $(MAKE) distribute)
-	rm -rf $(WEBSITEDIR)/*
-	- mkdir $(WEBSITEDIR)
-	mkdir release
-	cd release; cvs co bazar-ocaml/advi; \
-	cp -p ../test/*.dvi bazar-ocaml/advi/test/; \
-	cp -p ../doc/*.dvi bazar-ocaml/advi/doc/; \
-	cp -p ../doc/*.ps bazar-ocaml/advi/doc/; \
-	cp -p ../doc/*.pdf bazar-ocaml/advi/doc/; \
-	cp -p ../doc/*.html bazar-ocaml/advi/doc/; \
-	cp -p ../doc/*.htm bazar-ocaml/advi/doc/; \
-	cp -p ../doc/*.gif bazar-ocaml/advi/doc/; \
-	cp -p ../doc/*.jpg bazar-ocaml/advi/doc/; \
-	cp -p ../doc/style.css bazar-ocaml/advi/doc/; \
-	cp -p -r ../doc/pngs bazar-ocaml/advi/doc/; \
-	find . -name '.cvsignore' -print | xargs rm; \
-	find . -name 'CVS' -print | xargs rm -rf; \
-	find . -name 'advi-development-kit' -print | xargs rm -rf; \
-	(cd bazar-ocaml/advi/doc/; \
-	ln -sf eng.html index.html; cd ../../..); \
-	cp -pr bazar-ocaml/advi/doc/* $(WEBSITEDIR)
-	- chgrp -R caml $(WEBSITEDIR)
-	- chmod -R g+w $(WEBSITEDIR)
-
-clean_release:
-	rm -rf release
+# Automatic handling of versionning
+version:
+	for i in $(PACKAGEVERSIONFILES) $(DOCVERSIONFILES); do \
+	echo $$i; \
+	$(MV) $$i $$i~; \
+	sed -e '/ersion/s/$(OLDVERSION)/$(VERSION)/' $$i~ | \
+	sed -e '/year/s/$(OLDYEAR)/$(YEAR)/' > $$i; \
+	done
 
 distribution: all documentation
 	$(MAKE) -f Makefile.distrib distribute
@@ -289,22 +218,18 @@ distribution: all documentation
 release:
 	cvs rtag -R $(CVSRELEASETAG) bazar-ocaml/$(PACKAGE)
 
+unrelease:
+	$(RM) ./release
+	cvs rtag -R -d $(CVSRELEASETAG) bazar-ocaml/$(PACKAGE)
+
 announce:
 	mail -n -s "New release of $(PACKAGE)" \
 		caml-announce@inria.fr < $(ANNOUNCEFILE)
 
 package_distribution: release distribution announce	
 
-#rpm:
-#	if test -d /usr/src/redhat; then rpmdir=/usr/src/redhat; \
-#	else if test -d /usr/src/RPM; then rpmdir=/usr/src/RPM; \
-#	else if test -d /usr/src/rpm; then rpmdir=/usr/src/rpm; fi fi; fi; \
-#	if test "X$$rpmdir" = "X"; then \
-#		echo "cannot create rpm"; exit 2; fi; \
-#	echo YOU NEED TO SU ROOT; \
-#	su root -c "cp $(FTPSITEDIR)/$(ADVI).tar.gz $$rpmdir/SOURCES/; \
-#	rpm -ba --clean ./advi.spec"; \
-#	cp $$rpmdir/SRPMS/advi-$(VERSION)-1.src.rpm \
-#	   $$rpmdir/RPMS/*/advi-$(VERSION)-1.*.rpm $(FTPSITEDIR)
+count:
+	wc -l *.ml *.mli | sort -n
 
+include Makefile.common
 include .depend
