@@ -156,6 +156,8 @@ tar_and_web: tex/splash.dvi
 	find . -name '.cvsignore' -print | xargs rm; \
 	find . -name 'CVS' -print | xargs rm -rf; \
 	find . -name 'advi-development-kit' -print | xargs rm -rf; \
+	(cd bazar-ocaml/advi/doc/; \
+	ln -s index.html index-en.html; cd ../../..); \
 	cp -pr bazar-ocaml/advi/doc/* $(WEBSITEDIR)
 	- chgrp -R caml $(WEBSITEDIR)
 	- chmod -R g+w $(WEBSITEDIR)

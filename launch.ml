@@ -83,7 +83,7 @@ Options.add
   "-exec"
   (Arg.Unit
     (fun () ->
-      Misc.warning "Setting policy to -exec";
+      if !policy <> Exec then Misc.warning "Setting policy to -exec";
       set_policy Exec))
   "\tExec mode: allow all external applications to be executed";;
 
@@ -91,7 +91,7 @@ Options.add
   "-safer"
   (Arg.Unit
     (fun () ->
-      Misc.warning "Setting policy to -safer";
+      if !policy <> Safer then Misc.warning "Setting policy to -safer";
       set_policy Safer))
   "\tSafer mode: external applications are never launched";;
 
@@ -99,7 +99,7 @@ Options.add
   "-ask"
   (Arg.Unit
     (fun () ->
-      Misc.warning "Setting policy to -ask";
+      if !policy <> Ask then Misc.warning "Setting policy to -ask";
       set_policy Ask))
   "\tAsk mode: ask confirmation before launching an external application\n\
    \t(the default policy mode)";;
