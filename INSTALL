@@ -29,8 +29,8 @@ Install the binary(ies) by hand, by simply copying it (them) to the
 appropriate directories.
 
 Copy the files advi.sty to a place where it is a visible latex package.
-(kpewhich advi.pro should succeed from when LaTeX is run)
+(kpewhich advi.pro should succeed from where LaTeX is run)
 
 Copy the file advi.pro to a place where is it a visible PS header.
-(kpewhich advi.pro should succeed from when advi is run)
+(kpewhich advi.pro should succeed from where advi is run)
 
