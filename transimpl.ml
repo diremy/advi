@@ -246,7 +246,7 @@ let pathelem_inst (optx, opty, opts, optr) (x, y, s, r) =
     List.map
       (function
        | Some v, _ -> v
-       | None, v -> prerr_endline (Printf.sprintf "%f <\n" v); v)
+       | None, v -> v)
       (List.combine [optx; opty; opts; optr] [x; y; s; r]) in
   match l with
   | [actx; acty; acts; actr] -> (actx, acty, acts, actr)
