@@ -207,7 +207,7 @@ let main () =
       show_cursor (Cursor_id i);
       loop ()
     end in
-  loop 0;
+  loop ();
   List.iter show_cursor known_cursors;;
 
 main ();;
