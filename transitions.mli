@@ -5,7 +5,7 @@ type direction =
 
 type t =
     TransNone
-  | TransSlide of int * direction
-  | TransWipe of int * direction
-  | TransBlock of int * direction
+  | TransSlide of int option * direction
+  | TransWipe of int option * direction
+  | TransBlock of int option * direction
 ;;
