@@ -70,12 +70,12 @@ Press any key to launch  the demo:
 
 \noindent
 \begin{tabular}{l}
-\advirecord{H}{Hamlet}: Do you see yonder cloud that's almost in shape of a \advirecord{C}{camel}?\\
-\advirecord{P}{Plonius}: By th'mass, and 'tis like a \advirecord{C}{camel}, indeed\\
-\advirecord{H}{Hamlet}: Methinks it is like a \advirecord{W}{weasel}\\
-\advirecord{P}{Plonius}: It is back'd like a \advirecord{W}{weasel}\\
-\advirecord{H}{Hamlet}: Or like a \advirecord{W2}{whale}?\\
-\advirecord{P}{Plonius}: Very like a \advirecord{W2}{whale}.
+\advirecord{H}{Hamlet}: Do you see yonder cloud that's almost in shape of a \advirecord{C}{\rnode{CN1}{camel}}?\\
+\advirecord{P}{Plonius}: By th'mass, and 'tis like a \advirecord{C}{\rnode{CN2}{camel}}, indeed\\
+\advirecord{H}{Hamlet}: Methinks it is like a \advirecord{W}{\rnode{CN3}{weasel}}\\
+\advirecord{P}{Plonius}: It is back'd like a \advirecord{W}{\rnode{CN4}{weasel}}\\
+\advirecord{H}{Hamlet}: Or like a \advirecord{W2}{\rnode{CN5}{whale}}?\\
+\advirecord{P}{Plonius}: Very like a \advirecord{W2}{\rnode{CN6}{whale}}.
 \end{tabular}\\
 \noindent
 {\small \hfill (\advirecord{H}{Hamlet}  by William Shakespeare, Act III, scene 3.)}
@@ -83,7 +83,7 @@ Press any key to launch  the demo:
 \begin{enumerate}
 \item Who are they ? \advirecord{H}{Hamlet} and \advirecord{P}{Plonius}.
 \advirecord{Q2}{\item What do they say ? \advirecord{C}{Camel}, \advirecord{W}{weasel} and \advirecord{W2}{whale}.}
-\advirecord{Q3}{\item And what do they actually see ? \advirecord{C2}{Of course, \textcolor{red}{CAML!}}}
+\advirecord{Q3}{\item And what do they actually see ? \advirecord{C2}{Of course, \rnode{CN0}{\textcolor{red}{CAML!}}}}
 \end{enumerate}
 
 \adviwait
@@ -107,6 +107,12 @@ Press any key to launch  the demo:
 \adviplay{Q3}
 \adviwait
 \adviplay{C2}
+\nccurve[linecolor=red,linewidth=3pt,angleA=0,angleB=280]{->}{CN0}{CN1}
+\nccurve[linecolor=red,linewidth=3pt,angleA=0,angleB=350]{->}{CN0}{CN2}
+\nccurve[linecolor=red,linewidth=3pt,angleA=0,angleB=350]{->}{CN0}{CN3}
+\nccurve[linecolor=red,linewidth=3pt,angleA=0,angleB=355]{->}{CN0}{CN4}
+\nccurve[linecolor=red,linewidth=3pt,angleA=0,angleB=0]{->}{CN0}{CN5}
+\nccurve[linecolor=red,linewidth=3pt,angleA=0,angleB=0]{->}{CN0}{CN6}
 \vfill
 
 \vfill
