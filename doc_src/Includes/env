@@ -1,3 +1,4 @@
+CamlVersion="3.08.2"
 version = 1.6
 fullversion = "1.6.0"
 MOZILLA = "\\$MOZILLA"
