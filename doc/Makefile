@@ -44,13 +44,12 @@ distribute: clean all web
 web:
 	$(MAKE) -f MakeHTML all
 
-manual.dvi: splash_contents.tex scratch_write_splash_contents.tex \
-	 scratch_draw_splash_contents.tex
+manual.dvi: manual.sty splash_contents.tex \
+       scratch_write_splash_contents.tex scratch_draw_splash_contents.tex
+	$(LATEX) manual.tex && $(LATEX) manual.tex
 splash.dvi: splash_contents.tex
 scratch_write_splash.dvi: scratch_write_splash_contents.tex
 scratch_draw_splash.dvi: scratch_draw_splash_contents.tex
-
-manual.dvi: manual.sty
 
 ifeq ($(HAVE_HEVEA),true)
 manual.html: manual.tex manual.sty macros.hva 
