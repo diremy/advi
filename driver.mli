@@ -52,6 +52,7 @@ module type DEVICE = sig
   type app_type = Sticky | Persistent | Embedded
   val embed_app : string -> app_type -> string -> int -> int -> int -> int -> unit
   val kill_embedded_apps : unit -> unit 
+  val kill_embedded_app : string -> unit 
 
   module H :
       sig 

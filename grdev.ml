@@ -562,20 +562,22 @@ let raw_embed_app command app_type app_name width height x y =
 let hashtbl_find t p =
  let res = ref None in
  try
-  Hashtbl.iter (fun _ x -> if p x then (res := Some x; raise Exit)) t;
+  Hashtbl.iter (fun k x -> if p x then (res := Some (k, x); raise Exit)) t;
   raise Exit
  with Exit ->
   match !res with
   | None -> raise Not_found
-  | Some x -> x;;
+  | Some k_x -> k_x;;
+
+let find_embedded_app app_name =
+  hashtbl_find app_table (fun (_, name, _) -> name = app_name);;
 
 let map_embed_app command app_type app_name width height x y =
- let (app_type, app_name, wid) =
-  hashtbl_find app_table (fun (_, name, _) -> name = app_name) in
+ let _, (app_type, app_name, wid) = find_embedded_app app_name in
  GraphicsY11.map_subwindow wid;;
 
 let unmap_embed_app command app_type app_name width height x y =
- let (app_type, app_name, wid) =
+ let _, (app_type, app_name, wid) =
   hashtbl_find app_table (fun (_, name, _) -> name = app_name) in
  GraphicsY11.unmap_subwindow wid;;
 
@@ -595,26 +597,23 @@ let embed_app command app_type app_name width height x y =
      if not (already_launched app_name) then
      embeds :=
       (fun () -> raw_embed_app command app_type app_name width height x y) ::
-      !embeds;
-(*     persists := 
-      (fun () -> map_embed_app command app_type app_name width height x y) ::
-      !persists;*)
+      !embeds
   | Persistent ->
      if not (already_launched app_name) then
      embeds :=
       (fun () -> 
-prerr_endline ("Launching " ^ app_name);
-raw_embed_app command app_type app_name width height x y) ::
+         (* prerr_endline ("Launching " ^ app_name); *)
+         raw_embed_app command app_type app_name width height x y) ::
       !embeds;
      persists :=
       (fun () ->
-prerr_endline ("Mapping " ^ app_name);
- map_embed_app command app_type app_name width height x y) ::
+         (* prerr_endline ("Mapping " ^ app_name);*)
+         map_embed_app command app_type app_name width height x y) ::
       !persists;
      unmap_embeds :=
       (fun () ->
-prerr_endline ("Unmapping " ^ app_name);
- unmap_embed_app command app_type app_name width height x y) ::
+         (* prerr_endline ("Unmapping " ^ app_name);*)
+         unmap_embed_app command app_type app_name width height x y) ::
       !unmap_embeds;
   | Embedded ->
      embeds :=
@@ -622,25 +621,31 @@ prerr_endline ("Unmapping " ^ app_name);
       !embeds;;
 
 let kill_app pid wid =
+  prerr_endline (Printf.sprintf "Killing %d in window %s " pid wid);
+  Hashtbl.remove app_table pid;
   (try Unix.kill pid 9 with _ -> ());
-  GraphicsY11.close_subwindow wid
-;;
-
-let kill_apps app_type = 
-  let removed = ref [] in
-  Hashtbl.iter (fun pid (apt, app_name, wid) -> 
-    if app_type = apt then begin
-      removed := pid :: !removed;
-      kill_app pid wid
-    end) app_table;
-  List.iter (Hashtbl.remove app_table) !removed;
   while
     try
       let pid, _ = Unix.waitpid [Unix.WNOHANG] 0 in
       pid <> 0
     with
       Unix.Unix_error(Unix.ECHILD,_,_) -> false
-  do () done;;
+  do () done;
+  GraphicsY11.close_subwindow wid;;
+
+let kill_embedded_app app_name =
+  prerr_endline (Printf.sprintf "Killing %s" app_name);
+  let pid, (app_type, app_name, wid) = find_embedded_app app_name in
+  kill_app pid wid;;
+
+let kill_apps app_type = 
+  begin match app_type with
+  | Persistent -> prerr_endline "Killing persistent apps"
+  | Sticky -> prerr_endline "Killing sticky apps"
+  | Embedded -> prerr_endline "Killing embedded apps"
+  end;  
+  Hashtbl.iter (fun pid (apt, app_name, wid) -> 
+    if app_type = apt then kill_app pid wid) app_table;;
 
 let unmap_persistent_apps () =
   List.iter (fun f -> f ()) (List.rev !unmap_embeds);
@@ -651,7 +656,8 @@ let kill_embedded_apps () =
   unmap_persistent_apps ();;
 
 let kill_persistent_apps () =
-  kill_apps Sticky; kill_apps Persistent;;
+  kill_apps Sticky;
+  kill_apps Persistent;;
 
 (*** HTML interaction ***)
 

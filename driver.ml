@@ -62,6 +62,7 @@ module type DEVICE = sig
   type app_type = Sticky | Persistent | Embedded
   val embed_app : string -> app_type -> string -> int -> int -> int -> int -> unit
   val kill_embedded_apps : unit -> unit 
+  val kill_embedded_app : string -> unit 
 
   module H :
       sig 
@@ -652,6 +653,19 @@ module Make(Dev : DEVICE) = struct
     (* prerr_endline (Printf.sprintf "%d x %d pixel" width_pixel height_pixel); *)
     file, (llx, lly, urx, ury), (width_pixel, height_pixel)
 
+  let kill_embed_special st s =
+    (* advi: kill name=? *)
+    let records = List.map (fun (k,v) -> 
+      String.lowercase k, v) (split_record s)
+    in
+    let app_name =
+      try
+  	 unquote (List.assoc "name" records)
+      with Not_found -> raise (Failure ("No command to kill in " ^ s))
+    in
+    Dev.kill_embedded_app app_name
+    
+
   let app_type_of_string = function
     | "sticky" -> Dev.Sticky
     | "persistent" -> Dev.Persistent
@@ -1100,6 +1114,7 @@ module Make(Dev : DEVICE) = struct
       	else if has_prefix "advi: wait " s then wait_special st s
 	else if has_prefix "advi: embed " s then embed_special st s
 	else if has_prefix "advi: trans " s then transition_special st s
+	else if has_prefix "advi: kill " s then kill_embed_special st s
       	else if has_prefix "advi:" s then 
 	  raise (Failure ("unknown special: "^ s))
       end else if has_prefix "pn " s || has_prefix "pa " s
