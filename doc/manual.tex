@@ -121,24 +121,24 @@ displaying a slide.
 \usepackage{advi-slides}
 
 \begin{document}
-
-\firstslide{My talk}\centerline{{\large \bf \em Me Myself}}
+\firstslide{My talk}
+ \vspace*{5cm}\centerline{{\large \bf \em Me Myself}}
 \newslide{Plan}
- Nparts in this talk: Part 1, Part 2, and Partn.
+	This talk is divided into $n$ parts: Part 1, Part 2, and Partn.
 \newslide{Part 1}
- This is my first talk
+	This is my first talk using {\ActiveDVI}!
 \newslide{Part 2}
- Bla bla.
+	Bla bla.
 \newslide{Part n}
- Blz blz.
-\lastslide{Conclusion}
- This was my first talk.
+	Blz blz.
+\newslide{Conclusion}
+	This was my first talk.
 \end{document}
 \end{verbatim}
 
-More involved examples (including Makefiles to compile the whoe thing)
+More involved examples (including Makefiles to compile the whole thing)
 can be found in the directory {\tt examples} of the distribution. (In
-particular {\tt examples/slitex}.)
+particular, this example is given in {\tt examples/slitex/simplistic}.)
 
 \section{Safety concerns when using the {\ActiveDVI} previewer}
 
