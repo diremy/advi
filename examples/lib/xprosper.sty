@@ -1,5 +1,5 @@
 %% Modify by Didier Remy (Didier.Remy@inria .fr)
-%% From the original Prosper package, described below
+%% From the original Prosper package, described below:
 %==============================================================================
 % Prosper -- (prosper.cls) Class file
 % A LaTeX class for creating slides
@@ -42,6 +42,8 @@
 \newif \ifDVItoPS \DVItoPSfalse
 \newif \ifAccumulate \Accumulatefalse
 
+\def \ppp@overlay@patch {\let \@overlay \pdf@overlay}
+\DeclareOption {dvipdfm}{\AtBeginDocument{\ppp@overlay@patch}}
 \DeclareOption {psbubble}{\PassOptionsToPackage{ps}{bubble}}
 
 \ProcessOptions
@@ -354,6 +356,9 @@
   \ignorespaces}
 } % AtBeginDocument
 
+\def \pdf@overlay #1{\colors@cancel{white}\aftergroup \colors@restore}
+
+
 
 
 % \part
@@ -476,21 +481,22 @@
 \let \color@pst@color \pst@color
 \let \color@color \color
 \def \relax@color#1{}
-\def \colors@cancel
-  {\color{gray}\global \let \color \relax@color 
+\def \colors@cancel #1{%
+   \color{#1}\global \let \color \relax@color 
    \global \let \pst@color \relax@color}
 \def \colors@restore
   {\global \let \color \color@color
-   \global \let \pst@color \color@pst@color 
-   \color{black}}
+   \global \let \pst@color \color@pst@color}
+\def \colors@restore@black {\colors@restore \color{black}}
 \def \GrayAfterPause
-   {\ifpause{\color{black}}{\let \pause \gray@pause \colors@cancel}}
+   {\ifpause{\color{black}}{\let \pause \gray@pause \colors@cancel{gray}}}
 \def \pause@item {\pause \local@item}
 \def \pause@item@ {\let \item \pause@item \local@item}
 \def \PauseAfterItem {\let \local@item \item \let \item \pause@item@}
 \let \CancelColors \colors@cancel
-\let \RestoreColors \colors@restore
-\def \NormalPause {\let \pause \normal@pause \colors@restore}
+\def \CancelColorsGray {\colors@cancel{gray}}
+\let \RestoreColorsBlack \colors@restore@black
+\def \NormalPause {\let \pause \normal@pause \colors@restore@black}
 
 \newcommand {\alloverlays}[1][t]
   {\DVItoPStrue 
