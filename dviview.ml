@@ -1102,9 +1102,36 @@ let scale n st =
   update_dvi_size true st;
   redraw st;;
 
+(* Keymaps kinds for Active-DVI:
+   - Default_keymap is for normal key bindings.
+   - Control_x_keymap is for ^X prefixed key bindings. *)
+type keymap =
+   | Control_x_keymap
+   | Default_keymap;;
+
+let set_keymap, get_keymap =
+  let map = ref Default_keymap in
+  let get_keymap () = !map in
+  let set_keymap km =
+     match km with
+     | Default_keymap ->
+         Busy.restore_cursor ();
+         map := km
+     | Control_x_keymap ->
+         Busy.temp_set Busy.Change_Keymap;
+         map := km in
+  (set_keymap, get_keymap)
+;;
+
 module B =
   struct
-    let nop st = ()
+    let nop c st =
+      Misc.warning (Printf.sprintf "Unbound key %C" c)
+    let control_x_nop c st =
+      set_keymap Default_keymap;
+      Misc.warning (Printf.sprintf "Unbound Control-x key %C" c)
+    let set_control_x_keymap st =
+      set_keymap Control_x_keymap
     let push_next_page st =
       push_page false (st.page_number + max 1 st.num) st
     let next_pause st =
@@ -1273,11 +1300,10 @@ module B =
 
     let make_thumbnails st =
        Launch.without_launching
-         (fun () ->
-            Busy.set Busy.Busy;
-            make_thumbnails st;
-            Busy.stop ();
-            if not st.aborted then show_toc st)
+         (Busy.busy_exec
+           (fun () ->
+              make_thumbnails st;
+              if not st.aborted then show_toc st))
          ()
 
     let show_toc st =
@@ -1321,17 +1347,27 @@ module B =
     let duplex = duplex_switch false
     let duplex_sync = duplex_switch true
     let toggle_autoswitch st = toggle_autoswitch ()
+
+    let revert_to_default_keymap f st =
+      Busy.busy_exec f ();
+      set_keymap Default_keymap
+
+    let save_page = revert_to_default_keymap Shot.save_page
+
+    let abort_key st =
+      set_keymap Default_keymap
   end;;
 
-let bindings = Array.create 256 B.nop;;
+let bind_key tbl (key, action) = tbl.(int_of_char key) <- action;;
 
-let bind (key, action) = bindings.(int_of_char key) <- action;;
+let default_keymap = Array.init 256 (fun i -> B.nop (char_of_int i));;
+let bind_default_key = bind_key default_keymap;;
 
-let bind_keys () =
+let bind_default_keys () =
   for i = 0 to 9 do
-    bind (char_of_int (int_of_char '0' + i), B.digit i)
+    bind_default_key (char_of_int (int_of_char '0' + i), B.digit i)
   done;
-  List.iter bind [
+  List.iter bind_default_key [
    (* Default key bindings. *)
 
    (* General purpose keys. *)
@@ -1424,7 +1460,28 @@ let bind_keys () =
    '', B.toggle_autoswitch;
    'w', B.duplex;
    'W', B.duplex_sync;
+
+    (* First step to a true Emacs-like input policy... *)
+   '', B.set_control_x_keymap;
+   '', B.abort_key;
+
   ];;
+
+let control_x_keymap =
+  Array.init 256 (fun i -> B.control_x_nop (char_of_int i));;
+let bind_control_x_key = bind_key control_x_keymap;;
+
+(* Bindings for ^X-prefixed keys. *)
+let bind_control_x_keys () =
+  List.iter bind_control_x_key [
+    '', B.save_page;
+    '', B.abort_key;
+]
+;;
+
+let bind_keys () =
+  bind_default_keys ();
+  bind_control_x_keys ();;
 
 bind_keys ();;
 
@@ -1480,7 +1537,12 @@ let main_loop mastername clients =
                 else Grdev.clear_usr1 ();
             end
         | Grdev.Resized (x, y) -> resize st x y
-        | Grdev.Key c -> bindings.(Char.code c) st
+        | Grdev.Key c ->
+            let keymap =
+              match get_keymap () with
+              | Default_keymap -> default_keymap
+              | Control_x_keymap -> control_x_keymap in
+            keymap.(Char.code c) st
         | Grdev.Href h -> goto_href h st
         | Grdev.Advi (s, a) -> a ()
         | Grdev.Move (w, h) ->
