@@ -335,7 +335,7 @@ let init filename =
   let last_modified =
     try (Unix.stat filename).Unix.st_mtime
     with _ -> 0.0 in
-  Gs.set_do_ps (!Global_options.pson);
+  Gs.init_do_ps ();
   let npages =  Array.length dvi.Dvi.pages in
   let st =
     let npages = Array.length dvi.Dvi.pages in
@@ -813,7 +813,7 @@ let reload st =
     st.frozen <- true;
     st.aborted <- true;
     update_dvi_size false st;
-    Gs.set_do_ps !Global_options.pson;
+    Gs.init_do_ps ();
     redraw ?trans:(Some Transitions.DirTop) st
   with x ->
     (* To be revisited (should assert Options.debug) *)

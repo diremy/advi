@@ -26,6 +26,9 @@ val flush : unit -> unit;;
 val toggle_antialiasing : unit -> unit;;
 val current_x : int ref;;
 val current_y : int ref;;
+
 val get_do_ps : unit -> bool;;
 val set_do_ps : bool -> unit;;
-
+val init_do_ps : unit -> unit;;
+(** Handling the [do_ps] flag that gouverns the use of gv
+  to display PostScript. *)

@@ -19,10 +19,11 @@
 
 let debugs = Misc.debug_endline;;
 
-let get_do_ps, set_do_ps =
+let get_do_ps, set_do_ps, init_do_ps =
  let has_to_do_ps = ref !Global_options.pson in
  (fun () -> !has_to_do_ps),
- (fun b -> has_to_do_ps := b);;
+ (fun b -> has_to_do_ps := b),
+ (fun () -> has_to_do_ps := !Global_options.pson);;
 
 let antialias =
   Options.flag false
@@ -469,9 +470,12 @@ let kill () = gv # kill;;
 
 let draw s x y =
   if get_do_ps () then
-    try gv#ps (Misc.get_suffix  "ps: " s) x y  with Misc.Match ->
-      try gv#special (Misc.get_suffix  "\" " s) x y  with Misc.Match ->
-        try gv#def (Misc.get_suffix  "! " s) with Misc.Match -> ()
+    try gv#ps (Misc.get_suffix  "ps: " s) x y with
+    | Misc.Match ->
+        try gv#special (Misc.get_suffix  "\" " s) x y with
+        | Misc.Match ->
+            try gv#def (Misc.get_suffix  "! " s) with
+            | Misc.Match -> ()
 ;;
 
 let add_headers = gv#add_headers;;
@@ -481,10 +485,11 @@ let newpage = gv#newpage;;
 let flush () =
   if get_do_ps () then
     try  gv#sync
-    with Terminated ->
-      Misc.warning "Continuing without Postscript";
-      gv#kill;
-      set_do_ps false;;
+    with
+    | Terminated ->
+        Misc.warning "Continuing without Postscript";
+        gv#kill;
+        set_do_ps false;;
 
 let toggle_antialiasing () =
   antialias := not !antialias;
