@@ -25,7 +25,7 @@
 # Initialization:
 #  create an empty file named .Makefile.auto in the same directory,
 #  fill in the SRC and FILES variables below,
-#  type make auto to initialize the Makefile included rules.
+#  type make to initialize the Makefile included rules.
 
 # Site maintenance (or creation):
 #  make (or make all) will rebuild the whole thing
@@ -66,7 +66,7 @@ clean: $(AUTO)
 # since any addition to the Makefile may leads to the recompilation of
 # the rules. Hence,
 # make clean all
-# will recompute rules and the set of files again.
+# will recompute the rules and recompile the set of files again.
 
 $(AUTO): MakeHTML
 
@@ -78,7 +78,8 @@ $(AUTO):
 	echo $$i: $(SRC)/$(PACKAGE)-$$j.htm >> $(AUTO); \
 	echo >> $(AUTO); \
 	echo $(SRC)/$(PACKAGE)-$$j.htm: >> $(AUTO); \
-	echo "	cp -p $(SRC)/$(PACKAGE)-$$j.htm $$j.htm" >> $(AUTO); \
+	echo -n "	chmod +w $$j.htm; " >> $(AUTO); \
+	echo "cp -p $(SRC)/$(PACKAGE)-$$j.htm $$j.htm" >> $(AUTO); \
 	done
 
 include $(AUTO)
