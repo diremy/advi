@@ -33,6 +33,11 @@ KNOWN BUGS:
    hscale=100.0, instead of llx, lly, urx, ury).
  Fatal error: exception Failure("psfile: no bbox")
  ???
+ * going to full screen and back changes slightly the size and position 
+   of the window
+   This seems to be entirely due to improper saving of the X window state
+   in the fullscreen code in deviview.ml: one is not getting the same
+   width/height/x/y position as X
 
 DELAYED AFTER RELEASE:
 ======================
