@@ -40,7 +40,7 @@ endif
 
 all: $(DVIFILES) $(MLPROG) 
 
-$(DVIFILES): ../tex/bar.jpg.eps demo.sty ../tex/advi.sty ../tex/advi-annot.sty
+$(DVIFILES): bar.eps demo.sty ../tex/advi.sty ../tex/advi-annot.sty
 
 .dvi.advi:
 	$(ADVI) $<
@@ -66,6 +66,9 @@ ifeq ($(HAVE_CDK),true)
 else
 	ocamlc -custom -o adviclock unix.cma -I $(CAMLTKDIR) $(CAMLTKLIB) adviclock.ml
 endif
+
+bar.eps: ../tex/bar.eps
+	cp -p ../tex/bar.eps .
 
 clean::
 	$(RM) a.out *.toc *.aux *.log *.dvi *~ 

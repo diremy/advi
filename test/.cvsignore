@@ -6,6 +6,7 @@ adviclock
 *.aux
 *.toc
 demo*.ps
+bar.eps
 gpic.ps
 test_gpic.tex
 test_gpic.ps
