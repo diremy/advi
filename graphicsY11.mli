@@ -305,3 +305,8 @@ val only_on_backing_store : ('a -> 'b) -> 'a -> 'b;;
 val init : unit -> unit;;
 (** We have to call this function to disable the original Graphics
    event retrieving facility. *)
+
+external anti_synchronize : unit -> unit = "gr_anti_synchronize";;
+(** Synchronize the backing store drawings from the window display:
+  performs the inverse operation as the regular [synchronize] function. *)
+
