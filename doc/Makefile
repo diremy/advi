@@ -38,8 +38,11 @@ all: manual.dvi manual.ps manual.pdf manual.html \
     advi_remote.dvi advi_remote.html
 
 clean::
-	$(RM) *.dvi *.advi *~ *.aux *.log manual.html *.dvi *.pdf *.pdfm *.ps \
-		*.ima *.out *.toc *.haux *.htoc
+	$(RM) manual.advi manual.html
+        $(RM) *~ *.out
+        $(RM) *.aux *.log *.dvi *.toc *.ps
+	$(RM) *.pdf *.pdfm
+        $(RM) *.haux *.htoc *.ima
 	$(MAKE) -f MakeHTML clean
 
 distribute: clean all web
