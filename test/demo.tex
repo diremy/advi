@@ -58,6 +58,9 @@ Press: \keymenu{n}ext page \keymenu{p}revious page
 \newpage
 
 \subsection* {Active dvi has two components}
+
+%\embedsticky{advixanim}{1cm}{1cm}{xanim +F +Sx40 +Sy40 +Sr -Zr +q -Wr +W!g +W!p advi.anim.gif}
+
 \begin{itemize}
 \item {\tt mldvi}: {\bf a dvi} previewer (by Alexandre Miquel)
 \begin {itemize}
@@ -218,7 +221,7 @@ presentation using:\\
    For instance \\
    \verb|\embed{3cm}{1cm}{./but -geometry !g -use !p}|\\
    \embedpersistent{button}{2.3cm}{0.71cm}{./but -geometry !g -use !p}
-
+\pause
   \item Possibly interactive !\\
    \verb|\embed{6.5cm}{9.5cm}{./taquin -geometry !g -use !p dojoji.gif}|\\
   \embedpersistent{taquin}{7.5cm}{11cm}{./taquin -geometry !g -use !p dojoji.gif}
@@ -242,8 +245,8 @@ their placements may not obey your geometry specifications.
    \embed{2cm}{2cm}{xeyes -bw 0 -shape -geometry !g}
 
  \item An Xterm running an interesting application:\\
-   \verb|\embed{5cm}{5cm}{xterm -geometry 50x10+!x+!y -e ocaml}|\\
-   \embed{5cm}{5cm}{xterm -geometry 50x10+!x+!y -e ocaml}
+   \verb|\embed{10cm}{5cm}{xterm -geometry 50x10+!x+!y -e ocaml}|\\
+   \embed{10cm}{5cm}{xterm -geometry 50x10+!x+!y -e ocaml}
 \end{itemize}
 
 The \verb|embed| macro can launch any executable system command during
@@ -251,8 +254,10 @@ the presentation.
 \begin{itemize}
  \item You can add music to your presentation, if you have a music
   player available:\\
-  \verb|\embed{}{}{mpg123 -q music.mp3}|
+  \verb|\embed{mpg123}{}{}{mpg123 -q music.mp3}|
 \end{itemize}
+
+\embed[mpg123]{1cm}{1cm}{mpg123 -q music.mp3}
 
 \newpage
 
