@@ -2,7 +2,9 @@ let debug = GrMisc.debug;;
 
 open Ageometry
 
-module Symbol = Symbol.Make(GrGlyph);;
+(*
+module Symbol = Symbol.Make(GlGlyph);;
+*)
 
 let offset = function
   | No_offset -> None
@@ -29,7 +31,7 @@ class dvidevice ageom =
   in
   let id = incr idref; !idref in
   object (self)
-    inherit GrDvi.dviwidget w as super
+    inherit GrDvi.dviwidget ~width: ageom.width ~height: ageom.height w as super
 
     method win = win
 
@@ -38,10 +40,7 @@ class dvidevice ageom =
       win#misc#set_geometry ?x: (offset ageom.xoffset) 
 	?y: (offset ageom.yoffset) ();
 
-    method show () =
-      win#misc#show ();
-      self#draw#set_remember_mode true;
-      self#draw#set_display_mode !Options.global_display_mode
+    method show () = win#misc#show ()
 
     method hide () = win#misc#hide ()
 
@@ -51,9 +50,10 @@ class dvidevice ageom =
 	| Sticky -> ()
 	| Persistent -> self#embed#unmap proc.name
 	| Respawn -> self#embed#kill proc.name);
-      self#draw#set_display_mode !Options.global_display_mode;
-      super#draw#clear ();
+      super#draw#clear ()(*
+;
       Symbol.clear ()
+*)
 
     method destroy () =
       Hashtbl.remove devices self#id;

@@ -24,22 +24,21 @@ COPTOPTIONS = -warn-error A -unsafe -inline 9
 
 OCAMLC	  = $(CAML)c $(COPTIONS)
 OCAMLOPT  = $(CAML)opt $(COPTOPTIONS)
-# OCAMLOPT  = $(CAML)opt.opt -unsafe -inline 9 -ccopt -I
 OCAMLDEP  = $(CAML)dep
 
 # CAMLIMAGESDIR & CAMLIMAGESLIBS is defined in Makefile.config
 
-MLINCDIRS = $(CAMLIMAGESDIR) $(LABLGTKDIR)
+MLINCDIRS = $(CAMLIMAGESDIR) $(LABLGTKDIR) -I +lablGL
 
 EXEC	  = advi
 
 MISCMODULES = config misc options rc userfile launch texstack
-TEXMODULES = input symbol search table pkfont ttfont jfm glfont font glyph \
-		units dimension dvi devfont special
+TEXMODULES = input symbol search table pkfont ttfont jfm \
+		units dimension dvi glFont glGlyph devfont special
 GLMODULES =
 GUIMODULES = ageometry dvicolor
-GTKMODULES = grMisc grDialog grDrawable grDbuffer grCursor grSubwindow grEmbed \
-		grImage grGlyph grSleep grDvi grDev
+GTKMODULES = grMisc grDialog grCursor grGL grSubwindow grEmbed \
+		grImage grSleep grDvi grDev
 TEXGUIMODULES = drDvi drColor drWait drPsfile drEmbed \
 		drTpic drProc drSymbol drRender unfreeze driver \
 		dviview main
@@ -50,7 +49,7 @@ MODULES = $(MISCMODULES) $(TEXMODULES) $(GLMODULES) $(GUIMODULES) $(GTKMODULES) 
 # 	      gs transimpl embed ageometry thumbnails \
 # 	      dviview main
 
-LIBRARIES = unix str $(LABLGTKLIBS) $(CAMLIMAGESLIBS) 
+LIBRARIES = unix str $(LABLGTKLIBS) $(CAMLIMAGESLIBS) lablgl lablgtkgl
 CLIBS	  = unix str
 
 COBJS     = 

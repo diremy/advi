@@ -16,9 +16,27 @@
 (***********************************************************************)
 
 
-module type DEVICE = sig
+module type FONT = sig
   type t
-  val make : Glyph.t -> t
+  type graymap
+  type char_def = 
+      { code : int;
+	dx : int;
+	dy : int;
+	width : int;
+	height : int;
+	hoffset : int;
+	voffset : int;
+	graymap : graymap
+      } 
+  val find : string -> int -> t
+  val find_char_def : t -> int -> char_def
+end ;;
+
+module type GLYPH = sig
+  type t
+  type char_def
+  val from_char_def : char_def -> float -> t
 end ;;
 
 module type DEVFONT = sig
@@ -27,4 +45,5 @@ module type DEVFONT = sig
   val find_glyphs : string -> float -> glyph Table.t
 end ;;
 
-module Make (Dev : DEVICE) : DEVFONT with type glyph = Dev.t ;;
+module Make (Font : FONT) (Glyph : GLYPH with type char_def = Font.char_def) :
+    DEVFONT with type glyph = Glyph.t;;

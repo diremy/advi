@@ -65,48 +65,6 @@ let dwidget ?border_width ?width ?height ?packing ?show () =
   GObj.pack_return (new dwidget w) ~packing ~show
 ;;
 
-class dviDbuffer window = object (self)
-  inherit GrDbuffer.t window as super
-
-  val glyphgc = Gdk.GC.create GrMisc.root
-
-  method private get_bg_color x y w h =
-    if !ignore_background then 0xffffff else begin
-      let candidates = [ x, y-1; x+w-1, y-1; x, y+h; x+w-1, y+h ] in
-      let (colors, (rs,gs,bs)) = 
-	List.fold_left (fun (colors, (rs,gs,bs)) (x,y) ->
-	  try
-	    match super#get_color ~x ~y with
-	    | `RGB (r,g,b) -> colors + 1, (rs + r, gs + g, bs + b)
-	    | _ -> raise (Error "#get_color returned non rgb")
-	  with
-	  | Error s -> raise (Error s)
-	  | GrDbuffer.Out -> colors, (rs,gs,bs)) (0, (0,0,0)) candidates
-      in
-      if colors = 0 then 0xffffff else
-      GrMisc.Colour.dvi_of_gdraw (`RGB (rs/colors, gs/colors, bs/colors))
-    end
-
-  method glyph ~color g ~x:x0 ~y:y0 =
-    let w = GrGlyph.width g
-    and h = GrGlyph.height g in
-    let x = x0 - GrGlyph.hoffset g
-    and y = y0 - GrGlyph.voffset g in
-    try
-      let clip = self#clip ~x ~y ~width:w ~height:h in
-      let bg = self#get_bg_color x y w h in
-      let img = GrGlyph.get_image g (bg, color) in
-      let gc_backup = super#gc in
-      super#set_gc glyphgc;
-      super#set_clip_mask img.GrGlyph.mask;
-      super#set_clip_origin ~x ~y;
-      super#put_ximage_clip clip img.GrGlyph.ximage;
-      super#set_gc gc_backup
-    with
-    | GrDbuffer.Out -> ()
-
-  method image = GrImage.draw (self :> GrDbuffer.t)
-end
 
 type mode = [`NORMAL | `WAIT | `WAIT_FORCE]
 
@@ -116,25 +74,30 @@ let string_of_mode = function
   | `WAIT_FORCE -> "wait_force"
 ;;
 
-class dviwidget w =
+class dviwidget ~width ~height w =
   let _ = GtkBase.Widget.realize w in
   let window = GtkBase.Widget.window w in
-  let draw = new dviDbuffer window in
   let cursor = new GrCursor.t window in
   let subwin_dummy = new GrSubwindow.dummy in
+  let  glarea = GlGtk.area [`RGBA; `DOUBLEBUFFER; `DEPTH_SIZE 8;
+			    `BUFFER_SIZE 16] ~width ~height ()
+  in
+  let draw = new GrGL.t glarea in
   object (self)
     inherit dwidget w as super
 
     val mutable subwindow = subwin_dummy
     val mutable embed = new GrEmbed.t subwin_dummy
 
-    method draw = draw
-
-    method width = draw#width
-    method height = draw#height
-    method size = draw#size
+    val mutable width = width
+    val mutable height = height
+    method width = width
+    method height = height
+    method size = width, height
     method resize ~width:w ~height:h =
-      draw#resize ~width:w ~height:h;
+      width <- w;
+      height <- h;
+      glarea#misc#set_geometry ~width:w ~height:h () ;
       self#misc#set_geometry ~width:w ~height:h ()
       
     method cursor = cursor
@@ -169,10 +132,15 @@ class dviwidget w =
 	cont s)
 
     method destroy () = embed#destroy (); super#destroy ()
+ 
+    method draw = draw
 
     initializer
       subwindow <- new GrSubwindow.t (self :> GPack.fixed);
-      embed <- new GrEmbed.t subwindow
+      embed <- new GrEmbed.t subwindow;
+prerr_endline (Printf.sprintf "glarea set_geometry %dx%d" width height);
+      glarea#misc#set_geometry ~width ~height ();
+      self#put (glarea :> GObj.widget) ~x:0 ~y:0
   end
 ;;
 
@@ -180,7 +148,7 @@ class dviwidget w =
 let dviwidget ?border_width ~width ~height ?packing ?show () =
   let w = DWidget.create () in
   GtkBase.Container.set w ?border_width ~width ~height;
-  GObj.pack_return (new dviwidget w) ~packing ~show
+  GObj.pack_return (new dviwidget ~width ~height w) ~packing ~show
 ;;
 
 

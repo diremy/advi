@@ -15,20 +15,40 @@
 (*  Based on Mldvi by Alexandre Miquel.                                *)
 (***********************************************************************)
 
-
-module type DEVICE = sig
+module type FONT = sig
   type t
-  val make : Glyph.t -> t
+  type graymap
+  type char_def = 
+      { code : int;
+	dx : int;
+	dy : int;
+	width : int;
+	height : int;
+	hoffset : int;
+	voffset : int;
+	graymap : graymap
+      } 
+  val find : string -> int -> t
+  val find_char_def : t -> int -> char_def
+end ;;
+
+module type GLYPH = sig
+  type t
+  type char_def
+  val from_char_def : char_def -> float -> t
 end ;;
 
 module type DEVFONT = sig
   type glyph
   val find_metrics : string -> float -> (int * int) Table.t
+      (* find metrics table of given font at given dpi *)
   val find_glyphs : string -> float -> glyph Table.t
+      (* find glyph table of given font at given dpi *)
 end ;;
 
-module Make (Dev : DEVICE) = struct
-  type glyph = Dev.t
+module Make (Font : FONT) (Glyph : GLYPH with type char_def = Font.char_def) =
+  struct
+  type glyph = Glyph.t
 
   let base_dpi = 600
 
@@ -60,7 +80,7 @@ module Make (Dev : DEVICE) = struct
 	and ratio = dpi /. float base_dpi in
 	let build code =
 	  let cdef = Font.find_char_def font code in
-          Dev.make (Glyph.from_char_def cdef ratio) in
+          Glyph.from_char_def cdef ratio in
 	let table = Table.make build in
 	Hashtbl.add htable (fontname, sdpi) table ;
 	table

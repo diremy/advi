@@ -15,12 +15,14 @@
 (*  Based on Mldvi by Alexandre Miquel.                                *)
 (***********************************************************************)
 
+(* Glyph resizer *)
+
 type t = {
     width : int ;
     height : int ;
     voffset : int ;
     hoffset : int ;
-    graymap : string
+    graymap : GlGlyph.t
   } ;;
 
-val from_char_def : Font.char_def -> float -> t ;;
+val from_char_def : GlFont.char_def -> float -> t ;;

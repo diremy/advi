@@ -39,15 +39,9 @@ class dwidget : DWidget.t Gtk.obj -> object
 end
 ;;
 
-class dviDbuffer : Gdk.window -> object
-  inherit GrDbuffer.t
-  method glyph : color: Dvicolor.color -> GrGlyph.t -> x: int -> y:int -> unit
-  method image : GrImage.spec -> x:int -> y:int -> unit
-end
-
 type mode = [`NORMAL | `WAIT | `WAIT_FORCE]
 
-class dviwidget : DWidget.t Gtk.obj ->
+class dviwidget : width: int -> height: int -> DWidget.t Gtk.obj ->
   object
   inherit dwidget
 
@@ -56,7 +50,6 @@ class dviwidget : DWidget.t Gtk.obj ->
   method size : int * int
   method resize : width: int -> height: int -> unit
 
-  method draw : dviDbuffer
   method cursor : GrCursor.t
   method subwindow : GrSubwindow.t
   method embed : GrEmbed.t
@@ -68,6 +61,8 @@ class dviwidget : DWidget.t Gtk.obj ->
   method sleep : breakable: bool -> sec: float -> 
     cont: (GrSleep.state -> unit) -> unit
   method break_sleep : unit -> unit
+
+  method draw : GrGL.t
 end
 
 val dviwidget : ?border_width: int -> width: int -> height: int -> 

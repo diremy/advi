@@ -35,7 +35,7 @@ let put st code =
       end;
 *)
       st#dvi.device#draw#glyph ~color: st#color.top 
-	(glyph : GrGlyph.t) ~x ~y;
+	~x ~y 	(glyph : GlGlyph.t);
       (* add_char st x y code glyph; *)
     end
   with _ -> ()

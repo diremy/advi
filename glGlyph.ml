@@ -15,18 +15,36 @@
 (*  Based on Mldvi by Alexandre Miquel.                                *)
 (***********************************************************************)
 
-type char_def = {
-    code : int ;
-    dx : int ;
-    dy : int ;
+type t = {
     width : int ;
     height : int ;
-    hoffset : int ;
     voffset : int ;
-    bitmap : string
+    hoffset : int ;
+    graymap : GlFont.graymap
   } ;;
 
-type t ;;
+type char_def = GlFont.char_def;;
 
-val find : string -> int -> t ;;
-val find_char_def : t -> int -> char_def ;;
+let scale_size len off ratio =
+  let left = off
+  and right = len - off in
+  let left' = int_of_float (ceil (ratio *. float left))
+  and right' = int_of_float (ceil (ratio *. float right)) in
+  let len' = left' + right'
+  and off' = left' in
+  len', off' 
+;;
+
+let from_char_def cdef ratio =
+  let ncols = cdef.GlFont.width
+  and nrows = cdef.GlFont.height
+  and hot_col = cdef.GlFont.hoffset
+  and hot_row = cdef.GlFont.voffset in
+  let (ncols', hot_col') = scale_size ncols hot_col ratio
+  and (nrows', hot_row') = scale_size nrows hot_row ratio in
+  { width = ncols' ;
+    height = nrows' ;
+    hoffset = hot_col' ;
+    voffset = hot_row' ;
+    graymap = cdef.GlFont.graymap } 
+;;

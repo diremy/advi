@@ -6,7 +6,7 @@ type proc_unit = {
     escaped_stack : reg_set list;
     escaped_cur_font : cooked_font;
     escaped_cur_mtable : (int * int) Table.t;
-    escaped_cur_gtable : GrGlyph.t Table.t;
+    escaped_cur_gtable : GlGlyph.t Table.t;
     mutable escaped_commands : Dvi.command list
   };;
 

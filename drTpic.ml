@@ -19,28 +19,26 @@ let create () = {
 
 (* Graphics primitives *)
 
-let pensize_f (draw : GrDvi.dviDbuffer) pensize f arg =
-  draw#push_new_gc ();
+let pensize_f (draw : GrGL.t) pensize f arg =
+  draw#push [`line];
   draw#set_line_attributes ~width: pensize ();
   f arg;
-  draw#pop_gc ()
+  draw#pop ()
 ;;
 
-let shade_f draw shade f arg =
-  let rgb = 
-    GrMisc.Colour.parse (Gdk.Color.pixel draw#gc_values.Gdk.GC.foreground) in 
-  let r = 0xFF - rgb.Color.r
-  and g = 0xFF - rgb.Color.g
-  and b = 0xFF - rgb.Color.b in
-  let r = 0xFF - int_of_float (shade *. float r)
-  and g = 0xFF - int_of_float (shade *. float g)
-  and b = 0xFF - int_of_float (shade *. float b) in
-  draw#push_new_gc ();
-  draw#set_foreground (GrMisc.Colour.gdraw_of_rgb {Color.r=r;
-						   Color.g=g;
-						   Color.b=b});
+let shade_f (draw : GrGL.t) shade f arg =
+  (* this will be done gl blending *) 
+  let (r,g,b) = draw#foreground in 
+  let r = 1.00 -. r
+  and g = 1.00 -. g
+  and b = 1.00 -. b in
+  let r = 1.00 -. (shade *. r)
+  and g = 1.00 -. (shade *. g)
+  and b = 1.00 -. (shade *. b) in
+  draw#push [`current];
+  draw#set_foreground (r,g,b);
   f arg;
-  draw#pop_gc ()
+  draw#pop ()
 
 let draw_path st pts ~pensize =
   let draw = st#dvi.device#draw in
@@ -72,8 +70,8 @@ let milli_inch_to_sp = Units.from_to Units.IN Units.SP 1e-3;;
 
 let tpic_milli_inches s = parse_float s *. milli_inch_to_sp;;
 
-let tpic_pen st =
-  int_of_float (st#dvi.conv *. st#tpic.tpic_pensize +. 0.5)
+let tpic_pen st = st#dvi.conv *. st#tpic.tpic_pensize +. 0.5;;
+
 let tpic_x st x =
   st#dvi.x_origin + int_of_float (st#dvi.conv *. (float st#dvi.h +. x));;
 let tpic_y st y =

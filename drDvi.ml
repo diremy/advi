@@ -2,14 +2,16 @@
 
 (*** Cooked fonts ***)
 
+(*
 module Symbol = GrDev.Symbol;;
-module DFont = Devfont.Make(GrGlyph);;
+*)
+module DFont = Devfont.Make(GlFont)(GlGlyph);;
 
 type cooked_font = {
     name : string;
     ratio : float;
     mtable : (int * int) Table.t;
-    mutable gtables : (int * GrGlyph.t Table.t) list
+    mutable gtables : (int * GlGlyph.t Table.t) list
   };;
 
 let dummy_mtable = Table.make (fun _ -> raise Not_found);;
@@ -78,7 +80,7 @@ type state = {
   (* Current font attributes *)
   mutable cur_font : cooked_font;
   mutable cur_mtable : (int * int) Table.t;
-  mutable cur_gtable : GrGlyph.t Table.t;
+  mutable cur_gtable : GlGlyph.t Table.t;
 
   (* Registers *)
   mutable h : int;

@@ -29,6 +29,19 @@ let sync () = while Glib.Main.iteration false do () done;;
 
 (* color conversions *)
 module Colour = struct
+  let gl_of_rgb rgb = 
+    (float rgb.Color.r) /. 255.0,
+    (float rgb.Color.g) /. 255.0,
+    (float rgb.Color.b) /. 255.0
+    
+  let gl_of_dvi spec =
+    let r = spec lsr 16 in
+    let g = (spec land 0x00ff00) lsr 8 in
+    let b = spec land 0x0000ff in
+    float r /. 255.0, 
+    float g /. 255.0, 
+    float b /. 255.0
+
   let gdraw_of_rgb rgb =
     (`RGB (rgb.Color.r * 257, 
 	   rgb.Color.g * 257, 

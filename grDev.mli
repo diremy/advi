@@ -1,4 +1,6 @@
-module Symbol : Symbol.T with type glyph = GrGlyph.t;;
+(*
+module Symbol : Symbol.T with type glyph = Glyph.t;;
+*)
 
 class dvidevice : Ageometry.t -> object
   inherit GrDvi.dviwidget

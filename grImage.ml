@@ -264,7 +264,8 @@ let load spec =
   cache_name, image
 ;;
 
-let draw (dbuf : GrDbuffer.t) spec ~x:x0 ~y:y0 =
+(*
+let draw (dbuf : GrGL.t) spec ~x:x0 ~y:y0 =
   try
     let y0 = y0 - spec.height in
     let clip = dbuf#clip ~x:x0 ~y:y0
@@ -297,3 +298,4 @@ let draw dbuf spec ~x ~y =
   | Failure s -> Misc.warning s
   | e -> Misc.warning (Printexc.to_string e)
 ;;
+*)

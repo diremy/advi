@@ -11,6 +11,8 @@ val sync : unit -> unit
 
 module Colour :
   sig
+    val gl_of_rgb : Color.rgb -> Gl.rgb
+    val gl_of_dvi : int -> Gl.rgb
     val gdraw_of_rgb : Color.rgb -> GDraw.color
     val dvi_of_gdraw : GDraw.color -> Dvicolor.color
     val dvi_of_rgb : Color.rgb -> Dvicolor.color

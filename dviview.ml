@@ -92,7 +92,9 @@ Options.add
   (Arg.Float set_dpi_resolution)
   "REAL\tDpi resolution of the screen (min 72.27)))";;
 
+(*
 module Symbol = GrDev.Symbol;;
+*)
 
 open Dimension;;
 
@@ -340,7 +342,7 @@ let update_dvi_size all ?dx ?dy st =
 
 let draw_bounding_box st =
   Misc.warning "Draw_bounding box";
-  st.device#draw#set_foreground (GrMisc.Colour.gdraw_of_dvi 0xcccccc);
+  st.device#draw#set_foreground (GrMisc.Colour.gl_of_dvi 0xcccccc);
   st.device#draw#rectangle ~x: st.orig_x ~y: st.orig_y 
     ~width: st.dvi_width ~height: st.dvi_height ()
 ;;
@@ -353,6 +355,7 @@ let document_xy st x y =
   let y = st.size_y - y in
   x, y;;
 
+(*
 let position st x y =
   match Symbol.lines x y with
   | Some (s, line, bound, left, before, after, right, file) ->
@@ -363,6 +366,7 @@ let position st x y =
         line bound left before after right file;
       flush stdout
   | None -> ();;
+*)
 
 (* User has selected a region with the mouse. We dump characters. *)
 (*

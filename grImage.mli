@@ -27,5 +27,3 @@ type spec = {
 } 
 
 val clean_cache : unit -> unit
-
-val draw : GrDbuffer.t -> spec -> x:int -> y:int -> unit
