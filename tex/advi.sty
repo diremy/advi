@@ -55,7 +55,7 @@ Maybe you mean \@currenvir ing}}
 \advi@export \adviignore \advi@ignoretrue
 \advi@export \ifadvi \advi@ifadvi
 
-%%% record and play
+%%% Record and play
 
 \newif \ifadvi@recording 
 \def \advi@ifrecording {\ifadvi@recording
@@ -230,7 +230,6 @@ Maybe you mean \@currenvir ing}}
 \advi@export \setalpha \advi@setalpha
 \advi@export \setblend \advi@setblend
 
-
 %%% Animated transitions
 
 \def \advi@transfrom{}
@@ -268,7 +267,7 @@ Maybe you mean \@currenvir ing}}
 \def \AtEndPage {\g@addto@macro \endpage@hook}
 \AtEndPage {\advi@setpagestyle}
 
-% We musch pact \@begindvi to put out hook. 
+% We must patch \@begindvi to put out hook. 
 % However, hyperref may patch it as well. So we should do it at begin
 % document to have the control (no one after us). 
 % Howver, one must be careful, because \@begindvi redefines itself at the

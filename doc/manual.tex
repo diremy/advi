@@ -7,21 +7,53 @@
 \expandafter \ifx \csname driver\endcsname\relax \def \driver{}\fi 
 \usepackage [\driver]{hyperref}
 
+\usepackage{graphicx}
 \usepackage {advi}
 \usepackage {advi-annot}
 \usepackage {bubble}
 
 \title {{\ActiveDVI} manual}
-\author {Didier R{\'{e}}my and ???}
+\author {Didier R{\'{e}}my and Pierre Weis}
+
 \def \ActiveDVI {\textbf {Active-DVI}}
 
+\def\adviheader{\noindent
+{\bf\Large \ActiveDVI}\\
+\includegraphics[width=\textwidth]{../tex/bar.jpg.eps}\par}
+
+%\let \Newpage \newpage
+%\def \newpage {\Newpage \adviheader}
 
 \begin{document}
 
 \maketitle
 
 \begin{abstract}
-Put a Summary of Active DVI. 
+\ActiveDVI is a presentation graphics program to provide the highest
+quality slides presentation experience to the $\LaTeX$ users.
+
+\ActiveDVI is a viewer and presenter for DVI files that is targeted to
+presentations via laptop computers: \ActiveDVI uses the computer
+processing power to offer various special effects to animate the
+presentation.
+
+\ActiveDVI can be used as is, but will shine when driven by a user
+with a bias towards programming: new special effects can easily be
+added and creative advanced users like to program the presenter at
+various levels, either via $\LaTeX$ macros or $\LaTeX$ package
+files. Brave souls can even directly modify \ActiveDVI's source code
+since that code is freely available.
+
+Presentation examples can be found in the \verb"test" and
+\verb"examples" directories. Don't miss to play them! Then, feel free
+to read their source code and copy the effects they provide.
+
+If you ever succeed at adding a nice special effect that could be of
+a general interest, or if you can provide a nice or fancy presentation
+of your own that can serve as an example to the \ActiveDVI's users
+communauty, please don't hesitate to drop a mail to the implementors
+at \verb"advi@pauillac.inria.fr".
+
 \end{abstract}
 
 \tableofcontents
@@ -47,29 +79,31 @@ See the key bindings in the appendix.
 
 \section {The {\tt advi} package}
 
-This package provides commands interactive with {\ActiveDVI}. 
-This package does not have to be loaded if one does not need special
-effects. The package recognizes the option \verb"ignore", which 
-makes all not produce any {\tt advi} specials, 
-so that it can be previewed by other previewers or turned into Postscript 
-with {\tt dvips}. Of course, this will disable most effects, although some
-of them will be approximated.
+This package provides interactive commands for {\ActiveDVI}.  There is
+no need to load the package if those {\ActiveDVI} special effects are
+not required. The package recognizes the option \verb"ignore", which
+makes it not to produce any {\tt advi} specials, so that the show can
+be previewed by other previewers or turned into Postscript with {\tt
+dvips}. Of course, this option disables most effects, although some of
+them are still approximated.
 
-If the global option is not {\tt ignore} is not set, it is possible to set
-it locally with the commands {\docdef \adviignore}. However, this will not
-ignore all actions, since some decisions are taken when the package is
+If the {\tt ignore} option is not set globally, it can be set
+locally with the commands {\docdef \adviignore}. However, this will not
+prevent all effects, since some decisions are taken when the package is
 loaded.
 
-The package also defines the conditional {\docdef \ifadvi} which evaluate
-its first argument if advi is not ignore and its second argument otherwise.
+The package also defines the conditional {\docdef \ifadvi} which
+evaluates its first argument if advi is not in ignore mode and its
+second argument otherwise.
 
 \subsection {Pause, Record and Play}
 
 \medskip\noindent
 \docdef \adviwait\docopt{seconds}
 \begin{quote}
-Wait for \docid{seconds} or without argument forever, that is, until the
-user requests to continue (or to change page).
+Wait for \docid{seconds}. If no argument is provided, waits until the
+user requests to continue (hitting a key to move to next pause or to
+change page).
 \end{quote}
 
 \medskip\noindent
@@ -79,21 +113,22 @@ user requests to continue (or to change page).
 \doctt{[play]}\docarg{tag}\docarg{latex code}%
 \docid {text}\docdef \end\doctt{\{advirecording\}}
 \begin{quote}
-The computes \docid{latex code} and record its DVI ouput under tag
-\docid{tag}. The DVI output is not displayed during recording, unless the
-option \doctt{play} is set.
+Processes \docid{latex code} and records the corresponding DVI output,
+bound to the tag \docid{tag}. When recording, the DVI output is
+not displayed unless the option \doctt{play} is set.
 
-Records can be embedded. The inner record is always recorded
-its own  tag. It is also recorded under the outer tag if the inner record is
-played when recording.
+Records can be nested. If so, the inner record is always recorded
+with its own  tag; if the inner record is played when recording, it is
+also recorded as part of the outer tag.
 
-In the environment form, \docid{latex code} may contain fragile commands. 
+If the environment form is used, the \docid{latex code} may contain
+fragile commands.
 \end{quote}
 
 \medskip\noindent
 \docdef \adviplay\docopt{color}\docarg{tag}
 \begin{quote}
-Replay the DVI previously recorded as \docid{tag}.
+Replay the DVI previously recorded and bound to \docid{tag}.
 The optional argument changes the color to \docid{color} during replay. 
 \end{quote}
 
@@ -102,13 +137,17 @@ The optional argument changes the color to \docid{color} during replay.
 \\
 \docdef \begin\doctt{\{advianchoring\}}\docopt{activation}\docarg{tag}%
 \docid {text}\docdef \end\doctt{\{advianchoring\}}
-\begin{quote}
-Play record when anchor is activated. The argument \docid{activation} may
-either be \doctt{over} or \doctt{click}. The page is reset to its original
-appearance when the anchor is no more activated (the mouse leaves the anchor
-area or the button is released). 
 
-In the environment form, \docid{text} may contain fragile commands. 
+\begin{quote}
+Plays the record bound to \docid{tag} when the anchor is activated.
+
+The argument \docid{activation} may either be \doctt{over} or
+\doctt{click}. The page is reset to its original appearance when the
+anchor is no more activated (the mouse leaves the anchor area or the
+button is released).
+
+If the environment form is used, \docid{text} may contain fragile commands. 
+
 \end{quote}
 
 
@@ -119,7 +158,7 @@ In the environment form, \docid{text} may contain fragile commands.
 \medskip\noindent
 \docdef \advibg \doctt {[global]}\docarg{key=value list}
 \begin{quote}
-where \docid{key=value list} is a list of bindings of the followning kind:
+where \docid{key=value list} is a list of bindings of the following kind:
 
 \dockey[none]{color}{color}
 \begin{quote}
@@ -129,14 +168,13 @@ Set the background color to \docid{color}
 
 \dockey[none]{image}{file}
 \begin{quote}
-Use the file from \docid{file} as background
-(\doctt{none} means unset).
+Use the image found in \docid{file} as background (\doctt{none} means unset).
 \end{quote}
 
 \dockey[auto]{fit}{fit style}
 \begin{quote}
-Fit the background image according to \docid{style}, which may only be 
-{\tt auto} or one of the following keywords:
+Fit the background image according to \docid{style}, which may be 
+one of the following keywords:
 \begin{center}
 \tt
 auto \hfill {\rm or} \hfill
@@ -146,30 +184,30 @@ left&  center&  right \\
 bottomleft& bottom & bottomright\\
 \end{tabular}
 \end{center}
-The {\tt auto} fit mode means scale the image as desired in both directions
-so that it fits the page. The other styles only allows the same scaling
+The {\tt auto} fit style means scaling the image as desired in both directions
+so that it fits the entire page. Other styles only force the same scaling
 factor in both directions:
 \begin {itemize}
 
-\item
-Corner-styles mean adjust the image in the corner
-and scale so that all the page is covered. 
+\item Corner-styles means set the image in the corresponding corner
+and scale it to cover the entire page.
 
-\item
-{\tt center} means scale the
-image so that all the page is covered and center it on the page. 
+\item {\tt center} means set the image in the center of the page and
+scale it to cover the entire page.
 
-\item
-Segment-styles mean adjust the image and the page on the segment (in which
-case, the image may not totally cover the page on the opposite side). 
+\item Segment-styles means adjust the image and the page on the
+segment (in which case, the image may not completely cover the page on
+the opposite side).
 
 \end {itemize}
 \end{quote}
 
 \dockey[none]{alpha}{float}
 \begin{quote}
-Set the alpha factor for the background image to \docid{float}
-(\doctt{none} means unset).
+Set the alpha channel factor for the background image to \docid{float}
+(\doctt{none} means unset). An alpha factor of $0$ means that the
+image is not visible at all; conversely, an alpha factor of $1$ means that the
+image covers the background.
 \end{quote}
 
 \dockey[none]{blend}{blend mode}
@@ -182,14 +220,14 @@ following (unchecked): {\tt difference}, XXX?
 \goodbreak
 \dockey{none}{}
 \begin{quote}
-Unset all background paremeters.
-This key can only appear alone, without argument and without any other key. 
+Unset all background parameters.
+This key must appear on its own, no arguments or keys are allowed. 
 \end{quote}
 The optional parameter \doctt{global} indicates that
 the definition is global and will affect the following pages, 
-as well as the current page. 
+as well as the current page.
 
-By default, the transition affects only the current page. 
+By default, the background settings only affect the current page.
 \end{quote}
 
 \subsection {Transitions}
@@ -227,7 +265,7 @@ As for \docdef \advibg, the optional parameter \doctt{global} indicates that
 the definition is global and will affect the following pages, 
 as well as the current page. 
 
-By default, the transition affects only the current page. 
+By default, the transition definitions only affect the current page. 
 \end{quote}
 
 \medskip\noindent
@@ -238,6 +276,12 @@ whatever can follow an \docdef \hbox{} command. In particular, the material
 may contain verbatim commands, since as for the \docdef\hbox{} it is 
 parsed incrementally.
 \end{quote}
+
+The optional parameter \doctt{global} indicates that
+the definition is global and will affect the following pages, 
+as well as the current page.
+
+By default, the transition affects only the current page.
 
 \subsection {Hyperrefs}
 

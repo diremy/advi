@@ -1,6 +1,6 @@
-TOPDIR=../..
+TOPDIR=../../..
 FILES=join.tex 
-include ../lib/Makefile
+include ../../lib/Makefile
 
 join.dvi: join.tex
 	$(LATEX) $<
