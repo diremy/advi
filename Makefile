@@ -107,7 +107,7 @@ veryclean:
 	config.status drawps.ml config.ml
 
 tex/splash.dvi: tex/splash.tex
-	latex tex/$*
+	cd tex; latex splash.tex
 
 install:: advi.opt tex/splash.dvi
 	cp advi.opt ${bindir}/advi
