@@ -84,8 +84,6 @@ end
 else
 
 module M = struct 
-  open Freetype
-  
   type face
   
   type bitmap = string
@@ -106,6 +104,8 @@ module M = struct
   let build = no_freetype;;
   
   let jis_unicode_table = fun x -> x;;
+
+  let jis2uni jiscode = raise (Failure "no freetype library");;
 end
 ;;
 
