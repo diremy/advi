@@ -259,6 +259,31 @@ let draw_point x y =
   | 1 -> G.plot x y
   | _ -> G.fill_circle x y ((2 * !scratch_line_width + 3) / 4);;
 
+let draw_figure f =
+  let (x0, y0 as p0) = G.mouse_pos () in
+  wait_button_pressed draw_handle_char; 
+  let (x1, y1 as p1) = G.mouse_pos () in
+  f p0 p1;;
+
+let draw_hline (x0, y0) (x1, y1) =
+  G.moveto x0 y0;
+  G.lineto x1 y0;;
+
+let draw_vline (x0, y0) (x1, y1) =
+  G.moveto x0 y0;
+  G.lineto x0 y1;;
+
+let draw_segment (x0, y0) (x1, y1) =
+  G.moveto x0 y0;
+  G.lineto x1 y1;;
+
+let distance x0 y0 x1 y1 =
+  let dx = x1 - x0 and dy = y1 - y0 in
+  sqrt (float_of_int (dx * dx + dy * dy));;
+
+let draw_circle (x0, y0) (x1, y1) =
+  G.draw_circle x0 y0 (int_of_float (0.5 +. distance x0 y0 x1 y1));;
+
 (* Enter drawing on slide *)
 let rec scratch_draw00 () =
   let x, y = G.mouse_pos () in
@@ -309,20 +334,26 @@ and enter_draw () =
 
 and scratch_char_from scratch c =
   draw_handle_char c;
-  handle_figure !scratch_figure scratch
+  handle_figure scratch
 
-and handle_figure fig scratch =
-  match fig with
+and handle_figure scratch =
+  match !scratch_figure with
   | No_figure -> scratch ()
   | Point -> scratch_points scratch
-  | Hline | Vline | Segment | Circle | Polygone | Finish ->
-      clear_scratch_figure (); scratch ()
+  | Hline -> draw_figure draw_hline; handle_figure scratch
+  | Vline -> draw_figure draw_vline; handle_figure scratch
+  | Segment -> draw_figure draw_segment; handle_figure scratch
+  | Circle -> draw_figure draw_circle; handle_figure scratch
+  | Polygone | Finish ->
+      wait_button_pressed draw_handle_char; 
+      let (x1, y1 as p1) = mouse_pos () in
+      clear_scratch_figure (); handle_figure scratch
 
 and scratch_points scratch =
   wait_button_pressed (scratch_char_from scratch);
   let x, y = G.mouse_pos () in
   draw_point x y;
-  handle_figure !scratch_figure scratch;;
+  handle_figure scratch;;
 
 let do_draw () = save_excursion Cursor_spraycan !scratch_line_color enter_draw;;
 
