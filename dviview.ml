@@ -46,13 +46,25 @@ let browser = ref "netscape-communicator";;
 Options.add
   "-browser"
   (Arg.String (fun s -> browser := s))
-  "STRING\tCommand to call the browser";;
+  "STRING\tCommand to call the browser (default netscape-communicator)";;
 
 let pager = ref "xterm -e less";;
 Options.add
   "-pager"
   (Arg.String (fun s -> pager := s))
-  "STRING\tCommand to call the pager";;
+  "STRING\tCommand to call the pager (default xterm -e less)";;
+
+let pdf_viewer = ref "xpdf";;
+Options.add
+  "-pdf-viewer"
+  (Arg.String (fun s -> pdf_viewer := s))
+  "STRING\tCommand to view PDF files (default xpdf)";;
+
+let ps_viewer = ref "gv";;
+Options.add
+  "-ps-viewer"
+  (Arg.String (fun s -> ps_viewer := s))
+  "STRING\tCommand to view PS files (default gv)";;
 
 let click_turn_page =
   Options.flag false
@@ -658,43 +670,46 @@ let find_xref tag default st =
 exception Link;;
 
 let exec_xref link =
-  let call command =
+  let call command arg =
     Grdev.wait_button_up ();
-    ignore (Launch.fork_process command) in
-  if Misc.has_prefix "file:" link then
-    if Misc.has_prefix "file://" link then
-      call (!browser ^ " " ^ link) else
-    try
-      let filename, arguments =
-        match Misc.split_string (Misc.get_suffix "file:" link)
-               (function '#' -> true | _ -> false) 0 with
-        | [ filename; tag ] -> filename, ["-html"; tag ]
-        | [ filename ] -> filename, []
-        | _ -> Misc.warning ("Invalid link " ^ link); raise Link in
-      if not (Sys.file_exists filename) then
-        Misc.warning
-          (Printf.sprintf "File %s non-existent or not readable" filename) else
-      if Misc.has_suffix ".dvi"  filename then
-        let command =
-          String.concat " " (Sys.argv.(0) :: arguments @ [filename]) in
-        call command else
-      if Misc.has_suffix ".html" filename ||
-         Misc.has_suffix ".htm" filename then
-        call (!browser ^ " " ^ link) else
-      (* In any other cases we call the pager program. *)
-      (*if Misc.has_suffix ".txt" filename ||
-         Misc.has_suffix ".tex" filename then
-        call (!pager ^ " " ^ filename) else *)
-      call (!pager ^ " " ^ filename)
-    with
-    | Misc.Match -> assert false
-    | Link -> () else
-  if Misc.has_prefix "http:" link
-  || Misc.has_prefix "https:" link
-  || Misc.has_prefix "ftp:" link
-  || Misc.has_prefix "telnet:" link then
-    call (!browser ^ " " ^ link) else
-  Misc.warning (Printf.sprintf "Don't know what to do with link %s" link);;
+    ignore (Launch.fork_process (Printf.sprintf "%s %s" command arg)) in
+  match Misc.string_prefix ':' link with
+  | "file:" ->
+      if Misc.has_prefix "file://" link then call !browser link else
+      begin try
+        let fname, arguments =
+          match Misc.split_string (Misc.get_suffix "file:" link)
+                  (function '#' -> true | _ -> false) 0 with
+          | [ fname; tag ] -> fname, ["-html"; tag ]
+          | [ fname ] -> fname, []
+          | _ -> Misc.warning ("Invalid link " ^ link); raise Link in
+        if not (Sys.file_exists fname) then
+          Misc.warning
+            (Printf.sprintf
+               "File %s is non-existent or not readable" fname) else
+        match Misc.filename_extension fname with
+        | ".dvi" ->
+            let command =
+              String.concat " " (Sys.argv.(0) :: arguments) in
+            call command fname
+        | ".html" | ".htm" ->
+            call !browser link
+        (* In any other cases we call the pager program. *)
+        | ".txt" | ".tex" | ".ftex" | ".sty" | ".pic"
+        | ".ml" | ".scm" | ".c" | ".el" ->
+            call !pager fname
+        | ".pdf" -> call !pdf_viewer fname
+        | ".ps" | ".eps" -> call !ps_viewer fname
+        | _ ->
+            Misc.warning
+              (Printf.sprintf "Don't know what to do with link %s" link)
+      with
+      | Misc.Match -> assert false
+      | Link -> () end
+  | "http:" | "https:" | "ftp:" | "telnet:" ->
+      call !browser link
+  | _ ->
+      Misc.warning (Printf.sprintf "Don't know what to do with link %s" link);;
 
 let page_start default st =
   match !start_html with
