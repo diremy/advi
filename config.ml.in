@@ -4,9 +4,9 @@ let have_gs = @HAVE_GS@;;
 let advi_loc = "@ADVI_LOC@";;
 let splash_screen = Filename.concat advi_loc "splash.dvi";;
 (* In the future, these could be automatically generated *)
-let kpsewhich_path = "kpsewhich";;
+let kpsewhich_path = "@PATH_KPSEWHICH@";;
 let gs_path = "@PATH_GS@";;
 let texpicts_kind = "graphic/figure";;
 let psheaders_kind = "PostScript header";;
-let texdir_path = "/usr/share/texmf";;
+let texdir_path = "@TEXMFMAIN@";;
 let database_path = Filename.concat texdir_path "ls-R";;
