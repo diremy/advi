@@ -39,7 +39,10 @@ clean:
 web:
 	$(MAKE) -f MakeHTML all
 
-splash.dvi manual.dvi: splash_contents.tex
+manual.dvi: splash_contents.tex scratch_write_splash_contents.tex scratch_draw_splash_contents.tex
+splash.dvi: splash_contents.tex
+scratch_write_splash.dvi: scratch_write_splash_contents.tex
+scratch_draw_splash.dvi: scratch_draw_splash_contents.tex
 
 manual.dvi: manual.sty
 manual.html: manual.hva macros.hva
