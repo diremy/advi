@@ -28,7 +28,10 @@
 % Auxilliary macros
 
 \def \advi@empty{}
+\def \advi@ifempty #1{\def \@test {#1}\ifx \@test \advi@empty 
+  \expandafter \@firstoftwo \else \expandafter \@secondoftwo \fi}
 \def \advi@error #1{\PackageError {Advi}{#1}{Type <RETURN> to proceed.}}
+\def \advi@warning #1{\PackageWarning {Advi}{#1}}
 \ifadvi@ignore 
 \def \advi@special@ #1{\hbox{}}
 \else
@@ -55,8 +58,7 @@
   {\advi@special {proc record=end}}
 \newcommand {\advi@play}[2][]%
    {\begingroup
-      \def \@test {#1}\ifx \@test \advi@empty\else \color {#1}\fi
-      \advi@special {proc=#2 play}%
+      \advi@ifempty{#1}{}{\color {#1}}{\advi@special {proc=#2 play}}%
     \endgroup}
 
 \advi@exportenv {Advirecord}{Advi@record} 
@@ -93,13 +95,78 @@
 
 %%% Background colors and images
 
-\define@key {advi@bg}{color}{\advi@special{setbg color=#1}}
-\define@key {advi@bg}{image}{\advi@special{setbg image=#1}}
-\define@key {advi@bg}{alpha}{\advi@special{setbg alpha=#1}}
-\define@key {advi@bg}{blend}{\advi@special{setbg blend=#1}}
-\define@key {advi@bg}{reset}[]{\advi@special{setbg reset}}
-\define@key {advi@bg}{inherit}[]{\advi@special{setbg inherit}}
-\newcommand{\advibg}{\setkeys{advi@bg}}
+\def \do #1{\expandafter \def \csname advi@geom@#1\endcsname {#1}}
+\do {center}
+\do {left}
+\do {right}
+\do {bottom}
+\do {top}
+\do {topleft}
+\do {topright}
+\do {bottomleft}
+\do {bottomright}
+\let \do \relax
+\def \advi@ifnine #1#2#3{\@ifundefined {advi@geom@#1}{#3}{#2}}
+
+\let \advi@global \relax
+\def \advi@global@ {global}
+\newif \ifadvi@bgactive
+
+\def \advi@bg@do
+ {\do\advi@bgcolor \do\advi@bgimage \do \advi@bgalpha \do\advi@bgblend}
+\def \advi@auto@ {auto}
+\def \advi@bgreset 
+ {\def \do ##1{\expandafter \advi@global
+                  \expandafter \let \noexpand ##1\advi@empty}\advi@bg@do
+  \advi@global \let \advi@bgfit \advi@auto@
+  \advi@global \advi@bgactivefalse}
+\advi@bgreset
+
+\def \advi@none@ {none}
+\def \advi@ifnone #1{\def \@test{#1}\ifx \@test \advi@none@
+  \let \@test \advi@empty \fi \ifx \@test \advi@empty
+  \expandafter \@firstoftwo \else \expandafter \@secondoftwo \fi}
+
+\def \advi@setbg #1#2#3{\advi@ifnone {#1}
+  {\advi@global \expandafter \let \noexpand #1\advi@empty}
+  {\advi@global \expandafter \def \noexpand #1{ #2=#3}%
+   \advi@global \advi@bgactivetrue}}
+\define@key {advi@bg}{color}[]{\advi@setbg{\advi@bgcolor}{color}{#1}}
+\define@key {advi@bg}{image}[]{\advi@setbg{\advi@bgimage}{image}{#1}}
+\define@key {advi@bg}{alpha}[]{\advi@setbg{\advi@bgalpha}{alpha}{#1}}
+\define@key {advi@bg}{blend}[]{\advi@setbg{\advi@bgblend}{blend}{#1}}
+\define@key {advi@bg}{fit}[auto]{\def \advi@bgfit {#1}%
+     \message {[\advi@bgfit]}
+     \ifx \advi@bgfit \advi@auto@ \else
+     \advi@ifnine {\advi@bgfit}
+       {\message {#1}\advi@global \def \advi@bgfit{ fit=#1}\message{END}}
+       {\advi@error {Ill formed background fit=#1}}%
+   \fi}
+\def \advi@bgset #1{\advi@ifnone {#1}{\advi@bgreset}{\setkeys {advi@bg}{#1}}}
+
+%\define@key {advi@bg}{inherit}[]{\advi@special{setbg inherit}}
+
+\def \advi@bgemit 
+  {\advi@special 
+     {setbg \advi@bgcolor \advi@bgimage \advi@bgalpha \advi@bgblend
+      %\advi@bgfit
+      }}
+\newif \ifadvi@bglocal
+
+\newcommand{\advi@bg}[2][]{%
+  \begingroup 
+  \def \@test {#1}\ifx \@test \advi@global@ \let \advi@global \global
+  \advi@bgset {#2}\else
+  \ifx \@test \advi@empty \else \advi@warning
+     {Optional argument [#1] to \string \advibg ignored}\fi
+  \global \advi@bglocaltrue
+  \advi@bgset{#2}\advi@bgemit \fi
+  \endgroup}
+\def \advi@bgpage
+   {\ifadvi@bgactive \ifadvi@bglocal\else \advi@bgemit \fi\fi
+    \global \advi@bglocalfalse}
+
+\advi@export \advibg \advi@bg
 
 %%% Pausing and waiting
 
@@ -108,8 +175,7 @@
 
 %% export
 \newcommand {\adviwait}[1][]%
-   {\def \@test {#1}\ifx \@test \advi@empty \advi@pause 
-    \else \advi@wait {#1}\fi}
+   {\advi@ifempty {#1}{\advi@pause}{\advi@wait {#1}}}
 
 %%% Transparency and alpha blending
 %%% To be revised. 
@@ -140,7 +206,7 @@
 
 \def \advi@transfrom{}
 \def \advi@transsteps{}
-\let \advi@settrans \def
+\def \advi@settrans {\advi@global \def}
 \define@key {advi@trans}{none} []{\advi@settrans \advi@transmode {none}}
 \define@key {advi@trans}{slide}[]{\advi@settrans \advi@transmode {slide}}
 \define@key {advi@trans}{block}[]{\advi@settrans \advi@transmode {block}}
@@ -149,23 +215,26 @@
 \define@key {advi@trans}{steps}{\advi@settrans \advi@transsteps { steps=#1}}
 
 \def \advi@transemit
-   {\advi@special{trans \advi@transmode \advi@transfrom \advi@transsteps}%
-    \message {[\advi@transmode \advi@transfrom \advi@transsteps]}}
-\def \advi@global {global}
+   {\advi@special{trans \advi@transmode \advi@transfrom \advi@transsteps}}
 \newif \ifadvi@translocal 
 \newcommand {\advi@transition}[2][]{%
-  \def \@test {#1}\ifx \@test \advi@global
-     \begingroup \let \advi@settrans \gdef \setkeys {advi@trans}{#2}\endgroup
-  \else
+  \begingroup
+     \def \@test {#1}\ifx \@test \advi@global@ \let \advi@global \global
+     \setkeys {advi@trans}{#2}\else
+     \ifx \@test \advi@empty \else \advi@warning
+        {Optional argument [#1] to \string \advitransition ignored}\fi
      \global \advi@translocaltrue
-     \begingroup \setkeys {advi@trans}{#2}\advi@transemit \endgroup
-  \fi}
+     \setkeys {advi@trans}{#2}\advi@transemit \fi
+  \endgroup}
 
-%% should also print background info when its advi API will be fixed.
-\def \advi@setpagestyle
+\def \advi@transpage
   {\@ifundefined {advi@transmode}{}
         {\ifadvi@translocal\else \advi@transemit \fi}%
    \global \advi@translocalfalse}
+
+%% Hook \advi@setpagesetyle at \@begindvi that run at every page
+
+\def \advi@setpagestyle {\advi@bgpage \advi@transpage}
 
 \let \latex@begindvi \@begindvi
 \def \@begindvi

@@ -60,38 +60,84 @@ The optional argument changes the color to \docid{color} during replay.
 \subsection {Backgrounds}
 
 \medskip\noindent
-\docdef \advisetbg\docarg{key=value list}
+\docdef \advibg \doctt {[global]}\docarg{key=value list}
 \begin{quote}
 where \docid{key=value list} is a list of bindings of the followning kind:
 
-\dockey{color}{color}
+\dockey[none]{color}{color}
 \begin{quote}
-Set the background color to \docid{color}.
+Set the background color to \docid{color}
+(\doctt{none} means unset).
 \end{quote}
 
-\dockey{image}{file}
+\dockey[none]{image}{file}
 \begin{quote}
-Use the file from \docid{file} as background.
+Use the file from \docid{file} as background
+(\doctt{none} means unset).
 \end{quote}
 
-\dockey{alpha}{float}
+\dockey[auto]{fit}{fit style}
 \begin{quote}
-Set the alpha factor for the background image to \docid{float}.
+Fit the background image according to \docid{style}, which may only be 
+{\tt auto} or one of the following keywords:
+\begin{center}
+\tt
+auto \hfill {\rm or} \hfill
+\begin{tabular}{l@{\qquad}c@{\qquad}r}
+topleft&   top& topright\\
+left&  center&  right \\
+bottomleft& bottom & bottomright\\
+\end{tabular}
+\end{center}
+The {\tt auto} fit mode means scale the image as desired in both directions
+so that it fits the page. The other styles only allows the same scaling
+factor in both directions:
+\begin {itemize}
+
+\item
+Corner-styles mean adjust the image in the corner
+and scale so that all the page is covered. 
+
+\item
+{\tt center} means scale the
+image so that all the page is covered and center it on the page. 
+
+\item
+Segment-styles mean adjust the image and the page on the segment (in which
+case, the image may not totally cover the page on the opposite side). 
+
+\end {itemize}
 \end{quote}
 
-\dockey{blend}{blend mode}
+\dockey[none]{alpha}{float}
+\begin{quote}
+Set the alpha factor for the background image to \docid{float}
+(\doctt{none} means unset).
+\end{quote}
+
+\dockey[none]{blend}{blend mode}
 \begin{quote}
 Set the blend mode to \docid{blend mode}, which should be one of the
 following (unchecked): {\tt difference}, XXX?
+(\doctt{none} means unset).
 \end{quote}
 
+\goodbreak
+\dockey{none}{}
+\begin{quote}
+Unset all background paremeters.
+This key can only appear alone, without argument and without any other key. 
+\end{quote}
+The optional parameter \doctt{global} indicates that
+the definition is global and will affect the following pages, 
+as well as the current page. 
 
-
+By default, the transition affects only the current page. 
 \end{quote}
 
 \subsection {Transitions}
 
-\docdef \advitransition \docopt{\doctt {global}}\docarg {key=val list}
+\docdef \advitransition \doctt {[global]}\docarg {key=val list}
 \begin{quote}
 where \docid{key=value list} is a list of bindings of the following kind:
 
@@ -120,7 +166,7 @@ bottomleft& bottom & bottomright\\
 \begin{quote}
 Make the transition in \docid{n} steps. 
 \end{quote}
-The optional parameter \doctt{global} indicates that
+As for \docdef \advibg, the optional parameter \doctt{global} indicates that
 the definition is global and will affect the following pages, 
 as well as the current page. 
 

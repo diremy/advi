@@ -130,13 +130,13 @@ directives explicitly declared in a page, you have two options:
   \begin{itemize}
     \item run advi with the \verb|--reset_bkgd| option: this way,
      background inheritance is disabled in all the file, or
-    \item you can locally issue a \verb|\advibg{reset}| command, that resets
+    \item you can locally issue a \verb|\advibg{none}| command, that resets
      the background eliminating everything which is inherited. This is how
      we got rid of the background image in this page, that only sports a
      nice Cyan background color.
   \end{itemize}
 
-\advibg{reset}
+\advibg{none}
 
 \advibg{color=Cyan} 
 
@@ -180,14 +180,14 @@ To revert to normal text color, use
     \end{verbatim}
   \end{quote}
 
-at the end of the slide. (Write \verb"\advibg{reset}" at the
+at the end of the slide. (Write \verb"\advibg{none}" at the
 beginning of next slide, if you also want to revert to normal background.)
 
 \special{color pop}
 
 \newpage
 
-\advibg{reset}
+\advibg{none}
 
 \subsection* {TODO:}
 
