@@ -16,7 +16,7 @@ tools.pdf: $(EPS) tools.tex
 .SUFFIXES: .eps_gz .eps
 
 clean:
-	rm -f *.eps *.dvi *.pdf *.aux *.log *.ps
+	rm -f *.eps *.dvi *.pdf *.aux *.log *.ps *~
 
 %.eps:%.eps.gz
 	gunzip -c $< > $@
