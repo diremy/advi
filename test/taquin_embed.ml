@@ -1,5 +1,7 @@
 open Tk;;
 
+let taquin_color = ref (NamedColor "white");;
+
 let filename = ref "";;
 
 let opencamltk () =
@@ -108,23 +110,29 @@ let give_help parent lines () =
 let taquin nx ny =
   let fp = opencamltk () in
   Wm.title_set fp "Taquin";
+  Toplevel.configure fp [Background !taquin_color];
   let img = Imagephoto.create [File !filename] in
   let c =
     Canvas.create fp
      [Width(Pixels(Imagephoto.width img));
-      Height(Pixels(Imagephoto.height img))] in
+      Height(Pixels(Imagephoto.height img));
+      Background !taquin_color] in
   let (tx, ty, pièces) = découpe_image img nx ny in
   remplir_taquin c nx ny tx ty (permutation pièces);
   pack [c] [];
 
-  let quit = Button.create fp [Text "Quit"; Command closeTk] in
+  let quit =
+    Button.create fp
+      [Text "Quit"; Background !taquin_color; Command closeTk] in
   let help_lines =
    ["Pour jouer, cliquer sur une des pièces";
     "entourant le trou";
     "";
     "To play, click on a part around the hole"] in
   let help =
-    Button.create fp [Text "Help"; Command (give_help fp help_lines)] in
+    Button.create fp
+      [Text "Help"; Background !taquin_color;
+       Command (give_help fp help_lines)] in
   pack [quit; help] [Side Side_Left; Fill Fill_X];
   mainLoop ();;
 

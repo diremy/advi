@@ -122,7 +122,6 @@ let opencamltk () =
 
 type clock = {
     widget : Widget.widget;
-    mutable circle : tagOrId;
     mutable major : tagOrId;
     mutable minor : tagOrId;
     mutable major_elapsed : float;
@@ -172,18 +171,22 @@ let create_clock () =
   let r = d / 2 in
   let w = Canvas.create top [Background  (NamedColor !background_color)] in
   pack [w] [Expand true; Fill Fill_Both ];
+  if !width_circle > 0 then ignore (
+    Canvas.create_oval w
+      (Pixels base_x) (Pixels base_y) 
+      (Pixels (base_x + d)) (Pixels (base_y + d))
+      (options_circle ()));
   let clock =
     {
       widget = w;
-      circle =
-      Canvas.create_oval w
-        (Pixels base_x) (Pixels base_y) 
-	(Pixels (base_x + d)) (Pixels (base_y + d))
-	(options_circle ());
-      major = Canvas.create_line w [ Pixels (base_x + r); Pixels (base_y + r); 
-				     Pixels (base_x + r); Pixels base_y] (options_major ());
-      minor = Canvas.create_line w [ Pixels (base_x + r); Pixels (base_y + r); 
-				     Pixels (base_x + r); Pixels base_y] (options_minor ());
+      major =
+        Canvas.create_line w
+          [ Pixels (base_x + r); Pixels (base_y + r); 
+	    Pixels (base_x + r); Pixels base_y] (options_major ());
+      minor =
+        Canvas.create_line w
+          [ Pixels (base_x + r); Pixels (base_y + r); 
+            Pixels (base_x + r); Pixels base_y] (options_minor ());
       major_elapsed = (if !reverse then !total_time else 0.0);
       minor_elapsed = 0.0;
     }
