@@ -32,7 +32,7 @@ MLINCDIRS = $(CAMLIMAGESDIR)
 EXEC	  = advi
 
 MODULES	  = config misc input symbol search \
-	    graphicsY11 drawps draw_image \
+	    graphicsY11 drawps draw_image dvicolor \
 	    table pkfont ttfont jfm font glyph devfont \
 	    units dimension \
 	    gs transimpl grdev dvi driver dviview main
@@ -79,25 +79,17 @@ $(EXEC).opt: $(COBJS) $(CMX_OBJS)
 # config.ml:
 #	configure
  
-drawps.ml: Makefile.config drawps_with_ps.ml drawps_without_ps.ml
-	rm -f drawps.ml
-	if [ $(HAVE_CAMLIMAGES) = "true" -a $(HAVE_GS) = "true" ]; then \
-		cp drawps_with_ps.ml drawps.ml; \
-	else \
-		cp drawps_without_ps.ml drawps.ml; \
-	fi
+dvicolor.ml: Makefile.config dvicolor.mlp ifdef.cmo
+	camlp4o pa_ifdef.cmo ./ifdef.cmo -impl dvicolor.mlp > $@
 
-drawps.cmo : drawps.cmi
+drawps.ml: Makefile.config drawps.mlp ifdef.cmo
+	camlp4o pa_ifdef.cmo ./ifdef.cmo -impl drawps.mlp > $@
 
-ttfont.ml: Makefile.config ttfont_with_freetype.ml ttfont_without_freetype.ml
-	rm -f ttfont.ml
-	if [ $(HAVE_CAMLIMAGES) = "true" ]; then \
-		cp ttfont_with_freetype.ml ttfont.ml; \
-	else \
-		cp ttfont_without_freetype.ml ttfont.ml; \
-	fi
+ttfont.ml: Makefile.config ttfont.mlp ifdef.cmo
+	camlp4o pa_ifdef.cmo ./ifdef.cmo -impl ttfont.mlp > $@
 
-ttfont.cmo : ttfont.cmi
+ifdef.cmo: ifdef.ml
+	$(OCAMLC) -c -I +camlp4 $<
 
 grY11.o : grY11.c
 	$(OCAMLC) -ccopt "$(CFLAGS)" -c $<
@@ -121,9 +113,12 @@ clean:
 	rm -rf .advi test/.advi test/*.log test/*.aux test/*.dvi \
 	tex/.advi tex/*.log tex/*.aux tex/*.dvi
 
-veryclean:
+veryclean: clean
 	rm -f Makefile.config config.cache config.log \
-	config.status drawps.ml ttfont.ml config.ml
+	config.status drawps.ml ttfont.ml config.ml ifdef.ml
+
+veryveryclean: veryclean
+	rm -f configure
 
 tex/splash.dvi: tex/splash.tex
 	cd tex; latex splash.tex

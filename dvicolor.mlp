@@ -1,0 +1,52 @@
+open Graphics
+
+type color = Graphics.color
+
+let named_colors = [
+  "black", black;
+  "white", white;
+  "red", red;
+  "green", green;
+  "blue", blue;
+  "yellow", yellow;
+  "cyan", cyan;
+  "magenta", magenta;
+];;
+
+let cmyk c m y k =
+  let r = 255 - c
+  and g = 255 - m
+  and b = 255 - y in
+  (* k is ignored *)
+  rgb r g b ;;
+
+let parse_color_args = function
+  | ["rgb"; rs; gs; bs] ->
+      let r = int_of_float (255.0 *. float_of_string rs)
+      and g = int_of_float (255.0 *. float_of_string gs)
+      and b = int_of_float (255.0 *. float_of_string bs) in
+      rgb r g b
+  | ["cmyk"; cs; ms; ys; ks] ->
+      let c = int_of_float (255.0 *. float_of_string cs)
+      and m = int_of_float (255.0 *. float_of_string ms)
+      and y = int_of_float (255.0 *. float_of_string ys)
+      and k = int_of_float (255.0 *. float_of_string ks) in
+      cmyk c m y k
+  | ["gray"; gs] ->
+      let g = int_of_float (255.0 *. float_of_string gs) in
+      rgb g g g
+  | [s] ->
+      begin
+	try 
+ifdef HAVE_CAMLIMAGES then
+	  let {Color.r=r; Color.g=g; Color.b=b} = Color.color_parse s in
+	  rgb r g b
+else
+          raise Exit
+	with _ ->
+            try List.assoc (String.lowercase s) named_colors
+            with Not_found ->
+              Format.eprintf "unknown color %s@." s ;
+              0x000000
+      end
+  | _ -> 0x000000 ;;
