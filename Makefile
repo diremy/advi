@@ -19,10 +19,14 @@
 
 include Makefile.config
 
+YEAR=2004
+OLDYEAR=2003
 VERSION=1.6
 OLDVERSION=1.5
 PACKAGEVERSIONFILE=config.ml
-DOCVERSIONFILES=tex/advi.sty doc_src/Includes/advi-version.html doc/advi.1
+DOCVERSIONFILES=tex/advi.sty tex/advi.hva \
+doc_src/Includes/advi-version.html doc_src/Includes/env \
+doc/advi.1
 
 HELPFILES=doc/splash.dvi \
     doc/scratch_write_splash.dvi doc/scratch_draw_splash.dvi
@@ -131,7 +135,9 @@ version:
 	for i in $(PACKAGEVERSIONFILE) $(DOCVERSIONFILES); do \
 	echo $$i; \
 	mv $$i $$i~; \
-	sed -e '/ersion/s/$(OLDVERSION)/$(VERSION)/' $$i~ > $$i; \
+	sed -e '/ersion/s/$(OLDVERSION)/$(VERSION)/' $$i~ > $$i~~; \
+	sed -e '/year/s/$(OLDYEAR)/$(YEAR)/' $$i~~ > $$i; \
+	rm $$i~~; \
 	done
 
 .c.o:

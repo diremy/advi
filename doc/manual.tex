@@ -34,20 +34,12 @@
 \usepackage{tabularx}
 %\usepackage{pst-all}
 \usepackage{xwindows-colors}
-%\usepackage{hyperref}
-% End of splash specific stuff
-
 \expandafter \ifx \csname driver\endcsname\relax \def \driver{}\fi 
 \usepackage [\driver]{hyperref}
+% End of splash specific stuff
 
 % We use Hevea to create the HTML version
 \usepackage{hevea}
-%HEVEA\def\strech #1{2em}
-%HEVEA\def\vfill {2em}
-%HEVEA\def\hfill {2em}
-%HEVEA\def\vfil {2em}
-%HEVEA\def\space { }
-%HEVEA\def\sqrt#1{\mathbin{square}(#1)}
 
 \ifhevea\title{
 {\bf\ActiveDVI}\\

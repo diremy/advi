@@ -2,6 +2,7 @@
 \let\RequirePackage\usepackage
 \def\space{~}
 \def\vfill{}
+\def\vfil{}
 \def\hfill{\hspace*{4ex}}
 \def\goodbreak{}
 \newcommand{\sqrt}[2][2]{(#2)^{1/#1}}

@@ -38,7 +38,7 @@ Options.add
      \n\t (the default is %S)." (get_page_image_file_suffix ()));;
 
 let get_page_image_file_prefix, set_page_image_file_prefix =
- let file_prefix = ref "shot" in
+ let file_prefix = ref "./shot" in
  (fun () -> !file_prefix),
  (fun s -> file_prefix := s);;
 
@@ -77,7 +77,8 @@ let new_fname () =
 let output_page_area_image_file fname x y w h =
   GraphicsY11.anti_synchronize ();
   let img = Graphic_image.get_image x y w h in
-  Image.save fname None [] (Rgb24 img);;
+  Image.save fname None [] (Rgb24 img);
+  Misc.debug_endline (Printf.sprintf "image %s has been written." fname);;
 
 let save_page_area_image_file fname x y w h =
   let screen_w = Graphics.size_x () and screen_h = Graphics.size_y () in

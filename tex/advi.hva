@@ -1,6 +1,6 @@
 %%% Active-DVI
 %%
-%% This is the original source file advi.sty
+%% This is the original source file advi.hva
 %%
 %% Package `advi' to use with LaTeX 2e
 %% Copyright Roberto Di Cosmo, Jun Furuse, Didier Remy, and Pierre Weis
@@ -13,9 +13,9 @@
 % Which name is ours
 \def \advi@name {Active-DVI}
 % Which year of development are we (used for various copyrights message) ?
-\def \advi@year {2003}
+\def \advi@year {2004}
 % Which version is it ?
-\def \advi@version {1.50}
+\def \advi@version {1.60}
 
 %% End of administrative definitions that need updating.
 
