@@ -116,7 +116,7 @@ count:
 clean:
 	rm -f *.cm[oix] *.o $(EXEC) $(EXEC).opt *~ .depend *.log *.aux
 	rm -rf .advi test/.advi test/*.log tex/.advi
-	cd test; make clean
+	cd test; $(MAKE) clean
 
 veryclean: clean
 	rm -f Makefile.config config.cache config.log \
