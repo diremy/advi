@@ -1,12 +1,12 @@
 let have_gs = @HAVE_GS@;;
 
 (* Location of splash.dvi and test/caml.eps *)
-let advi_loc = "@ADVI_LOC@"
-let splash_screen = Filename.concat advi_loc "splash.dvi"
+let advi_loc = "@ADVI_LOC@";;
+let splash_screen = Filename.concat advi_loc "splash.dvi";;
 (* In the future, these could be automatically generated *)
-let kpsewhich_path = "kpsewhich" ;;
-let gs_path = "@PATH_GS@"
+let kpsewhich_path = "kpsewhich";;
+let gs_path = "@PATH_GS@";;
 let texpicts_kind = "graphic/figure";;
 let psheaders_kind = "PostScript header";;
-let texdir_path = "/usr/share/texmf" ;;
-let database_path = texdir_path ^ "/ls-R" ;;
+let texdir_path = "/usr/share/texmf";;
+let database_path = Filename.concat texdir_path "ls-R";;
