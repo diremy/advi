@@ -25,7 +25,7 @@ PDFIMAGEN=pdfimagen
 DVIPDFM=dvipdfm
 
 all: web \
-manual.ps manual.pdf \
+manual.dvi manual.ps manual.pdf \
 splash.dvi splash.ps \
 scratch_write_splash.dvi scratch_write_splash.ps \
 scratch_draw_splash.dvi scratch_draw_splash.ps \
