@@ -18,4 +18,5 @@
 (* The ``scratching'' facility for Active-DVI: you can interactively
    annotate your slides by ``scratching'' on them. *)
 
-val f : unit -> unit;;
+val draw : unit -> unit;;
+val write : unit -> unit;;

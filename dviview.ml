@@ -846,7 +846,9 @@ module B =
       ()
 
      let scratch st =
-       Scratch.f ()
+       Scratch.draw ()
+     let scratch_write st =
+       Scratch.write ()
   end;;
 
 let bindings = Array.create 256 B.nop;;
@@ -922,6 +924,7 @@ let bind_keys () =
 
    (* Scratching. *)
    's', B.scratch;
+   'S', B.scratch_write;
   ];;
 
 bind_keys ();;
