@@ -7,4 +7,5 @@ adviclock
 *.toc
 demo*.ps
 gpic.ps
+test_gpic.tex
 .advi

@@ -7,8 +7,7 @@ LATEX=TEXINPUTS=.:../tex:$(TEXINPUTS): latex
 PLATEX=TEXINPUTS=.:../tex:$(TEXINPUTS): platex
 
 TEXFILES= demo.tex demo2.tex trigo_source.tex \
-trans.tex trans2.tex trans3.tex background.tex \
-test_gpic.tex
+trans.tex trans2.tex trans3.tex background.tex
 #thumbnails.tex
 DVIFILES= $(TEXFILES:%.tex=%.dvi)
 ADVI=TEXPSHEADERS=../tex: ../advi
@@ -48,7 +47,7 @@ else
 	ocamlc -custom -o adviclock unix.cma -I $(CAMLTKDIR) $(CAMLTKLIB) adviclock.ml
 endif
 
-clean:
+clean::
 	$(RM) a.out *.aux *.log *.dvi *~ 
 	$(RM) $(MLPROG) *.cmi *.cmo
 	$(RM) .advi/*
@@ -61,5 +60,7 @@ trigo.tex: trigo.pic
 
 test_gpic.tex: test_gpic.pic
 	gpic -t test_gpic.pic > test_gpic.tex
+clean::
+	$(RM) test_gpic.tex
 
-.SUFFIXES: .tex .sty .dvi .eps .advi
+.SUFFIXES: .tex .sty .dvi .ps .eps .advi
