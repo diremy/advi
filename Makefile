@@ -116,8 +116,8 @@ MLFILES = $(addsuffix .ml, $(MODULES))
 
 # just for the authors
 VERSION=0.5.0
-ADVI=activedvi-$(VERSION)
-WEBSITEDIR=/net/pauillac/infosystems/www/activedvi
+ADVI=advi-$(VERSION)
+WEBSITEDIR=/net/pauillac/infosystems/www/advi
 
 # make splash builds splash.dvi
 splash:
@@ -128,13 +128,13 @@ distribute:
 #	rm -rf $(WEBSITEDIR)/*
 	- mkdir $(WEBSITEDIR)
 	mkdir release
-	cd release; cvs co bazar-ocaml/mldvi; \
+	cd release; cvs co bazar-ocaml/advi; \
 	find . -name '.cvsignore' -print | xargs rm; \
 	find . -name 'CVS' -print | xargs rm -rf; \
-	cp -pr bazar-ocaml/mldvi/doc/* $(WEBSITEDIR)
+	cp -pr bazar-ocaml/advi/doc/* $(WEBSITEDIR)
 	- chgrp -R caml $(WEBSITEDIR)
 	- chmod -R g+w $(WEBSITEDIR)
-	cd release; mv bazar-ocaml/mldvi $(ADVI); \
+	cd release; mv bazar-ocaml/advi $(ADVI); \
 	tar cvf $(ADVI).tar $(ADVI); \
 	gzip $(ADVI).tar; \
 	mv -f $(ADVI).tar.gz $(WEBSITEDIR)
