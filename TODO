@@ -1,11 +1,6 @@
 BEFORE RELEASE:
 ===============
 
- * Fixer les KNOWN BUGS
- ==> fait
-
- * Never add new KNOWN BUGS until the release 
-
  * compléter manual.tex (la plupart des morceaux manquants existent mais
    sont dispersés)
  ==> en cours ...
@@ -14,16 +9,6 @@ BEFORE RELEASE:
  ==> fait dans la même mesure que camlimages (RPM livré avec advi).
 
  * refaire la page WEB.
-
-    . transformer advi@pauillac en advi-bugs@pauillac
-    ==> oui, il faut créer une adresse advi-bugs@pauillac pour les
-        rapports de bugs, mais l'adresse advi@pauillac doit rester la
-        liste des implementeurs.
-    ==> c'est fait.
-    . mettre advi@pauillac comme liste d'abonnés avec Majordomo ?
-    ==> oui, mais il faut la nommer advi-list@pauillac.inria.fr comme
-    d'habitude avec les softs bat8.
-    ==> c'est fait.
 
  * packagifier pour Linux?
  ==> c'est fait pour RedHat.
@@ -105,6 +90,12 @@ user's preferences for key bindings.
  - Traiter les fichiers postscript sans llx lly urx ury mais avec
 vscale=100.0 hoffset=-228.0 voffset=-368.0 hscale=100.0
 
+ - while 'g' jumps to aboslute (dvi) <page number>, 
+  Make 'G' jumps to the page.<page number> url, i.e. latex page number, 
+  whenever possible, and if not jump to <page number> as 'g'. 
+  (Do not make 'G' the default, since it is fragiles ---depends on how latex
+  has generated page numbers. Experiment with book files slides, etc.)
+
  - Need to control advi from within tex
    \advikey{key} would generate a call to key as if key has been pressed
    \advicom{f arg} would generate a call to internal function f with
@@ -114,20 +105,31 @@ vscale=100.0 hoffset=-228.0 voffset=-368.0 hscale=100.0
    are displayed directly inside the advi screen.
 
  - Need also to be able to pop a small window to request something to
-the user (for instance to launch applications on a on demand basis).
+ the user (for instance to launch applications on a on demand basis).
 
  - Should incorporate the clock into the core advi in order to be able
-to interact smoothly with it (for instance to have a key to hide it)...
+ to interact smoothly with it (for instance to have a key to hide it)...
+
+ DR: Not necessarily: the key bindings could be programmed from tex (neeed
+ to be added). Then the user could also launch an application by hitting a
+ key of his choice [ add an action on-key similar to on-clikc or on-mouse
+ for active parts ]
 
  - Need a key to hide and show windows
+
+==> Which ones?
 
  - Need a key binding similar to 'g' such that it goes to the page and pushes
    on the stack alll the pages from here to the target page
 
--- Need a ``compiling'' version of advi (name it advic) that creates
+ - Need a ``compiling'' version of advi (name it advic) that creates
    and caches all the images of a presentation to speed up the
    presentation afterwards. (Otherwise one is obliged to play the
    presentation in advance by viewing every slides!)
+
+ DR: I don't think so, since there is already several unfreeze flags to do
+ that.  You should just use them, maybe add -unfreeze on the command line,
+ that would do as if you press the unfree keep.
 
  - Add a new macro !current-page! for insertion in arguments of command
    calls.

@@ -707,7 +707,10 @@ let proc_special st s =
         begin match !visible_stack with
         | h :: rest ->
             visible := h; visible_stack := rest;
-        | [] -> assert false; 
+        | [] ->
+            (* Ill-formed DVI not recording error should have ben reproted
+               right above *) 
+            (); 
         end;
 
     | _ -> ill_formed_special s
