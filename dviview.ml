@@ -449,8 +449,6 @@ module Make(Dev : DEVICE) = struct
 	    | Px n -> height + 2 * n
 	    | In f -> height + int_of_float (base_dpi *. 2.0 *. f)
 	    | _ -> assert false in
-            assert (attr.geom.width >= sx);
-            assert (attr.geom.height >= sy);
 	    (sx, sy)
           end else
 	    (attr.geom.width, attr.geom.height) in
