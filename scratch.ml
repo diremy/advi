@@ -251,9 +251,10 @@ let scratch_write_settings_handle_char c =
   | c ->
     Misc.warning (Printf.sprintf "Unknown scratch write setting key: %C" c);;
 
-let enter_scratch_settings settings c =
+let enter_scratch_settings splash_screen settings c =
   match c with
   | '' | 'q' -> end_write ()
+  | '?' -> Grdev.help_screen splash_screen
   | '' -> settings ()
   | c ->
     Misc.warning
@@ -341,7 +342,9 @@ and scratch_write_settings () =
 (* The main routine to begin write scratching:
    - wait for a click then enter scratching. *)
 and start_scratch_write () =
-  wait_button_pressed (enter_scratch_settings scratch_write_settings);
+  wait_button_pressed
+   (enter_scratch_settings
+      Config.scratch_write_splash_screen scratch_write_settings);
   enter_scratch_write ();;
 
 let do_write () =
@@ -596,6 +599,7 @@ and scratch_draw_down () =
 and key_pressed c =
   match c with
   | '' | 'q' -> end_draw ()
+  | '?' -> Grdev.help_screen Config.scratch_draw_splash_screen
   | '' -> scratch_draw_settings ()
   | c ->
      let x, y = G.mouse_pos () in
@@ -647,7 +651,9 @@ and scratch_draw_settings () =
 (* The main routine to begin draw scratching:
    - wait for a click then enter scratching. *)
 and start_scratch_draw () =
-  wait_button_pressed (enter_scratch_settings scratch_draw_settings);
+  wait_button_pressed
+    (enter_scratch_settings
+       Config.scratch_draw_splash_screen scratch_draw_settings);
   enter_scratch_draw ();;
 
 let do_draw () =
