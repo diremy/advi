@@ -1,0 +1,4 @@
+#!/bin/sh
+rm -f config.cache config.log
+CFLAGS="-I/usr/local/include" LDFLAGS="-L/usr/local/lib" ./configure  \
+--includedir=/usr/local/include --includedir=/usr/X11R6/include
