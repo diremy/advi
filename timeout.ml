@@ -17,7 +17,7 @@
 
 (* $Id$ *)
 
-(* simple timeout handler *)
+(* Simple timeout handler *)
 
 module Timeout = struct
   type t = {
@@ -43,7 +43,7 @@ let rec callback () =
     let min = TimeoutSet.min_elt !set in
     let now = Unix.gettimeofday () in
     let wait = min.at -. now in
-    (* be careful that is wait < 1e-7, timer will never be raised... *)
+    (* Be careful: if wait < 1e-7, timer will never be raised... *)
     if wait < 0.001 then begin
       set := TimeoutSet.remove min !set;
       min.callback ();
@@ -58,9 +58,9 @@ let rec callback () =
   with
   | Not_found -> ()
 ;;
- 
+
 let init () =
-  (* Already existing itimer's handle is disabled! *)
+  (* Already existing itimer's handler is disabled! *)
   ignore (Sys.signal Sys.sigalrm
             (Sys.Signal_handle (fun _ -> callback ())));
   set := TimeoutSet.empty;
@@ -77,11 +77,15 @@ let add sec cbk =
   set := TimeoutSet.add timeout !set;
   callback ();
   timeout
-;; 
+;;
 
 let rec repeat sec cbk =
-  ignore (add sec (fun () ->
-    try cbk(); repeat sec cbk with z -> repeat sec cbk; raise z ))
+  ignore
+    (add sec
+       (fun () ->
+          try cbk (); repeat sec cbk with
+          | exn -> repeat sec cbk; raise exn))
+;;
 
 let remove timeout =
   if not (TimeoutSet.mem timeout !set) then raise Not_found;
