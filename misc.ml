@@ -15,6 +15,8 @@
 (*  Based on Mldvi by Alexandre Miquel.                                *)
 (***********************************************************************)
 
+type file_name = string;;
+
 (* Reverse and filters list l according to f. (Pour faire plaisir à Gérard) *)
 let reverse_filter f l =
   let rec filter res = function
