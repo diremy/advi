@@ -184,7 +184,7 @@ Including some strange flashing effect!
 
 \newpage
 
-\subsection* {Embedding applications}
+\subsection* {Launching applications}
 
 Any Unix command can be launch during the presentation.
 This is convenient to call an external program to draw material in the
@@ -197,17 +197,18 @@ To launch the program {\verb"command"} use in your {\LaTeX} source file\\
 
 \verb+\adviembed{command}+\\
 
-\noindent
-Additionnally, you may precise the size of the rectangle where the
-application will draw its material. {\ActiveDVI} will reserve
-that area for your application.\\
+\noindent Additionnally, you may precise the size of the rectangular
+window where the application will draw its material. {\ActiveDVI} will
+reserve that area for your application.\\
 
 \verb+\adviembed[width=w,height=h]{command}+\\
 
 \noindent
 Moreover, {\ActiveDVI} provides two special \TeX macros \verb"!g" and
 \verb"!p" that specify the geometry and the (X) window identifier that
-the application should use. Hence\\
+the application should use. Hence, if {\verb"command"} has option
+{\tt -geometry} to specify its X geometry specification, and option
+{\verb"-use"} to specify the X window it should use, then\\
 
 \verb+\adviembed[width=w,height=h]{command -geometry !g -use !p}+\\
 
@@ -217,6 +218,19 @@ will be display in the window \verb"!p" (normally a sub-window of
 {\ActiveDVI}'s window).
 
 \newpage
+
+\subsection* {Embedding applications}
+
+There are two kinds of applications you can launch during the
+presentation:
+\begin{itemize}
+\item {\em embeddable applications} run inside a
+subwindow of the main {\ActiveDVI}'s window (hence their window is
+stuck to the precise place computed by {\ActiveDVI}),
+\item {\em non-embeddable applications} run in a window of
+their own (hence their window is unrelated to the {\ActiveDVI}'s window and
+may be moved independantly).
+\end{itemize}
 
 \subsubsection*{Embeddable applications}
 
@@ -245,10 +259,10 @@ cannot be rerooted and is indeed impossible to embed.
 
 \newpage
 
-\subsubsection*{Embedded applications}
+\subsubsection*{Launching embeddable applications}
 
-That way, applications that obeys to the X geometry specifications
-can be properly displayed within the {\ActiveDVI} window.
+Rerootable applications obeys to the X geometry specifications and can
+be properly displayed within the {\ActiveDVI} window (embedding).
 
 Examples:
 
@@ -267,17 +281,17 @@ presentation using:\\
 
 \newpage
 
-\subsection*{Embedded applications (cont.)}
+\subsection*{Launching embeddable applications (cont.)}
 
 \begin{itemize}
-  \item Any application which has embedding options can be launched, as\\
+  \item Any application which supports embedding options can be launched, as\\
    \verb+\adviembed[width=w,height=h]{prog -geometry !g -use !p}+\\
    For instance, using wish:\\
    \verb|\adviembed[persistent,width=5cm,height=1cm]|\\
    \verb|          {wish ./watch -geometry !g -use !p}|\\
    \adviembed[persistent=wish,width=5cm,height=0.71cm]{wish ./watch -geometry !g -use !p}
 \adviwait
-  \item Possibly interactive ! (we use CamlTk here)\\
+  \item Possibly interactive ! (We use CamlTk here)\\
    \verb|\adviembed[persistent=taquin,width=6.5cm,height=9.5cm]|\\
    \verb|          {./taquin -geometry !g -use !p dojoji.gif}|\\
   \adviembed[persistent=taquin,width=8.5cm,height=10cm]{./taquin.sh -geometry !g -use !p dojoji.gif}
@@ -286,7 +300,7 @@ presentation using:\\
 
 \newpage
 
-\subsection*{Non Embeddable applications}
+\subsection*{Launching non-embeddable applications}
 
 If an X application does not support the specification of its parent
 window, it will be automatically handled by the window manager. Then,
@@ -316,14 +330,14 @@ will not follow (they may even desappear {\em below} the
 
 \newpage
 
-\subsection* {Embedded applications (cont.)}
+\subsection* {Launching non-embeddable applications (cont.)}
 
-\begin{itemize}
- \item You can add music to your presentation, if you have a music
-  player available:\\
+You can add music to your presentation, if you have a music
+player available: just embed the music player at the precise place
+where you want it to play your sounds.
+
   \verb|\adviembed[width=1mm,height=1mm]|\\
   \verb|    {mpg123 -q music.mp3}|
-\end{itemize}
 
 \advirecord{play}
  {\adviembed[name=mpg123,width=1mm,height=1mm]{mpg123 -q music.mp3}}
