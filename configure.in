@@ -174,6 +174,7 @@ fi
 dnl Check for libraries: END
 
 AC_PATH_PROG(PATH_CAMLOPT, $CAMLOPT, "nope")
+PATH_CAMLOPT=nope
 if test "$PATH_CAMLOPT" = "nope"; then
   echo "**************** Warning ******************"
   echo "The ocaml native code compiler is not found"
@@ -182,7 +183,7 @@ if test "$PATH_CAMLOPT" = "nope"; then
   echo "to install the ocamlopt compiler if available"
   echo "in your OS."
   echo "*******************************************"
-  INSTALLTARGET="advi"
+  INSTALLTARGET="i_want_opt"
 else
   if test -f "$CAMLIMAGESDIR/ci_ps.cmxa"; then
     INSTALLTARGET="advi.opt"
@@ -193,7 +194,7 @@ else
     echo "Without it, we cannot compile the native-code"
     echo "version of advi, which we strongly recommend."
     echo "*******************************************"
-    INSTALLTARGET="advi"
+    INSTALLTARGET="i_want_opt"
   fi
 fi
 

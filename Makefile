@@ -75,9 +75,24 @@ BYTECCCOMPOPTS=-fno-defer-pop -Wall -Wno-unused
 CFLAGS=$(X11_INCLUDES) -O $(BYTECCCOMPOPTS)
 
 all: $(INSTALLTARGET) documentation
-allopt: opt
+allopt: opt documentation
+allbyte: byte documentation
 opt: $(EXEC).opt 
 byte: $(EXEC)
+
+i_want_opt:
+	@echo "************************** Warning ***************************"
+	@echo "  You have no native code version of the O'Caml compiler."
+	@echo "  For the best exprerience, we strongly recommend to use "
+	@echo "  Active-DVI compiled with the native code compiler (ocamlopt)."
+	@echo "  For further information about ocamlopt, look at:"
+	@echo "    http://www.caml.org/"
+	@echo "  If there is no ocamlopt compiler version for your platform,"
+	@echo "  you can still get a slow but fully functional version of"
+	@echo "  Active-DVI, by typing \"make allbyte\" that would build a byte"
+	@echo "  code version."
+	@echo "**************************************************************"
+	@exit 1        
 
 $(EXEC): $(COBJS) $(CMO_OBJS)
 	$(OCAMLC) -custom $(INCLUDES) $(BYTE_OBJS) $(LINK_OPTS) -o $(EXEC)
@@ -122,11 +137,14 @@ veryveryclean: veryclean
 
 installopt: install
 install:: $(INSTALLTARGET) doc/splash.dvi
-	cp $(INSTALLTARGET) ${bindir}/advi
-	if test ! -d $(ADVI_LOC); then mkdir -p $(ADVI_LOC); fi
-	cp doc/splash.dvi tex/advilogo.eps tex/caml.eps tex/bar.jpg.eps \
+	- install -d ${bindir}
+	install -m 755 $(INSTALLTARGET) ${bindir}/advi
+	- install -d $(ADVI_LOC)
+	install -m 644 doc/splash.dvi tex/advilogo.eps tex/caml.eps \
+		tex/bar.jpg.eps \
 		tex/*.sty tex/advi.pro $(ADVI_LOC)
-	if [ -f conf/jpfonts.conf ]; then cp conf/jpfonts.conf $(ADVI_LOC); fi
+	if [ -f conf/jpfonts.conf ]; then \
+		install -m 644 conf/jpfonts.conf $(ADVI_LOC); fi
 	texhash
 	@ if test "x`kpsewhich advi.sty`" = "x"; then \
 	  echo '*** NOTE BEFORE USE ***' ;\
