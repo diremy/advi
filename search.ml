@@ -50,11 +50,27 @@ let command_string com opt =
 let unwind_protect f x g y =
   try let v = f x in g y; v with z -> g y; raise z 
 
+let open_process_in cmd =
+  let (in_read, in_write) = Unix.pipe() in
+  let pid =
+    Unix.create_process "/bin/sh"  [| "/bin/sh"; "-c"; cmd |]
+      Unix.stdin in_write Unix.stderr in
+  Unix.close in_write;
+  let inchan = Unix.in_channel_of_descr in_read in
+  pid, inchan
+
+let close_process_in (pid, inchan) =
+  close_in inchan;
+  let rec wait() =
+    try snd(Unix.waitpid [] pid)
+    with Unix.Unix_error(Unix.EINTR,_,_) -> wait() in
+  wait()
+
 let command_string com opt = 
   let command = Printf.sprintf "%s %s" com opt in
   try 
-    let chan = Unix.open_process_in command in
-    unwind_protect input_line chan close_in chan
+    let pid, chan as pidchan = open_process_in command in
+    unwind_protect input_line chan close_process_in pidchan
   with Unix.Unix_error(c,_,_) -> 
     Misc.warning
       (Printf.sprintf "Error %s while executing %s %s"
