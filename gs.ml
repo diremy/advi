@@ -63,7 +63,6 @@ let current_y = ref 0;;
 
 let parse_pos s =
   let c = String.index s ',' in
-  let bc = s.[3] in
   (* y comes first, then x *)
   let y = String.sub s 3 (c - 3) in
   let x = String.sub s (c + 1) (String.length s - c - 1) in
@@ -106,10 +105,10 @@ let rec select fd_in fd_out fd_exn timeout =
   try
     Unix.select fd_in fd_out fd_exn timeout
   with
-    Unix.Unix_error (Unix.EINTR, _, _) as exn ->
-      let now = Unix.gettimeofday () in
-      let remaining = start +. timeout -. now in
-      if remaining > 0.0 then select fd_in fd_out fd_exn timeout else [], [], []
+  | Unix.Unix_error (Unix.EINTR, _, _) ->
+    let now = Unix.gettimeofday () in
+    let remaining = start +. timeout -. now in
+    if remaining > 0.0 then select fd_in fd_out fd_exn timeout else [], [], []
 ;;
 
 class gs () =

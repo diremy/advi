@@ -437,7 +437,7 @@ let color_special st s =
   | "color" :: "pop" :: [] ->
      color_pop st
   | "color" :: args ->
-     let c = Dvicolor.parse_color_args args in
+     let _c = Dvicolor.parse_color_args args in
      Misc.warning "global color special is not supported"
   | _ -> ill_formed_special s;;
 
@@ -557,8 +557,6 @@ let psfile_special st s =
     let y = st.y_origin + Misc.round (st.conv *. float st.v) in
     if !visible then
       if drawbygs then
-        let dx = st.x_origin in
-        let dy = st.y_origin in
         Dev.draw_ps_by_gs file bbox (rwi, rhi)
           (x - st.x_origin) (y - st.y_origin)
       else 
@@ -1471,7 +1469,7 @@ let scan_find_location cdvi page (line, filename) =
   let last = ref 0 in
   let eval = function
     | Dvicommands.C_xxx s when has_prefix "line: " s ->
-        let (l, f as location) = line_of_special s 6 in
+        let (l, f as _location) = line_of_special s 6 in
         if f = filename then
           begin
             if !last <= line && line < l then
@@ -1720,8 +1718,6 @@ let unfreeze_glyphs cdvi dpi =
   let sdpi = Misc.round (mag *. ldexp dpi 16)
   and mtable = ref dummy_mtable
   and gtable = ref dummy_gtable in
-  let headers = ref []
-  and xrefs = cdvi.base_dvi.Cdvi.xrefs in
   let otherwise = function
     | Dvicommands.C_fnt n ->
         let (mt, gt) =

@@ -72,12 +72,13 @@ documentation:
 	$(CP) ../doc/*.dvi bazar-ocaml/$(PACKAGE)/doc/; \
 	$(CP) ../doc/*.ps bazar-ocaml/$(PACKAGE)/doc/; \
 	$(CP) ../doc/*.pdf bazar-ocaml/$(PACKAGE)/doc/; \
-	$(CP) ../doc/*.html bazar-ocaml/$(PACKAGE)/doc/; \
-	$(CP) ../doc/*.htm bazar-ocaml/$(PACKAGE)/doc/; \
 	$(CP) ../doc/*.gif bazar-ocaml/$(PACKAGE)/doc/; \
 	$(CP) ../doc/*.jpg bazar-ocaml/$(PACKAGE)/doc/; \
-	$(CP) ../doc/style.css bazar-ocaml/$(PACKAGE)/doc/; \
-	$(CP) ../doc/pngs bazar-ocaml/$(PACKAGE)/doc/
+	$(CP) ../doc/*.$(MANEXT) bazar-ocaml/$(PACKAGE)/doc/; \
+	$(CP) ../doc/*.html bazar-ocaml/$(PACKAGE)/doc/; \
+	$(CP) ../doc/*.htm bazar-ocaml/$(PACKAGE)/doc/; \
+	$(CP) ../doc/style.css bazar-ocaml/$(PACKAGE)/doc/
+#	$(CP) ../doc/pngs bazar-ocaml/$(PACKAGE)/doc/
 
 website:
 	# Build the Web site

@@ -144,7 +144,7 @@ let rec treat_laser_event ptr q =
    | { mouse_x = x; mouse_y = y;
        button = btn;
        keypressed = kp;
-       key = c; } as ev ->
+       key = c; } ->
        show_pointer ptr x y;
        if kp then begin
          match c with

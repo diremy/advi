@@ -52,7 +52,7 @@ let load_face =
   
 let build face dpi pt unicode =
   set_char_size face (float dpi) (float dpi) pt pt;
-  let advx, advy = render_char face unicode [] Render_Mono in
+  let _advx, _advy = render_char face unicode [] Render_Mono in
   let bitmapinfo = get_bitmap_info face in
   let width = bitmapinfo.bitmap_width in
   let height = bitmapinfo.bitmap_height in

@@ -555,7 +555,6 @@ let valid position i = i >= 0 && i < Array.length position.history;;
 let around b x y =
   try
     let position = position x y in
-    let space_ref = position.history.(position.first) in
     let valid = valid position in
     let rec skip_spaces move i =
       if valid i then
@@ -576,7 +575,6 @@ let around b x y =
         | Rule (_, _) -> return w
         | _ ->
             if pre <> dummy_symbol && above pre h <> 0 then return w else
-            let c = symbol_name pre h in
             let add x y = if move 0 > 0 then x ^ y else y ^ x in
             word move i (add (true_symbol_name h) w) next
       else -1, w in
