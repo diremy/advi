@@ -808,13 +808,14 @@ module E =
       figures := { rect = r; info = info} :: !figures;
       if !editing then
         begin
-          Graphics.set_color Graphics.red;
+          Graphics.set_color Graphics.blue;
           draw_rectangle r.x r.y r.w r.h;
           let cv z = truncate (z *. info.unit) in
           let ox = cv info.origin.x in
           let oy = cv info.origin.y in
           let x0 = r.x - ox in
           let y0 = r.y - oy in
+          Graphics.set_color Graphics.green;
           draw_line x0 y0 ox oy;
           draw_point x0 y0;
           Graphics.set_color !color;

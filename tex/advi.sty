@@ -494,10 +494,10 @@ end
 \define@key {advi@edit}{line}{\def \advi@edit@line {#1}}
 \define@key {advi@edit}{file}{\def \advi@edit@file {#1}}
 
-\newcommand{\advi@edit}[3][\adviedit]{%
+\newcommand{\advi@edit}[3]{%
   \begingroup 
-    \def \advi@edit@comm{\string#1}%
-    \def \advi@edit@name{#2}%
+    \def \advi@edit@comm {\string#1}%
+    \def \advi@edit@name {#2}%
     \setkeys {advi@edit}{#3}%
     \advi@@edit}
 \newcommand{\advi@@edit}[4][]{%
@@ -542,7 +542,8 @@ end
 \def \advisetw {\advi@setdim {\advi@edit@w}}
 \def \adviseth {\advi@setdim {\advi@edit@h}}
 
-\advi@export \adviedit \advi@edit
+\newcommand{\adviedit}[2][]{\advi@edit{\adviedit}{#2}}
+%\advi@export \adviedit \advi@edit
 
 %%% End
 
