@@ -256,6 +256,10 @@ val display_mode : bool -> unit;;
 (** As [point_color] but according to values of [global_display_mode] *)
 val point_color : int -> int -> color;;
 
+val on_screen_only : ('a -> unit) -> 'a -> unit;;
+(** [on_screen_only f arg] performs [f arg] on the screen memory only,
+     not affecting the backing store. *)
+
 val init : unit -> unit;;
 (** We have to call this function to disable the original Graphics
    event retrieving facility. *)

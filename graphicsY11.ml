@@ -357,14 +357,14 @@ let key_pressed () =
 (** As [point_color] but read in window *)
 external window_color : int -> int -> Graphics.color = "gr_window_color";;
 
-(** Global_display mode allows to inhibit diplay_mode commands *)
+(** Global_display mode allows to inhibit display_mode commands *)
 external anti_synchronize : unit -> unit = "gr_anti_synchronize";;
 let global_display_mode_status = ref false;;
 let global_display_mode b = global_display_mode_status :=  b;;
 let synchronize () =
   if not !global_display_mode_status then
-    Graphics.synchronize()
-  else anti_synchronize();;
+    Graphics.synchronize ()
+  else anti_synchronize ();;
 
 let display_mode b =
   if not !global_display_mode_status then 
@@ -373,6 +373,15 @@ let display_mode b =
 let point_color x y =
   if !global_display_mode_status then window_color x y
   else Graphics.point_color x y;;
+
+(* This function performs f on the screen memory only,
+   not affecting the backing store. *) 
+let on_screen_only f x =
+  Graphics.remember_mode false;
+  display_mode true;
+  f x;
+  Graphics.remember_mode true;
+  display_mode false;;
 
 (* Graphics.sigio_signal is not exported. We declare it here again. *)
 external sigio_signal: unit -> int = "gr_sigio_signal";;
