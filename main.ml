@@ -75,7 +75,7 @@ let standalone_main () =
 	with Sys_error s ->
 	  eprintf "%s@.Try %s -help for more information@."
             usage_msg Sys.argv.(0);
-	  exit 1
+	  Misc.exit 1
       end;
       name
   | Some s -> s in
@@ -83,10 +83,7 @@ let standalone_main () =
   View.set_hmargin !hmargin;
   View.set_vmargin !vmargin;
   View.set_geometry !geometry;
-  try
-    View.main_loop filename; exit 0
-  with View.Error s | Failure s | Graphics.Graphic_failure s ->
-    eprintf "Fatal error: %s@." s; exit 1;;
+  View.main_loop filename
 
 let rec interactive_main () =
   printf "Dvi file name: @?";
@@ -110,7 +107,7 @@ at_exit Gs.kill;;
 at_exit Grdev.kill_all_embedded_apps;;
 
 let quit = 3;;
-Sys.set_signal quit (Sys.Signal_handle (fun _ -> exit 0));;
+Sys.set_signal quit (Sys.Signal_handle (fun _ -> Misc.exit 0));;
 
 let main =
   if !Sys.interactive

@@ -661,7 +661,8 @@ let raw_embed_app command app_type app_name width height x y =
   if Hashtbl.mem app_table pid then
     raise (Failure (Printf.sprintf
                       "pid %d is already in the app_table!" pid));
-  Hashtbl.add app_table pid (app_type, app_name, wid);;
+  Hashtbl.add app_table pid (app_type, app_name, wid);
+  ;;
 
 (* In hash table t, returns the first element that verifies p. *)
 let hashtbl_find t p =
@@ -689,7 +690,8 @@ let move_or_resize_persistent_app command app_type app_name width height x y =
   let _, (app_type, app_name, wid) = find_embedded_app app_name in
   GraphicsY11.resize_subwindow wid width height;
   let gry = !size_y - y + height - width in
-  GraphicsY11.move_subwindow wid x gry;;
+  GraphicsY11.move_subwindow wid x gry;
+;;
 
 (* In hash table t, verifies that at least one element verifies p. *)
 let hashtbl_exists t f =
@@ -711,8 +713,8 @@ let embed_app command app_type app_name width height x y =
      persists :=
       (fun () ->
          (* prerr_endline ("Moving " ^ app_name); *)
-         move_or_resize_persistent_app command app_type app_name
-           width height x y) ::
+	  move_or_resize_persistent_app command app_type app_name
+          width height x y) :: 
       !persists
   | Persistent ->
      if not (already_launched app_name) then
@@ -736,17 +738,23 @@ let embed_app command app_type app_name width height x y =
       !embeds;;
 
 let kill_app pid wid =
-  (* prerr_endline (Printf.sprintf "Killing %d in window %s " pid wid);*)
-  Hashtbl.remove app_table pid;
-  (try Unix.kill pid 9 with _ -> ());
+  begin try Hashtbl.remove app_table pid with _ -> 
+    prerr_endline "kill_app failed to remove application..."
+  end;
+  begin try Unix.kill pid 9 with _ -> 
+    (* prerr_endline (Printf.sprintf "kill_app (pid=%d,window=%s): process already dead" pid wid); *)
+    ()
+  end;
   while
     try
-      let pid, _ = Unix.waitpid [Unix.WNOHANG] 0 in
-      pid <> 0
+      let pid', _ = Unix.waitpid [Unix.WNOHANG] 0 in
+      pid' <> 0
     with
       Unix.Unix_error(Unix.ECHILD, _, _) -> false
   do () done;
-  GraphicsY11.close_subwindow wid;;
+  (* if this is the forked process, do not close the window!!! *)
+  if Unix.getpid () = Misc.advi_process then GraphicsY11.close_subwindow wid
+;;
 
 let kill_apps app_type =
   (* begin match app_type with
@@ -754,10 +762,11 @@ let kill_apps app_type =
   | Sticky -> prerr_endline "Killing sticky apps"
   | Ephemeral -> prerr_endline "Killing ephemeral apps"
   end; *)
-  Hashtbl.iter
-   (fun pid (apt, app_name, wid) ->
-      if apt = app_type then kill_app pid wid)
-   app_table;;
+  let to_be_killed =
+    Hashtbl.fold (fun pid (apt, app_name, wid) acc ->
+      if apt = app_type then (pid,wid) :: acc else acc) app_table []
+  in
+  List.iter (fun (pid,wid) -> kill_app pid wid) to_be_killed;;
 
 let kill_embedded_app app_name =
   try

@@ -29,7 +29,7 @@ endif
 
 # We do not remove jpdemo.dvi, because only Furuse can make it at Cristal.
 clean:
-	$(RM) a.out *.aux *.log demo.dvi trans.dvi background.dvi *~
+	$(RM) a.out *.aux *.log demo.dvi trans.dvi trans2.dvi background.dvi *~
 	$(RM) $(MLPROG) *.cmi *.cmo
 
 test_subwindow:

@@ -62,3 +62,11 @@ val handle_fatal_error : (unit -> unit) -> unit -> unit
 val fatal_error : string -> 'a
 
 val warning : string -> unit    
+
+val advi_process : int
+
+val exit : int -> unit 
+(* Same as [Pervasives.exit], but does not execute the functions
+   registered by [at_exit] when the exiting process is forked one. 
+   In the ADVI program, you MUST use this function instead of
+   [Pervasives.exit] !!!! *)

@@ -41,7 +41,7 @@ let subwindows = Hashtbl.create 13;;
 external raw_open_subwindow : int -> int -> int -> int -> window_id 
     = "gr_open_sub_window";;
 external raw_close_subwindow : window_id -> unit
-    = "gr_close_subwindow";;
+    = "gr_close_subwindow2";;
 
 let open_subwindow ~x ~y ~width ~height =
   if width = 0 && height = 0 then null_window else
@@ -59,7 +59,7 @@ let close_subwindow wid =
   if wid != null_window then begin
   check_window "close_subwindow" wid;
   raw_close_subwindow wid;
-  Hashtbl.remove subwindows wid end;;
+  Hashtbl.remove subwindows wid end
 
 external raw_map_window : window_id  -> unit = "gr_map_window";;
 external raw_unmap_window : window_id -> unit = "gr_unmap_window";;

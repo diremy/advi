@@ -70,15 +70,30 @@ let parse_shell_command str =
   let arglist = split_string str ' ' 0 in
   Array.of_list arglist
 ;;
+
+let advi_process = Unix.getpid ();;
+
+let exit code =
+  (* at_exit code must be called only by the ADVI process.
+     if it is one of the forked processes, it must DIE IMMEDIATELY:
+     any cleaning must not be permitted. *) 
+  if Unix.getpid () = advi_process then Pervasives.exit code
+  else Unix.kill (Unix.getpid ()) 9 (* SUICIDE *)
+;;
+ 
 let fork_process command = 
   let command_tokens = parse_shell_command command in
   let pid = Unix.fork () in
   if pid = 0 then
     begin (* child *)
       try
-        Unix.execvp command_tokens.(0) command_tokens
+        Unix.execvp command_tokens.(0) command_tokens;
+	exit 0
       with
-      | _ -> exit 127
+      | Unix.Unix_error (e,_,arg) -> 
+	  Printf.fprintf stderr "Warning: %s: %s" (Unix.error_message e) arg;
+	  prerr_newline ();
+	  exit 127
     end;
   pid;;
 
@@ -164,6 +179,5 @@ exception Fatal_error of string;;
 let fatal_error x = raise (Fatal_error x);;
 
 let handle_fatal_error f () =
-  try f () with Fatal_error s -> prerr_string s; prerr_newline()
+  try f () with Fatal_error s -> prerr_endline s; exit 1
 ;;
-

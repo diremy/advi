@@ -343,11 +343,12 @@ value gr_open_sub_window(value vx, value vy, value width, value height)
                             0, grblack, grbackground);
   XMapWindow(grdisplay, win);
   XFlush(grdisplay);
+
   return (id_of_window(win));
 }
 
-/* In graphics
-value gr_close_subwindow(value wid)
+/* In graphics */
+value gr_close_subwindow2(value wid)
 {
   Window win;
 
@@ -357,7 +358,6 @@ value gr_close_subwindow(value wid)
   XFlush(grdisplay);
   return Val_unit;
 }
-*/
 
 value gr_map_window(value wid)
 {

@@ -307,8 +307,8 @@ let transition_pop st =
   | [] -> ()
   | v :: rest ->
       st.transition <- v;
-      if not (is_hidden ()) then Dev.set_transition v;
-      st.transition_stack <- rest;;
+      if not (is_hidden ()) then Dev.set_transition v; 
+     st.transition_stack <- rest;;
 
 let fnt st n =
   let (mtable, gtable, cfont) =
