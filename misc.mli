@@ -29,6 +29,7 @@ val zap_to_char : char -> string -> string;;
 val catenate_sep : string -> string list -> string;;
 val int_or_float_of_string : string -> int;;
 val is_digit : char -> bool;;
+val string_replace : string -> string -> string -> string;;
 
 val fatal_error : string -> 'a;;
 val handle_fatal_error : (unit -> unit) -> unit -> unit;;

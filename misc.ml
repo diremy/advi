@@ -95,6 +95,27 @@ let int_or_float_of_string s =
 
 let is_digit c = c >= '0' && c <= '9';;
 
+let string_replace pat templ str =
+  let result = Buffer.create (String.length str * 2) in
+  let patlen = String.length pat in
+  let find pat str at =
+    let rec find_aux pos =
+      if String.sub str pos patlen = pat then pos
+      else find_aux (pos + 1) in
+    try find_aux at with _ -> raise Not_found in
+  let rec replace pos =
+    try
+      let fpos = find pat str pos in
+      Buffer.add_string result (String.sub str pos (fpos - pos));
+      Buffer.add_string result templ;
+      replace (fpos + patlen)
+    with
+    | Not_found ->
+        Buffer.add_string result
+          (String.sub str pos (String.length str - pos));
+        Buffer.contents result in
+  replace 0;;
+
 (* Fatal error in advi's code. *)
 exception Fatal_error of string;;
 let fatal_error x = raise (Fatal_error x);;
