@@ -15,6 +15,8 @@
 (*  Based on Mldvi by Alexandre Miquel.                                *)
 (***********************************************************************)
 
+(* $Id$ *)
+
 type face;;
 
 type bitmap = string

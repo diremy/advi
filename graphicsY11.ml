@@ -12,7 +12,6 @@
 
 (* $Id$ *)
 
-
 (* Re-imported from graphicsX11 *)
 
 (* Module [GraphicsY11]: additional graphics primitives for the X Windows system *)

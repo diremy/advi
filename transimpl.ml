@@ -15,6 +15,8 @@
 (*  Based on Mldvi by Alexandre Miquel.                                *)
 (***********************************************************************)
 
+(* $Id$ *)
+
 open Transitions;;
 
 (* Drawing (moving and resizing and ...) sprites on the screen. *)

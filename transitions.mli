@@ -15,6 +15,7 @@
 (*  Based on Mldvi by Alexandre Miquel.                                *)
 (***********************************************************************)
 
+(* $Id$ *)
 
 type direction = 
    | DirRight | DirLeft | DirTop | DirBottom

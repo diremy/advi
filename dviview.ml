@@ -15,6 +15,8 @@
 (*  Based on Mldvi by Alexandre Miquel.                                *)
 (***********************************************************************)
 
+(* $Id$ *)
+
 let pauses = Options.flag true "-nopauses" "Switch pauses off";;
 let fullwidth =
   Options.flag false "-fullwidth" "Adjust size to width";;

@@ -15,6 +15,7 @@
 (*  Based on Mldvi by Alexandre Miquel.                                *)
 (***********************************************************************)
 
+(* $Id$ *)
 
 module type DEVICE = sig
   type glyph

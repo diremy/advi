@@ -15,6 +15,7 @@
 (*  Based on Mldvi by Alexandre Miquel.                                *)
 (***********************************************************************)
 
+(* $Id$ *)
 
 (* jfm files are like tfm (tex font metric) files, but for japanese 
    characters *)

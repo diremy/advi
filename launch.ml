@@ -15,6 +15,8 @@
 (*  Based on Mldvi by Alexandre Miquel.                                *)
 (***********************************************************************)
 
+(* $Id$ *)
+
 (* Embedded applications function handlers (thunks). *)
 let embeds = ref [];;
 let persists = ref [];;

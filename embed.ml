@@ -15,6 +15,8 @@
 (*  Based on Mldvi by Alexandre Miquel.                                *)
 (***********************************************************************)
 
+(* $Id$ *)
+
 (* Embedding applications (in particular tcl/tk) *)
 
 type app_mode = Sticky | Persistent | Ephemeral;;

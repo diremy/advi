@@ -15,6 +15,8 @@
 (*  Based on Mldvi by Alexandre Miquel.                                *)
 (***********************************************************************)
 
+(* $Id$ *)
+
 type 'a t;;
 
 val make : (int -> 'a) -> 'a t;;

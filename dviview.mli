@@ -15,6 +15,8 @@
 (*  Based on Mldvi by Alexandre Miquel.                                *)
 (***********************************************************************)
 
+(* $Id$ *)
+
 open Dimension;;
 val set_autoresize : bool -> unit;;
 val set_geometry : string -> unit;;

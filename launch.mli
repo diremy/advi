@@ -15,6 +15,8 @@
 (*  Based on Mldvi by Alexandre Miquel.                                *)
 (***********************************************************************)
 
+(* $Id$ *)
+
 val add_embed : (unit -> unit) -> unit;;
 val add_persist : (unit -> unit) -> unit;;
 val add_unmap_embed : (unit -> unit) -> unit;;

@@ -15,6 +15,8 @@
 (*  Based on Mldvi by Alexandre Miquel.                                *)
 (***********************************************************************)
 
+(* $Id$ *)
+
 (* The ``scratching'' facility for Active-DVI: you can interactively
    annotate your slides by ``scratching'' on them. *)
 
