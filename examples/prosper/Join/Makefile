@@ -2,6 +2,9 @@ TOPDIR=../../..
 FILES=join.tex 
 include ../../lib/Makefile
 
+show: join.dvi
+	$(ADVI) join.dvi
+
 join.dvi: join.tex
 	$(LATEX) $<
 
