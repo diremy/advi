@@ -66,8 +66,10 @@ let init_arguments () =
  let options = advi_options () in
  let optfs = List.rev (Userfile.options_files ()) in
  List.iter
-   (fun fname -> Rc.parse_file fname options set_dvi_filename usage_msg)
+   (fun fname ->
+      Rc.cautious_parse_file fname options set_dvi_filename usage_msg)
    optfs;
+ Arg.current := 0;
  Arg.parse options set_dvi_filename usage_msg;
 ;;
 

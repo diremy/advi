@@ -107,7 +107,7 @@ let parse_argv argv speclist anonfun errmsg =
 ;;
 
 (* Implementation of rcfile input *)
-exception Lexical_Error of string;;
+exception Lexical_error of string;;
 
 let string_of_ic ic =
    let b = Buffer.create 1024 in
@@ -143,6 +143,7 @@ let lex s =
   let lim = String.length s in
   (* Find_tok is called at the beginning of a token *)
   let rec find_tok i =
+    if i >= lim then get_tok i b else
     match s.[i] with
     | '"' (* '"' *) -> find_string (i + 1)
     | ' ' | '\t' | '\n' -> get_tok i b
@@ -150,7 +151,7 @@ let lex s =
     | c -> Buffer.add_char b c; find_tok (i + 1)
 
   and find_string i =
-    if i >= lim then raise (Lexical_Error "end of string not found") else
+    if i >= lim then raise (Lexical_error "end of string not found") else
     match s.[i] with
     | '"' (* '"' *) -> get_tok (i + 1) b
     | '\\' -> find_escaped_string (i + 1)
@@ -158,7 +159,7 @@ let lex s =
 
   and find_escaped_string i =
     if i >= lim
-    then raise (Lexical_Error "end of string (with escape ) not found") else
+    then raise (Lexical_error "end of string (with escape ) not found") else
     match s.[i] with
     | '"' as c (* '"' *) -> Buffer.add_char b c; find_string (i + 1)
     | c -> Buffer.add_char b '\\'; Buffer.add_char b c; find_string (i + 1)
@@ -176,9 +177,15 @@ let lex s =
      with End_of_file -> List.rev accu in
   find_tokens [] 0;;
 
-let argv_of_string s = Array.of_list (lex s);;
+let argv_of_string s =
+  let l = lex s in
+  print_int (List.length l);
+  print_newline ();
+  List.iter (fun s -> print_string s; print_newline ()) l;
+ Array.of_list (lex s);;
 
-let argv_of_file fname = argv_of_string (string_of_file fname);;
+let argv_of_file fname =
+  argv_of_string (String.concat " " [fname; string_of_file fname]);;
 
 let parse_string s =
  current := 0;
@@ -187,6 +194,12 @@ let parse_string s =
 let parse_file fname =
  current := 0;
  parse_argv (argv_of_file fname);;
+
+let cautious_parse_file fname speclist anonfun errmsg =
+ try parse_file fname speclist anonfun errmsg with
+ | Failure s
+ | Lexical_error s
+ | Sys_error s -> Misc.warning (Printf.sprintf "While loading %s" s);;
 
 let parse_args x = current := 0; Arg.parse x;;
 

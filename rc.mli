@@ -27,6 +27,15 @@ val parse_file : string ->
   are allowed (a comment starts with a sharp sign and ends at the end
   of the line). *)
 
+val cautious_parse_file : string ->
+  (string * spec * string) list -> (string -> unit) -> string -> unit
+(** [Rc.cautious_parse_file fname speclist anonfun usage_msg] parses the file
+  fname as if it were the command line.
+  Syntax is exactly similar to a shell call to the command, except
+  that the command call can spread on more than one line and comments
+  are allowed (a comment starts with a sharp sign and ends at the end
+  of the line). *)
+
 val parse_string : string ->
   (string * spec * string) list -> (string -> unit) -> string -> unit
 (** [Rc.parse_string s speclist anonfun usage_msg] parses the string [s]
