@@ -56,7 +56,7 @@ let pson =
   if Config.have_gs then
     flag true
       "-nogs"
-      ": turn off the display of inlined Postscript.\
+      "  Turn off the display of inlined Postscript.\
       \n\t (the default is to display inlined Postscript)."
   else ref false;;
 let dops = ref !pson;;
@@ -68,7 +68,7 @@ let set_global_display_mode b =
 
 add "-fg"
  (Arg.Unit (fun () -> set_global_display_mode true))
- ": set the drawing policy to ``screen only'',\
+ "  Set the drawing policy to ``screen only'',\
  \n\t (the default is to draw both on the screen and in the memory).";;
 
 add "-w"
@@ -77,31 +77,6 @@ add "-w"
      | "a" -> Misc.set_warnings false
      | "A" -> Misc.set_warnings true
      | s -> raise (Arg.Bad (Printf.sprintf "-w %s is unknown" s))))
- "<flags>: A/a enable/disable all warnings,\
+ "<flags>  Enable/disable warnings according to <flags>,\
+ \n\t A/a enable/disable all warnings";;
  \n\t (the default is \"A\", to enable all warnings).";;
-
-(* Command line options *)
-
-let pretty all_options = 
-  let tab (o, s, m) =
-    let s = Misc.split_string m (function '\t' -> true | _ -> false) 0 in
-    if String.length m > 0 && m.[0] = '\t' then "" :: s else s in
-  let tab_options = List.map tab all_options in
-  let width =
-    2 + 
-    List.fold_left2
-      (fun w (o, _, _) -> function
-        | [] | _ :: [] -> w
-        | m :: _ -> max w (String.length o + String.length m))
-      0 all_options tab_options in
-  let margin = "\n" ^ String.make (width + 1) ' ' in
-  let indent o = function
-    | [] -> assert false
-    | [h] -> h
-    | h :: m :: t ->
-        let length = width - String.length o - String.length h in
-        let hm = h ^ String.make length ' ' ^ m in
-        if t = [] then hm
-        else hm ^ String.concat margin t in
-  List.map2 (fun  (o, s, _ ) ml -> (o, s, indent o ml))
-    all_options tab_options;;
