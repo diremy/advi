@@ -22,6 +22,11 @@
 #include "image.h"
 
 #include "grwm.h"
+/* the HAVE_XINERAMA variable should be defined by configure */
+/* #define HAVE_XINERAMA */
+#ifdef HAVE_XINERAMA
+#include <X11/extensions/Xinerama.h>
+#endif
 
 value gr_get_color(void)
 {
@@ -498,6 +503,16 @@ value gr_reposition (value x, value y, value w, value h)
   if (width < 0) {    /* means fullscreen */
     XGetWindowAttributes(grdisplay, DefaultRootWindow(grdisplay), &att);
     width = att.width; height = att.height;
+#ifdef HAVE_XINERAMA
+ if(XineramaIsActive(grdisplay))
+  {
+  XineramaScreenInfo *screens;
+  int num_screens;
+  screens = XineramaQueryScreens(grdisplay, &num_screens);
+  width=screens[0].width;
+  height=screens[0].height;
+  };
+#endif
     fullscreen = True;}
   else fullscreen=False;
   
