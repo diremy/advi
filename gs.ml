@@ -436,8 +436,10 @@ class gv =
     method ps b (x : int) (y : int) =
 (*prerr_endline (Printf.sprintf "Calling gv#PS with\n\t\t %s" b);*)
       (* insert non protected postscript, typically with ``ps:''
-         may (not ?) change graphic parameters *)
-      self # send [ texbegin; (*self # moveto x y;*) b; texend ];
+         may (not ?) change graphic parameters;
+         still need to set current point for initclip PStrick specials.
+       *)
+      self # send [ texbegin; self # moveto x y; b; texend ];
       sync <- false
 
     method special b (x : int) (y : int) =
