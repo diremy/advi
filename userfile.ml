@@ -33,8 +33,9 @@ let normalize path =
 	end
     | [] -> []
   in
-  let path = Misc.catenate_sep "/" (remove tks) in
-  (if full then "/" else "") ^ path ^ (if finalslash then "/" else "")
+  let path = String.concat "/" (remove tks) in
+  Printf.sprintf "%s%s%s"
+    (if full then "/" else "") path (if finalslash then "/" else "")
 ;;
 
 let fullpath fromdir path =
@@ -49,14 +50,16 @@ let rec next_slash s n =
   next_slash s (succ n)
 ;;
 
+let user_home_dir = try Sys.getenv "HOME" with _ -> "~";;
+
 let tilde_subst s =
  try
   if s = "" || s.[0] <> '~' then s else
   let len = String.length s in
-  if len = 1 then Sys.getenv "HOME" else
+  if len = 1 then user_home_dir else
   match s.[1] with
   | '/' -> 
-     Filename.concat (Sys.getenv "HOME") (String.sub s 2 (len - 2))
+     Filename.concat user_home_dir (String.sub s 2 (len - 2))
   | _ ->
      let final = next_slash s 1 in
      let user = String.sub s 1 (pred final) in
@@ -82,7 +85,7 @@ let rec digdir dir perm =
 
 (* cautious_perm_digdir digs a directory with cautious permissions,
    i.e. drwx------ *)
-let cautious_perm_digdir dir =  digdir dir 0o0700;;
+let cautious_perm_digdir dir = digdir dir 0o0700;;
 
 let prepare_file file =
   let dirname = Filename.dirname file in
@@ -94,17 +97,31 @@ let prepare_file file =
     end
 ;;
 
+(* The DVI file currently read. *)
+let dvi_filename = ref None;;
+let set_dvi_filename s = dvi_filename := Some s;;
+let get_dvi_filename () =
+  match !dvi_filename with
+  | None -> raise Not_found
+  | Some fname -> fname;;
+
+let get_dvi_file_dirname () =
+  match !dvi_filename with
+  | None -> raise Not_found
+  | Some fname -> Filename.dirname fname;;
+
 (* User preferences. *)
 (* User options files. *)
-let default_user_advi_dir = tilde_subst "~/.advi";;
+let default_user_advi_dir = Filename.concat user_home_dir ".advi";;
 
 let user_advi_dir =
-  let dir = try Sys.getenv "ADVIDIR" with _ -> default_user_advi_dir in
+  let dir =
+    try Sys.getenv "ADVIDIR" with _ -> default_user_advi_dir in
   try tilde_subst dir with
-  | _ -> "./.advi";;
+  | _ -> ".advi";;
 
 let default_init_file0 = "/etc/advirc";;
-let default_init_file1 = tilde_subst "~/.advirc";;
+let default_init_file1 = Filename.concat user_home_dir ".advirc";;
 let default_init_file2 =
   tilde_subst (Filename.concat default_user_advi_dir "advirc");;
 let default_init_file3 = ".advirc";;
@@ -123,13 +140,12 @@ let load_init_files options set_dvi_filename usage_msg =
  List.iter
    (fun fname ->
       if Sys.file_exists fname
-      then Rc.cautious_parse_file fname options set_dvi_filename usage_msg)
+      then load_options_file options set_dvi_filename usage_msg fname)
    init_files;;
 
 (* Cache directory *)
 
-(* test is the directory dirname can serve as a cache directory;
-   if it does not exist try to create it. *)
+(* Test if the directory dirname can serve as a cache directory *)
 let can_be_cache_directory dirname =
    Sys.file_exists dirname &&
    try
@@ -138,52 +154,89 @@ let can_be_cache_directory dirname =
    with
    | Unix.Unix_error _ -> false;;
 
+(* Try to dig a directory to serve as cache,
+   Raise Not_found if the directory still cannot be
+   used as a cache directory. *)
 let mk_user_advi_cache_dir dirname =
   cautious_perm_digdir dirname;
   if can_be_cache_directory dirname then dirname else raise Not_found;;
 
-let default_user_advi_cache_dir =
-  let d0 = Filename.concat (Unix.getcwd ()) ".advi" in
-  if can_be_cache_directory d0 then d0 else
-  let d1 = Filename.concat (tilde_subst "~") ".advi" in
-  if can_be_cache_directory d1 then d1 else
-  let d2 =
-    Filename.concat (Filename.dirname (Filename.temp_file "" "")) ".advi" in
-  if can_be_cache_directory d2 then d2 else
-  try mk_user_advi_cache_dir d2 with
-  | _ ->
-    try mk_user_advi_cache_dir d1 with
-    | _ ->
-      try mk_user_advi_cache_dir d0 with
-      | _ ->
-        Misc.warning "Cannot find a cache directory";
-        d0;;
+let get_user_advi_cache_dir () =
+  let add_user_defined_tmp dirs = 
+    try Sys.getenv "TMPDIR" :: dirs with
+    | Not_found -> dirs in
+  let add_system_tmp_dir dirs =
+    Filename.dirname (Filename.temp_file "" "") :: dirs in
+  let add_current_dvi_dirname dirs =
+    try get_dvi_file_dirname () :: dirs with
+    | Not_found -> dirs in
+  let add_user_tmp_dir dirs =
+    Filename.concat user_home_dir ".advi" :: dirs in
+  let dirs =
+    add_user_defined_tmp
+     (add_system_tmp_dir
+       (add_current_dvi_dirname
+         (add_user_tmp_dir []))) in
+  try List.find can_be_cache_directory dirs with
+  | Not_found ->
+      let rec find_cache_dir = function
+      | [] ->
+          Misc.warning "Cannot find a cache directory, try to use .";
+          Unix.getcwd ()
+      | d :: ds ->
+         try mk_user_advi_cache_dir d with
+         | _ -> find_cache_dir ds in
+      find_cache_dir dirs;;    
 
-let advi_cache_dir =
-  let d = default_user_advi_cache_dir in
-  Misc.debug_endline (Printf.sprintf "Using %s as cache directory." d);
-  ref d;;
+let advi_cache_dir = ref None;;
 
-let set_advi_cache_dir s =
-  if can_be_cache_directory s then advi_cache_dir := s else
-  Misc.warning (Printf.sprintf "Cannot use %s as a cache directory" s);;
+let set_advi_cache_dir d =
+  if can_be_cache_directory d then begin
+    Misc.debug_endline (Printf.sprintf "Using %s as cache directory." d);
+    advi_cache_dir := Some d end else
+  Misc.warning (Printf.sprintf "Cannot use %s as a cache directory" d);;
 
 Options.add
  "-cache-dir"
  (Arg.String set_advi_cache_dir)
- "STRING\tSet the cache directory (default ./.advi)";;
+ "STRING\tSet the cache directory (default /tmp)";;
 
-let get_advi_cache_dir () = !advi_cache_dir;;
+(* Get the actual advi cache directory.
+   If it has not yet been set (i.e. it was not specified on the command
+   line or in init files), try to figure out a reasonable default:
+   - if user's environment variable TMPDIR is set and the corresponding
+     directory is writtable, use it,
+   - otherwise, if /tmp can serve as a cache use it,
+   - otherwise, if the current file directory
+     is possible use it, 
+   - otherwise, if $HOME/.advi is available use it,
+   - otherwise, if none of those is possible, try to use the current
+     working directory as a cache.
+*)
+let get_advi_cache_dir () =
+  match !advi_cache_dir with
+  | Some d -> d
+  | None ->
+      let d = get_user_advi_cache_dir () in
+      set_advi_cache_dir d;
+      d;;
 
 (* Writing page current number to the file advi_page_number_file. *)
 let write_page_number =
  Options.flag false "-page-number"
   "Ask advi to write the current page number in a file (default is no)";;
 
-let advi_page_number_file =
-  ref (Filename.concat (get_advi_cache_dir ()) "advi_page_number");;
+let advi_page_number_file = ref None;;
 
-let set_page_number_file s = advi_page_number_file := s;;
+let set_page_number_file s = advi_page_number_file := Some s;;
+let get_page_number_file () =
+  match !advi_page_number_file with
+  | Some fname -> fname
+  | None ->
+      let fname =
+        Filename.concat (get_advi_cache_dir ()) "advi_page_number" in
+      set_page_number_file fname;
+      fname;;
 
 Options.add "-page-number-file"
  (Arg.String set_page_number_file)
@@ -195,17 +248,18 @@ Options.add "-page-number-file"
 let save_page_number n =
  if !write_page_number then
  try
-   let oc = open_out !advi_page_number_file in
+   let oc = open_out (get_page_number_file ()) in
    output_string oc (string_of_int n);
    output_char oc '\n';
    close_out oc
  with _ ->
    Misc.warning 
      (Printf.sprintf
-        "Cannot write file %s to record page number." !advi_page_number_file);;
+        "Cannot write file %s to record page number."
+        (get_page_number_file ()));;
 
 (* Initialization of advi_page_number_file. *)
 let init_advi_page_number_file () =
- if !write_page_number then prepare_file !advi_page_number_file;;
+ if !write_page_number then prepare_file (get_page_number_file ());;
 
 Rc.at_init init_advi_page_number_file;;
