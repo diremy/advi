@@ -12,7 +12,7 @@ advi@Dict begin
 end
 tx@Dict begin
 /PutCoor
-{ dup exec 2 copy moveto advi@Dict begin printcoor end
+{ dup exec 2 copy advi@Dict begin printrcoor end moveto
 gsave CP T CM STV exch exec moveto setmatrix CP grestore } def
 /LPut
 { tx@NodeDict /LPutPos known { LPutPos } { CP /Y ED /X ED /NAngle 0
@@ -20,8 +20,9 @@ def } ifelse LPutCoor  } def
 /LPutCoor
 { tx@NodeDict /LPutPos known { LPutPos } 
 { CP /Y ED /X ED /NAngle 0 def } ifelse NAngle tx@Dict begin /NAngle ED end
-gsave CM STV CP Y sub neg exch X sub neg exch 
-moveto setmatrix CP grestore } def
+gsave CM STV CP Y sub neg exch X sub neg exch moveto
+LPutPos advi@Dict begin printcoor end 
+setmatrix CP grestore } def
 end
 
 % END advi.pro

@@ -509,7 +509,9 @@ end
     {\let \psput@special \advi@psput@special
      %\@ifundefined {ncput@iii}{}{\let \ncput@iii \advi@ncput@iii}%
      \pstheader {advi.pro}}}
+\ifadvi@ignore \else
 \AtBeginDocument {\advi@pstricks@patch}
+\fi
 
 %%% Anchors
 

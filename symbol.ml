@@ -241,7 +241,9 @@ let cmmi_encoding font code =
         "\\omega"; "\\varepsilon"; "\\vartheta"; "\\varpi"; "\\varrho";
         "\\varsigma"; "\\varphi" ]
     in
-    List.nth alph (code - 11)
+    begin try List.nth alph (code - 11) with
+      Failure "nth" -> "[**unknown greek letter**]"
+    end
   else default_encoding font code;;
 
 (* Math font. *)

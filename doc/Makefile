@@ -17,7 +17,7 @@
 
 # $Id$
 
-LATEX=TEXINPUTS=.:../tex:/usr/local/lib/hevea: latex
+LATEX=TEXINPUTS=.:../tex:/usr/lib/hevea:/usr/local/lib/hevea: latex
 DVIPS=TEXPSHEADERS=.:../tex: dvips
 HEVEA=hevea -entities -I ../tex
 IMAGEN=imagen
