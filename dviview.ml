@@ -506,7 +506,75 @@ module Make(Dev : DEVICE) = struct
     print_newline ();
     flush stdout;
     ()
-      
+  
+  (* 
+   * The following functions are used to move around a page. 
+   *)
+
+  (* This function returns the pixel size of a dimension according to the dpi
+   * value
+   *)
+  let get_size_in_pix st = function
+    | Px n -> n
+    | In f -> int_of_float (st.base_dpi *. f)
+    | _ -> assert false
+   
+  (* The next four functions returns the position that correspond to the top,
+   * the bottom, the left and right of the page
+   *)
+  let top_of_page st =
+    let vmargin_size = get_size_in_pix st attr.vmargin in
+    vmargin_size
+  
+  let bottom_of_page st =
+    let vmargin_size = get_size_in_pix st attr.vmargin in
+    st.size_y - st.dvi_height - vmargin_size
+    
+  let left_of_page st =
+    let hmargin_size = get_size_in_pix st attr.hmargin in
+    hmargin_size
+    
+  let right_of_page st =
+    let hmargin_size = get_size_in_pix st attr.hmargin in
+    st.size_x - st.dvi_width - hmargin_size
+  
+  (* the two following functions move the displayed part of the page while
+   * staying inside the margins
+   *)
+  let move_within_margins_y st movey =
+    let vmargin_size = get_size_in_pix st attr.vmargin in
+    let tmp_orig_y = st.orig_y + movey in
+    let new_orig_y =
+      if movey < 0 then begin
+        if tmp_orig_y + st.dvi_height + vmargin_size < st.size_y
+        then st.size_y - st.dvi_height - vmargin_size
+        else tmp_orig_y
+      end else begin
+        if tmp_orig_y - vmargin_size > 0
+        then vmargin_size
+        else tmp_orig_y
+      end
+    in 
+    if st.orig_y <> new_orig_y then Some new_orig_y
+    else None
+   
+  let move_within_margins_x st movex =
+    let hmargin_size = get_size_in_pix st attr.hmargin in
+    let tmp_orig_x = st.orig_x + movex in
+    let new_orig_x =
+      if movex < 0 then begin
+        if tmp_orig_x + st.dvi_width + hmargin_size < st.size_x
+        then st.size_x - st.dvi_width - hmargin_size
+        else tmp_orig_x
+      end else begin
+        if tmp_orig_x - hmargin_size > 0
+        then hmargin_size
+        else tmp_orig_x
+      end
+    in 
+    if st.orig_x <> new_orig_x then Some new_orig_x
+    else None
+ 
   let redraw st =
     (* draws until the current pause_no or page end *)
     Dev.set_busy Dev.Busy;
@@ -816,6 +884,65 @@ module Make(Dev : DEVICE) = struct
         attr.hmargin <- Px 0; attr.vmargin <- Px 0; 
         update_dvi_size true st;
         redraw st
+
+      let page_left st =
+        match (move_within_margins_x st (st.size_x - 10)) with 
+            | Some n ->
+                st.orig_x <- n;
+                redraw st
+            | None -> ()
+
+      let page_down st =
+        let none () =
+            if st.page_no < st.num_pages - 1 then begin
+              (* the following test is necessary because of some
+               * floating point rounding problem
+               *)
+              if st.size_y < st.dvi_height + 2 * (get_size_in_pix st
+                attr.vmargin) then
+                st.orig_y <- top_of_page st;
+              goto_page (st.page_no + 1) st
+            end
+          in
+          begin
+            match (move_within_margins_y st (10 - st.size_y)) with 
+            | Some n ->
+                (* this test is necessary because of rounding errors *)
+                if n > st.orig_y then none () 
+                else begin
+                  st.orig_y <- n;
+                  redraw st
+                end
+            | None -> none ()
+          end
+
+      let page_up st =
+        let none () =
+            if st.page_no > 0 then begin
+              if st.size_y < st.dvi_height + 2 * (get_size_in_pix st
+                attr.vmargin) then
+                st.orig_y <- bottom_of_page st;
+              goto_page (st.page_no -1) st
+            end
+          in
+          begin
+            match (move_within_margins_y st (st.size_y - 10)) with 
+            | Some n ->
+                if n < st.orig_y then none ()
+                else begin
+                  st.orig_y <- n;
+                  redraw st
+                end
+            | None -> none ()
+          end
+
+      let page_right st =
+        match (move_within_margins_x st (10 - st.size_x)) with 
+            | Some n ->
+                st.orig_x <- n;
+                redraw st
+            | None -> ()
+
           
       let redraw = redraw
       let reload = reload
@@ -843,10 +970,12 @@ module Make(Dev : DEVICE) = struct
     let bind (key, action) = bindings.(Char.code key) <- action  in
     List.iter bind [
     (* For instance *)
+    (* Alan: I modified the bindings for hjkl to move the page around *)
+    'h'         , B.page_left;
     'i' 	, B.pop_page;
-    'j' 	, B.pop_previous_page;
-    'k' 	, B.next_pause;
-    'l' 	, B.push_next_page;
+    'j' 	, B.page_down;
+    'k' 	, B.page_up;
+    'l' 	, B.page_right;
     'm' 	, B.push_page;
     
     ' ' 	, B.next_pause;
