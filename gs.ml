@@ -17,6 +17,8 @@
 
 (* $Id$ *)
 
+let debugs = Misc.debug_endline;;
+
 let antialias =
   Options.flag false
     "-A"
@@ -122,11 +124,13 @@ class gs () =
   let command_args =
     [|
       "-dNOPLATFONTS"; "-dNOPAUSE";
-      "-sDEVICE="^(if !antialias then x11alpha else x11);
+      "-sDEVICE=" ^ (if !antialias then x11alpha else x11);
       "-q";
       "-dSAFER";
       "-";
     |] in
+
+  let _ = debugs command; Array.iter debugs command_args in
 
   (* Set environment so that ghostscript writes in our window. *)
   let int32_string k x =
