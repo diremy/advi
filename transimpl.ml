@@ -22,14 +22,7 @@ let prev_geom = ref None;;
 
 let init_sprite () = prev_geom := None;;
 
-(* This function performs f on the screen memory only,*)
-(* not affecting the backing store                    *) 
-let do_on_screen f x =
-  Graphics.remember_mode false;
-  GraphicsY11.display_mode true;
-  f x;
-  Graphics.remember_mode true;
-  GraphicsY11.display_mode false;;
+let do_on_screen = GraphicsY11.on_screen_only;;
 
 let draw_sprite newimg x y width height =
   let orgimg = Graphics.get_image x y width height in

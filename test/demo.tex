@@ -186,24 +186,63 @@ Including some strange flashing effect!
 
 \subsection* {Embedded applications}
 
-Any Unix command that obeys to the X geometry specifications may be
-used to draw material in the {\ActiveDVI} window.
-This is convenient to add a demo into your presentation.
+Any Unix command can be launch during the presentation.
+This is convenient to call an external program to draw material in the
+{\ActiveDVI} window, or to start a demo from within the presentation.
 
 \bigskip
 
 \noindent
 To launch the program {\verb"command"} use in your {\LaTeX} source file\\
 
+\verb+\adviembed{command}+\\
+
+\noindent
+Additionnally, you may precise the size of the rectangle where the
+application will draw its material. {\ActiveDVI} will reserve
+that area for your application.\\
+
+\verb+\adviembed[width=w,height=h]{command}+\\
+
+\noindent
+Moreover, {\ActiveDVI} provides two special \TeX macros \verb"!g" and
+\verb"!p" that specify the geometry and the (X) window identifier that
+the application should use. Hence\\
+
 \verb+\adviembed[width=w,height=h]{command -geometry !g -use !p}+\\
 
 \noindent
-where \verb"!g" specifies the required geometry, \verb"!p" the
-{\ActiveDVI} window identifier, and \verb"w", \verb"h" the width \&
-height of the rectangle where the application will draw its material.
-Values of \verb"!p" and \verb"!g" are automatically computed by
-{\ActiveDVI} and passed as arguments to the specified \verb"command".
- Examples:
+will launch \verb"command" with a geometry computed from the width and
+height specification \verb"w" and \verb"h".
+
+\subsubsection*{Embeddable applications}
+
+For each application to launch, {\ActiveDVI} allocates a new sub
+window of the specified size.  If provided, the identifier \verb"!p"
+is replaced by the (X) identifier of that sub window, in order for the
+application to use that sub window as its root window. Options to
+specify the root window may vary (\verb"-use" or \verb"-window" are
+common). Unfortunately, not every X-application is capable of using
+a specified window as its (root) window.  If an application can be
+rerooted, it is truely embeddable into {\ActiveDVI} (meaning it is
+really a part of the {\ActiveDVI} window). Otherwise the application
+is not embeddable.
+
+\subsubsection*{Not embeddable applications}
+
+If the application cannot be rerooted (or if the \verb"!p" parameter
+is not specified), {\ActiveDVI} cannot control the placement of the
+application: the window manager will handle it. However, {\ActiveDVI}
+helps by providing a complete X geometry specification: with width and
+height, an extra \verb"+x+y" shift is indicated to precisely access
+the place where the embedding should occur in the {\ActiveDVI}
+window. Hence, the application appears at the right place even if it
+cannot be rerooted and is impossible to embed.
+
+That way, applications that obeys to the X geometry specifications
+can be properly displayed in the {\ActiveDVI} window.
+
+Examples:
 
 \begin{itemize}
 \item The \verb"display" command (from ImageMagick) can show any image into your

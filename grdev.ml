@@ -1285,10 +1285,10 @@ let wait_event () =
                   let m = GraphicsY11.get_modifiers () in
                   if m land GraphicsY11.shift <> 0 then
                      (if not !temp_cursor then
-                       (temp_cursor:= true;
+                       (temp_cursor := true;
                         GraphicsY11.set_cursor select_cursor))
                   else if !temp_cursor then
-                    (temp_cursor:= false; reset_cursor ());
+                    (temp_cursor := false; reset_cursor ());
                   rescan ()
                 end
             end
