@@ -19,7 +19,10 @@
 
 include Makefile.config
 
-VERSION=1.5.0
+VERSION=1.5
+OLDVERSION=1.5
+PACKAGEVERSIONFILE=config.ml
+DOCVERSIONFILE=tex/advi.sty doc/index-en.html doc/index-fr.html doc/advi.1
 
 COPTIONS = -warn-error A -g
 COPTOPTIONS = -warn-error A -unsafe -inline 9
@@ -102,6 +105,14 @@ $(EXEC).opt: $(COBJS) $(CMX_OBJS)
 
 config.ml: config.ml.in configure
 	./configure
+
+version:
+	for i in $(PACKAGEVERSIONFILE) $(DOCVERSIONFILE); do \
+	echo $$i; \
+	mv $$i $$i~; \
+	sed -e '/ersion/s/$(OLDVERSION)/$(VERSION)/' $$i~ > $$i; \
+	done
+
 
 .c.o:
 	$(OCAMLC) -ccopt "$(CFLAGS)" -c $<
