@@ -3,17 +3,17 @@
 %
 % Pierre Weis 2002.
 %
-%
+% $Id: Exp
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Example of a slide-show using sladvi.tex
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%% File talk.tex %%%%%%%%%
+%%%%%%%%% File show.tex %%%%%%%%%
 %% \documentclass[landscape]{slides}
 %% 
-%% \input{sladvi}
+%% \usepackage{advi-slides}
 %% 
 %% \begin{document}
 %% 
@@ -50,7 +50,7 @@
 %% Even if proofs are still to be written, this framework is
 %% incredibly promising.
 %%
-%% Future work: we plan to implement the system
+%% Future work: we plan to implement the system.
 %%
 %% \lastpage
 %%
@@ -66,6 +66,10 @@
 \usepackage{graphicx}
 \usepackage{advi}
 \usepackage{alltt}
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{advi-slides}
+         [2003/04/01 v0.10 Advi Slides Package for the advi Previewer]
 
 % The simple pause command
 \def\pause{\adviwait}
