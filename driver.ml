@@ -481,13 +481,45 @@ let psfile_special st s =
   (* prerr_endline (Printf.sprintf "%dx%d pixel" width_pixel height_pixel);*)
   file, (llx, lly, urx, ury), (width_pixel, height_pixel);;
 
+let int_of_signal = function
+  | "SIGABRT" | "sigabrt" -> Sys.sigabrt (* -1 *)
+  | "SIGALRM" | "sigalrm" -> Sys.sigalrm (* -2 *)
+  | "SIGFPE" | "sigfpe" -> Sys.sigfpe (* -3 *)
+  | "SIGHUP" | "sighup" -> Sys.sighup (* -4 *)
+  | "SIGILL" | "sigill" -> Sys.sigill (* -5 *)
+  | "SIGINT" | "sigint" -> Sys.sigint (* -6 *)
+  | "SIGKILL" | "sigkill" -> Sys.sigkill (* -7 *)
+  | "SIGPIPE" | "sigpipe" -> Sys.sigpipe (* -8 *)
+  | "SIGQUIT" | "sigquit" -> Sys.sigquit (* -9 *)
+  | "SIGSEGV" | "sigsegv" -> Sys.sigsegv (* -10 *)
+  | "SIGTERM" | "sigterm" -> Sys.sigterm (* -11 *)
+  | "SIGUSR1" | "sigusr1" -> Sys.sigusr1 (* -12 *)
+  | "SIGUSR2" | "sigusr2" -> Sys.sigusr2 (* -13 *)
+  | "SIGCHLD" | "sigchld" -> Sys.sigchld (* -14 *)
+  | "SIGCONT" | "sigcont" -> Sys.sigcont (* -15 *)
+  | "SIGSTOP" | "sigstop" -> Sys.sigstop (* -16 *)
+  | "SIGTSTP" | "sigtstp" -> Sys.sigtstp (* -17 *)
+  | "SIGTTIN" | "sigttin" -> Sys.sigttin (* -18 *)
+  | "SIGTTOU" | "sigttou" -> Sys.sigttou (* -19 *)
+  | "SIGVTALRM" | "sigvtalrm" -> Sys.sigvtalrm (* -20 *)
+  | "SIGPROF" | "sigprof" -> Sys.sigprof (* -21 *)
+  | "" -> Sys.sigquit
+  | s -> int_of_string s;;
+
 let kill_embed_special st s =
-  (* advi: kill name=? *)
+  (* advi: kill name=? signal=? *)
   let records = get_records s in
   let app_name =
     try unquote (List.assoc "name" records)
     with Not_found -> raise (Failure ("No command to kill in " ^ s)) in
-  Dev.kill_embedded_app app_name;;
+  let sign = List.assoc "signal" records in
+  prerr_endline (Printf.sprintf "Signal is ``%s''" sign);
+  let sig_val =
+    try int_of_signal (unquote (List.assoc "signal" records))
+    with
+    | Not_found -> raise (Failure ("No signal to kill command in " ^ s))
+    | Failure _ -> raise (Failure ("Cannot understand signal in " ^ s))  in
+  Dev.kill_embedded_app sig_val app_name;;
 
 let app_mode_of_string = function
   | "sticky" -> Dev.Sticky

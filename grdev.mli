@@ -164,7 +164,7 @@ type app_mode =
 
 val embed_app :
   string -> app_mode -> string -> int -> int -> int -> int -> unit;;
-val kill_embedded_app : string -> unit;;
+val kill_embedded_app : int -> string -> unit;;
 val kill_all_embedded_apps : unit -> unit;;
 
 (* Events *)

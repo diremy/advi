@@ -748,7 +748,7 @@ let embed_app command app_mode app_name width height x y =
       !embeds else
      persists :=
       (fun () ->
-         (* prerr_endline ("Moving " ^ app_name); *)
+          prerr_endline ("Moving " ^ app_name);
 	  move_or_resize_persistent_app command app_mode app_name
           width height x y) :: 
       !persists
@@ -774,6 +774,7 @@ let embed_app command app_mode app_name width height x y =
       !embeds;;
 
 let kill_app pid wid =
+  (*prerr_endline (Printf.sprintf "kill_app (pid=%d,window=%s)" pid wid);*)
   begin try Hashtbl.remove app_table pid with _ -> 
     prerr_endline "kill_app failed to remove application..."
   end;
@@ -788,6 +789,7 @@ let kill_app pid wid =
     with
       Unix.Unix_error(Unix.ECHILD, _, _) -> false
   do () done;
+  prerr_endline (Printf.sprintf "kill_app (pid=%d,window=%s)" pid wid);
   (* if this is the forked process, do not close the window!!! *)
   if Unix.getpid () = Misc.advi_process then GY.close_subwindow wid
 ;;
@@ -804,10 +806,27 @@ let kill_apps app_mode =
   in
   List.iter (fun (pid,wid) -> kill_app pid wid) to_be_killed;;
 
-let kill_embedded_app app_name =
+let signal_app sig_val pid wid =
+  prerr_endline
+    (Printf.sprintf
+      "signal_app (pid=%d,window=%s) signal=%i killing=%b kill is %i"
+      pid wid sig_val (sig_val = Sys.sigquit) Sys.sigquit);
+  if sig_val = Sys.sigquit then kill_app pid wid else
+  try Unix.kill pid sig_val with _ ->
+    (* prerr_endline
+        (Printf.sprintf
+          "signal_app (pid=%d,window=%s) signal=%i: cannot signal process"
+          pid wid sig_val); *)
+    ();;
+
+let kill_embedded_app sig_val app_name =
+  (* prerr_endline
+   (Printf.sprintf
+     "kill_embedded_app (signal=%i app_name=%s)"
+     sig_val app_name); *)
   try
     let pid, (app_mode, app_name, wid) = find_embedded_app app_name in
-    kill_app pid wid
+    signal_app sig_val pid wid
   with
   | Not_found ->
       Misc.warning (Printf.sprintf "application %s is not running" app_name);;
