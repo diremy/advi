@@ -24,6 +24,17 @@ let ignore_background =
     "--ignore_background"
     "\tIgnore background for antialiasing";;
 
+let glyph_gamma = ref 1.0;;
+
+Options.add
+  "-gamma"
+  (Arg.Float (fun x -> 
+    if x <= 0.0 then Misc.warning "gamma value must be positive" 
+    else glyph_gamma := 1.0 /. x))
+  (Printf.sprintf
+     "FLOAT(>0)\tGamma correction of glyphs (default %f)" !glyph_gamma)
+;;
+
 type color = Graphics.color;;
 let href_frame = 0x00ff00;;
 let advi_frame = 0xaaaaff;;
@@ -408,7 +419,10 @@ let get_glyph_image g col =
           and p = ref 0 in
           for i = 0 to h - 1 do
             for j = 0 to w - 1 do
-              dst.(i).(j) <- table.(Char.code gmap.[!p]);
+	      let gamma_fix c =
+		int_of_float (((float c /. 255.0) ** !glyph_gamma) *. 255.0)
+	      in
+              dst.(i).(j) <- table.(gamma_fix (Char.code gmap.[!p]));
               incr p
             done
           done;
