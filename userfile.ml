@@ -24,7 +24,7 @@ let normalize path =
   let finalslash = path.[String.length path - 1] = '/' in
   let tks = Misc.split_string path (function '/' -> true | _ -> false) 0 in
   let rec remove = function
-    | x :: xs -> 
+    | x :: xs ->
 	begin match x :: remove xs with
 	| x :: [] -> [x]
     	| "." :: xs -> xs (* remove . *)
@@ -58,14 +58,14 @@ let tilde_subst s =
   let len = String.length s in
   if len = 1 then user_home_dir else
   match s.[1] with
-  | '/' -> 
+  | '/' ->
      Filename.concat user_home_dir (String.sub s 2 (len - 2))
   | _ ->
      let final = next_slash s 1 in
      let user = String.sub s 1 (pred final) in
      let pwnam = Unix.getpwnam user in
      if succ final >= len then pwnam.Unix.pw_dir else
-      Filename.concat pwnam.Unix.pw_dir 
+      Filename.concat pwnam.Unix.pw_dir
         (String.sub s (succ final) (len - succ final))
  with
  | Unix.Unix_error (_, _, _) -> s
@@ -162,8 +162,16 @@ let mk_user_advi_cache_dir dirname =
   cautious_perm_digdir dirname;
   if can_be_cache_directory dirname then dirname else raise Not_found;;
 
+(* try to figure out a reasonable default cache directory:
+   - if user's environment variable TMPDIR is set and the corresponding
+     directory is writtable, use it,
+   - otherwise, if /tmp can serve as a cache use it,
+   - otherwise, if the DVI file directory is possible use it,
+   - otherwise, if $HOME/.advi is available use it,
+   - otherwise, if none of those is possible, try to use the current
+     working directory as a cache. *)
 let get_user_advi_cache_dir () =
-  let add_user_defined_tmp dirs = 
+  let add_user_defined_tmp dirs =
     try Sys.getenv "TMPDIR" :: dirs with
     | Not_found -> dirs in
   let add_system_tmp_dir dirs =
@@ -187,7 +195,7 @@ let get_user_advi_cache_dir () =
       | d :: ds ->
          try mk_user_advi_cache_dir d with
          | _ -> find_cache_dir ds in
-      find_cache_dir dirs;;    
+      find_cache_dir dirs;;
 
 let advi_cache_dir = ref None;;
 
@@ -204,15 +212,8 @@ Options.add
 
 (* Get the actual advi cache directory.
    If it has not yet been set (i.e. it was not specified on the command
-   line or in init files), try to figure out a reasonable default:
-   - if user's environment variable TMPDIR is set and the corresponding
-     directory is writtable, use it,
-   - otherwise, if /tmp can serve as a cache use it,
-   - otherwise, if the current file directory
-     is possible use it, 
-   - otherwise, if $HOME/.advi is available use it,
-   - otherwise, if none of those is possible, try to use the current
-     working directory as a cache.
+   line or in init files), try to figure out a reasonable default using
+   get_user_advi_cache_dir above.
 *)
 let get_advi_cache_dir () =
   match !advi_cache_dir with
@@ -221,6 +222,10 @@ let get_advi_cache_dir () =
       let d = get_user_advi_cache_dir () in
       set_advi_cache_dir d;
       d;;
+
+let init_advi_cache_dir () = ignore (get_user_advi_cache_dir ());;
+
+Rc.at_init init_advi_cache_dir;;
 
 (* Writing page current number to the file advi_page_number_file. *)
 let write_page_number =
@@ -254,7 +259,7 @@ let save_page_number n =
    output_char oc '\n';
    close_out oc
  with _ ->
-   Misc.warning 
+   Misc.warning
      (Printf.sprintf
         "Cannot write file %s to record page number."
         (get_page_number_file ()));;
