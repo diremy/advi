@@ -32,11 +32,14 @@ exception Match;;
 val get_suffix : string -> file_name -> string;;
 val split_string : string -> (char -> bool) -> int -> string list;;
 val zap_to_char : char -> string -> string;;
-val catenate_sep : string -> string list -> string;;
 val int_or_float_of_string : string -> int;;
 val is_digit : char -> bool;;
 val string_replace : string -> string -> string -> string;;
 
+val string_prefix : char -> string -> string;;
+val string_suffix : char -> string -> string;;
+val filename_extension : file_name -> string;;
+ (** Raise [Not_found] if [char] cannot be found in the [string] argument. *)
 (* Lifting *)
 
 val lift : ('a -> unit) -> 'a option -> unit
