@@ -146,7 +146,7 @@ let block delay steps from (w, h) (x, y) =
       |	DirBottomLeft -> fun x y -> x + y
       |	DirBottomRight -> fun x y -> -x + y
       |	DirCenter -> fun x y -> abs (x - dx / 2) + abs (y - dy / 2)
-      | DirNone | _ -> fun x y -> Random.int (dx * dy)
+      | DirNone -> fun x y -> Random.int (dx * dy)
     in
     let order = Array.init (dx * dy) (fun i -> 
       let x = i mod dx and y = i / dx in 
