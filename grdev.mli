@@ -105,7 +105,7 @@ val sleep : float -> bool;; (* true= interrupted, false= fully performed *)
 (* generic image drawing function *)
 
 val draw_img :
-  string ->
+  Misc.file_name ->
   Drawimage.ratiopts ->
   bool ->
   Drawimage.alpha ->

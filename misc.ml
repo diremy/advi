@@ -16,6 +16,7 @@
 (***********************************************************************)
 
 type file_name = string;;
+type dir_name = string;;
 
 (* Reverse and filters list l according to f. (Pour faire plaisir à Gérard) *)
 let reverse_filter f l =

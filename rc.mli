@@ -18,7 +18,7 @@
 (* Init file loading. *)
 open Arg;;
 
-val parse_file : string ->
+val parse_file : Misc.file_name ->
   (string * spec * string) list -> (string -> unit) -> string -> unit
 (** [Rc.parse_file fname speclist anonfun usage_msg] parses the file
   fname as if it were the command line.

@@ -15,34 +15,34 @@
 (*  Based on Mldvi by Alexandre Miquel.                                *)
 (***********************************************************************)
 
-val user_dir : string;;
+val user_dir : Misc.dir_name;;
 (* Advi user directory. *)
 
-val get_cache_dir : unit -> string;;
+val get_cache_dir : unit -> Misc.dir_name;;
 (* Advi cache directory. *)
 
 val load_init_files : (string * Arg.spec * string) list ->
   (string -> unit) -> string -> unit;;
-(* [load_options_files options anon usage_message] loads the init files
+(* [load_init_files options anon usage_message] loads the init files
    [~/.advirc] and [~/.advi/advirc]. *)
 
 val load_options_file : (string * Arg.spec * string) list ->
-  (string -> unit) -> string -> string -> unit;;
+  (string -> unit) -> string -> Misc.file_name -> unit;;
 (* [load_options_file options anon usage_message fname] loads the init file
    [fname]. *)
 
-val fullpath : string -> string -> string;;
+val fullpath : Misc.dir_name -> Misc.file_name -> Misc.file_name;;
 (* [fullpath dir path] returns the normalized full path name of
    [path] which is relative to the directory [dir]. *)
 
-val tilde_subst : string -> string;;
+val tilde_subst : Misc.file_name -> Misc.file_name;;
 (* Replaces the occurences of "~/" or "~username" to the corresponding
    path names. *)
 
-val digdir : string -> int -> unit;;
+val digdir : Misc.dir_name -> int -> unit;;
 (* Same as [Unix.mkdir], but it also creates parent directories as needed *) 
 
-val prepare_file : string -> unit;;
+val prepare_file : Misc.file_name -> unit;;
 (* [prepare_file file] prepares the directory for [file]: if
    necessary, sub-directories are created as required to create [file]. *)
 
