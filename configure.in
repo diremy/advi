@@ -60,8 +60,18 @@ AC_SUBST(CAMLIMAGESDIR)
 AC_SUBST(HAVE_CAMLIMAGES)
 AC_SUBST(CAMLIMAGESLIBS)
 AC_SUBST(HAVE_GS)
-AC_SUBST(ADVI_LOC)
 
+dnl BUILD OUR OWN LIBDIR
+myprefix=$prefix
+myexec_prefix=$exec_prefix
+mylibdir=$libdir
+test "x$myprefix" = xNONE && myprefix=$ac_default_prefix
+test "x$myexec_prefix" = xNONE && myexec_prefix=${myprefix}
+mylibdir=$libdir
+test "x$libdir" = 'x${exec_prefix}/lib' && mylibdir="$myexec_prefix/lib"
+ADVI_LOC=$mylibdir/advi
+
+AC_SUBST(ADVI_LOC)
 AC_SUBST(WITH_X)
 AC_SUBST(HAVE_GS)
 AC_OUTPUT(Makefile.config config.ml)

@@ -2,6 +2,4 @@ let have_gs = @HAVE_GS@;;
 
 (* Location of splash.dvi and test/caml.eps *)
 let advi_loc = "@ADVI_LOC@"
-let splash_screen = advi_loc^"/splash.dvi"
-
-
+let splash_screen = Filename.concat advi_loc "splash.dvi"

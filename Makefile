@@ -107,7 +107,9 @@ veryclean:
 	config.status drawps.ml config.ml
 
 install: advi.opt
-	mv advi.opt /usr/local/bin/advi
+	cp advi.opt ${bindir}/advi
+	- mkdir -p $(ADVI_LOC)
+	cp splash.dvi caml.eps $(ADVI_LOC)
 
 MLFILES = $(addsuffix .ml, $(MODULES))
 .depend:: *.mli $(MLFILES) Makefile 
