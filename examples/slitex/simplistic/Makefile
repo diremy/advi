@@ -14,7 +14,9 @@ scratch: clean
 	/bin/rm -f *.dvi; rm -f *.bbl
 
 talk: talk.tex
-	@ TEXINPUTS=$(OSTYLES):$$TEXINPUTS; export TEXINPUTS; latex talk.tex
+
+.tex.dvi:
+	@ TEXINPUTS=$(OSTYLES):$$TEXINPUTS; export TEXINPUTS; latex $<
 
 ps:
 	dvips -o mod_talk.ps -t landscape talk.dvi
