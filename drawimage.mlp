@@ -76,12 +76,21 @@ module M = struct
       let data = input_value ic in
       rgba, width, height, data
     in
-    let ic = open_in_bin file in
+    let opener, closer =
+      if Config.gzip_path = "" then 
+	open_in_bin, close_in
+      else
+	(fun file -> 
+	  let command = Printf.sprintf "gzip -c -d %s" file in
+	  Unix.open_process_in command),
+	(fun ic -> ignore (Unix.close_process_in ic))
+    in
+    let ic = opener file in
     after (fun () ->
       let rgba, width, height, data = load ic in
       if rgba then Rgba32 (Rgba32.create_with width height data) 
       else Rgb24 (Rgb24.create_with width height data))
-      (fun () -> close_in ic)
+      (fun () -> closer ic)
   ;;
 
   let cache_save file img = 
@@ -104,8 +113,17 @@ module M = struct
   	  output_value oc (Bitmap.dump image.Rgb24.data);
       | _ -> assert false
     in
-    let oc = open_out_bin file in
-    after (fun () -> save oc) (fun () -> close_out oc) 
+    let opener, closer =
+      if Config.gzip_path = "" then
+	open_out_bin, close_out
+      else
+	(fun file -> 
+	  let command = Printf.sprintf "gzip > %s" file in
+	  Unix.open_process_out command),
+	(fun oc -> ignore (Unix.close_process_out oc))
+    in
+    let oc = opener file in
+    after (fun () -> save oc) (fun () -> closer oc)
   ;;
 
   let clean_cache () =

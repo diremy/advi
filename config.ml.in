@@ -6,6 +6,7 @@ let splash_screen = Filename.concat advi_loc "splash.dvi";;
 (* In the future, these could be automatically generated *)
 let kpsewhich_path = "@PATH_KPSEWHICH@";;
 let gs_path = "@PATH_GS@";;
+let gzip_path = "@PATH_GZIP@";;
 let texpicts_kind = "graphic/figure";;
 let psheaders_kind = "PostScript header";;
 let texdir_path = "@TEXMFMAIN@";;
