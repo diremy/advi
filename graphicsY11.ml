@@ -39,14 +39,14 @@ external get_window_id : unit -> window_id = "gr_window_id";;
 let subwindows = Hashtbl.create 13;;
 
 external raw_open_subwindow : int -> int -> int -> int -> window_id 
-    = "gr_open_subwindow";;
+    = "gr_open_sub_window";;
 external raw_close_subwindow : window_id -> unit
     = "gr_close_subwindow";;
 
 let open_subwindow ~x ~y ~width ~height =
   if width = 0 && height = 0 then null_window else
   let wid = raw_open_subwindow x y width height in
-  Hashtbl.add subwindows wid ();
+  Hashtbl.add subwindows wid height;
   wid;;
 
 let no_such_window fname wid =
@@ -69,13 +69,13 @@ let map_subwindow wid =
   if wid != null_window then begin
   check_window "map_subwindow" wid;
   raw_map_window wid end;;
-  
+
 let unmap_subwindow wid =
   if wid != null_window then begin
   check_window "unmap_subwindow" wid;
   raw_unmap_window wid end;;
 
-external raw_move_window : window_id -> int -> int -> unit
+external raw_move_window : window_id -> int -> int -> int -> unit
     = "gr_move_window";;
 
 external raw_resize_window : window_id -> int -> int -> unit
@@ -84,12 +84,14 @@ external raw_resize_window : window_id -> int -> int -> unit
 let resize_subwindow wid h w =
   if wid != null_window then begin 
   check_window "resize_subwindow" wid;
+  Hashtbl.replace subwindows wid h;
   raw_resize_window wid h w end;;
 
 let move_subwindow wid x y =
   if wid != null_window then begin
   check_window "move_subwindow" wid;
-  raw_move_window wid x y end;;
+  let h = Hashtbl.find subwindows wid in
+  raw_move_window wid x y h end;;
 
 external flush : unit -> unit = "gr_flush"
         (* flush the content of the backing store *)
