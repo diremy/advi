@@ -11,12 +11,15 @@
 % Which name is ours
 \def \advi@name {Active-DVI}
 
+% Which year of development are we (for various copyrights message) ?
+% (used for various copyrights messages)
+\def \advi@year {2003}
 % Which version is it ?
 \def \advi@version {1.40}
 
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{advi}
-         [2003/02/03 v1.40 Active-DVI Package for advi Previewer]
+         [2003/04/23 v1.74 Active-DVI Package for advi Previewer]
 
 %%
 
@@ -66,6 +69,7 @@ Maybe you mean \@currenvir ing}}
 \advi@export \ifadvi \advi@ifadvi
 
 \advi@export \adviversion \advi@version
+\advi@export \adviyear \advi@year
 \advi@export \adviname \advi@name
 \advi@export \ActiveDVI \advi@name
 
