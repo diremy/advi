@@ -192,3 +192,10 @@ Bindings
  PW We should choose one default key for each functionality and let the
  user redefine those bindings as soon as we have an .advirc
  implementation ?
+
+Scratching
+----------
+ Fonction stabilo
+ Fonction tracé supplémentaire: tracé soutenu par la machine
+ (horizontal, vertical et à 45 o) par analyse du déplacement de la
+ souris (mode par défaut ou mode obtenu par shift).
