@@ -304,6 +304,7 @@ exception GS;;
 val continue : unit -> unit;;
 val reposition : x:int -> y:int -> w:int -> h:int -> screen:int -> int * int;;
 val exec_ps : string -> int -> int -> unit;;
+val clearps : unit -> unit;;
 val newpage : (bool * string) list -> int -> float -> int -> int -> unit;;
 val add_headers : (bool * string) list -> unit;;
 val current_pos : unit -> int * int;;

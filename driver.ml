@@ -1543,7 +1543,9 @@ set_forward_eval_command eval_command;;
 let newpage h st magdpi x y =
   if st.status.Cdvi.hasps then 
     try Dev.newpage h st.sdpi magdpi x y
-    with Dev.GS -> st.status.Cdvi.hasps <- false;;
+    with Dev.GS -> st.status.Cdvi.hasps <- false
+  else Dev.clearps()
+;;
 
 let find_prologues l =
   let l = List.rev l in
@@ -1608,7 +1610,7 @@ let render_step cdvi num ?trans ?chst dpi xorig yorig =
       draw_html = [];
       checkpoint = 0;
     } in
-  if st.status.Cdvi.hasps then
+  (* if st.status.Cdvi.hasps then ---now check by newpage *)
   newpage [] st (mag *. dpi) xorig yorig;
   setup_bkgd st.status; (* apply the background preferences in Dev *)
   Dev.clear_dev ();     (* and redraw the background               *)
