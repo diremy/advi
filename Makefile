@@ -69,7 +69,7 @@ X11_INCLUDES=-I/usr/X11R6/include
 BYTECCCOMPOPTS=-fno-defer-pop -Wall -Wno-unused
 CFLAGS=$(X11_INCLUDES) -O $(BYTECCCOMPOPTS)
 
-all: byte opt documentation
+all: $(INSTALLTARGET) documentation
 allopt: opt
 opt: $(EXEC).opt 
 byte: $(EXEC)
