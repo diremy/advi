@@ -28,10 +28,10 @@ HELPFILES=doc/splash.dvi \
     doc/scratch_write_splash.dvi doc/scratch_draw_splash.dvi
 
 TEXSTYFILES= \
-    advi-annot.sty advi-slides.sty argv.sty tex/superpose.sty \
+    advi-annot.sty advi-slides.sty argv.sty superpose.sty \
     advi-graphicx.sty advi.sty bubble.sty xcolor.sty
 
-STYFILES= $(addprefix tex/, $(STY))
+STYFILES= $(addprefix tex/, $(TEXSTYFILES))
 
 COPTIONS = -warn-error A -g
 COPTOPTIONS = -warn-error A -unsafe -inline 9
