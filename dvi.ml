@@ -382,7 +382,8 @@ let input_string ch len =
 
 (*** parsing commands ***)
 
-let parse_commands commands =
+(* parse commands of a page between C_bop and C_eop *)
+let parse_a_page commands =
   let buf = make_buffer commands in
   let rec parse_rec () =
     let cmd = read_command buf in
@@ -393,6 +394,7 @@ let parse_commands commands =
     | _ -> raise (Error "ill-formed page")
   with End_of_buffer ->
     raise (Error "input exhausted");;
+
 (*** Reading a DVI file ***)
 
 let input_dvi ch =
@@ -460,7 +462,7 @@ let input_dvi ch =
             status = Unknown;
             line = None;
             text =
-              Grdev.Symbol.commands_to_ascii font_map (parse_commands commands);
+              Grdev.Symbol.commands_to_ascii font_map (parse_a_page commands);
           } in
         (*Misc.debug_endline page.text;*)
 	stack := page :: !stack ;
