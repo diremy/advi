@@ -388,7 +388,7 @@ let color_special st s =
 
 let parse_float s =
  try float_of_string s
- with _ -> failwith ("advi: cannot read a float number in " ^ s);;
+ with _ -> failwith ("advi: cannot read a floating number in \"" ^ s ^ "\"");;
 
 let alpha_special st s =
   match split_string s 0 with
@@ -531,15 +531,15 @@ let embed_special st s =
     Dev.embed_app command app_mode app_name width_pixel height_pixel x y;;
 
 let parse_transition mode record =
-  let parse_steps default =
+  let parse_steps =
     try
       let stepsstr = List.assoc "steps" record in
-      try int_of_string stepsstr
+      try Some (int_of_string stepsstr)
       with _ ->
         warning ("special: trans push: steps parse failed: \"" ^ 
                    stepsstr ^ "\"");
-        default
-    with Not_found -> default
+        None
+    with Not_found -> None
   in
   let parse_direction key default =
     try
@@ -559,15 +559,15 @@ let parse_transition mode record =
     with _ -> Transitions.DirNone
   in
   match String.lowercase mode with
-  | "slide" -> Transitions.TransSlide (parse_steps 20,
+  | "slide" -> Transitions.TransSlide (parse_steps,
                            parse_direction "from" Transitions.DirRight)
-  | "wipe" -> Transitions.TransWipe (parse_steps 20,
+  | "wipe" -> Transitions.TransWipe (parse_steps,
                            parse_direction "from" Transitions.DirRight)
-  | "block" -> Transitions.TransBlock (parse_steps 5000,
+  | "block" -> Transitions.TransBlock (parse_steps,
                            parse_direction "from" Transitions.DirNone)
   | "none" ->  Transitions.TransNone
   | _ ->
-     warning "special: trans push: mode parse failed";
+     warning ("special: trans push: mode parse failed \"" ^ mode ^ "\"");
      Transitions.TransNone;;
 
 let transition_special st s =
@@ -700,8 +700,7 @@ let wait_special st s =
     try parse_float (List.assoc "sec" records) 
     with
     | Not_found | Failure _ -> raise (Failure "wait: invalid special") in
-  Dev.synchronize();
-  if not (is_hidden()) then Dev.sleep second;
+  if not (is_hidden()) then ignore (Dev.sleep second);
   st.checkpoint <- 0;;
 
 (* Background object configuration. RDC *)
