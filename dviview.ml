@@ -25,6 +25,9 @@ Options.add
   (Arg.Int (fun i -> start_page := i))
   "INT\tMake advi start at page INT";;
 
+let starting_page npages =
+ if !start_page > 0 then min !start_page npages - 1 else 0;;
+
 let start_html = ref None;;
 Options.add
   "-html"
@@ -76,8 +79,7 @@ Options.add
 ;;
 
 let dpi_resolution = ref 72.27;;
-let set_dpi_resolution r =
- dpi_resolution := max r 72.27;;
+let set_dpi_resolution r = dpi_resolution := max r 72.27;;
 
 Options.add
   "-resolution"
@@ -153,8 +155,8 @@ let set_page_number st n =
 (*** Setting other parameters ***)
 
 let attr =
-  { geom =
-    { Ageometry.width = 0;
+  { geom = {
+      Ageometry.width = 0;
       Ageometry.height = 0;
       Ageometry.xoffset = Ageometry.No_offset;
       Ageometry.yoffset = Ageometry.No_offset;
@@ -216,18 +218,18 @@ let init filename =
       (attr.geom.Ageometry.width, attr.geom.Ageometry.height) in
   attr.geom.Ageometry.width <- size_x;
   attr.geom.Ageometry.height <- size_y;
-  let orig_x = (size_x - width)/2
-  and orig_y = (size_y - height)/2 in
+  let orig_x = (size_x - width) / 2
+  and orig_y = (size_y - height) / 2 in
   let last_modified =
     try (Unix.stat filename).Unix.st_mtime
     with _ -> 0.0 in
-  let pages = Array.length dvi.Dvi.pages in
   Options.dops := !Options.pson;
   let st =
+    let npages = Array.length dvi.Dvi.pages in
     { filename = filename;
       dvi = dvi;
       cdvi = cdvi;
-      num_pages = pages;
+      num_pages = npages;
       base_dpi = base_dpi;
       dvi_width = width;
       dvi_height = height;
@@ -238,7 +240,7 @@ let init filename =
       ratio = 1.0;
       page_stack = [];
       exchange_page = 0;
-      page_number = if !start_page > 0 then min !start_page pages - 1 else 0;
+      page_number = starting_page npages;
       last_modified = last_modified;
       button = None;
       fullscreen = None;
@@ -316,24 +318,24 @@ let goto_next_pause n st =
       | Some f ->
           st.cont <- None;
           try
-	    begin try
-	      while f () do () done;
-	      st.pause_number <- st.pause_number + 1;
-            with 
-	    | Driver.Wait sec -> 
-		ignore (Grdev.sleep sec); 
-		st.cont <- Some f;
-		aux n st
-	    | Driver.Pause ->
-		st.pause_number <- st.pause_number + 1;
-		st.cont <- Some f;
-		aux (pred n) st
-	    end;
+            begin try
+              while f () do () done;
+              st.pause_number <- st.pause_number + 1;
+            with
+            | Driver.Wait sec ->
+                ignore (Grdev.sleep sec);
+                st.cont <- Some f;
+                aux n st
+            | Driver.Pause ->
+                st.pause_number <- st.pause_number + 1;
+                st.cont <- Some f;
+                aux (pred n) st
+            end;
           with Grdev.Stop -> st.aborted <- true;
       end
   in
   aux n st;
-  Grdev.synchronize(); 
+  Grdev.synchronize();
   Grdev.set_busy (if st.cont = None then Grdev.Free else Grdev.Pause);;
 
 let draw_bounding_box st =
@@ -357,11 +359,8 @@ let position st x y =
       let line = max 0 line in
       let bound = max 0 bound in
       let file = match file with Some f ->  f | _ -> "" in
-      begin
-        Printf.printf "#line %d, %d <<%s>><<%s>> %s"
-          line bound before after file;
-        print_newline()
-      end
+      Printf.printf "#line %d, %d <<%s>><<%s>> %s\n"
+        line bound before after file
   | None -> ();;
 
 (* User has selected a region with the mouse. We dump characters. *)
@@ -442,7 +441,7 @@ let redraw ?trans st =
         try
           while
             try f () with
-  	    | Driver.Wait _ -> true	
+            | Driver.Wait _ -> true
             | Driver.Pause ->
                 if !current_pause = st.pause_number then raise Driver.Pause
                 else begin incr current_pause; true end
@@ -452,12 +451,12 @@ let redraw ?trans st =
         with
         | Driver.Pause -> st.cont <- Some f
       end else begin
-	Transimpl.sleep := (fun _ -> true); (* always breaks *)
-	while try f () with Driver.Wait _ | Driver.Pause -> true 
-	do () done
+        Transimpl.sleep := (fun _ -> true); (* always breaks *)
+        while try f () with Driver.Wait _ | Driver.Pause -> true
+        do () done
       end
     with
-    | Grdev.Stop -> st.aborted <- true 
+    | Grdev.Stop -> st.aborted <- true
   end;
   Grdev.synchronize ();
   Grdev.set_busy (if st.cont = None then Grdev.Free else Grdev.Pause);
@@ -490,12 +489,8 @@ exception Link;;
 
 let exec_xref link =
   let call command =
-    let pid = Launch.fork_process command in
-    (* I don't understand this change -Didier: it was
-    Grdev.wait_button_down() in *)
-    (* only to launch embeded apps *)
-    if Graphics.button_down () then
-      ignore (Graphics.wait_next_event [Graphics.Button_up]) in
+    Grdev.wait_button_up ();
+    ignore (Launch.fork_process command) in
   if Misc.has_prefix "file:" link then
     try
       let filename, arguments =
@@ -503,7 +498,7 @@ let exec_xref link =
                (function '#' -> true | _ -> false) 0 with
         | [ filename; tag ] -> filename, ["-html"; tag ]
         | [ filename ] -> filename, []
-        | _ -> Misc.warning ("Invalid link "^link); raise Link in
+        | _ -> Misc.warning ("Invalid link " ^ link); raise Link in
       if not (Sys.file_exists filename) then
         Misc.warning
           (Printf.sprintf "File %s non-existent or not readable" filename) else
@@ -514,8 +509,8 @@ let exec_xref link =
       if Misc.has_suffix ".txt" filename ||
          Misc.has_suffix ".tex" filename then
         call (!pager ^ " " ^ filename) else
-      if Misc.has_suffix ".html"  filename ||
-         Misc.has_suffix ".htm"  filename then
+      if Misc.has_suffix ".html" filename ||
+         Misc.has_suffix ".htm" filename then
         call (!browser ^ " " ^ link) else
       Misc.warning
         (Printf.sprintf "Don't know what to do with file %s" filename)
@@ -564,14 +559,14 @@ let reload st =
     and h_in = mag *. ldexp (float h_sp /. dvi_res) (-16) in
     let width = int_of_float (w_in *. st.base_dpi *. st.ratio)
     and height = int_of_float (h_in *. st.base_dpi *. st.ratio) in
-    let pages =  Array.length dvi.Dvi.pages in
+    let npages =  Array.length dvi.Dvi.pages in
     st.dvi <- dvi;
     st.cdvi <- cdvi;
-    st.num_pages <- pages;
-    st.page_stack <- clear_page_stack pages st.page_stack;
-    let page = page_start (min st.page_number (st.num_pages - 1)) st in
-    if page <> st.page_number then st.pause_number <- 0;
-    set_page_number st page;
+    st.num_pages <- npages;
+    st.page_stack <- clear_page_stack npages st.page_stack;
+    let npage = page_start (min st.page_number (st.num_pages - 1)) st in
+    if npage <> st.page_number then st.pause_number <- 0;
+    set_page_number st npage;
     st.frozen <- true;
     st.aborted <- true;
     update_dvi_size false st;
@@ -590,7 +585,7 @@ let goto_page n st = (* go to the begining of the page *)
     begin
       if st.page_number <> new_page_number
       then st.exchange_page <- st.page_number;
-      let t =
+      let trans =
         if new_page_number = succ st.page_number
            then Some Transitions.DirRight else
         if new_page_number = pred st.page_number
@@ -600,7 +595,7 @@ let goto_page n st = (* go to the begining of the page *)
         None in
       set_page_number st new_page_number;
       st.pause_number <- 0;
-      redraw ?trans:(t) st
+      redraw ?trans st
     end;;
 
 let push_stack b n st =
@@ -634,12 +629,12 @@ let pop_page b n st =
         if b && h >= 0
         then pop n return_page return_stack t
         else pop (pred n) h t t in
-  let page, stack = pop n st.page_number st.page_stack st.page_stack in
+  let npage, stack = pop n st.page_number st.page_stack st.page_stack in
   st.page_stack <- stack;
-  goto_page (if page > 0 then page else -1 - page) st;;
+  goto_page (if npage > 0 then npage else -1 - npage) st;;
 
 let goto_href link st = (* goto page of hyperref h *)
-  let page =
+  let npage =
     if Misc.has_prefix "#" link then
       let tag = Misc.get_suffix "#" link in
       find_xref tag st.page_number st
@@ -648,7 +643,7 @@ let goto_href link st = (* goto page of hyperref h *)
         exec_xref link;
         st.page_number
       end in
-  push_page true page st;
+  push_page true npage st;
   Grdev.H.flashlight (Grdev.H.Name link);;
 
 let goto_next_page st =
@@ -668,25 +663,21 @@ let scale n st =
   let factor =
     if n > 0 then !scale_step ** float n
     else  (1. /. !scale_step) ** float (0 - n) in
-  if !autoresize then
-    begin
-      let scale x = int_of_float (float x *. factor) in
-      attr.geom.Ageometry.width <- scale st.size_x;
-      attr.geom.Ageometry.height <- scale st.size_y;
-      Grdev.close_dev();
-      Grdev.open_dev (Printf.sprintf " " ^ Ageometry.to_string attr.geom);
-    end
-  else
-    begin
-      let new_ratio = factor *. st.ratio in
-      if new_ratio >= 0.02 && new_ratio < 50.0 then
-        begin
-          st.ratio <- new_ratio;
-          let (cx, cy) = (st.size_x / 2, st.size_y / 2) in
-          st.orig_x <- int_of_float (float (st.orig_x - cx) *. factor) + cx;
-          st.orig_y <- int_of_float (float (st.orig_y - cy) *. factor) + cy;
-        end;
-    end;
+  if !autoresize then begin
+     let scale x = int_of_float (float x *. factor) in
+     attr.geom.Ageometry.width <- scale st.size_x;
+     attr.geom.Ageometry.height <- scale st.size_y;
+     Grdev.close_dev ();
+     Grdev.open_dev (Printf.sprintf " " ^ Ageometry.to_string attr.geom);
+  end else begin
+     let new_ratio = factor *. st.ratio in
+     if new_ratio >= 0.02 && new_ratio < 50.0 then begin
+        st.ratio <- new_ratio;
+        let (cx, cy) = (st.size_x / 2, st.size_y / 2) in
+        st.orig_x <- int_of_float (float (st.orig_x - cx) *. factor) + cx;
+        st.orig_y <- int_of_float (float (st.orig_y - cy) *. factor) + cy;
+     end;
+  end;
   update_dvi_size true st;
   redraw st;;
 
@@ -743,9 +734,19 @@ module B =
       redraw st
 
     let page_left st =
-      match (move_within_margins_x st (attr.geom.Ageometry.width - 10)) with
+      match move_within_margins_x st (attr.geom.Ageometry.width - 10) with
       | Some n ->
           if n > st.orig_x  then begin
+            st.orig_x <- n;
+            set_bbox st;
+            redraw st
+          end
+      | None -> ()
+
+    let page_right st =
+      match (move_within_margins_x st (10 - attr.geom.Ageometry.width)) with
+      | Some n ->
+          if n < st.orig_x then begin
             st.orig_x <- n;
             set_bbox st;
             redraw st
@@ -759,61 +760,41 @@ module B =
              * floating point rounding problem
              *)
           if attr.geom.Ageometry.height <
-            st.dvi_height + 2 * vmargin_size st then
-            begin
-              st.orig_y <- top_of_page st;
-              set_bbox st;
-            end;
+            st.dvi_height + 2 * vmargin_size st then begin
+           st.orig_y <- top_of_page st;
+           set_bbox st;
+          end;
           goto_page (st.page_number + 1) st
-        end
-      in
-      begin
-        match (move_within_margins_y st (10 - attr.geom.Ageometry.height)) with
-        | Some n ->
-              (* this test is necessary because of rounding errors *)
-            if n > st.orig_y then none ()
-            else begin
-              st.orig_y <- n;
-              set_bbox st;
-              redraw st
-            end
-        | None -> none ()
+        end in
+      match move_within_margins_y st (10 - attr.geom.Ageometry.height) with
+      | Some n ->
+          (* this test is necessary because of rounding errors *)
+          if n > st.orig_y then none () else begin
+            st.orig_y <- n;
+            set_bbox st;
+            redraw st
+          end
+      | None -> none ()
       end
 
     let page_up st =
       let none () =
         if st.page_number > 0 then begin
           if attr.geom.Ageometry.height <
-            st.dvi_height + 2 * vmargin_size st then
-            begin
-              st.orig_y <- bottom_of_page st;
-              set_bbox st;
-            end;
+             st.dvi_height + 2 * vmargin_size st then begin
+            st.orig_y <- bottom_of_page st;
+            set_bbox st;
+          end;
           goto_page (st.page_number - 1) st
-        end
-      in
-      begin
-        match (move_within_margins_y st (attr.geom.Ageometry.height - 10)) with
-        | Some n ->
-            if n < st.orig_y then none ()
-            else begin
-              st.orig_y <- n;
-              set_bbox st;
-              redraw st
-            end
-        | None -> none ()
-      end
-
-    let page_right st =
-      match (move_within_margins_x st (10 - attr.geom.Ageometry.width)) with
+        end in
+      match move_within_margins_y st (attr.geom.Ageometry.height - 10) with
       | Some n ->
-          if n < st.orig_x then begin
-            st.orig_x <- n;
+          if n < st.orig_y then none () else begin
+            st.orig_y <- n;
             set_bbox st;
             redraw st
           end
-      | None -> ()
-
+      | None -> none ()
 
     let redraw = redraw ?trans:(Some Transitions.DirNone)
     let reload = reload
@@ -822,9 +803,9 @@ module B =
     let fullscreen st =
       let x, y =
         match st.fullscreen with
-          None ->
-            let x = GraphicsY11.origin_x() in
-            let y = GraphicsY11.origin_y() in
+        | None ->
+            let x = GraphicsY11.origin_x () in
+            let y = GraphicsY11.origin_y () in
             st.fullscreen <- Some (x, y, st.size_x, st.size_y);
             Grdev.reposition ~x:0 ~y:0 ~w:(-1) ~h:(-1);
         | Some (x, y, w, h) ->
@@ -873,7 +854,7 @@ let bind_keys () =
    'l', B.page_right;
    'c', B.center;
 
-   (* m, i reserved for scrolling
+   (* m, i are reserved for scrolling
      'm', B.scroll_one_line_down;
      'i', B.scroll_one_line_up;
     *)
@@ -943,43 +924,42 @@ let main_loop filename =
       Grdev.open_dev (" " ^ Ageometry.to_string attr.geom);
       set_bbox st;
       if st.page_number > 0 && !Options.dops then
-	Driver.scan_special_pages st.cdvi st.page_number
-      else
-	set_page_number st (page_start 0 st);
+        Driver.scan_special_pages st.cdvi st.page_number
+      else set_page_number st (page_start 0 st);
       redraw st;
       (* num is the current number entered by keyboard *)
       try while true do
-	let ev = if changed st then Grdev.Refreshed else Grdev.wait_event () in
-	st.num <- st.next_num;
-	st.next_num <- 0;
-	match ev with
-	| Grdev.Refreshed -> reload st
-	| Grdev.Resized (x, y) -> resize st x y
-	| Grdev.Key c -> bindings.(Char.code c) st
-	| Grdev.Href h -> goto_href h st
-	| Grdev.Advi (s, a) -> a ()
-	| Grdev.Move (w, h) ->
+        let ev = if changed st then Grdev.Refreshed else Grdev.wait_event () in
+        st.num <- st.next_num;
+        st.next_num <- 0;
+        match ev with
+        | Grdev.Refreshed -> reload st
+        | Grdev.Resized (x, y) -> resize st x y
+        | Grdev.Key c -> bindings.(Char.code c) st
+        | Grdev.Href h -> goto_href h st
+        | Grdev.Advi (s, a) -> a ()
+        | Grdev.Move (w, h) ->
             st.orig_x <- st.orig_x + w;
             st.orig_y <- st.orig_y + h;
             set_bbox st;
             redraw st
-	| Grdev.Region (x, y, w, h) -> ()
-	| Grdev.Selection s -> selection s
-	| Grdev.Position (x, y) ->
+        | Grdev.Region (x, y, w, h) -> ()
+        | Grdev.Selection s -> selection s
+        | Grdev.Position (x, y) ->
             position st x y
-	| Grdev.Click (Grdev.Top_left, _, _, _) ->
+        | Grdev.Click (Grdev.Top_left, _, _, _) ->
             if !click_turn_page then B.pop_page st
-	| Grdev.Click (_, Grdev.Button1, _, _) ->
+        | Grdev.Click (_, Grdev.Button1, _, _) ->
             if !click_turn_page then B.previous_pause st
-	| Grdev.Click (_, Grdev.Button2, _, _) ->
+        | Grdev.Click (_, Grdev.Button2, _, _) ->
             if !click_turn_page then B.pop_previous_page st
-	| Grdev.Click (_, Grdev.Button3, _, _) ->
+        | Grdev.Click (_, Grdev.Button3, _, _) ->
             if !click_turn_page then B.next_pause st
 (*
    | Grdev.Click (Grdev.Bottom_right, _) -> B.next_pause st
    | Grdev.Click (Grdev.Bottom_left, _) -> B.pop_previous_page st
    | Grdev.Click (Grdev.Top_right, _) -> B.push_page st
  *)
-	| _ -> ()
+        | _ -> ()
       done with Exit -> Grdev.close_dev ()
     end;;
