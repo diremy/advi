@@ -173,12 +173,12 @@ tar_and_web: tex/splash.dvi
 	cd advi-development-kit; make distribute
 
 rpm:
-	- echo YOU NEED TO SU ROOT
-	su root -c "rpm -ba --clean ./advi.spec"
 	if test -d /usr/src/redhat; then rpmdir=/usr/src/redhat; \
 	else if test -d /usr/src/RPM; then rpmdir=/usr/src/RPM; fi; fi; \
 	if test "X$$rpmdir" = "X"; then \
 		echo "cannot create rpm"; exit 2; fi; \
+	echo YOU NEED TO SU ROOT; \
+	su root -c "$(FTPSITEDIR)/$(ADVI).tar.gz $$rpmdir/SOURCES/; rpm -ba --clean ./advi.spec"; \
 	cp $$rpmdir/SRPMS/advi-$(VERSION)-1.src.rpm \
 	   $$rpmdir/RPMS/*/advi-$(VERSION)-1.*.rpm $(FTPSITEDIR)
 
