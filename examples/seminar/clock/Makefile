@@ -1,15 +1,37 @@
+#*********************************************************************#
+#                                                                     #
+#                             Active-DVI                              #
+#                                                                     #
+#                   Projet Cristal, INRIA Rocquencourt                #
+#                                                                     #
+#  Copyright 2003 Institut National de Recherche en Informatique et   #
+#  en Automatique.  All rights reserved.  This file is distributed    #
+#  under the terms of the GNU Lesser General Public License.          #
+#                                                                     #
+#  Jun Furuse, Didier Rémy and Pierre Weis.                           #
+#  Contributions by Roberto Di Cosmo, Didier Le Botlan,               #
+#  Xavier Leroy, and Alan Schmitt.                                    #
+#                                                                     #
+# Pierre Weis                                                         #
+#                                                                     #
+#*********************************************************************#
+
+# The Makefile for the clock example.
+
+# $Id$
+
+# To view the demos, use ../../../advi.opt file.dvi
+
 TOPDIR=../../..
 FILES=tools.tex
+EPS=bar.jpg.eps cameleon.eps cameleon2.eps hump.eps logo.gif.eps ocaml.eps ocamldoc.eps ODBC.eps
 
 include ../../lib/Makefile
 
-all::
+all:: tools.dvi
 	advi tools.dvi
 
-EPS=bar.jpg.eps cameleon.eps cameleon2.eps hump.eps logo.gif.eps ocaml.eps ocamldoc.eps ODBC.eps
-
-tools.dvi: uncompress $(EPS) tools.tex
-	ln -sf ../../../tex/advi.pro advi.pro
+tools.dvi: $(EPS) tools.tex
 	$(LATEX) tools.tex
 
 tools.pdf: $(EPS) tools.tex
@@ -17,7 +39,7 @@ tools.pdf: $(EPS) tools.tex
 	dvips -o $*.ps $*.dvi && ps2pdf $*.ps $*.pdf
 	rm $*.dvi 
 
-uncompress:
+$(EPS):$(EPS.eps=.eps.gz)
 	gunzip *.eps.gz
 
 clean::
@@ -32,4 +54,3 @@ clean::
 	rm -f *.dvi *.pdf *.aux *.log *.ps *~
 
 .phony: show
-

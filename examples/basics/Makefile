@@ -1,4 +1,26 @@
-# To view the demo, use ../advi file.dvi
+#*********************************************************************#
+#                                                                     #
+#                             Active-DVI                              #
+#                                                                     #
+#                   Projet Cristal, INRIA Rocquencourt                #
+#                                                                     #
+#  Copyright 2003 Institut National de Recherche en Informatique et   #
+#  en Automatique.  All rights reserved.  This file is distributed    #
+#  under the terms of the GNU Lesser General Public License.          #
+#                                                                     #
+#  Jun Furuse, Didier Rémy and Pierre Weis.                           #
+#  Contributions by Roberto Di Cosmo, Didier Le Botlan,               #
+#  Xavier Leroy, and Alan Schmitt.                                    #
+#                                                                     #
+# Pierre Weis                                                         #
+#                                                                     #
+#*********************************************************************#
+
+# The Makefile for the basic examples and its subdirectories.
+
+# $Id$
+
+# To view the demos, use ../advi.opt file.dvi
 
 SUBDIRS=cash
 
@@ -18,9 +40,11 @@ ADVI=TEXPSHEADERS=$(ADVIDIR)/tex: $(ADVIDIR)/advi
 
 MLPROG=
 
-all: $(DVIFILES) $(MLPROG) 
+all: dvi
 	advi simple.dvi && \
 	advi moderate.dvi
+
+dvi : $(DVIFILES) $(MLPROG)
 
 $(DVIFILES): $(ADVIDIR)/tex/bar.jpg.eps $(ADVIDIR)/tex/advi.sty $(ADVIDIR)/tex/advi-annot.sty
 
@@ -35,8 +59,7 @@ clean:
 	$(RM) $(MLPROG) *.cmi *.cmo
 	$(RM) .advi/*
 	for i in $(SUBDIRS); do \
-	  cd $$i; \
-	  $(MAKE) clean;  \
+	  cd $$i; $(MAKE) clean; cd ..; \
 	done
 
 .SUFFIXES: .tex .sty .dvi .eps .advi

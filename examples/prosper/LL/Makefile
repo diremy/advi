@@ -1,3 +1,27 @@
+#*********************************************************************#
+#                                                                     #
+#                             Active-DVI                              #
+#                                                                     #
+#                   Projet Cristal, INRIA Rocquencourt                #
+#                                                                     #
+#  Copyright 2003 Institut National de Recherche en Informatique et   #
+#  en Automatique.  All rights reserved.  This file is distributed    #
+#  under the terms of the GNU Lesser General Public License.          #
+#                                                                     #
+#  Jun Furuse, Didier Rémy and Pierre Weis.                           #
+#  Contributions by Roberto Di Cosmo, Didier Le Botlan,               #
+#  Xavier Leroy, and Alan Schmitt.                                    #
+#                                                                     #
+# Pierre Weis                                                         #
+#                                                                     #
+#*********************************************************************#
+
+# The Makefile for the LL example.
+
+# $Id$
+
+# To view the demos, use ../../../advi.opt file.dvi
+
 TEXINPUTS := ..:../../lib:../../../tex:$(TEXINPUTS)
 ADVI=../../../advi.opt
 LATEX=TEXINPUTS=$(TEXINPUTS) latex 
@@ -17,8 +41,7 @@ ll.pdf: ll.tex
 	rm ll.dvi
 
 clean:
-	/bin/rm -f ll.aux ll.log ll.dvi
-
+	/bin/rm -f ll.aux ll.log ll.dvi ll.ps ll.pdf *~
 
 .phony: show
 
