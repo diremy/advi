@@ -47,9 +47,9 @@ distribute: advi adk
 
 advi:
 	# Make documentation and test before release
-	@(MAKE) -f Makefile documentation
+	$(MAKE) -f Makefile documentation
 	(cd doc; $(MAKE) distribute)
-	(cd test; $(MAKE) all jpdemo.dvi)
+	(cd test; $(MAKE) all)# jpdemo.dvi)
 	# Then clean the old stuff
 	$(RM) release
 	mkdir release

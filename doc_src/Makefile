@@ -31,6 +31,8 @@ advi-screen-shots-fra.html advi-screen-shots-eng.html
 # The list of MAN source files
 MFILES=advi.man
 
+include ../Makefile.config
+
 ######## This part should automatically handle the generation of
 ######## object files
 
@@ -42,8 +44,8 @@ OBJS=$(HOBJS) $(MOBJS)
 all: $(OBJS)
 
 clean:
-	/bin/rm -f $(OBJS)
-	cd Includes; /bin/rm -f *~
+	$(RM) $(OBJS)
+	cd Includes; $(RM) *~
 
 .SUFFIXES:
 .SUFFIXES: .htm .html .man .m

@@ -41,7 +41,7 @@ PACKAGE=advi
 FILES=index.htm fra.htm eng.htm faq-fra.htm faq-eng.htm \
 screen-shots-fra.htm screen-shots-eng.htm
 
-RM=rm -f
+include ../Makefile.config
 
 ######## This part of the Makefile should automatically handle the
 ######## generation of object files for the list $(FILES)

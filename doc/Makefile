@@ -47,7 +47,7 @@ clean::
 	$(MAKE) -f MakeHTML clean
 	$(MAKE) -f MakeMan clean
 
-distribute: clean all web
+distribute: all web
 
 web:
 	$(MAKE) -f MakeHTML all

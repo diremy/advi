@@ -200,6 +200,16 @@ clean::
 		| sed -e 's|$(CAMLDIR)/[^ ]*||' >> .depend
 	chmod a+w .depend
 
+doc/splash.dvi: doc/splash.tex
+	cd doc; $(MAKE) `basename $@`
+doc/scratch_write_splash.dvi: doc/scratch_write_splash.tex
+	cd doc; $(MAKE) `basename $@`
+doc/scratch_draw_splash.dvi: doc/scratch_draw_splash.tex
+	cd doc; $(MAKE) `basename $@`
+
+doc/advi.1: doc_src/advi.man
+	cd doc; $(MAKE) `basename $@`
+
 # Just for the authors
 
 # Automatic handling of versionning
@@ -229,16 +239,6 @@ package_distribution: release distribution announce
 
 count:
 	wc -l *.ml *.mli | sort -n
-
-doc/splash.dvi: doc/splash.tex
-	cd doc; $(MAKE) `basename $@`
-doc/scratch_write_splash.dvi: doc/scratch_write_splash.tex
-	cd doc; $(MAKE) `basename $@`
-doc/scratch_draw_splash.dvi: doc/scratch_draw_splash.tex
-	cd doc; $(MAKE) `basename $@`
-
-doc/advi.1: doc_src/advi.man
-	cd doc; $(MAKE) `basename $@`
 
 include Makefile.common
 include .depend
