@@ -105,7 +105,7 @@ let parse_args progname argv speclist anonfun errmsg =
   done;
 ;;
 
-let parse_argv argv =
+let arg_dot_parse argv =
    let progname =
     if !current < Array.length argv then argv.(!current) else "(?)" in
    parse_args progname argv;;
@@ -150,7 +150,7 @@ let lex s =
     if i >= lim then get_tok i b else
     match s.[i] with
     | '"' (* '"' *) -> find_string (i + 1)
-    | ' ' | '\t' | '\n' -> get_tok i b
+    | ' ' | '\t' | '\n' | '\r' -> get_tok i b
     | '\\' -> find_tok (i + 1)
     | c -> Buffer.add_char b c; find_tok (i + 1)
 
@@ -182,15 +182,16 @@ let lex s =
   find_tokens [] 0;;
 
 let argv_of_string s =
-  let l = lex s in
-  print_int (List.length l);
-  print_newline ();
-  List.iter (fun s -> print_string s; print_newline ()) l;
+  (* Debug if necessary
+     let l = lex s in
+     print_int (List.length l);
+     print_newline (); 
+     List.iter (fun s -> print_string s; print_newline ()) l; *)
   Array.of_list (lex s);;
 
 let argv_of_file fname = argv_of_string (string_of_file fname);;
 
-let parse_argv_push_current progname argv speclist anonfun errmsg =
+let parse_argv progname argv speclist anonfun errmsg =
  let curr = !current in
  try
    current := -1;
@@ -198,9 +199,9 @@ let parse_argv_push_current progname argv speclist anonfun errmsg =
    current := curr
  with x -> current := curr; raise x;;
 
-let parse_string s = parse_argv_push_current s (argv_of_string s);;
+let parse_string s = parse_argv s (argv_of_string s);;
 
-let parse_file fname = parse_argv_push_current fname (argv_of_file fname);;
+let parse_file fname = parse_argv fname (argv_of_file fname);;
 
 let cautious_parse_file fname speclist anonfun errmsg =
  try parse_file fname speclist anonfun errmsg with

@@ -38,6 +38,11 @@ val parse_string : string ->
 (** [Rc.parse_string s speclist anonfun usage_msg] parses the string [s]
   as if it were the command line. *)
 
+val argv_of_string : string -> string array;;
+val argv_of_file : string -> string array;;
+val parse_argv : string -> string array -> 
+  (string * spec * string) list -> (string -> unit) -> string -> unit;;
+
 val at_init : (unit -> unit) -> unit;;
 (** [at_init f] records initialization function [f] to be executed
     when [init] will be invoked. *)
