@@ -174,7 +174,6 @@ fi
 dnl Check for libraries: END
 
 AC_PATH_PROG(PATH_CAMLOPT, $CAMLOPT, "nope")
-PATH_CAMLOPT=nope
 if test "$PATH_CAMLOPT" = "nope"; then
   echo "**************** Warning ******************"
   echo "The ocaml native code compiler is not found"
