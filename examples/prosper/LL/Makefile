@@ -2,6 +2,8 @@ TEXINPUTS := ..:../../lib:../../../tex:$(TEXINPUTS)
 ADVI=../../../advi.opt
 LATEX=TEXINPUTS=$(TEXINPUTS) latex 
 
+all: show
+
 show: ll.dvi
 	$(ADVI) ll.dvi
 
