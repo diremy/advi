@@ -124,9 +124,15 @@ let handle_fatal_error f () =
   try f () with Fatal_error s -> prerr_endline s; exit 1;;
 
 (* To emit a warning. *)
-let warning mes =
+let emit_warning mes =
   Printf.fprintf stderr "Warning: %s" mes;
   prerr_newline ();;
+
+let warnings = ref true;;
+
+let set_warnings b = warnings := b;;
+
+let warning s = if !warnings then emit_warning s;;
 
 let forward_debug_endline = ref (function (s : string) -> ());;
 

@@ -435,13 +435,14 @@ let redraw ?trans st =
       Driver.clear_symbols ();
       if !bounding_box then draw_bounding_box st;
       if !pauses then
-        let f = Driver.render_step st.cdvi st.page_number ?trans
+        let f =
+          Driver.render_step st.cdvi st.page_number ?trans
             (st.base_dpi *. st.ratio) st.orig_x st.orig_y in
         let current_pause = ref 0 in
         try
           while
             try f () with
-	    | Driver.Wait _ -> true	
+	    | Driver.Wait _ -> true
             | Driver.Pause ->
                 if !current_pause = st.pause_number then raise Driver.Pause
                 else begin incr current_pause; true end
@@ -449,10 +450,9 @@ let redraw ?trans st =
           if !current_pause < st.pause_number then
             st.pause_number <- !current_pause
         with
-        | Driver.Pause ->
-            st.cont <- Some f;
+        | Driver.Pause -> st.cont <- Some f
       else
-        Driver.render_page  st.cdvi st.page_number 
+        Driver.render_page st.cdvi st.page_number 
           (st.base_dpi *. st.ratio) st.orig_x st.orig_y;
     with Grdev.Stop ->
       st.aborted <- true 

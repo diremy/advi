@@ -85,7 +85,6 @@ let raw_embed_app command app_mode app_name width height x gry =
                (Misc.string_replace "!x" opt_x
                   (Misc.string_replace "!y" opt_y
                      command0)))) in
-  prerr_endline command;
   let pid = Launch.fork_process command in
   if Hashtbl.mem app_table pid then
     raise (Failure
@@ -179,7 +178,8 @@ let embed_app command app_mode app_name width height x gry =
 let kill_app pid wid =
   (* prerr_endline (Printf.sprintf "kill_app (pid=%d, window=%s)" pid wid); *)
   begin try Hashtbl.remove app_table pid with _ -> 
-    prerr_endline "kill_app failed to remove application..."
+    Misc.warning
+      (Printf.sprintf "kill_app failed to remove application %d..." pid)
   end;
   begin try Unix.kill pid 9 with _ -> 
     (* prerr_endline

@@ -251,7 +251,7 @@ let make_term =
 let end_of_line t =
   let line = t.lines.(t.cursor_y) in
   let l = String.length line in
-  prerr_endline (string_of_int l);
+  (*prerr_endline (string_of_int l);*)
   htab t l;;
 
 let beginning_of_line t = htab t 0;;
@@ -302,7 +302,7 @@ let rec edit t =
     | '' -> next_line t
     | '' -> previous_line t
     | '\n' | '\r' -> print_nl t
-    | c -> prerr_endline (String.make 1 c); print_chr t c end;
+    | c -> (*prerr_endline (String.make 1 c); *)print_chr t c end;
     edit t;;
 
 (* Basic functions to input strings. *)

@@ -727,7 +727,7 @@ let proc_special st s =
         if !playing = 0 then
           begin match !current_recording_proc with
           | [] ->
-              prerr_endline
+              Misc.warning
                 (Printf.sprintf "'xxx %s' not recording" s)
           | recording :: rest ->
               let procname = recording.tag in
@@ -780,7 +780,7 @@ let proc_special st s =
           end
       with
       | Not_found ->
-          prerr_endline
+          Misc.warning
             (Printf.sprintf "xxx '%s': %s not recorded" s procname);;
 
 let wait_special st s =
@@ -1258,7 +1258,7 @@ let render_step cdvi num ?trans dpi xorig yorig =
   Dev.set_color st.color;
   Dev.set_transition st.transition;
   st.checkpoint <- 0;
-  let check() =
+  let check () =
     begin try Dev.continue () with
     | Dev.Stop as exn -> raise exn
     end;

@@ -20,6 +20,7 @@ val reverse_filter : ('a -> bool) -> 'a list -> 'a list;;
 val reverse_map : ('a -> 'b) -> 'a list -> 'b list;;
 val reverse_concat : 'a list -> 'a list -> 'a list;;
 
+(* String additionals. *)
 val has_prefix : string -> string -> bool;;
 val has_suffix : string -> string -> bool;;
 exception Match;;
@@ -31,9 +32,12 @@ val int_or_float_of_string : string -> int;;
 val is_digit : char -> bool;;
 val string_replace : string -> string -> string -> string;;
 
+(* Handlers and raisers. *)
 val fatal_error : string -> 'a;;
 val handle_fatal_error : (unit -> unit) -> unit -> unit;;
 
+(* Warnings. *)
+val set_warnings : bool -> unit;;
 val warning : string -> unit;;
 
 (* 

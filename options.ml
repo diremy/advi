@@ -41,14 +41,14 @@ let debug option_name message =
   add option_name (Arg.Set r) ("\t" ^ message);
   make_debug r;;
 
-(* Some global options *)
-
 (* To print debugging messages. *)
 let debug_endline =
   let f = debug "--debug" "General debug" in
   fun s -> ignore (f s);;
 
 Misc.forward_debug_endline := debug_endline;;
+
+(* Some global options *)
 
 let pson = 
   if Config.have_gs then
@@ -65,6 +65,14 @@ let set_global_display_mode b =
 add "-fg"
  (Arg.Unit (fun () -> set_global_display_mode true))
  "\tDraw in the foreground";;
+
+add "-w"
+ (Arg.String
+    (function
+     | "a" -> Misc.set_warnings false
+     | "A" -> Misc.set_warnings true
+     | s -> raise (Arg.Bad (Printf.sprintf "-w %s is unknown" s))))
+ "STRING\tA/a enable/disable all warnings";;
 
 (* Command line options *)
 

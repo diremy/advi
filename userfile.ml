@@ -85,7 +85,7 @@ let prepare_file file =
       Misc.debug_endline "done"
     with
     | Unix.Unix_error (e, _, _) ->
-	prerr_endline (Unix.error_message e)
+	Misc.warning (Unix.error_message e)
     end
 ;;
 
