@@ -492,10 +492,30 @@ had been typed in a shell.
 in the future this should use Mine man Mailcap to find the type of the
 file and the proper previewer for that file.
 
+For the time being, the different viewer commands can be set using an
+option on the command line (or including the same option in a
+\verb".advirc" file).
+
+For instance, you can compare the rendering of \ActiveDVI's manual
+
+\begin{itemize}
+
+\item in PDF, viewing {\tt ../doc/manual.pdf} with the
+\hyperref{../doc/manual.pdf}{}{}{viewer for PDF files} (by default
+{\tt xpdf}),
+\item in PostScript, viewing {\tt ../doc/manual.ps} with the
+\hyperref{../doc/manual.ps}{}{}{\tt viewer for PostScript files} (by
+default {\tt gv}),
+\item in DVI \hyperref{../doc/manual.dvi}{}{}{as rendered by
+\ActiveDVI}.
+
+\end{itemize}
+
+
 \item A warning is emitted on standard error (Unix {\tt stderr}), if
 the file extension is not recognized:
 
-\hyperref{../tex/advi.sty}{}{}{\tt ../tex/advi.sty}
+\hyperref{bad-talk.ppt}{}{}{\tt bad-talk.ptt}
 
 or the file is non-existent:
 
