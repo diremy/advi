@@ -48,6 +48,7 @@ Reference manual
 various special effects can easily be incorporated to the presentation,
 via a companion \doctt{advi} {\LaTeX} package. 
 
+\bigskip
 {\ActiveDVI} is copyright \copyright\space 2000, 2001, 2002 INRIA
 and distributed under the Gnu Library General Public License ---see the LGPL
 file included in the distribution.
@@ -57,7 +58,7 @@ file included in the distribution.
 \vfill
  \section* {Contributors}
 
-The core of Active DVI is the plain DVI previewer, which was written by
+The core of Active DVI is the plain DVI previewer, written by
 Alexandre~Miquel. The other main implementors are Jun~Furuse,
 Didier~R{\'{e}}my, and Pierre~Weis. Other contributors are Didier~Le~Botlan,  
 Roberto~Di~Cosmo, Xavier~Leroy, and Alan~Schmitt. 
@@ -74,46 +75,85 @@ Roberto~Di~Cosmo, Xavier~Leroy, and Alan~Schmitt.
 \paragraph {\bf Warning!}
 
 {\ActiveDVI} may execute programs and commands embedded into the DVI file.
-To be safe, you should run \doctt{advi} with \doctt{-safer} option, 
-will inhibits the execution of embedded applications. 
-This applies in particular if you choose {\ActiveDVI} as your default 
-{\tt meta-mail} previewer for the {\tt application/x-dvi} mime-type . 
+Hence, when playing a DVI file from an untrusted source,
+you should run \doctt{advi} with the \doctt{-safer} option, 
+that inhibits the execution of embedded applications. 
 
+This warning applies in particular if you choose {\ActiveDVI} as your default 
+{\tt meta-mail} previewer for the {\tt application/x-dvi} mime-type.
 
 \subsection {Command line options}
 
-See the command help
+\ActiveDVI~is invoked with the following command syntax
 \begin{verbatim}
-advi -help
+advi [options] dvifile
 \end{verbatim}
 
-\begin{quote}
-\verb"geometry GEOM"
-\end{quote}
+\noindentThe \verb"advi" commands recognized the following options:
 
-Geometry \verb"GEOM" is specified in pixels, using the standard format
-to specify XWindow geometries (i.e: \verb"WIDTHxHEIGHT[+XOFFSET+YOFFSET]").
+\medskip\noindent\begin{tabular}{ll}
+\verb"-help"               & Short command line options help
+\end{tabular}
 
-\begin{quote}
-\verb"-hmargin" DIMEN        Horizontal margin  (default: 1cm)
-\verb"-vmargin" DIMEN        Vertical margin    (default: 1cm)
-\verb"-fullwidth"             Adjust size to the width of the screen
-\end{quote}
+\subsubsection*{Window and display specifications}
 
-Dimensions (for options \verb"-hmargin" and \verb"-vmargin") are specified as
-numbers optionally followed by two letters representing units.
-When no units are given, dimensions are treated as numbers of pixels.
-Currently supported units are the standard TeX units as specified in
-the TeXbook (D. Knuth, Addison-Wesley, (C) 1986):
-\begin{quote}
+\medskip\noindent\begin{tabular}{ll}
+\verb"-geometry geom"      & Geometry of \ActiveDVI's window specification
+\end{tabular}
+
+Geometry \verb"geom" is specified in pixels, using the standard format
+for XWindow geometry specifications (i.e:
+\verb"WIDTHxHEIGHT[+XOFFSET+YOFFSET]").
+
+\medskip\noindent\begin{tabular}{ll}
+\verb"-fullwidth"          & Adjust the size of the window to the width of the screen
+\end{tabular}
+
+\medskip\noindent\begin{tabular}{ll}
+\verb"-nomargins"          & Cancel horizontal and vertical margins \\
+\verb"-hmargin dimen"      & Horizontal margin specification (default: 1cm) \\
+\verb"-vmargin dimen"      & Vertical margin specification   (default: 1cm) \\
+\end{tabular}
+
+Dimensions are specified as numbers optionally followed by two letters
+representing units. When no units are given, dimensions are treated
+as numbers of pixels. Currently supported units are the standard TeX
+units as specified in the TeXbook (D. Knuth, Addison-Wesley, (C)
+1986):
  `pt' (point), `pc' (pica), `in' (inch), `bp' (big point),
  `cm' (centimeter), `mm' (millimeter), `dd' (didot point),
  `cc' (cicero) and `sp' (scaled point).
-\end{quote}
 Note that dimensions are specified w.r.t the original TeX document,
 and do not correspond to what is actually shown on the screen, which
 can be displayed at a different resolution than specified in the
 original TeX source.
+
+\medskip\noindent\begin{tabular}{ll}
+\verb"-crop"               & Crop the window to the best size (default) \\
+\verb"-nocrop"             & Disable cropping
+\end{tabular}
+
+\subsubsection*{Helpers specification}
+
+\medskip\noindent\begin{tabular}{ll}
+\verb"-pager" & \\
+\verb"-browser" & \\
+\end{tabular}
+
+\subsubsection*{Debugging options}
+
+\medskip\noindent\begin{tabular}{ll}
+\verb"--debug" & \\
+\verb"--debug_pages" & \\
+\verb"--show_ps" & \\
+\verb"--verbose_image_access" & \\
+\end{tabular}
+
+\subsubsection*{Rendering options}
+
+\medskip\noindent\begin{tabular}{ll}
+\verb"-A" & Set Postscript antialiasing \\
+\end{tabular}
 
 \subsection {Cut and paste}
 
@@ -280,11 +320,11 @@ background will be used for the remaining pages of the presentation
 (otherwise the presenter resets background options at each new page).
 
 Background images can be lighten by specifying an alpha value (a
-floating point number between 0 and 1) that mesures the melting
-between the background color and the image.
+floating point number between 0 and 1) that mesures the mixing
+between the color of the background and the image.
 
-Background images can also be blended, meaning specifying the
-algorithm that superposes the image to the background.
+Background images can also be blended, meaning that you can choose the
+algorithm that surimposes the image to the background.
 
 \medskip\noindent
 \docdef \advibg \doctt {[global]}\docarg{key=value list}
