@@ -558,7 +558,7 @@ let exec_xref link =
         if Sys.file_exists filename then
           begin
             if Misc.has_suffix ".dvi"  filename then
-              call (String.concat " " ("advi" :: arguments @ [ filename ]))
+              call (String.concat " " (Sys.argv.(0) :: arguments @ [ filename ]))
             else if Misc.has_suffix ".txt" filename ||
                     Misc.has_suffix ".tex" filename then
               call ("xterm -e less " ^ filename)
@@ -888,7 +888,8 @@ let scale n st =
           | Plus x -> x
           | Minus y -> - y in
         let pid = Misc.fork_process
-            (Printf.sprintf "advi -g %dx%d %s"
+            (Printf.sprintf "%s -g %dx%d %s"
+	       Sys.argv.(0)
                attr.geom.width
                attr.geom.height
                Config.splash_screen) in
