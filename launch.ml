@@ -71,35 +71,6 @@ Options.add
     (fun () -> set_policy Ask))
   "\tAsk mode: ask confirmation before launching an external application";;
 
-(* Support for white run via -n option *)
-
-let whiterun_commands = ref []
-and whiterun_flag = ref false;;
-
-let whiterun () = !whiterun_flag;;
-
-let add_whiterun_command command =
-  whiterun_commands := command::!whiterun_commands;;
-let dump_whiterun_commands () =
-  let unique l =
-    List.fold_right
-      (fun c acc ->
-	match acc with [] -> [c]
-	| c' :: r as cl -> if c = c' then cl else c :: cl)
-      (List.sort compare l) [] in
-  let comms = unique !whiterun_commands in
-  List.iter (fun c -> prerr_endline c) comms;;
-
-Options.add 
-    "-n"
-    (Arg.Unit (fun () -> whiterun_flag := true))
-    "\tEchoes commands, but does not execute them.";;
-
-
-let paranoid =
-  Options.flag false "-safer"
-    "\tSafer mode: external applications are never launched";;
-
 let cannot_execute_command command_invocation =
     Misc.warning
       (Printf.sprintf
@@ -141,3 +112,28 @@ let fork_process command_invocation =
 	  exit 127
     end;
   pid;;
+
+(* Support for white run via -n option *)
+
+let whiterun_commands = ref []
+and whiterun_flag = ref false;;
+
+let whiterun () = !whiterun_flag;;
+
+let add_whiterun_command command =
+  whiterun_commands := command :: !whiterun_commands;;
+
+let dump_whiterun_commands () =
+  let unique l =
+    List.fold_right
+      (fun c acc ->
+	match acc with [] -> [c]
+	| c' :: r as cl -> if c = c' then cl else c :: cl)
+      (List.sort compare l) [] in
+  let comms = unique !whiterun_commands in
+  List.iter (fun c -> prerr_endline c) comms;;
+
+Options.add 
+  "-n"
+  (Arg.Unit (fun () -> whiterun_flag := true))
+  "\tEchoes commands, but does not execute them.";;
