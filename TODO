@@ -4,6 +4,8 @@ BEFORE RELEASE:
  * Fixer les KNOWN BUGS
  ==> fait
 
+ * Never add new KNOWN BUGS until the release 
+
  * compléter manual.tex (la plupart des morceaux manquants existent mais
    sont dispersés)
  ==> en cours ...
