@@ -82,16 +82,20 @@
 \define@key {bubble} {p}  {\def \bbb@col {@{}p{#1}@{}}}
 \define@key {bubble} {P}  {\def \bbb@col {@{}>{$}p{#1}<{$}@{}}}
 \define@key {bubble} {col}{\def \bbb@col {#1}}
+\def \bbb@from {bbb@from}
+\def \bbb@to {bbb@to}
+\define@key {bubble} {from}[bbb@from]{\edef \bbb@from {#1}}
+\define@key {bubble} {to}[bbb@to]{\edef \bbb@to {#1}}
 
 \newcommand {\BubblePsArc}[2]%
   {{\psset{linestyle=solid,linewidth=2pt}%
-   \ncarc [arcangleA=-0,arcangleB=-3]{#1}{bbb@to}%
-   \ncarc [arcangleA=-0,arcangleB=-2]{#1}{bbb@to}%
-   \ncarc [arcangleA=-0,arcangleB=-1]{#1}{bbb@to}%
-   \ncarc [arcangleA=-0,arcangleB=0]{#1}{bbb@to}%
-   \ncarc [arcangleA=-0,arcangleB=1]{#1}{bbb@to}%
-   \ncarc [arcangleA=-0,arcangleB=2]{#1}{bbb@to}%
-   \ncarc [arcangleA=-0,arcangleB=3]{#1}{bbb@to}}}
+   \ncarc [arcangleA=-0,arcangleB=-3]{#1}{#2}%
+   \ncarc [arcangleA=-0,arcangleB=-2]{#1}{#2}%
+   \ncarc [arcangleA=-0,arcangleB=-1]{#1}{#2}%
+   \ncarc [arcangleA=-0,arcangleB=0]{#1}{#2}%
+   \ncarc [arcangleA=-0,arcangleB=1]{#1}{#2}%
+   \ncarc [arcangleA=-0,arcangleB=2]{#1}{#2}%
+   \ncarc [arcangleA=-0,arcangleB=3]{#1}{#2}}}
 
 \newcommand {\bbb@}[2][]{%
    \bgroup
@@ -118,7 +122,7 @@
 \ifbbb@tricks
 
 \let \bbb@set \psset
-\def \bbb@node {\Rnode {bbb@from}}
+\def \bbb@node {\Rnode {\bbb@from}}
 \def \bbb@shapenode {\bbb@ovalnode}
 \def \bbb@ovalnode {\ovalnode[framesep=0pt]}
 \def \bbb@rectnode #1#2{\Rnode{#1}{\psframebox{#2}}}
@@ -128,8 +132,8 @@
    \bbb@dima #2\bbb@unit \ifdim \bbb@dima<0em \@tempdimb -1\@tempdimc\fi
    \raise \@tempdimb \hb@xt@ \z@ 
        {\kern -0.5\@tempdima
-        \rput (#1,#2){\bbb@shapenode {bbb@to}{#3}}%
-        \BubblePsArc{bbb@from}{bbb@to}%
+        \rput (#1,#2){\bbb@shapenode {\bbb@to}{#3}}%
+        \BubblePsArc{\bbb@from}{\bbb@to}%
         \hss}%
 }
 

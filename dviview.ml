@@ -405,8 +405,11 @@ let compatible st st' =
   st.base_dpi = st'.base_dpi &&
   st.dvi_width = st'.dvi_width &&
   st.dvi_height = st'.dvi_height && *)
+(*
   st.size_x = st'.size_x &&
   st.size_y = st'.size_y
+*)
+ true
 ;;
 
 let set_bbox st =
@@ -1459,6 +1462,10 @@ let main_loop mastername clients =
       if changed st then reload false st;
       idraw st;
       (* num is the current number entered by keyboard *)
+      (*
+      Printf.eprintf "%s\n%!"
+        (match st.duplex with  Client _ -> "Client" | Master _ -> "Master "
+      | Alone -> "Alone"); *)
       try while true do
         st.num <- st.next_num;
         st.next_num <- 0;

@@ -36,7 +36,8 @@
 \newcommand {\advi@annot@text}[2][]{%
   \global \advance \advi@c@annot by 1%
   \leavevmode
-  \bbb@[#1,anchor=\advi@@anchor,bubble=\advi@@bubble]%
+  \bbb@[#1,from=bbb@from\the\advi@c@annot,to=bbb@to\the\advi@c@annot,%
+        anchor=\advi@@anchor,bubble=\advi@@bubble]%
        {\advi@anchor{advi@annot\the\advi@c@annot}{#2}}}
 
 %%% advi ignore -> footnotes
