@@ -92,6 +92,31 @@ box where you want to.</I>
 <DT><STRONG>How to get online help for Active-DVI keys ?</STRONG>
  <DD>Answer: <I>Just press <CODE>?</CODE> in the Active-DVI window.</I>
 
+<DT><STRONG>How to get examples of talks ?</STRONG>
+ <DD>Answer: <I>Look in the distribution, sub-directory
+<CODE>examples</CODE>. The sub-directories are
+<CODE>basics</CODE> (from simple to moderately advanced style effects)
+<CODE>prosper</CODE> (two presentations in directories <CODE>LL</CODE>,
+and <CODE>Join</CODE>), and <CODE>seminar</CODE> (one example).
+You may also consider the sub-directory
+<CODE>test</CODE> of the source main directory and look at the
+various <CODE>*.tex</CODE> files. Just type<CODE>make</CODE> in any of those
+sub-directories to build the corresponding DVI presentations.</I>
+
+<DT><STRONG>How to ensure safety, since unknown applications can be launched
+from the DVI file that I am previewing ?</STRONG>
+ <DD>Answer: <I>Active-DVI's  default behavior is not to automatically
+launch embedded applications: when a presentation attempt to launch an
+application, the presentation is stopped and a dialog box appear to
+tell you the name of the application and ask you for confirmation
+before launching.</I>
+
+<DT><STRONG>How do I know in advance the set of applications that a
+DVI file can launch ?</STRONG>
+ <DD>Answer: <I>Just launch Active-DVI the <CODE>-n</CODE> option.
+<CODE>advi -n file.dvi</CODE> will analyse the file <CODE>file.dvi</CODE>
+and print out the list of embedded commands it contains.</I>
+
 <DT><STRONG>How to print my slides for real on paper or slides for
 a retro-projector ?</STRONG>
  <DD>Answer: <I>Easy. Just use the <CODE>ignore</CODE> option of the
@@ -111,17 +136,6 @@ truth is: we worked hard such that the <CODE>ignore</CODE> option of
 <CODE>advi.sty</CODE> does a good job; however, it is clear that the
 Active-DVI style can just do its best to perform a task that
 cannot be done perfectly.</I>
-
-<DT><STRONG>How to get examples of talks ?</STRONG>
- <DD>Answer: <I>Look in the distribution, sub-directory
-<CODE>examples</CODE>. The sub-directories are
-<CODE>basics</CODE> (from simple to moderately advanced style effects)
-<CODE>prosper</CODE> (two presentations in directories <CODE>LL</CODE>,
-and <CODE>Join</CODE>), and <CODE>seminar</CODE> (one example).
-You may also consider the sub-directory
-<CODE>test</CODE> of the source main directory and look at the
-various <CODE>*.tex</CODE> files. Just type<CODE>make</CODE> in any of those
-sub-directories to build the corresponding DVI presentations.</I>
 
 <DT><STRONG>How do I write on my slide during the presentation ?</STRONG>
  <DD>Answer: <I>Just type <CODE>s</CODE> to write text and

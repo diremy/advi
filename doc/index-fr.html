@@ -111,7 +111,34 @@ vous le voulez.</I>
 
 <DT><STRONG>Comment savoir quelles sont les clefs Active-DVI
 disponibles pendant la présentation ?</STRONG>
- <DD>Answer: <I>Tapez <CODE>?</CODE> dans la fenêtre Active-DVI.</I>
+ <DD>Réponse: <I>Tapez <CODE>?</CODE> dans la fenêtre Active-DVI.</I>
+
+<DT><STRONG>Comment avoir des exemples de présentations ?</STRONG>
+ <DD>Réponse: <I>Regardez dans la distribution, sous-répertoire
+<CODE>examples</CODE>. Les sous-répertoires sont
+<CODE>basics</CODE> (de simple à modéremment avancé)
+<CODE>prosper</CODE> (deux présentations dans les répertoires <CODE>LL</CODE>
+et <CODE>Join</CODE>)
+<CODE>seminar</CODE> (un exemple).
+Vous pouvez aussi explorer le sous-répertoire
+<CODE>test</CODE> du répertoire principal de la distribution et jetter
+un coup d'oeil aux divers fichiers <CODE>*.tex</CODE> qui y sont. 
+Dans chacun de ces sous-répertoires lancez la commande <CODE>make</CODE>
+pour construire les différentes présentations.</I>
+
+<DT><STRONG>Comment assurer la sécurité des présentations si l'on peut
+lancer n'importe quel programme depuis un fichier DVI ?</STRONG>
+ <DD>Réponse: <I>Par défaut Active-DVI ne lance pas automatiquement
+les applications embarquées dans les fichiers DVI. Au moment du
+lancement d'une application embarquée, la présentation s'arrête et une
+boîte de dialogue vous indique quelle application va être lancée puis
+vous demande confirmation avant d'effectivement exécuter le code.</I>
+
+<DT><STRONG>Comment savoir à l'avance quelles applications sont
+lancées par un fichier DVI ?</STRONG>
+ <DD>Réponse: <I>Tapez <CODE>advi -n fichier.dvi</CODE>. Active-DVI ne
+se lance pas mais analyse le fichier pour trouver toutes les
+applications susceptibles d'être appelées durant la présentation.</I>
 
 <DT><STRONG>Comment imprimer mes transparents ``en vrai'', sur du
 papier ou des transparents pour retro-projecteur ?</STRONG>
@@ -134,19 +161,6 @@ fait, nous avons travaillé de notre mieux pour que l'option
 <CODE>ignore</CODE> de <CODE>advi.sty</CODE> fasse un bon travail;
 il n'en demeure pas moins, que le style fait de son mieux pour remplir
 un contrat impossible.</I> 
-
-<DT><STRONG>Comment copier des exemples de présentations ?</STRONG>
- <DD>Réponse: <I>Regardez dans la distribution, sous-répertoire
-<CODE>examples</CODE>. Les sous-répertoires sont
-<CODE>basics</CODE> (de simple à modéremment avancé)
-<CODE>prosper</CODE> (deux présentations dans les répertoires <CODE>LL</CODE>
-et <CODE>Join</CODE>)
-<CODE>seminar</CODE> (un exemple).
-Vous pouvez aussi explorer le sous-répertoire
-<CODE>test</CODE> du répertoire principal de la distribution et jetter
-un coup d'oeil aux divers fichiers <CODE>*.tex</CODE> qui y sont. 
-Dans chacun de ces sous-répertoires lancez la commande <CODE>make</CODE>
-pour construire les différentes présentations.</I>
 
 <DT><STRONG>Comment écrire sur un transparent au cours de la présentation ?</STRONG>
  <DD>Réponse: <I>Tapez <CODE>s</CODE> pour écrire du texte et
