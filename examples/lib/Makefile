@@ -25,7 +25,7 @@ all:: $(DVIFILES)
 	dvipdfm -o $@ $*.dvi
 	rm $*.dvi
 
-clean:
+clean::
 	rm -f $(FILES:%.tex=%.{aux,log,dvi,ps,pdf})
 
-.SUFFIXES: .tex .dvi .advi .ps .pdf
+.SUFFIXES: .tex .dvi .advi .ps .eps .ftex .gz .pdf
