@@ -60,16 +60,17 @@ This is now being generalised to an open framework to describe
 arbitrary paths for the box to follow in the animation.\\
 For example, the first effect is obtained via:
 
-\verb"\advitransbox{path,steps=10000,startx=500,starty=1000,stopx=10,stopy=10,genpath=line}"
+\verb"\advitransbox{path,steps=100,startx=500,starty=1000,stopx=10,stopy=10,genpath=line}"
 
-but we should make sure that, if start or stop is omitted, it is replaced by the actual coordinates
-of the box in the dvi screen, or we could add a special keyword to be parsed as boxx, boxy to be used
-in start and stop directives.
-
+Notice that, if start or stop is omitted, it is replaced by the actual coordinates
+of the box in the dvi screen, so that the effect for the \textcolor{yellow}{Yellow} line
+lebow can be obtained by simply writing:\\
+\verb"\advitransbox{path,steps=100,startx=500,starty=1000,genpath=line}{path}"
 {
 \Huge
 \begin{itemize}
 \item \textcolor{red}{From \advitransbox{path,steps=100,startx=500,starty=1000,stopx=10,stopy=10,genpath=line}{path}}
+\item \textcolor{yellow}{From \advitransbox{path,steps=100,startx=500,starty=1000,genpath=line}{path}}
 \item \textcolor{green}{From \advitransbox{slide,from=left}{left}}
 \item \textcolor{blue}{From \advitransbox{slide,from=top}{top}}
 \item \textcolor{cyan}{From \advitransbox{slide,from=bottom}{bottom}}
@@ -79,11 +80,8 @@ in start and stop directives.
 \adviwait
 \paragraph {Note}
 The command is robust:
-
-$$
+\[
 \advitransbox{slide,from=down}
    {it may include \verb"verbatim" material}
-$$
-
-\newpage
+\]
 \end{document}

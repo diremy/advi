@@ -22,6 +22,8 @@ let prev_geom = ref None;;
 
 let init_sprite () = prev_geom := None;;
 
+(* This function performs f on the screen memory only,*)
+(* not affecting the backing store                    *) 
 let do_on_screen f x =
   Graphics.remember_mode false;
   GraphicsY11.display_mode true;
@@ -239,6 +241,13 @@ let path delay steps genpath start stop =
 
 let get_steps default = function Some x -> x | None -> default;;
 
+let pathelem_inst (optx,opty,opts,optr) (x,y,s,r) =
+  let l = 
+    List.map
+      (function (Some v,_) -> v | (None,v) -> (prerr_endline (Printf.sprintf "%f <\n" v);v))
+      (List.combine [optx;opty;opts;optr] [x;y;s;r])
+  in match l with [actx;acty;acts;actr] -> (actx,acty,acts,actr);;
+
 let synchronize_transition () =
   if !current_transition <> TransNone then
   let w = Graphics.size_x () and h = Graphics.size_y () in
@@ -251,7 +260,9 @@ let synchronize_transition () =
     | TransBlock (steps, from) ->
         block 0.0 (get_steps 5000 steps) from (w, h) (0, 0)
     | TransPath (steps, genpath, start, stop) ->
-        path 0.0 (get_steps 20 steps) genpath start stop  
+        path 0.0 (get_steps 20 steps) genpath
+	  (pathelem_inst start (float w,float h,1.0,0.0))
+	  (pathelem_inst stop  (0.0,0.0,1.0,0.0))
     | TransNone -> assert false
   ) ();;
 
@@ -312,7 +323,10 @@ let box_transition trans oldimg newimg x y width height =
   | TransPath (steps, genpath, start, stop) ->
       let steps = get_steps 50 steps in
       do_on_screen (fun stop ->
-        move_along_path newimg width height 0.01 steps genpath start stop) stop
+        move_along_path newimg width height 0.01 steps genpath 
+          (pathelem_inst start (float x,float y,1.0,0.0))
+          (pathelem_inst stop  (float x,float y,1.0,0.0))
+	  ) stop
   | TransBlock (step, from) ->
       let step = get_steps 50 step in
       do_on_screen (fun () ->

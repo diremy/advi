@@ -22,7 +22,7 @@ type direction =
    | DirCenter | DirNone
 ;;
 
-type pathelem = float * float * float * float
+type pathelem = float option * float option * float option * float option
 ;;
 
 type t =

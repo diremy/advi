@@ -392,6 +392,10 @@ let parse_float s =
  try float_of_string s
  with _ -> failwith ("advi: cannot read a floating number in \"" ^ s ^ "\"");;
 
+let option_parse_float s r =
+  try Some(parse_float (List.assoc s r))
+  with _ -> None;;
+
 let alpha_special st s =
   match split_string s 0 with
   | ["advi:"; "alpha"; "push"; arg] ->
@@ -585,14 +589,10 @@ let parse_transition dir mode record =
       "spiral"
   in
   let parse_pathelem s =
-    try
-      (parse_float (List.assoc (s ^ "x") record),
-       parse_float (List.assoc (s ^ "y") record),
-       1.0,
-       0.0)
-    with _ ->
-      warning ("special: trans push: pathelem " ^ s ^ " not found ");
-      (0.0, 0.0, 1.0, 0.0)
+      (option_parse_float (s ^ "x") record,
+       option_parse_float (s ^ "y") record,
+       None,
+       None) (* to complete with parsed scale and rotation *)
   in
   let parse_steps =
     try
