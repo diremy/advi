@@ -1272,12 +1272,9 @@ let header_special st s = ();;
 
 (* Should check that a pause is not in the middle of some html code *)
 let open_html st link tag =
-  let x = st.x_origin + Misc.round (st.conv *. float st.h)
-  and y = st.y_origin + Misc.round (st.conv *. float st.v) in
-  begin match st.html with
+  match st.html with
   | Some (t, k) -> st.html <- Some (t, succ k)
-  | None -> st.html <- Some (tag (unquote link), 0)
-  end;;
+  | None -> st.html <- Some (tag (unquote link), 0);;
 
 let close_html st =
   match st.html with
@@ -1288,18 +1285,18 @@ let close_html st =
       st.html <- None;
       st.draw_html <- []
   | Some (_, k) -> assert false
-  | None -> warning ("Closing html tag that is not open");;
+  | None -> warning ("Closing html tag that was not open");;
 
 let html_special st html =
   if has_prefix "<A " html || has_prefix "<a " html then
     let stripped = String.sub html 3 (String.length html - 4) in
     let fields = split_record stripped in
     begin match fields with
-    | (("name" | "NAME"), link) :: _ ->
+    | ("name", link) :: _ ->
         open_html st link (fun x -> Dev.H.Name x)
-    | (("href" | "HREF"), link) :: _ ->
+    | ("href", link) :: _ ->
         open_html st link (fun x -> Dev.H.Href x)
-    | (("advi" | "hdvi" | "ADVI" | "HDVI" as kind), link) :: rest ->
+    | ("advi" | "hdvi", link) :: rest ->
         let mode =
           if kind = "advi" then Dev.H.Over else Dev.H.Click_down in
         let style =
@@ -1325,7 +1322,7 @@ let html_special st html =
              Dev.H.color = color;
              Dev.H.area = None} in
         open_html st link advi
-    | _ -> warning ("Incorrect html suffix" ^ html)
+    | _ -> warning ("Unknown html suffix " ^ html)
     end else
   if has_prefix "</A>" html || has_prefix "</a>" html then close_html st else
   warning ("Unknown html suffix " ^ html);;
@@ -1401,8 +1398,12 @@ let scan_special status (headers, xrefs, lastline as args) pagenum s =
 (*
   if has_prefix "src:" s then scan_special_line args s 4 else
 *)
-  if has_prefix "html:<A name=\"" s || has_prefix "html:<a name=\"" s then
-    scan_special_html args pagenum s;;
+  (* We must test both case <A and <a, since some latex packages
+     output the upper case variant of the anchor indication,
+     as opposed to package hyperref, and all the Active-DVI
+     defined anchor generating macros. *)
+  if has_prefix "html:<A name=\"" s || has_prefix "html:<a name=\"" s
+  then scan_special_html args pagenum s;;
 
 (* Scan a page calling function scan_special when seeing a special and
    the function otherwise for other DVI stuff. *)
@@ -1544,8 +1545,7 @@ let newpage h st magdpi x y =
   if st.status.Cdvi.hasps then 
     try Dev.newpage h st.sdpi magdpi x y
     with Dev.GS -> st.status.Cdvi.hasps <- false
-  else Dev.clearps()
-;;
+  else Dev.clearps ();;
 
 let find_prologues l =
   let l = List.rev l in
@@ -1580,8 +1580,8 @@ let render_step cdvi num ?trans ?chst dpi xorig yorig =
     if !headers <> [] then Dev.add_headers (find_prologues !headers);
     s in
  (* Didier: should it be ``Gs.get_do_ps ()'' instead of ``false''? 
-    and why has Dvi been chaned to Cdvi *)
-  (* --Why should we forget about the status? 
+    and why has Dvi been changed to Cdvi ?
+    --Why should we forget about the status? 
   status.Cdvi.hasps <- Gs.get_do_ps ();
   *)
   let orid = function Some f -> f | None -> fun x->x in
@@ -1610,10 +1610,9 @@ let render_step cdvi num ?trans ?chst dpi xorig yorig =
       draw_html = [];
       checkpoint = 0;
     } in
-  (* if st.status.Cdvi.hasps then ---now check by newpage *)
   newpage [] st (mag *. dpi) xorig yorig;
-  setup_bkgd st.status; (* apply the background preferences in Dev *)
-  Dev.clear_dev ();     (* and redraw the background               *)
+  setup_bkgd st.status; (* Apply the background preferences in Dev, *)
+  Dev.clear_dev ();     (* and redraw the background.               *)
   Dev.set_color st.color;
   Dev.set_transition st.transition;
   st.checkpoint <- 0;
