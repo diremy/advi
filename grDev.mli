@@ -10,6 +10,12 @@ class dvidevice : Ageometry.t -> object
   method hide : unit -> unit
 
   method clear : unit -> unit
+
+  method id : int
+      
+  method set_init : (unit -> unit) -> unit
 end
 
 val dvidevice : Ageometry.t -> dvidevice
+
+val destroy_all : unit -> unit

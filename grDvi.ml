@@ -121,8 +121,12 @@ class dviwidget w =
   let window = GtkBase.Widget.window w in
   let draw = new dviDbuffer window in
   let cursor = new GrCursor.t window in
+  let subwin_dummy = new GrSubwindow.dummy in
   object (self)
-    inherit dwidget w
+    inherit dwidget w as super
+
+    val mutable subwindow = subwin_dummy
+    val mutable embed = new GrEmbed.t subwin_dummy
 
     method draw = draw
 
@@ -134,7 +138,8 @@ class dviwidget w =
       self#misc#set_geometry ~width:w ~height:h ()
       
     method cursor = cursor
-    method subwindow = new GrSubwindow.t (self :> GPack.fixed)
+    method subwindow = subwindow
+    method embed = embed
 
     val mutable mode = (`NORMAL : mode)
     method mode = mode
@@ -162,6 +167,12 @@ class dviwidget w =
       GrSleep.f ~sec ~cont: (fun s ->
 	self#set_mode `NORMAL;
 	cont s)
+
+    method destroy () = embed#destroy (); super#destroy ()
+
+    initializer
+      subwindow <- new GrSubwindow.t (self :> GPack.fixed);
+      embed <- new GrEmbed.t subwindow
   end
 ;;
 

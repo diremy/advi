@@ -1,30 +1,30 @@
-(***********************************************************************)
-(*                                                                     *)
-(*                             Active-DVI                              *)
-(*                                                                     *)
-(*                   Projet Cristal, INRIA Rocquencourt                *)
-(*                                                                     *)
-(*  Copyright 2002 Institut National de Recherche en Informatique et   *)
-(*  en Automatique.  All rights reserved.  This file is distributed    *)
-(*  under the terms of the GNU Lesser General Public License.          *)
-(*                                                                     *)
-(*  Jun Furuse, Didier Rémy and Pierre Weis.                           *)
-(*  Contributions by Roberto Di Cosmo, Didier Le Botlan,               *)
-(*  Xavier Leroy, and Alan Schmitt.                                    *)
-(*                                                                     *)
-(*  Based on Mldvi by Alexandre Miquel.                                *)
-(***********************************************************************)
+class state : DrDvi.state -> DrColor.state -> DrProc.state -> DrTpic.state ->
+object
+  method dvi : DrDvi.state
+  method color : DrColor.state
+  method proc : DrProc.state
+  method tpic : DrTpic.state
+end
+;;
 
-exception Pause;;
-exception Wait of float
-type cooked_dvi;;
-val toggle_active : unit -> unit;;
-val cook_dvi : Dvi.t -> cooked_dvi;;
-val render_step : GrDev.dvidevice ->
-    cooked_dvi -> int -> (* YET ?trans:Transitions.direction -> *) 
-         (* YET ?chst:(Dvi.known_status -> Dvi.known_status) -> *)
-      float -> int -> int -> (unit -> bool);;
-val unfreeze_fonts : cooked_dvi -> unit;;
-val unfreeze_glyphs : cooked_dvi -> float -> unit;;
-val scan_special_pages : cooked_dvi -> int -> unit;;
-val clear_symbols : unit -> unit;;
+(*
+val clear_symbols : state -> unit
+*)
+(*
+val add_char : state -> int -> int -> int -> DrDvi.Symbol.glyph -> unit
+val add_line : state -> int * string option -> unit
+val add_blank : int -> state -> int -> unit
+val add_rule : state -> int -> int -> int -> int -> unit
+*)
+
+val add_special : string -> (state -> string -> unit) -> unit
+val special : state -> string -> unit
+
+val eval_dvi_command : state -> Dvi.command -> unit
+val eval_command : state -> Dvi.command -> unit
+val render_step :
+  GrDev.dvidevice ->
+  DrDvi.cooked_dvi -> int -> float -> int -> int -> unit -> bool
+
+val scan_special_pages : 'a -> 'b -> unit
+val toggle_active : unit -> unit

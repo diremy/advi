@@ -117,7 +117,7 @@ type state = {
     (* DVI attributes *)
     filename : string;
     mutable dvi : Dvi.t;
-    mutable cdvi : Driver.cooked_dvi;
+    mutable cdvi : DrDvi.cooked_dvi;
     mutable num_pages : int;
     (* Page layout *)
     mutable base_dpi : float;
@@ -279,7 +279,7 @@ let init device filename =
     | Sys_error _ -> raise (Error ("cannot open `" ^ filename ^ "'"))
     | Dvi.Error s -> raise (Error (filename ^ ": " ^ s))
     | _ -> raise (Error ("error while loading `" ^ filename ^ "'")) in
-  let cdvi = Driver.cook_dvi dvi in
+  let cdvi = DrDvi.cook_dvi dvi in
   let int = 0 in
   let float = 0. in
   let last_modified =
@@ -449,11 +449,11 @@ let goto_next_pause n st =
               st.pause_number <- st.pause_number + 1;
 	      raise Exit
             with
-            | Driver.Wait sec ->
+            | DrWait.Wait sec ->
                 synchronize st;
 		st.device#sleep ~breakable: true ~sec 
 		  ~cont: (fun _ -> aux n st)
-            | Driver.Pause ->
+            | DrWait.Pause ->
                 st.pause_number <- st.pause_number + 1;
                 aux (pred n) st
             end;
@@ -479,7 +479,7 @@ let redraw (* ?trans ?chst *) st =
 (*
     Grdev.continue ();
 *)
-    Driver.clear_symbols ();
+    (* Driver.clear_symbols st; ??? *)
     if !bounding_box then draw_bounding_box st;
     let f =
       Driver.render_step st.device st.cdvi st.page_number (* ?trans ?chst *)
@@ -489,11 +489,11 @@ let redraw (* ?trans ?chst *) st =
       let current_pause = ref 0 in
       while
         try f () with
-        | Driver.Wait sec -> true 
-        | Driver.Pause ->
+        | DrWait.Wait sec -> true 
+        | DrWait.Pause ->
             if !current_pause = st.pause_number then begin
 	      st.cont <- Some f;
-	      raise Driver.Pause
+	      raise DrWait.Pause
 	    end else begin incr current_pause; true end
       do () done;
       if !current_pause < st.pause_number
@@ -502,14 +502,14 @@ let redraw (* ?trans ?chst *) st =
 (*
       Transimpl.sleep := (fun _ -> true); (* always breaks *)
 *)
-      while try f () with Driver.Wait _ | Driver.Pause -> true
+      while try f () with DrWait.Wait _ | DrWait.Pause -> true
       do () done
     end
   with
 (*
   | Grdev.Stop -> st.aborted <- true
 *)
-  | Driver.Pause -> ()
+  | DrWait.Pause -> ()
   end;
   synchronize st;
   st.device#cursor#set
@@ -636,7 +636,7 @@ let show_thumbnails st r page =
 let show_toc st =
   if st.toc = None then make_toc st;
   Grdev.clear_dev();
-  Driver.clear_symbols();
+  DrDvi.clear_symbols();
   match st.toc with
     None -> ()
   | Some rolls -> 
@@ -743,7 +743,7 @@ let reload st =
   try
     st.last_modified <- reload_time st;
     let dvi = Dvi.load st.filename in
-    let cdvi = Driver.cook_dvi dvi in
+    let cdvi = DrDvi.cook_dvi dvi in
     let dvi_res = !dpi_resolution
     and mag = float dvi.Dvi.preamble.Dvi.pre_mag /. 1000.0 in
     let w_sp = dvi.Dvi.postamble.Dvi.post_width
@@ -961,9 +961,9 @@ module B =
     let exchange_page st =
       goto_page st.exchange_page st
     let unfreeze_fonts st =
-      Driver.unfreeze_fonts st.cdvi
+      Unfreeze.fonts st.cdvi
     let unfreeze_glyphs st =
-      Driver.unfreeze_glyphs st.cdvi (st.base_dpi *. st.ratio)
+      Unfreeze.glyphs st.cdvi (st.base_dpi *. st.ratio)
     let center st =
       st.ratio <- 1.0;
       st.orig_x <- (st.size_x - st.dvi_width) / 2;
@@ -1073,7 +1073,7 @@ module B =
       resize st ~dx ~dy x y;
       if b then center st
 
-    let exit st = raise Exit
+    let exit st = st.device#destroy (); raise Exit
 (*
     let switch_edit_mode st =
       Grdev.E.switch_edit_mode ();
@@ -1215,9 +1215,9 @@ bind_keys ();;
 
 let init device filename =
   let st = init device filename in
+  st.device#set_init (fun () -> redraw st);
   st.device#win#set_title ("Advi: " ^ Filename.basename filename);
   st.device#set_geometry attr.geom;
-  st.device#show ();
   let x, y = st.device#size in
   attr.geom.Ageometry.width <- x;
   attr.geom.Ageometry.height <- y;
@@ -1239,6 +1239,5 @@ let init device filename =
       |	_ -> ()
       end; true)
   in
-
-  redraw st
+  st.device#show ()
 ;;

@@ -59,6 +59,7 @@ class dviwidget : DWidget.t Gtk.obj ->
   method draw : dviDbuffer
   method cursor : GrCursor.t
   method subwindow : GrSubwindow.t
+  method embed : GrEmbed.t
 
   method mode : mode
   method set_mode : mode -> unit

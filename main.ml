@@ -103,13 +103,15 @@ let set_dvi_geometry () =
   Dviview.set_geometry !geometry
 ;;
 
-(* To quit nicely, killing all embedded processes. *)
 (*
 at_exit Gs.kill;;
-at_exit Embed.kill_all_embedded_apps;;
+*)
+
+
 (* Even in case of signal, we kill embedded processes. *)
 Sys.set_signal Sys.sigquit (Sys.Signal_handle (fun _ -> Launch.exit 0));;
 
+(*
 let main = if !Sys.interactive then interactive_main else standalone_main;;
 *)
 
@@ -138,9 +140,15 @@ let standalone_init () =
   in
   set_dvi_geometry ();
   let device = GrDev.dvidevice !geometry in
-  Dviview.init device filename;
-  device#show ()
+  Dviview.init device filename (* it shows the widget *)
 ;;
 
 standalone_init ();;
-GMain.main ();;
+
+(* To quit nicely, killing all embedded processes. *)
+at_exit GrDev.destroy_all;;
+
+try
+  GMain.main ()
+with
+| Exit -> Launch.exit 0;;

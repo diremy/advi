@@ -15,12 +15,17 @@
 (*  Based on Mldvi by Alexandre Miquel.                                *)
 (***********************************************************************)
 
-val fork_process : string -> int
+exception Error of string
 
-val exit : int -> unit 
-(* Same as [Pervasives.exit], but does not execute the functions
-   registered by [at_exit] when the exiting process is forked one. 
-   In the ADVI program, you MUST use this function instead of
-   [Pervasives.exit] !!!! *)
+type spec = {
+  filename : string;
+  width : int;
+  height : int;
+  bbox : (int * int * int * int) option;
+  antialiase : bool;
+  whitetransp : bool;
+} 
 
-val kill : signal: int -> int -> unit
+val clean_cache : unit -> unit
+
+val draw : GrDbuffer.t -> spec -> x:int -> y:int -> unit

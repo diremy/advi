@@ -10,6 +10,11 @@ let offset = function
   | Minus x -> Some (-x)
 ;;
 
+let idref = ref 0;;
+let devices = Hashtbl.create 17;;
+
+open GrEmbed;;
+
 class dvidevice ageom = 
   let win = GWindow.window ~title: "Advi" ~auto_shrink: true
       ?x: (offset ageom.xoffset) ?y: (offset ageom.yoffset) ()
@@ -22,7 +27,7 @@ class dvidevice ageom =
     GtkBase.Widget.show w;
     w
   in
-
+  let id = incr idref; !idref in
   object (self)
     inherit GrDvi.dviwidget w as super
 
@@ -41,13 +46,37 @@ class dvidevice ageom =
     method hide () = win#misc#hide ()
 
     method clear () =
+      self#embed#iter (fun proc -> 
+	match proc.mode with
+	| Sticky -> ()
+	| Persistent -> self#embed#unmap proc.name
+	| Respawn -> self#embed#kill proc.name);
       self#draw#set_display_mode !Options.global_display_mode;
       super#draw#clear ();
       Symbol.clear ()
+
+    method destroy () =
+      Hashtbl.remove devices self#id;
+      super#destroy ()
+
+    method id = id
+
+    (* this registers a callback function which is executed only once
+       when it is firstly exposed *)
+    method set_init (init : unit -> unit) =
+      let id = ref None in
+      id := Some (self#event#connect#expose ~callback: (fun _ ->
+	debug "first expose of device";
+	begin match !id with
+	| Some id -> self#misc#disconnect id
+	| None -> () end;
+	init (); true))
 end
 
 let dvidevice ageom = 
   let dev = new dvidevice ageom in
+
+  Hashtbl.add devices dev#id dev;
   ignore (dev#connect#redraw 
 	    ~callback: (fun () -> prerr_endline "redraw signal!"));
   ignore (dev#misc#connect#draw ~callback:(fun rect ->
@@ -58,4 +87,13 @@ let dvidevice ageom =
     debug "expose";
     dev#draw#synchronize (); true));
   dev
+;;
+
+let destroy_all () =
+  let ds = ref [] in
+  Hashtbl.iter (fun id dev -> ds := dev :: !ds) devices;
+  if !ds <> [] then begin
+    Misc.warning "destroy all the existing devices...";
+    List.iter (fun dev -> dev#destroy ()) !ds
+  end
 ;;

@@ -24,10 +24,10 @@ val reverse_map : ('a -> 'b) -> 'a list -> 'b list;;
 val reverse_concat : 'a list -> 'a list -> 'a list;;
 
 (* String additionals. *)
-val has_prefix : string -> file_name -> bool;;
-val has_suffix : string -> file_name -> bool;;
+val has_prefix : string -> string -> bool;;
+val has_suffix : string -> string -> bool;;
 exception Match;;
-val get_suffix : string -> file_name -> string;;
+val get_suffix : string -> string -> string;;
 val split_string : string -> (char -> bool) -> int -> string list;;
 val zap_to_char : char -> string -> string;;
 val catenate_sep : string -> string list -> string;;

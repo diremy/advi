@@ -57,21 +57,6 @@ let make_font_from_pk font name dpi =
     dpi = dpi;
     table = Table.make build }
 
-(*** Finding a given font ***)
-
-let find =
-  let htable = Hashtbl.create 257 in
-  fun fontname dpi ->
-    try Hashtbl.find htable (fontname, dpi)
-    with Not_found ->
-      try
-        let filename = Search.font_path fontname dpi in
-        let pk_font = Pkfont.load filename in
-        let font = make_font_from_pk pk_font fontname dpi in
-        Hashtbl.add htable (fontname, dpi) font;
-        font
-      with _ -> raise Not_found;;
-
 module Japanese = struct
   (* Temporal hack for Japanese DVI (of pTeX)
      This is really inefficient because we convert
@@ -228,6 +213,8 @@ module Japanese = struct
 
 end;;
 
+(*** Finding a given font ***)
+
 let find =
   let htable = Hashtbl.create 257 in
 
@@ -241,6 +228,11 @@ let find =
     try
       let filename = Search.font_path fontname dpi in
       let pk_font = Pkfont.load filename in
+
+(* TEXTURE TEST *)
+prerr_endline ("Texture " ^ filename);
+Glfont.create_texture_from_pk fontname dpi pk_font.Pkfont.defs;
+
       let font = make_font_from_pk pk_font fontname dpi in
       Hashtbl.add htable (fontname, dpi) font;
       font

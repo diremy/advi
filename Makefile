@@ -17,7 +17,7 @@
 
 include Makefile.config
 
-VERSION=1.2
+VERSION=1.9
 
 COPTIONS = -warn-error A -g
 COPTOPTIONS = -warn-error A -unsafe -inline 9
@@ -33,14 +33,17 @@ MLINCDIRS = $(CAMLIMAGESDIR) $(LABLGTKDIR)
 
 EXEC	  = advi
 
-MISCMODULES = config misc options rc userfile
-TEXMODULES = input symbol search table pkfont ttfont jfm font glyph \
-		units dimension dvi devfont
+MISCMODULES = config misc options rc userfile launch texstack
+TEXMODULES = input symbol search table pkfont ttfont jfm glfont font glyph \
+		units dimension dvi devfont special
+GLMODULES =
 GUIMODULES = ageometry dvicolor
-GTKMODULES = grMisc grDrawable grDbuffer grCursor grSubwindow \
+GTKMODULES = grMisc grDialog grDrawable grDbuffer grCursor grSubwindow grEmbed \
 		grImage grGlyph grSleep grDvi grDev
-TEXGUIMODULES = driver dviview main
-MODULES = $(MISCMODULES) $(TEXMODULES) $(GUIMODULES) $(GTKMODULES) $(TEXGUIMODULES)
+TEXGUIMODULES = drDvi drColor drWait drPsfile drEmbed \
+		drTpic drProc drSymbol drRender unfreeze driver \
+		dviview main
+MODULES = $(MISCMODULES) $(TEXMODULES) $(GLMODULES) $(GUIMODULES) $(GTKMODULES) $(TEXGUIMODULES)
 
 # 	      scratch launch \
 # 	      shot drawimage \
