@@ -41,6 +41,8 @@ PACKAGE=advi
 FILES=index.htm fra.htm eng.htm faq-fra.htm faq-eng.htm \
 screen-shots-fra.htm screen-shots-eng.htm
 
+RM=rm -f
+
 ######## This part of the Makefile should automatically handle the
 ######## generation of object files for the list $(FILES)
 
@@ -60,7 +62,7 @@ expand:
 clean: $(AUTO)
 	cd $(SRC) && $(MAKE) clean
 	cd pngs && $(MAKE) clean
-	/bin/rm -f $(FILES)
+	$(RM) $(FILES)
 
 #  Note: make auto regenerates the rules into file .Makefile.auto.
 # (handled automatically). .Makefile.auto depends upon this Makefile,
@@ -72,11 +74,11 @@ clean: $(AUTO)
 $(AUTO): MakeHTML
 
 $(AUTO):
-	/bin/rm -f $(AUTO)
+	$(RM) $(AUTO)
 	for i in $(FILES); do \
 	  j=`basename $$i .htm`; \
 	  echo $$i: $(SRC)/$(PACKAGE)-$$j.htm >> $(AUTO); \
-	  echo "	- /bin/rm -f $$j.htm; " >> $(AUTO); \
+	  echo "	- $(RM) $$j.htm; " >> $(AUTO); \
 	  echo "	cp -p $(SRC)/$(PACKAGE)-$$j.htm $$j.htm" >> $(AUTO); \
 	  echo >> $(AUTO); \
 	done

@@ -64,11 +64,14 @@ let rec split_string_quoted s start =
 
 (* "\"hello world\"" -> "hello world" *)
 let unquote s =
-  let f = if s.[0] = '"' then 1 else 0 in
-  let l =
-    if s.[String.length s - 1] = '"' then String.length s - 1 - f
-    else String.length s - f in
-  String.sub s f l;;
+  let len = String.length s in
+  if len = 0 then s else
+  let b = if s.[0] = '"' then 1 else 0 in
+  if len - b = 0 then "" else
+  let e = if s.[len - 1] = '"' then 1 else 0 in
+  let len = len - b - e in
+  if len = 0 then "" else
+  String.sub s b len;;
 
 let split_record s =
   let tokens = split_string_quoted s 0 in
@@ -1370,12 +1373,26 @@ let save_page_area_image_file_special st s =
 
 let push_events_special st s =
   Misc.debug_endline (Printf.sprintf "push_events_special %S" s);
-  match split_string s 0 with
+  match split_string_quoted s 0 with
   | ["advi:"; "pushevents"; keys] ->
-     let keys = unquote keys in
-     for i = String.length keys - 1 to 0 do Misc.push_char_event keys.[i] done
+     let push_events keys =
+       for i = String.length keys - 1 downto 0
+       do Misc.push_char_event keys.[i] done in
+     (* We scan the string as a Caml token to handle properly \ddd
+        chars. In case of error (i.e. when keys is not properly
+        enclosed between double quotes), we simply push back the
+        characters verbatim. *)
+     Misc.debug_endline (Printf.sprintf "advi_push_events %S" keys);
+     Scanf.kscanf
+       (Scanf.Scanning.from_string keys)
+       (fun _ _ ->
+          let keys = unquote keys in
+          Misc.debug_endline
+            (Printf.sprintf "advi_push_events non regular keys %S" keys);
+          push_events keys)
+       "%S" push_events
   | _ ->
-     failwith (Printf.sprintf "advi_push_events: invalid special %s" s);;
+     failwith (Printf.sprintf "advi_push_events: invalid special ``%s''" s);;
 
 (* This function is iterated on the current DVI page BEFORE
    rendering it, to gather the information contained in some

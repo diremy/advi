@@ -21,7 +21,12 @@
 type file_name = string;;
 type dir_name = string;;
 type line_number = int;;
+
 type modifiers = int;;
+type mouse_x = int;;
+type mouse_y = int;;
+type button_pressed = bool;;
+type key_pressed = bool;;
 
 (* Fatal error in advi's code. *)
 exception Fatal_error of string;;
@@ -57,22 +62,31 @@ let debug_stop s =
    prerr_endline "Ok"
   end;;
 
-(* Pushing a key (a char), with a given list of modifiers,
-   in the advi's events queue. *)
+(* Pushing events in the advi's events queue. *)
+let forward_push_char_event =
+  ref (fun (c : char) ->
+         failwith "undefined forward push_char_event");;
 let forward_push_key_event =
   ref (fun (c : char) (ms : modifiers) ->
          failwith "undefined forward push_key_event");;
+let forward_push_mouse_event =
+  ref (fun (x : mouse_x) (y : mouse_y) (b : button_pressed) ->
+         failwith "undefined forward push_mouse_event");;
+let forward_push_full_event =
+  ref (fun (c : char) (ms : modifiers) (k : key_pressed)
+           (x : mouse_x) (y : mouse_y) (b : button_pressed) ->
+         failwith "undefined forward push_full_event");;
 
-let push_key_event c ms = (!forward_push_key_event c ms: unit);;
-
-let set_forward_push_key_event f = forward_push_key_event := f;;
-
-let forward_push_char_event =
-  ref (fun (c : char) -> failwith "undefined forward push_char_event");;
-
-let push_char_event c = (!forward_push_char_event c: unit);;
+let push_char_event c = (!forward_push_char_event c : unit);;
+let push_key_event c ms = (!forward_push_key_event c ms : unit);;
+let push_mouse_event x y b = (!forward_push_mouse_event x y b : unit);;
+let push_full_event c ms k x y b =
+  (!forward_push_full_event c ms k x y b : unit);;
 
 let set_forward_push_char_event f = forward_push_char_event := f;;
+let set_forward_push_key_event f = forward_push_key_event := f;;
+let set_forward_push_mouse_event f = forward_push_mouse_event := f;;
+let set_forward_push_full_event f = forward_push_full_event := f;;
 
 (* To round properly a float to an int (round it to the nearest integer). *)
 let round_pos x = int_of_float (x +. 0.5);;

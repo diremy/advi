@@ -20,8 +20,7 @@
 # To view the demo, use ../advi demo.dvi
 include ../Makefile.config
 
-RM=/bin/rm -f
-
+#LATEX=TEXINPUTS=.:../tex:$(TEXINPUTS): latex '\def\driver{hypertex}\input'
 LATEX=TEXINPUTS=.:../tex:$(TEXINPUTS): latex
 PLATEX=TEXINPUTS=.:../tex:$(TEXINPUTS): platex
 

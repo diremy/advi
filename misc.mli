@@ -23,7 +23,12 @@ val round : float -> int;;
 type file_name = string;;
 type dir_name = string;;
 type line_number = int;;
+
 type modifiers = int;;
+type mouse_x = int;;
+type mouse_y = int;;
+type button_pressed = bool;;
+type key_pressed = bool;;
 
 (* filters and returns list. *)
 val reverse_filter : ('a -> bool) -> 'a list -> 'a list;;
@@ -75,8 +80,23 @@ val push_key_event : char -> modifiers -> unit;;
 (** [push_key_event c ms] pushes a key press [c]
   with a given modifier list [ms] into the Active-DVI's events queue. *)
 
+val push_mouse_event : mouse_x -> mouse_y -> button_pressed -> unit;;
+(** [push_mouse_event x y b] pushes a mouse event at position ([x], [y])
+  with a given button pressed [b] into the Active-DVI's events queue. *)
+
+val push_full_event :
+  char -> modifiers -> key_pressed ->
+  mouse_x -> mouse_y -> button_pressed -> unit;;
+(** [push_full_event c m k x y b] pushes a mouse event at position ([x], [y])
+  with a given button pressed [b], along with a key pressed [k] with
+  value [c] and modifier [m] into the Active-DVI's events queue. *)
+
 (* The necessary forwards: not to be called directly. *)
 val set_forward_debug_endline : (string -> unit) -> unit;;
 val set_forward_push_char_event : (char -> unit) -> unit;;
 val set_forward_push_key_event : (char -> modifiers -> unit) -> unit;;
-
+val set_forward_push_mouse_event :
+ (mouse_x -> mouse_y -> button_pressed -> unit) -> unit;;
+val set_forward_push_full_event :
+ (char -> modifiers -> key_pressed ->
+  mouse_x -> mouse_y -> button_pressed -> unit) -> unit;;

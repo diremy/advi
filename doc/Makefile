@@ -23,7 +23,7 @@ include ../Makefile.config
 
 SETTEXINPUTS=TEXINPUTS=.:../tex:/usr/lib/hevea/:/usr/local/lib/hevea/:/usr/local/share/texmf/tex//:$$TEXINPUTS
 
-LATEX=TEXINPUTS=.:../tex:/usr/lib/hevea/:/usr/local/lib/hevea/:/usr/local/share/texmf/tex//:$$TEXINPUTS latex
+LATEX=$(SETTEXINPUTS) latex
 DVIPS=TEXPSHEADERS=.:../tex: dvips
 HEVEA=$(PATH_HEVEA) -entities -I ../tex
 IMAGEN=$(SETTEXINPUTS) imagen
@@ -37,8 +37,8 @@ all: manual.dvi manual.ps manual.pdf manual.html \
     mathmode.dvi \
     advi_remote.dvi advi_remote.html
 
-clean:
-	rm -f *~ *.aux *.log manual.html *.dvi *.pdf *.pdfm *.ps \
+clean::
+	$(RM) $*.dvi *~ *.aux *.log manual.html *.dvi *.pdf *.pdfm *.ps \
 		*.ima *.out *.toc *.haux *.htoc
 	$(MAKE) -f MakeHTML clean
 
@@ -73,10 +73,12 @@ endif
 .tex.ps:
 	$(LATEX) '\def\driver{dvips}\input' $<
 	$(DVIPS) -o $@ $*.dvi
+	$(RM) $*.dvi
 
 .tex.pdf:
 	$(LATEX) '\def\driver{dvipdfm}\input' $<
 	- $(DVIPDFM) -o $@ $*.dvi
+	$(RM) $*.dvi
 
 .advi.dvi:
 	cp -p $< $*.dvi

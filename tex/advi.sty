@@ -636,6 +636,8 @@ end
 %%% Patch for hyperrefs
 
 % \AtBeginDocument {\@ifundefined {ifHy@nesting}{}{\Hy@nestingtrue}}
+% Resetting the normal default driver to hypertex
+\providecommand*{\Hy@defaultdriver}{hypertex}%
 
 %%% Thumbnails and Tocs
 

@@ -1,28 +1,28 @@
 index.htm: ../doc_src/advi-index.htm
-	- /bin/rm -f index.htm; 
+	- rm -f index.htm; 
 	cp -p ../doc_src/advi-index.htm index.htm
 
 fra.htm: ../doc_src/advi-fra.htm
-	- /bin/rm -f fra.htm; 
+	- rm -f fra.htm; 
 	cp -p ../doc_src/advi-fra.htm fra.htm
 
 eng.htm: ../doc_src/advi-eng.htm
-	- /bin/rm -f eng.htm; 
+	- rm -f eng.htm; 
 	cp -p ../doc_src/advi-eng.htm eng.htm
 
 faq-fra.htm: ../doc_src/advi-faq-fra.htm
-	- /bin/rm -f faq-fra.htm; 
+	- rm -f faq-fra.htm; 
 	cp -p ../doc_src/advi-faq-fra.htm faq-fra.htm
 
 faq-eng.htm: ../doc_src/advi-faq-eng.htm
-	- /bin/rm -f faq-eng.htm; 
+	- rm -f faq-eng.htm; 
 	cp -p ../doc_src/advi-faq-eng.htm faq-eng.htm
 
 screen-shots-fra.htm: ../doc_src/advi-screen-shots-fra.htm
-	- /bin/rm -f screen-shots-fra.htm; 
+	- rm -f screen-shots-fra.htm; 
 	cp -p ../doc_src/advi-screen-shots-fra.htm screen-shots-fra.htm
 
 screen-shots-eng.htm: ../doc_src/advi-screen-shots-eng.htm
-	- /bin/rm -f screen-shots-eng.htm; 
+	- rm -f screen-shots-eng.htm; 
 	cp -p ../doc_src/advi-screen-shots-eng.htm screen-shots-eng.htm
 

@@ -1288,9 +1288,12 @@ let push_key_event c m =
     key = c;
     modifiers = m;
   } in
+  Misc.debug_endline (Printf.sprintf "Pushing the key %c" c);
   push_event status;;
 
-let push_char_event = function
+let push_char_event c =
+  Misc.debug_endline (Printf.sprintf "Pushing the key %c" c);
+  match c with
   | '' .. '' as c -> push_key_event c GraphicsY11.control
   | c -> push_key_event c GraphicsY11.nomod;;
 
@@ -1314,8 +1317,11 @@ let push_full_event c m kp mx my b =
   } in
   push_event status;;
 
-(* Setting the forward in Misc. *)
+(* Setting the forwards in Misc. *)
+Misc.set_forward_push_char_event push_char_event;;
 Misc.set_forward_push_key_event push_key_event;;
+Misc.set_forward_push_mouse_event push_mouse_event;;
+Misc.set_forward_push_full_event push_full_event;;
 
 let reposition ~x ~y ~w ~h ~screen =
   Gs.flush ();
