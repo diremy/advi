@@ -39,9 +39,11 @@ WISH LIST:
   * exporter \ifadvi et \Ifadvi
 
   
-
-
 - images (background): il faut decider si on fixe a priori la couleur
   de la partie d'ecran non recouverte par l'image ou sin on laisse a
   LaTeX passer cela en parametre.
 
+BUGS:
+
+* embedded applications are not killed when advi is killed.
+* we must give some unique names to persistent apps without explicit names
