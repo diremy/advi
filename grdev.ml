@@ -277,7 +277,7 @@ let copy_of_bkgd_data () =
 let bg_color = ref bkgd_data.bgcolor;;
 let bg_colors = ref [];;
 
-let draw_img file ratio whitetrans alpha blend psbbox (w, h) x0 y0 =
+let draw_img file ratio whitetrans alpha blend psbbox antialias (w, h) x0 y0 =
   if not !opened then failwith "Grdev.draw_img: no window";
   let x = x0
   and y = !size_y - y0 in
@@ -286,7 +286,7 @@ let draw_img file ratio whitetrans alpha blend psbbox (w, h) x0 y0 =
     whitetrans
     alpha
     blend
-    psbbox ratio (w, h) (x, y);;
+    psbbox ratio antialias (w, h) (x, y);;
 
 let draw_bkgd () = 
   (* find the viewport *)
@@ -308,7 +308,9 @@ let draw_bkgd () =
       bkgd_data.bgwhitetrans
       bkgd_data.bgalpha
       bkgd_data.bgblend
-      None (w, h) xoff (!size_y - yoff)
+      None 
+      true (* antialias *)
+      (w, h) xoff (!size_y - yoff)
   ) bkgd_data.bgimg;
   (* Background: function. *)
   lift (fun draw -> draw  viewport) bkgd_data.bgfunction;;
@@ -544,12 +546,15 @@ let set_epstransparent s = epstransparent := s;;
 let alpha = ref 1.0;;
 let set_alpha a = alpha := a;;
 
+let epswithantialiasing = ref true;;
+let set_epswithantialiasing a = epswithantialiasing := a;;
+
 let draw_ps file bbox (w, h) x0 y0 =
   if not !opened then failwith "Grdev.fill_rect: no window";
   let x = x0
   and y = !size_y - y0 + h in
   try Drawimage.f file !epstransparent !alpha !blend
-        (Some bbox) Drawimage.ScaleAuto (w, h) (x, y - h)
+        (Some bbox) Drawimage.ScaleAuto !epswithantialiasing (w, h) (x, y - h)
   with
   | Not_found -> Misc.warning ("ps file " ^ file ^ " not found")
   | _ -> Misc.warning ("error happened while drawing ps file " ^ file)

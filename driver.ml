@@ -178,6 +178,10 @@ type state = {
     mutable blend_stack : Drawimage.blend list;
     mutable epstransparent : bool;
     mutable epstransparent_stack : bool list;
+    mutable epsbygs : bool;
+    mutable epsbygs_stack : bool list;
+    mutable epswithantialiasing : bool;
+    mutable epswithantialiasing_stack : bool list;
     mutable direction : Transitions.direction option;
     mutable transition : Transitions.t;
     mutable transition_stack : Transitions.t list;
@@ -431,17 +435,33 @@ let blend_special st s =
       blend_pop st
   | _ -> ();;
 
-let parse_epstransparent s =
+let parse_bool s =
   match String.lowercase s with
   | "true" -> true
   | "false" -> false
-  | _ -> raise (Failure "epstransparent: invalid mode");;
+  | _ -> raise (Failure "invalid boolean");;
 
 let epstransparent_special st s =
   match split_string s 0 with
   | ["advi:"; "epstransparent"; "push"; arg] ->
-      epstransparent_push st (parse_epstransparent arg)
+      epstransparent_push st (parse_bool arg)
   | "advi:" :: "epstransparent" :: "pop" :: [] ->
+      epstransparent_pop st
+  | _ -> ();;
+
+let epsbygs_special st s =
+  match split_string s 0 with
+  | ["advi:"; "epsbygs"; "push"; arg] ->
+      epstransparent_push st (parse_bool arg)
+  | "advi:" :: "epsbygs" :: "pop" :: [] ->
+      epstransparent_pop st
+  | _ -> ();;
+
+let epswithantialiasing_special st s =
+  match split_string s 0 with
+  | ["advi:"; "epswithantialiasing"; "push"; arg] ->
+      epstransparent_push st (parse_bool arg)
+  | "advi:" :: "epswithantialiasing" :: "pop" :: [] ->
       epstransparent_pop st
   | _ -> ();;
 
@@ -1242,10 +1262,13 @@ let special st s =
       and y = st.y_origin + int_of_float (st.conv *. float st.v) in
       if !visible then
         let draw =
-          if has_prefix "`" file then
+	  if st.epsbygs then
+            Dev.draw_ps file bbox 
+	  else begin
             Dev.draw_img (zap_to_char ' ' file)
-              Drawimage.ScaleAuto false 1.0 st.blend (Some bbox)
-          else Dev.draw_ps file bbox in
+	      Drawimage.ScaleAuto false 1.0 st.blend (Some bbox) st.epswithantialiasing
+	  end
+	in
         draw size x y
     with
     | Failure s -> Misc.warning s
@@ -1255,7 +1278,10 @@ let special st s =
     if has_prefix "advi: alpha" s then alpha_special st s else
     if has_prefix "advi: blend" s then blend_special st s else
     if has_prefix "advi: epstransparent" s then
-       epstransparent_special st s else
+      epstransparent_special st s else
+    if has_prefix "advi: epsbygs" s then epsbygs_special st s else
+    if has_prefix "advi: epswithantialiasing" s then 
+      epswithantialiasing_special st s else
     if has_prefix "advi: pause" s then raise Pause else
     if has_prefix "advi: proc" s then proc_special st s else
     if has_prefix "advi: setbg " s then bkgd_special st s else
@@ -1377,6 +1403,8 @@ let render_step cdvi num ?trans ?chst dpi xorig yorig =
       alpha = 1.0; alpha_stack = [];
       blend = Drawimage.Normal; blend_stack = [];
       epstransparent = true; epstransparent_stack = [];
+      epsbygs = true; epsbygs_stack = [];
+      epswithantialiasing = true; epswithantialiasing_stack = [];
       direction = trans;
       transition = Transitions.TransNone;
       transition_stack = [];

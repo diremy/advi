@@ -99,6 +99,7 @@ val fill_arc :
 (* Alpha blending *)
 val set_alpha : Drawimage.alpha -> unit;;
 val set_epstransparent : bool -> unit;;
+val set_epswithantialiasing : bool -> unit;;
 
 val set_blend : Drawimage.blend -> unit;;
 (** Fix the blending method (hence the blending function). *)
@@ -117,8 +118,9 @@ val draw_img :
   Drawimage.alpha ->
   Drawimage.blend ->
   Drawimage.ps_bbox option ->
+    bool ->
    int * int -> int -> int -> unit;;
-(** [draw_img fname ratio whitetrans alpha blend psbbox (width, height) x y]
+(** [draw_img fname ratio whitetrans alpha blend psbbox antialias (width, height) x y]
   draws the image contained in file [fname] at [x, y]. The image is
   resized to [(width, height)], blended with the background
   according to the blending option [blend], drawn with an alpha factor

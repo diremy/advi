@@ -152,7 +152,7 @@ let images_graphics = Hashtbl.create 107;;
 
 let after f g = try let x = f () in  g (); x with e -> g (); raise e;;
 
-let cache_path file whitetransp psbbox ratiopt (w, h) =
+let cache_path file whitetransp psbbox ratiopt antialias (w, h) =
   let file' = Userfile.fullpath (Unix.getcwd ()) file in
   let file' = if file == file' then String.copy file' else file' in
   for i = 0 to String.length file' - 1 do
@@ -193,7 +193,7 @@ let cache_path file whitetransp psbbox ratiopt (w, h) =
        bbox_str
        ratiopt_str
        (if whitetransp then "-tr" else "")
-       (if !image_aa then "-aa" else ""))
+       (if antialias then "-aa" else ""))
 ;;
 
 let cache_load file =
@@ -436,10 +436,10 @@ let resize_and_make_transparent image whitetransp ratiopt (ow, oh) =
   | _ -> assert false
 ;;
 
-let load_and_resize file whitetransp psbbox ratiopt (w, h) =
+let load_and_resize file whitetransp psbbox ratiopt antialias (w, h) =
   let file =
     Search.true_file_name [ "-format=" ^ Config.texpicts_kind ] file in
-  let cache_name = cache_path file whitetransp psbbox ratiopt (w, h) in
+  let cache_name = cache_path file whitetransp psbbox ratiopt antialias (w, h) in
   let image =
     try
       try
@@ -547,10 +547,11 @@ let draw_image image cache_name alpha blend (w, h) (x0, y0) =
 
 type alpha = float;;
 
-let f file whitetransp (alpha : alpha) blend psbbox ratiopt (w, h) (x0, y0) =
+let f file whitetransp (alpha : alpha) blend psbbox ratiopt antialias (w, h) (x0, y0) =
   try
+    let antialias = if not !image_aa then false else antialias in
     let cache_name, image =
-      load_and_resize file whitetransp psbbox ratiopt (w, h) in
+      load_and_resize file whitetransp psbbox ratiopt antialias (w, h) in
     (* load_and_resize may not return exactly the same size
        we specified as (w, h) *)
     debugs
