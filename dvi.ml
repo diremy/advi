@@ -380,10 +380,20 @@ let input_string ch len =
   really_input ch str 0 len ;
   str;;
 
-(*** parsing commands ***)
+(*** Parsing commands ***)
+
+let parse_string str =
+  let buf = make_buffer str in
+  let rec parse_rec () =
+    if buf.pos < buf.len then
+      read_command buf :: parse_rec ()
+    else [] in
+  try parse_rec ()
+  with End_of_buffer ->
+    raise (Error "input exhausted");;
 
 (* parse commands of a page between C_bop and C_eop *)
-let parse_a_page commands =
+let parse_page_of_commands commands =
   let buf = make_buffer commands in
   let rec parse_rec () =
     let cmd = read_command buf in
@@ -394,6 +404,45 @@ let parse_a_page commands =
     | _ -> raise (Error "ill-formed page")
   with End_of_buffer ->
     raise (Error "input exhausted");;
+
+let parse_page page = parse_page_of_commands page.commands
+
+let string_iter f str =
+  let buf = make_buffer str in
+  try
+    while buf.pos < buf.len do
+      f (read_command buf)
+    done
+  with End_of_buffer ->
+    raise (Error "input exhausted");;
+
+let page_iter f page =
+  let buf = make_buffer page.commands in
+  let rec iter_rec () =
+    let cmd = read_command buf in
+    if cmd <> C_eop then begin
+      f cmd ;
+      iter_rec ()
+    end in
+  try
+    match read_command buf with
+    | C_bop _ -> iter_rec ()
+    | _ -> raise (Error "ill-formed page")
+  with End_of_buffer ->
+    raise (Error "input exhausted");;
+
+let page_step f page =
+  let buf = make_buffer page.commands in
+  let rec iter_rec () =
+    let cmd = read_command buf in
+    if cmd <> C_eop then begin
+      f cmd; true
+    end else false
+  in
+  match read_command buf with
+  | C_bop _ -> iter_rec
+  | _ -> raise (Error "ill-formed page")
+;;
 
 (*** Reading a DVI file ***)
 
@@ -462,7 +511,7 @@ let input_dvi ch =
             status = Unknown;
             line = None;
             text =
-              Grdev.Symbol.commands_to_ascii font_map (parse_a_page commands);
+              Grdev.Symbol.commands_to_ascii font_map (parse_page_of_commands commands);
           } in
         (*Misc.debug_endline page.text;*)
 	stack := page :: !stack ;
@@ -499,69 +548,7 @@ let load filename =
     | End_of_file -> raise (Error "not a DVI file")
     | _ -> raise e;;
 
-(*** Parsing commands ***)
-
-let parse_string str =
-  let buf = make_buffer str in
-  let rec parse_rec () =
-    if buf.pos < buf.len then
-      read_command buf :: parse_rec ()
-    else [] in
-  try parse_rec ()
-  with End_of_buffer ->
-    raise (Error "input exhausted");;
-
-let parse_page page =
-  let buf = make_buffer page.commands in
-  let rec parse_rec () =
-    let cmd = read_command buf in
-    if cmd = C_eop then [] else cmd :: parse_rec () in
-  try
-    match read_command buf with
-    | C_bop _ -> parse_rec ()
-    | _ -> raise (Error "ill-formed page")
-  with End_of_buffer ->
-    raise (Error "input exhausted");;
-
-let string_iter f str =
-  let buf = make_buffer str in
-  try
-    while buf.pos < buf.len do
-      f (read_command buf)
-    done
-  with End_of_buffer ->
-    raise (Error "input exhausted");;
-
-let page_iter f page =
-  let buf = make_buffer page.commands in
-  let rec iter_rec () =
-    let cmd = read_command buf in
-    if cmd <> C_eop then begin
-      f cmd ;
-      iter_rec ()
-    end in
-  try
-    match read_command buf with
-    | C_bop _ -> iter_rec ()
-    | _ -> raise (Error "ill-formed page")
-  with End_of_buffer ->
-    raise (Error "input exhausted");;
-
-let page_step f page =
-  let buf = make_buffer page.commands in
-  let rec iter_rec () =
-    let cmd = read_command buf in
-    if cmd <> C_eop then begin
-      f cmd; true
-    end else false
-  in
-  match read_command buf with
-  | C_bop _ -> iter_rec
-  | _ -> raise (Error "ill-formed page")
-;;
-
 (*** Pretty-printing ***)
-
 let fprint_preamble fmt pre =
   fprintf fmt "@[<hov2>{ num = %d" pre.pre_num ;
   fprintf fmt "@ den = %d;" pre.pre_den ;
