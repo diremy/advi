@@ -116,7 +116,9 @@ let default_option_file = tilde_subst "~/.advirc";;
 
 let options_files = ref [default_option_file];;
 
-let add_options_file s = options_files := s :: !options_files;;
+let add_options_file s =
+ prerr_endline s; prerr_endline " recorded";
+ options_files := tilde_subst s :: !options_files;;
 
 Options.add "-options_file"
  (Arg.String add_options_file)

@@ -85,7 +85,7 @@ let raw_embed_app command app_mode app_name width height x gry =
                (Misc.string_replace "!x" opt_x
                   (Misc.string_replace "!y" opt_y
                      command0)))) in
-  (* prerr_endline command; *)
+  prerr_endline command;
   let pid = Launch.fork_process command in
   if Hashtbl.mem app_table pid then
     raise (Failure

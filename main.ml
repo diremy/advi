@@ -19,17 +19,18 @@ open Format;;
 
 (*** Parsing command-line arguments ***)
 
-let crop_flag = ref true;;
 let dvi_filename = ref None;;
+let set_dvi_filename s = dvi_filename := Some s;;
+
+let crop_flag = ref true;;
+
 let hmargin = ref (Dimension.Cm 1.0);;
 let vmargin = ref (Dimension.Cm 1.0);;
 let geometry = ref "864x864";;
 
-let set_dim r s =
-  r := Dimension.dimen_of_string s;;
+let set_geom g = Dviview.set_autoresize false; geometry := g;;
 
-let set_geom g =
-  Dviview.set_autoresize false; geometry := g;;
+let set_dim r s = r := Dimension.dimen_of_string s;;
 
 let spec_list = [
   ("-geometry", Arg.String set_geom,
@@ -56,22 +57,24 @@ let advi_options () =
 let usage_msg =
   Printf.sprintf "usage: %s [OPTIONS] DVIFILE" Sys.argv.(0);;
 
-let set_dvi_filename s =
-  dvi_filename := Some s
-  (*match !dvi_filename with
-  | None -> dvi_filename := Some s
-  | Some _ -> ()*);;
-
 let init_arguments () =
  let options = advi_options () in
  let optfs = List.rev (Userfile.options_files ()) in
- (*prerr_endline "Init files :";
-   List.iter prerr_endline optfs; prerr_endline "";*)
+ prerr_endline "Init files :";
+   List.iter prerr_endline optfs; prerr_endline "";
  List.iter
    (fun fname ->
       Rc.cautious_parse_file fname options set_dvi_filename usage_msg)
    optfs;
- Arg.parse options set_dvi_filename usage_msg;
+ let rec new_options =
+   ("-options_file",
+    Arg.String
+     (fun fname ->
+        prerr_endline (Printf .sprintf "Parsing %s" fname);
+        Rc.cautious_parse_file fname options set_dvi_filename usage_msg),
+    "") ::
+   options in
+ Arg.parse new_options set_dvi_filename usage_msg;
 ;;
 
 let set_dvi_geometry () =
@@ -100,6 +103,8 @@ let standalone_main () =
   Dviview.main_loop filename;;
 
 let rec interactive_main () =
+  (* To do : load the .advirc file ... *)
+  Rc.init ();
   printf "Dvi file name: @?";
   let filename = input_line stdin in
   if Sys.file_exists filename then begin
@@ -117,7 +122,7 @@ let rec interactive_main () =
 at_exit Gs.kill;;
 at_exit Embed.kill_all_embedded_apps;;
 
-let quit = 3;;
+let quit = Sys.sigquit;;
 Sys.set_signal quit (Sys.Signal_handle (fun _ -> Launch.exit 0));;
 
 let main = if !Sys.interactive then interactive_main else standalone_main;;
