@@ -44,17 +44,17 @@ let resize_cursor = GraphicsY11.Cursor_diamond_cross;;
 let resize_cursor_x = GraphicsY11.Cursor_sb_h_double_arrow;;
 let resize_cursor_y = GraphicsY11.Cursor_sb_v_double_arrow;;
 
-let set_cursor, restore_cursor =
+let set_cursor, restore_cursor, last_cursor =
   let last_cursor = ref free_cursor in
-  (function cursor ->
-    last_cursor := cursor;
-    GraphicsY11.set_cursor cursor),
-  (function () ->
-    GraphicsY11.set_cursor !last_cursor);;
+  (function cursor -> last_cursor := cursor; GraphicsY11.set_cursor cursor),
+  (function () -> GraphicsY11.set_cursor !last_cursor),
+  (function () -> !last_cursor);;
 
 (* To be called before system calls that make take a long time *)
 let busy_timeout = ref None;;
 let set_busy_cursor () = set_cursor GraphicsY11.Cursor_watch;;
+
+(** Starts a timer which triggers the indication of a busy state. *)
 let start_timer () =
   try
     busy_timeout := Some (Timeout.add !busy_delay set_busy_cursor)
@@ -68,10 +68,10 @@ let stop_busy () =
   | Some timeout ->
       begin try Timeout.remove timeout with Not_found -> () end
   | None -> ();;
+
 let non_busy cursor =
-  stop_busy(); 
-  set_cursor cursor
-;;
+  stop_busy (); 
+  set_cursor cursor;;
 
 (* Set the cursor when we want to refect the state as a cursor modification. *)
 let set = function
@@ -87,9 +87,9 @@ let set = function
   | Resize_y -> set_cursor resize_cursor_y;;
 
 let temp_set c =
-  stop_busy();
-  GraphicsY11.set_cursor
-    (match c with 
+  stop_busy ();
+  let c =
+    match c with 
     | Pause -> pause_cursor
     | Free -> free_cursor
     | Disk -> disk_cursor
@@ -99,7 +99,9 @@ let temp_set c =
     | Move -> move_cursor
     | Resize -> resize_cursor
     | Resize_x -> resize_cursor_x
-    | Resize_y -> resize_cursor_y
-    )
+    | Resize_y -> resize_cursor_y in
+  GraphicsY11.set_cursor c;;
 
+let stop () =
+ non_busy (last_cursor ());;
 

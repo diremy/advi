@@ -20,14 +20,22 @@
 
 type busy =
    | Free | Busy | Pause | Disk | Question | Selection | Move
-   | Resize | Resize_x | Resize_y
+   | Resize | Resize_x | Resize_y;;
 (** Different states of the computation. *)
 
 val start_timer : unit -> unit;;
 (** Starts a timer which triggers the indication of a busy state. *)
+
 val restore_cursor : unit -> unit;;
 (** Restore the last cursor saved by a busy timer. *)
+
 val set : busy -> unit;;
-(** Remove the busy timer and set the given cursor. *)
+(** Set the cursor to reflect the given busy state.
+    Remove the busy timer if necessary, record the current cursor,
+    and set the cursor to the appropriate value. *)
+
 val temp_set : busy -> unit;;
-(** Set but do not record the given cursor. *)
+(** Temporary set: set but do not record the given cursor. *)
+
+val stop : unit -> unit;;
+(** Remove the busy timer and reset the last cursor set by [Busy.set]. *)

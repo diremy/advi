@@ -15,7 +15,7 @@
 (*  Based on Mldvi by Alexandre Miquel.                                *)
 (***********************************************************************)
 
-open Misc
+open Misc;;
 
 let ignore_background =
     Options.flag false
@@ -795,7 +795,7 @@ module E =
       Busy.set
        (if !editing then Busy.Selection else Busy.Free)
           
-    let clear() = figures := []; screen := None
+    let clear () = figures := []; screen := None
         (*
            let save_screen cont =
            screen := Graphics.get_image 0 0 !size_x !size_y
@@ -1284,11 +1284,11 @@ let wait_event () =
             | Final (Position (x, y) as e) -> send e
             | Final (Move (dx, dy) as e) -> send e
             | Final (Click (_, _, _, _) as e) -> send e
-            | Final (Edit (_,_) as e) -> send e
+            | Final (Edit (_, _) as e) -> send e
             | Final Nil -> send Nil
             | Final
-                ( Resized (_,_) | Refreshed
-              | Key _ | Href _ | Advi (_,_) as e) ->
+                (Resized (_, _) | Refreshed |
+                 Key _ | Href _ | Advi (_, _) as e) ->
                 push_back_event ev;
                 send e
             | Raw _ -> rescan ()
