@@ -16,6 +16,7 @@
 
 % For splash inclusion
 \usepackage{color}
+\usepackage{xcolor}
 \usepackage{graphicx}
 \usepackage{tabularx}
 \usepackage{pst-all}
@@ -402,9 +403,142 @@ If the environment form is used, \docid{text} may contain fragile commands.
 
 \subsection{Images}
 
-Images can be encapsulated into the presentation using the package
-CamlImages provided with the distribution
-(see section~\ref {advi-grahicx})
+Images can be encapsulated into the presentation using the Caml library
+CamlImages provided with the distribution of {\ActiveDVI} (see
+section~\ref {advi-grahicx}).
+
+\subsection{Colors}
+
+\subsubsection*{The \doctt{color} package}
+
+In {\ActiveDVI}, colors can be specified with the conventions of the
+{\LaTeX} package \doctt{color.sty}, that is, it should either be a
+previously defined color or a specification of the form
+\docopt{model} \docarg{model color specification}.
+
+\subsubsection*{Named colors}
+
+Colors can be named using the keyword \docid{named}.  If you use named
+colors, the color names are case sensitive and should generally be
+capitalized; for instance: \verb"\color[named]{White}" specifies the
+white color. Hence, {\tt {\char92}color[named]\{Red\}\{{\it some
+text}\}} writes {\it some text} in {\color[named]{Red}{red}}.
+
+The names of available colors can be found in the {\tt dvipsnam.def}
+file, generally at location\\
+{\tt /usr/share/texmf/tex/latex/graphics/dvipsnam.def}.
+
+To give an idea, the names and colors available on a standard installation of
+{\LaTeX} are:
+
+{\color[named]{GreenYellow}{GreenYellow}} $\quad$
+{\color[named]{Yellow}{Yellow}} $\quad$
+{\color[named]{Goldenrod}{Goldenrod}} $\quad$
+{\color[named]{Dandelion}{Dandelion}} $\quad$
+{\color[named]{Apricot}{Apricot}} $\quad$
+
+{\color[named]{Peach}{Peach}} $\quad$
+{\color[named]{Melon}{Melon}} $\quad$
+{\color[named]{YellowOrange}{YellowOrange}} $\quad$
+{\color[named]{Orange}{Orange}} $\quad$
+{\color[named]{BurntOrange}{BurntOrange}} $\quad$
+
+{\color[named]{Bittersweet}{Bittersweet}} $\quad$
+{\color[named]{RedOrange}{RedOrange}} $\quad$
+{\color[named]{Mahogany}{Mahogany}} $\quad$
+{\color[named]{Maroon}{Maroon}} $\quad$
+{\color[named]{BrickRed}{BrickRed}} $\quad$
+
+{\color[named]{Red}{Red}} $\quad$
+{\color[named]{OrangeRed}{OrangeRed}} $\quad$
+{\color[named]{RubineRed}{RubineRed}} $\quad$
+{\color[named]{WildStrawberry}{WildStrawberry}} $\quad$
+{\color[named]{Salmon}{Salmon}} $\quad$
+
+{\color[named]{CarnationPink}{CarnationPink}} $\quad$
+{\color[named]{Magenta}{Magenta}} $\quad$
+{\color[named]{VioletRed}{VioletRed}} $\quad$
+{\color[named]{Rhodamine}{Rhodamine}} $\quad$
+{\color[named]{Mulberry}{Mulberry}} $\quad$
+
+{\color[named]{RedViolet}{RedViolet}} $\quad$
+{\color[named]{Fuchsia}{Fuchsia}} $\quad$
+{\color[named]{Lavender}{Lavender}} $\quad$
+{\color[named]{Thistle}{Thistle}} $\quad$
+{\color[named]{Orchid}{Orchid}} $\quad$
+{\color[named]{DarkOrchid}{DarkOrchid}} $\quad$
+
+{\color[named]{Purple}{Purple}} $\quad$
+{\color[named]{Plum}{Plum}} $\quad$
+{\color[named]{Violet}{Violet}} $\quad$
+{\color[named]{RoyalPurple}{RoyalPurple}} $\quad$
+{\color[named]{BlueViolet}{BlueViolet}} $\quad$
+
+{\color[named]{Periwinkle}{Periwinkle}} $\quad$
+{\color[named]{CadetBlue}{CadetBlue}} $\quad$
+{\color[named]{CornflowerBlue}{CornflowerBlue}} $\quad$
+{\color[named]{MidnightBlue}{MidnightBlue}} $\quad$
+
+{\color[named]{NavyBlue}{NavyBlue}} $\quad$
+{\color[named]{RoyalBlue}{RoyalBlue}} $\quad$
+{\color[named]{Blue}{Blue}} $\quad$
+{\color[named]{Cerulean}{Cerulean}} $\quad$
+{\color[named]{Cyan}{Cyan}} $\quad$
+{\color[named]{ProcessBlue}{ProcessBlue}} $\quad$
+
+{\color[named]{SkyBlue}{SkyBlue}} $\quad$
+{\color[named]{Turquoise}{Turquoise}} $\quad$
+{\color[named]{TealBlue}{TealBlue}} $\quad$
+{\color[named]{Aquamarine}{Aquamarine}} $\quad$
+{\color[named]{BlueGreen}{BlueGreen}} $\quad$
+
+{\color[named]{Emerald}{Emerald}} $\quad$
+{\color[named]{JungleGreen}{JungleGreen}} $\quad$
+{\color[named]{SeaGreen}{SeaGreen}} $\quad$
+{\color[named]{Green}{Green}} $\quad$
+{\color[named]{ForestGreen}{ForestGreen}} $\quad$
+
+{\color[named]{PineGreen}{PineGreen}} $\quad$
+{\color[named]{LimeGreen}{LimeGreen}} $\quad$
+{\color[named]{YellowGreen}{YellowGreen}} $\quad$
+{\color[named]{SpringGreen}{SpringGreen}} $\quad$
+
+{\color[named]{OliveGreen}{OliveGreen}} $\quad$
+{\color[named]{RawSienna}{RawSienna}} $\quad$
+{\color[named]{Sepia}{Sepia}} $\quad$
+{\color[named]{Brown}{Brown}} $\quad$
+{\color[named]{Tan}{Tan}} $\quad$
+
+{\color[named]{Gray}{Gray}} $\quad$
+{\color[named]{Black}{Black}} $\quad$
+\advirecord{thewhite}{\
+{\color[named]{Red}{White}}}
+
+\subsubsection*{The CMYK specifications of colors}
+
+You may also explicitely use a CMYK (Cyan, Magenta, Yellow, Black)
+specification. In this case the cyan, magenta, yellow and black values
+follow the \docid{cmyk} keyword, and are given as a list of four
+integers in the range 0 .. 255.
+For instance, {\tt {\char92}color[cmyk]\{0,1,0,0\}} is a valid specification
+for {\color[cmyk]{0,1,0,0}{magenta}}.
+
+\subsection*{The RGB specifications of colors}
+
+RGB (Red, Green, Blue) specifications are similar to the CMYK
+specifications: following the \docid{rbg} keyword, the red, green, or
+blue color values, are given as floating point numbers in the range
+0.0 .. 1.0.  Hence, {\tt{{\char92}color[rgb]\{1.0,0.0,0.0\}}} is a
+valid specification for {\color[rgb]{1.0,0.0,0.0}{red}}.
+
+\subsection*{X colors}
+
+{\ActiveDVI} provides the package \doctt{xcolor}, an extension to the
+\doctt{color} package, that defines a large set of X colors names, as
+found in the file {\tt rgb.txt} of a typical X installation (this file
+is generally located on {\tt /usr/X11R6/lib/X11/rgb.txt}). To know
+which colors are available look at the source file of package
+{\tt xcolor.sty} in the directory {\tt tex} of the distribution.
 
 \subsection{Background}
 
