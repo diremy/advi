@@ -278,28 +278,70 @@ The command to obtain this background is:
 \end{quote}
 \vfill
 
+
 \newpage
 
 \vfill
-\subsection{Circular gradient with starting color}
+\subsection{Small centered gradient with starting color}
 \vfill
 
 The command to obtain this background is:
 
-\advibg{color = [named]{MistyRose}, fun = "circgradient",
+\advibg{color = green, fun = "cgradient",
+        colorstart = blue,
+        colorstop = red,
+        xcenter = 0.25,
+        ycenter = 0.5,
+        xstart = 0.5,
+        ystart = 0.5,
+        width = 0.1,
+        height = 0.5}
+
+\begin{quote}
+  \begin{verbatim}
+    \advibg{color = green, fun = "cgradient",
+            colorstart = blue,
+            colorstop = red,
+            xcenter = 0.25,
+            ycenter = 0.25,
+            xstart = 0.5,
+            ystart = 0.5,
+            width = 0.1,
+            height = 0.5}
+  \end{verbatim}
+\end{quote}
+\vfill
+
+\newpage
+
+\vfill
+\subsection{Circular gradient with red starting color}
+\vfill
+
+The command to obtain this background is:
+
+\advibg{color = [named]{MistyRose},
+        fun = "circgradient",
         colorstart = red,
-        colorstop = yellow,
+        colorstop = [named]{MistyRose},
         width = 0.2,
-        height = 0.2,
+        height = 0.15,
         xstart = 0.75,
-        ystart = 0.75,
+        ystart = 0.8,
         xcenter = 0.5,
         ycenter = 0.5}
 
 \begin{quote}
   \begin{verbatim}
-  \advibg{color = cyan, fun = "cgradient",
-          colorstart = "blue"} 
+\advibg{color = [named]{MistyRose}, fun = "circgradient",
+        colorstart = red,
+        colorstop = [named]{MistyRose},
+        width = 0.2,
+        height = 0.15,
+        xstart = 0.75,
+        ystart = 0.8,
+        xcenter = 0.1,
+        ycenter = 0.5}
   \end{verbatim}
 \end{quote}
 \vfill

@@ -28,6 +28,12 @@
 \RequirePackage {keyval}
 \RequirePackage {color}
 
+%% two abstract colors set by advi. Defaut to black and white
+\DefineNamedColor{named}{background}{rgb}{1,1,1} %white
+\definecolor{bgcolor}{named}{background}
+\DefineNamedColor{named}{foreground}{rgb}{0,0,0} %black
+\definecolor{fgcolor}{named}{foreground}
+
 %% Options
 
 \newif \ifadvi@ignore \advi@ignorefalse
@@ -180,6 +186,7 @@ Maybe you mean \@currenvir ing}}
 \def \advi@global@ {global}
 \newif \ifadvi@bgactive
 
+%% Background stuff
 \def \advi@bg@do
  {\do \advi@bgcolor \do \advi@bgcolorstart \do \advi@bgcolorstop
   \do \advi@bgxstart \do \advi@bgystart
@@ -206,6 +213,7 @@ Maybe you mean \@currenvir ing}}
   {\advi@global \expandafter \def \noexpand #1{ #2=#3}%
    \advi@global \advi@bgactivetrue}}
 
+%% Setting the background solid color
 \def \advi@setbgcolor #1{\advi@ifnone {#1}
   {\advi@global \expandafter \let \noexpand #1\advi@empty}
   {\advi@setbg@color #1\relax}}
@@ -227,17 +235,47 @@ Maybe you mean \@currenvir ing}}
      \advi@global \edef \advi@bgcolor{ color="\advi@tmp"}%
      \advi@global \advi@bgactivetrue}}
 
-%% two abstract colors set by advi. Defaut to black and white
-\DefineNamedColor{named}{background}{rgb}{1,1,1} %white
-\definecolor{bgcolor}{named}{background}
-\DefineNamedColor{named}{foreground}{rgb}{0,0,0} %black
-\definecolor{fgcolor}{named}{foreground}
+%% Setting the gradient start color
+\def \advi@setbgcolorstart #1{\advi@ifnone {#1}
+  {\advi@global \expandafter \let \noexpand #1\advi@empty}
+  {\advi@setbg@colorstart #1\relax}}
+\def \advi@setbg@colorstart{%
+  \@ifnextchar[\advi@setbgstart@undeclared\advi@setbgstart@declared}
+\def \advi@setbgstart@declared #1\relax{%
+  \@ifundefined{\string\color @#1}%
+    {\c@lor@error{`#1'}}%
+    {\advi@global \edef \advi@bgcolorstart
+         { colorstart="\csname \string \color@#1\endcsname"}%
+     \advi@global \advi@bgactivetrue}}
+\def \advi@setbgstart@undeclared[#1]#2\relax{%
+  \@ifundefined{color@#1}%
+    {\c@lor@error{model `#1'}}%
+    {\csname color@#1\endcsname\advi@tmp {#2}%
+     \advi@global \edef \advi@bgcolorstart{ colorstart="\advi@tmp"}%
+     \advi@global \advi@bgactivetrue}}
+
+%% Setting the gradient stop color
+\def \advi@setbgcolorstop #1{\advi@ifnone {#1}
+  {\advi@global \expandafter \let \noexpand #1\advi@empty}
+  {\advi@setbg@colorstop #1\relax}}
+\def \advi@setbg@colorstop{%
+  \@ifnextchar[\advi@setbgstop@undeclared\advi@setbgstop@declared}
+\def \advi@setbgstop@declared #1\relax{%
+  \@ifundefined{\string\color @#1}%
+    {\c@lor@error{`#1'}}%
+    {\advi@global \edef \advi@bgcolorstop
+         { colorstop="\csname \string \color@#1\endcsname"}%
+     \advi@global \advi@bgactivetrue}}
+\def \advi@setbgstop@undeclared[#1]#2\relax{%
+  \@ifundefined{color@#1}%
+    {\c@lor@error{model `#1'}}%
+    {\csname color@#1\endcsname\advi@tmp {#2}%
+     \advi@global \edef \advi@bgcolorstop{ colorstop="\advi@tmp"}%
+     \advi@global \advi@bgactivetrue}}
 
 \define@key {advi@bg}{color}[]{\advi@setbgcolor{#1}}
-\define@key {advi@bg}{colorstart}[]%
-            {\advi@setbg{\advi@bgcolorstart}{colorstart}{#1}}
-\define@key {advi@bg}{colorstop}[]%
-            {\advi@setbg{\advi@bgcolorstop}{colorstop}{#1}}
+\define@key {advi@bg}{colorstart}[]{\advi@setbgcolorstart{#1}}
+\define@key {advi@bg}{colorstop}[]{\advi@setbgcolorstop{#1}}
 \define@key {advi@bg}{xstart}[]{\advi@setbg{\advi@bgxstart}{xstart}{#1}}
 \define@key {advi@bg}{ystart}[]{\advi@setbg{\advi@bgystart}{ystart}{#1}}
 \define@key {advi@bg}{width}[]{\advi@setbg{\advi@bgwidth}{width}{#1}}

@@ -424,7 +424,7 @@ let make_center xcr ycr
       (* Check the center coordinates wrt the background viewport. *)
       if fxc < x then x else
       if fxc < x + w then fxc else x + w - 1
-  | None -> x + (w + 1) / 2 in
+  | None -> fx + (fw + 1) / 2 in
   let yc = match ycr with
   | Some ycr ->
       (* Get the center coordinates integer values in the funviewport. *)
@@ -432,7 +432,7 @@ let make_center xcr ycr
       (* Check the center coordinates wrt the background viewport. *)
       if fyc < y then y else
       if fyc < y + h then fyc else y + h - 1
-  | None -> y + (h + 1) / 2 in
+  | None -> fy + (fh + 1) / 2 in
   Misc.debug_endline (Printf.sprintf
     "The gradient center is xc = %d; yc = %d." xc yc);
   xc, yc;;
@@ -483,7 +483,7 @@ let draw_bkgd () =
         "colors are {argcolor = %d; argcolorstart = %s; argcolorstop = %s}."
         bkgd_data.bgcolor (string_of_color_opt bkgd_data.bgcolorstart)
                           (string_of_color_opt bkgd_data.bgcolorstop));
-      bgfunction bgfunarg end;  
+      bgfunction bgfunarg end;
 
   (* Background: now draw the image. *)
   let draw_bg file =
