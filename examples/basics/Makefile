@@ -1,5 +1,7 @@
 # To view the demo, use ../advi file.dvi
 
+SUBDIRS=cash
+
 TEXFILES= simple.tex moderate.tex semi-complex.tex
 
 ADVIDIR=../..
@@ -30,5 +32,9 @@ clean:
 	$(RM) a.out *.aux *.log *.dvi *~ 
 	$(RM) $(MLPROG) *.cmi *.cmo
 	$(RM) .advi/*
+	for i in $(SUBDIRS); do \
+	  cd $$i; \
+	  $(MAKE) clean;  \
+	done
 
 .SUFFIXES: .tex .sty .dvi .eps .advi
