@@ -112,10 +112,10 @@ let width s =
 (* Symbols information. *)
 
 let dummy_symbol = {
-  color = 0 ;
-  locx = 0 ;
-  locy = 0 ;
-  code = 0 ;
+  color = 0;
+  locx = 0;
+  locy = 0;
+  code = 0;
   symbol = Line (-1, None)
 };;
 
@@ -128,18 +128,18 @@ let clear_global_display_set () = set_global_display_set [];;
 let add_to_global_display_set color x y code s =
  (* Add a display_symbol to the global_display_set. *)
   let symbol = {
-    color = color ;
-    locx = x ;
-    locy = y ;
-    code = code ;
+    color = color;
+    locx = x;
+    locy = y;
+    code = code;
     symbol = s;
   } in
   set_global_display_set (symbol :: get_global_display_set ());;
 
 
 type line = {
-   min : int ;
-   max : int ;
+   min : int;
+   max : int;
    contents : display_symbol list
 };;
 
@@ -263,8 +263,8 @@ let accents encoding font code =
 let cmmi_encoding font code =
   if code >= 11 && code <= 41 then
     let alph =
-      [ "\\alpha" ; "\\beta"; "\\gamma"; "\\delta";
-        "\\epsilon"; "\\zeta"; "\\eta" ;
+      [ "\\alpha"; "\\beta"; "\\gamma"; "\\delta";
+        "\\epsilon"; "\\zeta"; "\\eta";
         "\\theta"; "[**unknown greek letter**]"; "\\kappa";
         "\\lambda"; "\\mu"; "\\nu"; "\\xi"; "\\pi";
         "\\rho"; "\\sigma"; "\\tau"; "\\upsilon"; "\\phi"; "\\chi"; "\\psi";
@@ -298,25 +298,25 @@ let cmtt_encoding font code =
 (* List of recognized fonts (regexp) * handler *)
 (* Don't optimize the regexps, it is readable that way. *)
 let encodings = [
-  "cm[rs][0-9]+",     cmr_encoding ;
-  "cmt[ti][0-9]+",    cmtt_encoding ; 
-  "cms[lxs][0-9]+",   cmr_encoding ;
-  "cmbx[0-9]+",       cmr_encoding ;
-  "cmmi[0-9]+",       cmmi_encoding ;
-  "cmex[0-9]+",       cmex_encoding ;
-  "cmsy[0-9]+",       cmex_encoding ;
+  "cm[rs][0-9]+",     cmr_encoding;
+  "cmt[ti][0-9]+",    cmtt_encoding;
+  "cms[lxs][0-9]+",   cmr_encoding;
+  "cmbx[0-9]+",       cmr_encoding;
+  "cmmi[0-9]+",       cmmi_encoding;
+  "cmex[0-9]+",       cmex_encoding;
+  "cmsy[0-9]+",       cmex_encoding;
 (* does not seem correct. eg. ff is \027 instead of \011? what else? *)
-  "ecrm[0-9]+",       accents ecmr_encoding ;
-  "ecti[0-9]+",       accents ecmr_encoding ;
-  "ecbx[0-9]+",       accents ecmr_encoding ;
-  "ectt[0-9]+",       accents cmtt_encoding ;
-  "lcmssb?[0-9]+",    accents cmr_encoding ;
-  "lcmssi[0-9]+",     accents cmmi_encoding ;
+  "ecrm[0-9]+",       accents ecmr_encoding;
+  "ecti[0-9]+",       accents ecmr_encoding;
+  "ecbx[0-9]+",       accents ecmr_encoding;
+  "ectt[0-9]+",       accents cmtt_encoding;
+  "lcmssb?[0-9]+",    accents cmr_encoding;
+  "lcmssi[0-9]+",     accents cmmi_encoding;
 (* is this correct ? *)
-  "ptm[rbi][0-9]+r",  accents ecmr_encoding ;
-  "ptmri[0-9]+r",     accents ecmr_encoding ;
-  "phvb[0-9]+r",      accents ecmr_encoding ;
-  "msam[0-9]+",       accents ecmr_encoding ;
+  "ptm[rbi][0-9]+r",  accents ecmr_encoding;
+  "ptmri[0-9]+r",     accents ecmr_encoding;
+  "phvb[0-9]+r",      accents ecmr_encoding;
+  "msam[0-9]+",       accents ecmr_encoding;
 ];;
 
 let compile_regexps source =
@@ -327,18 +327,18 @@ let encodings_c = compile_regexps encodings;;
 
 let erase = "/back/";;
 
+let find_decoder font =
+  try snd (List.find (fun (r, h) -> Str.string_match r font 0) encodings_c)
+  with
+  | Not_found ->
+      fun f s -> "[" ^ f ^ "]" ^ default_encoding f s;;
+
 (* Returns the name of the symbol s, pre is the symbol before s. *)
 let true_symbol_name s =
   let font = fontname s in
   (* For normal symbols, find a matching regexp. *)
-  let handler =
-    try snd (List.find
-               (fun (r, h) -> Str.string_match r font 0)
-               encodings_c)
-    with Not_found ->
-      fun f s -> "[" ^ f ^ "]" ^ default_encoding f s
-  in
-  handler font s.code;;
+  let decoder = find_decoder font in
+  decoder font s.code;;
 
 let symbol_name pre s =
   match s.symbol with
@@ -440,7 +440,7 @@ let dump_line l =
         let ascii = symbol_name !old_sym s in
         if ascii <> "" then
           begin
-            line := !line ^ ascii ;
+            line := !line ^ ascii;
             if not (is_space s) || width s > 0 then old_sym := s;
           end;
         if not (is_space s) then some := true in
@@ -476,21 +476,17 @@ let to_ascii display_set =
 let commands_to_ascii fnt_map commands =
   let curfontdecoder = ref cmr_encoding in
   let curfont = ref "cmr7" in
-  let cset = Buffer.create 1024 in 
+  let cset = Buffer.create 1024 in
   List.iter
     (function
      | Dvicommands.C_fnt n ->
-         curfont:= (List.assoc n fnt_map).Dvicommands.name;
-         curfontdecoder:= (
-           try snd (List.find
-                     (fun (r, h) -> Str.string_match r !curfont 0)
-                     encodings_c) with
-           | Not_found -> (fun f s -> "[" ^ f ^ "]" ^ default_encoding f s))
+         curfont := (List.assoc n fnt_map).Dvicommands.name;
+         curfontdecoder:= find_decoder !curfont
      | Dvicommands.C_set code | Dvicommands.C_put code ->
-         Buffer.add_string cset (!curfontdecoder !curfont code) 
-     | Dvicommands.C_w0 | Dvicommands.C_w _ 
-     | Dvicommands.C_x0 | Dvicommands.C_x _ 
-     | Dvicommands.C_y0 | Dvicommands.C_y _ 
+         Buffer.add_string cset (!curfontdecoder !curfont code)
+     | Dvicommands.C_w0 | Dvicommands.C_w _
+     | Dvicommands.C_x0 | Dvicommands.C_x _
+     | Dvicommands.C_y0 | Dvicommands.C_y _
      | Dvicommands.C_z0 | Dvicommands.C_z _ -> Buffer.add_char cset ' '
      | _ -> ())
     commands;
