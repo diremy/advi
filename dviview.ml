@@ -355,12 +355,12 @@ let document_xy st x y =
 
 let position st x y =
   match Symbol.lines x y with
-  | Some (s, line, bound, before, after, file) ->
+  | Some (s, line, bound, left, before, after, right, file) ->
       let line = max 0 line in
       let bound = max 0 bound in
       let file = match file with Some f ->  f | _ -> "" in
-      Printf.printf "#line %d, %d <<%s>><<%s>> %s\n"
-        line bound before after file;
+      Printf.printf "#line %d, %d <<%s<<%s>><<%s>>%s>> %s\n"
+        line bound left before after right file;
       flush stdout
   | None -> ();;
 

@@ -57,7 +57,8 @@ module Symbol :
       val intime : int -> int -> int -> int -> set
       val iter : (element -> unit) -> set -> unit
       val lines : int -> int -> 
-        (element * int * int * string * string * string option) option
+        (element * int * int *
+           string * string * string * string * string option) option
     end;;
 
 (* Device configuration *)

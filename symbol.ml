@@ -526,7 +526,15 @@ let around b x y =
     let point = position.first in
     let iw1 = prefix succ (succ point) in
     let iw2 = prefix pred (point) in
-    Some (position, iw1, iw2)
+    let context move iw =
+      let i = move (fst iw) in
+      if valid i then
+        let i, w = prefix move (skip_spaces move i) in
+        if valid i then w else ""
+      else "" in
+    let left = context succ iw1 in
+    let right = context pred iw2 in
+    Some (position, left, iw1, iw2, right)
   with
   | Not_found -> None
   | Invalid_argument _ -> assert false
@@ -541,7 +549,7 @@ let rec least l min =
 let lines x y =
   match around true x y with
   | None -> None
-  | Some (region, (i1, w1), (i2, w2)) ->
+  | Some (region, left, (i1, w1), (i2, w2), right) ->
       let rec find_line move i =
         if valid region i then
           let h = region.history.(i) in
@@ -554,13 +562,13 @@ let lines x y =
       let l2, f2 = find_line pred (pred i2) in
       let l1 = if l1 > l2 && l2 > 0 then least !set l2 else l1 in
       let f = match f1 with Some _ -> f1 | _ -> f2 in
-      Some (space_ref, l1, l2, w1, w2, f)
+      Some (space_ref, l1, l2, left, w1, w2, right, f)
 ;;
 
 let word x y =
   match around false x y with
   | None -> None
-  | Some (region, (i1, w1), (i2, w2)) ->
+  | Some (region, left, (i1, w1), (i2, w2), right) ->
       let take w =
         let l = String.length w in
         l > 0 && w.[0] <> ' ' && w.[l - 1] <> ' ' in
