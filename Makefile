@@ -127,7 +127,7 @@ installopt:install
 install:: advi.opt tex/splash.dvi
 	cp advi.opt ${bindir}/advi
 	- mkdir -p $(ADVI_LOC)
-	cp tex/splash.dvi tex/advilogo.eps tex/caml.eps tex/bar.jpg.eps tex/advi.sty tex/advi.pro $(ADVI_LOC)
+	cp tex/splash.dvi tex/advilogo.eps tex/caml.eps tex/bar.jpg.eps tex/*.sty tex/advi.pro $(ADVI_LOC)
 	if [ -f conf/jpfonts.conf ]; then cp conf/jpfonts.conf $(ADVI_LOC); fi
 
 MLFILES = $(addsuffix .ml, $(MODULES))
@@ -136,9 +136,10 @@ MLFILES = $(addsuffix .ml, $(MODULES))
 	gcc -MM -I$(CAMLDIR) $(CFLAGS) $(COBJS:.o=.c) | sed -e 's|$(CAMLDIR)/[^ ]*||' >> .depend
 
 # just for the authors
-VERSION=0.4.0
+VERSION=1.0.0
 ADVI=advi-$(VERSION)
 WEBSITEDIR=/net/pauillac/infosystems/www/advi
+FTPSITEDIR=/net/pauillac/infosystems/ftp/cristal/advi
 
 # make splash builds splash.dvi
 tex/splash.dvi:
@@ -161,10 +162,11 @@ distribute: tex/splash.dvi test/demo.dvi test/trans.dvi	test/jpdemo.dvi
 	cp -pr bazar-ocaml/advi/doc/* $(WEBSITEDIR)
 	- chgrp -R caml $(WEBSITEDIR)
 	- chmod -R g+w $(WEBSITEDIR)
+	cp -pr bazar-ocaml/advi/LGPL bazar-ocaml/advi/README bazar-ocaml/advi/INDEX $(FTPSITEDIR)
 	cd release; mv bazar-ocaml/advi $(ADVI); \
 	tar cvf $(ADVI).tar $(ADVI); \
 	gzip $(ADVI).tar; \
-	mv -f $(ADVI).tar.gz $(WEBSITEDIR)
+	mv -f $(ADVI).tar.gz $(FTPSITEDIR)
 	rm -rf release
 
 include .depend
