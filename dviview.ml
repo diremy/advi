@@ -607,6 +607,7 @@ let show_toc st =
         | Thumbnails (r, page) -> show_thumbnails st r page
         end;
         synchronize st;
+        st.aborted <- true;
 ;;
         
 

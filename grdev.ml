@@ -64,7 +64,6 @@ let title = ref "Advi";;
 let set_title s = title := s;;
 
 let synchronize () =
-Misc.debug_stop "Dev.synchronize";
   Gs.flush ();
   Transimpl.synchronize_transition ();
   GraphicsY11.synchronize ();
@@ -289,7 +288,9 @@ let draw_bkgd () =
   ) bkgd_data.bgimg;
   (* Background: function. *)
   lift (fun draw -> draw  viewport) bkgd_data.bgfunction;
+(*
   synchronize()
+*)
 ;;
 
 type bgoption =
