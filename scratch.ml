@@ -290,7 +290,7 @@ let distance x0 y0 x1 y1 =
   sqrt (float_of_int (dx * dx + dy * dy));;
 
 let draw_circle (x0, y0) (x1, y1) =
-  G.draw_circle x0 y0 (int_of_float (0.5 +. distance x0 y0 x1 y1));;
+  G.draw_circle x0 y0 (Misc.round (distance x0 y0 x1 y1));;
 
 (* Enter drawing on slide *)
 let rec scratch_draw00 () =
