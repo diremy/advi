@@ -3,17 +3,18 @@ PREREQUISITES
 
 You need Objective Caml 3.04 or higher to compile the sources.
 
-However, you need a strictly higher version of Graphics (you can pick the
-one under CVS of a more recent release), especially if you are using Advi
-as your WhizzyTeX previewer. Otherwise, it should work but you will not
-obtain a correct handling of signals (USR1 is used to tell Advi to reload).
-
 You also need the `kpsewhich' utility of the `kpathsea' library
 provided by many TeX distributions.
 
-For the encapsulated postscript file inclusion, you require the
-camlimages library, available at 
+For bitmap based image inclusion using \includegraphics of 
+graphics macro package, you require the camlimages library, 
+available at 
 	http://pauillac.inria.fr/camlimages/
+
+To display postscript based drawings by PsTricks macro package,
+you need ghostscript (http://www.ghostscript.com). You need
+the version 6.52 or later for the correct synchronization of
+drawing of the TeX glyphs and postscript graphics.
 
 COMPILATION AND INSTALLATION
 ============================

@@ -15,7 +15,6 @@ dnl Checking cdk_config
 AC_PATH_PROG(PATH_CDK, cdk_config, "nope")
 if test "X$PATH_CDK" != "Xnope"; then
   HAVE_CDK="true"
-  echo "cdk_config has been found"
 else
   HAVE_CDK="false"
 fi
@@ -26,15 +25,17 @@ dnl CamlImages
 
 CAMLIMAGESDIR=$CAMLDIR/camlimages
 
+AC_MSG_CHECKING(checking camlimages)
 AC_ARG_WITH(camlimages, [  --with-camlimages=dir      specify camlimages library directory],
   if test "$withval" != "no" ; then  
 	CAMLIMAGESDIR=$withval
   else
+	AC_MSG_RESULT(no)
 	CAMLIMAGESDIR=nope
   fi)
 
 if test -f $CAMLIMAGESDIR/ci_ps.cma || $HAVE_CDK; then
-	echo "Camlimages: ok"
+	AC_MSG_RESULT(found)
 	HAVE_CAMLIMAGES="true"
         if $HAVE_CDK; then
 	        CAMLIMAGESLIBS="camlimages"
@@ -43,6 +44,7 @@ if test -f $CAMLIMAGESDIR/ci_ps.cma || $HAVE_CDK; then
                 CAMLIMAGESLIBS='$(WITH_CAMLIMAGES:.cma=)'
         fi
 else
+	AC_MSG_RESULT(found, but too old)
 	echo "**************** Warning ******************"
 	echo "camlimages is not found or incomplete in the directory \"$CAMLIMAGESDIR\""
 	echo "(make sure install the latest version 2.00)"
@@ -55,32 +57,65 @@ dnl CamlTk
 
 CAMLTKDIR=$CAMLDIR/camltk
 
+AC_MSG_CHECKING(checking camltk)
 AC_ARG_WITH(camltk, [  --with-camltk=dir      specify camltk library directory],
   if test "$withval" != "no" ; then  
 	CAMLTKDIR=$withval
   else
+	AC_MSG_RESULT(no)
 	CAMLTKDIR=nope
   fi)
 
 if test -f $CAMLTKDIR/camltk.cma || $HAVE_CDK; then
-	echo "CamlTk: ok"
+	AC_MSG_RESULT(found)
 	HAVE_CAMLTK="true"
 else
+	AC_MSG_RESULT(no)
 	HAVE_CAMLTK="false"
+fi
+
+dnl Checking gs:
+
+PATH_GS="nope"
+AC_MSG_CHECKING(checking gs)
+AC_ARG_WITH(gs, [  --with-gs=path          specify gs path],
+  if test "$withval" != "no" ; then  
+	PATH_GS=$withval
+  else
+	PATH_GS="nope"
+  fi)
+
+if test "X$PATH_GS" = "Xnope"; then
+  AC_PATH_PROG(PATH_GS, gs, "nope") 
+fi
+
+dnl check gs really exists and its version
+if test -f "$PATH_GS" ; then
+  HAVE_GS="true"
+  GS_VERSION=`$PATH_GS -v | grep Ghostscript | sed -e 's/.*Ghostscript \([[0-9\.]]*\).*/\1/'`
+  GS_VERSION_INT=`echo $GS_VERSION | sed -e 's/\.//'`
+  if test `expr $GS_VERSION_INT \>= 6.52` != "1"; then
+    AC_MSG_RESULT(found, but too old)
+    GS_UPTO_DATE="*** TOO OLD ***"
+    echo "**************** Warning ********************"
+    echo "Your Ghostscript $GS_VERSION is too old.     "
+    echo "You need Ghostscript version 6.52 or higher  "
+    echo "for the correct synchronization of postscript"
+    echo "and TeX graphics                             "
+    echo "*********************************************"
+  else
+    GS_UPTO_DATE=""	
+    AC_MSG_RESULT(found)
+  fi
+else
+  AC_MSG_RESULT(no)
+  HAVE_GS="false"
 fi
 
 dnl Check for libraries: END
 
 AC_PATH_XTRA
 WITH_X="$X_LIBS $X_PRE_LIBS -lX11 $X_EXTRA_LIBS"
-
-dnl Checking gs:
-AC_PATH_PROG(PATH_GS, gs, "nope") 
-if test "X$PATH_GS" != "Xnope" ; then
-  HAVE_GS="true"
-else
-  HAVE_GS="false"
-fi
 
 dnl Resources location
 ADVI_LOC=`pwd`
@@ -115,11 +150,11 @@ AC_SUBST(WITH_X)
 AC_SUBST(HAVE_GS)
 AC_OUTPUT(Makefile.config config.ml ifdef.ml)
 
-echo -------------------------------------------------- Configuration finished
-echo Language:            $CAML version $CAMLVERSION
-echo cdk_config:          $HAVE_CDK
-echo Camlimages:          $HAVE_CAMLIMAGES
-echo CamlTk:              $HAVE_CAMLTK
-echo GS:		  $HAVE_GS
-echo Resources:           $ADVI_LOC/
-echo -------------------------------------------------------------------------
+echo "------------------------------------------------- Configuration finished"
+echo "Language:    $CAML version $CAMLVERSION"
+echo "cdk_config:  $HAVE_CDK"
+echo "Camlimages:  $HAVE_CAMLIMAGES"
+echo "CamlTk:      $HAVE_CAMLTK"
+echo "GS:          $GS_UPTO_DATE version $GS_VERSION at $PATH_GS"
+echo "Resources:   $ADVI_LOC/"
+echo "------------------------------------------------------------------------"
