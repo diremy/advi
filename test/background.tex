@@ -140,7 +140,52 @@ have two options:
 
 Of course, you can use the usual LaTeX colors (or define new ones the usual way) for backgrounds.
 
+\Newpage
+\special{color push white}
+\setbgcolor{black}
+ \advifooter\adviheader
+
+\subsection* {Reverse video effect}
+
+If you want a reverse video effect, you just have to set the background
+of the page to black and the text color to white, as follows:
+
+\begin{itemize}
+
+\item set the background to black, anywhere in the text of the slide with
+
+  \begin{quote}
+    \begin{verbatim}
+	\setbgcolor{Black} 
+    \end{verbatim}
+  \end{quote}
+
+\item set the text color to white using
+  \begin{quote}
+    \begin{verbatim}
+	\special{color push white}
+    \end{verbatim}
+  \end{quote}
+at the beginning of the slide.
+
+\end{itemize}
+
+To revert to normal text color, use
+
+  \begin{quote}
+    \begin{verbatim}
+	\special{color pop}
+    \end{verbatim}
+  \end{quote}
+
+at the end of the slide. (Write \verb"\resetbg" at the
+biginning of next slide, if you also want to revert to normal background.)
+
+\special{color pop}
+
 \newpage
+
+\resetbg
 
 \subsection* {TODO:}
 
