@@ -42,7 +42,7 @@ Options.add
 let get_pointer_size, set_pointer_size =
   let pointer_size = ref 40 in
   (fun () -> !pointer_size),
-  (fun sz -> pointer_size := sz);;
+  (fun sz -> pointer_size := max 4 sz);;
 
 Options.add
   "-laser-pointer-size"
@@ -135,6 +135,7 @@ let show_pointer ptr x y =
   ptr.x <- x; ptr.y <- y;
   draw_image ptr.ptr_img x y;;
 
+(* An ``impossible'' key struck value. *)
 let null_key = '\000';;
 
 let rec treat_laser_event ptr q =
@@ -143,7 +144,7 @@ let rec treat_laser_event ptr q =
    | { mouse_x = x; mouse_y = y;
        button = btn;
        keypressed = kp;
-       key = c; } ->
+       key = c; } as ev ->
        show_pointer ptr x y;
        if kp then begin
          match c with
@@ -160,12 +161,19 @@ let rec treat_laser_event ptr q =
          | '' -> treat_laser_event ptr c
          | 'l' when q = '' -> raise Exit
          | c ->
-            Misc.push_key_event 'l' GraphicsY11.nomod;
-            Misc.push_key_event '' GraphicsY11.control;
+            go_on ();
             Misc.push_key_event c (GraphicsY11.get_modifiers ());
             if q = '' then Misc.push_key_event '' GraphicsY11.control;
             raise Exit
-       end;;
+       end else begin
+         go_on ();
+         Misc.push_mouse_event x y btn;
+         raise Exit
+       end
+
+and go_on () =
+  Misc.push_key_event 'l' GraphicsY11.nomod;
+  Misc.push_key_event '' GraphicsY11.control;;
 
 let switch_on_laser_beam () =
 

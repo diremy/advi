@@ -20,7 +20,7 @@
 (* Saving screen shots of the actual Active-DVI display.
    Pierre Weis.                                                        *)
 
-open Image;;
+open Images;;
 
 type x = int and y = int and w = int and h = int;;
 
@@ -77,7 +77,7 @@ let new_fname () =
 let output_page_area_image_file fname x y w h =
   GraphicsY11.anti_synchronize ();
   let img = Graphic_image.get_image x y w h in
-  Image.save fname None [] (Rgb24 img);
+  Images.save fname None [] (Rgb24 img);
   Misc.debug_endline (Printf.sprintf "image %s has been written." fname);;
 
 let save_page_area_image_file fname x y w h =

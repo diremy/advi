@@ -65,7 +65,7 @@ MLINCDIRS = $(CAMLIMAGESDIR)
 
 EXEC	  = advi
 
-MISC	  = config misc timeout ageometry 
+MISC	  = config misc timeout ageometry
 OPTIONS	  = options rc userfile
 GRAPHICS  = graphicsY11 global_options busy gradient gterm launch \
 	    dvicolor shot laser_pointer
@@ -89,7 +89,7 @@ CMO_OBJS  = $(addsuffix .cmo, $(MODULES))
 CMX_OBJS  = $(addsuffix .cmx, $(MODULES))
 
 ifeq ($(HAVE_CDK),true)
-CMA_OBJS  = `cdk_config $(LIBRARIES)` 
+CMA_OBJS  = `cdk_config $(LIBRARIES)`
 CMXA_OBJS = `cdk_config -opt $(LIBRARIES)`
 CAMLP4_FLAG = `cdk_config -c camlp4`
 else
@@ -115,7 +115,7 @@ default: Makefile.config $(INSTALLTARGET) $(HELPFILES)
 all: $(INSTALLTARGET) documentation
 allopt: opt documentation
 allbyte: byte documentation
-opt: $(EXEC).opt 
+opt: $(EXEC).opt
 byte: $(EXEC)
 
 i_want_opt:
@@ -124,13 +124,13 @@ i_want_opt:
 	@echo "  For the best exprerience, we strongly recommend to use "
 	@echo "  Active-DVI compiled with the native code compiler (ocamlopt)."
 	@echo "  For further information about ocamlopt, look at:"
-	@echo "    http://www.caml.org/"
+	@echo "    http://caml.inria.fr/"
 	@echo "  If there is no ocamlopt compiler version for your platform,"
 	@echo "  you can still get a slow but fully functional version of"
 	@echo "  Active-DVI, by typing \"make allbyte\" that would build a byte"
 	@echo "  code version (\"make installbyte\" for install.)"
 	@echo "**************************************************************"
-	@exit 1        
+	@exit 1
 
 $(EXEC): $(COBJS) $(CMO_OBJS)
 	$(OCAMLC) -custom $(INCLUDES) $(BYTE_OBJS) $(LINK_OPTS) -o $(EXEC)
@@ -181,7 +181,7 @@ veryveryclean: veryclean
 	rm -f configure
 
 installopt: install
-installbyte: 
+installbyte:
 	$(MAKE) install INSTALLTARGET=advi
 install:: $(INSTALLTARGET) $(HELPFILES)
 	- install -d ${bindir}

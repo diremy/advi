@@ -18,7 +18,7 @@
 (* $Id$ *)
 
 (* Screen shot. *)
-open Image;;
+open Images;;
 
 let save_gr_image fname x y nw nh =
   let screen_w = Graphics.size_x () and screen_h = Graphics.size_y () in
@@ -26,7 +26,7 @@ let save_gr_image fname x y nw nh =
   let cimg =
     if nw = screen_w && nh = screen_h then img else
     Rgb24.resize None img nw nh in
-  Image.save fname None [] (Rgb24 cimg)
+  Images.save fname None [] (Rgb24 cimg)
 ;;
 
 let thumbnails =

@@ -135,7 +135,7 @@ type antialias = bool;;
 
 type ps_bbox = int * int * int * int;;
 
-open Image;;
+open Images;;
 open Color;;
 open GraphicsY11;;
 
@@ -287,8 +287,8 @@ let image_load psbbox (w, h) file =
   debugs ("image load " ^ file);
   let image_aa_level = if !image_aa then 2.0 else 1.0 in
   try
-    match fst (Image.file_format file) with
-    | Image.Ps ->
+    match fst (Images.file_format file) with
+    | Images.Ps ->
         let (llx, lly, urx, ury) =
         match psbbox with
         | Some bbox -> bbox
@@ -304,9 +304,9 @@ let image_load psbbox (w, h) file =
         and  resy = max resy gs_min_res in
         Ps.load_ps file (Some (llx, lly, urx, ury))
           [Load_Resolution (resx, resy)]
-    | _ -> Image.load file []
+    | _ -> Images.load file []
   with
-  | Image.Wrong_file_type ->
+  | Images.Wrong_file_type ->
       Misc.warning ("Unsupported graphic format in: " ^ file);
       raise Exit
   | exc ->
@@ -316,7 +316,7 @@ let image_load psbbox (w, h) file =
 ;;
 
 let resize_and_make_transparent image whitetransp ratiopt (ow, oh) =
-  let iw, ih = Image.size image in
+  let iw, ih = Images.size image in
   let w, h =
     (* compute the size of the scaled image according to the options *)
     match ratiopt with
@@ -470,7 +470,7 @@ let draw_image image cache_name alpha blend (w, h) (x0, y0) =
     try Some (blend_func blend) with _ -> debugs "No blend"; None in
   (* load_and_resize may not return exactly the same size
      we specified as (w, h) *)
-  let iw, ih = Image.size image in
+  let iw, ih = Images.size image in
   match image with
   | Rgb24 _ when alpha = 255 && blend = None ->
       (* optimized *)

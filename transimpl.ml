@@ -208,7 +208,7 @@ let get_genpath = function
 let rescale_grimage img w h nw nh =
   if nw = w && nh = h then img else
   let cimg = Graphic_image.image_of img in
-  Graphic_image.of_image (Image.Rgb24 (Rgb24.resize None cimg nw nh))
+  Graphic_image.of_image (Images.Rgb24 (Rgb24.resize None cimg nw nh))
 ;;
 
 (* Rendering function for sprites along a path *)
