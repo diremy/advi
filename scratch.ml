@@ -36,8 +36,11 @@ let cursor_settings = Cursor_sizing;;
 let set_scratch_line_color, get_scratch_line_color =
   let scratch_line_color = ref G.red in
   (fun c ->
-    Misc.warning (Printf.sprintf "Setting scratch font color to %d" c);
-    if c > 0 then scratch_line_color := c),
+    (* Be careful not to emit a warning if there is no modification. *)
+    if c > 0 && c <> !scratch_line_color then begin
+      scratch_line_color := c;
+      Misc.warning (Printf.sprintf "Setting scratch font color to %d" c)
+    end),
   (fun () -> !scratch_line_color);;
 
 let set_scratch_line_color_string s =
@@ -70,8 +73,11 @@ let default_scratch_line_width = 2;;
 let set_scratch_line_width, get_scratch_line_width =
   let scratch_line_width = ref default_scratch_line_width in
   (fun i ->
-    Misc.warning (Printf.sprintf "Setting scratch line width to %d" i);
-    if i > 0 then scratch_line_width := i),
+    (* No warning if there is no modification. *)
+    if i > 0 && i <> !scratch_line_width then begin
+      Misc.warning (Printf.sprintf "Setting scratch line width to %d" i);
+      scratch_line_width := i
+    end),
   (fun () -> !scratch_line_width);;
 Options.add "-scratch-line-width"
  (Arg.Int set_scratch_line_width)
@@ -102,8 +108,11 @@ let build_font_name sz s1 s2 s3 s4 s5 =
 let set_scratch_font_color, get_scratch_font_color =
   let scratch_font_color = ref G.red in
   (fun c ->
-    Misc.warning (Printf.sprintf "Setting scratch font color to %d" c);
-    scratch_font_color := c),
+    (* Be careful not to emit a warning if there is no modification. *)
+    if c > 0 && c <> !scratch_font_color then begin
+      scratch_font_color := c;
+      Misc.warning (Printf.sprintf "Setting scratch font color to %d" c)
+    end),
   (fun () -> !scratch_font_color);;
 
 let set_scratch_font_color_string s =
@@ -130,9 +139,12 @@ let set_scratch_font, get_scratch_font =
   let scratch_font_ref =
     ref "-adobe-times-bold-r-normal--18-180-75-75-p-99-iso8859-1" in
   (fun s ->
-     Misc.warning
-      (Printf.sprintf "Setting scratch font to %s" s);
-     scratch_font_ref := s),
+    (* Be careful not to emit a warning if there is no modification. *)
+    if s <> !scratch_font_ref then begin
+      Misc.warning
+        (Printf.sprintf "Setting scratch font to %s" s);
+      scratch_font_ref := s
+    end),
   (fun () -> !scratch_font_ref);;
 
 Options.add "-scratch-font"
@@ -427,6 +439,7 @@ let draw_circle (x0, y0) (x1, y1) =
 let rec scratch_draw00 () =
   let x, y = G.mouse_pos () in
   G.moveto x y;
+  G.set_color (get_scratch_line_color ());
   scratch_draw0 ()
 
 (* Waiting for movements, button is pressed. *)
