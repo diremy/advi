@@ -141,6 +141,10 @@ if test -f $CAMLTKDIR/cTk.cmi || $HAVE_CDK; then
 else
 	AC_MSG_RESULT(no)
 	HAVE_CAMLTK="false"
+	echo "***************** Warning *******************"
+	echo "Your camltk library is too old. Use the latest one,"
+	echo "found in the O'Caml CVS tree"
+	echo "*******************************************"
 fi
 
 dnl Checking gs:
