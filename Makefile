@@ -145,7 +145,9 @@ FTPSITEDIR=/net/pauillac/infosystems/ftp/cristal/advi
 tex/splash.dvi:
 	cd tex; latex splash.tex
 
-distribute: tex/splash.dvi
+distribute: tar_and_web rpm
+
+tar_and_web: tex/splash.dvi
 	(cd test; make all jpdemo.dvi)
 	rm -rf release
 	rm -rf $(WEBSITEDIR)/*
@@ -166,5 +168,15 @@ distribute: tex/splash.dvi
 	gzip $(ADVI).tar; \
 	mv -f $(ADVI).tar.gz $(FTPSITEDIR)
 	rm -rf release
+
+rpm:
+	- echo YOU NEED TO SU ROOT
+	su root -c "rpm -ba --clean ./advi.spec"
+	if test -d /usr/src/redhat; then rpmdir=/usr/src/redhat; \
+	else if test -d /usr/src/RPM; then rpmdir=/usr/src/RPM; fi; fi; \
+	if test "X$$rpmdir" = "X"; then \
+		echo "cannot create rpm"; exit 2; fi; \
+	cp $$rpmdir/SRPMS/advi-$(VERSION)-1.src.rpm \
+	   $$rpmdir/RPMS/*/advi-$(VERSION)-1.*.rpm $(FTPDIR)
 
 include .depend
