@@ -176,12 +176,13 @@ dvi and passed as arguments to the specified \verb"command".
 \begin{itemize}
 \item The \verb"display" command (from ImageMagick) can show any image into your
 presentation using:\\
-\verb|\adviembed{3cm}{3.3cm}|\verb|{display -geometry !g! -window !p logo.gif}|\\
+\verb|\adviembed{3cm}{3.3cm}|\\
+\verb|          {display -geometry !g! -window !p logo.gif}|\\
 \adviembed{3cm}{3.3260869cm}{display -geometry !g! -window !p advilogo.gif}
 
-\item Similarly, \verb|animate| can display animations\\
-        \verb+animate -geometry !g -window !p file.gif+:\\
-        \verb|\adviembed{2cm}{2cm}{animate -geometry !g! -window !p anim.gif}|\\
+\item Similarly, \verb|animate| can display animations:\\
+        \verb|\adviembed{2cm}{2cm}|\\
+        \verb|          {animate -geometry !g! -window !p anim.gif}|\\
         \adviembed{2cm}{2cm}{animate -geometry !g! -window !p mmm.anim.gif}
 \end{itemize}
 
@@ -202,11 +203,13 @@ presentation using:\\
   \item Any CamlTk application using\\
    \verb+\adviembed{w}{h}{prog -geometry !g -use !p}+\\
    For instance (using wish)\\
-   \verb|\adviembed[persistent]{5cm}{1cm}{wish ./watch -geometry !g -use !p}|\\
+   \verb|\adviembed[persistent]{5cm}{1cm}|\\
+   \verb|          {wish ./watch -geometry !g -use !p}|\\
    \adviembed[persistent]{5cm}{0.71cm}{wish ./watch -geometry !g -use !p}
 \adviwait
   \item Possibly interactive ! (using CamlTk)\\
-   \verb|\adviembed[persistent-taui]{6.5cm}{9.5cm}{./taquin -geometry !g -use !p dojoji.gif}|\\
+   \verb|\adviembed[persistent]{6.5cm}{9.5cm}|\\
+   \verb|          {./taquin -geometry !g -use !p dojoji.gif}|\\
   \adviembed[persistent=taquin]{7.5cm}{11cm}{./taquin -geometry !g -use !p dojoji.gif}
 
 \end{itemize}
@@ -237,10 +240,10 @@ the presentation.
 \begin{itemize}
  \item You can add music to your presentation, if you have a music
   player available:\\
-  \verb|\adviembed[name=mpg123]{}{}{mpg123 -q music.mp3}|
+  \verb|\adviembed{1mm}{1mm}{mpg123 -q music.mp3}|
 \end{itemize}
 
-\adviembed[name=mpg123]{1cm}{1cm}{mpg123 -q music.mp3}
+\adviembed[name=mpg123]{1mm}{1mm}{mpg123 -q music.mp3}
 
 \newpage
 
