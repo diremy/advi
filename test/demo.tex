@@ -234,65 +234,22 @@ their placements may not obey your geometry specifications.
    \adviembed{2cm}{2cm}{xeyes -bw 0 -shape -geometry !g}
 
  \item An Xterm running an interesting application:\\
-   \verb|\adviembed{10cm}{5cm}{xterm -geometry 50x10+!x+!y -e ocaml}|\\
-   \adviembed{10cm}{5cm}{xterm -geometry 50x10+!x+!y -e ocaml}
+   \verb|\adviembed{10cm}{5cm}{xterm -geometry 50x7+!x+!y -e ocaml}|\\
+   \adviembed{10cm}{4cm}{xterm -geometry 50x7+!x+!y -e ocaml}
 \end{itemize}
 
 The \verb|embed| macro can launch any executable system command during
-the presentation.
+the presentation. 
 \begin{itemize}
  \item You can add music to your presentation, if you have a music
   player available:\\
   \verb|\adviembed{1mm}{1mm}{mpg123 -q music.mp3}|
 \end{itemize}
 
-\adviembed[name=mpg123]{1mm}{1mm}{mpg123 -q music.mp3}
-
-\newpage
-
-\subsection* {Embedded applications (list of commands)}
-
-The commands are 
-
-\medskip\noindent
-\docdef \adviembed\docopt{key=value 
-list}\docarg{width}\docarg{height}\docarg{command} 
-
-\begin{quote}
-where \docid{key=value list} is a list of bindings of the following kind:
-
-\dockey{name}{name}
-\begin{quote}
-Allows to refer to the embedded application as \docid{name}. 
-Annonymous applications have actually the default name \doctt{anonymous}.
-\end{quote}
-
-\dockey{ephemeral}{name}
-
-\begin{quote}
-This is the default case: the embedded application is killed when the page
-is turned.
-\end{quote}
-
-\dockey{persistent}{name}
-
-\begin{quote}
-The application keeps running in the background, but will only be visible in
-the current page.
-\end{quote}
-
-\dockey{sticky}{name}
-\begin{quote}
-The application keep running and remains visible when turning pages.
-\end{quote}
-
-\end{quote}
-
-\medskip\noindent
-\docdef \advikillembed \docarg{name}
-\begin{quote}
-Kill all embedded applications named \docid{name}
-\end{quote}
+\advirecord{play}{\adviembed[name=mpg123]{1mm}{1mm}{mpg123 -q music.mp3}}
+\advirecord {stop}{\advikillembed {mpg123}}
+\advianchor[click]{play}{Play}
+\advianchor[click]{stop}{Stop}
 
 \newpage
 

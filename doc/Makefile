@@ -23,7 +23,7 @@ manual.pdf: manual.tex
 	dvipdfm -o $@ $*.dvi
 
 clean: 
-	rm -f manual.{aux,log,html,tex,dvi,pdf,pdfm,ps,eps,ima,out} \
+	rm -f manual.{aux,log,html,dvi,pdf,pdfm,ps,eps,ima,out} \
 	  manual.image.* manual0[0-9][0-9].{eps,gif,pdf} 
 
 .SUFFIXES: .tex .dvi .ps .pdf .pdfm .tex .html .out .ima

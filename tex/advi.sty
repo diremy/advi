@@ -49,20 +49,27 @@
 
 %%% record and play
 
+\newif \ifadvi@record 
 \def \advi@start {start}
 \def \advi@startplay {start play}
 \define@key{advi@record}{play}[]{\let \advi@do \advi@startplay}
-\newenvironment {Advi@record}[2][]
-  {\let \advi@do \advi@start 
-   \setkeys{advi@record}{#1}\advi@special {proc=#2 record=\advi@do}}
+\def \advi@recordenv {advirecord}
+\newenvironment {advi@record}[2][]%
+  {\ifadvi@record \advi@error {Embedded record are not allowed}\fi
+   \ifx \@currenvir \advi@recordenv \else \begingroup \fi
+   \advi@recordtrue
+   \let \advi@do \advi@start 
+   \setkeys{advi@record}{#1}\advi@special {proc=#2 record=\advi@do}%
+   \ifx \@currenvir \advi@recordenv \let \@do \relax \else
+     \let \@do \advi@endrecord \fi \@do}
   {\advi@special {proc record=end}}
+\def \advi@endrecord #1{#1\endadvi@record \endgroup}
 \newcommand {\advi@play}[2][]%
    {\begingroup
       \advi@ifempty{#1}{}{\color {#1}}{\advi@special {proc=#2 play}}%
     \endgroup}
 
-\advi@exportenv {Advirecord}{Advi@record} 
-\newcommand {\advirecord}[3][]{\begin{Advi@record}[#1]{#2}#3\end{Advi@record}}
+\advi@exportenv {advirecord}{advi@record} 
 \advi@export \adviplay \advi@play
 
 
@@ -95,7 +102,7 @@
 
 %%% Background colors and images
 
-\def \do #1{\expandafter \def \csname advi@geom@#1\endcsname {#1}}
+\def \do #1{\expandafter \def \csname advi@geom@#1@\endcsname {#1}}
 \do {center}
 \do {left}
 \do {right}
@@ -106,7 +113,7 @@
 \do {bottomleft}
 \do {bottomright}
 \let \do \relax
-\def \advi@ifnine #1#2#3{\@ifundefined {advi@geom@#1}{#3}{#2}}
+\def \advi@ifnine #1#2#3{\@ifundefined {advi@geom@#1@}{#3}{#2}}
 
 \let \advi@global \relax
 \def \advi@global@ {global}
@@ -294,12 +301,22 @@ end
 
 %%% Active DVI
 
-\newenvironment {Advi@anchor}[1]
-  {\advi@special@ {html:<a advi="#1">}}
+\def \advi@over@ {over}
+\def \advi@click@ {click}
+\def \advi@anchorenv {advianchor}
+
+\newenvironment {advi@anchor}[2][over]{%
+   \ifx \@currenvir \advi@anchorenv \else \begingroup \fi 
+   \def \@test {#1}\ifx \@test \advi@over@ 
+       \advi@special@ {html:<a advi="#2">}\else
+   \ifx \@test \advi@click@ 
+       \advi@special@ {html:<a hdvi="#2">}\else
+   \advi@error {Incorect anchor mode #1}\fi \fi
+   \ifx \@currenvir \advi@anchorenv \let \@do \relax \else
+        \let \@do \advi@endanchor \fi \@do}
   {\advi@special@ {html:</a>}}
-\newcommand {\advi@anchor}[2]{\begin{Advi@anchor}{#1}#2\end{Advi@anchor}}
-\advi@exportenv {Advianchor}{Advi@anchor}
-\advi@export \advianchor \advi@anchor
+\def \advi@endanchor #1{#1\endadvi@anchor \endgroup}
+\advi@exportenv {advianchor}{advi@anchor}
 
 %%% Partial patch for overlays -- 0 will be shown > 0 will not be shown
 

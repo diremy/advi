@@ -1,6 +1,7 @@
 \documentclass{article}
 
 \usepackage {manual}
+\usepackage {fullpage}
 \usepackage {makeidx}
 
 \expandafter \ifx \csname driver\endcsname\relax \def \driver{}\fi 
@@ -19,7 +20,7 @@
 \maketitle
 
 \begin{abstract}
-Summary of Active DVI.
+Put a Summary of Active DVI. 
 \end{abstract}
 
 \tableofcontents
@@ -40,12 +41,18 @@ user requests to continue (or to change page).
 
 \medskip\noindent
 \docdef \advirecord \doctt{[play]}\docarg{tag}\docarg{latex code}
+\\
+\docdef \begin\doctt{\{advirecord\}}%
+\doctt{[play]}\docarg{tag}\docarg{latex code}%
+\docid {text}\docdef \end\doctt{\{advirecord\}}
 \begin{quote}
 The computes \docid{latex code} and record its DVI ouput under tag
 \docid{tag}. The DVI output is not displayed during recording, unless the
 option \doctt{play} is set.
 
 Embedded recordings are prohibited. 
+
+In the environment form \docid{latex code} may contain fragile commands. 
 \end{quote}
 
 \medskip\noindent
@@ -54,6 +61,21 @@ Embedded recordings are prohibited.
 Replay the DVI previously recorded as \docid{tag}.
 The optional argument changes the color to \docid{color} during replay. 
 \end{quote}
+
+\medskip\noindent
+\docdef \advianchor\docopt{activation}\docarg{tag}\docarg{text}
+\\
+\docdef \begin\doctt{\{advianchor\}}\docopt{activation}\docarg{tag}%
+\docid {text}\docdef \end\doctt{\{advianchor\}}
+\begin{quote}
+Play record when anchor is activated. The argument \docid{activation} may
+either be \doctt{over} or \doctt{click}. The page is reset to its original
+appearance when the anchor is no more activated (the mouse leaves the anchor
+area or the button is released). 
+
+In the environment form, \docid{text} may contain fragile commands. 
+\end{quote}
+
 
 \subsection {Images}
 
@@ -239,22 +261,15 @@ The command is
 
 \medskip\noindent
 \docdef \advianchor \docarg{tag}\docarg {text}
+\\
+\docdef \begin\doctt{\{advianchor\}}\docarg{tag}%
+\docid {text}\docdef \end\doctt{\{advianchor\}}
 \begin{quote}
 The text is first display as usual and mark as active. 
 Mouving the mouse above the text will display the record \docid{tag}.
+
+In the environment form, \docid{text} may contain fragile commands. 
 \end{quote}
-
-\noindent
-The command is also available as an environment 
-
-\medskip\noindent
-\docdef \begin\doctt{\{Advianchor\}}\docarg{tag}%
-\docid {text}\docdef \end\doctt{\{Advianchor\}}
-\begin{quote}
-Here, \docid{text} can have fragile commands. 
-\end{quote}
-
-\newpage
 
 \subsection {Postscript specials}
 
@@ -380,9 +395,9 @@ Fortunately, it seems that recent version of ghostscript $(> 6.5)$ have
 fixed this problem by using {\tt XSync(false)} instead.
 There, inline specials should be correctly rendered. 
 
-However, version some releases of 6.5x also carry a small fatal bug for
-advi, that will be fixed in future releases. This can easily be fixed, thoug 
-(see \url{http://cristal.pauillac.inria.fr/~remy/ghostscript/}).
+However, version some releases of 6.5x also carry a small but fatal bug for
+advi, that will be hopefully be fixed in future releases. This can easily be
+fixed, thoug (see \url{http://cristal.pauillac.inria.fr/~remy/ghostscript/}).
 
 \subsection*{Inlined postscript}
 

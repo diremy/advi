@@ -128,14 +128,16 @@ let embeds = ref [];;
 let persists = ref [];;
 let unmap_embeds = ref [];;
 
+let launch_embedded_apps() = 
+  List.iter (fun f -> f ()) (List.rev !embeds);  embeds := [];
+  List.iter (fun f -> f ()) (List.rev !persists);  persists := [];
+;;
 let synchronize () =
   Gs.flush ();
   Transimpl.synchronize_transition ();
   GY.synchronize ();
-  List.iter (fun f -> f ()) (List.rev !embeds);
-  embeds := [];
-  List.iter (fun f -> f ()) (List.rev !persists);
-  persists := [];;
+  launch_embedded_apps();
+;;
 
 (* for refreshed signal on usr1 *)
 exception Usr1;;
@@ -862,10 +864,18 @@ module A : ACTIVE =
 
 module H =
   struct
+    type mode = Over | Click_down  
+      type link = 
+          { link : string;
+            action : (unit -> unit);
+            mode : mode;
+            color : color option;
+            area : (int * int * int) option;
+          } 
     type tag =
       | Name of string
       | Href of string
-      | Advi of string * (unit -> unit)
+      | Advi of link
 
     type anchor = {
         tag : tag;
@@ -895,9 +905,9 @@ module H =
         let anchor = {tag = tag; draw = List.rev draw } in
         let e =
           match tag with
-          | Href s -> 0
-          | Advi (s, f) -> 0
-          | Name s -> 0 in
+          | Href _ -> 0
+          | Advi _ -> 0
+          | Name _ -> 0 in
         let y' = y - voff - 1 in
         let h' = h + 2 in
         let a =
@@ -943,10 +953,10 @@ module H =
 
 
     type backup =
-       | Nil
-       | Rect of Graphics.image * anchor A.active *
-             (Graphics.image * anchor A.active) list
-       | Screen of Graphics.image * anchor A.active * anchor A.t
+      | Nil
+      | Rect of Graphics.image * anchor A.active *
+            (Graphics.image * anchor A.active) list
+      | Screen of Graphics.image * anchor A.active * anchor A.t
 
     let up_to_date act = function
       | Rect (_, a, l) -> A.same_location a  act
@@ -955,25 +965,25 @@ module H =
 
 
     let deemphasize now emph =
-        match emph with
-        | Rect (ima, act, l) ->
-            GY.display_mode now;
-            List.iter
-              (function ima, act -> Graphics.draw_image ima act.A.x act.A.y) l;
-            Graphics.draw_image ima act.A.x act.A.y;
-            GY.set_cursor !free_cursor;
-            GY.display_mode false
-        | Screen (ima, act, all_anchors) ->
-            GY.display_mode true;
-            anchors := all_anchors;
-            Gs.flush ();
-            (* long delay to be safe *)
-            sleep_watch false false 0.1;
-            Graphics.draw_image ima 0 0;
-            GY.set_cursor !free_cursor;
-            GY.flush ();
-            GY.display_mode false
-        | Nil -> ()
+      match emph with
+      | Rect (ima, act, l) ->
+          GY.display_mode now;
+          List.iter
+            (function ima, act -> Graphics.draw_image ima act.A.x act.A.y) l;
+          Graphics.draw_image ima act.A.x act.A.y;
+          GY.set_cursor !free_cursor;
+          GY.display_mode false
+      | Screen (ima, act, all_anchors) ->
+          GY.display_mode true;
+          anchors := all_anchors;
+          Gs.flush ();
+          (* long delay to be safe *)
+          sleep_watch false false 0.1;
+          Graphics.draw_image ima 0 0;
+          GY.set_cursor !free_cursor;
+          GY.flush ();
+          GY.display_mode false
+      | Nil -> ()
 
     let emphasize c act =
       let ima = Graphics.get_image act.A.x act.A.y act.A.w act.A.h in
@@ -995,23 +1005,24 @@ module H =
       GY.sync ();
       (* wait until all events have been processed, flush should suffice *)
 (*
-      Graphics.set_color (Graphics.point_color 0 0);
-      (* it seems that the image is saved ``lazily'' and further instruction
-         could be capture in the image *)
-      sleep_watch false false 0.05;
-*)
+   Graphics.set_color (Graphics.point_color 0 0);
+   (* it seems that the image is saved ``lazily'' and further instruction
+      could be capture in the image *)
+   sleep_watch false false 0.05;
+ *)
       let all_anchors = !anchors in
       a ();
       flush_last ();
       GY.synchronize ();
+      launch_embedded_apps();
       Screen (ima, act, all_anchors)
 
     let light t =
       try
         match t with
         | Name n ->
-           let t = Name (Misc.get_suffix "#" n) in
-           emphasize name_emphasize (find_tag t)
+            let t = Name (Misc.get_suffix "#" n) in
+            emphasize name_emphasize (find_tag t)
         | _ -> Nil
       with
       | Not_found | Misc.Match -> Nil
@@ -1391,9 +1402,9 @@ let wait_event () =
   clear_sleep ();
   let temp_cursor = ref false in
   reset_cursor ();
-  let rec event emph =
+  let rec event emph b =
     let send ev = H.deemphasize true emph; ev in
-    let rescan () = H.deemphasize true emph; event H.Nil in
+    let rescan () = H.deemphasize true emph; event H.Nil false in
     match wait_signal_event all_events with
     | Raw ev ->
         begin
@@ -1416,18 +1427,36 @@ let wait_event () =
                       send (Href h)
                     end
                   else if H.up_to_date act emph then
-                    event emph
+                    event emph b
                   else
                     begin
                       H.deemphasize true emph;
-                      event (H.emphasize_and_flash href_emphasize act)
+                      event (H.emphasize_and_flash href_emphasize act) b
                     end
-              | {A.action = {H.tag = H.Advi (s, a); H.draw = d }} as act ->
-                  if H.up_to_date act emph then event emph
+              | {A.action =
+                 {H.tag = H.Advi {H.link=s; H.action=a; H.mode=H.Over};
+                  H.draw = d }} as act ->
+                  if H.up_to_date act emph then event emph b
                   else
                     begin
                       H.deemphasize true emph;
-                      event (H.save_screen_exec act a)
+                      event (H.save_screen_exec act a) b
+                    end
+              | {A.action =
+                 {H.tag = H.Advi {H.link=s; H.action=a; H.mode=H.Click_down};
+                  H.draw = d }} as act ->
+                  if ev.button && not b then
+                    begin
+                      H.deemphasize true emph;
+                      event (H.save_screen_exec act a) true;
+                    end
+                  else if ev.button then event emph b
+                  else if H.up_to_date act emph then
+                    event emph b
+                  else 
+                    begin
+                      H.deemphasize true emph;
+                      event (H.emphasize_and_flash href_emphasize act) b
                     end
               | _ ->
                   rescan ()
@@ -1459,7 +1488,7 @@ let wait_event () =
             end
         end
     | Final e -> send e in
-  event H.Nil;;
+  event H.Nil false;;
 
 (* To be changed *)
 exception GS = Gs.Terminated;;

@@ -61,11 +61,10 @@
 \else
 \def \advi@annottab #1#2{\begin{tabular}{@{}a@{}}#2\end{tabular}}%
 \def \annot@ii(#1)#2{%
-  \begin{Advi@record}{advi@annot\the\advi@c@annot}
-    \rput(#1){\ovalnode {advi@to}%
+  \advi@record{advi@annot\the\advi@c@annot}
+    {\rput(#1){\ovalnode {advi@to}%
                  {\begin{tabular}{a}#2\end{tabular}}}%
-     \AdviAnnotArc{advi@from\the\advi@c@annot}{advi@to}%
-  \end{Advi@record}\egroup}
+     \AdviAnnotArc{advi@from\the\advi@c@annot}{advi@to}}\egroup}
 \fi
 
 % \def \annot@ii(#1){\@ifnextchar [{\annot@iii(#1)}{\annot@iii(#1)[c]}}

@@ -937,7 +937,17 @@ let html_special st html =
   if  has_prefix "<A advi=\"" html || has_prefix "<a advi=\"" html then
     let advi x =
       let play() = proc_special st ("advi: proc="^x^" play") in
-      Dev.H.Advi (x, play) in
+      Dev.H.Advi
+        {Dev.H.link = x; Dev.H.action = play;
+         Dev.H.mode = Dev.H.Over; Dev.H.color = None; Dev.H.area = None} in 
+      open_html st html advi "Advi" else
+  if  has_prefix "<A hdvi=\"" html || has_prefix "<a hdvi=\"" html then
+    let advi x =
+      let play() = proc_special st ("advi: proc="^x^" play") in
+      Dev.H.Advi
+        {Dev.H.link = x; Dev.H.action = play;
+         Dev.H.mode = Dev.H.Click_down;
+         Dev.H.color = None; Dev.H.area = None} in 
       open_html st html advi "Advi" else
   if has_prefix "</A>" html || has_prefix "</a>" html then close_html st
   else warning ("Unknown html suffix" ^ html);;
@@ -998,11 +1008,13 @@ let special st s =
     if has_prefix "advi: pause" s then raise Pause else
     if has_prefix "advi: proc" s then proc_special st s else
     if has_prefix "advi: wait " s then wait_special st s else
-    if has_prefix "advi: embed " s then embed_special st s else
+    if has_prefix "advi: embed " s then
+      (if not !hidden then embed_special st s) else
     if has_prefix "advi: trans " s then transition_special st s else
     if has_prefix "advi: transbox save " s then transbox_save_special st s else
     if has_prefix "advi: transbox go " s then transbox_go_special st s else
-    if has_prefix "advi: kill " s then kill_embed_special st s else
+    if has_prefix "advi: kill " s then
+      (if not !hidden then kill_embed_special st s) else
     if has_prefix "advi: setbg " s then bkgd_special st s else
     if has_prefix "advi:" s then Misc.warning ("unknown special: "^ s)
    end else

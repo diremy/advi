@@ -174,7 +174,7 @@ type event =
   | Selection of string
   | Position of int * int
   | Href of string
-  | Advi of string * (unit -> unit)
+  | Advi of string * (unit -> unit) 
   | Click of area * button * int * int
   | Nil;;
 
@@ -182,10 +182,18 @@ val wait_event : unit -> event;;
 
 module H :
     sig
+      type mode = Over | Click_down  
+      type link = 
+          { link : string;
+            action : (unit -> unit);
+            mode : mode;
+            color : color option;
+            area : (int * int * int) option;
+          } 
       type tag =
         | Name of string 
         | Href of string
-        | Advi of string * (unit -> unit)
+        | Advi of link
 
       type anchor = {
           tag : tag;
