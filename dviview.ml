@@ -54,55 +54,67 @@ let starting_page npages =
 
 let start_html = ref None;;
 Options.add
-"-html"
-(Arg.String (fun s -> start_html := Some s))
+  "-html"
+  (Arg.String (fun s -> start_html := Some s))
   "<anchor>: ask Active-DVI to start at HTML reference named <anchor>.";;
 let debug_pages =
   Options.debug
     "--debug-pages"
     "  debug page motion.";;
 
-let browser = ref "netscape-communicator";;
+let browser = ref "netscape";;
 Options.add
   "-browser"
   (Arg.String (fun s -> browser := s))
-  "<com>: set the HTML files viewer command to <com>,\
-  \n\t (the default is \"netscape-communicator\").";;
+  (Printf.sprintf
+     "<com>: set the HTML files viewer command to <com>,\
+      \n\t (the default is %S)."
+     !browser);;
 
 let pager = ref "xterm -e less";;
 Options.add
   "-pager"
   (Arg.String (fun s -> pager := s))
-  "<com>: set the text files viewer command to <com>,\
-  \n\t (the default is \"xterm -e less\").";;
+  (Printf.sprintf
+    "<com>: set the text files viewer command to <com>,\
+     \n\t (the default is %S)."
+    !pager);;
 
 let pdf_viewer = ref "xpdf";;
 Options.add
   "-pdf-viewer"
   (Arg.String (fun s -> pdf_viewer := s))
-  "<com>: set the PDF files viewer command to <com>,\
-  \n\t (the default is \"xpdf\").";;
+  (Printf.sprintf
+    "<com>: set the PDF files viewer command to <com>,\
+     \n\t (the default is %S)."
+    !pdf_viewer);;
 
 let ps_viewer = ref "gv";;
 Options.add
   "-ps-viewer"
   (Arg.String (fun s -> ps_viewer := s))
-  "<com>: set the PostScript files viewer command to <com>,\
-  \n\t (the default is \"gv\").";;
+  (Printf.sprintf
+    "<com>: set the PostScript files viewer command to <com>,\
+    \n\t (the default is %S)."
+    !ps_viewer);;
 
 let image_viewer = ref "xv";;
 Options.add
   "-image-viewer"
   (Arg.String (fun s -> image_viewer := s))
-  "<com>: set the image files viewer command to <com>,\
-  \n\t (the default is \"xv\").";;
+  (Printf.sprintf
+    "<com>: set the image files viewer command to <com>,\
+    \n\t (the default is %S)."
+    !image_viewer);;
 
 let film_viewer = ref "mplayer";;
 Options.add
   "-film-viewer"
   (Arg.String (fun s -> film_viewer := s))
-  "<com>: set the movie files player command to <com>,\
-  \n\t (the default is \"mplayer\").";;
+  (Printf.sprintf
+    "<com>: set the movie files player command to <com>,\
+    \n\t (the default is %S)."
+    !film_viewer);;
 
 let click_turn_page =
   Options.flag false
@@ -116,10 +128,9 @@ let page_stack_to_string page stack =
 let scale_step = ref (sqrt (sqrt (sqrt 2.)));;
 
 let set_scale x =
-  if x > 1.0 && x <= 2. then scale_step := x
-  else
-    Misc.warning
-      (Printf.sprintf "out of bounds scale_step %f ignored" x);;
+  if x > 1.0 && x <= 2. then scale_step := x else
+  Misc.warning
+    (Printf.sprintf "out of bounds scale_step %f ignored" x);;
 Options.add
   "-scalestep"
   (Arg.Float set_scale)
@@ -131,16 +142,14 @@ Options.add
   "-noautoresize"
   (Arg.Clear autoresize)
   "  prevents scaling the page from resizing the window,\
-  \n\t (automatically set when the geometry is specified)."
-;;
+  \n\t (automatically set when the geometry is specified).";;
 
 let autoscale = ref true;;
 Options.add
   "-noautoscale"
   (Arg.Clear autoscale)
   "  prevents resizing the window from scaling the page,\
-  \n\t (automatically set when the geometry is specified)."
-;;
+  \n\t (automatically set when the geometry is specified).";;
 
 let dpi_resolution = ref 72.27;;
 let set_dpi_resolution r = dpi_resolution := max r 72.27;;
@@ -874,7 +883,10 @@ let exec_xref link =
   let call command arg =
     Grdev.wait_button_up ();
     ignore (Launch.fork_process (Printf.sprintf "%s %s" command arg)) in
-  match Misc.string_prefix ':' link with
+  let find_protocole link =
+    try Misc.string_prefix ':' link with
+    | Not_found -> "" in
+  match find_protocole link with
   | "file:" ->
       if Misc.has_prefix "file://" link then call !browser link else
       begin try
@@ -1035,7 +1047,7 @@ let next_slice st =
   print_string "#line 0, 0 <<Previous-Slice<<>><<>>>> ";
   print_newline ();;
 
-(* goto page of hyperref h *)
+(* goto hyperref link *)
 let goto_href link st =
   (*prerr_endline ("Goto reference " ^ link);*)
   let p =
