@@ -16,7 +16,8 @@
 
 (* $Id$ *)
 
-open Graphics
+open Grdev;;
+open Graphics;;
 
 (* Utils *)
 
@@ -40,21 +41,21 @@ let grad i startc ?endc w =
 
 (* Gradients *)
 
-let hgradient (w,h,xoff,yoff) =
+let hgradient {v_size_x = w; v_size_y = h; v_off_x = xoff; v_off_y = yoff} =
   set_line_width 0;
   let col = point_color 0 0 in
   for x=0 to w-1 do
     set_color (grad (w-x) col w);
     fill_rect (xoff+x) yoff 1 h;
-  done
+  done;;
 
-let vgradient (w,h,xoff,yoff) = 
+let vgradient {v_size_x = w; v_size_y = h; v_off_x = xoff; v_off_y = yoff} =
   set_line_width 0;
   let col = point_color 0 0 in
   for y=0 to h-1 do
     set_color (grad y col h);
     fill_rect xoff (yoff+y) w 1;
-  done
+  done;;
 
 (* N.B.: this code properly draws lines inside the Graphics window, by 
    accurately computing the exact x and y coordinates for each diagonal line.
@@ -64,7 +65,7 @@ let vgradient (w,h,xoff,yoff) =
    Hence, do *not* remove the set_line_width 1 in the function below!
  *)
 
-let dgradient (w,h,xoff,yoff) = 
+let dgradient {v_size_x = w; v_size_y = h; v_off_x = xoff; v_off_y = yoff} =
   let col = point_color 0 0 in
   let dline x y x' y' = moveto x y; lineto x' y' in
   set_line_width 1; (* this line is -essential- do not remove! *)
@@ -80,4 +81,5 @@ let dgradient (w,h,xoff,yoff) =
       else
 	  if dl < h then dline 0 dl h (dl-h)
 	  else dline w (dl-w) (dl-h) h
-  done
+  done;;
+
