@@ -24,19 +24,18 @@ type app_mode =
       (* A [Fake] application is not launched. It is just used to
          reserve a given area on the screen for another application to
          display its material afterwards. *)
-
      
    | Raw
 
-      (* A [Raw] application is launched at each invocation.  It is
-         never automatically killed, except at the end of show.  As
+      (* A [Raw] application is launched at each invocation. It is
+         never automatically killed, except at the end of show. As
          soon as launched, a [Raw] application remains visible until
          explicitly hidden. When hidden, [Raw] applications have to be
          remap manually when necessary. *)
 
    | Sticky
 
-      (* A [Sticky] application is launched once and only once.  It is
+      (* A [Sticky] application is launched once and only once. It is
          not killed when a new slide is visualized. Hence, as soon as
          launched, a [Sticky] application remains visible throughout
          the show. *)
@@ -45,7 +44,7 @@ type app_mode =
 
       (* A [Persistent] application is not visible out of the slide
          that launched it. A [Persistent] application is launched once
-         and only once and keeps running throughout the show.  A
+         and only once and keeps running throughout the show. A
          [Persistent] application must be embeddable, since its window
          must be mapped and unmapped. *)
 
@@ -55,7 +54,6 @@ type app_mode =
          page it appears in is visualised. It is automatically killed
          when going to another slide. If the page becomes visible
          again, the application will be launched again as well. *)
-
 ;;
 
 type app_name = string;;
@@ -68,7 +66,7 @@ val map_embedded_app : app_name -> unit;;
 val map_all_embedded_app : app_name -> unit;;
 val unmap_embedded_app : app_name -> unit;;
 val unmap_all_embedded_app : app_name -> unit;;
-val kill_embedded_app : signal -> string -> unit;;
+val kill_embedded_app : signal -> app_name -> unit;;
 val kill_all_embedded_app : signal -> app_name -> unit;;
 val kill_all_embedded_apps : unit -> unit;;
 val kill_ephemeral_apps : unit -> unit;;
