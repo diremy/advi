@@ -1190,7 +1190,7 @@ let close_html st =
   | Some (tag, k) when k > 0 ->
       st.html <- Some (tag, k-1)
   | Some (tag, 0) ->
-      Dev.H.add {Dev.H.tag =tag; Dev.H.draw = List.rev st.draw_html};
+      Dev.H.add {Dev.H.tag = tag; Dev.H.draw = List.rev st.draw_html};
       st.html <- None;
       st.draw_html <- []
   | Some (_, k) -> assert false
@@ -1455,7 +1455,7 @@ let render_step cdvi num ?trans ?chst dpi xorig yorig =
       cur_gtable = dummy_gtable;
       cur_font = dummy_font;
       h = 0; v = 0; w = 0; x = 0; y = 0; z = 0;
-      stack = []; color = Dev.fgcolor (); color_stack = [];
+      stack = []; color = Dev.get_fgcolor (); color_stack = [];
       alpha = 1.0; alpha_stack = [];
       blend = Drawimage.Normal; blend_stack = [];
       epstransparent = true; epstransparent_stack = [];

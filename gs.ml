@@ -147,8 +147,8 @@ class gs () =
   let _ =
     Unix.putenv "GHOSTVIEW"
       (if Global_options.get_global_display_mode ()
-       then Printf.sprintf "%lu %lu " gr.window gr.pixmap
-       else Printf.sprintf "%lu " gr.window) in
+       then Printf.sprintf "%lu " gr.window
+       else Printf.sprintf "%lu %lu " gr.window gr.pixmap) in
 
   let iof = int_of_float and foi = float_of_int in
   let lx = iof ( (foi (gr.x * dpi)) /. gr.xdpi)

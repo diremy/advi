@@ -19,17 +19,21 @@
 
 type color = Graphics.color;;
 
-let current_font = ref "8x13";;
-let set_font s = Graphics.set_font s; current_font := s;;
-let get_font () = !current_font;;
+(* Introducing get_ variants of regular set_ functions from Graphics. *)
+let set_font, get_font =
+ let current_font = ref "8x13" in
+ (fun s -> current_font := s; Graphics.set_font s),
+ (fun () -> !current_font);;
 
-let current_line_width = ref 1;;
+let set_line_width, get_line_width =
+ let current_line_width = ref 1 in
+ (fun n -> current_line_width := n; Graphics.set_line_width n),
+ (fun () -> !current_line_width);;
 
-let set_line_width n = current_line_width := n; Graphics.set_line_width n;;
-let get_line_width () = !current_line_width;;
-
+(* Returns the current painting color. *)
 external get_color : unit -> color = "gr_get_color";;
 
+(* Sub-windows. *)
 type window_id = string;;
 
 let null_window = "-1";;
@@ -40,12 +44,12 @@ external flush : unit -> unit = "gr_flush";;
 external sync : unit -> unit = "gr_sync";;
         (* flush pending events and wait until all have been processed *)
 
-external raw_draw_area : Graphics.image -> (int * int * int * int) ->
-  int -> int -> unit = "gr_draw_area";;
+external raw_draw_image_area : Graphics.image -> (int * int * int * int) ->
+  int -> int -> unit = "gr_draw_image_area";;
 
-let draw_area ~ima ~srcx ~srcy ~width ~height ~destx ~desty =
-  if srcx < 0 || srcy < 0 then raise (Invalid_argument "draw_area")
-  else raw_draw_area ima (srcx, srcy, width, height) destx desty;;
+let draw_image_area ~img ~src_x ~src_y ~w ~h ~dest_x ~dest_y =
+  if src_x < 0 || src_y < 0 then raise (Invalid_argument "draw_image_area")
+  else raw_draw_image_area img (src_x, src_y, w, h) dest_x dest_y;;
 
 external get_window_id : unit -> window_id = "gr_window_id";;
 
@@ -64,11 +68,9 @@ let open_subwindow ~x ~y ~width ~height =
   Hashtbl.add subwindows wid height;
   wid;;
 
-let no_such_window fname wid =
-   raise (Graphics.Graphic_failure (fname ^ ": no such window: " ^ wid));;
-
 let check_window fname wid =
-  if not (Hashtbl.mem subwindows wid) then no_such_window fname wid;;
+  if not (Hashtbl.mem subwindows wid)
+  then raise (Graphics.Graphic_failure (fname ^ ": no such window: " ^ wid));;
 
 let close_subwindow wid =
   if wid != null_window then begin
@@ -96,11 +98,11 @@ external raw_move_window : window_id -> int -> int -> int -> unit
 external raw_resize_window : window_id -> int -> int -> unit
     = "gr_resize_window";;
 
-let resize_subwindow wid h w =
+let resize_subwindow wid height width =
   if wid != null_window then begin 
   check_window "resize_subwindow" wid;
-  Hashtbl.replace subwindows wid h;
-  raw_resize_window wid h w end;;
+  Hashtbl.replace subwindows wid height;
+  raw_resize_window wid height width end;;
 
 let move_subwindow wid x y =
   if wid != null_window then begin
@@ -127,12 +129,12 @@ external set_named_atom_property : string -> string -> unit
         (* make_atom_property ATOM STRING define an X atom ATOM with
            property STRING *)
 
-external bstore_id : unit -> int32 = "gr_bstore"
-        (* return the X pixmap of the bstore window as an integer *)
+external bstore_id : unit -> int32 = "gr_bstore_id"
+ (** return the X id of the bstore canvas pixmap as an integer *)
 external window_id : unit -> int32 = "gr_window"
-        (* return the X pixmap of the bstore window as an integer *)
+ (** return the X id of the canvas of the on-screen window as an integer *)
 
-(* setting cursor *)
+(* Setting the cursor *)
 (* check by fd -fn cursor *)
 type cursor = 
   | Cursor_id of int
@@ -296,22 +298,25 @@ let glyph_of_cursor = function
   | Cursor_xterm -> 152
 ;;
 
+(* The Caml version of the raw C primitive has the same name as the
+   high level Caml function that calls it, to document the fact that
+   you should not call the C primitive directly. *)
 external set_cursor : int -> unit = "gr_set_cursor";;
 external unset_cursor : unit -> unit = "gr_unset_cursor";;
 
-let cursor = ref Cursor_left_ptr;;
-
-let set_cursor c =
- cursor := c;
- set_cursor (glyph_of_cursor c);;
-
-let get_cursor () = !cursor;;
+let get_cursor, set_cursor =
+ let cursor = ref Cursor_left_ptr in
+ (fun () -> !cursor),
+ (fun c ->
+   cursor := c;
+   set_cursor (glyph_of_cursor c));;
 
 external get_geometry : unit -> int * int * int * int = "gr_get_geometry";;
         (* returns width, height, x, y of the graphics window *)
 
 external get_modifiers : unit -> int = "gr_get_modifiers";;
         (* returns modifiers as an integer *)
+
 let button1 = 0x1
 and button2 = 0x2
 and button3 = 0x4
@@ -363,6 +368,7 @@ let read_key () =
 let key_pressed () =
   let e = wait_next_event [Poll] in e.keypressed;;
 
+(* Additional primitives that operate on the screen only *)
 external window_point_color : int -> int -> Graphics.color
   = "gr_window_point_color";;
 (** As [point_color] but read the information in the window display. *)
@@ -389,8 +395,11 @@ let synchronize () =
 
 (** [display_mode] according to [global_display_mode]. *)
 let display_mode b =
+  Misc.debug_endline ("GraphicsY11.display_mode " ^ string_of_bool b);
   let status = get_global_display_mode () in
-  if status then Graphics.display_mode b;;
+  if status then
+   (Misc.debug_endline ("Graphics.display_mode " ^ string_of_bool b);
+    Graphics.display_mode b);;
 
 (** [point_color] according to [global_display_mode]. *)
 let point_color x y =

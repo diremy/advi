@@ -32,14 +32,14 @@ let pson =
   else ref false;;
 
 let get_global_display_mode, set_global_display_mode =
- let global_display_mode = ref true in
+ let global_display_mode = ref false in
  (fun () -> !global_display_mode),
  (fun b ->
     GraphicsY11.set_global_display_mode b;
     global_display_mode := b);;
 
 Options.add "-fg"
- (Arg.Unit (fun () -> set_global_display_mode false))
+ (Arg.Unit (fun () -> set_global_display_mode true))
  " Set the drawing policy to ``screen only'',\
  \n\t (the default is to draw both on the screen and in the memory).";;
 

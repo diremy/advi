@@ -81,7 +81,7 @@ val embed_app :
 type 'a rect = { x : 'a; y : 'a; h : 'a; w : 'a };;
 
 type color = int;;
-val fgcolor : unit -> color;;
+val get_fgcolor : unit -> color;;
 
 val with_color : color -> ('a -> 'b) -> 'a -> 'b
 val set_color : color -> unit;;

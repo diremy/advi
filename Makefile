@@ -139,7 +139,7 @@ clean:
 
 veryclean: clean
 	rm -f Makefile.config config.cache config.log \
-	config.status drawps.ml ttfont.ml config.ml ifdef.ml
+	config.status config.ml
 
 veryveryclean: veryclean
 	rm -f configure

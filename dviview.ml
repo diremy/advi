@@ -711,6 +711,7 @@ let find_xref tag default st =
 
 exception Link;;
 
+(* View a link: call the appropriate viewer helping command. *)
 let exec_xref link =
   let call command arg =
     Grdev.wait_button_up ();
@@ -731,8 +732,7 @@ let exec_xref link =
                "File %s is non-existent or not readable" fname) else
         match Misc.filename_extension fname with
         | ".dvi" ->
-            let command =
-              String.concat " " (Sys.argv.(0) :: arguments) in
+            let command = String.concat " " (Sys.argv.(0) :: arguments) in
             call command fname
         | ".html" | ".htm" ->
             call !browser link

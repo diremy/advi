@@ -34,40 +34,41 @@ value gr_bsize_x(void)
   return Val_int(grbstore.w);
 }
 
-value gr_draw_area(value im, value xywh, value vx, value vy)
+value gr_raw_draw_image_area(value im, value x, value y, value w, value h,
+                         value vx, value vy)
 {
-  int x = Int_val(vx);
-  int y = Int_val(vy);
-  int wy = Wcvt(y) + 1 - Height_im(im);
-  int by = Bcvt(y) + 1 - Height_im(im);
-  int width = Int_val(Field (xywh, 2));
-  int height = Int_val(Field (xywh, 3));
-  int dx = Int_val(Field (xywh, 0));
-  int dy = Int_val(Field (xywh, 1));
+  int dest_x = Int_val(vx);
+  int dest_y = Int_val(vy);
+  int wdest_y = Wcvt(dest_y) + 1 - Height_im(im);
+  int bdest_y = Bcvt(dest_y) + 1 - Height_im(im);
+  int width = Int_val(w);
+  int height = Int_val(h);
+  int src_x = Int_val(x);
+  int src_y = Int_val(y);
 
   gr_check_open();
-  if (width > Width_im(im) - dx) width = Width_im(im) - dx;
-  if (height > Height_im(im) - dy) height = Width_im(im) - dy;
+  if (width > Width_im(im) - src_x) width = Width_im(im) - src_x;
+  if (height > Height_im(im) - src_y) height = Width_im(im) - src_y;
   if (Mask_im(im) != None) {
     if(grremember_mode) {
-      XSetClipOrigin(grdisplay, grbstore.gc, x, by);
+      XSetClipOrigin(grdisplay, grbstore.gc, dest_x, bdest_y);
       XSetClipMask(grdisplay, grbstore.gc, Mask_im(im));
     }
     if(grdisplay_mode) {
-      XSetClipOrigin(grdisplay, grwindow.gc, x, wy);
+      XSetClipOrigin(grdisplay, grwindow.gc, dest_x, wdest_y);
       XSetClipMask(grdisplay, grwindow.gc, Mask_im(im));
     }
   }
   if(grremember_mode)
     XCopyArea(grdisplay, Data_im(im), grbstore.win, grbstore.gc,
-              dx, dy,
+              src_x, src_y,
               width, height,
-              x, by);
+              dest_x, bdest_y);
   if(grdisplay_mode)
     XCopyArea(grdisplay, Data_im(im), grwindow.win, grwindow.gc,
-          dx, dy,
-          width, height,
-          x, wy);
+              src_x, src_y,
+              width, height,
+              dest_x, wdest_y);
   if (Mask_im(im) != None) {
     if(grremember_mode)
       XSetClipMask(grdisplay, grbstore.gc, None);
@@ -78,6 +79,69 @@ value gr_draw_area(value im, value xywh, value vx, value vy)
     XFlush(grdisplay);
   return Val_unit;
 }
+
+value gr_draw_image_area(value im, value xywh, value vx, value vy)
+{
+  value x = Field (xywh, 0);
+  value y = Field (xywh, 1);
+  value w = Field (xywh, 2);
+  value h = Field (xywh, 3);
+  gr_raw_draw_image_area(im, x, y, w, h, vx, vy);
+  return Val_unit;
+}
+/****
+value gr_draw_image_area(value im, value xywh, value vx, value vy)
+{
+  int dest_x = Int_val(vx);
+  int dest_y = Int_val(vy);
+  int wdest_y = Wcvt(dest_y) + 1 - Height_im(im);
+  int bdest_y = Bcvt(dest_y) + 1 - Height_im(im);
+  int width = Int_val(Field (xywh, 2));
+  int height = Int_val(Field (xywh, 3));
+  int src_x = Int_val(Field (xywh, 0));
+  int src_y = Int_val(Field (xywh, 1));
+
+  gr_check_open();
+  if (width > Width_im(im) - src_x) width = Width_im(im) - src_x;
+  if (height > Height_im(im) - src_y) height = Width_im(im) - src_y;
+  if (Mask_im(im) != None) {
+    if(grremember_mode) {
+      XSetClipOrigin(grdisplay, grbstore.gc, dest_x, bdest_y);
+      XSetClipMask(grdisplay, grbstore.gc, Mask_im(im));
+    }
+    if(grdisplay_mode) {
+      XSetClipOrigin(grdisplay, grwindow.gc, dest_x, wdest_y);
+      XSetClipMask(grdisplay, grwindow.gc, Mask_im(im));
+    }
+  }
+  if(grremember_mode)
+    XCopyArea(grdisplay, Data_im(im), grbstore.win, grbstore.gc,
+              src_x, src_y,
+              width, height,
+              dest_x, bdest_y);
+  if(grdisplay_mode)
+    XCopyArea(grdisplay, Data_im(im), grwindow.win, grwindow.gc,
+              src_x, src_y,
+              width, height,
+              dest_x, wdest_y);
+  if (Mask_im(im) != None) {
+    if(grremember_mode)
+      XSetClipMask(grdisplay, grbstore.gc, None);
+    if(grdisplay_mode)
+      XSetClipMask(grdisplay, grwindow.gc, None);
+  }
+  if(grdisplay_mode)
+    XFlush(grdisplay);
+  return Val_unit;
+}
+***/
+
+/* Should be :
+value gr_draw_image(value im, value vx, value vy)
+{
+  gr_raw_draw_image_area(im, 0, 0, (Width_im(im)), (Height_im(im)), vx, vy);
+  return Val_unit;
+} */
 
 value gr_anti_synchronize(void)
 {
@@ -158,6 +222,7 @@ value gr_origin_y(void)
   return Val_int(y);
 }
 
+/* Should be gr_window_id and gr_window_id should desapear. */
 value gr_window(void)
 { unsigned int w; value res;
   gr_check_open();
@@ -165,7 +230,7 @@ value gr_window(void)
   return copy_int32 (w); 
 }
 
-value gr_bstore(void)
+value gr_bstore_id(void)
 { unsigned int w; value res;
   gr_check_open();
   w = grbstore.win;

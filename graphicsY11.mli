@@ -53,7 +53,7 @@ val resize_subwindow : window_id -> int -> int -> unit;;
 
 val iter_subwindows : (window_id -> int -> unit) -> unit;;
 
-external bstore_id : unit -> int32 = "gr_bstore";;
+external bstore_id : unit -> int32 = "gr_bstore_id";;
         (* return the X pixmap of the bstore window as an integer *)
 external window_id : unit -> int32 = "gr_window";;
         (* return the X pixmap of the bstore window as an integer *)
@@ -67,7 +67,7 @@ external sync : unit -> unit = "gr_sync";;
 
 external bsize_x : unit -> int = "gr_bsize_x";;
 external bsize_y : unit -> int = "gr_bsize_y";;
-        (* Idem, but return the size of the backing store. *)
+ (** Similar as [size_x], [size_y] but return the size of the backing store. *)
 external screen_x : unit -> int = "gr_screen_x";;
 external screen_y : unit -> int = "gr_screen_y";;
 external origin_x : unit -> int = "gr_origin_x";;
@@ -164,11 +164,13 @@ type cursor =
 ;;
 
 val set_cursor : cursor -> unit;;
-        (* sets the cursor for the graphics window *)
+ (** sets the cursor for the graphics on-screen window *)
 val get_cursor : unit -> cursor;;
-        (* returns the current cursor of the graphics window *)
+ (** returns the current cursor of the graphics on-screen window *)
 val unset_cursor : unit -> unit;;
-        (* unsets the cursor (use the parent's cursor) *)
+ (** unsets the cursor of the graphics on-screen window.
+    Uses the parent's cursor instead.
+    Also syncs the on-screen window. *)
 
 external get_geometry : unit -> int * int * int * int = "gr_get_geometry";;
         (* returns width, height, x, y of the graphics window *)
@@ -193,10 +195,13 @@ val mod5 : int;;
 external cut : string -> unit = "gr_cut";;
         (* paste string to the cut and paste buffer *)
 
-val draw_area : 
-    ima:Graphics.image -> srcx:int -> srcy:int -> width:int -> height:int ->
-      destx:int -> desty:int -> unit;;
-
+(****
+val draw_image_area :
+    img:Graphics.image -> src_x:int -> src_y:int -> w:int -> h:int ->
+      dest_x:int -> dest_y:int -> unit;;
+(** Draw a rectangular area of image [img] with lower left corner at
+  the given destination point [(dest_x, dest_y)]. *)
+****)
 
 (* Redefinition of events *)
 
@@ -253,8 +258,8 @@ val key_pressed : unit -> bool;;
            would not block. *)
 
 val get_global_display_mode : unit -> bool;;
-(** [get_global_display_mode] returns the value of flag
-  [global_display_mode]. This flags enables/disables the command
+(** [get_global_display_mode] returns the value of the
+  [global_display_mode] flag. This flags enables/disables the command
   [display_mode]. By default the flag is [true], meaning that
   [display_mode] and [synchronize] commands are handled as usual.
   Otherwise [display_mode] commands are simply ignored and
@@ -272,8 +277,10 @@ val display_mode : bool -> unit;;
 (** Same as [Graphics.display_mode] but according to [global_display_mode] *)
 
 val point_color : int -> int -> color;;
-(** As [point_color] but according to values of [global_display_mode]
-  Coordinates should be inside the limit. *)
+(** Same as the regular [point_color] but according to the value of
+  [global_display_mode], it takes the color from the backing store
+  window or from the on-screen window.  Coordinates should be inside
+  the limit. *)
 
 val only_on_screen : ('a -> 'b) -> 'a -> 'b;;
 (** [only_on_screen f arg] performs [f arg] on the screen window only,

@@ -38,12 +38,12 @@ Options.add
 ;;
 
 type color = Graphics.color;;
-let href_frame = 0x00ff00;;
-let advi_frame = 0xaaaaff;;
-let rect_emphasize = Graphics.blue;;
-let href_emphasize = 0xffff00;;
-let name_emphasize = 0xffaaaa;;
-let cut_emphasize = Graphics.cyan;;
+let href_frame_color = 0x00ff00;;
+let advi_frame_color = 0xaaaaff;;
+let rect_emphasize_color = Graphics.blue;;
+let href_emphasize_color = 0xffff00;;
+let name_emphasize_color = 0xffaaaa;;
+let cut_emphasize_color = Graphics.cyan;;
 
 (*** Device configuration ***)
 
@@ -244,57 +244,62 @@ type bkgd_prefs = {
   mutable bgfunction: (viewport -> unit) option;
 };;
 
-let default_bgcolor = ref Graphics.white;;
-let default_fgcolor = ref Graphics.black;;
-let fgcolor () = !default_fgcolor;;
-
-let set_default_color_string r s =
-  r := Dvicolor.parse_color (String.lowercase s);;
-
-let default_bkgd_data () =
-  { bgcolor = !default_bgcolor;
+let default_bkgd_prefs c = {
+    bgcolor = c;
     bgimg = None;
     bgratiopt = Drawimage.ScaleAuto;
     bgwhitetransp = false;
     bgalpha = 1.0;
     bgblend = Drawimage.Normal;
     bgviewport = None;
-    bgfunction = None};;
+    bgfunction = None
+};;
 
-let bkgd_data = default_bkgd_data ();;
+let bkgd_data = default_bkgd_prefs Graphics.white;;
 
-let set_bgcolor c =
-  default_bgcolor := c;
-  bkgd_data.bgcolor <- !default_bgcolor;;
+let get_bgcolor, set_bgcolor =
+  let advi_bgcolor = ref Graphics.white in
+  (fun () -> !advi_bgcolor),
+  (fun c ->
+     advi_bgcolor := c;
+     bkgd_data.bgcolor <- c);;
+
+let get_fgcolor, set_fgcolor =
+  let advi_fgcolor = ref Graphics.black in
+  (fun () -> !advi_fgcolor),
+  (fun c -> advi_fgcolor := c);;
 
 let set_bgcolor_string s =
-  set_default_color_string default_bgcolor s;
-  bkgd_data.bgcolor <- !default_bgcolor;;
+  set_bgcolor (Dvicolor.parse_color (String.lowercase s));;
+
+let set_fgcolor_string s =
+  set_fgcolor (Dvicolor.parse_color (String.lowercase s));;
 
 Options.add
   "-bgcolor"
   (Arg.String set_bgcolor_string)
-  "<string>: set the default background color (named, RGB, or X),\
+  "<string>  set the default background color (named, RGB, or X),\
   \n\t (the default background is \"white\").";;
-
-let set_fgcolor_string = set_default_color_string default_fgcolor;;
 
 Options.add
   "-fgcolor"
   (Arg.String set_fgcolor_string)
-  "<string>: set the default foreground color (named, RGB, or X),\
+  "<string>  set the default foreground color (named, RGB, or X),\
   \n\t (the default foreground is \"black\").";;
 
 let reverse_colors () =
-  let c = fgcolor () in
-  default_fgcolor := !default_bgcolor;
-  set_bgcolor c;;
+  let fc = get_fgcolor () in
+  let bc = get_bgcolor () in
+  set_fgcolor bc;
+  set_bgcolor fc;;
 
 Options.add
   "-rv"
   (Arg.Unit reverse_colors)
-  ": ask for reverse video\
+  "  ask for reverse video\
   \n\t (simulated by exchanging the foreground and background colors).";;
+
+let default_bkgd_data () = default_bkgd_prefs (get_bgcolor ());;
 
 let blit_bkgd_data s d =
   d.bgcolor <- s.bgcolor;
@@ -478,23 +483,24 @@ let set_bbox bb =
   match bb with
   | None ->
       bbox := nobbox;
-  | Some(x0, y0, w, h) ->
-      bbox := { x = x0; y = !size_y - y0; w = w; h = -h};;
+  | Some (x0, y0, w, h) ->
+      bbox := {x = x0; y = !size_y - y0; w = w; h = -h};;
 
 (*** Drawing ***)
-let color = ref !default_fgcolor;;
-
-let set_color col =
-  if not !opened then failwith "Grdev.set_color: no window";
-  (*prerr_endline "set_color";*)
-  color := col;
-  Graphics.set_color col;;
+let get_color, set_color =
+ let color = ref (get_fgcolor ()) in
+ (fun () -> !color),
+ (fun c ->
+   if not !opened then failwith "Grdev.set_color: no window";
+   (*prerr_endline "set_color";*)
+   color := c;
+   Graphics.set_color c);;
 
 let with_color c f x =
-  let old = !color in
+  let cur = get_color () in
   set_color c;
-  try let v = f x in set_color old; v
-  with z -> set_color old; raise z
+  try let y = f x in set_color cur; y
+  with exn -> set_color cur; raise exn
 
 let draw_glyph g x0 y0 =
   if not !opened then failwith "Grdev.draw_glyph: no window";
@@ -504,7 +510,7 @@ let draw_glyph g x0 y0 =
   and y = !size_y - y0 + voffset g - h in
   if x + w > !xmin && x < !xmax && y + h > !ymin && y < !ymax then begin
     let bg = get_bg_color x y w h in
-    let img = get_glyph_image g (bg, !color) in
+    let img = get_glyph_image g (bg, get_color ()) in
     Graphics.draw_image img x y;
   end;;
 
@@ -523,11 +529,12 @@ let fill_rect x0 y0 w h =
   and h = y' - y in
   if w > 0 && h > 0 then begin
     Graphics.fill_rect x y w h;
-    add_background_color x y w h !color;
+    add_background_color x y w h (get_color ());
   end;;
-
 (* TODO: implement clipping in the following primitives ? *)
-let adjust_path path =
+
+(* Convert a path to Caml Graphics coordinates. *)
+let convert_path path =
   let newpath = Array.copy path in
   for i = 0 to Array.length newpath - 1 do
     let (x, y) = path.(i) in
@@ -537,38 +544,39 @@ let adjust_path path =
 
 let draw_path path ~pensize =
   if not !opened then failwith "Grdev.draw_path: no window";
-  let path = adjust_path path in
+  let path = convert_path path in
   Graphics.set_line_width pensize;
   Graphics.draw_poly_line path;
   Graphics.set_line_width 1;;
 
-let set_shade shade =
-  let r = 0xFF - (!color lsr 16) land 0xFF
-  and g = 0xFF - (!color lsr 8) land 0xFF
-  and b = 0xFF - !color land 0xFF in
+let shade_color shade =
+  let c = get_color () in
+  let r = 0xFF - (c lsr 16) land 0xFF
+  and g = 0xFF - (c lsr 8) land 0xFF
+  and b = 0xFF - c land 0xFF in
   let r = 0xFF - int_of_float (shade *. float r)
   and g = 0xFF - int_of_float (shade *. float g)
   and b = 0xFF - int_of_float (shade *. float b) in
-  Graphics.set_color (Graphics.rgb r g b);;
+  Graphics.rgb r g b;;
 
 let fill_path path ~shade =
   if not !opened then failwith "Grdev.fill_path: no window";
-  let path = adjust_path path in
-  set_shade shade;
+  let path = convert_path path in
+  Graphics.set_color (shade_color shade);
   Graphics.fill_poly path;
-  Graphics.set_color !color;;
+  Graphics.set_color (get_color ());;
 
-let draw_arc ~x ~y ~rx ~ry ~start:s ~stop:e ~pensize =
+let draw_arc ~x ~y ~rx ~ry ~start:a1 ~stop:a2 ~pensize =
   if not !opened then failwith "Grdev.draw_arc: no window";
   Graphics.set_line_width pensize;
-  Graphics.draw_arc x (!size_y - y) rx ry (- s) (- e);
+  Graphics.draw_arc x (!size_y - y) rx ry (- a1) (- a2);
   Graphics.set_line_width 1;;
 
-let fill_arc ~x ~y ~rx ~ry ~start:s ~stop:e ~shade =
+let fill_arc ~x ~y ~rx ~ry ~start:a1 ~stop:a2 ~shade =
   if not !opened then failwith "Grdev.fill_arc: no window";
-  set_shade shade;
-  Graphics.fill_arc x (!size_y - y) rx ry (- s) (- e);
-  Graphics.set_color !color;;
+  Graphics.set_color (shade_color shade);
+  Graphics.fill_arc x (!size_y - y) rx ry (- a1) (- a2);
+  Graphics.set_color (get_color ());;
 
 let draw_ps file bbox (w, h) x0 y0 =
   if not !opened then failwith "Grdev.draw_ps: no window";
@@ -578,25 +586,26 @@ let draw_ps file bbox (w, h) x0 y0 =
         (Some bbox) Drawimage.ScaleAuto !epswithantialiasing (w, h) (x, y - h)
   with
   | Not_found -> Misc.warning ("ps file " ^ file ^ " was not found")
-  | exc ->
+  | exn ->
       Misc.warning
         (Printf.sprintf "error happened while drawing ps file %s: %s"
-           file (Printexc.to_string exc))
+           file (Printexc.to_string exn))
 ;;
 
 let clean_ps_cache () = Drawimage.clean_cache ();;
 
 (*** HTML interaction ***)
 
-(* To save a rectangular image *)
-type rectangular_image = {
+type rectangle_frame_image = {
     north : Graphics.image;
     south : Graphics.image;
     east : Graphics.image;
     west : Graphics.image;
   };;
 
-let rec save_rectangle x y dx dy =
+(* To save a rectangular frame (4 images of 1 pixel width, each one
+for one side of the rectangle). *)
+let save_rectangle x y dx dy =
   let x = min x (x + dx) in
   let y = min y (y + dy) in
   let dx = max 1 (abs dx) in
@@ -607,7 +616,7 @@ let rec save_rectangle x y dx dy =
     north = Graphics.get_image x (y + dy) (succ dx) 1;
   };;
 
-let rec restore_rectangle r x y dx dy =
+let restore_rectangle r x y dx dy =
   let x = min x (x + dx) in
   let y = min y (y + dy) in
   let dx = max 1 (abs dx) in
@@ -687,6 +696,7 @@ let editing =
 module H =
   struct
     type mode = Over | Click_down
+    type draw_style = Draw | Fill
     type style = Box | Underline | Invisible
     type link = {
       link : string;
@@ -709,30 +719,30 @@ module H =
     let anchors = ref A.empty
     let clear () = anchors := A.empty
 
-    let frame_rect e x y w h =
-      if e > 0 && w > e && h > e then
-        let draw_rect_with_line_width e x y w h =
-          Graphics.fill_rect x y e h;
-          Graphics.fill_rect x y w e;
-          Graphics.fill_rect (x + w - e) y e h;
-          Graphics.fill_rect x (y + h - e) w e
-        in
-        draw_rect_with_line_width e x y w h
-      else Graphics.draw_rect x y w h
+    (* Draws a rectangle with border width bw if possible. *)
+    let frame_rect bw x y w h =
+      if bw > 0 && w > bw && h > bw then
+        let draw_rect_with_line_width bw x y w h =
+          Graphics.fill_rect x y bw h;
+          Graphics.fill_rect x y w bw;
+          Graphics.fill_rect (x + w - bw) y bw h;
+          Graphics.fill_rect x (y + h - bw) w bw in
+        draw_rect_with_line_width bw x y w h else
+      Graphics.draw_rect x y w h
 
-    let draw_anchor style c e a =
+    let draw_anchor style c bw a =
       Graphics.set_color c;
       begin match style with
-      | Box -> frame_rect e a.A.x a.A.y a.A.w a.A.h
-      | Underline -> frame_rect e a.A.x a.A.y a.A.w e
+      | Box -> frame_rect bw a.A.x a.A.y a.A.w a.A.h
+      | Underline -> frame_rect bw a.A.x a.A.y a.A.w bw
       | Invisible -> ()
       end;
-      Graphics.set_color !color
+      Graphics.set_color (get_color ())
 
     let make_anchors tag all_draw =
       let make_anchor draw (x, y as orig) w h voff =
-        let anchor = {tag = tag; draw = List.rev draw } in
-        let e =
+        let anchor = {tag = tag; draw = List.rev draw} in
+        let bw =
           match tag with
           | Href _ -> 0
           | Advi _ -> 0
@@ -740,20 +750,21 @@ module H =
         let y' = y - voff - 1 in
         let h' = h + 2 in
         let a =
-          let e = e + 1 in
-          { A.x = x - e;
-            A.y = (!size_y - y' - h') - e;
-            A.w = w + e + e;
-            A.h = h' + e + e;
+          let bw = bw + 1 in
+          { A.x = x - bw;
+            A.y = (!size_y - y' - h') - bw;
+            A.w = w + bw + bw;
+            A.h = h' + bw + bw;
             A.action = anchor;
           } in
         anchors := A.add a !anchors;
         match tag with
-        | Href _ -> draw_anchor Box href_frame 1 a
+        | Href _ -> draw_anchor Box href_frame_color 1 a
         | Advi link ->
             draw_anchor
               link.style
-              (match link.color with None -> advi_frame | Some c -> c)
+              (match link.color with
+               | None -> advi_frame_color | Some c -> c)
               1 a
         | _ -> ()
       in
@@ -779,7 +790,7 @@ module H =
     let add anchor = make_anchors anchor.tag anchor.draw
 
     let area tag x y w h =
-      let anchor = { tag = tag; draw = [] } in
+      let anchor = {tag = tag; draw = []} in
       let a = { A.x = x; A.y = y; A.w = w; A.h = h; A.action = anchor} in
       anchors := A.add a !anchors
 
@@ -802,46 +813,48 @@ module H =
 
     let deemphasize now emph =
       match emph with
-      | Rect (ima, act, l) ->
+      | Rect (img, act, l) ->
           GraphicsY11.display_mode now;
           List.iter
-            (function ima, act -> Graphics.draw_image ima act.A.x act.A.y) l;
-          Graphics.draw_image ima act.A.x act.A.y;
+            (function img, act -> Graphics.draw_image img act.A.x act.A.y) l;
+          Graphics.draw_image img act.A.x act.A.y;
           Busy.set
             (if !editing then Busy.Selection else Busy.Free);
-          GraphicsY11.display_mode true
-      | Screen (ima, act, all_anchors) ->
-          GraphicsY11.display_mode false;
+          GraphicsY11.display_mode false
+      | Screen (img, act, all_anchors) ->
+          GraphicsY11.display_mode true;
           anchors := all_anchors;
           Gs.flush ();
           (* long delay to be safe *)
           ignore (sleep_watch false false 0.1);
-          Graphics.draw_image ima 0 0;
+          Graphics.draw_image img 0 0;
           Busy.set
             (if !editing then Busy.Selection else Busy.Free);
           GraphicsY11.flush ();
-          GraphicsY11.display_mode true
+          GraphicsY11.display_mode false
       | Nil -> ()
 
     let emphasize fill c act =
-      let ima = Graphics.get_image act.A.x act.A.y act.A.w act.A.h in
+      let img = Graphics.get_image act.A.x act.A.y act.A.w act.A.h in
       Graphics.set_color c;
-      GraphicsY11.display_mode false;
-      if fill then Graphics.fill_rect act.A.x act.A.y act.A.w act.A.h else
-      Graphics.draw_rect
-        (act.A.x + 1) (act.A.y + 1) (act.A.w - 2) (act.A.h - 2);
-      Graphics.set_color !color;
+      GraphicsY11.display_mode true;
+      begin match fill with
+      | Fill -> Graphics.fill_rect act.A.x act.A.y act.A.w act.A.h
+      | Draw -> Graphics.draw_rect (act.A.x + 1) (act.A.y + 1)
+                  (act.A.w - 2) (act.A.h - 2)
+      end;
+      Graphics.set_color (get_color ());
       push_bg_color c;
       List.iter (function x, y, g -> draw_glyph g x y) act.A.action.draw;
       pop_bg_color ();
       GraphicsY11.set_cursor GraphicsY11.Cursor_hand2;
-      GraphicsY11.display_mode true;
-      Rect (ima, act, [])
+      GraphicsY11.display_mode false;
+      Rect (img, act, [])
 
     let save_screen_exec act a =
       Gs.flush ();
       (* get image take the image from the backing store *)
-      let ima = Graphics.get_image 0 0 !size_x !size_y in
+      let img = Graphics.get_image 0 0 !size_x !size_y in
       GraphicsY11.sync ();
       (* wait until all events have been processed, flush should suffice *)
       (*
@@ -855,14 +868,14 @@ module H =
       flush_last ();
       GraphicsY11.synchronize ();
       Launch.launch_embedded_apps ();
-      Screen (ima, act, all_anchors)
+      Screen (img, act, all_anchors)
 
     let light t =
       try
         match t with
         | Name n ->
             let t = Name (Misc.get_suffix "#" n) in
-            emphasize true name_emphasize (find_tag t)
+            emphasize Draw name_emphasize_color (find_tag t)
         | _ -> Nil
       with
       | Not_found | Misc.Match -> Nil
@@ -873,21 +886,21 @@ module H =
     let emphasize_and_flash color act =
       let fill, color =
         match act.A.action.tag with
-        | Href s when  has_prefix "#/page." s -> false, rect_emphasize
-        | _ -> true, color in
+        | Href s when  has_prefix "#/page." s -> Draw, rect_emphasize_color
+        | _ -> Fill, color in
       let emph = emphasize fill color act in
       let m =
         match act.A.action.tag with
         | Href n -> light (Name n)
         | _ -> Nil in
       match emph, m with
-      | Rect (ima, a, l), Rect (ima', a', l') ->
-          Rect (ima, a, (ima', a') :: (l' @ l))
+      | Rect (img, a, l), Rect (img', a', l') ->
+          Rect (img, a, (img', a') :: (l' @ l))
       | x, _ -> x
 
     let reemphasize emph act =
       deemphasize false emph;
-      emphasize_and_flash href_emphasize act
+      emphasize_and_flash href_emphasize_color act
   end;;
 
 module E =
@@ -929,7 +942,7 @@ module E =
           Graphics.set_color Graphics.green;
           draw_line x0 y0 ox oy;
           draw_point x0 y0;
-          Graphics.set_color !color;
+          Graphics.set_color (get_color ());
         end
 
     let inside x y p  =
@@ -973,6 +986,7 @@ let open_dev geom =
   if !opened then Graphics.close_graph ();
   Graphics.set_window_title !title;
   Graphics.open_graph geom;
+  opened := true;
 
   (* We disable Graphics's event retrieving *)
   GraphicsY11.init ();
@@ -980,15 +994,13 @@ let open_dev geom =
   (* Fill the event queue *)
   let rec f () =
     Timeout.add 0.25 (fun () ->
-      GraphicsY11.retrieve_events (); ignore (f ()))
-  in
+      GraphicsY11.retrieve_events (); ignore (f ())) in
   ignore (f ());
 
   update_device_geometry ();
   Graphics.remember_mode true;
   GraphicsY11.display_mode (Global_options.get_global_display_mode ());
-  color := !default_fgcolor;
-  opened := true;
+  set_color (get_fgcolor ());
   !size_x, !size_y;;
 
 let close_dev () =
@@ -1066,10 +1078,13 @@ let button_up = [
 ];;
 
 let events = ref [];;
+
 let push_back_event ev =
   if List.length !events > 1 then Misc.warning "STACK";
   events := ev :: !events;;
+
 let event_waiting () = !events <> [];;
+
 let rec pop_event () =
   match !events with
   | [] -> assert false
@@ -1143,15 +1158,16 @@ let wait_select_rectangle x y =
     | Raw e ->
         let dx' = e.GraphicsY11.mouse_x - x in
         let dy' = e.GraphicsY11.mouse_y - y in
-        if e.GraphicsY11.button then select dx' dy'
+        if e.GraphicsY11.button
+        then select dx' dy'
         else Final (Region (x, y, dx', 0 - dy'))
     | x -> x in
-  set_color !default_fgcolor;
+  set_color (get_fgcolor ());
   GraphicsY11.display_mode true;
   Busy.set Busy.Selection;
   let restore () =
     GraphicsY11.display_mode false;
-    set_color !color;
+    set_color (get_color ());
     Busy.set
       (if !editing then Busy.Selection else Busy.Free) in
   try
@@ -1164,7 +1180,7 @@ let wait_select_rectangle x y =
 let wait_select_button_up m x y =
   let draw_color b =
     let draw s c x y =
-      set_color (if b then c else cut_emphasize);
+      set_color (if b then c else cut_emphasize_color);
       draw_glyph s x y in
     Symbol.apply draw in
   let rec select r =
@@ -1188,7 +1204,7 @@ let wait_select_button_up m x y =
             Final (Selection (Symbol.region_to_ascii r'))
                 end;
     | x -> x in
-  let color = !color in
+  let color = (get_color ()) in
   GraphicsY11.synchronize ();
   Graphics.remember_mode false;
   GraphicsY11.display_mode true;
@@ -1197,7 +1213,7 @@ let wait_select_button_up m x y =
     Graphics.remember_mode true;
     GraphicsY11.display_mode false;
     set_color color;
-    Busy.restore_cursor() in
+    Busy.restore_cursor () in
   try
     let e =
       if m land GraphicsY11.button2 = 0 then
@@ -1218,7 +1234,8 @@ let wait_select_button_up m x y =
       | Not_found -> Final Nil
       | _ -> raise exn;;
 
-type trans =
+(* Graphical transformations to apply to rectangles. *)
+type rect_transformation =
   | Move_xy
   | Move_x
   | Move_y
@@ -1226,22 +1243,23 @@ type trans =
   | Resize_x
   | Resize_y;;
 
-let move rect dx dy = { rect with x = rect.x + dx; y = rect.y + dy };;
-let move_x rect dx dy = { rect with x = rect.x + dx };;
-let move_y rect dx dy = { rect with y = rect.y + dy };;
-let resize rect dx dy = { rect with w = rect.w + dx; h = rect.h + dy };;
-let resize_x rect dx dy = { rect with w = rect.w + dx };;
-let resize_y rect dx dy = { rect with h = rect.h + dy };;
+(* Their implementations. *)
+let move_rect r dx dy = { r with x = r.x + dx; y = r.y + dy };;
+let move_rect_x r dx dy = { r with x = r.x + dx };;
+let move_rect_y r dx dy = { r with y = r.y + dy };;
+let resize_rect r dx dy = { r with w = r.w + dx; h = r.h + dy };;
+let resize_rect_x r dx dy = { r with w = r.w + dx };;
+let resize_rect_y r dx dy = { r with h = r.h + dy };;
 
-let trans  = function
-  | Move_xy -> move
-  | Move_x -> move_x
-  | Move_y -> move_y
-  | Resize_xy -> resize
-  | Resize_x -> resize_x
-  | Resize_y -> resize_y;;
+let transform_rect = function
+  | Move_xy -> move_rect
+  | Move_x -> move_rect_x
+  | Move_y -> move_rect_y
+  | Resize_xy -> resize_rect
+  | Resize_x -> resize_rect_x
+  | Resize_y -> resize_rect_y;;
 
-let trans_cursor = function
+let transform_cursor = function
   | Move_xy -> Busy.Move
   | Move_x -> Busy.Move
   | Move_y -> Busy.Move
@@ -1249,13 +1267,15 @@ let trans_cursor = function
   | Resize_x -> Busy.Resize_x
   | Resize_y -> Busy.Resize_y;;
 
+(* ?? *)
 let filter trans event dx dy =
   let r = trans { x = 0; y = 0; w = 0; h = 0; } dx dy in
   event (r.x + r.w) (r.y + r.h);;
 
 let wait_move_button_up rect trans_type event x y =
-  let trans = trans trans_type in
-  let w = rect.w and h = rect.h in
+  let trans = transform_rect trans_type in
+  let cursor = transform_cursor trans_type in
+(*  let w = rect.w and h = rect.h in*)
   let rec move dx dy =
     let r = trans rect dx dy in
     let buf = save_rectangle r.x r.y r.w r.h in
@@ -1269,16 +1289,16 @@ let wait_move_button_up rect trans_type event x y =
         if e.GraphicsY11.button then move dx' dy'
         else Final (filter trans event dx' (0 - dy'))
     | z -> z in
-  let color = !color in
-  set_color !default_fgcolor;
-  Busy.temp_set (trans_cursor trans_type);
-  GraphicsY11.display_mode false;
+  let color = get_color () in
+  set_color (get_fgcolor ());
+  Busy.temp_set cursor;
+  GraphicsY11.display_mode true;
   let restore () =
-    GraphicsY11.display_mode true;
+    GraphicsY11.display_mode false;
     set_color color;
     Busy.restore_cursor () in
-  try let e = move 0 0 in restore (); e
-  with exn -> restore (); raise exn;;
+  try let e = move 0 0 in restore (); e with
+  | exn -> restore (); raise exn;;
 
 let near x x' = abs (x - x') < !size_x / 4;;
 let close x x' = abs (x - x') < !size_x / 10;;
@@ -1341,7 +1361,8 @@ let wait_button_up m x y =
           wait_move_button_up !bbox Move_xy event x y
         else wait_position ()
   end else
-  if pressed m G.shift && released m G.button1 then wait_select_button_up m x y
+  if pressed m G.shift && released m G.button1
+  then wait_select_button_up m x y
   else wait_position ();;
 
 let wait_event () =
@@ -1361,7 +1382,7 @@ let wait_event () =
               send (Href h) else
             if H.up_to_date act emph then event emph b else begin
               H.deemphasize false emph;
-              event (H.emphasize_and_flash href_emphasize act) b end
+              event (H.emphasize_and_flash href_emphasize_color act) b end
         | {A.action =
            {H.tag = H.Advi {H.link = s; H.action = a; H.mode = H.Over};
             H.draw = d}} as act ->
@@ -1377,7 +1398,7 @@ let wait_event () =
               if ev.button then event emph b else
               if H.up_to_date act emph then event emph b else begin
                 H.deemphasize false emph;
-                event (H.emphasize_and_flash href_emphasize act) b end
+                event (H.emphasize_and_flash href_emphasize_color act) b end
         | _ -> rescan ()
         with Not_found ->
           if ev.button then
