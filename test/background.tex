@@ -64,7 +64,7 @@ Press: \keymenu{n}ext page \keymenu{p}revious page
 
 \subsection* {Modifying the page backround}
 
-It is now possible to modify the background of your presentations, and
+You can modify the background of your presentations, and
 this file is a simple showcase for the current background effects.
 
 \tableofcontents
@@ -75,11 +75,11 @@ this file is a simple showcase for the current background effects.
 This page has a yellow background because we included
 in the LaTeX source of the page the following command:
 
-  \begin{quote}
-    \begin{verbatim}
-        \advibg{color=Yellow} 
-    \end{verbatim}
-  \end{quote}
+\begin{quote}
+  \begin{verbatim}
+      \advibg{color=Yellow} 
+   \end{verbatim}
+\end{quote}
 \advibg{color=Yellow} 
 
 \newpage
@@ -88,8 +88,9 @@ in the LaTeX source of the page the following command:
 
 \advibg{image="world.jpg"} 
 
-Wee can also set a background image, like \verb|world.jpg| which
-is now in the test directory, by including in the page the command
+We can use an image as background.
+This page's background is made of \verb|world.jpg| which
+is in the test directory. The source of this page contains
 
   \begin{quote}
     \begin{verbatim}
@@ -101,12 +102,13 @@ is now in the test directory, by including in the page the command
   \begin{quote}
 CAMLIMAGESLIBS
   \end{quote}
-in Advi's Makefile.config 
+in your Advi's Makefile.config .
 \newpage
 
 \section{Positioning the background image}
 
-As documented in the manual, the LaTeX macro for backgrounds has a wealth of options.\\
+As documented in the manual, the LaTeX macro for backgrounds has a
+wealth of options.\\
 For example, there are several different ways to adapt an image to the size of the
 background to fill, and they are declared with the \dockey{fit}{} parameter to \verb|\advibg|:
 
@@ -253,7 +255,7 @@ Set the alpha factor for the background image to \docid{float}
 \dockey[none]{blend}{blend mode}
 \begin{quote}
 Set the blend mode to \docid{blend mode}, which should be one of the
-following (unchecked): {\tt difference}, XXX?
+following: {\tt difference}, {\tt none}
 (\doctt{none} means unset).
 \end{quote}
 
@@ -267,7 +269,7 @@ In this page, the background is filled with an image for which we specify an alp
 value of less than 1.\\
 Notice that this effect is nice, but expensive to realise.
 
-Here is the command used to obtain this effect:
+Here is the command used to obtain it:
 
 \begin{center}
 {\tt \ttadvibg\{alpha=0.25,image="dojoji.gif"\}}
@@ -285,7 +287,8 @@ in {\tt difference} mode with the image which is scaled to fit the available are
 Here is the command used to obtain this effect:
 
 \begin{center}
-{\tt \ttadvibg\{color=LightBlue,alpha=0.1,blend=difference,image="dojoji.gif"\}}
+{\tt \ttadvibg\{color=LightBlue,alpha=0.1,blend=difference,
+ image="dojoji.gif"\}}
 \end{center}
 \advibg{color=LightBlue,alpha=0.1,blend=difference,image="dojoji.gif"}
 \vfill
