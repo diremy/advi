@@ -44,3 +44,14 @@
 \newcommand {\adviannot}[3][]{#2\footnote{\let\\\relax#3}}
 \let \advipause \@Ignore
 \let \adviwait \@Ignore
+
+\let \itemsep \@Ignore
+\let \topsep \@Ignore
+\newenvironment{citemize}{\begin{list}{$\bullet$}%
+{\itemsep 0pt \topsep 5pt}}{\end{list}}
+
+\newenvironment{cenumerate}%
+{\begin{list}{-}{\itemsep 0pt \topsep 5pt}}{\end{list}}
+
+\let \setblend \@Ignore
+\let \setalpha \@Ignore
