@@ -51,7 +51,7 @@ Press: \keymenu{n}ext page \keymenu{p}revious page
 Text movements are possible using the \verb"\advitransbox" \TeX macro.
 For instance,
 
-\verb"\advitransbox{slide from=right}{coming from the right}}"
+\verb"\advitransbox{slide,from=right}{coming from the right}}"
 
 \noindent move the text {\em coming from the right} from the
 right edge of the slide to its correct position into the
@@ -61,10 +61,10 @@ page. Variants \verb"right", \verb"left", \verb"top", and
 {
 \Huge
 \begin{itemize}
-\item \textcolor{red}{From \advitransbox{slide from=right}{right}}
-\item \textcolor{green}{From \advitransbox{slide from=left}{left}}
-\item \textcolor{blue}{From \advitransbox{slide from=top}{top}}
-\item \textcolor{cyan}{From \advitransbox{slide from=bottom}{bottom}}
+\item \textcolor{red}{From \advitransbox{slide,from=right}{right}}
+\item \textcolor{green}{From \advitransbox{slide,from=left}{left}}
+\item \textcolor{blue}{From \advitransbox{slide,from=top}{top}}
+\item \textcolor{cyan}{From \advitransbox{slide,from=bottom}{bottom}}
 \end{itemize}
 }
 
@@ -73,7 +73,7 @@ page. Variants \verb"right", \verb"left", \verb"top", and
 The command is robust:
 
 $$
-\advitransbox{slide from=down steps=250}
+\advitransbox{slide,from=down,steps=250}
    {it may include \verb"verbatim" material}
 $$
 
@@ -81,10 +81,10 @@ $$
 \section*{Setting speed of text movements}
 
 \noindent
-You can specify the number of steps of the animation with the
+You can specify the number of,steps of the animation with the
 extra optional \verb"steps=int" argument. For instance,
 
-\verb"\advitransbox{slide from=right steps=70}{coming from the right}"
+\verb"\advitransbox{slide,from=right,steps=70}{coming from the right}"
 
 \noindent move the text {\em coming from the right} at a peaceful
 pace.
@@ -94,15 +94,15 @@ pace.
 {
 \Huge
 \begin{itemize}
-\item From \advitransbox{slide from=right steps=70}{right}
-\item From \advitransbox{slide from=left steps=60}{left}
-\item From \advitransbox{slide from=top steps=70}{top}
-\item From \advitransbox{slide from=bottom steps=100}{bottom}
+\item From \advitransbox{slide,from=right,steps=70}{right}
+\item From \advitransbox{slide,from=left,steps=60}{left}
+\item From \advitransbox{slide,from=top,steps=70}{top}
+\item From \advitransbox{slide,from=bottom,steps=100}{bottom}
 \end{itemize}
 }
 
 \bigskip
-\noindent\advitransbox{slide from=top steps=150}{%
+\noindent\advitransbox{slide,from=top,steps=150}{%
 {\begin{minipage}{\textwidth}
 \adviheader\\
 \end{minipage}}
@@ -110,6 +110,6 @@ pace.
 
 \vfill
 
-\advitransbox{slide from=top steps=250}{\adviquitfooter}
+\advitransbox{slide,from=top,steps=250}{\adviquitfooter}
 
 \end{document}

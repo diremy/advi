@@ -31,6 +31,7 @@
 % Auxilliary macros
 
 \def \advi@empty{}
+\def \advi@error #1{\PackageError {Advi}{#1}{Type <RETURN> to proceed.}}
 \ifadvi@ignore 
 \def \advi@special@ #1{\hbox{}}
 \else
@@ -160,10 +161,16 @@
   {transbox save width=#1 height=#2 depth=#3}}
 \def\advi@transbox@go#1{\advi@special{transbox go #1}}
 
+\def \advi@transslide {slide}
 \def \advi@transbox #1{%
    \def \advi@afterbox 
       {\hbox {\advi@transbox@save{\the\wd0 }{\the\ht0 }{\the\dp0}%
-              \unhbox0\advi@transbox@go{#1}}}%
+              \unhbox0\setkeys {advi@trans}{#1}%
+              \ifx \advi@transmode \advi@transslide\else
+              \advi@error
+                 {Transbox mode \advi@transmode \space is not supported}\fi
+              \advi@transbox@go
+                  {slide\advi@transfrom \advi@transsteps}}}%
    \def \advi@@afterbox {\aftergroup \advi@afterbox} 
    \afterassignment \advi@@afterbox \setbox0 \hbox } 
 
