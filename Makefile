@@ -153,6 +153,7 @@ tar_and_web: tex/splash.dvi
 	cp -p ../test/*.dvi bazar-ocaml/advi/test/; \
 	cp -p ../doc/manual.dvi bazar-ocaml/advi/doc/; \
 	cp -p ../doc/manual.ps bazar-ocaml/advi/doc/; \
+	cp -p ../doc/manual.pdf bazar-ocaml/advi/doc/; \
 	cp -p ../doc/splash.dvi bazar-ocaml/advi/doc/; \
 	cp -p ../tex/advi.pro bazar-ocaml/advi/test/; \
 	find . -name '.cvsignore' -print | xargs rm; \
