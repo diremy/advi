@@ -139,7 +139,9 @@ let sleep = sleep_watch true true;;
 Transimpl.sleep := sleep_watch true false;;
 
 let set_transition trans = 
-  Misc.debug_endline(Printf.sprintf "Setting transition mode to : %s" (Transimpl.string_of_transmode trans));
+  Misc.debug_endline
+    (Printf.sprintf "Setting transition mode to : %s"
+       (Transimpl.string_of_transmode trans));
   Transimpl.current_transition := trans;;
 
 let transbox_save x y width height =

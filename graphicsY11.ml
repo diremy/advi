@@ -370,14 +370,13 @@ external anti_synchronize : unit -> unit = "gr_anti_synchronize";;
 let global_display_mode_status = ref false;;
 let global_display_mode b = global_display_mode_status :=  b;;
 let synchronize () =
-  if not !global_display_mode_status then
-(Misc.debug_stop "Graphics.synchronize";
+  if not !global_display_mode_status then (
+    Misc.debug_stop "Graphics.synchronize";
     Graphics.synchronize ()
-)
-  else
-(Misc.debug_stop "GraphicsY11.antisynchronize";
- anti_synchronize ()
-);;
+  ) else (
+    Misc.debug_stop "GraphicsY11.antisynchronize";
+    anti_synchronize ()
+  );;
 
 let display_mode b =
   if not !global_display_mode_status then 
