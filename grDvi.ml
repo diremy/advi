@@ -2,7 +2,7 @@ let debug = GrMisc.debug;;
 
 let ignore_background =
     Options.flag false
-    "--ignore-background"
+    "-ignore-background"
     "\tIgnore background for antialiasing";;
 
 exception Error of string
@@ -92,24 +92,20 @@ class dviDbuffer window = object (self)
     and h = GrGlyph.height g in
     let x = x0 - GrGlyph.hoffset g
     and y = y0 - GrGlyph.voffset g in
-    let xmax, ymax = super#size in
-    if x + w > 0 && x < xmax && y + h > 0 && y < ymax then begin
-      let xsrc, xdst = if x < 0 then -x,0 else 0,x in
-      let ysrc, ydst = if y < 0 then -y,0 else 0,y in
-      let xw = x + w in
-      let yh = y + h in
-      let width = if xw > xmax then xmax - xdst else xw - xdst in
-      let height = if yh > ymax then ymax - ydst else yh - ydst in
+    try
+      let clip = self#clip ~x ~y ~width:w ~height:h in
       let bg = self#get_bg_color x y w h in
       let img = GrGlyph.get_image g (bg, color) in
       let gc_backup = super#gc in
       super#set_gc glyphgc;
       super#set_clip_mask img.GrGlyph.mask;
       super#set_clip_origin ~x ~y;
-      super#put_ximage ~x:xdst ~y:ydst ~xsrc ~ysrc ~width ~height 
-	img.GrGlyph.ximage;
+      super#put_ximage_clip clip img.GrGlyph.ximage;
       super#set_gc gc_backup
-    end
+    with
+    | GrDbuffer.Out -> ()
+
+  method image = GrImage.draw (self :> GrDbuffer.t)
 end
 
 type mode = [`NORMAL | `WAIT | `WAIT_FORCE]
@@ -155,6 +151,10 @@ class dviwidget w =
     method register_handler m (w : GObj.widget) id =
       Hashtbl.add handlers m (w,id);
       if mode <> m then w#misc#handler_block id
+
+    method break_sleep () =
+      debug "break_sleep";
+      if mode = `WAIT then GrSleep.break_all_timeouts ()
 
     method sleep ~breakable ~sec ~cont =
       debug "sleep";

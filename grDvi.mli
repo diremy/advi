@@ -42,6 +42,7 @@ end
 class dviDbuffer : Gdk.window -> object
   inherit GrDbuffer.t
   method glyph : color: Dvicolor.color -> GrGlyph.t -> x: int -> y:int -> unit
+  method image : GrImage.spec -> x:int -> y:int -> unit
 end
 
 type mode = [`NORMAL | `WAIT | `WAIT_FORCE]
@@ -65,6 +66,7 @@ class dviwidget : DWidget.t Gtk.obj ->
 
   method sleep : breakable: bool -> sec: float -> 
     cont: (GrSleep.state -> unit) -> unit
+  method break_sleep : unit -> unit
 end
 
 val dviwidget : ?border_width: int -> width: int -> height: int -> 

@@ -15,7 +15,7 @@
 (*  Based on Mldvi by Alexandre Miquel.                                *)
 (***********************************************************************)
 
-let debug = Options.debug ~label: "dviview" "--debug-dviview" "Debug dviview module";;
+let debug = Options.debug ~label: "dviview" "-debug-dviview" "Debug dviview module";;
 
 let pauses = Options.flag true "-nopauses" "Switch pauses off";;
 let fullwidth =
@@ -40,7 +40,7 @@ Options.add
   "STRING\tMake advi start at html reference of name STRING";;
 let debug_pages =
   Options.debug
-    "--debug_pages"
+    "-debug-pages"
     "Debug page motion";;
 *)
 
@@ -1230,13 +1230,15 @@ let init device filename =
 
   let key_cbk =
     st.device#win#event#connect#key_press ~callback: (fun ev ->
-      let keystring = GdkEvent.Key.string ev in
-      if String.length keystring = 1 then begin
-	bindings.(Char.code keystring.[0]) st
-      end else ();
-      true)
+      begin match st.device#mode with
+      |	`NORMAL -> 
+	  let keystring = GdkEvent.Key.string ev in
+	  if String.length keystring = 1 then 
+	    bindings.(Char.code keystring.[0]) st
+      |	`WAIT -> st.device#break_sleep ()
+      |	_ -> ()
+      end; true)
   in
-  st.device#register_handler `NORMAL (st.device#win :> GObj.widget) key_cbk;
 
   redraw st
 ;;

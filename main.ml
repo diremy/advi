@@ -61,7 +61,7 @@ let spec_list = [
   ("-vmargin", Arg.String (set_dim vmargin),
    "DIMEN\tVertical margin (default: 1cm)");
   version_spec "-v";
-  version_spec "--version";
+  version_spec "-version";
   ] in
 
 List.iter (fun (nm, act, man) -> Options.add nm act man) spec_list;;
@@ -102,48 +102,6 @@ let set_dvi_geometry () =
   Dviview.set_vmargin !vmargin;
   Dviview.set_geometry !geometry
 ;;
-
-(*
-let standalone_main () =
-  init_arguments ();
-  Rc.init ();
-  let filename = match !dvi_filename with
-  | None -> 
-      (* Test if file can be found, otherwise print console stuff. *)
-      let name = Config.splash_screen in
-      begin
-	try let channel = open_in name in close_in channel
-	with Sys_error s ->
-	  eprintf "%s@.Try %s -help for more information@."
-            usage_msg Sys.argv.(0);
-(*
-	  Launch.exit 1
-*)
-	  ()
-      end;
-      name
-  | Some s -> s in
-  set_dvi_geometry ();
-  Dviview.main_loop filename;;
-
-let rec interactive_main () =
-  (* Load the .advirc file ... *)
-  Userfile.load_init_files advi_options set_dvi_filename usage_msg; 
-  Rc.init ();
-  printf "Dvi file name: @?";
-  let filename = input_line stdin in
-  if Sys.file_exists filename then begin
-    set_dvi_geometry ();
-    try
-      Dviview.main_loop filename
-    with Dviview.Error s | Failure s | Graphics.Graphic_failure s ->
-      eprintf "Fatal error: %s@." s
-  end else begin
-    printf "File `%s' does not exists.@." filename;
-    printf "Please make another choice.@.";
-    interactive_main ()
-  end;;
-*)
 
 (* To quit nicely, killing all embedded processes. *)
 (*

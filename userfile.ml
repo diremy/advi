@@ -127,7 +127,7 @@ let load_init_files options set_dvi_filename usage_msg =
    if it does not exist try to create it. *)
 let can_be_cache_directory dirname =
    if not (Sys.file_exists dirname) then
-     (try Unix.mkdir dirname 700 with _ -> ());
+     (try Unix.mkdir dirname 0o700 with _ -> ());
    try Unix.access dirname
          [Unix.R_OK; Unix.W_OK; Unix.X_OK; Unix.F_OK];
        true with

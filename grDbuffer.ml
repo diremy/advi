@@ -8,9 +8,21 @@ let debug = GrMisc.debug;;
 let grsync = ref false;;
 
 Options.add
-  "--debug-grsync"
+  "-debug-grsync"
   (Arg.Unit (fun x -> grsync := true))
     "\tsynchronize graphics operations";;
+
+type clip = {
+    xsrc : int;
+    ysrc : int;
+    xdst : int;
+    ydst : int;
+    width : int;
+    height : int
+  } 
+
+let string_of_clip clip =
+  Printf.sprintf "%dx%d+%d+%d @ %d+%d" clip.width clip.height clip.xsrc clip.ysrc clip.xdst clip.ydst;;
 
 class t (window : Gdk.window) =
   let w, h = Gdk.Window.get_size window in
@@ -136,7 +148,15 @@ class t (window : Gdk.window) =
 	(ximg : OXimage.ximage) =
       self#gr_op (fun v -> 
 	v#put_image ~x ~y ?xsrc ?ysrc ?width ?height ximg#data)
+    method put_ximage_clip clip (ximg : OXimage.ximage) =
+      self#gr_op (fun v -> 
+	v#put_image ~x:clip.xdst ~y:clip.ydst 
+	  ~xsrc:clip.xsrc ~ysrc:clip.ysrc 
+	  ~width:clip.width ~height:clip.height ximg#data)
     method get_ximage = OXimage.get_image store#drawable
+    method get_ximage_clip clip =
+      OXimage.get_image store#drawable
+	~x:clip.xdst ~y:clip.ydst ~width:clip.width ~height:clip.height
 
     method get_color ~x ~y =
       if x < 0 || y < 0 || x >= width || y >= width then raise Out;
@@ -147,5 +167,17 @@ class t (window : Gdk.window) =
 
     method drawable = 
       (raise (Error "#drawable not accessible") : Gdk.window)
+
+    method clip ~x ~y ~width:w ~height:h =
+      if x + w > 0 && x < width && y + h > 0 && y < height then begin
+	let xsrc, xdst = if x < 0 then -x,0 else 0,x in
+	let ysrc, ydst = if y < 0 then -y,0 else 0,y in
+	let xw = x + w in
+	let yh = y + h in
+	let width = if xw > width then width - xdst else xw - xdst in
+	let height = if yh > height then height - ydst else yh - ydst in
+	{ xsrc= xsrc; ysrc= ysrc; xdst= xdst; ydst= ydst;
+	  width= width; height= height }
+      end else raise Out
   end
 ;;

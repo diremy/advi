@@ -37,8 +37,8 @@ MISCMODULES = config misc options rc userfile
 TEXMODULES = input symbol search table pkfont ttfont jfm font glyph \
 		units dimension dvi devfont
 GUIMODULES = ageometry dvicolor
-GTKMODULES = grMisc grDrawable grDbuffer grCursor grSubwindow grGlyph \
-		grSleep grDvi grDev
+GTKMODULES = grMisc grDrawable grDbuffer grCursor grSubwindow \
+		grImage grGlyph grSleep grDvi grDev
 TEXGUIMODULES = driver dviview main
 MODULES = $(MISCMODULES) $(TEXMODULES) $(GUIMODULES) $(GTKMODULES) $(TEXGUIMODULES)
 

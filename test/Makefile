@@ -8,7 +8,7 @@ PLATEX=TEXINPUTS=.:../tex:$(TEXINPUTS): platex
 
 TEXFILES= demo.tex demo2.tex trigo_source.tex \
 trans.tex trans2.tex trans3.tex background.tex \
-color.tex
+color.tex sleep.tex
 #thumbnails.tex
 DVIFILES= $(TEXFILES:%.tex=%.dvi)
 ADVI=TEXPSHEADERS=../tex: ../advi

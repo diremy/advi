@@ -1,4 +1,4 @@
-let debug = Options.debug ~label: "gr" "--debug-gr" "Debug graphic engine";;
+let debug = Options.debug ~label: "gr" "-debug-gr" "Debug graphic engine";;
 
 exception Error of string
 
@@ -47,8 +47,12 @@ module Colour = struct
     let b = spec land 0x0000ff in
     (`RGB(r * 257, g * 257, b * 257) : GDraw.color)
 
-  let create = Ximage.Truecolor.color_creator visual
-  let parse = Ximage.Truecolor.color_parser visual
+  (* We can use color context ? *)    
+  let create = 
+    Ximage.Truecolor.color_creator visual
+
+  let parse = 
+    Ximage.Truecolor.color_parser visual
 
   let gdraw_of_system c = gdraw_of_rgb (parse c)
 end;;

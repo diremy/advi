@@ -167,10 +167,10 @@ type state = {
     mutable color_stack : Dvicolor.color list;
     (* Other attributes *)
 (*
-    mutable alpha : Drawimage.alpha;
-    mutable alpha_stack : Drawimage.alpha list;
-    mutable blend : Drawimage.blend;
-    mutable blend_stack : Drawimage.blend list;
+    mutable alpha : GrImage.alpha;
+    mutable alpha_stack : GrImage.alpha list;
+    mutable blend : GrImage.blend;
+    mutable blend_stack : GrImage.blend list;
     mutable epstransparent : bool;
     mutable epstransparent_stack : bool list;
     mutable direction : Transitions.direction option;
@@ -413,20 +413,20 @@ let alpha_special st s =
 
 let parse_blend s =
   match String.lowercase s with
-  | "none" -> Drawimage.Normal
-  | "normal" -> Drawimage.Normal
-  | "multiply" -> Drawimage.Multiply
-  | "screen" -> Drawimage.Screen
-  | "overlay" -> Drawimage.Overlay
-  | "dodge" -> Drawimage.ColorDodge
-  | "burn" -> Drawimage.ColorBurn
-  | "darken" -> Drawimage.Darken
-  | "lighten" -> Drawimage.Lighten
-  | "difference" -> Drawimage.Difference
-  | "exclusion" -> Drawimage.Exclusion
+  | "none" -> GrImage.Normal
+  | "normal" -> GrImage.Normal
+  | "multiply" -> GrImage.Multiply
+  | "screen" -> GrImage.Screen
+  | "overlay" -> GrImage.Overlay
+  | "dodge" -> GrImage.ColorDodge
+  | "burn" -> GrImage.ColorBurn
+  | "darken" -> GrImage.Darken
+  | "lighten" -> GrImage.Lighten
+  | "difference" -> GrImage.Difference
+  | "exclusion" -> GrImage.Exclusion
   | _ ->
       Misc.warning ("blend: invalid blend mode " ^ s);
-      Drawimage.Normal;;
+      GrImage.Normal;;
 
 let blend_special st s =
   match split_string s 0 with
@@ -881,16 +881,16 @@ let setup_bkgd status =
   Dev.blit_bkgd_data Dev.bkgd_data status.Dvi.bkgd_prefs;;
 
 let ratios_alist = [
-  ("auto", Drawimage.ScaleAuto);
-  ("center", Drawimage.ScaleCenter);
-  ("top", Drawimage.ScaleTop);
-  ("bottom", Drawimage.ScaleBottom);
-  ("left", Drawimage.ScaleLeft);
-  ("right", Drawimage.ScaleRight);
-  ("topleft", Drawimage.ScaleTopLeft);
-  ("bottomright", Drawimage.ScaleBottomRight);
-  ("topright", Drawimage.ScaleTopRight);
-  ("bottomleft", Drawimage.ScaleBottomLeft);
+  ("auto", GrImage.ScaleAuto);
+  ("center", GrImage.ScaleCenter);
+  ("top", GrImage.ScaleTop);
+  ("bottom", GrImage.ScaleBottom);
+  ("left", GrImage.ScaleLeft);
+  ("right", GrImage.ScaleRight);
+  ("topleft", GrImage.ScaleTopLeft);
+  ("bottomright", GrImage.ScaleBottomRight);
+  ("topright", GrImage.ScaleTopRight);
+  ("bottomleft", GrImage.ScaleBottomLeft);
 ];;
 
 (* The find_bgfuns should eventually handle dynamically
@@ -926,7 +926,7 @@ let bkgd_alist = [
      [Dev.BgBlend b]);
   ("fit", fun s st ->
      let f =
-       try List.assoc (unquote s) ratios_alist with _ -> Drawimage.ScaleAuto in
+       try List.assoc (unquote s) ratios_alist with _ -> GrImage.ScaleAuto in
      [Dev.BgRatio f]);
   ("fun", fun s st ->
      [Dev.BgFun (find_bgfun (unquote s))]);
@@ -1230,22 +1230,32 @@ let special st s =
   if has_prefix "color " s then color_special st s else
 (*
   if has_prefix "html:" s then html_special st (get_suffix "html:" s) else
+*)
   if has_prefix "PSfile=" s || has_prefix "psfile=" s then begin
     try
       let file, bbox, size = psfile_special st s in
       let x = st.x_origin + int_of_float (st.conv *. float st.h)
-      and y = st.y_origin + int_of_float (st.conv *. float st.v) in
+      and y = st.y_origin + int_of_float (st.conv *. float st.v) 
+      in
       if !visible then
+(*
         let draw =
           if has_prefix "`" file then
             Dev.draw_img (zap_to_char ' ' file)
-              Drawimage.ScaleAuto false 1.0 st.blend (Some bbox)
+              GrImage.ScaleAuto false 1.0 st.blend (Some bbox)
           else Dev.draw_ps file bbox in
         draw size x y
+*)
+	st.device#draw#image ~x ~y
+	  { GrImage.filename = file;
+	    GrImage.width= fst size;
+	    GrImage.height= snd size;
+	    GrImage.bbox= Some bbox;
+	    GrImage.antialiase= true;
+	    GrImage.whitetransp= false }
     with
     | Failure s -> Misc.warning s
     | e -> Misc.warning (Printexc.to_string e) end else
-*)
   if has_prefix "advi: " s then begin
 (*
     if has_prefix "advi: edit" s then edit_special st s else
@@ -1375,7 +1385,7 @@ let render_step device cdvi num (* ?trans ?chst *) dpi xorig yorig =
       stack = []; color = (* Grdev.fgcolor () *) 0; color_stack = [];
 (*
       alpha = 1.0; alpha_stack = [];
-      blend = Drawimage.Normal; blend_stack = [];
+      blend = GrImage.Normal; blend_stack = [];
       epstransparent = true; epstransparent_stack = [];
 *)
 (*

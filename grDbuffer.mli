@@ -1,5 +1,16 @@
 exception Out;;
 
+type clip = {
+    xsrc : int;
+    ysrc : int;
+    xdst : int;
+    ydst : int;
+    width : int;
+    height : int
+  } 
+
+val string_of_clip : clip -> string
+
 class t : Gdk.window -> object
     inherit [[`window]] GrDrawable.t
 
@@ -37,10 +48,14 @@ class t : Gdk.window -> object
     method get_color : x:int -> y:int -> GDraw.color
     method get_ximage :
       x:int -> y:int -> width:int -> height:int -> OXimage.ximage
+    method get_ximage_clip : clip -> OXimage.ximage
     method put_ximage :
       x:int ->
       y:int ->
       ?xsrc:int ->
       ?ysrc:int -> ?width:int -> ?height:int -> OXimage.ximage -> unit
+    method put_ximage_clip : clip -> OXimage.ximage -> unit
+
+    method clip : x: int -> y: int -> width: int -> height: int -> clip
 
 end

@@ -31,7 +31,7 @@ let showps s =
   if !showing_ps then (print_string s; print_newline ());;
 
 Options.add
-  "--showps" (Arg.Set showing_ps)
+  "-showps" (Arg.Set showing_ps)
   "\tPrint a copy of Postscript sent to gs to stdout";;
 
 let pspage = ref 0;;

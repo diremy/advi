@@ -103,6 +103,7 @@ let get_image g col =
             done;
           done;
 	  let img = { ximage = img; mask = mask }  in
+	  Gc.finalise (fun img -> img.ximage#destroy) img;
           g.img_list <- (col, img) :: g.img_list;
           img
       in

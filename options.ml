@@ -46,7 +46,7 @@ let debug ?label option_name message =
 
 (* To print debugging messages. *)
 let debug_endline =
-  let f = debug "--debug" "General debug" in
+  let f = debug "-debug" "General debug" in
   fun s -> ignore (f s);;
 
 Misc.forward_debug_endline := debug_endline;;
