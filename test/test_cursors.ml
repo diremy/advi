@@ -23,7 +23,7 @@ xfd -fn cursor
 
 ocamlc -I .. -c test_cursors.ml
 
-ocamlopt -I .. ../events.o ../grwm.o ../grY11.o \
+ocamlopt -I .. ../events.o ../grwm.o  ../graphicsY11.o ../grY11.o \
    graphics.cmxa misc.cmx graphicsY11.cmx test_cursors.ml
 
 *)
@@ -195,9 +195,20 @@ let string_of_cursor = function
   | Cursor_xterm -> "xterm"
 ;;
 
+let show_cursor c = set_cursor c; wait (string_of_cursor c);;
+
 let main () =
-  List.iter
-    (fun c -> set_cursor c; wait (string_of_cursor c)) known_cursors;;
+  let rec loop () =
+    print_string "Enter a cursor integer value or -1 to end";
+    print_newline ();
+    let l = input_line stdin in
+    let i = Scanf.sscanf l "%d" (fun i -> i) in
+    if i <> -1 then begin
+      show_cursor (Cursor_id i);
+      loop ()
+    end in
+  loop 0;
+  List.iter show_cursor known_cursors;;
 
 main ();;
 
