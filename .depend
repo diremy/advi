@@ -17,10 +17,16 @@ drawps.cmo: graphicsY11.cmi misc.cmi search.cmi drawps.cmi
 drawps.cmx: graphicsY11.cmx misc.cmx search.cmx drawps.cmi 
 table.cmo: table.cmi 
 table.cmx: table.cmi 
+input.cmo: input.cmi 
+input.cmx: input.cmi 
 pkfont.cmo: input.cmi pkfont.cmi 
 pkfont.cmx: input.cmx pkfont.cmi 
-font.cmo: pkfont.cmi search.cmi table.cmi font.cmi 
-font.cmx: pkfont.cmx search.cmx table.cmx font.cmi 
+ttfont.cmo: ttfont.cmi 
+ttfont.cmx: ttfont.cmi 
+jfm.cmo: input.cmi jfm.cmi 
+jfm.cmx: input.cmx jfm.cmi 
+font.cmo: jfm.cmi pkfont.cmi search.cmi table.cmi ttfont.cmi font.cmi 
+font.cmx: jfm.cmx pkfont.cmx search.cmx table.cmx ttfont.cmx font.cmi 
 glyph.cmo: font.cmi glyph.cmi 
 glyph.cmx: font.cmx glyph.cmi 
 devfont.cmo: font.cmi glyph.cmi table.cmi devfont.cmi 
@@ -49,4 +55,5 @@ dviview.cmx: config.cmx dimension.cmx driver.cmx dvi.cmx glyph.cmx misc.cmx \
     symbol.cmx transitions.cmi dviview.cmi 
 main.cmo: config.cmo dimension.cmi dviview.cmi grdev.cmi gs.cmi misc.cmi 
 main.cmx: config.cmx dimension.cmx dviview.cmx grdev.cmx gs.cmx misc.cmx 
-grY11.o: grY11.c libgraph.h
+grY11.o: grY11.c  \
+   libgraph.h

@@ -31,7 +31,9 @@ MLINCDIRS = $(CAMLIMAGESDIR)
 EXEC      = advi
 MODULES   = config misc input symbol search \
 	    graphicsY11 drawps \
-            table pkfont font glyph devfont dvi \
+            table input pkfont \
+	    ttfont jfm \
+	    font glyph devfont dvi \
 	    units dimension driver\
 	    gs transimpl grdev dviview main
 LIBRARIES = graphics unix str $(CAMLIMAGESLIBS)
@@ -81,6 +83,16 @@ drawps.ml: Makefile.config drawps_with_ps.ml drawps_without_ps.ml
 
 drawps.cmo : drawps.cmi
 
+ttfont.ml: Makefile.config ttfont_with_freetype.ml ttfont_without_freetype.ml
+	rm -f ttfont.ml
+	if [ $(HAVE_CAMLIMAGES) = "true" ]; then \
+		cp ttfont_with_freetype.ml ttfont.ml; \
+	else \
+		cp ttfont_without_freetype.ml ttfont.ml; \
+	fi
+
+ttfont.cmo : ttfont.cmi
+
 grY11.o : grY11.c
 	$(OCAMLC) -ccopt "$(CFLAGS)" -c $<
 
@@ -105,7 +117,7 @@ clean:
 
 veryclean:
 	rm -f Makefile.config config.cache config.log \
-	config.status drawps.ml config.ml
+	config.status drawps.ml ttfont.ml config.ml
 
 tex/splash.dvi: tex/splash.tex
 	cd tex; latex splash.tex

@@ -554,7 +554,7 @@ fi
 if test -f $CAMLIMAGESDIR/ps_img.cma; then
 	echo "Camlimages: ok"
 	HAVE_CAMLIMAGES="true"
-	CAMLIMAGESLIBS="img ppm_img ps_img graphic_image"
+	CAMLIMAGESLIBS="img ppm_img ps_img graphic_image freetype"
 else
 	echo "**************** Warning ******************"
 	echo "camlimages is not found or incomplete in the directory \"$CAMLIMAGESDIR\""
