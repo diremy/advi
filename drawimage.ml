@@ -19,24 +19,25 @@
 
 let debugs = Misc.debug_endline;;
 
-type ratiopts =
+type white_is_transparent = bool;;
+
+type ratiopt =
    | ScaleOriginal    (* leave the image at its original native size  *)
    | ScaleAuto        (* scale to fit requested area                  *)
    | ScaleCenter      (* scale as needed to cover the image,
-                         keep original Ratio and center *)
+                         keep original ratio and center *)
    | ScaleTop         (* scale x coords to align to top of the screen,
-                         keep original Ratio  *)
+                         keep original ratio  *)
    | ScaleBottom      (* scale x coords to align to bottom of the screen,
-                         keep original Ratio  *)
+                         keep original ratio  *)
    | ScaleLeft        (* scale y coords to align to left of the screen,
-                         keep original Ratio  *)
+                         keep original ratio  *)
    | ScaleRight       (* scale y coords to align to right of the screen,
-                         keep original Ratio  *)
+                         keep original ratio  *)
    | ScaleTopLeft
    | ScaleBottomLeft
    | ScaleTopRight
-   | ScaleBottomRight
-;;
+   | ScaleBottomRight;;
 
 (* Blending *)
 type blend =
@@ -124,7 +125,13 @@ let blend_func = function
         let t = t + t lsr 8 in
         t lsr 8;;
 
+type alpha = float;;
+
 type image_size = int * int;;
+
+type position = int * int;;
+
+type antialias = bool;;
 
 type ps_bbox = int * int * int * int;;
 
@@ -143,13 +150,12 @@ let verbose_image_access =
 let image_aa =
   Options.flag true
     "-disable-image-anti-aliasing"
-    "\tDisable eps inclusion anti-aliasing"
-;;
+    "\tDisable eps inclusion anti-aliasing";;
 
 let images_camlimages = Hashtbl.create 107;;
 let images_graphics = Hashtbl.create 107;;
 
-let after f g = try let x = f () in  g (); x with e -> g (); raise e;;
+let after f g = try let x = f () in  g (); x with exc -> g (); raise exc;;
 
 let cache_path file whitetransp psbbox ratiopt antialias (w, h) =
   let file' = Userfile.fullpath (Unix.getcwd ()) file in
@@ -304,8 +310,9 @@ let image_load psbbox (w, h) file =
   | Image.Wrong_file_type ->
       Misc.warning ("Unsupported graphic format in: " ^ file);
       raise Exit
-  | _ ->
-      Misc.warning ("Failed to load " ^ file);
+  | exc ->
+      Misc.warning
+        (Printf.sprintf "Failed to load %s: %s" file (Printexc.to_string exc));
       raise Exit
 ;;
 
@@ -431,24 +438,19 @@ let resize_and_make_transparent image whitetransp ratiopt (ow, oh) =
 let load_and_resize file whitetransp psbbox ratiopt antialias (w, h) =
   let file =
     Search.true_file_name [ "-format=" ^ Config.texpicts_kind ] file in
-  let cache_name = cache_path file whitetransp psbbox ratiopt antialias (w, h) in
+  let cache_name =
+    cache_path file whitetransp psbbox ratiopt antialias (w, h) in
   let image =
     try
-      try
-        Hashtbl.find images_camlimages cache_name
-      with
+      try Hashtbl.find images_camlimages cache_name with
       | Not_found ->
           if (Unix.stat file).Unix.st_mtime >=
-             (Unix.stat cache_name).Unix.st_mtime
-          then raise Exit;
+             (Unix.stat cache_name).Unix.st_mtime then raise Exit;
           (* Use the cache file *)
-          if !verbose_image_access
-            then GraphicsY11.set_cursor Cursor_exchange;
+          if !verbose_image_access then GraphicsY11.set_cursor Cursor_exchange;
           let im = cache_load cache_name in
-          if !verbose_image_access
-            then GraphicsY11.set_cursor Cursor_left_ptr;
-          im
-    with
+          if !verbose_image_access then GraphicsY11.set_cursor Cursor_left_ptr;
+          im with
     | _ ->
         if !verbose_image_access then GraphicsY11.set_cursor Cursor_exchange;
         begin try Unix.unlink cache_name with _ -> () end;
@@ -456,11 +458,9 @@ let load_and_resize file whitetransp psbbox ratiopt antialias (w, h) =
         let image =
           resize_and_make_transparent image whitetransp ratiopt (w, h) in
         Userfile.prepare_file cache_name;
-        (* We have no trivial image format for rgba32! *)
         cache_save cache_name image;
         if !verbose_image_access then GraphicsY11.set_cursor Cursor_left_ptr;
-        image
-  in
+        image in
   Hashtbl.replace images_camlimages cache_name image;
   cache_name, image
 ;;
@@ -536,11 +536,7 @@ let draw_image image cache_name alpha blend (w, h) (x0, y0) =
   | _ -> assert false
 ;;
 
-
-type alpha = float;;
-
-let f file whitetransp (alpha : alpha) blend psbbox ratiopt
-    antialias (w, h) (x0, y0) =
+let f file whitetransp alpha blend psbbox ratiopt antialias (w, h) (x0, y0) =
   try
     let antialias = if not !image_aa then false else antialias in
     let cache_name, image =
