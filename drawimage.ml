@@ -219,8 +219,9 @@ let cache_load file =
       open_in_bin, close_in
     else
       (fun file ->
-        let command = Printf.sprintf "%s -c -d %s" Config.gzip_path
-            (Filename.quote file) in
+        let command =
+          Printf.sprintf "%s -c -d %s" Config.gzip_path (Filename.quote file) in
+        debugs ("cache_load " ^ command);
         Unix.open_process_in command),
       (fun ic -> ignore (Unix.close_process_in ic))
   in
@@ -253,12 +254,11 @@ let cache_save file img =
     | _ -> assert false
   in
   let opener, closer =
-    if Config.gzip_path = "" then
-      open_out_bin, close_out
-    else
+    if Config.gzip_path = "" then open_out_bin, close_out else
       (fun file ->
-        let command = Printf.sprintf "%s > %s" Config.gzip_path
-            (Filename.quote file) in
+        let command =
+          Printf.sprintf "%s > %s" Config.gzip_path (Filename.quote file) in
+        debugs ("cache_save " ^ command);
         Unix.open_process_out command),
       (fun oc -> Pervasives.flush oc; ignore (Unix.close_process_out oc))
   in
@@ -304,9 +304,6 @@ let image_load psbbox (w, h) file =
           [Load_Resolution (resx, resy)]
     | _ -> Image.load file []
   with
-  | Failure s ->
-      Misc.warning ("Failed to load " ^ file ^ ": " ^ s);
-      raise Exit
   | Image.Wrong_file_type ->
       Misc.warning ("Unsupported graphic format in: " ^ file);
       raise Exit

@@ -54,8 +54,10 @@ let parse_pos s =
   let c = String.index s ',' in
   let bc = s.[3] in
   let b =
-    if bc = 'a' then true else if bc = 'r' then false
-    else assert false in
+    match s.[3] with
+    | 'a' -> true
+    | 'r' -> false
+    | _ -> assert false in
   let left = String.sub s 4 (c - 4) in
   let right = String.sub s (c + 1) (String.length s - c - 1) in
   let int_of_floatstring f = int_of_float (float_of_string f +. 0.5) in
@@ -101,8 +103,7 @@ let rec select fd_in fd_out fd_exn timeout =
     Unix.Unix_error (Unix.EINTR, _, _) as exn ->
       let now = Unix.gettimeofday () in
       let remaining = start +. timeout -. now in
-      if remaining > 0.0 then select fd_in fd_out fd_exn timeout
-      else [], [], []
+      if remaining > 0.0 then select fd_in fd_out fd_exn timeout else [], [], []
 ;;
 
 class gs () =
@@ -142,8 +143,13 @@ class gs () =
       s.[k -1 - i] <- Char.chr b;
     done;
     s in
-  let int32_string x = Int32.format "%u" x in
+  let int32_string x = Printf.sprintf "%lu" x in
 
+  let  _ = Unix.putenv "GHOSTVIEW"
+    (Printf.sprintf "%s %s "
+       (int32_string gr.window)
+       (if !Options.global_display_mode then "" else int32_string gr.pixmap)
+    ) in
   let _ =
     Unix.putenv "GHOSTVIEW"
       (Printf.sprintf "%s %s "
@@ -158,7 +164,8 @@ class gs () =
   and uy = iof ( (foi ((gr.y + gr.bheight) * dpi)) /. gr.ydpi) in
 
   (* Set ghostscript property. *)
-  let content = Printf.sprintf "%s %d %d %d %d %d %f %f %d %d %d %d"
+  let content =
+    Printf.sprintf "%s %d %d %d %d %d %f %f %d %d %d %d"
       "0" (* no backing pixmap for the window *)
       0   (* Rotation : 0 90 180 270 *)
       lx ly ux uy
@@ -172,7 +179,6 @@ class gs () =
       try GraphicsY11.set_named_atom_property  "GHOSTVIEW" content;
       with x -> Misc.fatal_error "Cannot set ``GHOSTVIEW'' property"
     end;
-
   (* Ignore signal SIGPIPE. *)
   Unix.sigprocmask Unix.SIG_BLOCK [13] in
 
@@ -228,9 +234,8 @@ class gs () =
                   end
               | _, _, _ ->
                   input_line rightin  in
-          if Misc.has_prefix s ack_string
-          then ack <- ack - 1
-          else if Misc.has_prefix pos_string s then
+          if Misc.has_prefix s ack_string then ack <- ack - 1 else
+          if Misc.has_prefix pos_string s then
             begin
               try
                 let b, y, x = parse_pos s in
@@ -239,18 +244,18 @@ class gs () =
                   begin
                     Printf.fprintf stderr "<-- %s %d %d"
                       (if b then "-" else "+") x y;
-                    prerr_newline();
+                    prerr_newline ();
                   end;
                 current_x := x; current_y := y
               with
               | Not_found | Failure _ -> prerr_endline s
-            end
-          else if Misc.has_prefix err_string s then
+            end else
+          if Misc.has_prefix err_string s then
             begin
               prerr_endline s;
               raise (Killed "Error in Postscript");
-            end
-          else prerr_endline s;
+            end else
+          prerr_endline s;
           self # ack
         end;
 
@@ -266,8 +271,8 @@ class gs () =
         showps l;
         output_string leftout l;
         output_char leftout '\n';
-      with x ->
-        prerr_endline  (Printexc.to_string x);
+      with exc ->
+        prerr_endline (Printexc.to_string exc);
         self # kill;
         prerr_endline "GS Terminated";
         flush stderr
@@ -350,7 +355,7 @@ class gv =
       if not sync then
         begin
           match process with
-            Some p -> p # sync; sync <- true
+          | Some p -> p # sync; sync <- true
           | None -> ()
         end
 

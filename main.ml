@@ -57,7 +57,7 @@ let version_spec = function
        opt, Arg.Unit print_advi_full_version,
        "\tPrint the current Active-DVI version, sub-version and release date"
 ;;
- 
+
 let spec_list = [
   ("-geometry", Arg.String set_geom,
    "GEOM\tSets the (maximum) geometry GEOM");
