@@ -1,14 +1,41 @@
 \documentclass{article}
 
 
-\usepackage{advi}
+\usepackage{../tex/advi}
+
+\usepackage{color}
+\usepackage{graphicx}
+\def\adviheader{\noindent
+{\bf\Large Active dvi}\\
+\includegraphics[width=\textwidth]{../tex/bar.jpg.eps}}
 
 \begin{document}
+
+\adviheader
+
+Text movements are possible using the \verb"\transbox" $\TeX$ macro.
+For instance,
+
+\verb"\transbox{slide from=right}{text coming from the right}}"
+
+\noindent move the text {\em text coming from the right} from the
+right edge of the slide to its correct position into the
+page. Variants \verb"right", \verb"left", \verb"top", and
+\verb"bottom" of this macro are available.
+
 \Huge
 \begin{itemize}
 \item From \transbox{slide from=right}{right}
 \item From \transbox{slide from=left}{left}
 \item From \transbox{slide from=top}{top}
 \item From \transbox{slide from=bottom}{bottom}
+%\item \textcolor{red}{From \transbox{slide from=right}{right}}
+%\item \textcolor{green}{From \transbox{slide from=left}{left}}
+%\item \textcolor{blue}{From \transbox{slide from=top}{top}}
+%\item \textcolor{cyan}{From \transbox{slide from=bottom}{bottom}}
 \end{itemize}
+
+\noindent\transbox{slide from=top}{{\bf\Large Active dvi}}\par
+\transbox{slide from=top}{\includegraphics[width=\textwidth]{../tex/bar.jpg.eps}}
+
 \end{document}
