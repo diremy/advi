@@ -1,70 +1,6 @@
 \documentclass[12pt]{article}
 
-% You need graphics package
-\usepackage{color}
-\usepackage{graphicx}
-
-\usepackage{pst-all}
-
-
-\usepackage{hyperref}
-
-\usepackage {advi}
-\usepackage {advi-annot}
-%% \usepackage[annot]{advi} 
-%% must occur after packages using PStricks macros 
-%% (it redefines some of them) 
-
-%\def\mathsym#1{\ifmmode{#1}\else$#1$\fi}
-
-\pagestyle{empty}
-
-\definecolor{red}{rgb}{1.0,0.0,0.0}
-\definecolor{green}{rgb}{0.0,1.0,0.0}
-\definecolor{blue}{rgb}{0.0,0.0,1.0}
-\definecolor{c1}{rgb}{1.0,0.0,0.0}
-\definecolor{c2}{rgb}{0.5,0.4,0.0}
-\definecolor{c3}{rgb}{0.0,0.8,0.0}
-\definecolor{c4}{rgb}{0.0,0.4,0.5}
-\definecolor{c5}{rgb}{0.0,0.0,1.0}
-\definecolor{c6}{rgb}{0.5,0.0,0.5}
-
-\def\smallpause{0.3}
-
-\def\keymenu#1{\textcolor{red}{\underline{#1}}}
-
-\def\advifooter{\vbox to 0em{\vbox to \vsize {\vfill
-Press: \keymenu{n}ext page \keymenu{p}revious page
-\keymenu{\textvisiblespace} next pause%
-\hfill{\adviembed[sticky=advianim]{1.56cm}{1.824cm}{animate -geometry !g! -window !p advilogo.anim.gif}}
-} \vss}}
-
-\def\adviheader{\noindent
-{\bf\Large Active dvi}\\
-\includegraphics[width=\textwidth]{../tex/bar.jpg.eps}\par}
-
-\let \Newpage \newpage
-\def \newpage {\Newpage \advifooter\adviheader}
-
-\def\adviemptyfooter{\vbox to 0em{\vbox to \vsize {\vfill
-~~\vss\advikillembed{advianim}}}}
-
-\def\lastpage{\Newpage\adviemptyfooter\adviheader}
-
-%  \setlength\textwidth{660\p@}
-%  \setlength\textheight{460\p@}
-
-\epswhite
-\def \docdef #1{{\tt \string #1}}
-\def \docid #1{$\langle \hbox {\rm\em #1}\rangle$}
-\def \doctt #1{{\tt #1}}
-\def \docarg #1{{\tt \{\docid {#1}\}}}
-\def \docopt #1{{\tt [\docid {#1}]}}
-\def \docpar #1{{\tt (\docid {#1})}}
-\def \empty {}
-\newcommand \dockey[3][]{{\tt #2\def \test {#3}\ifx \test \empty \else
-  =\docid{#3}\fi} \def \test {#1}\ifx \test \empty \else
-  \quad (default value is {\tt #1})\fi}
+\usepackage {demo}
 
 \begin{document}
 
@@ -87,99 +23,127 @@ Press: \keymenu{n}ext page \keymenu{p}revious page
 \item[+] GPIC specials (by Xavier Leroy)
 \item[+] Postscript specials (by Didier R{\'{e}}my)
 \item[+] hyperrefs (by Didier R{\'{e}}my)
+\item[+] active anchors (by Didier R{\'{e}}my)
 \item[+] and a few other gadgets...
 \end {itemize}
 \end{itemize}
 
 \begin{itemize}
-\item A set of macros to animate your presentation 
-(by Jun Furuse and Didier R{\'{e}}my).
+\item 
+A set of macros to animate your presentation 
+(by Jun~Furuse and Didier~R{\'{e}}my).
  
-\item A simple way to launch arbitrary demonstration and/or animation
+\item 
+A simple way to launch arbitrary demonstration and/or animation
 programs from inside your slides
-(by Jun Furuse and Pierre Weis).
+\hbox {(by Jun Furuse and Pierre Weis)}.
  \item We can have a BGM:\\
-   \verb|\adviembed{5cm}{5cm}{mpg123 -q music.mp3}|\\
-   \adviembed{5cm}{5cm}{mpg123 -q music.mp3}
+   \verb|\adviembed{5cm}{5cm}{mpg123 -q music.mp3}|
+%   \adviembed{5cm}{5cm}{mpg123 -q music.mp3}
+
+\item 
+A package to annotate text (using active anchors)
 \end{itemize}
 
 \newpage
 
 %Didier's flashy macro
 \def \flash #1{\let \do\leflash \do #1\relax}
-\def \leflash #1{\ifx #1\relax \def \do{}\else \def \do {#1\wait{0.05}\leflash}\fi \do}
+\def \leflash #1{\ifx #1\relax \def \do{}\else \def \do {#1\adviwait[0.05]\leflash}\fi \do}
 
 \def\goon{\hbox{{\Large $\Rightarrow$}~Type~space~to~go~on}}
 
-\subsection* {Macros enable}
-  \begin{itemize}
-  \item EPS graphics inclusion using Camlimages\\
-        \verb+\includegraphics[width=0.1\textwidth]{caml.eps}+\\
-        \verb+\includegraphics[width=0.2\textwidth]{caml.eps}+\\
-        \includegraphics[width=0.1\textwidth]{../tex/caml.eps}
-        \includegraphics[width=0.2\textwidth,height=0.09\textwidth]{../tex/caml.eps}
-  \item Other eye candies for presentation
-        \begin{itemize}
-        \item \verb+\pause+ \pause
-          and \verb+\wait{+{\em sec}\verb+}+ 
-          \flash{for~simple~animation}
+\subsection* {EPS graphics inclusing using Camlimages}
+\begin{quote}
+\verb+\includegraphics[width=0.1\textwidth]{caml.eps}+\\
+\verb+\includegraphics[width=0.2\textwidth]{caml.eps}+\\
+\includegraphics[width=0.1\textwidth]{../tex/caml.eps}
+\includegraphics[width=0.2\textwidth,height=0.09\textwidth]{../tex/caml.eps}
+\end{quote}
 
-        \item \verb+\record+ \& \verb+\play+ feature to change the colour
-         of a text:
-         \begin{itemize}
-           \item mark the text with a tag name:\\
-             $\tt{\backslash}record\{this\}\
-                  \{\record[play]{this}{Warning~to~the~casual~user}\}$
-           \item then change the current text color and replay the tagged text:
-          $\tt{\backslash}play\{this\}$.
-         \end{itemize}
-        \end{itemize}
-\end{itemize}
+\subsection* {Other eye candies for presentation}
+
+\medskip\noindent
+\docdef \adviwait\docopt{seconds}
+\begin{quote}
+Wait for \docid{seconds} or without argument forever, that is, until the
+user requests to continue (or to change page).
+\end{quote}
+
+\medskip\noindent
+\docdef \advirecord \doctt{[play]}\docarg{tag}\docarg{latex code}
+\begin{quote}
+The computes \docid{latex code} and record its DVI ouput under tag
+\docid{tag}. The DVI output is not displayed during recording, unless the
+option \doctt{play} is set.
+
+Embedded recordings are prohibited. 
+\end{quote}
+
+\medskip\noindent
+\docdef \adviplay\docopt{color}\docarg{tag}
+\begin{quote}
+Replay the DVI previously recorded as \docid{tag}.
+The optional argument changes the color to \docid{color} during replay. 
+\end{quote}
+
+\medskip\noindent
+\verb+\advirecord+ \& \verb+\adviplay+ feature to change the colour
+ of a text:
+ \begin{itemize}
+   \item mark the text with a tag name:\\
+     $\tt{\backslash}record\{this\}\
+          \{\advirecord[play]{this}{Warning~to~the~casual~user}\}$
+   \item then change the current text color and replay the tagged text:
+  $\tt{\backslash}play\{this\}$.
+ \end{itemize}
 
 \noindent
 For instance, to display in red the text associated to the tag
 {\tt this} above, you can either pass a color option to the play command:
-\verb+\play[color=red]{this}}+\\
-\record[play]{that}{\goon}\pause%
-\textcolor{c1}{\play{this}\play{that}}\pause{\play{this}\play{that}}\pause
+\verb+\adviplay[red]{this}}+\\
+\advirecord[play]{that}{\goon}\adviwait%
+\textcolor {c1}{\adviplay {this}\adviplay {that}}\adviwait
+{\adviplay{this}\adviplay {that}}\adviwait
 
 \noindent
 or place the command in the appropriate color environment:
 to display the same text in green, type\\
-\verb+\textcolor{green}{\play{this}}+\\
-\record[play]{goon}{\goon}\pause\textcolor{green}{\play{this}\play{goon}\pause}
+\verb+\textcolor{green}{\adviplay{this}}+\\
+\advirecord[play]{goon}{\goon}\adviwait
+\textcolor{green}{\adviplay{this}\adviplay{goon}\adviwait}
 
 \noindent
 Using pauses and color settings, you can get
-\record[play]{this}{various}
-\textcolor{red}{\play{this}\play{goon}}\pause
-\record[play]{this}{color (and fonts)}
-\textcolor{c2}{\play{this}\play{goon}}\pause
-\record[play]{this}{effects}
-\textcolor{c3}{\play{this}\play{goon}}\pause
-\record[play]{this}{in}
-\textcolor{c4}{\play{this}\play{goon}}\pause
-\record[play]{this}{your}
-\textcolor{c5}{\play{this}\play{goon}}\pause
-\record[play]{this}{texts}
-\textcolor{c6}{\play{this}\play{goon}}\pause
-\record[play]{this}{!}\\
-\textcolor{red}{\play{this}\play{goon}}\pause
+\advirecord[play]{this}{various}
+\textcolor{red}{\adviplay{this}\adviplay{goon}}\adviwait
+\advirecord[play]{this}{color (and fonts)}
+\textcolor{c2}{\adviplay{this}\adviplay{goon}}\adviwait
+\advirecord[play]{this}{effects}
+\textcolor{c3}{\adviplay{this}\adviplay{goon}}\adviwait
+\advirecord[play]{this}{in}
+\textcolor{c4}{\adviplay{this}\adviplay{goon}}\adviwait
+\advirecord[play]{this}{your}
+\textcolor{c5}{\adviplay{this}\adviplay{goon}}\adviwait
+\advirecord[play]{this}{texts}
+\textcolor{c6}{\adviplay{this}\adviplay{goon}}\adviwait
+\advirecord[play]{this}{!}\\
+\textcolor{red}{\adviplay{this}\adviplay{goon}}\adviwait
 Including some strange flashing effect!
-\play{goon}
-\textcolor{c6}{\play{this}}\wait{\smallpause}%
-\textcolor{c1}{\play{this}}\wait{\smallpause}%
-\textcolor{c2}{\play{this}}\wait{\smallpause}%
-\textcolor{c3}{\play{this}}\wait{\smallpause}%
-\textcolor{c4}{\play{this}}\wait{\smallpause}%
-\textcolor{c5}{\play{this}}\wait{\smallpause}%
-\textcolor{c6}{\play{this}}\wait{\smallpause}%
-\textcolor{c1}{\play{this}}\wait{\smallpause}%
-\textcolor{c2}{\play{this}}\wait{\smallpause}%
-\textcolor{c3}{\play{this}}\wait{\smallpause}%
-\textcolor{c4}{\play{this}}\wait{\smallpause}%
-\textcolor{c5}{\play{this}}\wait{\smallpause}%
-\textcolor{c6}{\play{this}}\wait{\smallpause}%
+\adviplay{goon}
+\textcolor{c6}{\adviplay{this}}\adviwait[\smallpause]%
+\textcolor{c1}{\adviplay{this}}\adviwait[\smallpause]%
+\textcolor{c2}{\adviplay{this}}\adviwait[\smallpause]%
+\textcolor{c3}{\adviplay{this}}\adviwait[\smallpause]%
+\textcolor{c4}{\adviplay{this}}\adviwait[\smallpause]%
+\textcolor{c5}{\adviplay{this}}\adviwait[\smallpause]%
+\textcolor{c6}{\adviplay{this}}\adviwait[\smallpause]%
+\textcolor{c1}{\adviplay{this}}\adviwait[\smallpause]%
+\textcolor{c2}{\adviplay{this}}\adviwait[\smallpause]%
+\textcolor{c3}{\adviplay{this}}\adviwait[\smallpause]%
+\textcolor{c4}{\adviplay{this}}\adviwait[\smallpause]%
+\textcolor{c5}{\adviplay{this}}\adviwait[\smallpause]%
+\textcolor{c6}{\adviplay{this}}\adviwait[\smallpause]%
 
 
 \newpage
@@ -236,7 +200,7 @@ presentation using:\\
    For instance (using wish)\\
    \verb|\adviembed[persistent]{5cm}{1cm}{wish ./watch -geometry !g -use !p}|\\
    \adviembed[persistent]{5cm}{0.71cm}{wish ./watch -geometry !g -use !p}
-\pause
+\adviwait
   \item Possibly interactive ! (using CamlTk)\\
    \verb|\adviembed[persistent-taui]{6.5cm}{9.5cm}{./taquin -geometry !g -use !p dojoji.gif}|\\
   \adviembed[persistent=taquin]{7.5cm}{11cm}{./taquin -geometry !g -use !p dojoji.gif}
@@ -458,30 +422,30 @@ two identical figures can be superposed. For instance,
 $$
 \psset {linestyle=none,fillstyle=solid}
 \rlap
-{\record{tagb}{\ovalnode [fillcolor=green]{A}{\textbf {Postscript}}}}%
-\record[play]{taga}{\ovalnode [fillcolor=yellow]{B}{\textbf {Postscript}}}
+{\advirecord{tagb}{\ovalnode [fillcolor=green]{A}{\textbf {Postscript}}}}%
+\advirecord[play]{taga}{\ovalnode [fillcolor=yellow]{B}{\textbf {Postscript}}}
 $$
 will  be rendered by
 \begin{verbatim}
   \psset {linestyle=none,fillstyle=solid}
   \def \PS {\textbf {Postscript}}
-  \rlap {\record{tagb}{\ovalnode [fillcolor=green]{A}{\PS}}}%
-  \record[play]{taga}{\ovalnode [fillcolor=yellow]{B}{\PS}}}
+  \rlap {\advirecord{tagb}{\ovalnode [fillcolor=green]{A}{\PS}}}%
+  \advirecord[play]{taga}{\ovalnode [fillcolor=yellow]{B}{\PS}}}
 \end{verbatim}
 \begin {enumerate}
 
 \item
 Type space to change the text color. 
-\pause \textcolor{red}{\play{taga}}
+\adviwait \textcolor{red}{\adviplay{taga}}
 \begin{verbatim}
-    \pause \textcolor{red}{\play{taga}}
+    \adviwait \textcolor{red}{\adviplay{taga}}
 \end{verbatim}
 
 \item
 Type space to change the background.
-\pause\textcolor{red}{\play{tagb}}
+\adviwait\textcolor{red}{\adviplay{tagb}}
 \begin{verbatim}
-    \pause\textcolor{red}{\play{tagb}}
+    \adviwait\textcolor{red}{\adviplay{tagb}}
 \end{verbatim}
 
 \end {enumerate}
@@ -500,24 +464,28 @@ leaves the anchor region.
 For instance, scratch those stamps with the mouse to see how much you win.
 $$
 \ovalnode [linestyle=none,fillstyle=solid,fillcolor=yellow]{A}
-  {\record {A}{\textbf {10000}}\advi{A}{\play[color=yellow]{A}}}
+  {\advirecord {A}{\textbf {10000}}}
+\advianchor{A}{\adviplay[yellow]{A}}
 \hspace {4em}
 \def \i{\textcolor{green}{.}}
 \ovalnode [linestyle=none,fillstyle=solid,fillcolor=green]{B}
-  {\record {B}{\i\textbf{Lost}!\i}\advi{B}{\play[color=green]{B}}}
+  {\advirecord {B}{\i\textbf{Lost}!\i}}
+\advianchor{B}{\adviplay[green]{B}}
 $$
 For instance, the left game was typeset as
+{\small
 \begin{verbatim}
 \ovalnode [linestyle=none,fillstyle=solid,fillcolor=yellow]{A}
-  {\record {A}{10000}\advi{A}{\play[color=yellow]{A}{yellow}}}
-\end{verbatim}
+  {\advirecord {A}{\textbf {10000}}}
+\advianchor{A}{\adviplay[yellow]{A}}
+\end{verbatim}}%
 
-\bigskip
+\medskip
 Of course, the effect of active anchors can also be 
-\advi{C}{delocalized}.
+\advianchor{C}{delocalized}.
 
 \SpecialCoor
-\record {C}
+\advirecord {C}
   {\ncarc[linecolor=red,arcangleA=50,arcangleB=50,linewidth=3pt]
          {<->}{A}{B}%\Aput{Fire!}
 }
@@ -528,6 +496,29 @@ On plateforms for which PS tricks does not synchronizes correctly,
 calling PS tricks by active anchors may result in part of the action 
 to erroneously remain on screen when leaving the anchor. 
 
+
+\newpage
+
+\subsection*{Active anchors (manual)}
+
+The command is 
+
+\medskip\noindent
+\docdef \advianchor \docarg{tag}\docarg {text}
+\begin{quote}
+The text is first display as usual and mark as active. 
+Mouving the mouse above the text will display the record \docid{tag}.
+\end{quote}
+
+\noindent
+The command is also available as an environment 
+
+\medskip\noindent
+\docdef \begin\doctt{\{Advianchor\}}\docarg{tag}%
+\docid {text}\docdef \end\doctt{\{Advianchor\}}
+\begin{quote}
+Here, \docid{text} can have fragile commands. 
+\end{quote}
 
 \newpage
 

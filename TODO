@@ -13,6 +13,12 @@ variable accordingly.
 
 CLEANING: 
 
+* transbox: replace steps by a timer
+
+* transitions: remove the transition stack
+
+* alpha, blend, etc.: remove the stack?
+
 WISH LIST: 
 
 - adapter la résolution aux vrai dpy de l'écran

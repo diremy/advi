@@ -1,0 +1,65 @@
+% You need graphics package
+\usepackage{color}
+\usepackage{graphicx}
+
+\usepackage{pst-all}
+
+
+\usepackage{hyperref}
+
+\usepackage {advi}
+\usepackage {advi-annot}
+%% \usepackage[annot]{advi} 
+%% must occur after packages using PStricks macros 
+%% (it redefines some of them) 
+
+%\def\mathsym#1{\ifmmode{#1}\else$#1$\fi}
+
+\pagestyle{empty}
+
+\definecolor{red}{rgb}{1.0,0.0,0.0}
+\definecolor{green}{rgb}{0.0,1.0,0.0}
+\definecolor{blue}{rgb}{0.0,0.0,1.0}
+\definecolor{c1}{rgb}{1.0,0.0,0.0}
+\definecolor{c2}{rgb}{0.5,0.4,0.0}
+\definecolor{c3}{rgb}{0.0,0.8,0.0}
+\definecolor{c4}{rgb}{0.0,0.4,0.5}
+\definecolor{c5}{rgb}{0.0,0.0,1.0}
+\definecolor{c6}{rgb}{0.5,0.0,0.5}
+
+\def\smallpause{0.3}
+
+\def\keymenu#1{\textcolor{red}{\underline{#1}}}
+
+\def\advifooter{\vbox to 0em{\vbox to \vsize {\vfill
+Press: \keymenu{n}ext page \keymenu{p}revious page
+\keymenu{\textvisiblespace} next pause%
+\hfill{\adviembed[sticky=advianim]{1.56cm}{1.824cm}{animate -geometry !g! -window !p advilogo.anim.gif}}
+} \vss}}
+
+\def\adviheader{\noindent
+{\bf\Large Active dvi}\\
+\includegraphics[width=\textwidth]{../tex/bar.jpg.eps}\par}
+
+\let \Newpage \newpage
+\def \newpage {\Newpage \advifooter\adviheader}
+
+\def\adviemptyfooter{\vbox to 0em{\vbox to \vsize {\vfill
+~~\vss\advikillembed{advianim}}}}
+
+\def\lastpage{\Newpage\adviemptyfooter\adviheader}
+
+%  \setlength\textwidth{660\p@}
+%  \setlength\textheight{460\p@}
+
+\epswhite
+\def \docdef #1{{\tt \string #1}}
+\def \docid #1{$\langle \hbox {\rm\em #1}\rangle$}
+\def \doctt #1{{\tt #1}}
+\def \docarg #1{{\tt \{\docid {#1}\}}}
+\def \docopt #1{{\tt [\docid {#1}]}}
+\def \docpar #1{{\tt (\docid {#1})}}
+\def \empty {}
+\newcommand \dockey[3][]{{\tt #2\def \test {#3}\ifx \test \empty \else
+  =\docid{#3}\fi} \def \test {#1}\ifx \test \empty \else
+  \quad (default value is {\tt #1})\fi}

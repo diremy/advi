@@ -37,8 +37,7 @@
    \NormalCoor
    \setkeys {adviannot}{#1}%
    \Rnode {advi@from\the\advi@c@annot}%
-          {\begin{advi*}{advi@annot\the\advi@c@annot}#2\end{advi*}}%
-   \annot@i}
+      {\Advi@anchor{advi@annot\the\advi@c@annot}{#2}}\annot@i}
 
 \def \advi@annot@setdefault  {\psset{}}
 
@@ -52,11 +51,11 @@
 \else
 \def \advi@annottab #1#2{\begin{tabular}{@{}#1@{}}#2\end{tabular}}%
 \def \annot@ii(#1)#2{%
-  \begin{advi@record}{advi@annot\the\advi@c@annot}
+  \begin{Advi@record}{advi@annot\the\advi@c@annot}
     \rput(#1){\ovalnode {advi@to}%
                  {\advi@annottab {\advi@annot@col}{#2}}}%
      \AdviAnnotArc{advi@from\the\advi@c@annot}{advi@to}%
-  \end{advi@record}\egroup}
+  \end{Advi@record}\egroup}
 \fi
 
 % \def \annot@ii(#1){\@ifnextchar [{\annot@iii(#1)}{\annot@iii(#1)[c]}}

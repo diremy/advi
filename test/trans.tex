@@ -47,7 +47,7 @@ Press: \underline{n}ext page \underline{p}revious page
 \subsection*{Transitions}
 
 Active dvi has transitions --- animated page display for each pause.
-You can specify the transition by \verb|\settransition{|%
+You can specify the transition by \verb|\advitransition{|%
 $mode~arg_1~\ldots~arg_n$\verb|}| advi macro.
 Currently the following transition modes are available:
 \begin{itemize}
@@ -58,7 +58,7 @@ Currently the following transition modes are available:
 appear randomly
 \end{itemize}
 For example, if you want to slide the page, write
-\verb+\settransition{slide}+ in your document. 
+\verb+\advitransition{slide}+ in your document. 
 
 \subsection*{Notes}
 
@@ -68,7 +68,7 @@ For example, if you want to slide the page, write
 \item The transition animations occur even at \verb+\pause+ and
   \verb+\wait+ commands. 
   If you feel it too lousy for each pause, 
-  you have to disable the transition by \verb+\settransition{none}+
+  you have to disable the transition by \verb+\advitransition{none}+
   just before pauses.
 \end{itemize}
 
@@ -84,12 +84,12 @@ Usually the followings are available:
 \item {\tt steps=}{\em{arg}}  --- number of animation steps
 \end{itemize}
 For example, if you want to slide-in a page from left in 30 steps,
-write \verb+\settransition{slide from=left steps=30}+.
+write \verb+\advitransition{slide, from=left, steps=30}+.
 
 \newpage\adviback{blue}
 
 \subsection*{Slide transition}
-\settransition{slide from=left steps=30}
+\advitransition{slide, from=left, steps=30}
 New pages appears sliding into the screen.
 
 \subsubsection*{Options}
@@ -103,8 +103,8 @@ New pages appears sliding into the screen.
 
 \subsubsection*{Examples}
 \begin{itemize}
-\item \verb+\settransition{slide}+
-\item \verb+\settransition{slide from=left steps=30}+
+\item \verb+\advitransition{slide}+
+\item \verb+\advitransition{slide, from=left, steps=30}+
 \end{itemize}
 
 \begin{flushright}
@@ -114,7 +114,7 @@ New pages appears sliding into the screen.
 
 \newpage\adviback{yellow}
 
-\settransition{wipe from=right steps=30}
+\advitransition{wipe, from=right, steps=30}
 
 \subsection*{Wipe transition}
 New pages appears wiping out the old graphics.
@@ -130,8 +130,8 @@ New pages appears wiping out the old graphics.
 
 \subsubsection*{Examples}
 \begin{itemize}
-\item \verb+\settransition{wipe}+
-\item \verb+\settransition{wipe from=center steps=30}+
+\item \verb+\advitransition{wipe}+
+\item \verb+\advitransition{wipe,from=center,steps=30}+
 \end{itemize}
 
 \begin{flushleft}
@@ -140,7 +140,7 @@ New pages appears wiping out the old graphics.
 \end{flushleft}
 
 \newpage\adviback{magenta}
-\settransition{block from=topleft steps=20000}
+\advitransition{block,from=topleft,steps=20000}
 
 \subsection*{Block transition}
 New pages appears gradually into small pieces.
@@ -156,8 +156,8 @@ New pages appears gradually into small pieces.
 
 \subsubsection*{Examples}
 \begin{itemize}
-\item \verb+\settransition{block}+
-\item \verb+\settransition{block from=topleft steps=10000}+
+\item \verb+\advitransition{block}+
+\item \verb+\advitransition{block,from=topleft,steps=10000}+
 \end{itemize}
 
 \begin{flushright}
@@ -167,14 +167,14 @@ New pages appears gradually into small pieces.
 
 \lastpage
 
-\settransition{block from=center steps=50000}
+\advitransition{block,from=center,steps=50000}
 
-\wait{0.1}
+\adviwait[0.1]
 
 ~\vfill
 \begin{center}
 \includegraphics[width=0.5\textwidth]{../tex/advilogo.eps}\\
-\wait{0.1}
+\adviwait[0.1]
 \bigskip
 {\Huge \bf That's all, folks!!}
 \end{center}

@@ -49,17 +49,21 @@
 %%% record and play
 
 \def \advi@start {start}
-\define@key{advi@record}{play}[]{\def \advi@start {start play}}
-\newenvironment {advi@record}[2][]
-  {\setkeys{advi@record}{#1}\advi@special {proc=#2 record=\advi@start}}
+\def \advi@startplay {start play}
+\define@key{advi@record}{play}[]{\let \advi@do \advi@startplay}
+\newenvironment {Advi@record}[2][]
+  {\let \advi@do \advi@start 
+   \setkeys{advi@record}{#1}\advi@special {proc=#2 record=\advi@do}}
   {\advi@special {proc record=end}}
-\define@key{advi@play}{color}[blue]{\color{#1}}
-\newcommand {\advi@play}[2][]
-   {\bgroup \setkeys {advi@play}{#1}\advi@special {proc=#2 play}\egroup}
+\newcommand {\advi@play}[2][]%
+   {\begingroup
+      \def \@test {#1}\ifx \@test \advi@empty\else \color {#1}\fi
+      \advi@special {proc=#2 play}%
+    \endgroup}
 
-\advi@exportenv {record*}{advi@record}
-\newcommand {\record}[3][]{\begin{advi@record}[#1]{#2}#3\end{advi@record}}
-\advi@export \play \advi@play
+\advi@exportenv {Advirecord}{Advi@record} 
+\newcommand {\advirecord}[3][]{\begin{Advi@record}[#1]{#2}#3\end{Advi@record}}
+\advi@export \adviplay \advi@play
 
 
 %%% Embedded applications
@@ -91,8 +95,8 @@
 
 %%% Background colors and images
 
-\define@key {advi@bg}{color}{\advi@special{setbg col=#1}}
-\define@key {advi@bg}{image}{\advi@special{setbg ima=#1}}
+\define@key {advi@bg}{color}{\advi@special{setbg color=#1}}
+\define@key {advi@bg}{image}{\advi@special{setbg image=#1}}
 \define@key {advi@bg}{alpha}{\advi@special{setbg alpha=#1}}
 \define@key {advi@bg}{blend}{\advi@special{setbg blend=#1}}
 \define@key {advi@bg}{reset}[]{\advi@special{setbg reset}}
@@ -101,14 +105,16 @@
 
 %%% Pausing and waiting
 
-\def\advi@pause{\advi@special{pause}}
+\def\advi@pause {\advi@special{pause}}
 \def\advi@wait#1{\advi@special{wait sec=#1}}
 
 %% export
-\newcommand {\pause}{\advi@pause}
-\newcommand {\wait}{\advi@wait}
+\newcommand {\adviwait}[1][]%
+   {\def \@test {#1}\ifx \@test \advi@empty \advi@pause 
+    \else \advi@wait {#1}\fi}
 
 %%% Transparency and alpha blending
+%%% To be revised. 
 
 \def\advi@epstransparent
    {\advi@special{epstransparent push true}%
@@ -134,17 +140,21 @@
 
 %%% Animated transitions
 
-\def\advi@settransition#1{\advi@special{trans push #1}}
-\def\advi@resettransition{\advi@special{trans pop}}
+\def \advi@transsteps{}
+\define@key {advi@trans}{slide}[]{\def \advi@transmode {slide}}
+\define@key {advi@trans}{from}{\def \advi@transfrom { from=#1}}
+\define@key {advi@trans}{steps}{\def \advi@transsteps { step=#1}}
+\def\advi@transition #1{%
+  \begingroup \setkeys {advi@trans}{#1}%
+      \advi@special{trans push \advi@transmode \advi@transfrom
+                    \advi@transsteps}%
+  \endgroup}
+% not used anymore
+% \def\advi@resettransition{\advi@special{trans pop}}
 
 \def\advi@transbox@save#1#2#3{\advi@special
   {transbox save width=#1 height=#2 depth=#3}}
 \def\advi@transbox@go#1{\advi@special{transbox go #1}}
-% \def\advi@transbox#1#2{%
-%   \hbox{\setbox0\hbox{#2}%
-%   \advi@transbox@save{\the\wd0 }{\the\ht0 }{\the\dp0}%
-%   \unhbox0 
-%   \advi@transbox@go{#1}}}
 
 \def \advi@transbox #1{%
    \def \advi@afterbox 
@@ -153,13 +163,8 @@
    \def \advi@@afterbox {\aftergroup \advi@afterbox} 
    \afterassignment \advi@@afterbox \setbox0 \hbox } 
 
-\def \advi@trans {\setkeys{advi@trans}}
-\define@key{advi@trans}{push}{\advi@special {trans push #1}}
-\define@key{advi@trans}{pop}[]{\advi@special{trans pop}}
+\advi@export \advitransition \advi@transition
 \advi@export \advitransbox \advi@transbox
-
-\advi@export \settransition \advi@settransition
-\advi@export \resettransition \advi@resettransition
 
 %%% For PS Tricks
 
@@ -195,31 +200,31 @@ end
 
 %%% Active DVI
 
-\newenvironment {advi@active}[1]
+\newenvironment {Advi@anchor}[1]
   {\advi@special@ {html:<a advi="#1">}}
   {\advi@special@ {html:</a>}}
-\advi@exportenv {advi*}{advi@active}
-\newcommand {\advi}[2]{\begin{advi@active}{#1}#2\end{advi@active}}
+\newcommand {\advi@anchor}[2]{\begin{Advi@anchor}{#1}#2\end{Advi@anchor}}
+\advi@exportenv {Advianchor}{Advi@anchor}
+\advi@export \advianchor \advi@anchor
 
 %%% Partial patch for overlays -- 0 will be shown > 0 will not be shown
 
-\newif \ifadvi@hide \advi@hidefalse
+\newif \ifadvi@hidden \advi@hiddenfalse
 \def \advi@overlay 
-  {\ifadvi@hide \else
-     \advi@beginhide \aftergroup \advi@endhide \advi@hidetrue 
+  {\ifadvi@hidden \else
+     \advi@hide \aftergroup \advi@endhide \advi@hidetrue 
    \fi}
 
-\def \advi@beginhide {\advi@record{@hide}}
-\def \advi@endhide   {\endadvi@record}
+\def \advi@hide {\Advi@record{@hide}}
+\def \advi@endhide   {\endAdvi@record}
 \def \make@advioverlay 
   {\let \advi@old@overlay \overlay
    \renewcommand {\overlay}{\advi@overlay \advi@ignore}}
 \def \advi@ignore #1{}
 \@ifundefined {overlay}{}
   {\ifadvi@ignore
-     \def \advi@@start #1{\bgroup \overlay 9}
-     \def \advi@@startplay #1{\bgroup}
-     \def \advi@@end #1{\egroup}
+     \def \advi@hide {\bgroup \overlay 9}
+     \def \advi@endhide {\egroup}
    \else
      \AtBeginDocument {\make@advioverlay}
    \fi}

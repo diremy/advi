@@ -299,10 +299,13 @@ let epstransparent_pop st =
       st.epstransparent_stack <- rest;;
 
 let transition_push st v =
+(*
   st.transition_stack <- st.transition :: st.transition_stack;
+*)
   st.transition <- v;
   if not (is_hidden ()) then Dev.set_transition v;;
 
+(*
 let transition_pop st =
   match st.transition_stack with
   | [] -> ()
@@ -310,6 +313,7 @@ let transition_pop st =
       st.transition <- v;
       if not (is_hidden ()) then Dev.set_transition v; 
      st.transition_stack <- rest;;
+*)
 
 let fnt st n =
   let (mtable, gtable, cfont) =
@@ -568,12 +572,10 @@ let parse_transition mode record =
 
 let transition_special st s =
   match split_string s 0 with
-  | "advi:" :: "trans" :: "push" :: mode :: args ->
+  | "advi:" :: "trans" :: mode :: args ->
       let record = split_record (String.concat " " args) in
       let trans = parse_transition mode record in
       transition_push st trans
-  | "advi:" :: "trans" :: "pop" :: [] ->
-      transition_pop st
   | _ -> ();;
 
 let transbox_save_special st s =
