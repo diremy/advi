@@ -33,7 +33,7 @@
 \usepackage{graphicx}
 \usepackage{tabularx}
 %\usepackage{pst-all}
-\usepackage{xcolor}
+\usepackage{xwindows-colors}
 \usepackage{hyperref}
 % End of splash specific stuff
 
@@ -109,7 +109,9 @@ Xavier~Leroy, and Alan~Schmitt.
 
 \clearpage
 %\advitoc
+\hypertarget{/toc.first}{}
 \tableofcontents
+\hypertarget{/toc.last}{}
 %\endadvitoc
 \clearpage
 
@@ -578,7 +580,7 @@ master, whenever {\ActiveDVI} receives signal \doctt{usr1} (to mean
 immediate refresh). 
 
 
-\section{The \softtarget{advistyle} {\doctt{advi.sty}} {\LaTeX} package}
+\section{The \softtarget{advistyle}{\doctt{advi.sty}} {\LaTeX} package}
 
 {\ActiveDVI} provides some {\LaTeX} packages to facilitate animations and
 interaction with the presenter from within your {\LaTeX} source text.
@@ -842,12 +844,13 @@ valid specification for {\color[rgb]{1.0,0.0,0.0}{red}}.
 
 \subsubsection*{The X colors}
 
-{\ActiveDVI} provides the package \doctt{xcolor}, an extension to the
-\doctt{color} package, that defines a large set of X colors names, as
-found in the file {\tt rgb.txt} of a typical X installation (this file
-is generally located on {\tt /usr/X11R6/lib/X11/rgb.txt}). To know
-which colors are available look at the source file of the package
-{\tt xcolor.sty} in the directory {\tt tex} of the distribution.
+{\ActiveDVI} provides the package \doctt{xwindows-colors}, an
+extension to the \doctt{color} package, that defines a large set of X
+colors names, as found in the file {\tt rgb.txt} of a typical X
+installation (this file is generally located on {\tt
+/usr/X11R6/lib/X11/rgb.txt}). To know which colors are available look
+at the source file of the package {\tt xwindows-colors.sty} in the
+directory {\tt tex} of the distribution.
 
 \subsection{Background}
 
@@ -1310,7 +1313,7 @@ Embeddded-Postcript figures, including scaling.
 Other PStricks may or may not work.
 
 
-\section{The \softtarget{advi-slides} {\doctt{advi-slides.sty}} {\LaTeX} package}
+\section{The \softtarget{advi-slides}{\doctt{advi-slides.sty}} {\LaTeX} package}
 
 {\ActiveDVI} provides a specialized {\LaTeX} package to facilitate
 writing presentation slides in the spirit of SliTeX.

@@ -21,7 +21,7 @@ include ../Makefile.config
 
 # See also file MakeHTML to recompile HTML files for the Web site.
 
-LATEX=TEXINPUTS=.:../tex:/usr/lib/hevea:/usr/local/lib/hevea: latex
+LATEX=TEXINPUTS=.:../tex:/usr/lib/hevea:/usr/local/lib/hevea:/usr/local/share/texmf/tex//:$$TEXINPUTS latex
 DVIPS=TEXPSHEADERS=.:../tex: dvips
 HEVEA=$(PATH_HEVEA) -entities -I ../tex
 IMAGEN=imagen
@@ -47,15 +47,17 @@ web:
 
 manual.dvi: manual.sty splash_contents.tex \
        scratch_write_splash_contents.tex scratch_draw_splash_contents.tex
-	$(LATEX) manual.tex && $(LATEX) manual.tex
+	$(LATEX) manual.tex && $(LATEX) manual.tex && $(LATEX) manual.tex
 splash.dvi: splash_contents.tex
 scratch_write_splash.dvi: scratch_write_splash_contents.tex
 scratch_draw_splash.dvi: scratch_draw_splash_contents.tex
 
 ifeq ($(HAVE_HEVEA),true)
 manual.html: manual.tex manual.sty macros.hva 
+advi_remote.html: advi_remote.tex manual.sty macros.hva 
 else
 manual.html:
+advi_remote.html:
 endif
 
 .SUFFIXES: .tex .dvi .advi .ps .pdf .pdfm .html .ima

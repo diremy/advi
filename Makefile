@@ -29,7 +29,7 @@ HELPFILES=doc/splash.dvi \
 
 TEXSTYFILES= \
     advi-annot.sty advi-slides.sty argv.sty superpose.sty \
-    advi-graphicx.sty advi.sty bubble.sty xcolor.sty
+    advi-graphicx.sty advi.sty bubble.sty xwindows-colors.sty
 
 TEXEPSFILES= \
     advilogo.eps bar.eps caml.eps
@@ -128,7 +128,7 @@ config.ml: config.ml.in configure
 	./configure
 
 version:
-	for i in $(PACKAGEVERSIONFILE) $(DOCVERSIONFILE); do \
+	for i in $(PACKAGEVERSIONFILE) $(DOCVERSIONFILES); do \
 	echo $$i; \
 	mv $$i $$i~; \
 	sed -e '/ersion/s/$(OLDVERSION)/$(VERSION)/' $$i~ > $$i; \
