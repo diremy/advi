@@ -133,13 +133,21 @@ module Japanese = struct
   	    Pervasives.truncate (float width *. float pt *. float dpi 
 				   /. 1152.0) (* 72x16 *)
   	  in
-  	  let x_fix =
+  	  let x_fix, y_fix =
   	    let fix = try List.assoc jiscode (match typ with
   					      | Mincho -> Jfm.monospace_fix
   					      | Gothic -> Jfm.monospace_fix)
   		      with _ -> 0.0
   	    in
-  	    Pervasives.truncate (float pt *. float dpi /. 72.0 *. fix /. 1000.0)
+	    (* width min10 (mincho 10pt) is 9.62216pt
+	       (http://www.matsusaka-u.ac.jp/~okumura/jsclasses/jfm.html)
+             *)
+  	    Pervasives.truncate (float pt *. 0.962216 *. 
+				   float dpi /. 72.0 *. fix /. 1000.0),
+	    (* baseline fix is quite ad-hoc. I took 5% without reason 
+             *)
+  	    Pervasives.truncate (float pt *. 
+				   float dpi /. 72.0 *. 0.05)
   	  in
 
 	  (* drawing using ttfont.build *)
@@ -151,13 +159,13 @@ module Japanese = struct
 	    width= chardef.Ttfont.width;
 	    height= chardef.Ttfont.height;
 	    hoffset= chardef.Ttfont.hoffset - x_fix;
-	    voffset= chardef.Ttfont.voffset;
+	    voffset= chardef.Ttfont.voffset - y_fix;
 	    bitmap= chardef.Ttfont.bitmap }
       in
       { name= fontname; dpi= dpi; table= Table.make build }
   ;;
 
-  (* wrapper : any error raises Not_found *)
+  (* wrapper : any error returns dumb font *)
   let make_font fontname dpi =
     try make_font fontname dpi with _ -> raise Not_found
   ;;
