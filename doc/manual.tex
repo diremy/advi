@@ -91,7 +91,7 @@ following (unchecked): {\tt difference}, XXX?
 
 \subsection {Transitions}
 
-\docdef \advitrans \docarg {key=val list}
+\docdef \advitrans \docopt{\doctt {global}}\docarg {key=val list}
 \begin{quote}
 where \docid{key=value list} is a list of bindings of the following kind:
 
@@ -120,6 +120,11 @@ bottomleft& bottom & bottomright\\
 \begin{quote}
 Make the transition in \docid{n} steps. 
 \end{quote}
+The optional parameter \doctt{global} indicates that
+the definition is global and will affect the following pages, 
+as well as the current page. 
+
+By default, the transition affects only the current page. 
 \end{quote}
 
 \medskip\noindent
