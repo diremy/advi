@@ -167,6 +167,7 @@ MLFILES = $(addsuffix .ml, $(MODULES))
 	$(OCAMLDEP) *.mli $(MLFILES) > .depend
 	gcc -MM -I$(CAMLDIR) $(CFLAGS) $(COBJS:.o=.c) \
 		| sed -e 's|$(CAMLDIR)/[^ ]*||' >> .depend
+	chmod a+w .depend
 
 # just for the authors
 ADVI=advi-$(VERSION)
