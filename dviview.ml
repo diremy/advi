@@ -470,7 +470,7 @@ let move_within_margins_x st movex =
   if st.orig_x <> new_orig_x then Some new_orig_x
   else None;;
 
-let redraw st =
+let redraw ?trans st =
     (* draws until the current pause_no or page end *)
   Grdev.set_busy Grdev.Busy;
   st.cont <- None;
@@ -487,7 +487,7 @@ let redraw st =
       Driver.clear_symbols ();
       if !bounding_box then draw_bounding_box st;
       if !pauses then
-        let f = Driver.render_step st.cdvi st.page_no
+        let f = Driver.render_step st.cdvi st.page_no ?trans
             (st.base_dpi *. st.ratio) st.orig_x st.orig_y in
         let current_pause = ref 0 in
         begin
@@ -506,7 +506,7 @@ let redraw st =
         end
       else
         begin
-          Driver.render_page  st.cdvi st.page_no
+          Driver.render_page  st.cdvi st.page_no 
             (st.base_dpi *. st.ratio) st.orig_x st.orig_y;
         end;
     with Grdev.Stop ->
@@ -633,7 +633,7 @@ let reload st =
     st.aborted <- true;
     update_dvi_size false st ;
     Misc.dops := !Misc.pson;
-    redraw st
+    redraw ?trans:(Some Transitions.DirTop) st
   with x ->
     assert (Misc.debug (Printexc.to_string x));
     st.cont <- None;;
@@ -646,9 +646,14 @@ let goto_page n st = (* go to the begining of the page *)
     begin
       if st.page_no <> new_page_no then
         st.exchange_page <- st.page_no;
+      let t =
+        if new_page_no = succ st.page_no then Some Transitions.DirRight
+        else if new_page_no = pred st.page_no then Some Transitions.DirLeft
+        else if new_page_no = st.page_no then Some Transitions.DirTop
+        else None in
       st.page_no <- new_page_no ;
       st.pause_no <- 0 ;
-      redraw st
+      redraw ?trans:(t) st
     end;;
 
 let push_stack b n st =
@@ -863,8 +868,8 @@ let scale n st =
         | None -> ()
 
 
-      let redraw = redraw
-      let reload = reload
+      let redraw = redraw ?trans:(Some Transitions.DirNone)
+      let reload = reload 
 
       let fullscreen st =
         let x, y = 

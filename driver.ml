@@ -165,6 +165,7 @@ type state = {
     mutable blend_stack : Dev.blend list;
     mutable epstransparent : bool;
     mutable epstransparent_stack : bool list;
+    mutable direction : Transitions.direction option;
     mutable transition : Transitions.t;
     mutable transition_stack : Transitions.t list;
       (* TPIC specials state *)
@@ -532,7 +533,9 @@ let embed_special st s =
   if not (is_hidden ()) then
     Dev.embed_app command app_mode app_name width_pixel height_pixel x y;;
 
-let parse_transition mode record =
+let parse_transition dir mode record =
+  let default_dir =
+    match dir with Some d -> d | None -> Transitions.DirNone in
   let parse_steps =
     try
       let stepsstr = List.assoc "steps" record in
@@ -558,13 +561,13 @@ let parse_transition mode record =
       | s ->
          warning ("special: trans push: direction parse failed: \""^ s ^"\"");
          raise Exit
-    with _ -> Transitions.DirNone
+    with _ -> default (* Transitions.DirNone *)
   in
   match String.lowercase mode with
   | "slide" -> Transitions.TransSlide (parse_steps,
-                           parse_direction "from" Transitions.DirRight)
+                           parse_direction "from" default_dir)
   | "wipe" -> Transitions.TransWipe (parse_steps,
-                           parse_direction "from" Transitions.DirRight)
+                           parse_direction "from" default_dir)
   | "block" -> Transitions.TransBlock (parse_steps,
                            parse_direction "from" Transitions.DirNone)
   | "none" ->  Transitions.TransNone
@@ -576,7 +579,7 @@ let transition_special st s =
   match split_string s 0 with
   | "advi:" :: "trans" :: mode :: args ->
       let record = split_record (String.concat " " args) in
-      let trans = parse_transition mode record in
+      let trans = parse_transition st.direction mode record in
       transition_push st trans
   | _ -> ();;
 
@@ -608,7 +611,7 @@ let transbox_go_special st s =
   match split_string s 0 with
   | "advi:" :: "transbox" :: "go" :: mode :: args ->
       let record = split_record (String.concat " " args) in 
-      let trans = parse_transition mode record in
+      let trans = parse_transition None mode record in
       Dev.transbox_go trans
   | _ -> raise (Failure "advi: transbox go special failed");;
 
@@ -1095,7 +1098,7 @@ let find_prologues l =
 let render_page cdvi num dpi xorig yorig =
   failwith "Render_page is deprecated.";;
 
-let render_step cdvi num dpi xorig yorig =
+let render_step cdvi num ?trans dpi xorig yorig =
   proc_clean ();
   if num < 0 || num >= Array.length cdvi.base_dvi.Dvi.pages then
     invalid_arg "Driver.render_step";
@@ -1122,7 +1125,9 @@ let render_step cdvi num dpi xorig yorig =
       alpha = 1.0; alpha_stack = [];
       blend = Dev.Normal; blend_stack = [];
       epstransparent = true; epstransparent_stack = [];
-      transition = Transitions.TransNone; transition_stack = [];
+      direction = trans;
+      transition = Transitions.TransNone;
+      transition_stack = [];
       tpic_pensize = 0.0; tpic_path = []; tpic_shading = 0.0;
       status = status;
       headers = [];

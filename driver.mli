@@ -19,7 +19,8 @@ exception Pause
 type cooked_dvi
 val cook_dvi : Dvi.t -> cooked_dvi
 val render_page : cooked_dvi -> int -> float -> int -> int -> unit
-val render_step : cooked_dvi -> int -> float -> int -> int -> (unit -> bool)
+val render_step : cooked_dvi -> int -> ?trans:Transitions.direction -> 
+        float -> int -> int -> (unit -> bool)
 val unfreeze_fonts : cooked_dvi -> unit
 val unfreeze_glyphs : cooked_dvi -> float -> unit
 val scan_special_pages : cooked_dvi -> int -> unit
