@@ -59,7 +59,7 @@ manual.dvi: manual.sty
 	touch $*.ima
 
 .tex.html:
-	$(HEVEA) -fix macro.hva manual -o $*.html $*.tex
+	$(HEVEA) -fix macros.hva manual -o $*.html $*.tex
 	if [ -f $<.image.tex ]; then mv $<.image.tex $*.image.tex; fi
 	if [ -f $*.image.tex ]; then $(IMAGEN) $*; fi
 
