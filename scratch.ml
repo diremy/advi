@@ -107,7 +107,9 @@ let save_excursion c f () =
   in
   G.set_color c;
   Graphics.set_line_width !scratch_line_width;
-  Graphics.set_font !scratch_write_font;
+  try
+    Graphics.set_font !scratch_write_font
+  with G.Graphic_failure s -> Misc.warning s;
   set_cursor Cursor_pencil;
   try f (); restore ()
   with x -> restore (); raise x
