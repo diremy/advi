@@ -16,6 +16,7 @@
 /* But see http://freedesktop.org/Standards/wm-spec/wm-spec-1.3.html */
 /* for "official" specifications                                     */
 
+#include <string.h>
 #include <X11/Xatom.h>
 #include <X11/cursorfont.h>
 #include "libgraph.h"
