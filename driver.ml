@@ -17,6 +17,11 @@
 
 open Misc;;
 
+let active = 
+  Options.flag true "-passive" "Cancel all advi-effects";;
+let toggle_active () = active := not !active
+
+
 (* number of steps before checking for user interruptions *)
 let checkpoint_frequency = 10;;
 
@@ -1196,52 +1201,58 @@ Misc.debug_stop "Scanning specials";
 let special st s =
   if has_prefix "\" " s || has_prefix "ps: " s || has_prefix "! " s then
     ps_special st s else
-  if has_prefix "advi: moveto" s then moveto_special st true s else
-  if has_prefix "advi: rmoveto" s then moveto_special st false s else
+    if has_prefix "advi: moveto" s then moveto_special st true s else
+    if has_prefix "advi: rmoveto" s then moveto_special st false s else
 
-  (* Other specials *)
-  if has_prefix "color " s then color_special st s else
-  if has_prefix "html:" s then html_special st (get_suffix "html:" s) else
-  if has_prefix "PSfile=" s || has_prefix "psfile=" s then
-    begin
-      try
-  	let file, bbox, size = psfile_special st s in
-  	let x = st.x_origin + int_of_float (st.conv *. float st.h)
-  	and y = st.y_origin + int_of_float (st.conv *. float st.v) in
-  	if !visible then 
-  	  let draw = 
-  	    if has_prefix "`" file then
-  	     Dev.draw_img (zap_to_char ' ' file)
-  	       Drawimage.ScaleAuto false 1.0 st.blend (Some bbox)
-  	    else Dev.draw_ps file bbox in
-  	  draw size x y
-      with
-      |	Failure s -> Misc.warning s
-      |	e -> Misc.warning (Printexc.to_string e)
-  end else
-  if has_prefix "advi: " s then begin
-    if has_prefix "advi: edit" s then edit_special st s else
-    if has_prefix "advi: alpha" s then alpha_special st s else
-    if has_prefix "advi: blend" s then blend_special st s else
-    if has_prefix "advi: epstransparent" s then epstransparent_special st s else
-    if has_prefix "advi: pause" s then raise Pause else
-    if has_prefix "advi: proc" s then proc_special st s else
-    if has_prefix "advi: wait " s then wait_special st s else
-    if has_prefix "advi: embed " s then
-      (if !visible then embed_special st s) else
-    if has_prefix "advi: trans " s then transition_special st s else
-    if has_prefix "advi: transbox save " s then transbox_save_special st s else
-    if has_prefix "advi: transbox go " s then transbox_go_special st s else
-    if has_prefix "advi: kill " s then
-      (if !visible then kill_embed_special st s) else
-    if has_prefix "advi: setbg " s then bkgd_special st s else
-    if has_prefix "advi:" s then Misc.warning ("unknown special: "^ s)
-   end else
-  if has_prefix "line: " s then line_special st s else
-  if has_prefix "pn " s || has_prefix "pa " s || s = "fp" || s = "ip" ||
-     has_prefix "da " s || has_prefix "dt " s || s = "sp" ||
-     has_prefix "sp " s || has_prefix "ar " s || has_prefix "ia " s ||
-     has_prefix "sh " s || s = "wh" || s = "bk" then tpic_specials st s;;
+    (* Other specials *)
+    if has_prefix "color " s then color_special st s else
+    if has_prefix "html:" s then html_special st (get_suffix "html:" s) else
+    if has_prefix "PSfile=" s || has_prefix "psfile=" s then
+      begin
+        try
+  	  let file, bbox, size = psfile_special st s in
+  	  let x = st.x_origin + int_of_float (st.conv *. float st.h)
+  	  and y = st.y_origin + int_of_float (st.conv *. float st.v) in
+  	  if !visible then 
+  	    let draw = 
+  	      if has_prefix "`" file then
+  	        Dev.draw_img (zap_to_char ' ' file)
+  	          Drawimage.ScaleAuto false 1.0 st.blend (Some bbox)
+  	      else Dev.draw_ps file bbox in
+  	    draw size x y
+        with
+        |	Failure s -> Misc.warning s
+        |	e -> Misc.warning (Printexc.to_string e)
+      end else
+      if has_prefix "advi: " s then begin
+        if has_prefix "advi: edit" s then edit_special st s else
+        if has_prefix "advi: alpha" s then alpha_special st s else
+        if has_prefix "advi: blend" s then blend_special st s else
+        if has_prefix "advi: epstransparent" s then epstransparent_special st s else
+        if has_prefix "advi: pause" s then raise Pause else
+        if has_prefix "advi: proc" s then proc_special st s else
+        if has_prefix "advi: setbg " s then bkgd_special st s else
+        (* all following have effect and should be ignore if active is false *)
+        if !active then begin
+          if has_prefix "advi: wait " s then wait_special st s 
+          else if has_prefix "advi: embed " s then
+            (if !visible then embed_special st s) 
+          else if has_prefix "advi: trans " s then transition_special st s 
+          else if has_prefix "advi: transbox save " s then
+            transbox_save_special st s 
+          else if has_prefix "advi: transbox go " s then
+            transbox_go_special st s 
+          else if has_prefix "advi: kill " s then
+              (if !visible then kill_embed_special st s) 
+          else Misc.warning ("unknown special: "^ s)
+        end
+        (* else we ignore it, whether well-formed or ill-formed *)
+      end else
+        if has_prefix "line: " s then line_special st s else
+        if has_prefix "pn " s || has_prefix "pa " s || s = "fp" || s = "ip" ||
+        has_prefix "da " s || has_prefix "dt " s || s = "sp" ||
+        has_prefix "sp " s || has_prefix "ar " s || has_prefix "ia " s ||
+        has_prefix "sh " s || s = "wh" || s = "bk" then tpic_specials st s;;
 
 (*** Page rendering ***)
 let eval_dvi_command st = function

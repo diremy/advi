@@ -692,6 +692,7 @@ let reload_time st =
 
 let reload st =
   try
+    Grdev.clear_usr1(); 
     st.last_modified <- reload_time st;
     let dvi = Dvi.load st.filename in
     let cdvi = Driver.cook_dvi dvi in
@@ -726,7 +727,8 @@ let reload st =
     assert (Misc.debug_endline (Printexc.to_string x); true);
     st.cont <- None;;
 
-let changed st = reload_time st > st.last_modified;;
+let changed st = 
+  reload_time st > st.last_modified;;
 
 let goto_page n st = (* go to the begining of the page *)
   let new_page_number = max 0 (min n (st.num_pages - 1)) in
@@ -983,6 +985,10 @@ module B =
       | None -> none ()
 
     let redraw = redraw ?trans:(Some Transitions.DirNone) ?chst:None
+
+    let toggle_active st =
+      Driver.toggle_active(); redraw st
+
     let reload = reload
     let redisplay = redisplay
 
@@ -1044,6 +1050,7 @@ let bind_keys () =
    (* Default key bindings. *)
 
    (* General purpose keys. *)
+   'a', B.toggle_active;
    'q', B.exit;
    '?', B.help;
 
@@ -1145,7 +1152,8 @@ let main_loop filename =
       redraw st;
       (* num is the current number entered by keyboard *)
       try while true do
-        let ev = if changed st then Grdev.Refreshed else Grdev.wait_event () in
+        let ev = 
+          if changed st then Grdev.Refreshed else Grdev.wait_event () in
         st.num <- st.next_num;
         st.next_num <- 0;
         match ev with
