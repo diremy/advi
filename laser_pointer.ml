@@ -103,6 +103,7 @@ let create_pointer x y w =
 (* Clear the actual pointer. *)
 let clear_pointer ptr = draw_image ptr.bkg_img ptr.x ptr.y;;
 
+(* The X11 pointer shifts with respect to Advi's laser pointer center. *)
 let xptr_x = 1
 and xptr_y = 5;;
 
@@ -121,7 +122,7 @@ let show_pointer ptr x y =
 ;;
 
 let switch_on_laser_beam () =
- 
+
  let x0 = Graphics.size_x () / 2
  and y0 = Graphics.size_y () / 2 in
  let laser_pointer =
@@ -143,9 +144,14 @@ let switch_on_laser_beam () =
        if kp then begin
          match c with
          | '' -> raise Exit
+         | '' ->
+            Misc.push_key_event c GraphicsY11.control;
+            raise Exit
          | c ->
-            Misc.warning
-             (Printf.sprintf "Laser pointer: unknown key binding %C" c)
+            Misc.push_key_event ' ' GraphicsY11.nomod;
+            Misc.push_key_event '' GraphicsY11.control;
+            Misc.push_key_event c (GraphicsY11.get_modifiers ());
+            raise Exit
        end
    done with
  | Exit -> clear_pointer laser_pointer;;
