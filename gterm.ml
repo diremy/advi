@@ -27,7 +27,7 @@ type term = {
  mutable gheight : int;
  (* Width in pixels. *)
  mutable gwidth : int;
- (* Lower left corner of the terminal screen. *)
+ (* Coordinates of the lower left corner of the terminal screen. *)
  mutable gx : int;
  mutable gy : int;
  (* Coordinates of the cursor in the char array. *)
@@ -38,8 +38,8 @@ type term = {
  mutable cursor_gy : int;
  (* Colors *)
  mutable cursor_color : Graphics.color;
- mutable foreground : Graphics.color;
- mutable background : Graphics.color;
+ mutable foreground_color : Graphics.color;
+ mutable background_color : Graphics.color;
  mutable border_width_color : Graphics.color;
  (* Decorations *)
  mutable border_width : int;
@@ -58,13 +58,13 @@ let draw_cursor t cc cf gx gy =
  Graphics.moveto t.cursor_gx t.cursor_gy;
  Graphics.set_color cf;
  Graphics.draw_char c;
- Graphics.set_color t.foreground;;
+ Graphics.set_color t.foreground_color;;
 
 let show_cursor t =
- draw_cursor t t.cursor_color t.background t.cursor_gx t.cursor_gy;;
+ draw_cursor t t.cursor_color t.background_color t.cursor_gx t.cursor_gy;;
 
 let hide_cursor t =
- draw_cursor t t.background t.foreground t.cursor_gx t.cursor_gy;;
+ draw_cursor t t.background_color t.foreground_color t.cursor_gx t.cursor_gy;;
 
 let htab t h =
  let h = (max 0 h) mod t.width in
@@ -106,10 +106,10 @@ let draw_border t =
  Graphics.moveto (x - w + max 0 hmargin) (y + gh + vmargin);
  Graphics.set_color t.title_color;
  Graphics.draw_string title;
- Graphics.set_color t.foreground;;
+ Graphics.set_color t.foreground_color;;
 
 let draw_term t =
- Graphics.set_color t.background;
+ Graphics.set_color t.background_color;
  Graphics.fill_rect t.gx t.gy t.gwidth t.gheight; 
  draw_border t;
  show_cursor t;;
@@ -124,10 +124,10 @@ let redraw t =
  show_cursor t;;
 
 let clear t =
- Graphics.set_color t.background;
+ Graphics.set_color t.background_color;
  Graphics.fill_rect
    t.gx t.gy (t.width * t.font_size_x) (t.height * t.font_size_y);
- Graphics.set_color t.foreground;
+ Graphics.set_color t.foreground_color;
  Array.iter (fun s -> String.fill s 0 (String.length s) ' ') t.lines;
  htab t 0;
  vtab t (t.height - 1)
@@ -147,10 +147,10 @@ let rec print_str t s =
  let print_it s =
    let l = String.length s in
    Graphics.moveto t.cursor_gx t.cursor_gy;
-   Graphics.set_color t.background;
+   Graphics.set_color t.background_color;
    Graphics.fill_rect t.cursor_gx t.cursor_gy
                       (l * t.font_size_x) t.font_size_y;
-   Graphics.set_color t.foreground;
+   Graphics.set_color t.foreground_color;
    Graphics.draw_string s;
    String.blit s 0 t.lines.(t.cursor_y) t.cursor_x l;
    t.cursor_gx <- ncursor_gx;
@@ -197,33 +197,31 @@ let print_chr t c =
  | '\n' -> print_nl t
  | _ -> print_str t (String.make 1 c);;
 
-let make_term_gen fg bg bw bwc tc cc x y h w =
- let font_size_x, font_size_y =
-   let sx, sy = Graphics.text_size "Ly" in
-   (sx + 1) / 2, sy in
+let make_term_gen fg bg bw bwc tc cc xc yc h w =
+ let font_size_x, font_size_y = Graphics.text_size "M" in
  let t = {
    lines = Array.init h (fun i -> String.make w ' ');
    height = h;
    width = w;
    gheight = h * font_size_y;
    gwidth = w * font_size_x;
-   gx = x;
-   gy = y;
+   gx = xc;
+   gy = yc;
    cursor_x = 0;
    cursor_y = h - 1;
-   cursor_gx = x;
-   cursor_gy = y + (h - 1) * font_size_y;
+   cursor_gx = xc;
+   cursor_gy = yc + (h - 1) * font_size_y;
 
    cursor_color = cc;
-   foreground = fg;
-   background = bg;
+   foreground_color = fg;
+   background_color = bg;
    border_width_color = bwc;
    border_width = bw;
    title = Printf.sprintf "Gterm %ix%i" w h;
    title_color = tc;
 
    font = Printf.sprintf "%ix%i" font_size_x font_size_y;
-   font_size_x = (font_size_x + 1) / 2;
+   font_size_x = font_size_x;
    font_size_y = font_size_y;
   } in
  t;;
@@ -252,7 +250,6 @@ let make_term =
 let end_of_line t =
   let line = t.lines.(t.cursor_y) in
   let l = String.length line in
-  (*prerr_endline (string_of_int l);*)
   htab t l;;
 
 let beginning_of_line t = htab t 0;;
@@ -285,31 +282,30 @@ let scroll_one_window_up t =
 let scroll_one_window_down t =
 *)
 
-module G = Graphics;;
-
-module Graphics = GraphicsY11;;
+let rec get_next_key t =
+  let c = GraphicsY11.read_key () in
+  match c with
+  | '' -> beginning_of_line t; get_next_key t
+  | '' -> backward_char t; get_next_key t
+  | '' -> end_of_line t; get_next_key t
+  | '' -> forward_char t; get_next_key t
+  | '' -> redraw t; get_next_key t
+  | c -> c;;
 
 let rec edit t =
-  let evt = Graphics.wait_next_event [Graphics.Key_pressed] in
-  if evt.Graphics.keypressed then
-    let c = evt.Graphics.key in
-    begin match c with
-    | '' -> beginning_of_line t
-    | '' -> backward_char t
-    | '' -> end_of_line t
-    | '' -> forward_char t
-    | '' | '' -> backspace t
-    | '' -> redraw t
-    | '' -> next_line t
-    | '' -> previous_line t
-    | '\n' | '\r' -> print_nl t
-    | c -> (*prerr_endline (String.make 1 c); *)print_chr t c end;
-    edit t;;
+  begin match get_next_key t with
+  | '' | '' -> backspace t
+  | '' -> next_line t
+  | '' -> previous_line t
+  | '\n' | '\r' -> print_nl t
+  | c -> print_chr t c end;
+  edit t;;
 
 (* Basic functions to input strings. *)
 let rec flush_keys () =
- if Graphics.key_pressed () then
-   let c = Graphics.read_key () in flush_keys ();;
+ if GraphicsY11.key_pressed () then
+   let c = GraphicsY11.read_key () in
+   flush_keys ();;
 
 let get_line =
   let b = Buffer.create 11 in
@@ -318,16 +314,15 @@ let get_line =
     let limx = t.cursor_x
     and limy = t.cursor_y in
     let rec read t =
-   Graphics.synchronize ();
-      let evt = Graphics.wait_next_event [Graphics.Key_pressed] in
-      if evt.Graphics.keypressed then
-      match evt.Graphics.key with
-      | '\n' | '\r' ->
+      GraphicsY11.synchronize ();
+      let c = get_next_key t in
+      match c with
+      | '\n' | '\r' | '' ->
          print_nl t;
          let s = Buffer.contents b in
          Buffer.clear b;
          s
-      | '' ->
+      | '' | '' ->
           if t.cursor_x = limx then () else
            begin
              let s = Buffer.contents b in
@@ -341,16 +336,18 @@ let get_line =
           Buffer.clear b;
           while t.cursor_x > limx do backspace t done;
           read t
+      | '' | '' ->
+         Buffer.clear b;
+         ""
       | c ->
          Buffer.add_char b c;
          print_chr t c;
-         read t
-      else read t in
+         read t in
     read t in
   get;;
 
 let ask t s =
- print_str t s;
- let answer = get_line t in
- flush_keys ();
- answer;;
+  print_str t s;
+  let answer = get_line t in
+  flush_keys ();
+  answer;;

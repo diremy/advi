@@ -121,7 +121,7 @@ open Gterm;;
 let ask_user t s1 s2 s3 =
  vtab t 16; htab t 15; print_str t s1;
  vtab t 12; htab t 10; print_str t s2;
- vtab t 8; htab t 15; 
+ vtab t 8; htab t 15;
  let answer = Gterm.ask t s3 in
  match answer with
  | "yes" -> true
