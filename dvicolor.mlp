@@ -61,9 +61,14 @@ ifdef HAVE_CAMLIMAGES then
 else
           raise Exit
 	with _ ->
+            (* Try known colors *)
             try List.assoc (String.lowercase s) named_colors
             with Not_found ->
-              Format.eprintf "unknown color %s@." s;
+            (* Try an explicit 0xFFFFFF integer *)
+            try int_of_string s
+            (* Otherwise emit a warning and give a default *)
+            with Failure _ ->
+              Misc.warning (Printf.sprintf "unknown color %s@." s);
               0x000000
       end
   | _ -> 0x000000;;
