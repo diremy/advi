@@ -35,7 +35,6 @@ KNOWN BUGS:
    hscale=100.0, instead of llx, lly, urx, ury).
  Fatal error: exception Failure("psfile: no bbox")
 
-
  * Bulles?
  ==> corrigé ?
 
@@ -71,20 +70,20 @@ WISH LIST:
       after reloading (this is also an interesting feature)
     ==> could you explain ?
 
-- Adapter la résolution aux vrai dpy de l'écran
+ - Adapter la résolution aux vrai dpy de l'écran
 
-- transbox: replace steps by a timer
-  ==> to wish list
+ - transbox: replace steps by a timer
+   ==> to wish list
 
-- alpha, blend, etc. for images: keep track within text and emit the info
-  at every image?
-  ==> to wish list
+ - alpha, blend, etc. for images: keep track within text and emit the info
+   at every image?
+   ==> to wish list
 
-==> tester fullscreen mode
+ ==> tester fullscreen mode
 
-- fork? (i.e. lancer un dvi identique à celui qui tourne)
+ - fork? (i.e. lancer un dvi identique à celui qui tourne)
 
-- améliorer advi.sty
+ - améliorer advi.sty
  
   * pour les bulles-actives 
       -> générer un slide supplémentaire
@@ -93,10 +92,26 @@ WISH LIST:
   * exporter \ifadvi et \Ifadvi
   ==> done ?
 
-- ajouter u et i comme j et k mais une ligne à la fois (scrolling).
+ - ajouter m et i comme j et k mais une ligne à la fois (scrolling).
 
-- We need a .advirc file to setup options at launch time, and store
+ - We need a .advirc file to setup options at launch time, and store
 user's preferences for key bindings.
 
-- Traiter les fichiers postscript sans llx lly urx ury mais avec
+ - Traiter les fichiers postscript sans llx lly urx ury mais avec
 vscale=100.0 hoffset=-228.0 voffset=-368.0 hscale=100.0
+
+ - Need to control advi from within tex
+   \advikey{key} would generate a call to key as if key has been pressed
+   \advicom{f arg} would generate a call to internal function f with
+   argument arg.
+
+ - Need to be able to generate graphics from the Graphics module, that
+   are displayed directly inside the advi screen.
+
+ - Need also to be able to pop a small window to request something to
+the user (for instance to launch applications on a on demand basis).
+
+ - Should incorporate the clock into the core advi in order to be able
+to interact smoothly with it (for instance to have a key to hide it)...
+
+ - Need a key to hide and show windows

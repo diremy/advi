@@ -914,11 +914,13 @@ let bind_keys () =
    'l', B.page_right;
    'c', B.center;
 
-   (* m, i, return, tab, backspace, escape, and x
-      for handling page marks stack. *)
-   'm', B.push_page;
-   'i', B.pop_page;
+   (* m, i reserved for scrolling
+     'm', B.scroll_one_line_down;
+     'i', B.scroll_one_line_up;
+    *)
 
+   (* return, tab, backspace, escape, and x
+      to handle the page marks stack. *)
    '\t' (* tab *), B.push_page;
    '' (* Escape *), B.pop_page;
 
