@@ -15,6 +15,8 @@
 (*  Based on Mldvi by Alexandre Miquel.                                *)
 (***********************************************************************)
 
+open Misc
+
 let ignore_background =
     Options.flag false
     "--ignore_background"
@@ -225,6 +227,12 @@ let make_glyph g =
     img_list = [] };;
 
 let get_glyph g = g.glyph;;
+
+(* Blending *)
+type blend =
+   | Normal | Multiply | Screen | Overlay (* | SoftLight | HardLight *)
+   | ColorDodge | ColorBurn | Darken | Lighten | Difference
+   | Exclusion (* | Luminosity | Color | Saturation | Hue *);;
 
 let blend = ref Drawimage.Normal;;
 let set_blend b = blend := b;;
@@ -467,6 +475,7 @@ let draw_glyph g x0 y0 =
     Graphics.draw_image img x y;
   end;;
 
+
 let fill_rect x0 y0 w h =
   if not !opened then failwith "Grdev.fill_rect: no window";
   let x = x0
@@ -550,6 +559,42 @@ let clean_ps_cache () = Drawimage.clean_cache ();;
 
 (*** HTML interaction ***)
 
+(* pour sauver une image_rectiligne *)
+type rectangular_image = {
+  north : Graphics.image;
+  south : Graphics.image;
+  east : Graphics.image;
+  west : Graphics.image;
+};;
+
+let rec save_rectangle x y dx dy =
+  let x = min x (x + dx) in
+  let y = min y (y + dy) in
+  let dx = max 1 (abs dx) in
+  let dy = max 1 (abs dy) in
+  { south = Graphics.get_image x y dx 1;
+    west = Graphics.get_image x y 1 dy;
+    east = Graphics.get_image (x + dx) y 1 dy;
+    north = Graphics.get_image x (y + dy) (succ dx) 1;
+  };;
+
+let rec restore_rectangle r x y dx dy =
+  let x = min x (x + dx) in
+  let y = min y (y + dy) in
+  let dx = max 1 (abs dx) in
+  let dy = max 1 (abs dy) in
+  Graphics.draw_image r.south x y;
+  Graphics.draw_image r.west x y;
+  Graphics.draw_image r.east (x + dx) y;
+  Graphics.draw_image r.north x (y + dy);;
+
+let rec draw_rectangle x y dx dy =
+  Graphics.moveto x y;
+  Graphics.lineto (x + dx) y;
+  Graphics.lineto (x + dx) (y + dy);
+  Graphics.lineto x (y + dy);
+  Graphics.lineto x y;;
+
 (* Should be improve later using quad-tree or similar 2d structure *)
 module type ACTIVE =
   sig
@@ -597,16 +642,47 @@ module A : ACTIVE =
 
   end;;
 
+module E =
+  struct
+    type direction = X | Y | XY | Z
+    type info = { name : string; unit : float;
+                  move : direction; resize : direction; }
+    type figure = { rect : rect; info : info; }
+    type action = Move of int * int | Resize of int * int
+
+    let figures : figure list ref = ref []
+    let clear() = figures := []
+    let add rect info =
+      let r = { rect with y = !size_y - rect.y; } in
+      figures := { rect = r; info = info} :: !figures;
+      draw_rectangle r.x r.y r.w r.h
+
+
+    let inside x y p  =
+      let a = p.rect in
+      a.x <= x && a.y <= y && x <= a.x + a.w && y <= a.y + a.h
+    let find x y = List.find (inside x y) !figures
+
+    let tostring p a =
+      let inverse x = float x  /. p.info.unit in
+      let action, dx, dy =
+        match a with
+        | Move (dx, dy) -> "move", inverse dx, inverse (0-dy)
+        | Resize (dx, dy) -> "resize", inverse dx, inverse (0-dy) in
+      Printf.sprintf "<edit %s %s dx=%.4f dy=%.4f>"
+        p.info.name action dx dy
+  end;;
+
 module H =
   struct
     type mode = Over | Click_down
-      type link =
-          { link : string;
-            action : (unit -> unit);
-            mode : mode;
-            color : color option;
-            area : (int * int * int) option;
-          }
+    type link =
+        { link : string;
+          action : (unit -> unit);
+          mode : mode;
+          color : color option;
+          area : (int * int * int) option;
+        }
     type tag =
       | Name of string
       | Href of string
@@ -687,10 +763,10 @@ module H =
 
 
     type backup =
-       | Nil
-       | Rect of Graphics.image * anchor A.active *
-           (Graphics.image * anchor A.active) list
-       | Screen of Graphics.image * anchor A.active * anchor A.t
+      | Nil
+      | Rect of Graphics.image * anchor A.active *
+            (Graphics.image * anchor A.active) list
+      | Screen of Graphics.image * anchor A.active * anchor A.t
 
     let up_to_date act = function
       | Rect (_, a, l) -> A.same_location a  act
@@ -738,12 +814,12 @@ module H =
       let ima = Graphics.get_image 0 0 !size_x !size_y in
       GraphicsY11.sync ();
       (* wait until all events have been processed, flush should suffice *)
- (*
-   Graphics.set_color (Graphics.point_color 0 0);
-   (* it seems that the image is saved ``lazily'' and further instruction
-      could be capture in the image *)
-   sleep_watch false false 0.05;
- *)
+      (*
+         Graphics.set_color (Graphics.point_color 0 0);
+         (* it seems that the image is saved ``lazily'' and further instruction
+            could be capture in the image *)
+         sleep_watch false false 0.05;
+       *)
       let all_anchors = !anchors in
       a ();
       flush_last ();
@@ -825,11 +901,12 @@ let clear_dev () =
   if not !opened then failwith "Grdev.clear_dev: no window";
   Embed.kill_ephemeral_apps ();
   Launch.unmap_persistent_apps ();
-Misc.debug_stop "subwindows of persistent apps unmapped";
+  Misc.debug_stop "subwindows of persistent apps unmapped";
   GraphicsY11.display_mode !Options.global_display_mode;
   Graphics.clear_graph ();
-Misc.debug_stop "graphics cleared";
+  Misc.debug_stop "graphics cleared";
   H.clear ();
+  E.clear ();
   bg_color := bkgd_data.bgcolor;
   bg_colors := [];
   background_colors := [];
@@ -865,6 +942,7 @@ type event =
    | Refreshed
    | Key of char
    | Move of int * int
+   | Edit of E.figure * E.action
    | Region of int * int * int * int
    | Selection of string
    | Position of int * int
@@ -938,41 +1016,6 @@ let resized () =
     end
   else None;;
 
-(* pour sauver une image_rectiligne *)
-type rectangular_image = {
-  north : Graphics.image;
-  south : Graphics.image;
-  east : Graphics.image;
-  west : Graphics.image;
-};;
-
-let rec save_rectangle x y dx dy =
-  let x = min x (x + dx) in
-  let y = min y (y + dy) in
-  let dx = max 1 (abs dx) in
-  let dy = max 1 (abs dy) in
-  { south = Graphics.get_image x y dx 1;
-    west = Graphics.get_image x y 1 dy;
-    east = Graphics.get_image (x + dx) y 1 dy;
-    north = Graphics.get_image x (y + dy) (succ dx) 1;
-  };;
-
-let rec restore_rectangle r x y dx dy =
-  let x = min x (x + dx) in
-  let y = min y (y + dy) in
-  let dx = max 1 (abs dx) in
-  let dy = max 1 (abs dy) in
-  Graphics.draw_image r.south x y;
-  Graphics.draw_image r.west x y;
-  Graphics.draw_image r.east (x + dx) y;
-  Graphics.draw_image r.north x (y + dy);;
-
-let rec draw_rectangle x y dx dy =
-  Graphics.moveto x y;
-  Graphics.lineto (x + dx) y;
-  Graphics.lineto (x + dx) (y + dy);
-  Graphics.lineto x (y + dy);
-  Graphics.lineto x y;;
 
 let rec wait_signal_event events =
     match resized (), !usr1_status, event_waiting () with
@@ -1081,22 +1124,28 @@ let wait_select_button_up m x y =
       | Not_found -> Final Nil
       | _ -> raise exn;;
 
-let wait_move_button_up x y =
-  let bbox = !bbox in
-  let w = bbox.w and h = bbox.h in
+let move rect dx dy = { rect with x = rect.x + dx; y = rect.y + dy }
+let move_x rect dx dy = { rect with x = rect.x + dx }
+let move_y rect dx dy = { rect with y = rect.y + dy }
+let resize rect dx dy = { rect with w = rect.w + dx; h = rect.h + dy }
+let resize_x rect dx dy = { rect with w = rect.w + dx }
+let resize_y rect dx dy = { rect with h = rect.h + dy }
+
+let wait_move_button_up rect trans event x y =
+  let w = rect.w and h = rect.h in
   let rec move dx dy =
-    let x' = bbox.x + dx and y' = bbox.y + dy in
-    let buf = save_rectangle x' y' w h in
-    draw_rectangle x' y' w h;
+    let r = trans rect dx dy in 
+    let buf = save_rectangle r.x r.y r.w r.h in
+    draw_rectangle r.x r.y r.w r.h;
     let ev = wait_signal_event button_up_motion in
-    restore_rectangle buf x' y' w h;
+    restore_rectangle buf r.x r.y r.w r.h;
     match ev with
     | Raw e ->
         let dx' = e.GraphicsY11.mouse_x - x in
         let dy' = e.GraphicsY11.mouse_y - y in
         if e.GraphicsY11.button then move dx' dy'
-        else Final (Move (dx', 0 - dy'))
-    | x -> x in
+        else Final (event dx' (0 - dy'))
+    | z -> z in
   let color = !color in
   set_color !default_fgcolor;
   GraphicsY11.set_cursor move_cursor;
@@ -1121,20 +1170,44 @@ let click_area x y =
     else Middle
   else Middle;;
 
+let pressed m b = m land b <> 0
+let released m b = m land b = 0
+
+module G = GraphicsY11
 let button m =
-  if m land GraphicsY11.button1 <> 0 then Button1 else
-  if m land GraphicsY11.button2 <> 0 then Button2 else
-  if m land GraphicsY11.button3 <> 0 then Button3
+  if pressed m G.button1 then Button1
+  else if pressed m G.button3 then Button3
   else Button2;;
 
 let wait_button_up m x y =
-  if m land GraphicsY11.control <> 0 then wait_move_button_up x y else
-  if m land GraphicsY11.shift <> 0 && m land GraphicsY11.button1 = 0 then
+  if pressed m G.control then
+    begin
+      try 
+        let p = E.find x y in
+        let rect = p.E.rect in
+        let info = p.E.info in
+        if pressed m G.button2 && info.E.move <> E.Z then
+          let event dx dy = Edit (p, E.Move (dx, dy)) in
+          let action = match info.E.move with
+            E.X -> move_x | E.Y -> move_y | _ -> move in
+          wait_move_button_up rect action event x y 
+        else if pressed m G.button3 && info.E.resize <> E.Z then
+          let event dx dy = Edit (p, E.Resize (dx, dy)) in
+          let action = match info.E.resize with
+            E.X -> resize_x | E.Y -> resize_y | _ -> resize in
+          wait_move_button_up rect action event x y 
+        else Final Nil
+      with
+        Not_found ->
+          let event dx dy = Move (dx, dy) in
+          wait_move_button_up !bbox move event x y 
+    end
+  else if pressed m G.shift && released m G.button1 then
     wait_select_button_up m x y
   else
     match wait_signal_event button_up with
     | Raw e ->
-        if m land GraphicsY11.shift <> 0
+        if pressed m G.shift
         then Final (Position (x, !size_y - y))
         else Final (Click (click_area x y, button m, x, !size_y - y))
     | x -> x
@@ -1152,56 +1225,54 @@ let wait_event () =
     | Final e -> send e
     | Raw ev ->
         if ev.GraphicsY11.keypressed then send (Key ev.GraphicsY11.key) else
-        try
-         match H.find ev.mouse_x ev.mouse_y with
-         | {A.action = {H.tag = H.Href h; H.draw = d}} as act ->
-             if ev.button then
+        try match H.find ev.mouse_x ev.mouse_y with
+        | {A.action = {H.tag = H.Href h; H.draw = d}} as act ->
+            if ev.button then
               let ev' = GraphicsY11.wait_next_event button_up in
               send (Href h) else
-             if H.up_to_date act emph then event emph b else begin
+              if H.up_to_date act emph then event emph b else begin
                 H.deemphasize true emph;
                 event (H.emphasize_and_flash href_emphasize act) b end
-         | {A.action =
-             {H.tag = H.Advi {H.link = s; H.action = a; H.mode = H.Over};
-              H.draw = d}} as act ->
-             if H.up_to_date act emph then event emph b else begin
+        | {A.action =
+           {H.tag = H.Advi {H.link = s; H.action = a; H.mode = H.Over};
+            H.draw = d}} as act ->
+              if H.up_to_date act emph then event emph b else begin
                 H.deemphasize true emph;
                 event (H.save_screen_exec act a) b end
-         | {A.action =
-             {H.tag = H.Advi {H.link = s; H.action = a; H.mode = H.Click_down};
-              H.draw = d}} as act ->
-             if ev.button && not b then begin
+        | {A.action =
+           {H.tag = H.Advi {H.link = s; H.action = a; H.mode = H.Click_down};
+            H.draw = d}} as act ->
+              if ev.button && not b then begin
                 H.deemphasize true emph;
                 event (H.save_screen_exec act a) true end else
-             if ev.button then event emph b else
-             if H.up_to_date act emph then event emph b else begin
-                H.deemphasize true emph;
-                event (H.emphasize_and_flash href_emphasize act) b end
-         | _ -> rescan ()
-        with
-        | Not_found ->
-            if ev.button then
-             let m = GraphicsY11.get_modifiers () in
-             match wait_button_up m ev.mouse_x ev.mouse_y with
-             | Final (Region (x, y, dx, dy) as e) -> send e
-             | Final (Selection s as e) -> send e
-             | Final (Position (x, y) as e) -> send e
-             | Final (Move (dx, dy) as e) -> send e
-             | Final (Click (_, _, _, _) as e) -> send e
-             | Final Nil -> send Nil
-             | Final e ->
-                 push_back_event ev;
-                 send e
-             | Raw _ -> rescan ()
-            else
-             let m = GraphicsY11.get_modifiers () in
-             if m land GraphicsY11.shift <> 0 then begin
-                if not !temp_cursor then begin
-                   temp_cursor := true;
-                   GraphicsY11.set_cursor select_cursor end end else
-             if !temp_cursor then begin
+                if ev.button then event emph b else
+                if H.up_to_date act emph then event emph b else begin
+                  H.deemphasize true emph;
+                  event (H.emphasize_and_flash href_emphasize act) b end
+        | _ -> rescan ()
+        with Not_found ->
+          if ev.button then
+            let m = GraphicsY11.get_modifiers () in
+            match wait_button_up m ev.mouse_x ev.mouse_y with
+            | Final (Region (x, y, dx, dy) as e) -> send e
+            | Final (Selection s as e) -> send e
+            | Final (Position (x, y) as e) -> send e
+            | Final (Move (dx, dy) as e) -> send e
+            | Final (Click (_, _, _, _) as e) -> send e
+            | Final Nil -> send Nil
+            | Final e ->
+                push_back_event ev;
+                send e
+            | Raw _ -> rescan ()
+          else
+            let m = GraphicsY11.get_modifiers () in
+            if m land GraphicsY11.shift <> 0 then begin
+              if not !temp_cursor then begin
+                temp_cursor := true;
+                GraphicsY11.set_cursor select_cursor end end else
+              if !temp_cursor then begin
                 temp_cursor := false; reset_cursor () end;
-             rescan () in
+            rescan () in
   event H.Nil false;;
 
 (* To be changed *)

@@ -335,8 +335,7 @@ let put st code =
     if !visible then
       begin
         begin match st.html with
-        | Some _ ->
-            st.draw_html <- (x, y, glyph) :: st.draw_html
+        | Some _ -> st.draw_html <- (x, y, glyph) :: st.draw_html
         | None -> ()
         end;
         Dev.draw_glyph (glyph : Dev.glyph) x y;
@@ -368,6 +367,7 @@ let set_rule st a b =
 
 let ill_formed_special s =
   Misc.warning (Printf.sprintf "Ill formed special <<%s>>" s);;
+
 
 let line_special st s =
   match split_string s 0 with
@@ -680,6 +680,59 @@ let transbox_go_special st s =
       let trans = parse_transition None mode record in
       Dev.transbox_go trans
   | _ -> raise (Failure "advi: transbox go special failed");;
+
+exception Ignore
+let edit_special st s =
+  try
+  match split_string s 0 with
+  | "advi:" :: "edit" :: args ->
+      let record = split_record (String.concat " " args) in
+      let field x =
+        try List.assoc x record
+        with Not_found -> 
+          warning (Printf.sprintf "Field %s missing in special %s" x s);
+          raise Ignore in
+      let dpi = ldexp (float st.sdpi) (-16) in
+      let pixels dim =
+	match Dimension.normalize (Dimension.dimen_of_string dim) with
+	| Dimension.Px x -> float x
+	| Dimension.In x -> x *. dpi
+        | _ -> assert false in
+      let prop = function
+        | "X" -> Dev.E.X | "Y" -> Dev.E.Y | "XY" -> Dev.E.XY | "Z" -> Dev.E.Z
+        | _ -> ill_formed_special s; Dev.E.Z in
+      let unit = pixels (field "unit") in
+      let float_to_pixel_field x =
+        let fx = field x in
+        try truncate (float_of_string fx *. unit)
+        with Invalid_argument _  ->
+          warning
+            (Printf.sprintf "Field %s=%s not a float ins special %s" x fx s);
+            raise Ignore in
+      let cv z = truncate (z *. unit) in
+      let dx = float_to_pixel_field "x" in
+      let dy = float_to_pixel_field "y" in
+      let rect = {
+        Dev.x =  st.x_origin + int_of_float (st.conv *. float st.h) + dx;
+        Dev.y = st.y_origin + int_of_float (st.conv *. float st.v) - dy;
+        Dev.w =  float_to_pixel_field "w"; 
+        Dev.h =  float_to_pixel_field "h";
+      } in
+      let info =
+        { Dev.E.name = field "name";
+          Dev.E.unit = unit;
+          Dev.E.move =
+            (try prop (List.assoc "move" record) with Not_found -> Dev.E.Z);
+          Dev.E.resize =
+            (try prop (List.assoc "resize" record) with Not_found -> Dev.E.Z);
+        } in
+      Dev.E.add rect info
+
+  | _ ->
+      warning (Printf.sprintf "Incorrect advi Special `%s' ignored" s)
+  with Ignore -> ()
+;;
+
 
 let forward_eval_command = ref (fun _ _ -> ());;
 
@@ -1132,6 +1185,7 @@ let special st s =
       |	e -> Misc.warning (Printexc.to_string e)
   end else
   if has_prefix "advi: " s then begin
+    if has_prefix "advi: edit" s then edit_special st s else
     if has_prefix "advi: alpha" s then alpha_special st s else
     if has_prefix "advi: blend" s then blend_special st s else
     if has_prefix "advi: epstransparent" s then epstransparent_special st s else

@@ -458,5 +458,56 @@ end
 \@ifundefined {overlay}{}
    {\AtBeginDocument {\advi@overlay@patch}}
 
+%%% Edit
+
+\newdimen \advi@edit@unit
+\advi@edit@unit 1em
+\def \advi@edit@x{0}
+\def \advi@edit@y{0}
+\def \advi@edit@move{Z}
+\def \advi@edit@resize{Z}
+\define@key {advi@embed}{width}%
+   {\@tempdima#1\relax \edef \advi@embed@width {\the\@tempdima}}
+
+\def \define@keydim #1#2{%
+   \define@key {#1}{#2}%
+     {\@tempdima##1\relax \expandafter 
+        \edef \csname #1@#2\endcsname {\the\@tempdima}}}
+\def \define@keyset #1#2{%
+   \expandafter \define@key@set \csname #1@#2\endcsname {#1}{#2}}
+\def \define@key@set #1#2#3{\define@key {#2}{#3}{\def #1{##1}}}
+\def \advi@mandatory #1#2{%
+  \@ifundefined {advi@#1@#2}%
+     {\advi@error {Undefined field #2 in \string\advi#1 command}}{}}
+\define@key {advi@edit}{unit}{\advi@edit@unit #1}
+\define@keyset {advi@edit}{x}
+\define@keyset {advi@edit}{y}
+\define@keyset {advi@edit}{w}
+\define@keyset {advi@edit}{h}
+\define@key {advi@edit}{move}[XY]{\def \advi@edit@move{#1}}
+\define@key {advi@edit}{resize}[XY]{\def \advi@edit@resize{#1}}
+\newcommand{\advi@edit}[4][]{%
+  \begingroup 
+    \setkeys {advi@edit}{#1}%
+    \setkeys {advi@edit}{#3}%
+    \advi@mandatory{edit}{w}\advi@mandatory{edit}{h}%
+    \advi@special 
+      {edit name=#2
+       unit=\the\advi@edit@unit\space
+       x=\advi@edit@x\space
+       y=\advi@edit@y\space
+       w=\advi@edit@w\space
+       h=\advi@edit@h\space
+       move=\advi@edit@move\space
+       resize=\advi@edit@resize}%
+  #4%
+  \endgroup}
+\def \advix {\advi@edit@x \advi@edit@unit}
+\def \adviy {\advi@edit@y \advi@edit@unit}
+\def \adviw {\advi@edit@w \advi@edit@unit}
+\def \advih {\advi@edit@h \advi@edit@unit}
+\advi@export \adviedit \advi@edit
+
+%%% End
 
 \endinput

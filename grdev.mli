@@ -73,6 +73,8 @@ val embed_app :
 
 (* Drawing *)
 
+type rect = { x : int; y : int; h : int; w : int };;
+
 type color = int;;
 val fgcolor : unit -> color;;
 
@@ -158,22 +160,20 @@ type status = {
     modifiers : int;
   };;
 
-type area = Bottom_right | Bottom_left | Top_right | Top_left | Middle;;
-type button = Button1 | Button2 | Button3;;
-type event =
-    Resized of int * int
-  | Refreshed
-  | Key of char
-  | Move of int * int
-  | Region of int * int * int * int
-  | Selection of string
-  | Position of int * int
-  | Href of string
-  | Advi of string * (unit -> unit)
-  | Click of area * button * int * int
-  | Nil;;
+module E : 
+ sig
+    type direction = X | Y | XY | Z
+    type info = { name : string; unit : float;
+                  move : direction; resize : direction; }
+    type figure = { rect : rect; info : info; }
+    type action = Move of int * int | Resize of int * int
 
-val wait_event : unit -> event;;
+    val clear : unit -> unit
+    val add : rect -> info -> unit
+    val inside : int -> int -> figure -> bool
+    val find : int -> int -> figure
+    val tostring : figure -> action -> string
+ end;;
 
 module H :
     sig
@@ -199,6 +199,26 @@ module H :
       val flashlight : tag -> unit
 
     end;;
+
+type area = Bottom_right | Bottom_left | Top_right | Top_left | Middle;;
+type button = Button1 | Button2 | Button3;;
+type event =
+    Resized of int * int
+  | Refreshed
+  | Key of char
+  | Move of int * int
+  | Edit of E.figure * E.action
+  | Region of int * int * int * int
+  | Selection of string
+  | Position of int * int
+  | Href of string
+  | Advi of string * (unit -> unit) 
+  | Click of area * button * int * int
+  | Nil;;
+val wait_event : unit -> event;;
+
+
+
 
 exception Stop;;
 exception GS;;

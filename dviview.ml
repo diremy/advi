@@ -942,6 +942,10 @@ let main_loop filename =
             st.orig_y <- st.orig_y + h;
             set_bbox st;
             redraw st
+        | Grdev.Edit (p, a) ->
+            print_endline (Grdev.E.tostring p a);
+            flush stdout;
+            redraw st
         | Grdev.Region (x, y, w, h) -> ()
         | Grdev.Selection s -> selection s
         | Grdev.Position (x, y) ->
