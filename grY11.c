@@ -241,6 +241,7 @@ value gr_set_cursor(value glyphid) {
   Cursor c;
   int gid;
   gid = Int_val(glyphid);
+  gr_check_open();
   if (gid < 0 || gid >= XC_num_glyphs) {
     invalid_argument("set_cursor");
   }
@@ -263,7 +264,8 @@ void get_position_against_root( Window w, int *pos )
   Window *children;
   int nchildren;
   XWindowAttributes attr;
-    
+
+  gr_check_open();
   XGetWindowAttributes(grdisplay, w, &attr);
   pos[0] += attr.x;
   pos[1] += attr.y;
@@ -284,6 +286,7 @@ value gr_get_geometry(value unit){
   XWindowAttributes attr;
   int pos[2] = {0,0};
 
+  gr_check_open();
   XGetWindowAttributes(grdisplay, grwindow.win, &attr);
   get_position_against_root( grwindow.win, pos );
 
@@ -304,6 +307,7 @@ value gr_get_modifiers(void)
   unsigned int modifiers;
   unsigned int i;
 
+  gr_check_open();
   if (XQueryPointer(grdisplay, grwindow.win,
                     &rootwin, &childwin,
                     &root_x, &root_y, &win_x, &win_y,

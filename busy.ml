@@ -29,7 +29,9 @@ Options.add
      "FLOAT\tDelay before the watch cursor appears (default %fs)" !busy_delay);;
 
 type busy =
-   | Free | Busy | Pause | Disk | Question | Selection | Move;;
+   | Free | Busy | Pause | Disk | Question | Selection | Move
+   | Resize | Resize_x | Resize_y
+;;
 
 let free_cursor = GraphicsY11.Cursor_left_ptr;;
 let busy_cursor = GraphicsY11.Cursor_watch;;
@@ -38,6 +40,9 @@ let disk_cursor = GraphicsY11.Cursor_exchange;;
 let question_cursor = GraphicsY11.Cursor_question_arrow;;
 let selection_cursor = GraphicsY11.Cursor_xterm;;
 let move_cursor = GraphicsY11.Cursor_fleur;;
+let resize_cursor = GraphicsY11.Cursor_diamond_cross;;
+let resize_cursor_x = GraphicsY11.Cursor_sb_h_double_arrow;;
+let resize_cursor_y = GraphicsY11.Cursor_sb_v_double_arrow;;
 
 let set_cursor, restore_cursor =
   let last_cursor = ref free_cursor in
@@ -57,21 +62,44 @@ let start_timer () =
   | _ -> ();;
 
 (* Stop the busy cursor, remove the timer if any and restore previous cursor. *)
-let stop_busy cursor =
-  set_cursor cursor;
+
+let stop_busy () =
   match !busy_timeout with
   | Some timeout ->
       begin try Timeout.remove timeout with Not_found -> () end
   | None -> ();;
+let non_busy cursor =
+  stop_busy(); 
+  set_cursor cursor
+;;
 
 (* Set the cursor when we want to refect the state as a cursor modification. *)
 let set = function
-  | Pause -> stop_busy pause_cursor
-  | Free -> stop_busy free_cursor
+  | Pause -> non_busy pause_cursor
+  | Free -> non_busy free_cursor
   | Disk -> set_cursor disk_cursor
   | Busy -> if !show_busy then start_timer ()
-  | Question -> stop_busy question_cursor
-  | Selection -> stop_busy selection_cursor
-  | Move -> set_cursor move_cursor;;
+  | Question -> non_busy question_cursor
+  | Selection -> non_busy selection_cursor
+  | Move -> set_cursor move_cursor
+  | Resize -> set_cursor resize_cursor
+  | Resize_x -> set_cursor resize_cursor_x
+  | Resize_y -> set_cursor resize_cursor_y;;
+
+let temp_set c =
+  stop_busy();
+  GraphicsY11.set_cursor
+    (match c with 
+    | Pause -> pause_cursor
+    | Free -> free_cursor
+    | Disk -> disk_cursor
+    | Busy -> busy_cursor
+    | Question -> question_cursor
+    | Selection -> selection_cursor
+    | Move -> move_cursor
+    | Resize -> resize_cursor
+    | Resize_x -> resize_cursor_x
+    | Resize_y -> resize_cursor_y
+    )
 
 

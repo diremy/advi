@@ -1088,13 +1088,12 @@ let wait_select_button_up m x y =
   GraphicsY11.synchronize ();
   Graphics.remember_mode false;
   GraphicsY11.display_mode true;
-  Busy.set Busy.Selection;
+  Busy.temp_set Busy.Selection;
   let restore () =
     Graphics.remember_mode true;
     GraphicsY11.display_mode false;
     set_color color;
-    Busy.set
-      (if !editing then Busy.Selection else Busy.Free) in
+    Busy.restore_cursor() in
   try
     let e =
       if m land GraphicsY11.button2 = 0 then
@@ -1115,6 +1114,14 @@ let wait_select_button_up m x y =
       | Not_found -> Final Nil
       | _ -> raise exn;;
 
+type trans =
+    Move_xy
+  | Move_x
+  | Move_y
+  | Resize_xy
+  | Resize_x
+  | Resize_y
+
 let move rect dx dy = { rect with x = rect.x + dx; y = rect.y + dy };;
 let move_x rect dx dy = { rect with x = rect.x + dx };;
 let move_y rect dx dy = { rect with y = rect.y + dy };;
@@ -1122,11 +1129,31 @@ let resize rect dx dy = { rect with w = rect.w + dx; h = rect.h + dy };;
 let resize_x rect dx dy = { rect with w = rect.w + dx };;
 let resize_y rect dx dy = { rect with h = rect.h + dy };;
 
+let trans  = function
+  | Move_xy -> move
+  | Move_x -> move_x
+  | Move_y -> move_y
+  | Resize_xy -> resize
+  | Resize_x -> resize_x
+  | Resize_y -> resize_y
+;;
+
+let trans_cursor = function
+  | Move_xy -> Busy.Move
+  | Move_x -> Busy.Move
+  | Move_y -> Busy.Move
+  | Resize_xy -> Busy.Resize
+  | Resize_x -> Busy.Resize_x
+  | Resize_y -> Busy.Resize_y
+;;
+
+
 let filter trans event dx dy =
   let r = trans { x = 0; y = 0; w = 0; h = 0; } dx dy in
   event (r.x + r.w) (r.y + r.h);;
 
-let wait_move_button_up rect trans event x y =
+let wait_move_button_up rect trans_type event x y =
+  let trans = trans trans_type in
   let w = rect.w and h = rect.h in
   let rec move dx dy =
     let r = trans rect dx dy in 
@@ -1143,13 +1170,12 @@ let wait_move_button_up rect trans event x y =
     | z -> z in
   let color = !color in
   set_color !default_fgcolor;
-  Busy.set Busy.Move;
+  Busy.temp_set (trans_cursor trans_type);
   GraphicsY11.display_mode true;
   let restore () =
     GraphicsY11.display_mode false;
     set_color color;
-    Busy.set
-      (if !editing then Busy.Selection else Busy.Free) in
+    Busy.restore_cursor () in
   try let e = move 0 0 in restore (); e
   with exn -> restore (); raise exn;;
 
@@ -1195,18 +1221,18 @@ let wait_button_up m x y =
         if pressed m G.button2 && info.E.move <> E.Z then
           let event dx dy = Edit (p, E.Move (dx, dy)) in
           let action = match info.E.move with
-            E.X -> move_x | E.Y -> move_y | _ -> move in
+            E.X -> Move_x | E.Y -> Move_y | _ -> Move_xy in
           wait_move_button_up rect action event x y 
         else if pressed m G.button3 && info.E.resize <> E.Z then
           let event dx dy = Edit (p, E.Resize (dx, dy)) in
           let action = match info.E.resize with
-            E.X -> resize_x | E.Y -> resize_y | _ -> resize in
+            E.X -> Resize_x | E.Y -> Resize_y | _ -> Resize_xy in
           wait_move_button_up rect action event x y 
         else Final Nil
       with
         Not_found ->
             let event dx dy = Move (dx, dy) in
-            wait_move_button_up !bbox move event x y 
+            wait_move_button_up !bbox Move_xy event x y 
     end
   else if pressed m G.shift && released m G.button1 then
     wait_select_button_up m x y
@@ -1217,7 +1243,6 @@ let wait_button_up m x y =
 let wait_event () =
   (* We reached a pause. Now we can reset the sleep break *)
   clear_sleep ();
-  Busy.restore_cursor ();
   let rec event emph b =
     let send ev = H.deemphasize true emph; ev in
     let rescan () = H.deemphasize true emph; event H.Nil false in
@@ -1259,15 +1284,18 @@ let wait_event () =
             | Final (Position (x, y) as e) -> send e
             | Final (Move (dx, dy) as e) -> send e
             | Final (Click (_, _, _, _) as e) -> send e
+            | Final (Edit (_,_) as e) -> send e
             | Final Nil -> send Nil
-            | Final e ->
+            | Final
+                ( Resized (_,_) | Refreshed
+              | Key _ | Href _ | Advi (_,_) as e) ->
                 push_back_event ev;
                 send e
             | Raw _ -> rescan ()
           else
             let m = GraphicsY11.get_modifiers () in
             if m land GraphicsY11.shift <> 0
-            then Busy.set Busy.Selection
+            then Busy.temp_set Busy.Selection
             else Busy.restore_cursor ();
             rescan () in
   event H.Nil false;;
@@ -1310,3 +1338,5 @@ let embed_app command app_mode app_name width_pixel height_pixel x y =
 let wait_button_up () =
   if GraphicsY11.button_down () then
     ignore (GraphicsY11.wait_next_event [GraphicsY11.Button_up]);;
+
+
