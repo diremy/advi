@@ -56,9 +56,9 @@ type app_mode =
          again, the application will be launched again as well. *)
 ;;
 
-type app_name = string;;
 type signal = int;;
-type app_command = string;;
+
+open Launch;;
 
 val embed_app :
   app_command -> app_mode -> app_name -> int -> int -> int -> int -> unit;;

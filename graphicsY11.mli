@@ -17,10 +17,14 @@
 
 type color = Graphics.color;;
 
+type window_geometry = string;;
+
 type x = int
 and y = int
 and w = int
-and h = int;;
+and h = int
+and width = int
+and height = int;;
 
 type rectangle = {x : x; y : y; w : w; h : h};;
 

@@ -58,6 +58,12 @@ let xmax = ref 0;;
 let ymin = ref 0;;
 let ymax = ref 0;;
 
+let get_initial_window_device_geometry, set_initial_window_device_geometry =
+  let initial_window_device_geometry = ref "" in
+  (fun () -> !initial_window_device_geometry),
+  (fun geom -> initial_window_device_geometry := geom)
+;;
+
 let update_device_geometry () =
   size_x := Graphics.size_x ();
   size_y := Graphics.size_y ();
@@ -1124,9 +1130,12 @@ let cut s =
   GraphicsY11.cut s;
 ;;
 
+type window_geometry = string;;
+
 let open_dev geom =
   if !opened then Graphics.close_graph ();
   Graphics.set_window_title !title;
+  set_initial_window_device_geometry geom;
   Graphics.open_graph geom;
   opened := true;
 
@@ -1264,7 +1273,6 @@ let resized () =
       Some (x, y)
     end
   else None;;
-
 
 let rec wait_signal_event events =
     match resized (), !usr1_status, event_waiting () with
@@ -1601,6 +1609,12 @@ let exec_ps s x0 y0 =
 let embed_app app_command app_mode app_name width_pixel height_pixel x y =
   Embed.embed_app
    app_command app_mode app_name width_pixel height_pixel x (!size_y - y);;
+
+let help_screen screen_name =
+  ignore
+    (Launch.fork_me
+      (Printf.sprintf "-g %s" (get_initial_window_device_geometry ()))
+      screen_name);;
 
 let wait_button_up () =
   if GraphicsY11.button_down ()

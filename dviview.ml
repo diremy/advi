@@ -1111,14 +1111,12 @@ module B =
     let clear_image_cache st = (* clear image cache *)
       Grdev.clean_ps_cache ()
     let help st =
-      let pid =
-        Launch.fork_process
-          (Printf.sprintf "%s -g %dx%d %s"
-             Sys.argv.(0)
+      ignore (
+        Launch.fork_me
+          (Printf.sprintf "-g %dx%d"
              attr.geom.Ageometry.width
-             attr.geom.Ageometry.height
-             Config.splash_screen) in
-      ()
+             attr.geom.Ageometry.height)
+        Config.splash_screen)
 
     let toggle_antialiasing st =
       Gs.toggle_antialiasing ()
@@ -1169,13 +1167,13 @@ module B =
          re)
 
     let search_forward st =
-      let re = ask_to_search "Search Forward (re): " in
-      prerr_endline (Printf.sprintf "Search forward %s" re);
+      let re_string = ask_to_search "Search Forward (re): " in
+      Misc.warning (Printf.sprintf "Search forward %s" re_string);
       ()
 
     let search_backward st =
-      let re = ask_to_search "Search Backward (re): " in
-      prerr_endline (Printf.sprintf "Search backward %s" re);
+      let re_string = ask_to_search "Search Backward (re): " in
+      Misc.warning (Printf.sprintf "Search backward %s" re_string);
       ()
   end;;
 

@@ -84,7 +84,8 @@ module Symbol : sig
 
 (* Device configuration *)
 
-val open_dev : string -> int * int;;
+val open_dev :
+ GraphicsY11.window_geometry -> GraphicsY11.width * GraphicsY11.height;;
 val close_dev : unit -> unit;;
 val clear_dev : unit -> unit;;
 val clear_usr1 : unit -> unit;;
@@ -92,8 +93,10 @@ val set_bbox : (int * int * int * int) option -> unit;;
 
 (* Application embedding *)
 val embed_app :
-  Embed.app_command -> Embed.app_mode -> Embed.app_name ->
+  Launch.app_command -> Embed.app_mode -> Launch.app_name ->
   w -> h -> x -> y -> unit;;
+
+val help_screen : Misc.file_name -> unit;;
 
 (* Drawing *)
 
@@ -258,9 +261,9 @@ module H :
           area : (int * int * int) option;
         }
       type tag =
-        | Name of string
-        | Href of string
-        | Advi of link
+         | Name of string
+         | Href of string
+         | Advi of link
 
       type anchor = {
           tag : tag;
@@ -276,18 +279,18 @@ module H :
 type area = Bottom_right | Bottom_left | Top_right | Top_left | Middle;;
 type button = Button1 | Button2 | Button3;;
 type event =
-  | Resized of int * int
-  | Refreshed
-  | Key of char
-  | Move of int * int
-  | Edit of E.figure * E.action
-  | Region of int * int * int * int
-  | Selection of string
-  | Position of int * int
-  | Href of string
-  | Advi of string * (unit -> unit)
-  | Click of area * button * int * int
-  | Nil;;
+   | Resized of int * int
+   | Refreshed
+   | Key of char
+   | Move of int * int
+   | Edit of E.figure * E.action
+   | Region of int * int * int * int
+   | Selection of string
+   | Position of int * int
+   | Href of string
+   | Advi of string * (unit -> unit)
+   | Click of area * button * int * int
+   | Nil;;
 val wait_event : unit -> event;;
 
 exception Stop;;

@@ -27,12 +27,10 @@ let hashtbl_find_all t p =
 
 type app_mode = | Fake | Raw | Sticky | Persistent | Ephemeral;;
 
-type app_name = string;;
 type signal = int;;
-type app_command = string;;
 
 type app = {
-  app_name : app_name;
+  app_name : Launch.app_name;
   app_mode : app_mode;
   app_pid : int;
   app_wid : GraphicsY11.window_id;
