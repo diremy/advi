@@ -576,11 +576,10 @@ let get_bg_color x y w h =
       let c = point_color (x + 1) (y + 1) in
       let c' = point_color (x + w - 1) (y + h - 1) in
       if c = c' then c
-      else 
+      else
         if get_playing () > 0 then find_bg_color x y w h 
-        else (* mean_color c c' *)
-          point_color (x + w / 2) (y + h / 2)
-    else find_bg_color x y w h
+        else mean_color c c' 
+    else find_bg_color x y w h 
   end;;
 
 let get_color_table =
