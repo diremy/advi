@@ -886,9 +886,9 @@ module Make(Dev : DEVICE) = struct
         Drv.unfreeze_glyphs st.cdvi (st.base_dpi *. st.ratio)
       let center st =
         st.ratio <- 1.0 ;
-        update_dvi_size false st ;
         st.orig_x <- (st.size_x - st.dvi_width)/2 ;
         st.orig_y <- (st.size_y - st.dvi_height)/2 ;
+        update_dvi_size false st ;
         redraw st
           
       let scale_up st = scale (max 1 st.num) st
