@@ -166,7 +166,7 @@ vscale=100.0 hoffset=-228.0 voffset=-368.0 hscale=100.0
  ==> PW: the windows that advi launches, what else ?
 
  - Need a key binding similar to 'g' such that it goes to the page and pushes
-   on the stack alll the pages from here to the target page
+   on the stack all the pages from here to the target page
 
  -PW Need a ``compiling'' version of advi (name it advic) that creates
    and caches all the images of a presentation to speed up the
@@ -210,7 +210,24 @@ Bindings
 
 Scratching
 ----------
- Fonction stabilo
- Fonction tracé supplémentaire: tracé soutenu par la machine
+ -PW Fonction stabilo
+ -PW Fonction tracé supplémentaire: tracé soutenu par la machine
  (horizontal, vertical et à 45 o) par analyse du déplacement de la
  souris (mode par défaut ou mode obtenu par shift).
+ -PW Need to save the stabilo drawings and replay them on
+  demand. (This would allow arbitrary add-ons (prepared in advance) to
+  be drawn on the slide.)
+
+Interaction with the WM
+-----------------------
+
+(1) Name of icons
+
+ -PW Should be able to set up the name of advi's icon.
+  (Should also provide an icon for advi.)
+
+(2) Window class
+
+ -PW Must set up the WM_CLASS X property to "advi": this way we would
+  automatically benefit from the WM automatic handling of ``onglets''
+  (window grouping).

@@ -31,37 +31,38 @@ module Make
 type glyph = G.t;;
 type fontname = string;;
 type fontratio = float;;
-type g =
-    { fontname : string;
-      fontratio : float;
-      glyph : glyph;
-    };;
+type g = {
+  fontname : string;
+  fontratio : float;
+  glyph : glyph;
+};;
 type symbol =
-    Glyph of g
-  | Space of int * int
-  | Rule of int * int
-  | Line of int * string option;;
-type element =
-    { color   : int ;
-      locx    : int ;
-      locy    : int ;
-      code    : int ;
-      symbol : symbol };;
+   | Glyph of g
+   | Space of int * int
+   | Rule of int * int
+   | Line of int * string option;;
+type element = {
+  color   : int ;
+  locx    : int ;
+  locy    : int ;
+  code    : int ;
+  symbol : symbol
+};;
 type set = element list;;
 
 let fontname s =
   match s.symbol with
   | Glyph g -> g.fontname
-  | Space (w,h) -> "space"
-  | Rule (w,h) -> "rule"
-  | Line (w,h) -> "line";;
+  | Space (w, h) -> "space"
+  | Rule (w, h) -> "rule"
+  | Line (w, h) -> "line";;
 
-let space s = match s.symbol with Space _ -> true | _ -> false;;
+let space s = match s.symbol with | Space _ -> true | _ -> false;;
 
 let voffset s =
   match s.symbol with
   | Glyph g -> G.voffset g.glyph
-  | Space (w,h) -> h
+  | Space (w, h) -> h
   | _ -> 0;;
 
 let hoffset s =
@@ -72,60 +73,62 @@ let hoffset s =
 let height s =
   match s.symbol with
   | Glyph g -> G.height g.glyph
-  | Space (w,h) | Rule (w,h) -> h
+  | Space (w, h) | Rule (w, h) -> h
   | _ -> 0;;
 
 let width s =
   match s.symbol with
   | Glyph g -> G.width g.glyph
-  | Space (w,h) | Rule (w,h) -> w
+  | Space (w, h) | Rule (w, h) -> w
   | _ -> 0;;
 
 (* Symbols information. *)
 
-let dummy_symbol =
-  { color = 0 ;
-    locx  =  0 ;
-    locy  =  0 ;
-    code   = 0 ;
-    symbol = Line(-1, None) };;
+let dummy_symbol = {
+  color  = 0 ;
+  locx   = 0 ;
+  locy   = 0 ;
+  code   = 0 ;
+  symbol = Line (-1, None)
+};;
 
 let set : set ref = ref [];;
-let clear() = set := [];;
-let give() = !set;;
+let clear () = set := [];;
+let give () = !set;;
 
-type line =
-    { min : int ;
-      max : int ;
-      content : element list };;
+type line = {
+   min : int ;
+   max : int ;
+   content : element list
+};;
 
 (* Iterates ff over the set. *)
 let iter ff set = List.iter ff set;;
 
 (* Add an element. *)
 let add color x y code s =
-  let symbol =
-    { color = color ;
-      locx = x ;
-      locy = y ;
-      code = code ;
-      symbol = s;
-    } in
+  let symbol = {
+    color = color ;
+    locx = x ;
+    locy = y ;
+    code = code ;
+    symbol = s;
+  } in
   set := symbol :: !set;;
 
 (* Says if the character code is probably the ascii code. *)
 let is_pure code =
   match Char.chr code with
-  | 'A'..'Z' | 'a'..'z' | '0'..'9' -> true
-  | '!'..'~' -> true (* "false" helps for debugging. *)
+  | 'A' .. 'Z' | 'a' .. 'z' | '0' .. '9' -> true
+  | '!' .. '~' -> true (* "false" helps for debugging. *)
   | _ -> false;;
 
 (* Tells if s1 and s2, known to be on the same line,
    overlap (1), go beyond (2), or not (0). *)
 let overlap s1 s2 =
  (* Threshold in percent is used to tell when a space goes beyond a symbol,
-    or just overlaps it. *)
- (* That is : if the space goes 50% further than the symbol,
+    or just overlaps it.
+    That is : if the space goes 50% further than the symbol,
     there is a space, otherwise there is not. *)
   let threshold = 50 in
   let s1, s2 = if s1.locx <= s2.locx then s1, s2 else s2, s1 in
@@ -145,21 +148,25 @@ let get_line pre s = "";;
 (* Rules. *)
 let get_rule pre s = "_";;
 
-(* Spaces are a pain: *)
-(* 3 kinds of spaces exist in dvi: 'r', 'w' and 'x' spaces. *)
-(* Though 'w' should only be used to separate words, *)
-(* TeX use indifferently all of them inside words, between letters, and so on. *)
-(* Therefore no information can be drawn from this. Well done ! *)
-(* However, a stupid method seems to work in *all* cases. *)
-(* By converting spaces to pixels, which is not a good idea, since it depends on resolution, *)
-(* it appears that all spaces > 0 should be shown. *)
-(* The stupid method give definitely the best results. *)
+(* Spaces are a pain:
+
+   3 kinds of spaces exist in dvi: 'r', 'w' and 'x' spaces. Though
+   'w' should only be used to separate words, TeX use indifferently
+   all of them inside words, between letters, and so on.
+   Therefore no information can be drawn from this. Well done !
+
+   However, a stupid method seems to work in *all* cases.
+   By converting spaces to pixels, which is not a good idea, since it
+   depends on resolution, it appears that all spaces > 0 should be
+   shown.
+   The stupid method give definitely the best results. *)
+
 let get_space pre s =
   if width s <= 0 then "" else
   (* A line beginning with a tabulation. *)
   if pre == dummy_symbol then "\t" else
   (* Same test as in get_rule. *)
-  if overlap pre s = 1 then  "" else " ";;
+  if overlap pre s = 1 then "" else " ";;
 
 (* Keep it for debug : dumps different spaces with size information. *)
 let get_space2 pre s =
@@ -311,8 +318,8 @@ let symbol_name pre s =
       if space pre && overlap pre s <> 0 then erase ^ name else name;;
 
 
-(* Says if the symbol is in zone x1-x2 y1-y2. *)
-(* Size of the symbol should be used...we'll see later. *)
+(* Says if the symbol is in zone x1-x2 y1-y2.
+   Size of the symbol should be used...we'll see later. *)
 let symbol_inzone x1 y1 x2 y2 =
   let (x1, x2) = if x1 <= x2 then x1, x2 else x2, x1
   and (y1, y2) = if y1 <= y2 then y1, y2 else y2, y1 in
@@ -379,8 +386,10 @@ let above s1 s2 =
   and bot2 = top2 + height s2 in
   above_lines bot1 top1 bot2 top2;;
 
-(* Provided symbols s1 and s2 are on the same line, -1 means that s1 is at the left of s2. *)
-(* It is important to compare right sides of symbols since spaces, for example, can stretch wide. *)
+(* Provided symbols s1 and s2 are on the same line,
+   -1 means that s1 is at the left of s2.
+   It is important to compare right sides of symbols since spaces,
+   for example, can stretch wide. *)
 let at_right s1 s2 =
   if s1.locx - hoffset s1 + width s1 < s2.locx - hoffset s2 + width s2
   then -1 else 1;;
@@ -423,8 +432,8 @@ let rec split current lines = function
                   content = s :: current.content}
             lines sl;;
 
-(* to_ascii returns a string representing the symbols in set. *)
-(* Elements are filtered according to the first argument. *)
+(* to_ascii returns a string representing the symbols in set.
+   Elements are filtered according to the first argument. *)
 let to_ascii set =
   (* Split lines. *)
   let lines = split {min = 0; max = 0; content = []} [] set in
@@ -449,7 +458,7 @@ let commands_to_ascii fnt_map commands =
      | Dvicommands.C_w0 | Dvicommands.C_w _ 
      | Dvicommands.C_x0 | Dvicommands.C_x _ 
      | Dvicommands.C_y0 | Dvicommands.C_y _ 
-     | Dvicommands.C_z0 | Dvicommands.C_z _ ->  Buffer.add_char cset ' '
+     | Dvicommands.C_z0 | Dvicommands.C_z _ -> Buffer.add_char cset ' '
      | _ -> ())
     commands;
   Buffer.contents cset;;
@@ -458,16 +467,17 @@ let commands_to_ascii fnt_map commands =
 let to_escaped set = String.escaped (to_ascii set);;
 
 (* get the closest lines to a given position on the screen *)
-type rect =
-    { mutable top : int;
-      mutable bot : int;
-      mutable left : int;
-      mutable right : int };;
+type rect = {
+  mutable top : int;
+  mutable bot : int;
+  mutable left : int;
+  mutable right : int };;
 
-type region =
-    { history : element array;
-      first : int; last : int;
-    };;
+type region = {
+  history : element array;
+  first : int;
+  last : int;
+};;
 
 let region_to_ascii r =
   let pos = min r.first r.last in
@@ -541,7 +551,7 @@ let around b x y =
         let pre = if p < 0 then dummy_symbol else position.history.(p) in
         let return w = p, w in
         match h.symbol with
-        | Space (_,_) ->
+        | Space (_, _) ->
             let c = symbol_name pre h in
             if c = " " then return w else word move i w next
         | Line (_, _) -> word move i w next
@@ -644,6 +654,3 @@ let new_region r x y =
   if distance x y l = 0 then r else  { r with last = nearest r x y };;
 
 end;;
-
-
-
