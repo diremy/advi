@@ -1352,10 +1352,16 @@ module B =
       Busy.busy_exec f ();
       set_keymap Default_keymap
 
-    let save_page = revert_to_default_keymap Shot.save_page
+    let save_page_image = revert_to_default_keymap Shot.save_page
+
+    let laser_beam st =
+      set_keymap Default_keymap;
+      Laser_pointer.laser_beam ();
+      set_keymap Default_keymap
 
     let abort_key st =
       set_keymap Default_keymap
+
   end;;
 
 let bind_key tbl (key, action) = tbl.(int_of_char key) <- action;;
@@ -1371,8 +1377,8 @@ let bind_default_keys () =
    (* Default key bindings. *)
 
    (* General purpose keys. *)
-   'a', B.toggle_active;
    'A', B.toggle_antialiasing;
+   'a', B.toggle_active;
    'q', B.exit;
    '?', B.help;
 
@@ -1474,7 +1480,8 @@ let bind_control_x_key = bind_key control_x_keymap;;
 (* Bindings for ^X-prefixed keys. *)
 let bind_control_x_keys () =
   List.iter bind_control_x_key [
-    '', B.save_page;
+    ' ', B.laser_beam;
+    '', B.save_page_image;
     '', B.abort_key;
 ]
 ;;

@@ -69,7 +69,6 @@ let start_timer () =
   | _ -> ();;
 
 (* Stop the busy cursor, remove the timer if any and restore previous cursor. *)
-
 let stop_busy () =
   match !busy_timeout with
   | Some timeout ->
@@ -114,10 +113,8 @@ let temp_set c =
   in
   GraphicsY11.set_cursor c;;
 
-let stop () =
- non_busy (last_cursor ());;
-
 let busy_exec f () =
+ let c = last_cursor () in
  set Busy;
- f ();
- stop ();;
+ try f (); non_busy c with
+ | x -> non_busy c; raise x;;

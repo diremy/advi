@@ -298,6 +298,10 @@ val only_on_screen : ('a -> 'b) -> 'a -> 'b;;
 (** [only_on_screen f arg] performs [f arg] on the screen window only,
    not affecting the backing store. *)
 
+val only_on_backing_store : ('a -> 'b) -> 'a -> 'b;;
+(** [only_on_screen f arg] performs [f arg] on the backing store canvas only,
+   not affecting the screen window. *)
+
 val init : unit -> unit;;
 (** We have to call this function to disable the original Graphics
    event retrieving facility. *)

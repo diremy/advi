@@ -53,7 +53,7 @@ EXEC	  = advi
 
 MISC	  = config misc timeout ageometry 
 OPTIONS	  = options rc userfile
-GRAPHICS  = graphicsY11 global_options busy gradient gterm launch
+GRAPHICS  = graphicsY11 global_options busy gradient gterm launch laser_pointer
 SYMBOL	  = symbol
 DVI	  = input dvicolor table pkfont ttfont jfm search \
 	    font glyph devfont \

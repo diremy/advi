@@ -465,6 +465,16 @@ let only_on_screen f x =
     res with
   | exn -> restore_modes dm rm; raise exn;;
 
+(* Similar to [only_on_screen] for the backing store. *)
+let only_on_backing_store f x =
+  let dm, rm = get_display_mode (), get_remember_mode () in
+  set_backing_store_only_mode ();
+  try
+    let res = f x in
+    restore_modes dm rm;
+    res with
+  | exn -> restore_modes dm rm; raise exn;;
+
 (* Graphics.sigio_signal is not exported. We declare it here again. *)
 external sigio_signal: unit -> int = "gr_sigio_signal";;
 
