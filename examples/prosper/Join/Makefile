@@ -26,7 +26,7 @@ TOPDIR=../../..
 FILES=join.tex 
 include ../../lib/Makefile
 
-all: show
+all:: show
 
 show: join.dvi
 	$(ADVI) join.dvi
@@ -39,7 +39,7 @@ join.pdf: join.tex
 	dvips -o $*.ps $*.dvi && ps2pdf $*.ps $*.pdf
 	rm $*.dvi
 
-clean:
+clean::
 	/bin/rm -f join.aux join.log join.dvi join.ps join.pdf *~
 
 .phony: show
