@@ -192,10 +192,12 @@ module E :
 module H :
     sig
       type mode = Over | Click_down
+      type style = Box | Underline | Invisible
       type link =
           { link : string;
             action : (unit -> unit);
             mode : mode;
+            style : style;
             color : color option;
             area : (int * int * int) option;
           }

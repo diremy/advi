@@ -403,25 +403,40 @@ end
 
 %%% Active DVI
 
-\def \advi@over@ {over}
-\def \advi@click@ {click}
-\def \advi@null {\hbox {}}
+\def \advi@style {box}
+\def \advi@mode {advi}
+\define@key {advi@anchor}{over}  []{\def \advi@mode {advi}}
+\define@key {advi@anchor}{click} []{\def \advi@mode {hdvi}}
+\define@key {advi@anchor}{box}   []{\def \advi@style{box}}
+\define@key {advi@anchor}{invisible}[]{\def \advi@style {invisible}}
+\define@key {advi@anchor}{underline}[]{\def \advi@style {underline}}
 
-\newenvironment {advi@anchoring}[2][over]{%
-   \begingroup
-   \def \@test {#1}\ifx \@test \advi@over@ 
-       \advi@special@ {html:<a advi="#2">}\else
-   \ifx \@test \advi@click@ 
-       \advi@special@ {html:<a hdvi="#2">}\else
-   \advi@error {Incorect anchor mode #1}\fi \fi\endgroup}
+\newcommand {\setanchor}{\setkeys{advi@anchor}}
+\newenvironment {advi@anchoring}[2][]%
+   {\begingroup
+     \setkeys {advi@anchor}{#1}%
+     \advi@special@ {html:<a \advi@mode="#2" style=\advi@style>}%
+    \endgroup}
   {\advi@special@ {html:</a>}}
-\newcommand {\advi@anchor}[3][over]%
+\newcommand {\advi@anchor}[3][]%
    {\advi@anchoring[#1]{#2}#3\endadvi@anchoring}
 
 \def \advi@endanchor #1{#1\endadvi@anchor \endgroup}
 \advi@exportenv {advianchoring}{advi@anchoring}
 \advi@export \advianchor \advi@anchor
 \let \endadvianchor \advi@undefinedenv
+
+%%% Some anchors
+
+\newcommand {\advi@emphasize}[2][yellow]{%
+  \global \advance \advi@c@annot by 1%
+  \leavevmode
+  \advi@record{\the\advi@c@annot}{\kern-\fboxsep
+     \colorbox{#1}%
+        {\advi@anchor[invisible]{\the\advi@c@annot}%
+           {\advi@record[play]{\the\advi@c@annot}{#2}%
+        }}\kern-\fboxsep}}
+\advi@export \adviemphasize \advi@emphasize
 
 %%% Partial patch for overlays -- 0 will be shown > 0 will not be shown
 
@@ -439,13 +454,12 @@ end
     \c@overlay=0
     \@whilenum\c@overlay<\advi@max
     \do {\advance \c@overlay  by 1%
-         \adviwait \adviplay{overlay@\the\c@overlay}}%
-  \endgroup
-  \gdef \advi@max {0}}
+         \adviwait \adviplay{overlay@\the\c@overlay}}\relax
+  \endgroup}
  {\latex@overlay@loop}}
 
 \def \advi@end@slide 
-  {\advi@ifadvi {\overlay@loop}{}\latex@end@slide}
+  {\advi@ifadvi {\overlay@loop}{}\gdef\advi@max{0}\latex@end@slide}
 
 \def \advi@overlay@patch {%
    \let \latex@overlay \@overlay

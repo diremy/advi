@@ -388,9 +388,9 @@ Background images can also be blended, meaning that you can choose the
 algorithm that surimposes the image to the background.
 
 \medskip\noindent
-\docdef \advibg \doctt {[global]}\docarg{key=value list}
+\docdef \advibg \doctt {[global]}\docarg{decl}
 \begin{quote}
-where \docid{key=value list} is a list of bindings of the following kind:
+where \docid{decl} is a list of settings of the following from:
 
 \dockey[none]{color}{color}
 \begin{quote}
@@ -474,9 +474,9 @@ By default, the background settings only affect the current page.
 
 \subsection {Transitions}
 
-\docdef \advitransition \doctt {[global]}\docarg {key=val list}
+\docdef \advitransition \doctt {[global]}\docarg {decl}
 \begin{quote}
-where \docid{key=value list} is a list of bindings of the following kind:
+where \docid{decl} is a list of settings of the following from:
 
 \dockey{none}{} or \dockey{slide}{} or \dockey{block}{} or \dockey{wipe}{}
 \begin{quote}
@@ -498,6 +498,10 @@ bottomleft& bottom & bottomright\\
 \end{tabular}
 \end{center}
 \end{quote}
+The default direction, to be used when no local or global direction has been
+specified, is determined dynamically: \verb"right" when coming from
+previsous page, \verb"left" when coming from next page, and \verb"top"
+otherwise.
 
 \dockey{steps}{n}
 \begin{quote}
@@ -587,15 +591,35 @@ Kill all embedded applications named \docid{name}
 The command is 
 
 \medskip\noindent
-\docdef \advianchor \docarg{tag}\docarg {text}
+\docdef \advianchor \docopt{decl}\docarg{tag}\docarg {text}
 \\
-\docdef \begin\doctt{\{advianchor\}}\docarg{tag}%
+\docdef \begin\doctt{\{advianchor\}}\docopt{decl}\docarg{tag}%
 \docid {text}\docdef \end\doctt{\{advianchor\}}
 \begin{quote}
-The text is first display as usual and mark as active. 
-Moving the mouse above the text will display the record \docid{tag}.
+The text is first display as usual, then the anchor is drawn
+according to the style given by \docid{decl}, and made active. 
+It's acctivation, which depends on the mode give by \docid{decl}, 
+will play record \docid{tag}. 
 
+The declarations \docid{decl} are of the following form:
+\begin{description}
+\item [\doctt{over} \textrm{or} \doctt{click}]\indent\par 
+this defines the mode of  activation, which is either by
+moving mouse  over  or clicking on the anchor. 
+The default mode is \doctt{over}.
+\item [\doctt{box}, \doctt{invisible}, or \doctt{underline}]\indent\par
+the defines the style in which the anchor should be drawn.
+The default style is \doctt{boxed}.
+\end{description}
 In the environment form, \docid{text} may contain fragile commands. 
+\end{quote}
+
+\medskip\noindent
+\docdef \adviemphasize \docopt{color}\docarg {text}
+\begin{quote}
+This makes an invisible anchor around \docid{text}, which when activated
+will redraw text in a box colored with \docid{color}, which defaults to
+\doctt{yellow}. 
 \end{quote}
 
 \subsection {Postscript specials}

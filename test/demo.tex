@@ -576,12 +576,15 @@ inner tabulars\\ should be between\\ parentheses\end{tabular}}}\\
 \adviannot[p=9em]{Active anchors}(1,1.5)
 {\centering Active anchors are even greater!}
 can also annotate text as \adviannot[C,bg=green]{here}{here=h+e+r+e},
-\adviannot{for instance}[linecolor=red](-1.5,1){for example ?}.
+{\setanchor{invisible}\adviannot
+  {for instance}[linecolor=red](-1.5,1){you found it!}}.
 
 \medskip
 
 \noindent
-These annotations have been typeset respectively as:
+{\let \do\adviemphasize
+\do{These} \do{annotations} \do{have} \do{been} \do{typeset} 
+\do{respectively} \do{as}\let\do\relax:}
 \begin{small}
 \begin{verbatim}
 \adviannot{Active Annotations}(2,1.5){Annotations \\are great!}
@@ -599,15 +602,24 @@ These annotations have been typeset respectively as:
 
 The command 
 \begin{quote}
+\hsize \linewidth\setbox0\vbox\bgroup
 
 \verb"\usepackage{advi}"
 
 \verb"\usepackage{advi-annot}"
 
+\egroup
+\adviemphasize[lightgreen]{\box0}
 \end{quote}
 must appear after other packages that uses PS tricks, since it redefines
 some macros.  The package \verb"advi-annot" is necessary to get
 the annotation macros.
+
+\vfil\noindent
+\adviemphasize[lightblue]
+{\em
+Some invisible anchors have been hidden in this page, could you find them?
+}
 
 \newpage
 

@@ -633,10 +633,12 @@ let editing =
 module H =
   struct
     type mode = Over | Click_down
+    type style = Box | Underline | Invisible
     type link = {
       link : string;
       action : (unit -> unit);
       mode : mode;
+      style : style;
       color : color option;
       area : (int * int * int) option;
     }
@@ -664,9 +666,13 @@ module H =
 	draw_rect_with_line_width e x y w h
       else Graphics.draw_rect x y w h
 
-    let draw_anchor c e a =
+    let draw_anchor style c e a =
       Graphics.set_color c;
-      frame_rect e a.A.x a.A.y a.A.w a.A.h;
+      begin match style with
+        Box -> frame_rect e a.A.x a.A.y a.A.w a.A.h
+      | Underline -> frame_rect e a.A.x a.A.y a.A.w e
+      | Invisible -> ()
+      end;
       Graphics.set_color !color
 
     let make_anchors tag all_draw =
@@ -689,8 +695,12 @@ module H =
           } in
         anchors := A.add a !anchors;
         match tag with
-        | Href _ -> draw_anchor href_frame 1 a
-        | Advi _ -> draw_anchor advi_frame 1 a
+        | Href _ -> draw_anchor Box href_frame 1 a
+        | Advi link ->
+            draw_anchor
+              link.style
+              (match link.color with None ->  advi_frame | Some c -> c)
+              1 a
         | _ -> ()
       in
       let rec split draw (x, y as orig) w h voff = function

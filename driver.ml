@@ -1089,15 +1089,12 @@ let header_special st s = ();;
 (* For html specials *)
 
 (* Should check that a pause is not in the middle of some html code *)
-let open_html st html tag tag_string =
-  let name = String.sub html 9 (String.length html - 11) in
+let open_html st link tag tag_string =
   let x = st.x_origin + int_of_float (st.conv *. float st.h)
   and y = st.y_origin + int_of_float (st.conv *. float st.v) in
   begin match st.html with
-  | Some (t, k) ->
-      st.html <- Some (t, succ k)
-  | None ->
-      st.html <- Some (tag name, 0)
+  | Some (t, k) -> st.html <- Some (t, succ k)
+  | None -> st.html <- Some (tag link, 0)
   end;;
 
 let close_html st =
@@ -1112,32 +1109,45 @@ let close_html st =
   | None -> warning ("Closing html tag that is not open");;
 
 let html_special st html =
-  if has_prefix "<A name=\"" html || has_prefix "<a name=\"" html
-   ||  has_prefix "<A name=" html then
-    open_html st html (fun x -> Dev.H.Name x) "Name" else
-  if  has_prefix "<A href=\"" html || has_prefix "<a href=\"" html then
-    open_html st html (fun x -> Dev.H.Href x) "Href" else
-  if  has_prefix "<A advi=\"" html || has_prefix "<a advi=\"" html then
-    let advi x =
-      let play () = proc_special st ("advi: proc=" ^ x ^ " play") in
-      Dev.H.Advi
-        {Dev.H.link = x;
-         Dev.H.action = play;
-         Dev.H.mode = Dev.H.Over;
-         Dev.H.color = None;
-         Dev.H.area = None} in 
-      open_html st html advi "Advi" else
-  if  has_prefix "<A hdvi=\"" html || has_prefix "<a hdvi=\"" html then
-    let advi x =
-      let play () = proc_special st ("advi: proc=" ^ x ^ " play") in
-      Dev.H.Advi
-        {Dev.H.link = x;
-         Dev.H.action = play;
-         Dev.H.mode = Dev.H.Click_down;
-         Dev.H.color = None;
-         Dev.H.area = None} in 
-      open_html st html advi "Advi" else
-  if has_prefix "</A>" html || has_prefix "</a>" html then close_html st
+  if has_prefix "<A " html || has_prefix "<a " html then
+    let stripped = String.sub html 3 (String.length html-4) in
+    let fields = split_record stripped in
+    begin match fields with
+      ("name", _) :: _ ->
+        open_html st html (fun x -> Dev.H.Name x) "Name"
+    | ("href", link) :: _ -> 
+        open_html st link (fun x -> Dev.H.Href x) "Href" 
+    | (("advi" | "hdvi" as kind), link) :: rest ->
+        let mode =
+          if kind = "advi" then Dev.H.Over else Dev.H.Click_down in
+        let style =
+          try
+            match List.assoc "style" rest with
+            | "invisible" -> Dev.H.Invisible
+            | "underline" -> Dev.H.Underline
+            | "box" -> Dev.H.Box
+            | _ ->
+                warning ("Incorrect style in html suffix " ^ html);
+                Dev.H.Box
+          with Not_found -> Dev.H.Box in
+        let color = 
+        (* try Some ??? (List.assoc "color" rest) with Not_found -> *)
+          None in
+        let advi x =
+          let play () = proc_special st ("advi: proc=" ^ x ^ " play") in
+          Dev.H.Advi
+            {Dev.H.link = x;
+             Dev.H.action = play;
+             Dev.H.mode = mode;
+             Dev.H.style = style;
+             Dev.H.color = color;
+             Dev.H.area = None} in 
+        open_html st link advi "Advi"
+    | _ -> 
+        warning ("Incorrect html suffix" ^ html)
+    end
+  else if has_prefix "</A>" html || has_prefix "</a>" html then
+    close_html st
   else warning ("Unknown html suffix" ^ html);;
 
 let scan_special_html (headers, xrefs) page s =
