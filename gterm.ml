@@ -20,6 +20,7 @@
 (* A simple terminal to handle simple editions and user's interaction. *)
 
 type term = {
+ (* Character contents of the terminal. *)
  mutable lines : string array;
  (* Height in lines. *)
  mutable height : int;
@@ -36,8 +37,8 @@ type term = {
  mutable cursor_x : int;
  mutable cursor_y : int;
  (* Coordinates of the cursor in the graphics window. *)
- mutable cursor_gx : int;
- mutable cursor_gy : int;
+ (*mutable cursor_gx : int;
+   mutable cursor_gy : int;*)
  (* Colors *)
  mutable cursor_color : Graphics.color;
  mutable foreground_color : Graphics.color;
@@ -53,33 +54,40 @@ type term = {
  mutable font_size_y : int;
 };;
 
-let draw_cursor t cc cf gx gy =
+let get_gx t x = t.font_size_x * x + t.gx;;
+let get_gy t y = t.font_size_y * y + t.gy;;
+
+let cursor_gx t = get_gx t t.cursor_x;;
+let cursor_gy t = get_gy t t.cursor_y;;
+
+let draw_cursor t cc cf =
  Graphics.set_color cc;
+ let gx = cursor_gx t
+ and gy = cursor_gy t
+ in 
  Graphics.fill_rect gx gy t.font_size_x t.font_size_y;
  let c = t.lines.(t.cursor_y).[t.cursor_x] in
- Graphics.moveto t.cursor_gx t.cursor_gy;
+ Graphics.moveto gx gy;
  Graphics.set_color cf;
  Graphics.draw_char c;
  Graphics.set_color t.foreground_color;;
 
 let show_cursor t =
- draw_cursor t t.cursor_color t.background_color t.cursor_gx t.cursor_gy;;
+ draw_cursor t t.cursor_color t.background_color;;
 
 let hide_cursor t =
- draw_cursor t t.background_color t.foreground_color t.cursor_gx t.cursor_gy;;
+ draw_cursor t t.background_color t.foreground_color;;
 
 let htab t h =
  let h = (max 0 h) mod t.width in
  hide_cursor t;
  t.cursor_x <- h;
- t.cursor_gx <- t.gx + t.font_size_x * h;
  show_cursor t;;
  
 let vtab t v =
  let v = (max 0 v) mod t.height in
  hide_cursor t;
  t.cursor_y <- v;
- t.cursor_gy <- t.gy + t.font_size_y * v;
  show_cursor t;;
 
 let draw_border t =
@@ -143,28 +151,27 @@ let rec print_str t s =
  let n =
   try String.index s '\n'
   with Not_found -> l in
- let sx, sy = Graphics.text_size s in
- let ncursor_gx = t.cursor_gx + sx in
+
+ let ncursor_x = t.cursor_x + l in
 
  let print_it s =
+   let gx = cursor_gx t 
+   and gy = cursor_gy t
+   in
    let l = String.length s in
-   Graphics.moveto t.cursor_gx t.cursor_gy;
+   Graphics.moveto gx gy;
    Graphics.set_color t.background_color;
-   Graphics.fill_rect t.cursor_gx t.cursor_gy
-                      (l * t.font_size_x) t.font_size_y;
+   Graphics.fill_rect gx gy (l * t.font_size_x) t.font_size_y;
    Graphics.set_color t.foreground_color;
    Graphics.draw_string s;
    String.blit s 0 t.lines.(t.cursor_y) t.cursor_x l;
-   t.cursor_gx <- ncursor_gx;
    t.cursor_x <- t.cursor_x + l in
 
  let print_cont t scont =
    print_it scont;
    t.cursor_x <- 0;
-   t.cursor_gx <- t.gx;
    let v = (max 0 (t.cursor_y - 1)) mod t.height in
-   t.cursor_y <- v;
-   t.cursor_gy <- t.gy + t.font_size_y * v in
+   t.cursor_y <- v in
 
  let print_endline =
    let endline = String.make 1 ' ' in
@@ -174,17 +181,14 @@ let rec print_str t s =
    fun t -> print_cont t endline in
 
  begin
-  if n < l then begin
+  if n < l then begin (* if we have newline character in s *)
     print_str t (String.sub s 0 n);
     print_endline t;
     if l - n > 1 then print_str t (String.sub s (n + 1) (l - n - 1));
-
   end else begin
-    let lim = t.gx + t.gwidth in
-    if ncursor_gx < lim then print_it s else
-    if ncursor_gx = lim then print_continue t else
+    if ncursor_x < t.width then print_it s else
     begin
-     let nbc = t.width - t.cursor_x - 1 in
+     let nbc = t.width - 1 - t.cursor_x in
      print_str t (String.sub s 0 nbc);
      print_continue t;
      print_str t (String.sub s nbc (l - nbc));
@@ -211,8 +215,6 @@ let make_term_gen fg bg bw bwc tc cc xc yc h w =
    gy = yc;
    cursor_x = 0;
    cursor_y = h - 1;
-   cursor_gx = xc;
-   cursor_gy = yc + (h - 1) * font_size_y;
 
    cursor_color = cc;
    foreground_color = fg;
