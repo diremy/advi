@@ -109,7 +109,7 @@ veryclean:
 install: advi.opt
 	cp advi.opt ${bindir}/advi
 	- mkdir -p $(ADVI_LOC)
-	cp splash.dvi caml.eps $(ADVI_LOC)
+	cp splash.dvi caml.eps advi.sty advi.pro $(ADVI_LOC)
 
 MLFILES = $(addsuffix .ml, $(MODULES))
 .depend:: *.mli $(MLFILES) Makefile 
