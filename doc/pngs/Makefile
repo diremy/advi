@@ -23,6 +23,7 @@
 include ../../Makefile.config
 
 MKTHUMBNAIL=TOOLS/mkthumbnail
+MKFRISE=TOOLS/mkfrise
 RM=/bin/rm -f
 
 DIRS=basics basics/cash \
@@ -31,16 +32,17 @@ seminar/a14 seminar/clock \
 slitex/advi slitex/caml slitex/simplistic slitex/skin_detection \
 test
 
-all: DONE
+all: f.png
 
-DONE:
+f.png:
 	for i in $(DIRS); do \
 	  $(MKTHUMBNAIL) $$i/*.png; \
 	done;
-	touch DONE
-	
+	$(MKFRISE)
+
 clean:
 	for i in $(DIRS); do \
 	$(RM) $$i/thumb_*; \
-	done;
-	$(RM) DONE
+	done; \
+	$(RM) thumb_*; \
+	$(RM) f.png

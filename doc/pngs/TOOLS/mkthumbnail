@@ -31,8 +31,7 @@ for i in $IMGS
 do
  file=`basename $i`;
  dir=`dirname $i`;
- echo "convert $i -geometry ${HWIDTH}x$HHEIGHT! $dir/thumb_$file"
+ echo "convert -geometry ${HWIDTH}x$HHEIGHT! $i $dir/thumb_$file"
  #read x
- convert $i -geometry ${HWIDTH}x$HHEIGHT! $dir/thumb_$file
+ convert -geometry ${HWIDTH}x$HHEIGHT! $i $dir/thumb_$file
 done
-
