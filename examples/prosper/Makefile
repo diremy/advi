@@ -1,11 +1,12 @@
 TEXINPUTS := ../lib:../../tex:../../lib:$(TEXINPUTS)
 ADVI=../../advi.opt
+LATEX=TEXINPITS=$(TEXINPUTS) latex 
 
 show: join.dvi
 	$(ADVI) join.dvi
 
 join.dvi: join.tex
-	latex join.tex
+	$(LATEX) join.tex
 
 
 clean:

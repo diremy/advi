@@ -1,11 +1,12 @@
 TEXINPUTS := ../tex/:$(TEXINPUTS)
+LATEX=TEXINPUTS=$(TEXINPUTS) latex
 all: manual.ps manual.pdf 
 
 manual.dvi: manual.tex
-	latex $<
+	$(LATEX) $<
 
 manual.ps: manual.tex
-	latex '\def\driver{dvips}\input' $<
+	$(LATEX) '\def\driver{dvips}\input' $<
 	dvips -o $@ $*.dvi
 
 manual.html: manual.tex
@@ -18,7 +19,7 @@ manual.ima: manual.html
 	touch manual.ima
 
 manual.pdf: manual.tex
-	latex '\def\driver{dvipdfm}\input' $<
+	$(LATEX) '\def\driver{dvipdfm}\input' $<
 	dvipdfm -o $@ $*.dvi
 
 clean: 
