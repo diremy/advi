@@ -21,11 +21,15 @@ val user_dir : string;;
 val get_cache_dir : unit -> string;;
 (* Advi cache directory. *)
 
-val default_option_file : string;;
-(* Advi user default options file ("~/.advirc"). *)
+val load_init_files : (string * Arg.spec * string) list ->
+  (string -> unit) -> string -> unit;;
+(* [load_options_files options anon usage_message] loads the init files
+   [~/.advirc] and [~/.advi/advirc]. *)
 
-val options_files : unit -> string list;;
-(* [options_files ()] returns the list of files to find options to set. *)
+val load_options_file : (string * Arg.spec * string) list ->
+  (string -> unit) -> string -> string -> unit;;
+(* [load_options_file options anon usage_message fname] loads the init file
+   [fname]. *)
 
 val fullpath : string -> string -> string;;
 (* [fullpath dir path] returns the normalized full path name of

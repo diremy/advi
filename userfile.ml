@@ -111,21 +111,21 @@ Options.add
  "STRING\tSet the cache directory (default ./.advi)";;
 
 (* User preferences. *)
-let default_option_file = tilde_subst "~/.advirc";;
+let default_init_file1 = tilde_subst "~/.advirc";;
+let default_init_file2 = tilde_subst "~/.advi/advirc";;
 
-let options_files = ref [default_option_file];;
+let init_files = [default_init_file1; default_init_file2];;
 
-let add_options_file s =
- prerr_endline s; prerr_endline " recorded";
- options_files := tilde_subst s :: !options_files;;
+let load_options_file options set_dvi_filename usage_msg fname =
+ Rc.cautious_parse_file fname options set_dvi_filename usage_msg;;
 
-Options.add "-options_file"
- (Arg.String add_options_file)
- "STRING\tLoad this file when starting advi to set up user's options\n\
- (to override the options of the default ~/.advirc init file).";;
-
-let options_files () = !options_files;;
-
+let load_init_files options set_dvi_filename usage_msg =
+ List.iter
+   (fun fname ->
+      if Sys.file_exists fname
+      then Rc.cautious_parse_file fname options set_dvi_filename usage_msg)
+   init_files;;
+ 
 (* Writing page current number to the file advi_page_number_file. *)
 let write_page_number =
  Options.flag false "-page_number"

@@ -59,21 +59,16 @@ let usage_msg =
 
 let init_arguments () =
  let options = advi_options () in
- let optfs = List.rev (Userfile.options_files ()) in
- prerr_endline "Init files :";
-   List.iter prerr_endline optfs; prerr_endline "";
- List.iter
-   (fun fname ->
-      Rc.cautious_parse_file fname options set_dvi_filename usage_msg)
-   optfs;
  let rec new_options =
-   ("-options_file",
-    Arg.String
-     (fun fname ->
-        prerr_endline (Printf .sprintf "Parsing %s" fname);
-        Rc.cautious_parse_file fname options set_dvi_filename usage_msg),
-    "") ::
-   options in
+    ("-options_file",
+     Arg.String
+      (fun fname ->
+        Userfile.load_options_file
+          new_options set_dvi_filename usage_msg fname),
+     "STRING\tLoad this file when parsing this option to set up options\n\
+      (to override the options of the default ~/.advirc init file).") ::
+    options in
+ Userfile.load_init_files new_options set_dvi_filename usage_msg;
  Arg.parse new_options set_dvi_filename usage_msg;
 ;;
 
