@@ -1,3 +1,4 @@
+
 (*
  * advi - A DVI previewer
  * Copyright (C) 2000  Alexandre Miquel
@@ -15,22 +16,47 @@
  * details (enclosed in the file LGPL).
  *)
 
-let kpsewhich_path = "kpsewhich" ;;
 let temp_filename = Filename.temp_file "advi" "" ;;
-let texdir_path = "/usr/share/texmf" ;;
-let database_path = texdir_path ^ "/ls-R" ;;
 let database_mtime = ref 0.0 ;;
 let database_table = Hashtbl.create 257 ;;
 
 (* Add local path to search environment. *)
-let addpath elem var =
-  let oldv = try Unix.getenv var with Not_found -> "" in
+
+exception Command;;
+let command_string com opt =
+  let command = Printf.sprintf "%s %s > %s" com opt temp_filename in
+  let exit_status = Sys.command command in
+  if exit_status = 0 then
+    begin
+      try
+        let ch = open_in temp_filename in
+        try
+          let res = input_line ch in
+          close_in ch;
+          res
+        with x -> close_in ch; raise x
+      with _ -> 
+        Misc.warning
+          (Printf.sprintf "Error %d while executing %s %s"
+             exit_status com opt);
+        raise Command
+    end
+  else
+    raise Command
+;;
+
+let addpath elem var kind =
+  let oldv =
+    try Unix.getenv var with Not_found -> 
+      try command_string Config.kpsewhich_path
+          (Printf.sprintf "-show-path='%s'" kind)
+      with Command -> "" in
   let newv = oldv^":"^elem in
   Unix.putenv var newv
 
-let _ = 
-  addpath Config.advi_loc "PSHEADERS";
-  addpath Config.advi_loc "TEXPICTS";
+let _ =
+  addpath Config.advi_loc "PSHEADERS" Config.psheaders_kind;
+  addpath Config.advi_loc "TEXPICTS"  Config.texpicts_kind;
   ()
 
 let _ = at_exit (fun () -> try Sys.remove temp_filename with _ -> ()) ;;
@@ -48,7 +74,7 @@ let remove_spaces line =
   String.sub line !p (!q - !p) ;;
 
 let reload_database () =
-  let ch = open_in database_path in
+  let ch = open_in Config.database_path in
   Hashtbl.clear database_table ;
   let curr_dir = ref "" in
   try while true do
@@ -65,7 +91,7 @@ let reload_database () =
 
 let reload_if_changed_database () =
   try
-    let stats = Unix.stat database_path in
+    let stats = Unix.stat Config.database_path in
     let mtime = stats.Unix.st_mtime in
     if mtime > !database_mtime then begin
       database_mtime := mtime ;
@@ -77,26 +103,14 @@ let database_font_path fontname dpi =
   reload_if_changed_database () ;
   let name = Printf.sprintf "%s.%dpk" fontname dpi in
   let path = Hashtbl.find database_table name in
-  texdir_path ^ "/" ^ path ;;
+  Config.texdir_path ^ "/" ^ path ;;
 
 let true_file_name options file =
   let args = String.concat " " (options @ [file]) in
-  let command = Printf.sprintf "%s %s > %s" kpsewhich_path args temp_filename
-  in
-  let exit_status =
-    Sys.command command in
-  if exit_status <> 0 then begin
-    Misc.warning (Printf.sprintf "%s is not found. (Error while executing %s)" file command);
-    raise Not_found
-  end ;
-  try
-    let ch = open_in temp_filename in
-    let filename = input_line ch in
-    close_in ch;
-    filename
+  try command_string Config.kpsewhich_path args
   with
-  | _ -> 
-      Misc.warning (Printf.sprintf "%s is not found" file);
+    Command ->
+      Misc.warning (Printf.sprintf "%s is not found" file); 
       raise Not_found
 ;;
 

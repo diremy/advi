@@ -3,6 +3,11 @@ let antialias =
     "-A"
     "Set Postscript antialias";;
 
+let pstricks =
+  Misc.option_flag false
+    "-pstricks"
+    "Show moveto";;
+
 let showps = ref false;;
 Misc.set_option
   "--showps" (Arg.Set showps)
@@ -22,10 +27,14 @@ let current_y = ref 0;;
 
 let parse_pos s =
   let c = String.index s ',' in
-  let left = String.sub s 3 (c-3) in
+  let bc = s.[3] in
+  let b =
+    if bc = 'a' then true else if bc = 'r' then false
+    else assert false in
+  let left = String.sub s 4 (c-4) in
   let right = String.sub s (c+1) (String.length s -c-1) in
   let int_of_floatstring f = int_of_float (float_of_string f +. 0.5) in
-  int_of_floatstring left, int_of_floatstring right;;
+  b, int_of_floatstring left, int_of_floatstring right;;
 let ack_request =
   String.concat ""
     [ "flushpage ("; ack_string; ") print flush "; ];;
@@ -201,8 +210,14 @@ class gs () =
           else if Misc.has_prefix pos_string s then
             begin
               try
-                let y, x = parse_pos s in
-                let y = gr.height + y in
+                let b, y, x = parse_pos s in
+                let y = (if b then gr.height else 0) + y in
+                if !pstricks then
+                  begin
+                    Printf.fprintf stderr "<-- %s %d %d"
+                      (if b then "-" else "+") x y;
+                    prerr_newline();
+                  end;
                 current_x := x; current_y := y
               with
               | Not_found | Failure _ -> prerr_endline s
@@ -288,6 +303,11 @@ class gv =
     method moveto x y =
       let x' = xorig + x in
       let y' = y - yorig  in
+      if !pstricks then
+        begin
+          Printf.fprintf stderr "--> %d %d" x' y';
+          prerr_newline();
+        end;
       moveto x' y'
     method check_size =
       begin
@@ -377,11 +397,11 @@ class gv =
       sync <- false
 
     method ps b (x:int) (y:int) =
-      self # send [ texbegin;  self # moveto x y; b; texend ];
+      self # send [ texbegin; self # moveto x y; b; texend ];
       sync <- false
 
     method special b (x:int) (y:int) =
-      self # send [ texbegin; self # moveto x y;
+      self # send [ texbegin; self # moveto x y; 
                     "@beginspecial @setspecial";
                     b;
                     "@endspecial"; texend;
@@ -417,6 +437,7 @@ let flush () =
     try  gv#sync
     with Terminated ->
       Misc.warning "Continuing without Postscript";
+      gv#kill;
       Misc.dops := false;;
 
 let toggle_antialias () =

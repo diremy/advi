@@ -15,9 +15,11 @@ module M = struct
   let images_graphics = Hashtbl.create 107
   
   let f file whitetransp alpha blend (llx,lly,urx,ury) (w,h) x0 y0 =
-    let file = Search.true_file_name [] file in
+    let file =
+      Search.true_file_name [ "-format=" ^ Config.texpicts_kind ] file in
     let cache_name =
       let file' = Userfile.fullpath (Unix.getcwd ()) file in
+      let file' = if file == file' then String.copy file' else file' in
       for i = 0 to String.length file' - 1 do
   	if file'.[i] = '/' then file'.[i] <- '-'
       done;

@@ -24,9 +24,11 @@ type ratiopts =
 let white_rgb = {r = 255; g = 255; b = 255};;
 
 let f file whitetransp alpha blend ratiopts (w, h) x0 y0 =
+  
   let file = Search.true_file_name [] file in
   let cache_name =   (* The computed cache name *)
     let file' = Userfile.fullpath (Unix.getcwd ()) file in
+    let file' = if file == file' then String.copy file' else file' in
     for i = 0 to String.length file' - 1 do
       if file'.[i] = '/' then file'.[i] <- '-'
     done;

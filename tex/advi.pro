@@ -5,22 +5,23 @@
 advi@Dict begin
 /floatstring 20 string def 
 /printfloat { floatstring cvs print } def
-/printpos { 
-     (dvi) print printfloat  (,) print printfloat (\n) print 
-} def
-/reference matrix currentmatrix bind def
-/absolute { matrix currentmatrix itransform reference transform } def
-/printpos { 
-     (dvi) print printfloat  (,) print printfloat  (\n) print 
-} def
-/printCP { 
-     currentpoint printpos
-} def
-/printEP {
-   @beginspecial @setspecial tx@Dict begin
-   newpath 0 360 0 0 0 0 Ellipse closepath
-   currentpoint
-   (dvi) print printfloat  (,) print  printfloat (\n) print 
-} def
+/rcoor { exch 4 1 roll sub exch 3 -1 roll sub exch } def
+/printpos { (dvia) print printfloat  (,) print printfloat (\n) print } def
+/printcoor { (dvia) print printfloat  (,) print printfloat (\n) print } def
+/printrcoor { (dvir) print printfloat  (,) print printfloat (\n) print } def
 end
+tx@Dict begin
+/PutCoor
+{ dup exec 2 copy moveto advi@Dict begin printcoor end
+gsave CP T CM STV exch exec moveto setmatrix CP grestore } def
+/LPut
+{ tx@NodeDict /LPutPos known { LPutPos } { CP /Y ED /X ED /NAngle 0
+def } ifelse LPutCoor  } def 
+/LPutCoor
+{ tx@NodeDict /LPutPos known { LPutPos } 
+{ CP /Y ED /X ED /NAngle 0 def } ifelse NAngle tx@Dict begin /NAngle ED end
+gsave CM STV CP Y sub neg exch X sub neg exch 
+moveto setmatrix CP grestore } def
+end
+
 % END advi.pro

@@ -581,7 +581,8 @@ let draw_ps file bbox (w, h) x0 y0 =
       bbox (w, h) x y
   with
   | Not_found -> Misc.warning ("ps file " ^ file ^ " not found")
-  | _ -> Misc.warning ("error happened while drawing ps file " ^ file);;
+  | _ ->
+      Misc.warning ("error happened while drawing ps file " ^ file);;
 
 let clean_ps_cache () = Drawps.clean_cache ();;
 

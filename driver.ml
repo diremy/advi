@@ -849,13 +849,19 @@ let tpic_specials st s =
       ();;
 (* End of TPIC hacks *)
 
-let moveto_special st s =
-  if !Misc.dops then
-    begin
-      let x, y = Dev.current_pos() in
-      st.h <- int_of_float (float (x - st.x_origin) /. st.conv);
-      st.v <- int_of_float (float (y - st.y_origin) /. st.conv);
-    end;;
+ let moveto_special st b s =
+   if !Misc.dops then
+     let x, y = Dev.current_pos() in
+     if b then
+       begin
+         st.h <- int_of_float (float (x - st.x_origin) /. st.conv);
+         st.v <- int_of_float (float (y - st.y_origin) /. st.conv);
+       end
+     else
+       begin
+         st.h <- st.h + int_of_float (float (x) /. st.conv);
+         st.v <- st.v + int_of_float (float (y) /. st.conv);
+       end;;
 
 let ps_special st s =
   if !Misc.dops && st.status.Dvi.hasps then
@@ -950,7 +956,8 @@ let scan_special_page otherwise cdvi globals pagenum =
 
 let special st s =
   if has_prefix "\" " s || has_prefix "ps: " s then ps_special st s else
-  if has_prefix "advi: moveto" s then moveto_special st s else
+  if has_prefix "advi: moveto" s then moveto_special st true s else
+  if has_prefix "advi: rmoveto" s then moveto_special st false s else
 
   (* Other specials *)
   if has_prefix "color " s then color_special st s else

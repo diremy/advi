@@ -19,8 +19,9 @@
 \newif \ifadvi@ignore \advi@ignorefalse
 \DeclareOption {annot}{\advi@annottrue}
 \DeclareOption {ignore}{\advi@ignoretrue}
-
 \ProcessOptions
+
+\@ifundefined {advi}{}{\advi@annottrue}
 
 \ifadvi@annot \RequirePackage {pst-node}\fi
 
@@ -98,43 +99,27 @@
 
 %%% For PS Tricks
 
+\def \advi@rel { 4 1 roll sub exch 3 -1 roll sub exch }
 \def \advi@moveto {\advi@special {advi: moveto}}
-\def \advi@set #1#2{\pst@Verb {#1 #2 advi@Dict begin printpos end}}
-\def\advi@psput@special#1{%
-\hbox{%
-\pst@Verb{{ \pst@coor }  dup exec
-advi@Dict begin
-2 copy moveto
-printpos 
-end
-\tx@PutCoor 
-\tx@PutBegin}
-\hbox {\advi@moveto \box#1}%
-\pst@Verb{\tx@PutEnd}}}
+\def \advi@rmoveto {\advi@special {advi: rmoveto}}
 
-\def\advi@ncput@iii{%
-\leavevmode
-\hbox{%
-\pst@Verb{%
-\pst@nodedict
-/t \psk@npos def
-tx@NodeDict /LPutPos known { LPutPos } { CP /Y ED /X ED /NAngle 0
-def } ifelse 
-LPutCoor 
-100 200 moveto 
-100 200 advi@Dict begin printpos end
-end
-\tx@PutBegin
-}
-\hbox {\advi@moveto
-\box\pst@hbox}%
-\pst@Verb{\tx@PutEnd}}}
+\def\advi@psput@special#1{\hbox {\pst@Verb
+{{ \pst@coor } \advi@tx@PutCoor \tx@PutBegin }\advi@moveto 
+\box#1\pst@Verb{\tx@PutEnd}}}
+\def \advi@tx@PutCoor {PutCoor }
 
+\def\advi@ncput@iii 
+{\leavevmode \hbox{\pst@Verb {\pst@nodedict /t \psk@npos def 
+\advi@tx@LPut end \tx@PutBegin }\advi@moveto \box\pst@hbox
+\pst@Verb{\tx@PutEnd}}}
+\def \advi@tx@LPut { LPut }
+
+\ifadvi@ignore\else
 \@ifundefined {psput@special}{}
 {\let \psput@special \advi@psput@special
- \@ifundefined {ncput@iii}{}{\let \ncput@iii \advi@ncput@iii}%
- \advi@special {header=advi.pro}}
-
+ %\@ifundefined {ncput@iii}{}{\let \ncput@iii \advi@ncput@iii}
+ \AtBeginDocument {\advi@special {header=advi.pro}}}
+\fi
 %%% Active DVI
 
 \ifadvi@ignore
