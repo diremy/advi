@@ -1,0 +1,79 @@
+#*********************************************************************#
+#                                                                     #
+#                             Active-DVI                              #
+#                                                                     #
+#                   Projet Cristal, INRIA Rocquencourt                #
+#                                                                     #
+#  Copyright 2002 Institut National de Recherche en Informatique et   #
+#  en Automatique.  All rights reserved.  This file is distributed    #
+#  under the terms of the GNU Lesser General Public License.          #
+#                                                                     #
+#  Jun Furuse, Didier Rémy and Pierre Weis.                           #
+#  Contributions by Roberto Di Cosmo, Didier Le Botlan,               #
+#  Xavier Leroy, and Alan Schmitt.                                    #
+#                                                                     #
+#  Based on Mldvi by Alexandre Miquel.                                #
+#*********************************************************************#
+
+# $Id$
+
+include Makefile
+WEBSITEDIR=/net/pauillac/infosystems/www/$(PACKAGE)
+FTPSITEDIR=/net/pauillac/infosystems/ftp/cristal/caml-light/bazar-ocaml/$(PACKAGE)
+
+fake:
+	echo '\n\nThis Makefile is used to distribute the software,\n\
+Read it to understand how to use it!'
+
+distribute: advi adk
+
+advi:
+	# Make documentation and test before release
+	make -f Makefile documentation
+	(cd test; $(MAKE) all jpdemo.dvi)
+	# Then clean the old stuff
+	${RM} release
+	${RM} $(WEBSITEDIR)/*
+	mkdir release
+	- mkdir $(WEBSITEDIR)
+	# And check out a brand new version,
+	# clean it
+	# copy the documentation in it
+	# then copy the images
+	cd release; cvs co bazar-ocaml/$(PACKAGE); \
+	$(CP) -r ../doc bazar-ocaml/$(PACKAGE)/; \
+	${RM} bazar-ocaml/$(PACKAGE)/Makefile.distrib; \
+	find . -name '.cvsignore' -print | xargs ${RM}; \
+	find . -name 'CVS' -print | xargs ${RM}; \
+	find . -name 'advi-development-kit' -print | xargs rm -rf; \
+	$(CP) bazar-ocaml/$(PACKAGE)/README bazar-ocaml/$(PACKAGE)/doc/; \
+	$(CP) bazar-ocaml/$(PACKAGE)/LICENSE bazar-ocaml/$(PACKAGE)/doc/; \
+	$(CP) bazar-ocaml/$(PACKAGE)/INSTALL bazar-ocaml/$(PACKAGE)/doc/; \
+		$(CP) ../test/*.dvi bazar-ocaml/$(PACKAGE)/test/; \
+	$(CP) ../doc/*.dvi bazar-ocaml/$(PACKAGE)/doc/; \
+	$(CP) ../doc/*.ps bazar-ocaml/$(PACKAGE)/doc/; \
+	$(CP) ../doc/*.pdf bazar-ocaml/$(PACKAGE)/doc/; \
+	$(CP) ../doc/*.html bazar-ocaml/$(PACKAGE)/doc/; \
+	$(CP) ../doc/*.htm bazar-ocaml/$(PACKAGE)/doc/; \
+	$(CP) ../doc/*.gif bazar-ocaml/$(PACKAGE)/doc/; \
+	$(CP) ../doc/*.jpg bazar-ocaml/$(PACKAGE)/doc/; \
+	$(CP) ../doc/style.css bazar-ocaml/$(PACKAGE)/doc/; \
+	$(CP) -r ../doc/pngs bazar-ocaml/$(PACKAGE)/doc/; \
+	$(CP) bazar-ocaml/$(PACKAGE)/doc/* $(WEBSITEDIR)/;
+	# Build the Web site
+	ln -s $(WEBSITEDIR)/index.htm $(WEBSITEDIR)/index.html
+	# Give the release its versioning name
+	cd release; mv bazar-ocaml/$(PACKAGE) $(PACKAGE)-$(VERSION); \
+	(cd bazar-ocaml/$(PACKAGE)/doc/; \
+	ln -sf eng.html index.html; cd ..); \
+	cp -pr bazar-ocaml/$(PACKAGE)/doc/* $(WEBSITEDIR)
+	- chgrp -R caml $(WEBSITEDIR)
+	- chmod -R g+w $(WEBSITEDIR)
+	# Build the archive and move it in the proper ftp site
+	tar zcvf $(PACKAGE)-$(VERSION).tgz $(PACKAGE)-$(VERSION); \
+	$(MV) $(PACKAGE)-$(VERSION).tgz $(FTPSITEDIR)
+	${RM} release
+
+adk :
+	cd advi-development-kit; \
+	$(MAKE) distribute
