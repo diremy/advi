@@ -30,7 +30,7 @@ let hmargin = ref (Dimension.Cm 1.0);;
 let vmargin = ref (Dimension.Cm 1.0);;
 let geometry = ref "864x864";;
 
-let set_geom g = Dviview.set_autoresize false; geometry := g;;
+let set_geom g = Dviview.set_autoresize false; Dviview.set_autoscale false; geometry := g;;
 
 let set_dim r s = r := Dimension.dimen_of_string s;;
 

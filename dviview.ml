@@ -82,6 +82,13 @@ Options.add
   "\tPrevents scaling from resizing the window (done if geometry is provided)"
 ;;
 
+let autoscale = ref true;;
+Options.add
+  "-noautoscale"
+  (Arg.Clear autoscale)
+  "\tPrevents resizing the window from scaling (done if geometry is provided)"
+;;
+
 let dpi_resolution = ref 72.27;;
 let set_dpi_resolution r = dpi_resolution := max r 72.27;;
 
@@ -207,6 +214,7 @@ let attr =
   };;
 
 let set_autoresize b = autoresize := b
+let set_autoscale b = autoscale := b
 let set_geometry g = attr.geom <- Ageometry.parse g;;
 
 let set_crop b = attr.crop <- b;;
@@ -858,7 +866,7 @@ let resize st ?dx ?dy x y =
       Ageometry.xoffset = Ageometry.No_offset;
       Ageometry.yoffset = Ageometry.No_offset;
     };
-  update_dvi_size true ?dx ?dy st;
+  if !autoscale then update_dvi_size true ?dx ?dy st;
   redraw st;;
 
 let scale n st =

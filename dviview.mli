@@ -19,6 +19,7 @@
 
 open Dimension;;
 val set_autoresize : bool -> unit;;
+val set_autoscale : bool -> unit;;
 val set_geometry : string -> unit;;
 val set_crop : bool -> unit;;
 val set_hmargin : dimen -> unit;;
