@@ -12,7 +12,7 @@
 
 \newpage
 
-\subsection* {\ActiveDVI~has two components}
+\subsection* {{\ActiveDVI} has two components}
 
 \begin{itemize}
 \item {\tt mldvi}: {\bf a dvi} previewer (by Alexandre Miquel)
@@ -38,7 +38,7 @@
 \begin{itemize}
 \item 
 A set of macros to animate your presentation 
-(by Jun~Furuse and Didier~R{\'{e}}my).
+(by Jun~Furuse, Didier~R{\'{e}}my, Pierre Weis, and Roberto Di Cosmo).
  
 \item 
 A simple way to launch arbitrary demonstration and/or animation
@@ -69,29 +69,37 @@ Support for \verb+\includegraphics+ with native image formats
 
 This last command looks for a file named {\tt world} with extensions
 out of the ones provided by the directive
-\verb+\DeclareGraphicsExtensions+ in the \verb|advi-images| package
-(in the present case, it finds \verb+world.jpg+, for which a
+\verb+\DeclareGraphicsExtensions+ in the \verb|advi-images| package.
+In the present case, it finds \verb+world.jpg+, for which a
 bounding box specification must be available in the file
-\verb+world.bb+)\\
+\verb+world.bb+. For this image \verb+world.bb+ is:
+\begin{verbatim}
+%%BoundingBox: 15 208 580 633
+\end{verbatim}
+
+\medskip
 
 \includegraphics[width=0.1\textwidth]{../tex/caml.eps}
 \includegraphics[width=0.2\textwidth,height=0.09\textwidth]{../tex/caml.eps}
 \framebox{\includegraphics[width=0.1\textwidth]{world}}
 \end{quote}
 
+\newpage
+
 \subsection* {Other eye candies for presentation}
 
 \medskip\noindent
 \docdef \adviwait\docopt{seconds}
 \begin{quote}
-Wait for \docid{seconds} or without argument forever, that is, until the
-user requests to continue (or to change page).
+Wait for \docid{seconds} or wait for ever if no argument is
+provided. Wait means do nothing until until the user requests to
+continue (or to move to another page).
 \end{quote}
 
 \medskip\noindent
 \docdef \advirecord \doctt{[play]}\docarg{tag}\docarg{latex code}
 \begin{quote}
-The computes \docid{latex code} and record its DVI ouput under tag
+The computes \docid{latex code} and record its DVI output bound to the tag
 \docid{tag}. The DVI output is not displayed during recording, unless the
 option \doctt{play} is set.
 
@@ -105,7 +113,7 @@ Replay the DVI previously recorded as \docid{tag}.
 The optional argument changes the color to \docid{color} during replay. 
 \end{quote}
 
-\newpage 
+\newpage
 
 \subsection* {Eye candies (examples)}
 
@@ -115,7 +123,7 @@ The optional argument changes the color to \docid{color} during replay.
       \{\advirecord[play]{this}{Warning~to~the~casual~user}\}$
 
    \item then change the current text color and replay the tagged text:\\
-  $\tt{\backslash}play\{this\}$.
+  $\tt{\backslash}adviplay\{this\}$.
 \end{itemize}
 
 
@@ -177,7 +185,7 @@ This is convenient to add a demo into your presentation.
 \bigskip
 
 \noindent
-You launch a command using
+You launch a command use
 
 \verb+\adviembed[width=w,height=h]{command -geometry !g -use !p}+
 
@@ -241,11 +249,13 @@ their placements may not obey your geometry specifications.
 
 \begin{itemize}
  \item Xeyes using the macro command \verb|embed|:\\
-   \verb|\adviembed[width=2cm,height=2cm]{xeyes -bw 0 -shape -geometry !g}|\\
+   \verb|\adviembed[width=2cm,height=2cm]|\\
+   \verb|    {xeyes -bw 0 -shape -geometry !g}|\\
    \adviembed[width=2cm,height=2cm]{xeyes -bw 0 -shape -geometry !g}
 
  \item An Xterm running an interesting application:\\
-   \verb|\adviembed[width=10cm,height=5cm]{xterm -geometry 50x7+!x+!y -e ocaml}|\\
+   \verb|\adviembed[width=10cm,height=5cm]|\\
+   \verb|    {xterm -geometry 50x7+!x+!y -e ocaml}|\\
    \adviembed[width=10cm,height=4cm]{xterm -geometry 50x7+!x+!y -e ocaml}
 \end{itemize}
 
@@ -254,7 +264,8 @@ the presentation.
 \begin{itemize}
  \item You can add music to your presentation, if you have a music
   player available:\\
-  \verb|\adviembed[width=1mm,height=1mm]{mpg123 -q music.mp3}|
+  \verb|\adviembed[width=1mm,height=1mm]|\\
+  \verb|    {mpg123 -q music.mp3}|
 \end{itemize}
 
 \advirecord{play}
@@ -339,16 +350,19 @@ material, which works well with \verb"advi".
 Some reimplementation of \verb"\overlay" for \verb"advi" to work with 
 seminar overlays might still be possible...  
 
-\subsection* {Ignore mode}
+\subsection* {Printing your slides: the ignore mode}
 
-The package \verb"advi" can be loaded with the \verb"batch" option:
+The package \verb"advi" can be loaded with the \verb"ignore" option:
 
 \smallskip
 {\verb"\usepackage[ignore]{advi}"}
 \smallskip
 
+\noindent
 The effect is to switch off some \verb"advi" gadgets and to render some others 
-in Postscript, if possible. 
+in Postscript, if possible. This is useful to generate a DVI file that
+can be easily turned into Postscript to print a set of slides as an
+approximation of the show that {\ActiveDVI} plays.
 
 \newpage
 
@@ -356,19 +370,19 @@ in Postscript, if possible.
 
 \begin {itemize}
 
-\item (recursive) link to \hyperref{demo.dvi}{}{overlays}{\tt demo.dvi}
-produced by
+\item (Recursive) link to \hyperref{demo.dvi}{}{overlays}{\tt demo.dvi}
+is produced by
 
 \qquad\verb"\hyperref{demo.dvi}{}{overlays}{\tt demo.dvi}"
 
-A click opens file \verb"demo.dvi" with a new \verb"advi" and jumps to the
-link \verb"overlays" in that file, as if the command
+A click opens file \verb"demo.dvi" with a new \verb"advi" process and
+jumps to the link \verb"overlays" in that file, as if the command
 
 \qquad\verb"advi -html overlays demo.dvi"
 
 had been typed in a shell.
 
-\item the source file of this demo is \hyperref{demo.tex}{}{}{\tt
+\item The source file of this demo is \hyperref{demo.tex}{}{}{\tt
 demo.tex}. A link to it is produced by
 
 \qquad\verb"\hyperref{demo.tex}{}{}{\tt more demo.tex}"
@@ -382,9 +396,9 @@ had been typed in a shell.
 \item Currently, the file name should end with either \verb".dvi",
 \verb".txt", \verb".tex", \verb".htm", or \verb".html" extensions, but
 in the future this should use Mine man Mailcap to find the type of the
-file and the previewer for that file.
+file and the proper previewer for that file.
 
-\item Issue a warning if the extension is not recognized or the file
+\item A warning is emitted if the extension is not recognized or the file
 is non-existent:
 \hyperref{nonexistent.dvi}{}{}{\tt nonexistent.dvi}
 or
@@ -396,12 +410,12 @@ or
 
 \subsection* {Combination of replays and PS tricks}
 
-Replay can be used to hide or show text or to change the color of text. 
-However, postscript colors are hard-wired by {\TeX}, {\em i.e.} they are not
-interpreted in the current color context as font colors. 
-
-Replay can still be used to simulate replay of Postscript colors: instead, 
-two identical figures can be superposed. For instance, 
+Replay command can hide or show text or change the color of text. 
+However, Postscript colors are hard-wired by {\TeX}, {\em i.e.} they are not
+interpreted in the current color context as font colors are.
+\noindent
+Replay can still be used to simulate the replay of Postscript colors:
+it suffices to superpose two identical figures. For instance, 
 $$
 \psset {linestyle=none,fillstyle=solid}
 \rlap
@@ -417,15 +431,13 @@ will  be rendered by
 \end{verbatim}
 \begin {enumerate}
 
-\item
-Type space to change the text color. 
+\item Type space to change the text color. 
 \adviwait \textcolor{red}{\adviplay{taga}}
 \begin{verbatim}
     \adviwait \textcolor{red}{\adviplay{taga}}
 \end{verbatim}
 
-\item
-Type space to change the background.
+\item Type space to change the background.
 \adviwait\textcolor{red}{\adviplay{tagb}}
 \begin{verbatim}
     \adviwait\textcolor{red}{\adviplay{tagb}}
@@ -437,13 +449,13 @@ Type space to change the background.
 
 \subsection*{Active anchors}
 
-Active anchors are much alike html anchors, except that instead of
-jumping to a reference anchors (usually at another page), definitely, they 
-allow to play a previously recorded piece of dvi when the mouse is over the
-anchor region. The page is saved and reset to its normal shape when the mouse
-leaves the anchor region. 
+Active anchors are much alike HTML anchors, except that instead of
+jumping to a reference anchors (usually another page), they 
+replay a recorded piece of DVI when the mouse is over the
+anchor area. The page is saved and reset to its normal shape when the mouse
+leaves the anchor region. For instance, scratch those stamps with the
+mouse to see how much you win \verb":)"
 
-For instance, scratch those stamps with the mouse to see how much you win.
 $$
 \ovalnode [linestyle=none,fillstyle=solid,fillcolor=yellow]{A}
   {\advirecord {A}{\textbf {10000}}}
@@ -477,19 +489,21 @@ The effect of active anchors can also be
 \noindent
 Another form of
 \begin{superpose}
-\advirecord[play]{a1}{\advianchor{a2}{simple}}\\
+\advirecord[play]{a1}{\advianchor{a2}{ simple }}\\
 \advirecord{a2}{\adviplay[white]{a1}\colorbox{yellow}{ cool }}
 \end{superpose}
-simple annotations is the overriding of
+annotations is the overriding of
 \begin{superpose}
-\advianchor{7}{words}\\
-\advirecord{7}{\adviplay[white]{6}\colorbox{white}{{by text}}}\\
+\advianchor{7}{ words. }\\
+\advirecord{7}{\adviplay[white]{6}\colorbox{white}{{ text. }}}\\
 \end{superpose}
-or by little 
+
+\noindent
+You can also replace larger pieces of text by other
 \begin{superpose}
 \advirecord[play]{1}{pieces \advianchor{2}{of} text}\\
 \advirecord{2}{\colorbox{white}{\begin{tabular}{@{}l@{}}
-inner tabular\\ should be between\\ parentheses\end{tabular}}}\\
+inner tabulars\\ should be between\\ parentheses\end{tabular}}}\\
 \advirecord{3}{The \qquad End}
 \end{superpose}
 
@@ -500,8 +514,8 @@ inner tabular\\ should be between\\ parentheses\end{tabular}}}\\
 \noindent
 \adviannot[p=9em]{Active anchors}(1,1.5)
 {\centering Active anchors are even greater!}
-can also be used to annotate \adviannot[C,bg=green]{text}{text=t+e+x+t} as
-here, \adviannot{for instance}[linecolor=red](-1.5,1){for example}. 
+can also annotate text as \adviannot[C,bg=green]{here}{here=h+e+r+e},
+\adviannot{for instance}[linecolor=red](-1.5,1){for example}. 
 
 \medskip
 
@@ -514,7 +528,7 @@ These annotations have been typeset respectively as:
 \adviannot[p=9em]{Active anchors}(1,1.5)
    {\centering Active anchors are even greater!}
 
-\adviannot[C,bg=green]{text}{text=+t+e+x+t}
+\adviannot[C,bg=green]{here}{here=h+e+r+e}
 
 \adviannot[C]{for instance}[linecolor=red](-1.5,1){for example?}
 \end{verbatim}
@@ -538,22 +552,45 @@ the annotation macros.
 
 \subsection*{Superpose Package}
 
-This very small package allows the superosing of boxes, making the
-surrounding box so that it fits all included boxes. This is convenient
-when displayin each included box at different pauses.
+This very small package allows the superimposition of boxes, making the
+surrounding box large enough to fit all the included boxes. This is convenient
+when displaying each included box at different pauses.
 
-Movie...
+\noindent
+Kind of {\ActiveDVI} movie
 \advirecord{0}{\colorbox{white}
 {\begin{superpose}
-\advirecord{1}{Begin}\\
-\advirecord{2}{{\begin{tabular}{@{}l@{}}
-inner tabular\\ should be between\\ parentheses\end{tabular}}}\\
-\advirecord{3}{The End}
+\advirecord{1}{\textcolor{c2}{can be played}}\\
+\advirecord{15}{\textcolor{c1}{changing text at each space}}\\
+\advirecord{2}{\textcolor{c3}{you can use graphics}}\\
+\advirecord{3}{{\includegraphics[width=0.02\textwidth]{../tex/caml.eps}}}\\
+\advirecord{31}{{\includegraphics[width=0.03\textwidth]{../tex/caml.eps}}}\\
+\advirecord{32}{{\includegraphics[width=0.04\textwidth]{../tex/caml.eps}}}\\
+\advirecord{33}{{\includegraphics[width=0.08\textwidth]{../tex/caml.eps}}}\\
+\advirecord{34}{{\includegraphics[width=0.1\textwidth]{../tex/caml.eps}}}\\
+\advirecord{35}{{\includegraphics[width=0.02\textwidth]{../tex/caml.eps}\
+\includegraphics[width=0.03\textwidth]{../tex/caml.eps}\
+\includegraphics[width=0.04\textwidth]{../tex/caml.eps}\
+\includegraphics[width=0.08\textwidth]{../tex/caml.eps}\
+\includegraphics[width=0.1\textwidth]{../tex/caml.eps}}}\\
+\advirecord{36}{{\includegraphics[width=0.1\textwidth]{world}}}\\
+\advirecord{4}{{\begin{tabular}{@{}l@{}}
+Note that inner tabular\\ should be between\\ parentheses\end{tabular}}}\\
+\advirecord{5}{\textcolor{c4}{The End}}
 \end{superpose}}}
-end
+here.
 \adviplay{1}
+\adviwait\adviplay{0}\adviplay{15}
 \adviwait\adviplay{0}\adviplay{2}
 \adviwait\adviplay{0}\adviplay{3}
+\adviwait\adviplay{0}\adviplay{31}
+\adviwait\adviplay{0}\adviplay{32}
+\adviwait\adviplay{0}\adviplay{33}
+\adviwait\adviplay{0}\adviplay{34}
+\adviwait\adviplay{0}\adviplay{35}
+\adviwait\adviplay{0}\adviplay{36}
+\adviwait\adviplay{0}\adviplay{4}
+\adviwait\adviplay{0}\adviplay{5}
 
 \newpage
 

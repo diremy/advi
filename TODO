@@ -23,6 +23,7 @@ KNOWN BUGS:
    file contained vscale=100.0 hoffset=-228.0 voffset=-368.0
    hscale=100.0, instead of llx, lly, urx, ury).
  Fatal error: exception Failure("psfile: no bbox")
+ *PW Cache cleaning is bogous.
 
 DELAYED AFTER RELEASE:
 ======================
