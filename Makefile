@@ -19,7 +19,7 @@
 
 include Makefile.config
 
-VERSION=1.4.0
+VERSION=1.5.0
 
 COPTIONS = -warn-error A -g
 COPTOPTIONS = -warn-error A -unsafe -inline 9
