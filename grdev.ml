@@ -234,6 +234,7 @@ let full_screen_view () =
 (* The Background preferences                    *)
 type bkgd_prefs = {
   mutable bgcolor : color;
+  mutable bgcolorstart : color;
   mutable bgimg : string option;
   mutable bgratiopt : Drawimage.ratiopt;
   mutable bgwhitetransp : bool;
@@ -241,11 +242,13 @@ type bkgd_prefs = {
   mutable bgblend : Drawimage.blend;
   mutable bgviewport: viewport option;
   (* hook for sophisticated programmed graphics backgrounds *)
-  mutable bgfunction: (viewport -> unit) option;
+  mutable bgfunction:
+   (Graphics.color -> Graphics.color -> viewport -> unit) option;
 };;
 
 let default_bkgd_prefs c = {
     bgcolor = c;
+    bgcolorstart = Graphics.white;
     bgimg = None;
     bgratiopt = Drawimage.ScaleAuto;
     bgwhitetransp = false;
@@ -303,6 +306,7 @@ let default_bkgd_data () = default_bkgd_prefs (get_bgcolor ());;
 
 let blit_bkgd_data s d =
   d.bgcolor <- s.bgcolor;
+  d.bgcolorstart <- s.bgcolorstart;
   d.bgimg <- s.bgimg;
   d.bgratiopt <- s.bgratiopt;
   d.bgwhitetransp <- s.bgwhitetransp;
@@ -336,11 +340,16 @@ let draw_bkgd () =
   (* Background: color. *)
   bg_color := bkgd_data.bgcolor;
   Graphics.set_color !bg_color;
-  (* Fix me: why this test ? could have a white bg, no ? *)
-  (*  if !bg_color <> Graphics.white then *)
+  (* Fix me: why this test ? could have a white bg, no ?
+     Yes but then useless to draw the rectangle.
+     Mmm is it worth the burden to test ?
+   *)
+  if !bg_color <> Graphics.white then
   Graphics.fill_rect x y w h;
   (* Background: function. *)
-  lift (fun draw -> draw viewport) bkgd_data.bgfunction;
+  lift (fun bgfunction ->
+          bgfunction bkgd_data.bgcolorstart bkgd_data.bgcolor viewport)
+       bkgd_data.bgfunction;
   (* Background: image. *)
   let draw_bg file =
     Drawimage.f file bkgd_data.bgwhitetransp bkgd_data.bgalpha
@@ -352,15 +361,17 @@ let draw_bkgd () =
 
 type bgoption =
    | BgColor of color
+   | BgColorStart of color
    | BgImg of Misc.file_name
    | BgAlpha of Drawimage.alpha
    | BgBlend of Drawimage.blend
    | BgRatio of Drawimage.ratiopt
    | BgViewport of viewport option
-   | BgFun of (viewport -> unit) option;;
+   | BgFun of (Graphics.color -> Graphics.color -> viewport -> unit) option;;
 
 let set_bg_option = function
   | BgColor c -> bkgd_data.bgcolor <- c
+  | BgColorStart c -> bkgd_data.bgcolorstart <- c
   | BgImg file -> bkgd_data.bgimg <- Some file
   | BgAlpha a -> bkgd_data.bgalpha <- a
   | BgBlend b -> bkgd_data.bgblend <- b

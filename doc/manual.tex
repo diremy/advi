@@ -71,7 +71,12 @@ Reference manual\\
 
 \maketitle
 
+\ifhevea
+\renewenvironment{abstract}{\begin{quote}}{\end{quote}}
+\else
 \def \abstractname {}
+\fi
+
 \begin{abstract}
 {\bf\ActiveDVI} is a viewer for DVI files that also recognizes a new class of 
 \docdef\special's targeted to presentations via laptop computers:

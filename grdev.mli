@@ -147,13 +147,14 @@ type viewport = {
 
 type bkgd_prefs = {
   mutable bgcolor : color;
+  mutable bgcolorstart : color;
   mutable bgimg : Misc.file_name option;
   mutable bgratiopt : Drawimage.ratiopt;
   mutable bgwhitetransp : Drawimage.white_is_transparent;
   mutable bgalpha : Drawimage.alpha;
   mutable bgblend : Drawimage.blend;
   mutable bgviewport : viewport option;
-  mutable bgfunction : (viewport -> unit) option;
+  mutable bgfunction : (color -> color -> viewport -> unit) option;
 };;
 
 val blit_bkgd_data : bkgd_prefs -> bkgd_prefs -> unit;;
@@ -164,12 +165,13 @@ val get_playing : (unit -> int) ref;;
 
 type bgoption =
    | BgColor of color
+   | BgColorStart of color
    | BgImg of Misc.file_name
    | BgAlpha of Drawimage.alpha
    | BgBlend of Drawimage.blend
    | BgRatio of Drawimage.ratiopt
    | BgViewport of viewport option
-   | BgFun of (viewport -> unit) option
+   | BgFun of (color -> color -> viewport -> unit) option
 ;;
 
 val set_bg_options : bgoption list -> unit;;

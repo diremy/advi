@@ -181,7 +181,7 @@ Maybe you mean \@currenvir ing}}
 \newif \ifadvi@bgactive
 
 \def \advi@bg@do
- {\do \advi@bgcolor \do \advi@bgimage \do \advi@bgalpha \do \advi@bgblend \do \advi@bgfun}
+ {\do \advi@bgcolor \do \advi@bgimage \do \advi@bgalpha \do \advi@bgblend \do \advi@bgfun \do \advi@bgcolorstart}
 \def \advi@auto@ { fit=auto}
 \def \advi@bgreset
  {\def \do ##1{\expandafter \advi@global
@@ -228,6 +228,8 @@ Maybe you mean \@currenvir ing}}
 \definecolor{fgcolor}{named}{foreground}
 
 \define@key {advi@bg}{color}[]{\advi@setbgcolor{#1}}
+\define@key {advi@bg}{colorstart}[]%
+            {\advi@setbg{\advi@bgcolorstart}{colorstart}{#1}}
 \define@key {advi@bg}{fun}[]{\advi@setbg{\advi@bgfun}{fun}{#1}}
 \define@key {advi@bg}{image}[]{\advi@setbg{\advi@bgimage}{image}{#1}}
 \define@key {advi@bg}{alpha}[]{\advi@setbg{\advi@bgalpha}{alpha}{#1}}
@@ -245,7 +247,7 @@ Maybe you mean \@currenvir ing}}
 \def \advi@bgemit
   {\advi@special
      {setbg \advi@bgcolor \advi@bgimage \advi@bgalpha \advi@bgblend
-      \advi@bgfit \advi@bgfun
+      \advi@bgfit \advi@bgfun \advi@bgcolorstart
       }}
 \newif \ifadvi@bglocal
 
@@ -276,7 +278,7 @@ Maybe you mean \@currenvir ing}}
 \advi@export \advipause \advi@pause
 
 
-%%% Transparency and alpha blending
+%%% Transparency and alpha blending for EPS
 %%% To be revisited.
 
 \def\advi@epstransparent

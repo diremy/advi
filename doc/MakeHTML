@@ -76,7 +76,7 @@ $(AUTO):
 	for i in $(FILES); do \
 	  j=`basename $$i .htm`; \
 	  echo $$i: $(SRC)/$(PACKAGE)-$$j.htm >> $(AUTO); \
-	  echo "	chmod +w $$j.htm; " >> $(AUTO); \
+	  echo "	- chmod +w $$j.htm; " >> $(AUTO); \
 	  echo "	cp -p $(SRC)/$(PACKAGE)-$$j.htm $$j.htm" >> $(AUTO); \
 	  echo $(SRC)/$(PACKAGE)-$$j.htm: >> $(AUTO); \
 	  echo >> $(AUTO); \

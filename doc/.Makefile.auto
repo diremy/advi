@@ -1,35 +1,35 @@
 index.htm: ../doc_src/advi-index.htm
-	chmod +w index.htm; 
+	- chmod +w index.htm; 
 	cp -p ../doc_src/advi-index.htm index.htm
 ../doc_src/advi-index.htm:
 
 fra.htm: ../doc_src/advi-fra.htm
-	chmod +w fra.htm; 
+	- chmod +w fra.htm; 
 	cp -p ../doc_src/advi-fra.htm fra.htm
 ../doc_src/advi-fra.htm:
 
 eng.htm: ../doc_src/advi-eng.htm
-	chmod +w eng.htm; 
+	- chmod +w eng.htm; 
 	cp -p ../doc_src/advi-eng.htm eng.htm
 ../doc_src/advi-eng.htm:
 
 faq-fra.htm: ../doc_src/advi-faq-fra.htm
-	chmod +w faq-fra.htm; 
+	- chmod +w faq-fra.htm; 
 	cp -p ../doc_src/advi-faq-fra.htm faq-fra.htm
 ../doc_src/advi-faq-fra.htm:
 
 faq-eng.htm: ../doc_src/advi-faq-eng.htm
-	chmod +w faq-eng.htm; 
+	- chmod +w faq-eng.htm; 
 	cp -p ../doc_src/advi-faq-eng.htm faq-eng.htm
 ../doc_src/advi-faq-eng.htm:
 
 screen-shots-fra.htm: ../doc_src/advi-screen-shots-fra.htm
-	chmod +w screen-shots-fra.htm; 
+	- chmod +w screen-shots-fra.htm; 
 	cp -p ../doc_src/advi-screen-shots-fra.htm screen-shots-fra.htm
 ../doc_src/advi-screen-shots-fra.htm:
 
 screen-shots-eng.htm: ../doc_src/advi-screen-shots-eng.htm
-	chmod +w screen-shots-eng.htm; 
+	- chmod +w screen-shots-eng.htm; 
 	cp -p ../doc_src/advi-screen-shots-eng.htm screen-shots-eng.htm
 ../doc_src/advi-screen-shots-eng.htm:
 

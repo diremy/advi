@@ -980,6 +980,10 @@ let bgfuns_alist = [
   ("hgradient", Addons.hgradient);
   ("vgradient", Addons.vgradient);
   ("dgradient", Addons.dgradient);
+  ("d1gradient", Addons.d1gradient);
+  ("d2gradient", Addons.d2gradient);
+  ("cgradient", Addons.cgradient);
+  ("circgradient", Addons.circgradient);
 ];;
 
 let find_bgfun s =
@@ -987,8 +991,9 @@ let find_bgfun s =
 
 let bkgd_alist = [
   ("color", fun s st ->
-     let c = Dvicolor.parse_color_args (split_string (unquote s) 0)
-     in [Dev.BgColor c]);
+     let c = Dvicolor.parse_color_args (split_string (unquote s) 0) in
+     (*prerr_endline s;*)
+     [Dev.BgColor c]);
   ("image", fun s st ->
      [Dev.BgImg s]);
   ("reset", fun s st ->
@@ -1007,6 +1012,10 @@ let bkgd_alist = [
      let f =
        try List.assoc (unquote s) ratios_alist with _ -> Drawimage.ScaleAuto in
      [Dev.BgRatio f]);
+  ("colorstart", fun s st ->
+     let c = Dvicolor.parse_color_args (split_string (unquote s) 0) in
+     (*prerr_endline s;*)
+     [Dev.BgColorStart c]);
   ("fun", fun s st ->
      [Dev.BgFun (find_bgfun (unquote s))]);
 ];;

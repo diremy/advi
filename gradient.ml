@@ -45,8 +45,8 @@ type rectangle_gradient_mode =
    | Rect_Vertical of from_color * to_color
    | Rect_Diagonal1 of from_color * to_color
    | Rect_Diagonal2 of from_color * to_color
-   | Rect_Centered of x * y * from_color * to_color
-   | Rect_Circular of x * y * from_color * to_color
+   | Rect_Centered of from_color * to_color * x * y
+   | Rect_Circular of from_color * to_color * x * y
 ;;
 
 (* Scaling from c to c', by i steps over w steps.
@@ -176,7 +176,7 @@ let grad_rect_d2 c1 c2 x y w h =
   loop 0 (x + w - 1) y (x + w - 1) y;;
 
 (* Circular gradient into a rectangle *)
-let grad_rect_circular xc yc c1 c2 x y w h =
+let grad_rect_circular c1 c2 xc yc x y w h =
   let xmin, xmax = x, x + w
   and ymin, ymax = y, y + h in
   let scx = min (xc - xmin) (xmax - xc)
@@ -197,7 +197,7 @@ let grad_rect_circular xc yc c1 c2 x y w h =
 
 (* Centered gradient into a rectangle
    (means growing squares with center xc yc). *)
-let grad_rect_centered xc yc c1 c2 x y w h =
+let grad_rect_centered c1 c2 xc yc x y w h =
   let xmin, xmax = x, x + w
   and ymin, ymax = y, y + h in
   let scx = min (xc - xmin) (xmax - xc)
@@ -234,7 +234,7 @@ let grad_rect gm x y w h =
      grad_rect_d1 c1 c2 x y w h
   | Rect_Diagonal2 (c1, c2) ->
      grad_rect_d2 c1 c2 x y w h
-  | Rect_Centered (xc, yc, c1, c2) ->
-     grad_rect_centered xc yc c1 c2 x y w h
-  | Rect_Circular (xc, yc, c1, c2) ->
-     grad_rect_circular xc yc c1 c2 x y w h;;
+  | Rect_Centered (c1, c2, xc, yc) ->
+     grad_rect_centered c1 c2 xc yc x y w h
+  | Rect_Circular (c1, c2, xc, yc) ->
+     grad_rect_circular c1 c2 xc yc x y w h;;

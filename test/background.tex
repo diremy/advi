@@ -3,6 +3,7 @@
 % You need graphics package
 \usepackage{../doc/manual}
 \usepackage{color}
+\usepackage{xcolor}
 \usepackage{graphicx}
 \usepackage{advi-graphicx}
 \usepackage{alltt}
@@ -131,13 +132,68 @@ Here is the effect produced by the following command:
 
 \begin{quote}
   \begin{verbatim}
-      \advibg{color=green,fun="dgradient"} 
+      \advibg{color=green,fun="d1gradient"} 
    \end{verbatim}
 \end{quote}
-\advibg{color=green,fun="dgradient"} 
+\advibg{color=green,fun="d1gradient"} 
+
 
 \newpage
 
+Here is the effect produced by the following command:
+
+\begin{quote}
+  \begin{verbatim}
+      \advibg{color=green,fun="d2gradient"} 
+   \end{verbatim}
+\end{quote}
+\advibg{color=green,fun="d2gradient"} 
+
+\newpage
+
+Here is the effect produced by the following command:
+
+\begin{quote}
+  \begin{verbatim}
+      \advibg{color=green,fun="cgradient"} 
+   \end{verbatim}
+\end{quote}
+\advibg{color=green,fun="cgradient"} 
+
+\newpage
+
+Here is the effect produced by the following command:
+
+\begin{quote}
+  \begin{verbatim}
+      \advibg{color=green,fun="circgradient"} 
+   \end{verbatim}
+\end{quote}
+\advibg{color=green,fun="circgradient"} 
+
+\newpage
+
+Here is the effect produced by the following command:
+
+\begin{quote}
+  \begin{verbatim}
+  \advibg{color=green,fun="circgradient",colorstart="red"} 
+   \end{verbatim}
+\end{quote}
+\advibg{color=green,fun="circgradient",colorstart=red}
+
+\newpage
+
+Here is the effect produced by the following command:
+
+\begin{quote}
+  \begin{verbatim}
+  \advibg{color=cyan,fun="cgradient",colorstart="blue"} 
+   \end{verbatim}
+\end{quote}
+\advibg{color=green,fun="cgradient",colorstart=blue}
+
+\newpage
 
 \section{Setting the background image}
 
@@ -546,6 +602,31 @@ image\\
 \newpage
 
 \advibg{color=cyan,image="dojojismall.jpg",alpha=0.25}
+\verb|\advibg{color=cyan,image="dojojismall.jpg",alpha=0.25}|
+
+\section{Future work}
+
+  \begin{itemize}
+    \item background preferences are ``asynchronous'', in the sense
+that they can imply rendering modifications in a part of the page that
+has already been displayed; this is why we first scan a page, looking
+for background specials (example, a red background), and only after we
+render it (setting the background to red before everything else). By
+the way, this mechanism was already in place to handle PostScript
+headers, that also appear asynchronously.
+
+    \item is it worthwhile to consider the possibility of making a
+``synchronous'' variant? This would allow for example to change the
+background color after a pause. But at what price ?
+
+    \item anybody willing to add support for color gradients with
+function arguments and more fancy variants ?\\
+Done.
+  \end{itemize}
+
+\newpage
+
+\advibg{color=[named]{LemonChiffon},fun=circgradient,colorstart=red,image="dojojismall.jpg",alpha=0.25}
 \verb|\advibg{color=cyan,image="dojojismall.jpg",alpha=0.25}|
 
 \section{Future work}
