@@ -357,13 +357,14 @@ let copy_of_bkgd_data () =
   blit_bkgd_data bkgd_data c;
   c;;
 
-let draw_img file whitetrans alpha blend psbbox ratio (w,h) x0 y0 =
-     Drawimage.f
-      file
-      whitetrans
-      alpha
-      blend 
-      psbbox ratio (w, h) (x0,y0);;
+let draw_img file ratio whitetrans alpha blend psbbox (w,h) x0 y0 =
+  if not !opened then failwith "Grdev.fill_rect: no window";
+  Drawimage.f
+    file
+    whitetrans
+    alpha
+    blend 
+    psbbox ratio (w, h) (x0,y0);;
 
 let draw_bkgd_img (w, h) x0 y0 =
   match bkgd_data.bgimg with
@@ -371,10 +372,11 @@ let draw_bkgd_img (w, h) x0 y0 =
   | Some file ->
      draw_img
       file
+      bkgd_data.bgratio
       bkgd_data.bgwhitetrans
       bkgd_data.bgalpha
       (try Some (blend_func bkgd_data.bgblend) with _ -> None)
-      None bkgd_data.bgratio (w, h) x0 y0;;
+      None (w, h) x0 y0;;
 
 type bgoption =
    | BgColor of color

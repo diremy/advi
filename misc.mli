@@ -8,8 +8,10 @@ val has_suffix : string -> string -> bool
 exception Match
 val get_suffix : string -> string -> string
 val split_string : string -> (char -> bool) -> int -> string list
+val zap_to_char : char -> string -> string
 val catenate_sep : string -> string list -> string
-    
+val int_of_int_or_float_string : string -> int
+
 val parse_shell_command : string -> string array
 val fork_process : string -> int
 

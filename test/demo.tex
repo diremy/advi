@@ -4,6 +4,24 @@
 \usepackage{advi}
 \usepackage{advi-annot}
 \usepackage{demo}
+
+%
+% These declarations, properly conditioned to the real presence
+% of the graphic{s,x} package, should go into advi.sty
+% The current mechanism creates the same DVI commands for image
+% inclusion by Advi AND dvips or the like. 
+% Basically, this works by looking in Advi if there is an escape `
+% at the head of the file name, in which case it handles the file
+% direclty via camlimages.
+%
+% Notice though that the list of filters is not complete . . .
+% we need to provide a converter for .png,.gif etc.
+%
+\DeclareGraphicsExtensions{.jpg,.eps,.tif,.tiff}
+\DeclareGraphicsRule{.jpg}{eps}{.bb}{`jpeg2ps #1} % compact conversion!
+\DeclareGraphicsRule{.tif,.tiff}{eps}{.bb}{`tiffps #1} % from camlimages examples
+
+
 \begin{document}
 
 \newpage
@@ -53,12 +71,20 @@ A package to annotate text (using active anchors)
 
 \def\goon{\hbox{{\Large $\Rightarrow$}~Type~space~to~go~on}}
 
-\subsection* {EPS graphics including using Camlimages}
+\subsection* {EPS (and other!) graphics including using Camlimages}
 \begin{quote}
 \verb+\includegraphics[width=0.1\textwidth]{caml.eps}+\\
 \verb+\includegraphics[width=0.2\textwidth]{caml.eps}+\\
+\verb+\includegraphics[width=0.1\textwidth]{world}+\\
+
+This last command looks for a file named {\tt world} with extensions out 
+of the ones provided by the directive \verb+\DeclareGraphicsExtensions+
+in the preamble (in the present case, it finds \verb+world.jpg+, for which the
+bounding box is made available in \verb+world.bb+)\\
+
 \includegraphics[width=0.1\textwidth]{../tex/caml.eps}
 \includegraphics[width=0.2\textwidth,height=0.09\textwidth]{../tex/caml.eps}
+\framebox{\includegraphics[width=0.1\textwidth]{world}}
 \end{quote}
 
 \subsection* {Other eye candies for presentation}

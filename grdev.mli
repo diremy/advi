@@ -105,11 +105,12 @@ val sleep : float -> bool;; (* true= interrupted, false= fully performed *)
 
 val draw_img :
   string ->
+  Drawimage.ratiopts ->
   bool ->
   float ->
   (int -> int -> int) option ->
   (int * int * int * int) option ->
-  Drawimage.ratiopts -> int * int -> int -> int -> unit                                                                                  
+   int * int -> int -> int -> unit                                                                                  
 
 (* Background information *)
 

@@ -60,9 +60,21 @@ let rec split_string s p start =
     String.sub s i0 (i1 - i0) :: split_string s p i1
   end;;
 
+let zap_to_char c s =
+  let len = String.length s
+  and i = ref 0 in
+  while !i < len && s.[!i] <> c do incr i done ;
+  let i0 = !i+1 in
+  if i0 >= len then "" else String.sub s i0 (len - i0)
+;;
+
 let catenate_sep sep = function 
   | [] -> ""
   | x :: l -> List.fold_left (fun s s' -> s ^ sep ^ s') x l;;
+
+let int_of_int_or_float_string s =
+    try int_of_string s
+    with _ -> truncate (float_of_string s);;
 
 (* Unix command line parser *)
 let parse_shell_command str =

@@ -452,10 +452,10 @@ let psfile_special st s =
   (* bbox *)
   let llx, lly, urx, ury =
     try
-      let llx = int_of_string (List.assoc "llx" records)
-      and lly = int_of_string (List.assoc "lly" records)
-      and urx = int_of_string (List.assoc "urx" records)
-      and ury = int_of_string (List.assoc "ury" records) in
+      let llx = int_of_int_or_float_string (List.assoc "llx" records)
+      and lly = int_of_int_or_float_string (List.assoc "lly" records)
+      and urx = int_of_int_or_float_string (List.assoc "urx" records)
+      and ury = int_of_int_or_float_string (List.assoc "ury" records) in
       (* prerr_endline
          ("BBOX=" ^ Printf.sprintf "%d %d %d %d" llx lly urx ury); *)
       llx, lly, urx, ury
@@ -1036,7 +1036,11 @@ let special st s =
       let file, bbox, size = psfile_special st s in
       let x = st.x_origin + int_of_float (st.conv *. float st.h)
       and y = st.y_origin + int_of_float (st.conv *. float st.v) in
-      if not (is_hidden ()) then Dev.draw_ps file bbox size x y
+      if not (is_hidden ()) then 
+        (if (has_prefix "`" file)
+        then Dev.draw_img (zap_to_char ' ' file) Drawimage.ScaleAuto false 1.0 None (Some bbox)
+        else Dev.draw_ps file bbox)
+          size x y
     end else
   if has_prefix "advi: " s then begin
     if has_prefix "advi: alpha" s then alpha_special st s else
