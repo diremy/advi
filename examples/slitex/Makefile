@@ -26,11 +26,15 @@ SUBDIRS=advi caml simplistic skin_detection
 
 all:
 	for i in $(SUBDIRS); do \
-	  cd $$i; $(MAKE) all; cd ..; \
+	  if test -d $$i; then \
+	    cd $$i; $(MAKE) all; cd ..; \
+	  fi; \
 	done
 
 clean:
 	$(RM) a.out *.aux *.log *.dvi *~ 
 	for i in $(SUBDIRS); do \
-	  cd $$i; $(MAKE) clean; cd ..; \
+	  if test -d $$i; then \
+	    cd $$i; $(MAKE) clean; cd ..; \
+	  fi; \
 	done

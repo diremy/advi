@@ -38,3 +38,7 @@ mandir = @mandir@
 includedir = @includedir@
 
 ADVI_LOC=@ADVI_LOC@
+
+HAVE_HEVEA=@HAVE_HEVEA@
+PATH_HEVEA=@PATH_HEVEA@
+

@@ -17,11 +17,13 @@
 
 # $Id$
 
+include ../Makefile.config
+
 # See also file MakeHTML to recompile HTML files for the Web site.
 
 LATEX=TEXINPUTS=.:../tex:/usr/lib/hevea:/usr/local/lib/hevea: latex
 DVIPS=TEXPSHEADERS=.:../tex: dvips
-HEVEA=hevea -entities -I ../tex
+HEVEA=$(PATH_HEVEA) -entities -I ../tex
 IMAGEN=imagen
 PDFIMAGEN=pdfimagen
 DVIPDFM=dvipdfm
@@ -30,7 +32,7 @@ all: manual.html manual.dvi manual.ps manual.pdf \
     splash.dvi splash.ps \
     scratch_write_splash.dvi scratch_write_splash.ps \
     scratch_draw_splash.dvi scratch_draw_splash.ps \
-    mathmode.dvi manual.html
+    mathmode.dvi
 
 clean: 
 	rm -f *.aux *.log manual.html *.dvi *.pdf *.pdfm *.ps *.ima *.out *.toc
@@ -49,7 +51,12 @@ scratch_write_splash.dvi: scratch_write_splash_contents.tex
 scratch_draw_splash.dvi: scratch_draw_splash_contents.tex
 
 manual.dvi: manual.sty
+
+ifeq ($(HAVE_HEVEA),true)
 manual.html: manual.tex manual.sty macros.hva 
+else
+manual.html:
+endif
 
 .SUFFIXES: .tex .dvi .advi .ps .pdf .pdfm .html .ima
 

@@ -191,6 +191,26 @@ fi
 
 WITH_X="$X_LIBS $X_PRE_LIBS $XINE_LIBS -lX11 $X_EXTRA_LIBS"
 
+dnl Checking hevea:
+
+PATH_HEVEA="nope"
+AC_ARG_WITH(hevea, [  --with-hevea=path          specify hevea path],
+  if test "$withval" != "no" ; then  
+	PATH_HEVEA=$withval
+  else
+	PATH_HEVEA="nope"
+  fi)
+
+if test "X$PATH_HEVEA" = "Xnope"; then
+  AC_PATH_PROG(PATH_HEVEA, hevea, "nope") 
+fi
+
+if test "$PATH_HEVEA" = "nope"; then
+  HAVE_HEVEA=false
+else
+  HAVE_HEVEA=true
+fi
+
 dnl Resources location
 ADVI_LOC=`pwd`
 
@@ -214,6 +234,8 @@ AC_SUBST(LABLTKDIR)
 AC_SUBST(LABLTKLIB)
 AC_SUBST(INSTALLTARGET)
 AC_SUBST(HAVE_XINERAMA)
+AC_SUBST(PATH_HEVEA)
+AC_SUBST(HAVE_HEVEA)
 
 dnl BUILD OUR OWN LIBDIR
 myprefix=$prefix
@@ -241,4 +263,5 @@ echo "Camlimages:  $HAVE_CAMLIMAGES"
 echo "LablTk:      $HAVE_LABLTK"
 echo "GS:          $GS_UPTO_DATE version $GS_VERSION at $PATH_GS"
 echo "Resources:   $ADVI_LOC/"
+echo "Hevea:       $PATH_HEVEA"
 echo "------------------------------------------------------------------------"
