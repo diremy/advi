@@ -6,21 +6,21 @@ install:
 	 if test ! -f Makefile.config; then \
 	   ./configure; \
 	 fi)
-	(cd $(CAMLIMAGES); make all opt install) 
+	(cd $(CAMLIMAGES); $(MAKE) all opt install) 
 
 	(cd $(ADVI); \
 	 if test ! -f Makefile.config; then \
 	   ./configure; \
 	 fi)
-	(cd $(ADVI); make all install) 
+	(cd $(ADVI); $(MAKE) all install) 
 
 reconfigure: clean
 	rm -f $(CAMLTK)/Makefile.config
 	rm -f $(CAMLIMAGES)/Makefile.config
 	rm -f $(ADVI)/Makefile.config
-	make install
+	$(MAKE) install
 
 clean:
-	(cd $(CAMLTK); make clean)
-	(cd $(CAMLIMAGES); make clean)
-	(cd $(ADVI); make clean)
+	(cd $(CAMLTK); $(MAKE) clean)
+	(cd $(CAMLIMAGES); $(MAKE) clean)
+	(cd $(ADVI); $(MAKE) clean)
