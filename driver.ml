@@ -1064,12 +1064,8 @@ module Make(Dev : DEVICE) = struct
         if not !Misc.dops then PS false
         else 
           begin match page.Dvi.status with
-          | Dvi.Unknown ->
-              prerr_endline "Unknown";
-              Unknown
-          | Dvi.PS b ->
-              prerr_endline ("PS "^(if b then "true" else "false"));
-              PS b
+          | Dvi.Unknown -> Unknown
+          | Dvi.PS b -> PS b
           end;
         headers = [];
         html = None;
@@ -1149,19 +1145,9 @@ module Make(Dev : DEVICE) = struct
         if not !Misc.dops then PS false
         else 
           begin match page.Dvi.status with
-          | Dvi.Unknown ->
-              prerr_endline "Unknown";
-              Scanning false
-          | Dvi.PS b ->
-              prerr_endline ("PS "^(if b then "true" else "false"));
-              PS b
-          end;
-(*
-          begin match page.Dvi.status with
           | Dvi.Unknown -> Scanning false
           | Dvi.PS b -> PS b
           end;
-*)
         headers = [];
         html = None;
         draw_html = [];

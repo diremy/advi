@@ -30,11 +30,13 @@ let geometry = ref "864x864" ;;
 
 let set_dim r s =
   r := Dimension.dimen_of_string s ;;
+let set_geom g =
+  View.set_autoresize false; geometry := g;;
 
 let spec_list = [
-  ("-geometry", Arg.String ((:=) geometry),
+  ("-geometry", Arg.String set_geom,
    "GEOM\tSets the (maximum) geometry GEOM") ;
-  ("-g", Arg.String ((:=) geometry),
+  ("-g", Arg.String set_geom,
    "GEOM\tSame as -geometry GEOM") ;
   ("-crop", Arg.Set crop_flag,
    "\tCrop the window to the best size (default)") ;

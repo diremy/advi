@@ -38,7 +38,7 @@ let dimx = 100
 and dimy = 100
 
 (* Empty set *)
-let empty_set p_width p_height =
+let empty_set ~pagewidth:p_width ~pageheight:p_height =
   let matrix = Array.create_matrix dimx dimy [] in
   { sym_width = 1 + p_width / dimx ;
     sym_height = 1 + p_height / dimy ;

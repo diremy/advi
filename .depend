@@ -1,10 +1,12 @@
 devfont.cmi: glyph.cmi table.cmi 
-driver.cmi: dvi.cmi glyph.cmi 
+driver.cmi: dvi.cmi glyph.cmi symbol.cmi 
 dviview.cmi: dimension.cmi glyph.cmi 
 glyph.cmi: font.cmi 
 grdev.cmi: glyph.cmi 
 misc.cmo: config.cmo misc.cmi 
 misc.cmx: config.cmx misc.cmi 
+symbol.cmo: misc.cmi symbol.cmi 
+symbol.cmx: misc.cmx symbol.cmi 
 search.cmo: config.cmo search.cmi 
 search.cmx: config.cmx search.cmi 
 graphicsY11.cmo: graphicsY11.cmi 
@@ -28,17 +30,17 @@ units.cmx: units.cmi
 dimension.cmo: units.cmi dimension.cmi 
 dimension.cmx: units.cmx dimension.cmi 
 driver.cmo: devfont.cmi dimension.cmi dvi.cmi glyph.cmi misc.cmi search.cmi \
-    table.cmi units.cmi driver.cmi 
+    symbol.cmi table.cmi units.cmi driver.cmi 
 driver.cmx: devfont.cmx dimension.cmx dvi.cmx glyph.cmx misc.cmx search.cmx \
-    table.cmx units.cmx driver.cmi 
+    symbol.cmx table.cmx units.cmx driver.cmi 
 gs.cmo: graphicsY11.cmi misc.cmi search.cmi gs.cmi 
 gs.cmx: graphicsY11.cmx misc.cmx search.cmx gs.cmi 
 grdev.cmo: drawps.cmi glyph.cmi graphicsY11.cmi gs.cmi misc.cmi grdev.cmi 
 grdev.cmx: drawps.cmx glyph.cmx graphicsY11.cmx gs.cmx misc.cmx grdev.cmi 
 dviview.cmo: config.cmo dimension.cmi driver.cmi dvi.cmi glyph.cmi misc.cmi \
-    dviview.cmi 
+    symbol.cmi dviview.cmi 
 dviview.cmx: config.cmx dimension.cmx driver.cmx dvi.cmx glyph.cmx misc.cmx \
-    dviview.cmi 
+    symbol.cmx dviview.cmi 
 main.cmo: config.cmo dimension.cmi dviview.cmi grdev.cmi gs.cmi misc.cmi 
 main.cmx: config.cmx dimension.cmx dviview.cmx grdev.cmx gs.cmx misc.cmx 
 grY11.o: grY11.c libgraph.h

@@ -51,7 +51,13 @@ let _ =
     (Arg.Float set_scale)
     "REAL\tScale step for '<' and '>' (default sqrt(sqrt(2.0)))"
 ;;
-    
+
+let autoresize = ref true;;
+let _ = Misc.set_option
+    "-noautoresize"
+    (Arg.Clear autoresize)
+    "\tPrevents scaling from resizing the window (done if geometry is provided)"
+;;
 
 (****************)
 (*  Signatures  *)
@@ -138,6 +144,7 @@ end ;;
 
 module type DVIVIEW = sig
   open Dimension
+  val set_autoresize : bool -> unit
   val set_geometry : string -> unit
   val set_crop : bool -> unit
   val set_hmargin : dimen -> unit
@@ -183,17 +190,6 @@ module Make(Dev : DEVICE) = struct
       mutable vmargin : dimen
     }
         
-  let attr =
-    { geom =
-      { width = 0 ;
-	height = 0 ;
-	xoffset = No_offset ;
-	yoffset = No_offset } ;
-      crop = false ;
-      hmargin = Px 0 ;
-      vmargin = Px 0
-    }
-      
   let string_of_geometry geom =
     let w = geom.width
     and h = geom.height
@@ -248,6 +244,7 @@ module Make(Dev : DEVICE) = struct
   let is_digit c = (c >= '0' && c <= '9')
       
   let parse_geometry str =
+    try
     let len = String.length str
     and i = ref 0 in
     let parse_int () =
@@ -281,13 +278,26 @@ module Make(Dev : DEVICE) = struct
     let xoffset = parse_offset () in
     let yoffset = parse_offset () in
     { width = width; height = height; xoffset = xoffset; yoffset = yoffset }
+    with Failure _ -> invalid_arg "parse_geometry"
       
-  let set_geometry str =
-    try attr.geom <- (parse_geometry str)
-    with Failure _ -> invalid_arg "set_geometry"
-        
   (*** Setting other parameters ***)
         
+  let attr =
+    { geom = 
+      { width = 0;
+        height = 0;
+        xoffset = No_offset;
+        yoffset = No_offset;
+      };
+      crop = false ;
+      hmargin = Px 0 ;
+      vmargin = Px 0
+    }
+
+  let set_autoresize b = autoresize := b
+  let set_geometry geom =
+    attr.geom <- parse_geometry geom
+
   let set_crop b =
     attr.crop <- b
         
@@ -296,6 +306,9 @@ module Make(Dev : DEVICE) = struct
         
   let set_vmargin d =
     attr.vmargin <- normalize d
+
+      
+
         
   (*** Initialization ***)
         
@@ -415,8 +428,9 @@ module Make(Dev : DEVICE) = struct
         st.orig_x <- orig_x; 
         st.orig_y <- orig_y; 
       end;
-      st.dvi_width <- int_of_float (st.base_dpi *. w_in *. st.ratio);
-      st.dvi_height <- int_of_float (st.base_dpi *. h_in *. st.ratio)
+    st.dvi_width <- int_of_float (st.base_dpi *. w_in *. st.ratio);
+    st.dvi_height <- int_of_float (st.base_dpi *. h_in *. st.ratio)
+    
       
   let goto_next_pause st f =
     try 
@@ -702,17 +716,6 @@ module Make(Dev : DEVICE) = struct
       cont (* return the current cont. *)
     else goto_page st cont (st.page_no + 1) 
         
-  let scale_by st factor =
-    let new_ratio = factor *. st.ratio in
-    if new_ratio >= 0.1 && new_ratio < 10.0 then begin
-      st.ratio <- new_ratio ;
-      let (cx, cy) = (st.size_x/2, st.size_y/2) in
-      st.orig_x <- int_of_float (float (st.orig_x - cx) *. factor) + cx ;
-      st.orig_y <- int_of_float (float (st.orig_y - cy) *. factor) + cy ;
-      update_dvi_size false st ;
-      redraw st
-    end else None
-        
   let resize st x y =
     attr.geom <-
       { width = x;
@@ -722,7 +725,31 @@ module Make(Dev : DEVICE) = struct
       };
     update_dvi_size true st;
     redraw st
+
+  let scale_by st factor =
+    if !autoresize then
+      begin
+        let scale x = int_of_float (float x *. factor) in
+        attr.geom.width <- scale attr.geom.width;
+        attr.geom.height <- scale attr.geom.height;
+        Dev.close_dev();
+        Dev.open_dev (Printf.sprintf " " ^ string_of_geometry attr.geom);
+      end
+    else
+      begin
+        let new_ratio = factor *. st.ratio in
+        if new_ratio >= 0.1 && new_ratio < 10.0 then
+          begin
+            st.ratio <- new_ratio ;
+            let (cx, cy) = (st.size_x/2, st.size_y/2) in
+            st.orig_x <- int_of_float (float (st.orig_x - cx) *. factor) + cx ;
+            st.orig_y <- int_of_float (float (st.orig_y - cy) *. factor) + cy ;
+          end;
+      end;
+    update_dvi_size true st;
+    redraw st
       
+
   let nomargin st =
     attr.hmargin <- Px 0; attr.vmargin <- Px 0; 
     update_dvi_size true st;
