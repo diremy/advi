@@ -1,0 +1,68 @@
+
+
+                       Active-DVI
+
+
+Active-DVI is a presenter and previewer for texts or slides written in LaTeX,
+hence the presentation tool of choice for the discriminating hacker.
+
+Version 1.6.0 is now available. As the release number shows, this is a
+major improvement w.r.t version 1.2.0 of Active-DVI.
+
+This new version has been developed by Jun Furuse, Didier Rémy and
+Pierre Weis with also contributions by Roberto Di Cosmo.
+
+In addition to the regular features of the Active-DVI previewer:
+
+   * Encapsulated Postscript File inclusion
+     (using the graphics LaTeX package)
+
+   * Some effects for presentation (pause, delay, text color change) 
+
+   * Embedded applications
+
+this release introduces a lot of new features
+
+   * Improved API for embedded applications.
+
+   * Support for X colors via an additional xwindows-colors.sty LaTeX package.
+
+   * Thumbnails to see the entire presentation at a glance (press T to
+     build the thumbnails, then t to toggle from thumbnails to your
+     presentation).
+
+   * Hyper references can now be made invisible.
+
+   * Enhanced background possibilities.
+
+   * A laser pointer.
+
+   * Support for ``scripting'' from within the LaTeX source file via
+     key bindings events generation.
+
+   * Programmable save-slide feature.
+
+   * An additional advi-slides.sty package for the impatient and/or
+     the beginner facilitates easy presentations. (Comments on this
+     new package warmly welcome.)
+
+   * Additional examples, including simple ones for the slitex LaTeX package.
+
+   * An improved manual.
+
+Play advi on the demonstration presentation demo.dvi that is in the test
+directory of the distribution. Look at source code of various talks in
+the directory ``examples''.
+
+The source code, RPM packages, and information are available at
+
+    http://pauillac.inria.fr/activedvi/
+
+Contributions and comments are warmly welcome.
+
+Mailing list advi-list-request@pauillac.inria.fr
+Bug reports to advi-bugs@pauillac.inria.fr
+
+--
+For the Active-DVI development team, 16th Jul 2004
+Pierre Weis (Pierre.Weis@inria.fr)
