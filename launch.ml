@@ -39,9 +39,10 @@ let unsafe =
   Options.flag false "-unsafe"
     "\tUnsafer mode: allow all external applications to be launched";;
 
-let safe_commands =
-  Sys.argv.(0) ::
+let safe_commands =  [  ] 
+(* unsafe: il faudrait le chemin absolu.
     [ "animate"; "display"; "xeyes"; "mpg123"; "advi"; "netscape"; ]
+*)
 ;;
 
 let paranoid =
