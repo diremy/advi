@@ -52,3 +52,6 @@ val save_page_number : int -> unit;;
  (* [save_page_number n] saves the page number [n] to file
     [cache_dir ^ "/advi_page_number". *)
 
+val set_dvi_filename : string -> unit;;
+val get_dvi_filename : unit -> Misc.file_name;;
+
