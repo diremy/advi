@@ -359,6 +359,9 @@ let set_rule st a b =
 
 (*** Specials ***)
 
+let ill_formed_special s =
+  Misc.warning (Printf.sprintf "Ill formed special <<%s>>" s);;
+
 let line_special st s =
   match split_string s 0 with
   | key :: line :: rest ->
@@ -366,11 +369,9 @@ let line_special st s =
         let l = int_of_string line in
         let f = match rest with file :: _ -> Some file | _ -> None in
         add_line st (l, f)
-      with Failure _ ->
-        Misc.warning
-          (Printf.sprintf "Ill formed special <<%s>>" s)
+      with Failure _ -> ill_formed_special s
       end
-  | _ -> Misc.warning "Ill formed line: special";;
+  | _ -> ill_formed_special s;;
 
 let color_special st s =
   match split_string s 0 with
@@ -385,7 +386,7 @@ let alpha_special st s =
   | ["advi:"; "alpha"; "push"; arg] ->
       alpha_push st
         (try float_of_string arg
-        with _ -> raise (Failure "advi: invalid alpha"))
+         with _ -> raise (Failure "advi: invalid alpha"))
   | ["advi:"; "alpha"; "pop"] ->
       alpha_pop st
   | _ -> ();;
@@ -433,8 +434,7 @@ let psfile_special st s =
   let records = get_records s in
   let file =
     try unquote (List.assoc "psfile" records)
-    with Not_found -> raise (Failure "psfile: invalid special")
-  in
+    with Not_found -> raise (Failure "psfile: invalid special") in
   (* prerr_endline ("PSFILE=" ^ file); *)
   (* bbox *)
   let llx, lly, urx, ury =
@@ -447,8 +447,7 @@ let psfile_special st s =
          ("BBOX=" ^ Printf.sprintf "%d %d %d %d" llx lly urx ury); *)
       llx, lly, urx, ury
     with
-    | _ -> raise (Failure "psfile: no bbox")
-  in
+    | _ -> raise (Failure "psfile: no bbox") in
   let width, height = (* return Big Points *)
     let w = try int_of_string (List.assoc "rwi" records) with _ -> 0
     and h = try int_of_string (List.assoc "rhi" records) with _ -> 0 in
