@@ -180,6 +180,6 @@ rpm:
 	if test "X$$rpmdir" = "X"; then \
 		echo "cannot create rpm"; exit 2; fi; \
 	cp $$rpmdir/SRPMS/advi-$(VERSION)-1.src.rpm \
-	   $$rpmdir/RPMS/*/advi-$(VERSION)-1.*.rpm $(FTPDIR)
+	   $$rpmdir/RPMS/*/advi-$(VERSION)-1.*.rpm $(FTPSITEDIR)
 
 include .depend
