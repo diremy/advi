@@ -338,7 +338,7 @@ let goto_next_pause n st =
   in
   aux n st;
   Grdev.synchronize();
-  Grdev.set_busy (if st.cont = None then Grdev.Free else Grdev.Pause);;
+  Busy.set (if st.cont = None then Busy.Free else Busy.Pause);;
 
 let draw_bounding_box st =
 Misc.warning "Draw_bounding box";
@@ -429,7 +429,7 @@ let move_within_margins_x st movex =
 let redraw ?trans st =
   (* draws until the current pause_number or page end *)
   (* the pauses and waits appears before are ignored *)
-  Grdev.set_busy Grdev.Busy;
+  Busy.set Busy.Busy;
   st.cont <- None;
   st.aborted <- false;
   begin
@@ -463,7 +463,7 @@ let redraw ?trans st =
     | Grdev.Stop -> st.aborted <- true
   end;
   Grdev.synchronize ();
-  Grdev.set_busy (if st.cont = None then Grdev.Free else Grdev.Pause);
+  Busy.set (if st.cont = None then Busy.Free else Busy.Pause);
 Misc.debug_stop "Page has been drawn\n";
 ;;
 

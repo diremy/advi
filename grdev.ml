@@ -22,18 +22,6 @@ let ignore_background =
     "--ignore_background"
     "\tIgnore background for antialiasing";;
 
-let show_busy =
-    Options.flag true
-    "-nowatch"
-    "\tDon't display a watch when busy";;
-
-let busy_delay = ref 0.5;;
-
-Options.add
-  "-watch"
-  (Arg.Float (fun x -> busy_delay := x))
-  "FLOAT\tDelay before the watch cursor appears (default 0.5s)";;
-
 type color = Graphics.color;;
 let href_frame = 0x00ff00;;
 let advi_frame = 0xaaaaff;;
@@ -70,54 +58,6 @@ let flush_last () = if !last_is_dvi then flush_dvi () else flush_ps ();;
 
 let sync b =
   if !last_is_dvi <> b then begin flush_last (); last_is_dvi := b end;;
-
-let control_cursor = GraphicsY11.Cursor_left_ptr;;
-let move_cursor = GraphicsY11.Cursor_fleur;;
-let select_cursor = GraphicsY11.Cursor_xterm;;
-let free_cursor = ref control_cursor;;
-
-type busy = Free | Busy | Pause | Disk;;
-
-let busy_timeout = ref 0.;;
-
-let last_cursor = ref control_cursor;;
-
-let busy_set_cursor cursor =
-  busy_timeout := 0.;
-  last_cursor := cursor;
-  GraphicsY11.set_cursor cursor;;
-
-let reset_cursor () = GraphicsY11.set_cursor !last_cursor;;
-
-(* To be called before system calls that make take a long time *)
-let busy_timeout = ref None;;
-let busy_start () =
-  try
-    busy_timeout :=
-      Some (Timeout.add !busy_delay
-              (fun () -> busy_set_cursor GraphicsY11.Cursor_watch))
-  with
-  | _ -> ();;
-
-let busy_end () =
-  match !busy_timeout with
-  | Some timeout ->
-      begin try Timeout.remove timeout with Not_found -> () end
-  | None -> ();;
-
-let set_busy sw =
-  if !show_busy then
-    match sw with
-    | Pause ->
-        busy_end ();
-        busy_set_cursor GraphicsY11.Cursor_right_side
-    | Free ->
-        busy_end ();
-        busy_set_cursor !free_cursor
-    | Disk ->
-        busy_set_cursor GraphicsY11.Cursor_exchange
-    | Busy ->
-        busy_start ();;
 
 let title = ref "Advi";;
 let set_title s = title := s;;
@@ -650,6 +590,9 @@ module A : ACTIVE =
 
   end;;
 
+(* *)
+let editing = ref false;;
+
 module H =
   struct
     type mode = Over | Click_down
@@ -758,7 +701,8 @@ module H =
           List.iter
             (function ima, act -> Graphics.draw_image ima act.A.x act.A.y) l;
           Graphics.draw_image ima act.A.x act.A.y;
-          GraphicsY11.set_cursor !free_cursor;
+          Busy.set
+            (if !editing then Busy.Selection else Busy.Free);
           GraphicsY11.display_mode false
       | Screen (ima, act, all_anchors) ->
           GraphicsY11.display_mode true;
@@ -767,7 +711,8 @@ module H =
           (* long delay to be safe *)
           ignore (sleep_watch false false 0.1);
           Graphics.draw_image ima 0 0;
-          GraphicsY11.set_cursor !free_cursor;
+          Busy.set
+            (if !editing then Busy.Selection else Busy.Free);
           GraphicsY11.flush ();
           GraphicsY11.display_mode false
       | Nil -> ()
@@ -845,10 +790,10 @@ module E =
 
     let figures : figure list ref = ref []
     let screen = ref None
-    let editing = ref false
-    let switch_edit_mode() =
+    let switch_edit_mode () =
       editing := not !editing;
-      free_cursor := (if !editing then select_cursor else control_cursor)
+      Busy.set
+       (if !editing then Busy.Selection else Busy.Free)
           
     let clear() = figures := []; screen := None
         (*
@@ -1100,11 +1045,12 @@ let wait_select_rectangle x y =
     | x -> x in
   set_color !default_fgcolor;
   GraphicsY11.display_mode true;
-  GraphicsY11.set_cursor select_cursor;
+  Busy.set Busy.Selection;
   let restore () =
     GraphicsY11.display_mode false;
     set_color !color;
-    GraphicsY11.set_cursor !free_cursor in
+    Busy.set
+      (if !editing then Busy.Selection else Busy.Free) in
   try
     let e = select 0 0 in
     restore ();
@@ -1142,12 +1088,13 @@ let wait_select_button_up m x y =
   GraphicsY11.synchronize ();
   Graphics.remember_mode false;
   GraphicsY11.display_mode true;
-  GraphicsY11.set_cursor select_cursor;
+  Busy.set Busy.Selection;
   let restore () =
     Graphics.remember_mode true;
     GraphicsY11.display_mode false;
     set_color color;
-    GraphicsY11.set_cursor !free_cursor in
+    Busy.set
+      (if !editing then Busy.Selection else Busy.Free) in
   try
     let e =
       if m land GraphicsY11.button2 = 0 then
@@ -1168,16 +1115,16 @@ let wait_select_button_up m x y =
       | Not_found -> Final Nil
       | _ -> raise exn;;
 
-let move rect dx dy = { rect with x = rect.x + dx; y = rect.y + dy }
-let move_x rect dx dy = { rect with x = rect.x + dx }
-let move_y rect dx dy = { rect with y = rect.y + dy }
-let resize rect dx dy = { rect with w = rect.w + dx; h = rect.h + dy }
-let resize_x rect dx dy = { rect with w = rect.w + dx }
-let resize_y rect dx dy = { rect with h = rect.h + dy }
+let move rect dx dy = { rect with x = rect.x + dx; y = rect.y + dy };;
+let move_x rect dx dy = { rect with x = rect.x + dx };;
+let move_y rect dx dy = { rect with y = rect.y + dy };;
+let resize rect dx dy = { rect with w = rect.w + dx; h = rect.h + dy };;
+let resize_x rect dx dy = { rect with w = rect.w + dx };;
+let resize_y rect dx dy = { rect with h = rect.h + dy };;
+
 let filter trans event dx dy =
   let r = trans { x = 0; y = 0; w = 0; h = 0; } dx dy in
-  event (r.x + r.w) (r.y + r.h)
-  
+  event (r.x + r.w) (r.y + r.h);;
 
 let wait_move_button_up rect trans event x y =
   let w = rect.w and h = rect.h in
@@ -1196,12 +1143,13 @@ let wait_move_button_up rect trans event x y =
     | z -> z in
   let color = !color in
   set_color !default_fgcolor;
-  GraphicsY11.set_cursor move_cursor;
+  Busy.set Busy.Move;
   GraphicsY11.display_mode true;
   let restore () =
     GraphicsY11.display_mode false;
     set_color color;
-    GraphicsY11.set_cursor !free_cursor in
+    Busy.set
+      (if !editing then Busy.Selection else Busy.Free) in
   try let e = move 0 0 in restore (); e
   with exn -> restore (); raise exn;;
 
@@ -1218,8 +1166,8 @@ let click_area x y =
     else Middle
   else Middle;;
 
-let pressed m b = m land b <> 0
-let released m b = m land b = 0
+let pressed m b = m land b <> 0;;
+let released m b = m land b = 0;;
 
 module G = GraphicsY11
 let button m =
@@ -1231,14 +1179,14 @@ let wait_button_up m x y =
     let wait_position () = 
     match wait_signal_event button_up with
     | Raw e ->
-        if !E.editing || pressed m G.shift
+        if !editing || pressed m G.shift
         then Final (Position (x, !size_y - y))
         else Final (Click (click_area x y, button m, x, !size_y - y))
     | x -> x
     in
-  if !E.editing && pressed m G.button1 then
+  if !editing && pressed m G.button1 then
     wait_position()
-  else if !E.editing || pressed m G.control then
+  else if !editing || pressed m G.control then
     begin
       try 
         let p = E.find x y in
@@ -1267,10 +1215,9 @@ let wait_button_up m x y =
 ;;
 
 let wait_event () =
-  (* We reached to a pause. Now we can reset the sleep break *)
+  (* We reached a pause. Now we can reset the sleep break *)
   clear_sleep ();
-  let temp_cursor = ref false in
-  reset_cursor ();
+  Busy.restore_cursor ();
   let rec event emph b =
     let send ev = H.deemphasize true emph; ev in
     let rescan () = H.deemphasize true emph; event H.Nil false in
@@ -1319,12 +1266,9 @@ let wait_event () =
             | Raw _ -> rescan ()
           else
             let m = GraphicsY11.get_modifiers () in
-            if m land GraphicsY11.shift <> 0 then begin
-              if not !temp_cursor then begin
-                temp_cursor := true;
-                GraphicsY11.set_cursor select_cursor end end else
-              if !temp_cursor then begin
-                temp_cursor := false; reset_cursor () end;
+            if m land GraphicsY11.shift <> 0
+            then Busy.set Busy.Selection
+            else Busy.restore_cursor ();
             rescan () in
   event H.Nil false;;
 
@@ -1335,11 +1279,8 @@ let resized () =
   Graphics.size_x () <> !size_x || Graphics.size_y () <> !size_y;;
 
 let continue () =
-  if resized () || GraphicsY11.key_pressed () (*  || !usr1_status *) then
-    begin
-      Gs.flush ();
-      raise Stop
-    end;;
+  if resized () || GraphicsY11.key_pressed () (*  || !usr1_status *)
+  then begin Gs.flush (); raise Stop end;;
 
 (* Calling GS *)
 

@@ -1,24 +1,6 @@
 BEFORE RELEASE:
 ===============
 
- * compléter manual.tex (la plupart des morceaux manquants existent mais
-   sont dispersés)
- ==>PW toujours en cours ...
-
- * distribuer camltk avec advi (la seule GUI actuellement embeddable.)
- ==>PW fait dans la même mesure que camlimages (RPM livré avec advi).
-
- * refaire la page WEB.
-
- * packagifier pour Linux?
- ==>PW c'est fait pour RedHat grâce à Jun.
-
- * fixer partout dans la distribution le nom d'Active-DVI en utilisant
-la macro du manuel \def\ActiveDVI{Active-DVI}
- ==>PW ouf! c'est fait!
-
- * Options sont toutes sans _
-
  * Vérifier que adviwait[sec] marche.
 
  * Vérifier que toutes les formes de spécification de couleurs marchent
@@ -35,7 +17,7 @@ KNOWN BUGS:
    file contained vscale=100.0 hoffset=-228.0 voffset=-368.0
    hscale=100.0, instead of llx, lly, urx, ury).
  Fatal error: exception Failure("psfile: no bbox")
- *PW Cache cleaning is bogous.
+ ???
 
 DELAYED AFTER RELEASE:
 ======================

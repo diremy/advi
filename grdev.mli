@@ -220,9 +220,6 @@ type event =
   | Nil;;
 val wait_event : unit -> event;;
 
-
-
-
 exception Stop;;
 exception GS;;
 val continue : unit -> unit;;
@@ -232,10 +229,6 @@ val newpage : string list -> int -> float -> int -> int -> unit;;
 val add_headers : string list -> unit;;
 val current_pos : unit -> int * int;;
 val synchronize : unit -> unit;;
-
-type busy = Free | Busy | Pause | Disk;;
-
-val set_busy : busy -> unit;;
 
 val set_transition : Transitions.t -> unit;;
 

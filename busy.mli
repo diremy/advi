@@ -19,7 +19,7 @@
    the program. *)
 
 type busy =
-   | Free | Busy | Pause | Disk | Question | Selection;;
+   | Free | Busy | Pause | Disk | Question | Selection | Move;;
 (** Different states of the computation. *)
 
 val start_timer : unit -> unit;;
