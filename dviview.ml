@@ -215,7 +215,8 @@ and state = {
     mutable toc : toc array option;
     synchronize : bool;
 };;
-exception Duplex of (state -> unit) * state
+
+exception Duplex of (state -> unit) * state;;
 
 
 let set_page_number st n =
@@ -673,9 +674,9 @@ let make_thumbnails st =
          (fun p ->
            let chgvp s =
              {s with
-	      Dvi.bkgd_prefs =
+              Dvi.bkgd_prefs =
                {s.Dvi.bkgd_prefs with
-	        Grdev.bgviewport =
+                Grdev.bgviewport =
                   Some {
                    Grdev.vx = 0;
                    Grdev.vy = size_y - dy;
@@ -684,11 +685,11 @@ let make_thumbnails st =
                   }
                }
              } in
-	   let without_pauses f x =
-	     let p = !pauses in
-	     try pauses := false; let v = f x in pauses := p; v
-	     with x -> pauses := p; raise x in
-	   without_pauses(redraw ?chst:(Some chgvp))
+           let without_pauses f x =
+             let p = !pauses in
+             try pauses := false; let v = f x in pauses := p; v
+             with x -> pauses := p; raise x in
+           without_pauses(redraw ?chst:(Some chgvp))
              {ist with page_number = p};
            (* Interrupt thumbnail computation in case of user interaction. *)
            begin try Grdev.continue() with
@@ -785,7 +786,6 @@ let rec reload foreground st =
       (Printf.sprintf "exception while reloading %s" (Printexc.to_string x));
     st.cont <- None
 ;;
-
 
 let find_xref_master tag default st =
   try
@@ -1352,7 +1352,7 @@ module B =
       Busy.busy_exec f ();
       set_keymap Default_keymap
 
-    let save_page_image = revert_to_default_keymap Shot.save_page
+    let save_page_image = revert_to_default_keymap Shot.save_page_image
 
     let laser_beam st =
       set_keymap Default_keymap;
