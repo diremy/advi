@@ -253,11 +253,6 @@ let fgcolor () = !default_fgcolor;;
 let set_default_color_string r s =
   r := Dvicolor.parse_color (String.lowercase s);;
 
-Options.add
-  "-fgcolor"
-  (Arg.String set_fgcolor_string)
-  "STRING\tSet default foreground color (Named or RGB)";;
-
 let default_bkgd_data () =
   { bgcolor = !default_bgcolor;
     bgimg = None;
@@ -1095,14 +1090,8 @@ let reposition ~x ~y ~w ~h =
   Gs.flush ();
   Gs.kill ();
   GraphicsY11.reposition x y w h;
-<<<<<<< grdev.ml
-  let w = Graphics.size_x () and h = Graphics.size_y () in
-  size_x := w; size_y := h;
-  w, h;;
-=======
   update_device_geometry ();
   !size_x, !size_y;;
->>>>>>> 1.107
 
 let resized () =
   let x = Graphics.size_x () and y = Graphics.size_y () in
