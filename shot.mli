@@ -19,6 +19,7 @@
 
 type x = int and y = int and w = int and h = int;;
 
-val save_area : Misc.file_name -> x -> y -> w -> h -> unit;;
-val save_page : Misc.file_name -> unit;;
-val save : unit -> unit;;
+val save_area_file : Misc.file_name -> x -> y -> w -> h -> unit;;
+val save_area : x -> y -> w -> h -> unit;;
+val save_page_file : Misc.file_name -> unit;;
+val save_page : unit -> unit;;
