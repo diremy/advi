@@ -215,7 +215,7 @@ val blit_bkgd_data : bkgd_prefs -> bkgd_prefs -> unit;;
 val copy_of_bkgd_data : unit -> bkgd_prefs;;
 val default_bkgd_data : unit -> bkgd_prefs;;
 val bkgd_data : bkgd_prefs;;
-val get_playing : (unit -> int) ref;;
+val set_forward_get_playing : (unit -> int) -> unit;;
 
 val set_bg_options : bgoption list -> unit;;
 

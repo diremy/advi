@@ -886,15 +886,20 @@ let edit_special st s =
   with Ignore -> ()
 ;;
 
-
 (* Defining the forward function eval_command. *)
-let forward_eval_command = ref (fun _ _ -> ());;
+let forward_eval_command =
+  ref (fun (st : state) (c : Dvicommands.command) ->
+        (failwith "Undefined forward eval_command" : unit));;
+
+let set_forward_eval_command f = forward_eval_command := f;;
+
+let eval_command st c = !forward_eval_command st c;;
 
 let playing = ref 0;;
 let get_playing () = !playing;;
 
 (* Setting the forward function Dev.get_playing. *)
-Dev.get_playing := get_playing;;
+Dev.set_forward_get_playing get_playing;;
 
 let visible_stack = ref [];;
 
@@ -971,7 +976,7 @@ let proc_special st s =
                st.cur_mtable <- u.escaped_cur_mtable;
                st.cur_gtable <- u.escaped_cur_gtable;
                st.cur_font <- u.escaped_cur_font;
-               List.iter (fun com -> !forward_eval_command st com)
+               List.iter (fun com -> eval_command st com)
                  u.escaped_commands
             ) us;
           decr playing;
@@ -1479,7 +1484,7 @@ let eval_command st c =
   eval_dvi_command st c;;
 
 (* Setting the forward function eval_command. *)
-forward_eval_command := eval_command;;
+set_forward_eval_command eval_command;;
 
 let newpage h st magdpi x y =
   try Dev.newpage h st.sdpi magdpi x y

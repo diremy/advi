@@ -552,7 +552,11 @@ let find_bg_color x y w h =
   find_color !background_colors;;
 
 (* Forward to Driver.playing. *)
-let get_playing = ref (fun () -> 0);;
+let forward_get_playing =
+  ref (fun () -> (failwith "Undefined forward get_playing" : int));;
+let set_forward_get_playing f = forward_get_playing := f;;
+
+let get_playing () = !forward_get_playing ();;
 
 let mean_color c c' =
   let rgb_of_color c =
@@ -575,7 +579,7 @@ let get_bg_color x y w h =
       let c = point_color (x + 1) (y + 1) in
       let c' = point_color (x + w - 1) (y + h - 1) in
       if c = c' then c else
-      if !get_playing () > 0 then find_bg_color x y w h else
+      if get_playing () > 0 then find_bg_color x y w h else
       mean_color c c'
     else find_bg_color x y w h
   end;;
