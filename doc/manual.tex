@@ -569,13 +569,17 @@ presentation. For instance:
 \begin{verbatim}
 \advipushkeys{"q"}
 \end{verbatim}
-ends the talk immediately. Similarly, the command
+ends the talk immediately.
 
+Note that control keys must be encoded inside key strings passed to
+{\ActiveDVI}: we use the Emacs textual convention. For instance, the
+character ``Control-A'' (ASCII 1) is denoted by the two charcters
+\verb"^X" (i.e. a carret character immediately followed by an X).
+Hence, the command
 \begin{verbatim}
-\advipushkeys{^X^F}
+\advipushkeys{"^X^F"}
 \end{verbatim}
-
-will switch to full screen mode.
+switches to full screen mode.
 
 \subsection{Using and making special effects}
 

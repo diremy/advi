@@ -7,7 +7,7 @@ Active-DVI is a presenter and previewer for texts or slides written in LaTeX,
 hence the presentation tool of choice for the discriminating hacker.
 
 Version 1.6.0 is now available. As the release number shows, this is a
-major improvement w.r.t version 1.2.0 of Active-DVI.
+major improvement w.r.t version 1.4.0 of Active-DVI.
 
 This new version has been developed by Jun Furuse, Didier Rémy and
 Pierre Weis with also contributions by Roberto Di Cosmo.
@@ -42,27 +42,28 @@ this release introduces a lot of new features
 
    * Programmable save-slide feature.
 
-   * An additional advi-slides.sty package for the impatient and/or
-     the beginner facilitates easy presentations. (Comments on this
-     new package warmly welcome.)
+   * An additional advi-slides.sty package facilitates easy
+     presentations and is specially devoted to the impatient and/or
+     the beginner. (Comments on this new package are warmly welcome.)
 
    * Additional examples, including simple ones for the slitex LaTeX package.
 
    * An improved manual.
 
 Play advi on the demonstration presentation demo.dvi that is in the test
-directory of the distribution. Look at source code of various talks in
+directory of the distribution. Look at source code of the various talks in
 the directory ``examples''.
 
-The source code, RPM packages, and information are available at
+The source code and molre information are available at
 
     http://pauillac.inria.fr/activedvi/
 
-Contributions and comments are warmly welcome.
+Once again, contributions and comments are warmly welcome.
 
 Mailing list advi-list-request@pauillac.inria.fr
 Bug reports to advi-bugs@pauillac.inria.fr
 
 --
-For the Active-DVI development team, 16th Jul 2004
+For the Active-DVI development team, 12nd Aug 2004
+
 Pierre Weis (Pierre.Weis@inria.fr)
