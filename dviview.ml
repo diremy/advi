@@ -102,13 +102,18 @@ module type DEVICE = sig
   val embed_app : string -> app_type -> int -> int -> int -> int -> unit
   val kill_embedded_apps : unit -> unit 
 
+  type area = Bottom_right | Bottom_left | Top_right | Top_left | Middle
+  type button = Button1 | Button2 | Button3
   type event =
       Resized of int * int
     | Refreshed
     | Key of char
+    | Move of int * int
     | Region of int * int * int * int
     | Href of string
     | Advi of string * (unit -> unit)
+    | Click of area * button
+    | Nil
 
   val wait_event : unit -> event
 
@@ -136,7 +141,8 @@ module type DEVICE = sig
   val exec_ps : string -> int -> int -> unit
   val add_headers : string list -> unit
   val synchronize : unit -> unit
-
+  type mode = Control | Selection
+  val set_selection_mode : mode -> unit ;;
   type busy = Free | Busy | Pause | Disk
   val set_busy : busy -> unit;;
   val set_title : string -> unit
@@ -208,6 +214,7 @@ module Make(Dev : DEVICE) = struct
           
   (*** The view state ***)
           
+  type mode = Selection | Control
   type state = {
       (* DVI attributes *)
       filename : string ;
@@ -232,56 +239,64 @@ module Make(Dev : DEVICE) = struct
       
       mutable pause_no : int;
       (* Attributes for Embedded postscript *)
+      
+      (* true when page was not completed: may need to redraw *)
       mutable aborted : bool;
+      (* true when hrefs have not been processed *)
       mutable frozen : bool;
-      (* If the page was not completed *)
+      (* numeric value for keyboard interaction *)
+      mutable num : int;
+      (* next numeric value *) 
+      mutable next_num : int;
+      (* control the action of the mouse *) 
+      mutable mode : mode;
+      (* Some of f when on a pause *)
+      mutable cont : (unit -> bool) option;
     }
         
-  let state = ref None
-      
   (*** Setting the geometry ***)
-      
+        
   let is_digit c = (c >= '0' && c <= '9')
       
   let parse_geometry str =
     try
-    let len = String.length str
-    and i = ref 0 in
-    let parse_int () =
-      if !i = len || not (is_digit str.[!i] || str.[!i] == '-') then
-	invalid_arg "set_geometry" ;
-      let start = !i in
-      if str.[!i] = '-' && !i < len+1 then incr i;
-      while !i < len && is_digit str.[!i] do incr i done ;
-      let stop = !i in
-      int_of_string (String.sub str start (stop - start)) in
-    let parse_offset () =
-      if !i = len || (str.[!i] <> '+' && str.[!i] <> '-') then
-	No_offset
-      else begin
-	let sgn = str.[!i] in
-	incr i ;
-	if !i = len || not (is_digit str.[!i] || str.[!i] == '-') then
+      let len = String.length str
+      and i = ref 0 in
+      let parse_int () =
+        if !i = len || not (is_digit str.[!i] || str.[!i] == '-') then
+	  invalid_arg "set_geometry" ;
+        let start = !i in
+        if str.[!i] = '-' && !i < len+1 then incr i;
+        while !i < len && is_digit str.[!i] do incr i done ;
+        let stop = !i in
+        int_of_string (String.sub str start (stop - start)) in
+      let parse_offset () =
+        if !i = len || (str.[!i] <> '+' && str.[!i] <> '-') then
 	  No_offset
-	else
-	  match sgn with
-	  | '+' -> Plus (parse_int ())
-	  | '-' -> Minus (parse_int ())
-	  | _ -> assert false
-      end in
-    while !i < len && str.[!i] = ' ' do incr i done ;
-    let width = parse_int () in
-    if !i = len || (str.[!i] <> 'x' && str.[!i] <> 'X') then
-      invalid_arg "set_geometry" ;
-    incr i ;
-    let height = parse_int () in
-    let xoffset = parse_offset () in
-    let yoffset = parse_offset () in
-    { width = width; height = height; xoffset = xoffset; yoffset = yoffset }
-    with Failure _ -> invalid_arg "parse_geometry"
-      
+        else begin
+	  let sgn = str.[!i] in
+	  incr i ;
+	  if !i = len || not (is_digit str.[!i] || str.[!i] == '-') then
+	    No_offset
+	  else
+	    match sgn with
+	    | '+' -> Plus (parse_int ())
+	    | '-' -> Minus (parse_int ())
+	    | _ -> assert false
+        end in
+      while !i < len && str.[!i] = ' ' do incr i done ;
+      let width = parse_int () in
+      if !i = len || (str.[!i] <> 'x' && str.[!i] <> 'X') then
+        invalid_arg "set_geometry" ;
+      incr i ;
+      let height = parse_int () in
+      let xoffset = parse_offset () in
+      let yoffset = parse_offset () in
+      { width = width; height = height; xoffset = xoffset; yoffset = yoffset }
+      with Failure _ -> invalid_arg "parse_geometry"
+          
   (*** Setting other parameters ***)
-        
+          
   let attr =
     { geom = 
       { width = 0;
@@ -293,11 +308,11 @@ module Make(Dev : DEVICE) = struct
       hmargin = Px 0 ;
       vmargin = Px 0
     }
-
+      
   let set_autoresize b = autoresize := b
   let set_geometry geom =
     attr.geom <- parse_geometry geom
-
+        
   let set_crop b =
     attr.crop <- b
         
@@ -306,9 +321,9 @@ module Make(Dev : DEVICE) = struct
         
   let set_vmargin d =
     attr.vmargin <- normalize d
-
-      
-
+        
+        
+        
         
   (*** Initialization ***)
         
@@ -361,27 +376,38 @@ module Make(Dev : DEVICE) = struct
       with _ -> 0.0 in
     let pages = Array.length dvi.Dvi.pages in
     Misc.dops := !Misc.pson;
-    { filename = filename ;
-      dvi = dvi ;
-      cdvi = cdvi ;
-      num_pages = pages ;
-      base_dpi = base_dpi ;
-      dvi_width = width ;
-      dvi_height = height ;
-      size_x = size_x ;
-      size_y = size_y ;
-      orig_x = orig_x ;
-      orig_y = orig_y ;
-      ratio = 1.0 ;
-      page_stack = [];
-      page_no = if !start_page > 0 then min !start_page pages -1 else 0;
-      last_modified = last_modified ;
-      button = None;
-      
-      pause_no = 0;
-      frozen = true;
-      aborted = false;
-    }
+    let st = 
+      { filename = filename ;
+        dvi = dvi ;
+        cdvi = cdvi ;
+        num_pages = pages ;
+        base_dpi = base_dpi ;
+        dvi_width = width ;
+        dvi_height = height ;
+        size_x = size_x ;
+        size_y = size_y ;
+        orig_x = orig_x ;
+        orig_y = orig_y ;
+        ratio = 1.0 ;
+        page_stack = [];
+        page_no = if !start_page > 0 then min !start_page pages -1 else 0;
+        last_modified = last_modified ;
+        button = None;
+        
+        pause_no = 0;
+        frozen = true;
+        aborted = false;
+        cont = None;
+        mode = Control;
+        num = 0;
+        next_num = 0;
+      } in
+    st
+
+
+  let set_bbox st =
+    Dev.set_bbox (Some (st.orig_x, st.orig_y, st.dvi_width, st.dvi_height))
+    
       
   let update_dvi_size init st =
     let dvi_res = 72.27
@@ -429,34 +455,33 @@ module Make(Dev : DEVICE) = struct
         st.orig_y <- orig_y; 
       end;
     st.dvi_width <- int_of_float (st.base_dpi *. w_in *. st.ratio);
-    st.dvi_height <- int_of_float (st.base_dpi *. h_in *. st.ratio)
-    
+    st.dvi_height <- int_of_float (st.base_dpi *. h_in *. st.ratio);
+    set_bbox st
       
-  let goto_next_pause st f =
-    try 
+      
+  let goto_next_pause f st =
+    st.cont <- None;
+    try
       let cont =
         try 
 	  while f () do () done; 
 	  st.pause_no <- st.pause_no + 1; 
-	  None
         with Drv.Pause -> 
 	  st.pause_no <- st.pause_no + 1; 
-	  Some f 
+	  st.cont <- Some f 
       in
-      Dev.set_busy (if cont = None then Dev.Free else Dev.Pause);
-      Dev.synchronize();
-      cont
+      Dev.set_busy (if st.cont = None then Dev.Free else Dev.Pause);
+      Dev.synchronize()
     with Dev.Stop ->
-      st.aborted <- true;
-      None
-        
+      st.aborted <- true
+          
   let draw_bounding_box st = 
     Dev.set_color 0xcccccc ;
     Dev.fill_rect st.orig_x st.orig_y st.dvi_width 1 ;
     Dev.fill_rect st.orig_x st.orig_y 1 st.dvi_height ;
     Dev.fill_rect st.orig_x (st.orig_y + st.dvi_height) st.dvi_width 1 ;
     Dev.fill_rect (st.orig_x + st.dvi_width) st.orig_y 1 st.dvi_height 
-
+      
   (* Input : a point in window coordinates, relative to lower-left corner. *)
   (* Output : a point in document coordinates, relative to upper-right corner. *)
   (* The output depends on the ratio st.ratio. *)
@@ -468,7 +493,7 @@ module Make(Dev : DEVICE) = struct
     let docx = int_of_float (float (x - st.orig_x))
     and docy = int_of_float (float (y - st.orig_y))
     in docx, docy
-
+      
   (* User has selected a region with the mouse. We dump characters. *)
   let selection st x y dx dy =
     let docx , docy  = document_xy st x y
@@ -485,7 +510,9 @@ module Make(Dev : DEVICE) = struct
   let redraw st =
     (* draws until the current pause_no or page end *)
     Dev.set_busy Dev.Busy;
-    let cont = 
+    st.cont <- None;
+    st.aborted <- false;
+    begin
       try
         Dev.continue(); 
         Dev.clear_dev () ;
@@ -493,113 +520,96 @@ module Make(Dev : DEVICE) = struct
 	let blank_w = 20
 	and blank_h = 20 in
 	Drv.clear_symbols st.size_x st.size_y blank_w blank_h ;
-        let cont = 
-          if !pauses then
-            let f = Drv.render_step st.cdvi st.page_no
-	        (st.base_dpi *. st.ratio) st.orig_x st.orig_y in
-            let current_pause = ref 0 in
-            begin
-              try
-                while 
-	          try f () with
-      	          | Drv.Pause ->
-	              if !current_pause = st.pause_no then raise Drv.Pause
-	              else begin incr current_pause; true end
-(*
-   | e -> prerr_endline (Printexc.to_string e); false
-*)
-                do () done;
-                None
-              with
-              | Drv.Pause ->
-                  Some f
-            end
-          else
-            begin
-              Drv.render_page  st.cdvi st.page_no
-                (st.base_dpi *. st.ratio) st.orig_x st.orig_y;
-              None
-            end in
-        st.aborted <- false; 
-        cont
-      with Dev.Stop ->
-        st.aborted <- true;
-        None
-    in
-    if (!bounding_box) then draw_bounding_box st;
-    Dev.set_busy (if cont = None then Dev.Free else Dev.Pause);
-    Dev.synchronize();
-    cont
-      
-  let center st =
-    st.ratio <- 1.0 ;
-    update_dvi_size false st ;
-    st.orig_x <- (st.size_x - st.dvi_width)/2 ;
-    st.orig_y <- (st.size_y - st.dvi_height)/2 ;
-    redraw st
-      
-      
-  let find_xref st tag default =
-      try Hashtbl.find st.dvi.Dvi.xrefs tag
-      with Not_found ->
-        if st.frozen then
+        if !pauses then
+          let f = Drv.render_step st.cdvi st.page_no
+	      (st.base_dpi *. st.ratio) st.orig_x st.orig_y in
+          let current_pause = ref 0 in
           begin
-            Drv.scan_specials st.cdvi max_int;
-            st.frozen <- false;
-            try Hashtbl.find st.dvi.Dvi.xrefs tag
-            with Not_found ->
-              default
+            try
+              while 
+	        try f () with
+      	        | Drv.Pause ->
+	            if !current_pause = st.pause_no then raise Drv.Pause
+	            else begin incr current_pause; true end
+              do () done
+            with
+            | Drv.Pause ->
+                st.cont <- Some f
           end
-        else default
-
+        else
+          begin
+            Drv.render_page  st.cdvi st.page_no
+              (st.base_dpi *. st.ratio) st.orig_x st.orig_y;
+          end
+      with Dev.Stop ->
+        st.aborted <- true
+    end;
+    if (!bounding_box) then draw_bounding_box st;
+    Dev.set_busy (if st.cont = None then Dev.Free else Dev.Pause);
+    Dev.synchronize()
+      
+      
+  let find_xref tag default st =
+    try Hashtbl.find st.dvi.Dvi.xrefs tag
+    with Not_found ->
+      if st.frozen then
+        begin
+          Drv.scan_specials st.cdvi max_int;
+          st.frozen <- false;
+          try Hashtbl.find st.dvi.Dvi.xrefs tag
+          with Not_found ->
+            default
+        end
+      else default
+          
   exception Link
   let exec_xref link = 
       (* -- check that files exist; use mine and mailcap; etc. *)
-      if Misc.has_prefix "file:" link then
-        try
-          let filename, arguments = 
-            match Misc.split_string (Misc.get_suffix "file:" link) '#' 0 with
-            | [ filename ; tag ] -> filename, ["-html"; tag ]
-            | [ filename ] -> filename, []
-            | _ ->
-                Misc.warning ("Invalid link "^link);
-                raise Link
-          in
-          let call command =
-            Dev.embed_app command Dev.Sticky
-              attr.geom.width
-              attr.geom.height
-              (int_of_offset attr.geom.xoffset)
-              (int_of_offset attr.geom.yoffset); 
-            if Graphics.button_down() then
-              ignore (Graphics.wait_next_event [ Graphics.Button_up ]) in
-          if Sys.file_exists filename then
-            begin
-              if Misc.has_suffix ".dvi"  filename then
+    if Misc.has_prefix "file:" link then
+      try
+        let filename, arguments = 
+          match Misc.split_string (Misc.get_suffix "file:" link) '#' 0 with
+          | [ filename ; tag ] -> filename, ["-html"; tag ]
+          | [ filename ] -> filename, []
+          | _ ->
+              Misc.warning ("Invalid link "^link);
+              raise Link
+        in
+        let call command =
+          Dev.embed_app command Dev.Sticky
+            attr.geom.width
+            attr.geom.height
+            (int_of_offset attr.geom.xoffset)
+            (int_of_offset attr.geom.yoffset); 
+          if Graphics.button_down() then
+            ignore (Graphics.wait_next_event [ Graphics.Button_up ]) in
+        if Sys.file_exists filename then
+          begin
+            if Misc.has_suffix ".dvi"  filename then
               call  (String.concat " " ("advi" :: arguments @ [ filename ]))
-              else if (Misc.has_suffix ".txt"  filename
-                    || Misc.has_suffix ".tex"  filename) then
-                call ("xterm -e more "^ filename)
-              else
-                Misc.warning 
-                  (Printf.sprintf
-                     "Don't know what to do with file %s"
-                     filename);
-            end
-          else
-            Misc.warning
-              (Printf.sprintf "File %s non-existent or not readable"
-                 filename)
-        with
-          Misc.Match -> assert false
-        | Link ->
-            ()
-          
-  let page_start st default =   
+            else if (Misc.has_suffix ".txt"  filename
+                   || Misc.has_suffix ".tex"  filename) then
+              call ("xterm -e more "^ filename)
+            else
+              Misc.warning 
+                (Printf.sprintf
+                   "Don't know what to do with file %s"
+                   filename);
+          end
+        else
+          Misc.warning
+            (Printf.sprintf "File %s non-existent or not readable"
+               filename)
+      with
+        Misc.Match -> assert false
+      | Link ->
+          ()
+            
+  let page_start default st =   
     match !start_html with None -> default
     | Some html ->
         Drv.scan_specials st.cdvi max_int;
-        find_xref st html default
+        find_xref html default st
           
   let rec clear_page_stack max stack =
     let pages = Array.create max false in
@@ -616,11 +626,11 @@ module Make(Dev : DEVICE) = struct
             s
       | _ -> [] in
     clear stack
-
-  let reload_time st =
-      try let s = Unix.stat st.filename in s.Unix.st_mtime
-      with _ -> st.last_modified
       
+  let reload_time st =
+    try let s = Unix.stat st.filename in s.Unix.st_mtime
+    with _ -> st.last_modified
+        
   let reload st =
     try
       st.last_modified <- reload_time st;
@@ -639,7 +649,7 @@ module Make(Dev : DEVICE) = struct
       st.cdvi <- cdvi ;
       st.num_pages <- pages ;
       st.page_stack <- clear_page_stack pages st.page_stack; 
-      st.page_no <- page_start st (min st.page_no (st.num_pages - 1));
+      st.page_no <- page_start (min st.page_no (st.num_pages - 1)) st;
       st.pause_no <- 0 ;
       st.frozen <- true;
       st.aborted <- true;
@@ -648,11 +658,11 @@ module Make(Dev : DEVICE) = struct
       redraw st
     with x ->
       assert (Misc.debug (Printexc.to_string x));      
-      None
-        
+      st.cont <- None
+          
   let changed st = reload_time st > st.last_modified
-        
-  let goto_page st cont n = (* go to the begining of the page *) 
+      
+  let goto_page n st = (* go to the begining of the page *) 
     let new_page_no = max 0 (min n (st.num_pages - 1)) in
     if st.page_no <> new_page_no || st.aborted then
       begin
@@ -660,24 +670,22 @@ module Make(Dev : DEVICE) = struct
         st.pause_no <- 0 ;
         redraw st
       end
-    else cont (* return the current cont: do nothing *)
-
-  let push_stack b st n =
+        
+  let push_stack b n st =
     match st.page_stack with
     | p :: rest when p = n -> if b then st.page_stack <- ( -1 - n )::rest
     | p :: rest when p = -1 - n -> ()
     | all -> st.page_stack <- (if b then -1 - n else n) :: all
-      
-  let push_page b st cont n =
+                                                            
+  let push_page b n st =
     let new_page_no = max 0 (min n (st.num_pages - 1)) in
     if st.page_no <> new_page_no || st.aborted then
       begin
-        push_stack b st st.page_no;
-        goto_page st cont n
+        push_stack b st.page_no st;
+        goto_page n st
       end
-    else cont
         
-  let pop_page b st cont n =
+  let pop_page b n st =
     assert (debug_pages
               (Printf.sprintf "%s\n => popping %s page %d "
                  (page_stack_to_string st.page_no st.page_stack)
@@ -695,26 +703,23 @@ module Make(Dev : DEVICE) = struct
           else pop (pred n) h t t in
     let page, stack = pop n st.page_no st.page_stack st.page_stack in
     st.page_stack <- stack;
-    goto_page st cont (if page > 0 then page else -1 - page)
+    goto_page (if page > 0 then page else -1 - page) st
       
-  let goto_href st cont link = (* goto page of hyperref h *)
+  let goto_href link st = (* goto page of hyperref h *)
     let page = 
       if Misc.has_prefix "#" link then
         let tag = Misc.get_suffix "#" link in
-        find_xref st tag st.page_no
+        find_xref tag st.page_no st
       else 
         begin
           exec_xref link;
           st.page_no
         end in
-    let cont = push_page true st cont page in
-    Dev.H.flashlight (Dev.H.Name link);
-    cont
+    push_page true page st;
+    Dev.H.flashlight (Dev.H.Name link)
       
-  let goto_next_page st cont = (* go to the begining of the page *)
-    if st.page_no = st.num_pages - 1 then
-      cont (* return the current cont. *)
-    else goto_page st cont (st.page_no + 1) 
+  let goto_next_page st = 
+    if st.page_no <> st.num_pages - 1 then goto_page (st.page_no + 1) st
         
   let resize st x y =
     attr.geom <-
@@ -725,8 +730,11 @@ module Make(Dev : DEVICE) = struct
       };
     update_dvi_size true st;
     redraw st
-
-  let scale_by st factor =
+      
+  let scale n st =
+    let factor =
+      if n > 0 then !scale_step ** float n
+      else  (1. /. !scale_step) ** float (0 - n) in
     if !autoresize then
       begin
         let scale x = int_of_float (float x *. factor) in
@@ -734,11 +742,12 @@ module Make(Dev : DEVICE) = struct
         attr.geom.height <- scale attr.geom.height;
         Dev.close_dev();
         Dev.open_dev (Printf.sprintf " " ^ string_of_geometry attr.geom);
+        set_bbox st;
       end
     else
       begin
         let new_ratio = factor *. st.ratio in
-        if new_ratio >= 0.1 && new_ratio < 10.0 then
+        if new_ratio >= 0.02 && new_ratio < 50.0 then
           begin
             st.ratio <- new_ratio ;
             let (cx, cy) = (st.size_x/2, st.size_y/2) in
@@ -749,111 +758,166 @@ module Make(Dev : DEVICE) = struct
     update_dvi_size true st;
     redraw st
       
-
-  let nomargin st =
-    attr.hmargin <- Px 0; attr.vmargin <- Px 0; 
-    update_dvi_size true st;
-    redraw st
+  module B =
+    struct
+      let nop st = ()
+      let next_pause st =
+        begin match st.cont with
+        | None -> 
+            push_page false  (st.page_no + max 1 st.num) st
+        | Some f ->
+            goto_next_pause f st
+        end
+      let digit k st = 
+        st.next_num <- st.num * 10 + k
+      let next_page st = 
+        goto_page (st.page_no + max 1 st.num) st
+      let push_next_page st = 
+        push_page false (st.page_no + max 1 st.num) st
+      let goto st =
+        push_page true (if st.num > 0 then st.num - 1 else st.num_pages) st
+          
+      let push_page st =
+        push_stack true st.page_no st
+      let previous_page st = 
+        goto_page (st.page_no - max 1 st.num) st
+      let pop_previous_page st = 
+        pop_page false (max 1 st.num) st
+      let pop_page st =
+        pop_page true 1 st
+      let first_page st =
+        goto_page 0 st
+      let last_page st =
+        goto_page max_int st
+      let unfreeze_fonts st =
+        Drv.unfreeze_fonts st.cdvi
+      let unfreeze_glyphs st =
+        Drv.unfreeze_glyphs st.cdvi (st.base_dpi *. st.ratio)
+      let switch_mode st =
+        begin
+          st.mode <-
+            match st.mode with
+            | Selection -> Dev.set_selection_mode Dev.Control; Control
+            | Control -> Dev.set_selection_mode Dev.Selection; Selection
+        end;
+        if st.cont = None then Dev.set_busy Dev.Free
+            
+      let center st =
+        st.ratio <- 1.0 ;
+        update_dvi_size false st ;
+        st.orig_x <- (st.size_x - st.dvi_width)/2 ;
+        st.orig_y <- (st.size_y - st.dvi_height)/2 ;
+        redraw st
+          
+      let scale_up st = scale (max 1 st.num) st
+      let scale_down st = scale (0 - max 1 st.num) st
+          
+      let nomargin st =
+        attr.hmargin <- Px 0; attr.vmargin <- Px 0; 
+        update_dvi_size true st;
+        redraw st
+          
+      let redraw = redraw
+      let reload = reload
+          
+      let exit st = raise Exit
+      let clear_image_cash st = (* clear image cache *)
+        Dev.clean_ps_cache ()
+      let help st =
+        let int = function
+            No_offset -> 0
+          | Plus x -> x
+          | Minus y -> 0 - y in
+        Dev.embed_app ("advi "^ Config.splash_screen) Dev.Embedded
+          attr.geom.width
+          attr.geom.height
+          (int_of_offset attr.geom.xoffset)
+          (int_of_offset attr.geom.yoffset)
+    end
+      
+  let bindings = Array.create 256 B.nop
+  let _ =
+    for i = 0 to 9 do
+      bindings.(Char.code '0' + i) <- B.digit i
+    done;
+    let bind (key, action) = bindings.(Char.code key) <- action  in
+    List.iter bind [
+    (* For instance *)
+    'i' 	, B.pop_page;
+    'j' 	, B.pop_previous_page;
+    'k' 	, B.next_pause;
+    'l' 	, B.push_next_page;
+    'm' 	, B.push_page;
+    
+    ' ' 	, B.next_pause;
+    'n' 	, B.next_page;
+    '\r'	, B.push_next_page;
+    '\t'	, B.push_page;
+    'p' 	, B.previous_page;
+    '\b'	, B.pop_previous_page;
+    '\027'	, B.pop_page; 
+    ',' 	, B.first_page; 
+    '.' 	, B.last_page; 
+    'f' 	, B.unfreeze_fonts; 
+    'F' 	, B.unfreeze_glyphs; 
+    'r' 	, B.redraw; 
+    'R' 	, B.reload; 
+    'm' 	, B.switch_mode; 
+    'c' 	, B.center; 
+    '<' 	, B.scale_down; 
+    '>' 	, B.scale_up; 
+    'g' 	, B.goto; 
+    '#' 	, B.nomargin; 
+    'q' 	, B.exit; 
+    'C' 	, B.clear_image_cash; 
+    '?' 	, B.help; 
+  ] 
       
   let main_loop filename =
     let st = init filename in
     let cont = ref None in (* drawing continuation *)
     Dev.open_dev (Printf.sprintf " " ^ string_of_geometry attr.geom) ;
+    set_bbox st;
     Dev.set_title ("Advi: " ^ Filename.basename filename);
     if st.page_no > 0 && !Misc.dops then
       Drv.scan_specials st.cdvi st.page_no
     else
-      st.page_no <- page_start st 0;
-    cont := redraw st ;
-
+      st.page_no <- page_start 0 st;
+    redraw st;
+    
     (* num is the the current number entered by keyboard *)
-    let num = ref 0 in
-
-    (* selection_mode says if a mouse click should move the window or select text. *)
     let selection_mode = ref false in
-
+    
     try while true do
       let ev = if changed st then Dev.Refreshed else Dev.wait_event() in
-      let num_val = !num in
+      st.num <- st.next_num;
+      st.next_num <- 0;
       match ev with
-      | Dev.Refreshed -> 
-          cont := reload st
-      | Dev.Resized (x,y) -> 
-          cont := resize st x y
-      | Dev.Key ' ' -> 
-          begin match !cont with
-          | None -> 
-              (* If you want to go to the next page by space,
-                 use () instead of the following instead  *)
-              num := 0; 
-              cont := push_page false st !cont (st.page_no + max 1 num_val)
-          | Some f -> cont := goto_next_pause st f
-          end
-      | Dev.Key ('0'..'9' as c) ->
-          num := !num * 10 + Char.code c - Char.code '0'
-      | Dev.Key 'n' ->
-          num := 0;
-          cont := goto_page st !cont (st.page_no + max 1 num_val) ; 
-      | Dev.Key '\r' ->
-          num := 0;
-          cont := push_page false st !cont (st.page_no + max 1 num_val) 
-      | Dev.Key '\t' -> 
-          push_stack true st st.page_no
-      | Dev.Key 'p' ->
-          num := 0; 
-          cont := goto_page st !cont (st.page_no - max 1 num_val) 
-      | Dev.Key '\b' ->
-          num := 0;
-          cont := pop_page false st !cont (max 1 num_val) 
-      | Dev.Key '\027' ->
-          num := 0; 
-          cont := pop_page true st !cont 1; 
-      | Dev.Key ',' -> cont := goto_page st !cont 0;
-      | Dev.Key '.' -> cont := goto_page st !cont max_int;
-      | Dev.Key 'f' -> Drv.unfreeze_fonts st.cdvi
-      | Dev.Key 'F' -> Drv.unfreeze_glyphs st.cdvi (st.base_dpi *. st.ratio)
-      | Dev.Key 'r' -> cont := redraw st
-      | Dev.Key 'R' -> cont := reload st
-      |	Dev.Key 's' -> selection_mode := not !selection_mode
-      | Dev.Key 'c' -> cont := center st
-      | Dev.Key '<' -> cont := scale_by st (1.0 /. !scale_step)
-      | Dev.Key '>' -> cont := scale_by st !scale_step
-      | Dev.Key 'g' ->
-          num := 0;
-          cont :=
-            push_page true st !cont
-              (if num_val > 0 then num_val - 1 else st.num_pages)
-      | Dev.Key '#' ->
-          num := 0;
-          cont := nomargin st
-          
-      | Dev.Key 'q' -> raise Exit
-      | Dev.Key 'C' -> (* clear image cache *)
-          Dev.clean_ps_cache ()
-      | Dev.Key '?' ->
-          let int = function
-              No_offset -> 0
-            | Plus x -> x
-            | Minus y -> 0 - y in
-          Dev.embed_app ("advi "^ Config.splash_screen) Dev.Embedded
-            attr.geom.width
-            attr.geom.height
-            (int_of_offset attr.geom.xoffset)
-            (int_of_offset attr.geom.yoffset)
-      | Dev.Key _ -> ()
-      | Dev.Href h ->
-          cont := goto_href st !cont h
-      | Dev.Advi (s,a) -> a();
+      | Dev.Refreshed -> reload st
+      | Dev.Resized (x,y) -> resize st x y
+      | Dev.Key c -> bindings.(Char.code c) st
+      | Dev.Href h -> goto_href h st
+      | Dev.Advi (s,a) -> a()
+      | Dev.Move (w, h) ->
+          st.orig_x <- st.orig_x + w ;
+          st.orig_y <- st.orig_y + h ;
+          set_bbox st;
+          redraw st
       | Dev.Region (x, y, w, h) ->
-
-	  if !selection_mode then selection st x y w (-h)
-	  else
-	    begin
-              st.orig_x <- st.orig_x + w ;
-              st.orig_y <- st.orig_y + h ; 
-              cont := redraw st
-	    end
-	      
+          selection st x y w (-h)
+            
+      | Dev.Click (Dev.Top_left, _) -> B.pop_page st
+      | Dev.Click (_, Dev.Button1) -> B.pop_previous_page st
+      | Dev.Click (_, Dev.Button2) -> B.next_pause st
+      | Dev.Click (_, Dev.Button3) -> B.push_next_page st
+            
+(*
+   | Dev.Click (Dev.Bottom_right, _) -> B.next_pause st
+   | Dev.Click (Dev.Bottom_left, _) -> B.pop_previous_page st
+   | Dev.Click (Dev.Top_right, _) -> B.push_page st
+*)
+      | _ -> ()
+	    
     done with Exit -> Dev.close_dev ()
         
 end ;;

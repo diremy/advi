@@ -208,3 +208,12 @@ let set_cursor c =
 
 external get_geometry : unit -> int * int * int * int = "gr_get_geometry"
         (* returns width, height, x, y of the graphics window *)
+
+external get_modifiers : unit -> int = "gr_get_modifiers"
+        (* returns modifiers as an integer *)
+let button1 = 0x1
+let button2 = 0x2
+let button3 = 0x4
+let shift = 0x10
+let control = 0x20
+let mod1 = 0x40

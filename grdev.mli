@@ -72,13 +72,18 @@ type status = {
     key : char
   } ;;
 
+type area = Bottom_right | Bottom_left | Top_right | Top_left | Middle
+type button = Button1 | Button2 | Button3
 type event =
     Resized of int * int
   | Refreshed
   | Key of char
+  | Move of int * int
   | Region of int * int * int * int
   | Href of string
   | Advi of string * (unit -> unit)
+  | Click of area * button
+  | Nil
         
 val wait_event : unit -> event ;;
 
@@ -108,6 +113,9 @@ val add_headers : string list -> unit
 val current_pos : unit -> int * int;;
 val set_mode : bool -> unit ;;
 val synchronize : unit -> unit ;; 
+
+type mode = Control | Selection
+val set_selection_mode : mode -> unit ;;
 
 type busy = Free | Busy | Pause | Disk
 val set_busy : busy -> unit;;

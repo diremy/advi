@@ -126,3 +126,14 @@ val unset_cursor : unit -> unit
 
 external get_geometry : unit -> int * int * int * int = "gr_get_geometry"
         (* returns width, height, x, y of the graphics window *)
+
+external get_modifiers : unit -> int = "gr_get_modifiers"
+        (* returns the list of modifiers as an integer *)
+
+val button1 : int
+val button2 : int
+val button3 : int
+val shift : int
+val control : int
+val mod1 : int
+        (* mask for modifiers *)

@@ -15,13 +15,16 @@
  * details (enclosed in the file LGPL).
  *)
 
+module G = GraphicsY11
+
 let ignore_background = Misc.option_flag false
     "--ignore_background"
     "\tIgnore background for antialiasing";;
 
-let watch_cursor = Misc.option_flag true
+let show_busy = Misc.option_flag true
     "-nowatch"
     "\tDon't display a watch when busy";;
+
 
 
 type color = int ;;
@@ -55,7 +58,7 @@ let psused = ref false;;
 let last_is_dvi = ref true
 
 let flush_ps() = if not !psused then psused := true;  Gs.flush();;
-let flush_dvi() = GraphicsY11.flush();;
+let flush_dvi() = G.flush();;
 let flush_last() = if !last_is_dvi then flush_dvi() else flush_ps();;
 
 let sync b =
@@ -66,15 +69,30 @@ let synchronize () =
   Gs.flush();
   Graphics.synchronize();;
 
+let control_cursor = G.Cursor_left_ptr
+let move_cursor = G.Cursor_fleur
+let select_cursor = G.Cursor_xterm
+
+type mode = Control | Selection
+let free_cursor = ref control_cursor
+let mode = ref Control
+let set_selection_mode m =
+  mode := m; 
+  free_cursor :=
+    begin match m with
+    | Control ->  control_cursor
+    | Selection -> select_cursor
+    end
+
 type busy = Free | Busy | Pause | Disk
 
 let set_busy sw = 
-  if !watch_cursor then 
+  if !show_busy then
     match sw with
-    | Pause -> GraphicsY11.set_cursor GraphicsY11.Cursor_right_side
-    | Busy -> GraphicsY11.set_cursor GraphicsY11.Cursor_watch
-    | Free -> GraphicsY11.set_cursor GraphicsY11.Cursor_left_ptr
-    | Disk -> GraphicsY11.set_cursor GraphicsY11.Cursor_exchange
+    | Pause -> G.set_cursor G.Cursor_right_side
+    | Disk -> G.set_cursor G.Cursor_exchange
+    | Busy -> G.set_cursor G.Cursor_watch
+    | Free -> G.set_cursor !free_cursor
   else ();;
 
 let set_title s = Graphics.set_window_title s ;;
@@ -227,7 +245,8 @@ let set_bbox bbox =
       ymin := 0 ; ymax := !size_y
   | Some(x0, y0, w, h) ->
       xmin := x0 ; xmax := x0 + w ;
-      ymin := !size_y - (y0 + h) ; ymax := !size_y - y0 ;;
+      ymin := !size_y - (y0 + h) ; ymax := !size_y - y0
+ ;;
 
 (*** Drawing ***)
 
@@ -483,7 +502,7 @@ let embed_app command app_type width height x y =
       let against_root = (command0 = command) in
       if against_root then begin
         (* fix the geometry *)
-	let (ww,wh,wx,wy) = GraphicsY11.get_geometry () in
+	let (ww,wh,wx,wy) = G.get_geometry () in
 	x+wx, y - height + wy
       end else begin
 	0,0
@@ -710,7 +729,7 @@ module H =
             Graphics.draw_image ima 0 0;
 	| Nil -> raise (Failure "this must not be called") 
 	end;
-	GraphicsY11.set_cursor GraphicsY11.Cursor_left_ptr;
+	G.set_cursor !free_cursor;
 	Graphics.display_mode false
       end
         
@@ -723,14 +742,14 @@ module H =
       push_bg_color c;
       List.iter (function x, y, g -> draw_glyph g x y) act.A.action.draw;
       pop_bg_color();
-      GraphicsY11.set_cursor GraphicsY11.Cursor_hand2;
+      G.set_cursor G.Cursor_hand2;
       Graphics.display_mode false;
       Rect (ima, act, []) 
         
     let save_screen_exec act a =
       Gs.flush();
       let ima = Graphics.get_image 0 0 !size_x !size_y in
-      GraphicsY11.flush();
+      G.flush();
       (* it seems that the image is saved ``lazily'' and further instruction
          could be capture in the image *) 
       sleep_watch false 0.05;
@@ -778,8 +797,10 @@ let open_dev geom =
   Graphics.open_graph geom ;
   size_x := Graphics.size_x () ;
   size_y := Graphics.size_y () ;
+(*  
   xmin := 0 ; xmax := !size_x ;
   ymin := 0 ; ymax := !size_y ;
+*)
   Graphics.remember_mode true ;
   Graphics.display_mode !display_mode ;
   opened := true ;;
@@ -804,8 +825,10 @@ let clear_dev () =
   background_colors := [];
   size_x := Graphics.size_x () ;
   size_y := Graphics.size_y () ;
+(*
   xmin := 0 ; xmax := !size_x ;
   ymin := 0 ; ymax := !size_y ;
+*)
 ;;
 
 (*** Events ***)
@@ -819,13 +842,18 @@ type status = Graphics.status = {
   } ;;
 
 
+type area = Bottom_right | Bottom_left | Top_right | Top_left | Middle
+type button = Button1 | Button2 | Button3
 type event =
     Resized of int * int
   | Refreshed
   | Key of char
+  | Move of int * int
   | Region of int * int * int * int
   | Href of string
   | Advi of string * (unit -> unit)
+  | Click of area * button
+  | Nil
 ;;
 
 type option_event = Final of event | Raw of status
@@ -840,6 +868,10 @@ let all_events = [
 let button_up_motion = [
   Graphics.Button_up ;
   Graphics.Mouse_motion; 
+] ;;
+
+let button_up = [
+  Graphics.Button_up ;
 ] ;;
 
 let event = ref [];;
@@ -932,7 +964,7 @@ let rec wait_signal_event events =
             raise exn
           ;;
 
-let wait_button_up x y =
+let wait_select_button_up x y =
   let rec select dx dy =
     let buf = save_rectangle x y dx dy in
     draw_rectangle x y dx dy;
@@ -948,17 +980,89 @@ let wait_button_up x y =
   in
   set_color Graphics.black;
   Graphics.display_mode true;
-  let restore() = Graphics.display_mode false; set_color !color in
+  G.set_cursor select_cursor;
+  let restore() =
+    Graphics.display_mode false;
+    set_color !color;
+    G.set_cursor !free_cursor
+  in
   try let e = select 0 0 in restore(); e
   with exn -> restore(); raise exn
         ;;  
+
+let wait_move_button_up x y =
+  let w = !xmax - !xmin and h = !ymax - !ymin in
+  let rec move dx dy =
+    let x' = !xmin + dx and y' = !ymin + dy in
+    let buf = save_rectangle x' y' w h in
+    draw_rectangle x' y' w h;
+    let ev = wait_signal_event button_up_motion in
+    restore_rectangle buf x' y' w h;
+    match ev with
+    | Raw e ->
+        let dx' = e.Graphics.mouse_x - x in 
+        let dy' = e.Graphics.mouse_y - y in 
+        if e.Graphics.button then move dx' dy'
+        else Final (Move (dx', 0 - dy'))
+    | x -> x
+  in
+  set_color Graphics.black;
+  G.set_cursor move_cursor;
+  Graphics.display_mode true;
+  let restore() =
+    Graphics.display_mode false;
+    set_color !color;
+    G.set_cursor !free_cursor
+  in
+  try let e = move 0 0 in restore(); e
+  with exn -> restore(); raise exn
+
+
+let near x x' = abs (x - x') < !size_x / 4;;
+let click_area x y =
+  if near x 0 then
+    if near y 0 then Bottom_left
+    else if near y !size_y then Top_left
+    else Middle
+  else if near x !size_x then
+    if near y 0 then Bottom_right
+    else if near y !size_y then Top_right
+    else Middle
+  else Middle
+
+let button m =
+  if m land G.button1 <> 0 then Button1
+  else if m land G.button2 <> 0 then Button2
+  else if m land G.button3 <> 0 then Button3
+  else Button2
+
+let test() = 
+  for i = 1 to 76
+  do
+    print_int (i+i); print_newline();
+    G.set_cursor (G.Cursor_id (i + i));
+    ignore (wait_signal_event [ Graphics.Button_up ]);
+    ignore (wait_signal_event [ Graphics.Button_down ]);
+  done
+
+let wait_button_up m x y =
+  if m land G.control <> 0 then wait_move_button_up x y
+  else if m land G.shift <> 0 then wait_select_button_up x y
+  else
+    begin
+      match wait_signal_event button_up with
+        Raw e ->
+          Final (Click (click_area x y, button m))
+      | x -> x 
+    end
 
 let wait_event () =
   let rec event emph =
     
     let send ev =
       H.deemphasize true emph; ev in
-    let rescan() = H.deemphasize true emph; event H.Nil in
+    let rescan() =
+      H.deemphasize true emph; event H.Nil in
     match wait_signal_event all_events with
     | Raw ev ->
         begin
@@ -990,11 +1094,15 @@ let wait_event () =
                       event (H.save_screen_exec act a)
                     end
 
-              | _ -> rescan()
+              | _ ->
+                  rescan()
               end with Not_found ->
                 if ev'.button then
-                  match wait_button_up ev.mouse_x ev.mouse_y with
-                  | Final (Region _ as e) -> send e
+                  let m = G.get_modifiers() in
+                  match wait_button_up m ev.mouse_x ev.mouse_y with
+                  | Final (Region (x, y, dx, dy) as e) -> send e
+                  | Final (Move (dx, dy) as e) -> send e
+                  | Final (Click (a,b) as e) -> send e
                   | Final e ->
                       push_back_event ev; 
                       send e

@@ -132,3 +132,30 @@ value gr_get_geometry(value unit){
   Field(res,3) = Val_int(pos[1]);
   CAMLreturn(res);
 }
+
+/* get modifiers... */
+value gr_get_modifiers(void)
+{
+  int mouse_x, mouse_y, button, key, keypressed;
+  Window rootwin, childwin;
+  int root_x, root_y, win_x, win_y;
+  unsigned int modifiers;
+  unsigned int i;
+
+  if (XQueryPointer(grdisplay, grwindow.win,
+                    &rootwin, &childwin,
+                    &root_x, &root_y, &win_x, &win_y,
+                    &modifiers)) {
+    button = 0;
+    if (modifiers & Button1Mask) button = button | 0x1;
+    if (modifiers & Button2Mask) button = button | 0x2;
+    if (modifiers & Button3Mask) button = button | 0x4;
+    
+    if (modifiers & ShiftMask) button = button | 0x10;
+    if (modifiers & ControlMask) button = button | 0x20;
+    if (modifiers & Mod1Mask) button = button | 0x40;
+  } else {
+    button = -1;
+  }
+  return Val_int(button);
+}
