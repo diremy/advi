@@ -165,7 +165,7 @@ let lex s =
 
   and find_escaped_string i =
     if i >= lim
-    then raise (Lexical_error "end of string (with escape ) not found") else
+    then raise (Lexical_error "end of string (with escape) not found") else
     match s.[i] with
     | '"' as c (* '"' *) -> Buffer.add_char b c; find_string (i + 1)
     | c -> Buffer.add_char b '\\'; Buffer.add_char b c; find_string (i + 1)

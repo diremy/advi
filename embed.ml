@@ -52,7 +52,7 @@ let raw_embed_app command app_mode app_name width height x gry =
       (If they are X apps, of course...)
 
     !g : geometry like 100x100+20+30
-    !w : width  of the target window in pixel
+    !w : width of the target window in pixel
     !h : height of the target window in pixel
     !x : x of the application against the root
     !y : y of the application against the root

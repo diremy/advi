@@ -145,7 +145,8 @@ let load_init_files options set_dvi_filename usage_msg =
 
 (* Cache directory *)
 
-(* Test if the directory dirname can serve as a cache directory *)
+(* test is the directory dirname can serve as a cache directory:
+   it should be readable writable and executable. *)
 let can_be_cache_directory dirname =
    Sys.file_exists dirname &&
    try
