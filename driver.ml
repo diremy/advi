@@ -74,6 +74,14 @@ let named_colors = [
   "yellow", 0xffff00;
   "cyan", 0x00ffff;
   "magenta", 0xff00ff;
+  "Black", 0x000000;
+  "White", 0xffffff;
+  "Red", 0xff0000;
+  "Green", 0x00ff00;
+  "Blue", 0x0000ff;
+  "Yellow", 0xffff00;
+  "Cyan", 0x00ffff;
+  "Magenta", 0xff00ff;
 ];;
 
 let rgb r g b =

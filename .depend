@@ -26,8 +26,10 @@ ttfont.cmo: ttfont.cmi
 ttfont.cmx: ttfont.cmi 
 jfm.cmo: input.cmi jfm.cmi 
 jfm.cmx: input.cmx jfm.cmi 
-font.cmo: jfm.cmi pkfont.cmi search.cmi table.cmi ttfont.cmi font.cmi 
-font.cmx: jfm.cmx pkfont.cmx search.cmx table.cmx ttfont.cmx font.cmi 
+font.cmo: jfm.cmi misc.cmi pkfont.cmi search.cmi table.cmi ttfont.cmi \
+    font.cmi 
+font.cmx: jfm.cmx misc.cmx pkfont.cmx search.cmx table.cmx ttfont.cmx \
+    font.cmi 
 glyph.cmo: font.cmi glyph.cmi 
 glyph.cmx: font.cmx glyph.cmi 
 devfont.cmo: font.cmi glyph.cmi table.cmi devfont.cmi 
