@@ -8,7 +8,7 @@ PLATEX=TEXINPUTS=.:../tex:$(TEXINPUTS): platex
 
 TEXFILES= demo.tex trigo_source.tex trans.tex trans2.tex background.tex
 DVIFILES= $(TEXFILES:%.tex=%.dvi)
-ADVI= TEXPSHEADERS=../tex: ../advi
+ADVI=TEXPSHEADERS=../tex: ../advi
 
 ifeq ($(HAVE_CAMLTK),true)
 MLPROG=taquin
