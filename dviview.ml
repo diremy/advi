@@ -237,7 +237,9 @@ let init_geometry all st =
     | _ -> assert false in
   let base_dpi = min wdpi hdpi in
   let width = int_of_float (base_dpi *. w_in)
-  and height = int_of_float (base_dpi *. h_in) in
+  and height = int_of_float (base_dpi *. h_in) 
+  and real_width = int_of_float (base_dpi *. w_in *. st.ratio)
+  and real_height = int_of_float (base_dpi *. h_in *. st.ratio) in
   let (size_x, size_y) =
     if attr.crop then begin
       let sx = match attr.hmargin with
@@ -261,8 +263,8 @@ let init_geometry all st =
       st.orig_x <- orig_x;
       st.orig_y <- orig_y;
     end;
-  st.dvi_width <- width;
-  st.dvi_height <- height;
+  st.dvi_width <- real_width;
+  st.dvi_height <- real_height;
   st.toc <- None;
 ;;
 
