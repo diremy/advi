@@ -76,6 +76,7 @@ Maybe you mean \@currenvir ing}}
 
 \def \advi@ifadvi {\ifadvi@ignore
   \expandafter \@secondoftwo \else \expandafter \@firstoftwo \fi}
+\advi@export \ifadviignore \ifadvi@ignore
 \advi@export \adviignore \advi@ignoretrue
 \advi@export \ifadvi \advi@ifadvi
 
@@ -568,6 +569,7 @@ end
 \def \advi@style {box}
 \def \advi@mode {advi}
 \define@key {advi@anchor}{over}  []{\def \advi@mode {advi}}
+\define@key {advi@anchor}{stick}  []{\def \advi@mode {pdvi}}
 \define@key {advi@anchor}{click} []{\def \advi@mode {hdvi}}
 \define@key {advi@anchor}{box}   []{\def \advi@style {box}}
 \define@key {advi@anchor}{invisible}[]{\def \advi@style {invisible}}
@@ -742,6 +744,8 @@ end
 \define@key {advi@edit}{min}{\def \advi@edit@min {#1}}
 \def \advi@edit@min{1ex}
 
+\let \advi@edit@setlinehook \relax
+
 %\advi@edit {command}{name}{keys}{precode}{keys}{code}
 \newcommand{\advi@edit}[4]{%
   \hbox \bgroup
@@ -772,7 +776,6 @@ end
        \setbox0=\hbox {\raise \adviy \hbox {\kern \advix\box0}}%
        \dp0=0pt\wd0=0pt\ht0=0pt
     \fi
-    \advi@edit@makelineno
     \advi@special
       {edit\space
        comm="\advi@edit@comm"\space

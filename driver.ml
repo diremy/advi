@@ -1300,9 +1300,12 @@ let html_special st html =
         open_html st link (fun x -> Dev.H.Name x)
     | ("href", link) :: _ ->
         open_html st link (fun x -> Dev.H.Href x)
-    | (("advi" | "hdvi" as kind), link) :: rest ->
+    | (("advi" | "hdvi" | "pdvi" as kind), link) :: rest ->
         let mode =
-          if kind = "advi" then Dev.H.Over else Dev.H.Click_down in
+          if kind = "advi" then Dev.H.Over
+          else if kind = "hdvi" then Dev.H.Click_down
+          else Dev.H.Stick
+        in
         let style =
           try
             match List.assoc "style" rest with

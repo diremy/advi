@@ -1332,10 +1332,12 @@ will play the record named \docid{tag}.
 
 The declarations \docid{decl} are of the following form:
 \begin{description}
-\item [\doctt{over} \textrm{or} \doctt{click}]\indent\par 
-this defines the mode of  activation, which is either by
-moving mouse  over  or clicking on the anchor. 
-The default mode is \doctt{over}.
+\item [\doctt{over}, \doctt{click}, \textrm{or} \doctt{stick}]\indent\par 
+The mode \doctt{stick} plays the tag \docid{tag} on
+click. The mode \doctt{click} is similar, except that it restores the
+previous state when leaving the anchor area. The mode \doctt{over} is as
+\doctt{click} but display the \docid{tag} when the mouse is \doctt{over}
+the anchor instead of waiting for a click.
 \item [\doctt{box}, \doctt{invisible}, or \doctt{underline}]\indent\par
 this defines the style in which the anchor should be drawn.
 The default style is \doctt{box}.

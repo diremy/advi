@@ -255,7 +255,7 @@ module E :
 
 module H :
     sig
-      type mode = Over | Click_down
+      type mode = Over | Click_down | Stick
       type style = Box | Underline | Invisible
       type link = {
           link : string;

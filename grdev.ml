@@ -865,7 +865,7 @@ let editing =
 
 module H =
   struct
-    type mode = Over | Click_down
+    type mode = Over | Click_down | Stick
     type draw_style = Draw | Fill
     type style = Box | Underline | Invisible
     type link = {
@@ -1047,6 +1047,14 @@ module H =
       GraphicsY11.synchronize ();
       Launch.launch_embedded_apps ();
       Screen (img, act, all_anchors)
+
+    let nosave_screen_exec act a =
+      a ();
+      (* is the following needed? *)
+      flush_last ();
+      GraphicsY11.synchronize ();
+      Launch.launch_embedded_apps ();
+      Nil
 
     let light t =
       try
@@ -1624,6 +1632,16 @@ let wait_event () =
               if ev.button && not b then begin
                 H.deemphasize true emph;
                 event (H.save_screen_exec act a) true end else
+              if ev.button then event emph b else
+              if H.up_to_date act emph then event emph b else begin
+                H.deemphasize true emph;
+                event (H.emphasize_and_flash href_emphasize_color act) b end
+        | {A.action =
+           {H.tag = H.Advi {H.link = s; H.action = a; H.mode = H.Stick};
+            H.draw = d}} as act ->
+              if ev.button && not b then begin
+                H.deemphasize true emph;
+                event (H.nosave_screen_exec act a) true end else
               if ev.button then event emph b else
               if H.up_to_date act emph then event emph b else begin
                 H.deemphasize true emph;

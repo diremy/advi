@@ -303,6 +303,7 @@ let encodings = [
   "cm[rs][0-9]+",     cmr_encoding;
   "cmt[ti][0-9]+",    cmtt_encoding;
   "cms[lxs][0-9]+",   cmr_encoding;
+  "cmcsc[0-9]+",      cmr_encoding; (* is this correct? *)
   "cmbx[0-9]+",       cmr_encoding;
   "cmmi[0-9]+",       cmmi_encoding;
   "cmex[0-9]+",       cmex_encoding;
