@@ -6,16 +6,20 @@ RM=/bin/rm -f
 LATEX=TEXINPUTS=.:../tex: latex
 PLATEX=TEXINPUTS=.:../tex: platex
 
+TEXFILES= demo.tex trigo_source.tex trans.tex trans2.tex background.tex
+DVIFILES= $(TEXFILES:%.tex=%.dvi)
+
 ifeq ($(HAVE_CAMLTK),true)
 MLPROG=taquin
 else
 MLPROG=
 endif
 
-all: demo.dvi trigo_source.dvi trans.dvi trans2.dvi background.dvi \
-     $(MLPROG) 
+all: $(DVIFILES) $(MLPROG) 
 
-.tex.dvi: ../tex/bar.jpg.eps
+$(DVIFILES): ../tex/bar.jpg.eps demo.sty
+
+.tex.dvi: 
 	if test "$<" = "jpdemo.tex" ; then $(PLATEX) $<; \
 	else $(LATEX) $<; \
 	fi 
@@ -34,3 +38,5 @@ clean:
 
 test_subwindow:
 	ocamlc -custom -I .. unix.cma graphics.cma -ccopt -L.. ../grY11.o ../events.o ../graphicsY11.cmo test_subwindow.ml 
+
+.SUFFIXES: .tex .sty .dvi .eps
