@@ -34,7 +34,9 @@ ANNOUNCEFILE=Announce-$(VERSION).$(PATCHLEVEL)
 PACKAGEVERSIONFILE=config.ml
 DOCVERSIONFILES=tex/advi.sty tex/advi.hva \
 doc_src/Includes/advi-version.html doc_src/Includes/env \
-doc/advi.1
+doc_src/advi.man
+
+MANFILES=doc/advi.1
 
 HELPFILES=doc/splash.dvi \
     doc/scratch_write_splash.dvi doc/scratch_draw_splash.dvi
@@ -186,6 +188,8 @@ install:: $(INSTALLTARGET) $(HELPFILES)
 	install -m 755 $(INSTALLTARGET) ${bindir}/advi
 	- install -d $(ADVI_LOC)
 	install -m 644 $(HELPFILES) $(EPSFILES)	$(STYFILES) $(ADVI_LOC)
+	- install -d $(MANDIR)/man$(MANEXT)
+	install -m 644 $(MANFILES) $(MANDIR)/man$(MANEXT)
 	if [ -f conf/jpfonts.conf ]; then \
 		install -m 644 conf/jpfonts.conf $(ADVI_LOC); fi
 	texhash
