@@ -228,23 +228,20 @@ let draw_bkgd_img (w,h) x0 y0 =
                 (w,h) x0 y0 
 ;;
 
-let default_bg_color = ref bkgd_data.bgcolor
-;;
-
 type bgoption = BgColor of color | BgImg of string
 ;;
 
 let set_bg_option = function
-    BgColor c ->bkgd_data.bgcolor <- c; prerr_endline ("Color: "^string_of_int c);
-                default_bg_color := c
-  | BgImg fn -> bkgd_data.bgimg <- Some fn; prerr_endline ("Image: "^fn);
-                    (* draw it! *)
+    BgColor c ->bkgd_data.bgcolor <- c
+  | BgImg fn -> bkgd_data.bgimg <- Some fn
 ;;
 
-let set_bg_options l = List.iter set_bg_option l
+let set_bg_options l = 
+     List.iter set_bg_option l
 ;;
 
-let bg_color = ref !default_bg_color;;
+
+let bg_color = ref bkgd_data.bgcolor;;
 let bg_colors = ref [];;
 let push_bg_color c =
   bg_colors := !bg_color :: !bg_colors;
@@ -252,7 +249,7 @@ let push_bg_color c =
 let pop_bg_color() =
   match !bg_colors with
   | h::t -> bg_color := h; bg_colors := t
-  | [] -> bg_color := !default_bg_color
+  | [] -> bg_color := bkgd_data.bgcolor
 ;;
 
 
@@ -974,6 +971,12 @@ let close_dev () =
   end;
   opened := false;;
 
+let draw_scale (w,h) x0 y0 =
+  Graphics.set_color Graphics.black;
+  for i = 0 to h do
+      if (i mod 50) = 0 then (Graphics.moveto x0 i; Graphics.lineto (x0+200) i;Graphics.draw_string (string_of_int i));
+  done;;
+
 let clear_dev () =
   if not !opened then
     failwith "Grdev.clear_dev: no window" ;
@@ -982,7 +985,7 @@ let clear_dev () =
   Graphics.display_mode !display_mode ;
   Graphics.clear_graph ();
   H.clear(); 
-  bg_color := !default_bg_color; (* reference modified via \setbgcolor . RDC *)
+  bg_color := bkgd_data.bgcolor; (* modifiable via \setbgcolor . RDC *)
   bg_colors := [];
   background_colors := [];
   Symbol.clear();
@@ -994,6 +997,8 @@ let clear_dev () =
   Graphics.set_color !bg_color;
   Graphics.fill_rect !xmin !ymin !xmax !ymax;
   (* now try to handle background images *)
+prerr_endline ("w: "^(string_of_int !xmax)^" h: "^(string_of_int !ymax));
+  draw_scale (!xmax,!ymax) 0 0;
   draw_bkgd_img (!xmax,!ymax) 0 0
 ;;
 

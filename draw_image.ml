@@ -22,6 +22,8 @@ type ratiopts =
 ;;
 
 let f file whitetransp alpha blend ratiopts (w,h) x0 y0 =
+prerr_endline ("w: "^(string_of_int w)^" h: "^(string_of_int h));
+prerr_endline ("gw: "^string_of_int (Graphics.size_x ())^" gh: "^string_of_int (Graphics.size_y ()));
   let file = Search.true_file_name [] file in
   let cache_name =   (* The computed cache name *)
     let file' = String.copy file in
@@ -44,6 +46,7 @@ let f file whitetransp alpha blend ratiopts (w,h) x0 y0 =
       let height = input_value ic in
       let data = input_value ic in
       close_in ic;
+prerr_endline ("cw: "^(string_of_int width)^" ch: "^(string_of_int height));
       Rgba32 (Rgba32.create_with width height data) 
     end else begin
       let ic = open_in_bin cache_name in
@@ -102,7 +105,6 @@ let f file whitetransp alpha blend ratiopts (w,h) x0 y0 =
       	in
 	let image = match image with
 	| Rgb24 i ->
-prerr_endline "in rgb24";
   	    let width = i.Rgb24.width 
   	    and height = i.Rgb24.height
   	    in
@@ -136,7 +138,6 @@ prerr_endline "in rgb24";
 
   match image with
   | Rgb24 _ when alpha = 1.0 && blend = None ->
-prerr_endline "in rgb24blend";
       (* optimized *) 
       let image_graphics =
 	try
@@ -149,7 +150,6 @@ prerr_endline "in rgb24blend";
       in
       Graphics.draw_image image_graphics x0 y0
   | Rgb24 _ | Rgba32 _ ->
-prerr_endline "in rgb24noblend";
 (* RDC alpha blending INUTILE pour backgrounds? Let's say so for now...
       let alpha = truncate (alpha *. 255.0) in
       let get_src_alpha =

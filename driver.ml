@@ -763,13 +763,13 @@ let set_rule st a b =
     (* Background object configuration. RDC *)
     
     let setup_bkgd status = (* propagate bkgd preferences to graphics device *)
-      Dev.copy_bkgd_data status.Dvi.bkgd_prefs Dev.bkgd_data;
-      Dev.set_bg_options status.Dvi.bkgd_local_prefs;
-      Dev.copy_bkgd_data Dev.bkgd_data status.Dvi.bkgd_prefs
+      Dev.copy_bkgd_data status.Dvi.bkgd_prefs Dev.bkgd_data; (* store the default/inherited prefs into Dev *)
+      Dev.set_bg_options status.Dvi.bkgd_local_prefs;         (* apply local modifications                  *)
+      Dev.copy_bkgd_data Dev.bkgd_data status.Dvi.bkgd_prefs  (* recover modified preferences               *)
       ;;
 
     let bkgd_alist = [
-      ("col",fun s -> fun st -> [Dev.BgColor (parse_color_args (split_string (unquote s) 0))]);
+      ("col",fun s -> fun st -> let c = (parse_color_args (split_string (unquote s) 0)) in [Dev.BgColor c]);
       ("img",fun s -> fun st -> [Dev.BgImg s]);
       ("reset",fun s -> fun st -> Dev.copy_bkgd_data (Dev.default_bkgd_data ()) st.Dvi.bkgd_prefs; []) 
       (***RDC: is this code ---/\ doing the rest of data we want to see ? ***)
@@ -998,11 +998,21 @@ let set_rule st a b =
       else if has_prefix "html:<A name=\"" s || has_prefix "html:<a name=\"" s then 
         scan_special_html (headers,xrefs) pagenum s
 
+    let reset_bkgd_info = Misc.option_flag false
+       "--reset_bkgd"
+       "\tReset background options at each new page";;
+
+
     let scan_special_page cdvi globals pagenum =
        let page = cdvi.base_dvi.Dvi.pages.(pagenum) in
            match page.Dvi.status with
             | Dvi.Unknown ->  
-               let status = {Dvi.hasps=false;Dvi.bkgd_local_prefs=[];Dvi.bkgd_prefs=Dev.bkgd_data} in
+               let status = {Dvi.hasps=false;
+                             Dvi.bkgd_local_prefs=[];
+                             Dvi.bkgd_prefs=
+                              (if !reset_bkgd_info 
+                               then Dev.default_bkgd_data ()
+                               else Dev.bkgd_data)} in
                let eval = function
                   Dvi.C_xxx s -> scan_special status globals pagenum s
                   | _ -> () 
