@@ -193,11 +193,24 @@ problèmes pourvu que vous les entouriez des parenthèses spéciales
 les fontes basées sur des fichiers PK, dont les sources sont des
 fichiers <CODE>.mf</CODE>. Les fontes Adobe n'ont pas de fichiers
 source <CODE>.mf</CODE> associés; c'est pourquoi METAFONT ne peut
-créer de fichiers <CODE>.pk</CODE> correspondants pour Active-DVI.
+créer de fichiers <CODE>.pk</CODE> correspondants pour Active-DVI.</I>
 
- <DD>Pour s'en tirer, il suffit d'utiliser un équivalent de la fonte
-qui pose problème dans l'ensemble des fontes Computer-Modern, qui a
+ <DD><I>Pour s'en tirer, il suffit d'utiliser un équivalent de la fonte
+qui pose problème, parmi l'ensemble des fontes Computer-Modern qui a
 été créé par Donald Knuth pour servir de fontes par défaut à TeX.</I>
+
+<DT><STRONG>Comment se fait-il que Active-DVI ait des problèmes de
+marges (alors que <CODE>xdvi</CODE> n'en a pas) ?</STRONG>
+ <DD>Réponse: <I><CODE>xdvi</CODE> et <CODE>advi</CODE> n'utilise pas
+les mêmes marges. <CODE>Advi</CODE> utilise la spécification
+d'encombrement (bounding box) émise par tex dans le fichier DVI et
+n'ajoute aucune marge supplémentaire. Malheureusement, beaucoup de
+styles et de librairies LaTeX ne donnent pas une valeur correcte à la
+bounding box.
+ <DD>Le remède consiste à modifier les marges en déplaçant la boîte
+englobante (bounding box) à la souris (Control Bouton), ou sur la
+ligne de commande au lancement de <CODE>advi</CODE> 
+(options <CODE>-vmargin</CODE> et <CODE>-hmargin</CODE>).</I>
 
 </DL>
 

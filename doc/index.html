@@ -161,17 +161,29 @@ formulas in them ?</STRONG>
 use the environment <CODE>alltt</CODE> and insert the formulas into fancy
 parens <CODE>\(</CODE> and <CODE>\)</CODE>.</I>
 
-
 <DT><STRONG>How to visualize Adobe PostScript fonts like
 <CODE>ptmr8t</CODE> using Active-DVI ?</STRONG>
 
  <DD>Answer: <I>You cannot! Active-DVI can display only PK based fonts
 whose sources are provided in <CODE>.mf</CODE> files. Adobe fonts
 having no <CODE>.mf</CODE> source files, hence METAFONT cannot create
-the corresponding <CODE>.pk</CODE> files for Active-DVI.
- <DD>The workaround is to use an equivalent of the problematic font
+the corresponding <CODE>.pk</CODE> files for Active-DVI.</I>
+ <DD><I>The workaround is to use an equivalent of the problematic font
 in the Computer-Modern font set, that has been designed by Donald Knuth
 to be the default fonts for TeX.</I>
+
+<DT><STRONG>How to solve the margin problems of Active-DVI (margins
+are wrong with <CODE>advi</CODE> while <CODE>xdvi</CODE> works
+perfect) ?</STRONG>
+ <DD>Answer: <I><CODE>xdvi</CODE> and <CODE>advi</CODE> do not use the
+same margins. <CODE>Advi</CODE> uses the specification that TeX emits
+into the DVI file (bounding box) and does not add extra space for
+margins. Unfortunately, many LaTeX
+styles and packages do not give a relevant value to the bounding box.
+ <DD>The workaround is to modify margins, either by moving the
+bounding-box around with the mouse (Control+button), or to use the
+relevant option on the command line when launching <CODE>advi</CODE>
+(the <CODE>-vmargin</CODE> and <CODE>-hmargin</CODE> options).</I>
 
 </DL>
 
