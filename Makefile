@@ -211,7 +211,8 @@ web: tex/splash.dvi
 
 rpm: tex/splash.dvi
 	if test -d /usr/src/redhat; then rpmdir=/usr/src/redhat; \
-	else if test -d /usr/src/RPM; then rpmdir=/usr/src/RPM; fi; fi; \
+	else if test -d /usr/src/RPM; then rpmdir=/usr/src/RPM; \
+	else if test -d /usr/src/rpm; then rpmdir=/usr/srsc/rpm; fi fi; fi; \
 	if test "X$$rpmdir" = "X"; then \
 		echo "cannot create rpm"; exit 2; fi; \
 	echo YOU NEED TO SU ROOT; \
