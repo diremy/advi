@@ -1,0 +1,350 @@
+\documentclass{article}
+
+\usepackage {manual}
+\usepackage {makeidx}
+
+\expandafter \ifx \csname driver\endcsname\relax \def \driver{}\fi 
+\usepackage [\driver]{hyperref}
+\usepackage {advi}
+\usepackage {advi-annot}
+
+
+\title {Active DVI manual}
+\author {???}
+
+
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Summary of Active DVI.
+\end{abstract}
+
+\tableofcontents
+
+\section {Installation}
+
+
+\section {Documentation}
+
+\subsection {Pause, Record and Play}
+
+\medskip\noindent
+\docdef \adviwait\docopt{seconds}
+\begin{quote}
+Wait for \docid{seconds} or without argument forever, that is, until the
+user requests to continue (or to change page).
+\end{quote}
+
+\medskip\noindent
+\docdef \advirecord \doctt{[play]}\docarg{tag}\docarg{latex code}
+\begin{quote}
+The computes \docid{latex code} and record its DVI ouput under tag
+\docid{tag}. The DVI output is not displayed during recording, unless the
+option \doctt{play} is set.
+
+Embedded recordings are prohibited. 
+\end{quote}
+
+\medskip\noindent
+\docdef \adviplay\docopt{color}\docarg{tag}
+\begin{quote}
+Replay the DVI previously recorded as \docid{tag}.
+The optional argument changes the color to \docid{color} during replay. 
+\end{quote}
+
+\subsection {Images}
+
+\subsection {Backgrounds}
+
+\medskip\noindent
+\docdef \advisetbg\docarg{key=value list}
+\begin{quote}
+where \docid{key=value list} is a list of bindings of the followning kind:
+
+\dockey{color}{color}
+\begin{quote}
+Set the background color to \docid{color}.
+\end{quote}
+
+\dockey{image}{file}
+\begin{quote}
+Use the file from \docid{file} as background.
+\end{quote}
+
+\dockey{alpha}{float}
+\begin{quote}
+Set the alpha factor for the background image to \docid{float}.
+\end{quote}
+
+\dockey{blend}{blend mode}
+\begin{quote}
+Set the blend mode to \docid{blend mode}, which should be one of the
+following (unchecked): {\tt difference}, XXX?
+\end{quote}
+
+
+
+\end{quote}
+
+\subsection {Transitions}
+
+\docdef \advitrans \docarg {key=val list}
+\begin{quote}
+where \docid{key=value list} is a list of bindings of the following kind:
+
+\dockey{none}{} or \dockey{slide}{} or \dockey{block}{} or \dockey{wipe}{}
+\begin{quote}
+Set the transition mode to the corresponding key.
+One of this key is mandatory (several is should be illegal, but in fact
+overides the previous one). 
+\end{quote}
+
+\dockey{from}{direction}
+\begin{quote}
+Make the transition come from \docid{direction}.  Directions are not checked
+but should be one of the following: 
+\begin{center}
+\tt
+\begin{tabular}{l@{\qquad}c@{\qquad}r}
+topleft&   top& topright\\
+left&  center&  right \\
+bottomleft& bottom & bottomright\\
+\end{tabular}
+\end{center}
+\end{quote}
+
+\dockey{steps}{n}
+\begin{quote}
+Make the transition in \docid{n} steps. 
+\end{quote}
+\end{quote}
+
+\medskip\noindent
+\docdef \advitransbox \docarg {key=val list}\docarg{hbox material}
+\begin{quote}
+where \docid {key=val list} is as above and \docarg{hbox material} is
+whatever can follow an \docdef \hbox{} command. In particular, the material
+may contain verbatim commands, since as for the \docdef\hbox{} it is 
+parsed incrementally.
+\end{quote}
+
+\subsection {Hyperrefs}
+
+Active dvi supports hyperrefs. 
+
+Explain \verb"<a name>aaa</a>"
+
+\subsection {Embed applications anchors}
+
+The commands are 
+
+\medskip\noindent
+\docdef \adviembed\docopt{key=value 
+list}\docarg{width}\docarg{height}\docarg{command} 
+
+\begin{quote}
+where \docid{key=value list} is a list of bindings of the following kind:
+
+\dockey{name}{name}
+\begin{quote}
+Allows to refer to the embedded application as \docid{name}. 
+Annonymous applications have actually the default name \doctt{anonymous}.
+\end{quote}
+
+\dockey{ephemeral}{name}
+
+\begin{quote}
+This is the default case: the embedded application is killed when the page
+is turned.
+\end{quote}
+
+\dockey{persistent}{name}
+
+\begin{quote}
+The application keeps running in the background, but will only be visible in
+the current page.
+\end{quote}
+
+\dockey{sticky}{name}
+\begin{quote}
+The application keep running and remains visible when turning pages.
+\end{quote}
+
+\end{quote}
+
+\medskip\noindent
+\docdef \advikillembed \docarg{name}
+\begin{quote}
+Kill all embedded applications named \docid{name}
+\end{quote}
+
+
+\subsection {Active anchors}
+
+The command is 
+
+\medskip\noindent
+\docdef \advianchor \docarg{tag}\docarg {text}
+\begin{quote}
+The text is first display as usual and mark as active. 
+Mouving the mouse above the text will display the record \docid{tag}.
+\end{quote}
+
+\noindent
+The command is also available as an environment 
+
+\medskip\noindent
+\docdef \begin\doctt{\{Advianchor\}}\docarg{tag}%
+\docid {text}\docdef \end\doctt{\{Advianchor\}}
+\begin{quote}
+Here, \docid{text} can have fragile commands. 
+\end{quote}
+
+\newpage
+
+\subsection {Postscript specials}
+
+\subsubsection {PStricks}
+
+For instance, some features of {\tt
+PStricks} such as annotations above arrows do not work, yet.
+
+\subsubsection {PStricks that are know to work}
+\begin{itemize}
+\item[-]
+Labels over arrows \verb"\Aput", \verb"Bput", etc.
+(they change the Postscript coordinates...)
+
+\item[-]
+{\tt pspicture}
+(idem, but drawings that are not embedded in pspictures works)
+
+\item[-]
+
+Advi only recognizes binary overlays (display if 0, hide otherwise). 
+This is sufficient for the proper documentclass
+(see \hyperlink {overlays}{below}).
+\end {itemize}
+PS-tricks that are known to work:
+\begin {itemize}
+
+\item[+]
+Simple drawings work
+
+\item[+] 
+{\tt\string\SpecialCoor} works, {\em i.e.} commands of the form
+{\tt \string \rput \{A\}\{bla bla\}} works where {\tt A} is a node
+
+\item[+]
+Connections between nodes {\tt \string \ncarc}, {\tt \string \ncarc},
+also works.
+\end {itemize}
+
+
+\section {Auxiliary packages}
+
+\subsection {Annotations}
+\subsection*{Active Annotations (manual)}
+
+To use annotations, you must load the additional package
+\begin{verbatim}
+\usepackage{advi-annot}
+\end{verbatim}
+This defines the following command:
+
+\medskip\noindent
+\docdef \adviannot \docopt{key=value list}\docarg{anchor}%
+    \docopt{ps options}\docpar {pos}\docarg{text}
+\begin{quote}
+The \docid{key=value list} is a list of bindings of the following kind:
+
+\dockey[yellow]{bg}{color}
+\begin{quote}
+The background color for annotations. 
+\end{quote}
+
+\dockey[c]{col}{colspec}
+\begin{quote}
+Where \docid{colspec} is a column specification for the tabular
+environment. Moreover, the following abbreviations are recognized:
+
+\smallskip
+\tt
+\begin{tabular}{|l|l|}
+\hline
+\rm\em key & \rm expands to \\
+\hline
+c &  col=c\\
+l &  col=l\\
+r &  col=r\\
+p=\docid{w} & col=p\docarg{w}\\
+\cline{1-2}
+\end{tabular}
+\begin{tabular}{|l|l|}
+\hline
+\rm\em key & \rm expands to \\
+\hline
+C &  col=\{>\{\$\}c<\{\$\}\}\\
+L &  col=\{>\{\$\}l<\{\$\}\}\\
+R &  col=\{>\{\$\}r<\{\$\}\}\\
+P\docid{w} &  \doctt{col=\{>\{\$\}p\docarg{w}<\{\$\}\}}\\
+\cline{1-2}
+\end{tabular}
+\end{quote}
+
+\docid{pos} is the optional relative position of the annotation 
+defaults to $1,1$ (it is passed to the command \docdef\rput).
+
+\docid{ps options} are pased to  the command \docdef\psset). 
+\end{quote}
+Parameters (color and tabular column specification) can also 
+be set globally using the command:
+
+\medskip \noindent
+\docdef \setkeys\doctt{\{adviannot\}}\docarg{key=value list}
+
+
+%Annotation location can also be invisible \advi{C}{\tt{ }}instead of visible.
+
+
+\appendix
+
+
+\section {Known bugs}
+
+\subsection*{Inlined postscript}
+
+PS relies on {\tt ghoscript} to display Postscript inlined specials.
+However, some earlier releases of {\tt ghostscript} 
+implements Postscript {\tt flushpage} command as a {\tt XFlush} 
+which does not force evaluations of commands, and make the 
+synchronization between {\tt ghostscrip} and {\tt advi} drawings 
+uncontrolable. In this case, the inerleaving of inlined postscript 
+and other material may be inconsistent. 
+
+Fortunately, it seems that recent version of ghostscript $(> 6.5)$ have
+fixed this problem by using {\tt XSync(false)} instead.
+There, inline specials should be correctly rendered. 
+
+However, version some releases of 6.5x also carry a small fatal bug for
+advi, that will be fixed in future releases. This can easily be fixed, thoug 
+(see \url{http://cristal.pauillac.inria.fr/~remy/ghostscript/}).
+
+\subsection*{Inlined postscript}
+
+So far, the implementation of inline Postscript does not correctly handle
+complex change of coordinates.  (See PStricks section). 
+
+
+\section {Future}
+
+\section {Key bindings}
+
+\section {Index}
+
+\printindex
+
+\end{document}

@@ -497,35 +497,6 @@ Of course, the effect of active anchors can also be
          {<->}{A}{B}%\Aput{Fire!}
 }
 
-\subsection*{Known bug}
-
-On plateforms for which PS tricks does not synchronizes correctly,
-calling PS tricks by active anchors may result in part of the action 
-to erroneously remain on screen when leaving the anchor. 
-
-
-\newpage
-
-\subsection*{Active anchors (manual)}
-
-The command is 
-
-\medskip\noindent
-\docdef \advianchor \docarg{tag}\docarg {text}
-\begin{quote}
-The text is first display as usual and mark as active. 
-Mouving the mouse above the text will display the record \docid{tag}.
-\end{quote}
-
-\noindent
-The command is also available as an environment 
-
-\medskip\noindent
-\docdef \begin\doctt{\{Advianchor\}}\docarg{tag}%
-\docid {text}\docdef \end\doctt{\{Advianchor\}}
-\begin{quote}
-Here, \docid{text} can have fragile commands. 
-\end{quote}
 
 \newpage
 
@@ -553,71 +524,6 @@ These annotations have been typeset respectively as:
 \adviannot[C]{for instance}[linecolor=red](-1.5,1){for example?}
 \end{verbatim}
 \end{small}
-
-\newpage
-
-\subsection*{Active Annotations (manual)}
-
-To use annotations, you must load the additional package
-\begin{verbatim}
-\usepackage{advi-annot}
-\end{verbatim}
-This defines the following command:
-
-\medskip\noindent
-\docdef \adviannot \docopt{key=value list}\docarg{anchor}%
-    \docopt{ps options}\docpar {pos}\docarg{text}
-\begin{quote}
-The \docid{key=value list} is a list of bindings of the following kind:
-
-\dockey[yellow]{bg}{color}
-\begin{quote}
-The background color for annotations. 
-\end{quote}
-
-\dockey[c]{col}{colspec}
-\begin{quote}
-Where \docid{colspec} is a column specification for the tabular
-environment. Moreover, the following abbreviations are recognized:
-
-\smallskip
-\tt
-\begin{tabular}{|l|l|}
-\hline
-\rm\em key & \rm expands to \\
-\hline
-c &  col=c\\
-l &  col=l\\
-r &  col=r\\
-p=\docid{w} & col=p\docarg{w}\\
-\cline{1-2}
-\end{tabular}
-\begin{tabular}{|l|l|}
-\hline
-\rm\em key & \rm expands to \\
-\hline
-C &  col=\{>\{\$\}c<\{\$\}\}\\
-L &  col=\{>\{\$\}l<\{\$\}\}\\
-R &  col=\{>\{\$\}r<\{\$\}\}\\
-P\docid{w} &  \doctt{col=\{>\{\$\}p\docarg{w}<\{\$\}\}}\\
-\cline{1-2}
-\end{tabular}
-\end{quote}
-
-\docid{pos} is the optional relative position of the annotation 
-defaults to $1,1$ (it is passed to the command \docdef\rput).
-
-\docid{ps options} are pased to  the command \docdef\psset). 
-\end{quote}
-Parameters (color and tabular column specification) can also 
-be set globally using the command:
-
-\medskip \noindent
-\docdef \setkeys\doctt{\{adviannot\}}\docarg{key=value list}
-
-
-%Annotation location can also be invisible \advi{C}{\tt{ }}instead of visible.
-
 
 \newpage
 

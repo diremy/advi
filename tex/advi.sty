@@ -18,13 +18,10 @@
 
 %% Options
 
-\newif \ifadvi@annot \advi@annotfalse
 \newif \ifadvi@ignore \advi@ignorefalse
 \DeclareOption {ignore}{\advi@ignoretrue}
 
 \ProcessOptions
-
-\ifadvi@annot \RequirePackage {pst-node}\fi
 
 %% More declarations
 
@@ -167,7 +164,7 @@
       {\hbox {\advi@transbox@save{\the\wd0 }{\the\ht0 }{\the\dp0}%
               \unhbox0\setkeys {advi@trans}{#1}%
               \advi@transbox@go
-                  {\advi@transmode\advi@transfrom \advi@transsteps}}}%
+                  {\advi@transmode \advi@transfrom \advi@transsteps}}}%
    \def \advi@@afterbox {\aftergroup \advi@afterbox} 
    \afterassignment \advi@@afterbox \setbox0 \hbox } 
 
