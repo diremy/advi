@@ -1,7 +1,40 @@
-Active dvi is a DVI previewer and presenter written in Objective Caml
-(http://caml.inria.fr/ocaml/) with some eye candy effects for presentation.
+WARNING -- WARNING -- WARNING -- WARNING -- WARNING -- WARNING -- WARNING
+=========================================================================
 
-Active dvi is largely based on Mldvi written by Alexandre Miquel
+    advi -safer file.dvi
+
+    Active-DVI ``plays'' the DVI files that is displays: during
+    presentation advi can launch arbitrary commands that were
+    incorporated into the LaTeX source of the DVI file to animate the
+    presentation.
+    Hence, when playing a DVI file from some untrusted source, you
+    must use the -safer option that prevents the execution of
+    embedded commands:
+
+    advi -safer file.dvi
+
+For instance, if you choose advi as your default application to view
+DVI files, the safe entry for your .mailcap file is
+ 
+    application/x-dvi; advi -safer %s
+
+It is also recommended to check before visualisation the list of
+embedded commands that a suspicious DVI file could execute by calling
+
+    advi -n file.dvi
+
+
+                 Presentation
+                 ============
+
+
+Active-DVI is a DVI previewer and presenter written in Objective Caml
+(http://caml.inria.fr/ocaml/) with some eye candy effects for
+presentation, support for interactive demonstrations, and embedding of
+arbitrary applications within the presentation (hence the Active
+adjective of the presenter :).
+
+Active-DVI is largely based on Mldvi written by Alexandre Miquel
 (http://pauillac.inria.fr/~miquel/).
 
 Version: 1.0
@@ -36,13 +69,14 @@ The invocation is
 
 where OPTIONS are:
 
+  -safer                Safer mode: external applications are not launched
   -geometry GEOM        Sets the (maximum) geometry GEOM
   -g GEOM               Same as -geometry GEOM
   -crop                 Crop the window to the best size (default)
   -nocrop               Disable cropping
+  -nomargins            Suppress horizontal and vertical margins
   -hmargin DIMEN        Horizontal margin  (default: 1cm)
   -vmargin DIMEN        Vertical margin    (default: 1cm)
-
   -A                    Set Postscript antialias
   -bg                   Draw in the background
   -fullwidth            Adjust size to width
@@ -50,6 +84,9 @@ where OPTIONS are:
   -nogs                 Turn off dipslay of inlined Postscript
   -nopauses             Swictch pauses off
   -page INT             Make advi start at page INT
+  -pager STRING         Command to call the pager
+  -safer                Safer mode: external applications are not launched
+  -scalestep REAL       Scale step for '<' and '>' (default sqrt (sqrt (sqrt 2.0)))
 
 Geometry GEOM is specified in pixels, using the standard format
 for specifying geometries (i.e: "WIDTHxHEIGHT[+XOFFSET+YOFFSET]").
@@ -148,35 +185,29 @@ EYE CANDY MACROS
 ================
 
 Using the LaTeX style advi.sty provided with the package, you can
-embed some Active dvi specials into your TeX documents. Advi
+embed some Active-DVI specials into your TeX documents. Advi
 interprets those specials to provide some eye candy features for your
 presentation.
 
-\pause
-	Advi stops rendering at this point of the source document and 
-	waits a user key stroke.
-
 \wait{sec}
-	Delay the rendering at the point of the document for sec seconds. 
+	Delay the rendering at the point of the document for sec
+        seconds. Wait forever (i.e. stops) if parameter sec is omitted.
 
-\tag{this}{material}
+\advirecord[play]{this}{material}
 	Define an "advi tag" named ``this'' to refer to the text
-        enclosed in the following brackets. The tag can be used to
-        change the color of the text later. 
+        enclosed in the following brackets. The tag can be later on
+        to play or replay the text. By default, [material] is not
+        display, unless option [play] is set.
 
-\hide{this}{material}
-	Same as \tag{this}{material}, but does not render the text at
-        this point. You can display the text later, using the \play macro.
+\adviplay[color]{this}
+	Replay the material previously bound to {this}. If [color] is
+        provided changes the drawing color to [color] before displaying.
 
-\play{this}
-	Display the texts associated with the tag ``this''.
-
-\hilight{this}{col}
-	Display the texts associated with the tag ``this'', using the
-        color ``col''.
-
-Please look at test/demo.{tex|dvi} and test/macros.{tex|dvi} for
-more information and examples.
+Please look at doc/manula.dvi for more information.
+Look in directory test for examples (try advi test/*.dvi).
+Advanced examples are in directory examples.
+(See examples/seminar/clock/tools.dvi, examples/prosper/LL/ll.dvi,
+examples/prosper/Join/join.dvi.)
 
 COPYRIGHT
 =========
@@ -190,9 +221,9 @@ AUTHOR
 
 Alexandre Miquel  <Alexandre.Miquel@inria.fr>
 Jun Furuse <Jun.Furuse@inria.fr>
-Xavier Leroy <Xavier.Leroy@inria.fr> gpic specials
 Didier Remy <Didier.Remy@inria.fr> inlined Postcript, hyperlinks
 Pierre Weis <Pierre.Weis@inria.fr>
+Xavier Leroy <Xavier.Leroy@inria.fr> gpic specials
 Roberto Di Cosmo <dicosmo@pauillac.inria.fr>
 Didier Le Botlan <Didier.Le_Botlan@inria.fr>
 Alan Schmitt <Alan.Schmitt@inria.fr>
