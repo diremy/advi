@@ -148,6 +148,7 @@ let iter ff display_set = List.iter ff display_set;;
 
 (* Says if the character code is probably the ascii code. *)
 let is_pure code =
+  code < 256 && (* code maybe more than 255 for CJK chars *)
   match Char.chr code with
   | 'A' .. 'Z' | 'a' .. 'z' | '0' .. '9' -> true
   | '!' .. '~' -> true (* "false" helps for debugging. *)
@@ -215,7 +216,10 @@ let get_space2 pre s =
 let default_encoding font code =
 (*  if is_pure code
   then String.make 1 (Char.chr code)
-  else *) String.make 1 (Char.chr code);;
+  else *) 
+  if code < 256 then String.make 1 (Char.chr code)
+  else String.make 1 '?' (* CJK code is not supported yet *)
+;;
    (*  Printf.sprintf "[[%s:%d]]" font code *)
 
 (* cmr is one of the usual tex fonts. *)
