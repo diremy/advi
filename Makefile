@@ -159,6 +159,7 @@ tar_and_web: tex/splash.dvi
 	cp -p ../tex/advi.pro bazar-ocaml/advi/test/; \
 	find . -name '.cvsignore' -print | xargs rm; \
 	find . -name 'CVS' -print | xargs rm -rf; \
+	find . -name 'advi-development-kit' -print | xargs rm -rf; \
 	cp -pr bazar-ocaml/advi/doc/* $(WEBSITEDIR)
 	- chgrp -R caml $(WEBSITEDIR)
 	- chmod -R g+w $(WEBSITEDIR)
@@ -168,6 +169,7 @@ tar_and_web: tex/splash.dvi
 	gzip $(ADVI).tar; \
 	mv -f $(ADVI).tar.gz $(FTPSITEDIR)
 	rm -rf release
+	cd advi-development-kit; make distribute
 
 rpm:
 	- echo YOU NEED TO SU ROOT
