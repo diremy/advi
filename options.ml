@@ -18,13 +18,13 @@
 (* To add options to the command line in different modules way *)
 let options = ref [];;
 let all () = !options;;
-let add op action man =
-  options := (op, action, man) :: !options;;
+let add option_name action man =
+  options := (option_name, action, man) :: !options;;
 
 (* A special case: flag options *)
-let flag initial option message =
+let flag initial option_name message =
   let r = ref initial in
-  add option
+  add option_name
     (if initial then Arg.Clear r else Arg.Set r)
     ("\t" ^ message);
   r;;
@@ -34,9 +34,9 @@ let make_debug r s =
   if !r then prerr_endline s;
   true;;
 
-let debug option message =
+let debug option_name message =
   let r = ref false in
-  add option (Arg.Set r) ("\t" ^ message);
+  add option_name (Arg.Set r) ("\t" ^ message);
   make_debug r;;
 
 (* Some global options *)
@@ -85,9 +85,7 @@ let pretty all_options =
     | h :: m :: t ->
         let length = width - String.length o - String.length h in
         let hm = h ^ String.make length ' ' ^ m in
-        if t = [] then  hm
+        if t = [] then hm
         else hm ^ String.concat margin t in
   List.map2 (fun  (o, s, _ ) ml -> (o, s, indent o ml))
     all_options tab_options;;
-
-
