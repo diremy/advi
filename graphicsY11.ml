@@ -205,3 +205,6 @@ external unset_cursor : unit -> unit = "gr_unset_cursor"
 let set_cursor c =
   set_cursor (glyph_of_cursor c)
 ;;
+
+external get_geometry : unit -> int * int * int * int = "gr_get_geometry"
+        (* returns width, height, x, y of the graphics window *)

@@ -464,21 +464,47 @@ let embed_app command app_type width height x y =
     !p : embedding target window id (in digit)
     !w : width  of the target window in pixel
     !h : height of the target window in pixel
-  
+    !x : x of the application against the root
+    !y : y of the application against the root
     Why "!"?  '\' is for TeX. "%" is for TeX. "$" is for TeX...
   ***)
 
-  let opt_geometry = 
-    Printf.sprintf "%dx%d+%d+%d" width height 0 0
-  in
   let opt_parent = 
     Printf.sprintf "%s" wid
   in
-  let command = string_replace "!p" opt_parent
-      (string_replace "!g" opt_geometry  
-	 (string_replace "!w" (string_of_int width)
-	    (string_replace "!h" (string_of_int height) command)))
+  let command0 = string_replace "!p" opt_parent command in
+  
+  (* if there is no !p, the application geometry will be treated 
+     by the WM. In such cases, we try to fix the geoemtry
+     so that it is against the root. *)
+
+  let opt_geometry, opt_x, opt_y = 
+    let px,py = 
+      let against_root = (command0 = command) in
+      if against_root then begin
+        (* fix the geometry *)
+	let (ww,wh,wx,wy) = GraphicsY11.get_geometry () in
+	x+wx, y - height + wy
+      end else begin
+	0,0
+      end
+    in
+    Printf.sprintf "%dx%d+%d+%d" width height px py,
+    string_of_int px,
+    string_of_int py
   in
+
+  let command =
+    string_replace "!g" opt_geometry  
+	(string_replace "!w" (string_of_int width)
+	    (string_replace "!h" (string_of_int height) 
+	       (string_replace "!x" opt_x
+		  (string_replace "!y" opt_y
+		     command0))))
+  in
+  
+  (* prerr_endline command; *)
+
   let command_tokens = Misc.parse_shell_command command in
   let pid = Unix.fork () in
   if pid = 0 then begin (* child *)

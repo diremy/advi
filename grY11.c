@@ -12,6 +12,8 @@
 
 /* $Id$ */
 
+#include <memory.h>
+#include <alloc.h>
 #include <X11/Xatom.h>
 #include <X11/cursorfont.h>
 #include <fail.h>
@@ -92,3 +94,41 @@ value gr_unset_cursor(value unit) {
   return Val_unit;
 }
 
+/* may not be correct ? may use the output of xwininfo ? */
+void get_position_against_root( Window w, int *pos )
+{
+  Window root, parent;
+  Window *children;
+  int nchildren;
+  XWindowAttributes attr;
+    
+  XGetWindowAttributes(grdisplay, w, &attr);
+  pos[0] += attr.x;
+  pos[1] += attr.y;
+  XQueryTree(grdisplay, w, &root, &parent, &children, &nchildren);
+  if(children != NULL){
+    XFree(children);
+  }
+  if( root == parent ){ 
+    return; 
+  } else {
+    get_position_against_root( parent, pos );
+  }
+}
+
+value gr_get_geometry(value unit){
+  CAMLparam1(unit);
+  CAMLlocal1(res);
+  XWindowAttributes attr;
+  int pos[2] = {0,0};
+
+  XGetWindowAttributes(grdisplay, grwindow.win, &attr);
+  get_position_against_root( grwindow.win, pos );
+
+  res = alloc_tuple(4);
+  Field(res,0) = Val_int(attr.width);
+  Field(res,1) = Val_int(attr.height);
+  Field(res,2) = Val_int(pos[0]);
+  Field(res,3) = Val_int(pos[1]);
+  CAMLreturn(res);
+}

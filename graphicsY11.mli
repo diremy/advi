@@ -123,3 +123,6 @@ val set_cursor : cursor -> unit
 
 val unset_cursor : unit -> unit 
         (* unset the cursor (use the parent's cursor) *)
+
+external get_geometry : unit -> int * int * int * int = "gr_get_geometry"
+        (* returns width, height, x, y of the graphics window *)
