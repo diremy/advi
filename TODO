@@ -17,6 +17,18 @@ BEFORE RELEASE:
 la macro du manuel \def\ActiveDVI{Active-DVI}
  ==>PW ouf! c'est fait!
 
+ * Options sont toutes sans _
+
+ * Vérifier que adviwait[sec] marche.
+
+ * Vérifier que toutes les formes de spécification de couleurs marchent
+
+ * Vérifier le resizing et le grossissement.
+
+ * Vérifier les bugs de Damien.
+
+ * Distribuer pour MacOs X
+
 KNOWN BUGS:
 ===========
  *PW Spurious fatal error: (the psfile had a bounding box, but the dvi

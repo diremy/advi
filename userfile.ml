@@ -91,27 +91,27 @@ let prepare_file file =
 
 (* Cache directory *)
 
-let default_user_dir = tilde_subst "~/.advi";;
+let default_user_advi_dir = tilde_subst "~/.advi";;
 
-let user_dir = 
-  let dir = try Sys.getenv "ADVIDIR" with _ -> default_user_dir in
+let user_advi_dir = 
+  let dir = try Sys.getenv "ADVIDIR" with _ -> default_user_advi_dir in
   try tilde_subst dir with
   | _ -> "./.advi"
 ;;
 
-let default_user_cache_dir = Filename.concat (Unix.getcwd ()) ".advi";;
-let cache_dir = ref default_user_cache_dir;;
-let set_cache_dir s = cache_dir := s;;
+let default_user_advi_cache_dir = Filename.concat (Unix.getcwd ()) ".advi";;
+let advi_cache_dir = ref default_user_advi_cache_dir;;
+let set_advi_cache_dir s = advi_cache_dir := s;;
 
 (* User preferences. *)
-let default_option_files = 
+let default_advi_option_files = 
   [tilde_subst "~/.advirc";
-   tilde_subst (Filename.concat default_user_dir "advirc")]
-let options_files = ref default_option_files;;
+   tilde_subst (Filename.concat default_user_advi_dir "advirc")]
+let advi_options_files = ref default_advi_option_files;;
 
 Options.add
  "-cache-dir"
- (Arg.String set_cache_dir)
+ (Arg.String set_advi_cache_dir)
  "STRING\tSet the cache directory (default ./.advi)";;
 
 (* User preferences. *)
@@ -129,14 +129,14 @@ let load_init_files options set_dvi_filename usage_msg =
       if Sys.file_exists fname
       then Rc.cautious_parse_file fname options set_dvi_filename usage_msg)
    init_files;;
- 
+
 (* Writing page current number to the file advi_page_number_file. *)
 let write_page_number =
- Options.flag false "-page_number"
+ Options.flag false "-page-number"
   "Ask advi to write the current page number in a file (default is no)";;
 
 let advi_page_number_file =
-  ref (Filename.concat !cache_dir "advi_page_number");;
+  ref (Filename.concat !advi_cache_dir "advi_page_number");;
 
 let set_page_number_file s = advi_page_number_file := s;;
 
@@ -144,7 +144,8 @@ Options.add "-page-number-file"
  (Arg.String set_page_number_file)
  "STRING\tSet the name of the file where \
   advi could write the current page number\n\
-  \t(default is file \"advi_page_number\" in directory \".advi\"";;
+  \t(default is file \"advi_page_number\" in the cache directory\n\
+  \t(default \"~/.advi\"))";;
 
 let save_page_number n =
  if !write_page_number then
@@ -158,7 +159,7 @@ let save_page_number n =
      (Printf.sprintf
         "Cannot write file %s to record page number." !advi_page_number_file);;
 
-let get_cache_dir () = !cache_dir;;
+let get_advi_cache_dir () = !advi_cache_dir;;
 
 (* Initialization of advi_page_number_file. *)
 let init_advi_page_number_file () =

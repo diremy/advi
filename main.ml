@@ -70,7 +70,8 @@ let get_advi_options () =
         Userfile.load_options_file
           !advi_options set_dvi_filename usage_msg fname))
      "STRING\tLoad this file when parsing this option to set up options\n\
-      (to override the options of the default ~/.advirc init file).";
+      \t(to override the options of the default ~/.advirc or ~/.advi/advirc\n\
+      init file).";
  advi_options := sort_advi_options ();
  !advi_options;;
 

@@ -849,7 +849,7 @@ let wait_special st s =
 (* Background object configuration. RDC *)
 let inherit_background_info =
   Options.flag false
-    "-inherit_background"
+    "-inherit-background"
     "\tBackground options are inherited from previous page";;
 
 let setup_bkgd status =

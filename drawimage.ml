@@ -155,7 +155,7 @@ let cache_path file whitetransp psbbox ratiopt (w, h) =
     | ScaleTopRight    -> "-tr"
     | ScaleBottomRight -> "-br"
   in
-  Filename.concat (Userfile.get_cache_dir ())
+  Filename.concat (Userfile.get_advi_cache_dir ())
     (Printf.sprintf "%s%s-%dx%d%s%s%s"
        cache_prefix
        file'
@@ -232,14 +232,14 @@ let clean_cache () =
   (* erase the files match with "cache-*" *)
   let prefix = cache_prefix in
   let suffix = "" in
-  let dh = Unix.opendir (Userfile.get_cache_dir ()) in
+  let dh = Unix.opendir (Userfile.get_advi_cache_dir ()) in
   try while true do
     let file = Unix.readdir dh in
     if String.length file > 10 &&
        String.sub file 0 (String.length prefix) = prefix &&
        String.sub file (String.length file - String.length suffix)
                        (String.length suffix) = suffix
-    then Unix.unlink (Filename.concat (Userfile.get_cache_dir ()) file)
+    then Unix.unlink (Filename.concat (Userfile.get_advi_cache_dir ()) file)
   done with End_of_file -> Unix.closedir dh
 ;;
 

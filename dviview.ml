@@ -143,7 +143,7 @@ type state = {
     mutable mode : mode;
     (* Some of f when on a pause *)
     mutable cont : (unit -> bool) option;
-  };;
+};;
 
 let set_page_number st n =
  Userfile.save_page_number n;

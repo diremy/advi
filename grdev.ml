@@ -676,22 +676,22 @@ module E =
 module H =
   struct
     type mode = Over | Click_down
-    type link =
-        { link : string;
-          action : (unit -> unit);
-          mode : mode;
-          color : color option;
-          area : (int * int * int) option;
-        }
+    type link = {
+      link : string;
+      action : (unit -> unit);
+      mode : mode;
+      color : color option;
+      area : (int * int * int) option;
+    }
     type tag =
-      | Name of string
-      | Href of string
-      | Advi of link
+       | Name of string
+       | Href of string
+       | Advi of link
 
     type anchor = {
-        tag : tag;
-        draw : (int * int * glyph) list
-      }
+      tag : tag;
+      draw : (int * int * glyph) list
+    }
 
     let anchors = ref A.empty
     let clear () = anchors := A.empty

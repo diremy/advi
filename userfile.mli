@@ -15,10 +15,10 @@
 (*  Based on Mldvi by Alexandre Miquel.                                *)
 (***********************************************************************)
 
-val user_dir : Misc.dir_name;;
+val user_advi_dir : Misc.dir_name;;
 (* Advi user directory. *)
 
-val get_cache_dir : unit -> Misc.dir_name;;
+val get_advi_cache_dir : unit -> Misc.dir_name;;
 (* Advi cache directory. *)
 
 val load_init_files : (string * Arg.spec * string) list ->
