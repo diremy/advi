@@ -173,6 +173,30 @@ tar_and_web: tex/splash.dvi
 	rm -rf release
 	cd advi-development-kit; $(MAKE) distribute
 
+web: tex/splash.dvi
+	(cd test; $(MAKE) all jpdemo.dvi)
+	rm -rf release
+	rm -rf $(WEBSITEDIR)/*
+	- mkdir $(WEBSITEDIR)
+	mkdir release
+	cd release; cvs co bazar-ocaml/advi; \
+	cp -p ../test/*.dvi bazar-ocaml/advi/test/; \
+	cp -p ../doc/manual.dvi bazar-ocaml/advi/doc/; \
+	cp -p ../doc/manual.ps bazar-ocaml/advi/doc/; \
+	cp -p ../doc/manual.pdf bazar-ocaml/advi/doc/; \
+	cp -p ../doc/splash.dvi bazar-ocaml/advi/doc/; \
+	cp -p ../tex/advi.pro bazar-ocaml/advi/test/; \
+	find . -name '.cvsignore' -print | xargs rm; \
+	find . -name 'CVS' -print | xargs rm -rf; \
+	find . -name 'advi-development-kit' -print | xargs rm -rf; \
+	(cd bazar-ocaml/advi/doc/; \
+	ln -s index.html index-en.html; cd ../../..); \
+	cp -pr bazar-ocaml/advi/doc/* $(WEBSITEDIR)
+	- chgrp -R caml $(WEBSITEDIR)
+	- chmod -R g+w $(WEBSITEDIR)
+	rm -rf release
+
+
 rpm:
 	if test -d /usr/src/redhat; then rpmdir=/usr/src/redhat; \
 	else if test -d /usr/src/RPM; then rpmdir=/usr/src/RPM; fi; fi; \
