@@ -34,9 +34,9 @@
   {\@ifundefined {DefineNamedColor}{\usepackage{color}}{}%
    %% two abstract colors set by advi. Defaut to black and white
    \DefineNamedColor{named}{background}{rgb}{1,1,1} %white
-   \definecolor{bgcolor}{named}{background}%
-   \DefineNamedColor{named}{foreground}{rgb}{0,0,0} %black
-   \definecolor{fgcolor}{named}{foreground}%
+    \definecolor{bgcolor}{named}{background}%
+    \DefineNamedColor{named}{foreground}{rgb}{0,0,0} %black
+    \definecolor{fgcolor}{named}{foreground}%
   }
 
 %% Options
@@ -640,19 +640,29 @@ end
 %%% Thumbnails and Tocs
 
 \def\advi@html#1{\special {html:<a name="#1">}\special{html:</a>}}
-\def\advitoc {\advi@html {/toc.first}}
-\def\endadvitoc {\advi@html {/toc.last}}
+\def\advitoc 
+    {\advi@html {/toc.first}}
+\def\endadvitoc
+    {\advi@html {/toc.last}%
+     %% So that next call is uneffective
+     \global \let \advitoc \relax \global \let \endadvitoc \relax}
 \newcommand {\advithumbnail}[1][\thepage]{\advi@html {/page.#1}}
+%% Old version: delete if new is fine.
+%
+% \@ifundefined {@starttoc}{}
+%   {\let \latex@starttoc \@starttoc
+%    \def \@starttoc
+%      {\advitoc \let \@starttoc \latex@starttoc \@starttoc}}
+% \@ifundefined {tableofcontents}{}
+%   {\let \latex@tableofcontents \tableofcontents
+%    \def \tableofcontents
+%       {\@ifundefined{latex@starttoc}{\advitoc}{}%
+%        \latex@tableofcontents
+%        \endadvitoc}}
+% Allows redefinition of \tableofcontents---then may be inneffective.
 \@ifundefined {@starttoc}{}
-  {\let \latex@starttoc \@starttoc
-   \def \@starttoc
-     {\advitoc \let \@starttoc \latex@starttoc \@starttoc}}
-\@ifundefined {tableofcontents}{}
-  {\let \latex@tableofcontents \tableofcontents
-   \def \tableofcontents
-      {\@ifundefined{latex@starttoc}{\advitoc}{}%
-       \latex@tableofcontents
-       \endadvitoc}}
+  {\let \advi@starttoc \@starttoc
+   \def \@starttoc #1{\advitoc \advi@starttoc {#1}\endadvitoc}}
 
 %%% Edit: special for edition with WhizzyTeX
 
