@@ -28,13 +28,13 @@ let get_do_ps, set_do_ps, init_do_ps =
 let antialias =
   Options.flag false
     "-A"
-    ": ask Active-DVI to use PostScript antialiasing,\
+    "  ask Active-DVI to use PostScript antialiasing,\
     \n\t (the default is not to use PostScript antialiasing).";;
 
 let pstricks =
   Options.flag false
     "-pstricks"
-    ": ask Active-DVI to show moveto,\
+    "  ask Active-DVI to show moveto,\
     \n\t (the default is not to show moveto).";;
 
 let showing_ps = ref false;;
@@ -43,7 +43,7 @@ let showps s =
 
 Options.add
   "--showps" (Arg.Set showing_ps)
-  ": ask advi to print to stdout a copy\
+  "  ask advi to print to stdout a copy\
   \n\t of the PostScript program sent to gs.";;
 
 let pspage = ref 0;;
