@@ -241,6 +241,7 @@ module Make(Dev : DEVICE) = struct
       mutable ratio : float ;
       mutable page_no : int;
       mutable page_stack : int list;
+      mutable exchange_page : int;
       mutable last_modified : float ;
       mutable button : (int * int) option ;
       
@@ -397,7 +398,8 @@ module Make(Dev : DEVICE) = struct
         orig_y = orig_y ;
         ratio = 1.0 ;
         page_stack = [];
-        page_no = if !start_page > 0 then min !start_page pages -1 else 0;
+        exchange_page = 0;
+        page_no = if !start_page > 0 then min !start_page pages - 1 else 0;
         last_modified = last_modified ;
         button = None;
         
@@ -410,7 +412,7 @@ module Make(Dev : DEVICE) = struct
         next_num = 0;
       } in
     st
-
+      
   let set_bbox st =
     Dev.set_bbox (Some (st.orig_x, st.orig_y, st.dvi_width, st.dvi_height))    
       
@@ -451,8 +453,8 @@ module Make(Dev : DEVICE) = struct
           end else
 	    (attr.geom.width, attr.geom.height) in
 (*
-        attr.geom.width <- size_x ;
-        attr.geom.height <- size_y ;
+   attr.geom.width <- size_x ;
+   attr.geom.height <- size_y ;
 *)
         st.base_dpi <- base_dpi;
         st.size_x <- size_x;
@@ -466,22 +468,27 @@ module Make(Dev : DEVICE) = struct
     set_bbox st
       
       
-  let goto_next_pause f st =
-    st.cont <- None;
-    try
-      let cont =
-        try 
-	  while f () do () done; 
-	  st.pause_no <- st.pause_no + 1; 
-        with Drv.Pause -> 
-	  st.pause_no <- st.pause_no + 1; 
-	  st.cont <- Some f 
-      in
-      Dev.synchronize();
-      Dev.set_busy (if st.cont = None then Dev.Free else Dev.Pause)
-    with Dev.Stop ->
-      st.aborted <- true
-          
+  let rec goto_next_pause n st =
+    if n > 0 then
+      begin match st.cont with
+        None -> ()
+      | Some f ->
+          st.cont <- None;
+          try
+            let () =
+              try 
+	        while f () do () done; 
+	        st.pause_no <- st.pause_no + 1; 
+              with Drv.Pause -> 
+	        st.pause_no <- st.pause_no + 1; 
+	        st.cont <- Some f in
+            goto_next_pause (pred n) st
+          with Dev.Stop ->
+            st.aborted <- true;
+      end;
+    Dev.synchronize();
+    Dev.set_busy (if st.cont = None then Dev.Free else Dev.Pause)
+      
   let draw_bounding_box st = 
     Dev.set_color 0xcccccc ;
     Dev.fill_rect st.orig_x st.orig_y st.dvi_width 1 ;
@@ -508,7 +515,7 @@ module Make(Dev : DEVICE) = struct
       |	Interval -> Symbol.intime docx docy docx2 docy2 symbols
       |	Rectangle -> Symbol.inzone docx docy docx2 docy2 symbols
     in
-
+    
     (* Local printing functions. *)
     (* Show a rule. *)
     let ifrule s =
@@ -518,9 +525,9 @@ module Make(Dev : DEVICE) = struct
     in
     (* Show glyphs. *)
     let show_glyph s =
-	match s.Symbol.glyph with
-	| None -> ifrule s
-	| Some g -> Dev.draw_glyph g s.Symbol.locx s.Symbol.locy
+      match s.Symbol.glyph with
+      | None -> ifrule s
+      | Some g -> Dev.draw_glyph g s.Symbol.locx s.Symbol.locy
     in
     let show_colored_glyph s =
       Dev.set_color s.Symbol.color ;
@@ -531,14 +538,15 @@ module Make(Dev : DEVICE) = struct
       match s.Symbol.glyph with
       |	None ->
 	  (* (* Show the spaces. *)
-	  if s.Symbol.fontname = Symbol.spacename
-	  then 
-	    let a1 = s.Symbol.locx - s.Symbol.hoffset
-	    and b1 = s.Symbol.locy - s.Symbol.voffset in
-	    let a2 = a1 + s.Symbol.width
-	    and b2 = b1 + s.Symbol.height in
-	    Dev.draw_path [| a1,b1 ; a1,b2 ; a2,b2 ; a2,b1 ; a1,b1|] 1
-	  else *)
+	     if s.Symbol.fontname = Symbol.spacename
+	     then 
+	     let a1 = s.Symbol.locx - s.Symbol.hoffset
+	     and b1 = s.Symbol.locy - s.Symbol.voffset in
+	     let a2 = a1 + s.Symbol.width
+	     and b2 = b1 + s.Symbol.height in
+	     Dev.draw_path [| a1,b1 ; a1,b2 ; a2,b2 ; a2,b1 ; a1,b1|]
+             ~pensize:1
+	     else *)
 	  ()
       |	Some b ->
 	  let a1 = s.Symbol.locx - s.Symbol.hoffset
@@ -546,7 +554,8 @@ module Make(Dev : DEVICE) = struct
 	  let a2 = a1 + s.Symbol.width
 	  and b2 = b1 + s.Symbol.height in
 	  Dev.set_color Graphics.cyan ;
-	  Dev.draw_path [| a1,b1 ; a1,b2 ; a2,b2 ; a2,b1 ; a1,b1|] 1
+	  Dev.draw_path [| a1,b1 ; a1,b2 ; a2,b2 ; a2,b1 ; a1,b1|]
+            ~pensize:1
     in
     (* Show the selection. *)
     Dev.set_color Graphics.cyan;
@@ -554,52 +563,52 @@ module Make(Dev : DEVICE) = struct
     (* Symbol.iter show_bbox input ; *) (* This shows the bounding box of each symbol. *)
     (* Dev.draw_path [| docx,docy ; docx2,docy ; docx2,docy2 ; docx,docy2 ; docx,docy |] 1; *)
     Dev.synchronize();
-
+    
     (* Immediately erase the glyph, but do not synchronize. *)
     (* We won't be able to erase them later since many things can occur between : *)
     (* Next page, overlay, whatever...*)
     Symbol.iter show_colored_glyph input ;
-
+    
     let output = Symbol.to_ascii input in
     print_string output;
     print_newline ();
     flush stdout;
     ()
-  
+      
   (* 
-   * The following functions are used to move around a page. 
-   *)
-
+     * The following functions are used to move around a page. 
+  *)
+      
   (* This function returns the pixel size of a dimension according to the dpi
-   * value
-   *)
+     * value
+  *)
   let get_size_in_pix st = function
     | Px n -> n
     | In f -> int_of_float (st.base_dpi *. f)
     | _ -> assert false
-   
+          
   (* The next four functions returns the position that correspond to the top,
-   * the bottom, the left and right of the page
-   *)
+     * the bottom, the left and right of the page
+  *)
   let top_of_page st =
     let vmargin_size = get_size_in_pix st attr.vmargin in
     vmargin_size
-  
+      
   let bottom_of_page st =
     let vmargin_size = get_size_in_pix st attr.vmargin in
     attr.geom.height - st.dvi_height - vmargin_size
-    
+      
   let left_of_page st =
     let hmargin_size = get_size_in_pix st attr.hmargin in
     hmargin_size
-    
+      
   let right_of_page st =
     let hmargin_size = get_size_in_pix st attr.hmargin in
     attr.geom.width - st.dvi_width - hmargin_size
-  
+      
   (* the two following functions move the displayed part of the page while
-   * staying inside the margins
-   *)
+     * staying inside the margins
+  *)
   let move_within_margins_y st movey =
     let vmargin_size = get_size_in_pix st attr.vmargin in
     let tmp_orig_y = st.orig_y + movey in
@@ -616,7 +625,7 @@ module Make(Dev : DEVICE) = struct
     in 
     if st.orig_y <> new_orig_y then Some new_orig_y
     else None
-   
+        
   let move_within_margins_x st movex =
     let hmargin_size = get_size_in_pix st attr.hmargin in
     let tmp_orig_x = st.orig_x + movex in
@@ -633,13 +642,13 @@ module Make(Dev : DEVICE) = struct
     in 
     if st.orig_x <> new_orig_x then Some new_orig_x
     else None
- 
+        
   let redraw st =
     (* draws until the current pause_no or page end *)
     Dev.set_busy Dev.Busy;
     st.cont <- None;
     st.aborted <- false;
-    begin
+    let () =
       try
         Dev.continue(); 
         Dev.clear_dev () ;
@@ -647,6 +656,7 @@ module Make(Dev : DEVICE) = struct
 	let blank_w = 20
 	and blank_h = 20 in
 	Drv.clear_symbols st.size_x st.size_y blank_w blank_h ;
+        if (!bounding_box) then draw_bounding_box st;
         if !pauses then
           let f = Drv.render_step st.cdvi st.page_no
 	      (st.base_dpi *. st.ratio) st.orig_x st.orig_y in
@@ -658,23 +668,31 @@ module Make(Dev : DEVICE) = struct
       	        | Drv.Pause ->
 	            if !current_pause = st.pause_no then raise Drv.Pause
 	            else begin incr current_pause; true end
-              do () done
+              do () done;
+              if !current_pause < st.pause_no then
+                st.pause_no <- !current_pause
             with
             | Drv.Pause ->
-                st.cont <- Some f
+                st.cont <- Some f;
           end
         else
           begin
             Drv.render_page  st.cdvi st.page_no
               (st.base_dpi *. st.ratio) st.orig_x st.orig_y;
-          end
+          end;        
       with Dev.Stop ->
-        st.aborted <- true
-    end;
-    if (!bounding_box) then draw_bounding_box st;
+        st.aborted <- true in
     Dev.synchronize();
     Dev.set_busy (if st.cont = None then Dev.Free else Dev.Pause)
       
+  let goto_previous_pause n st =
+    if n > 0 then
+      begin
+        st.pause_no <- max 0 (st.pause_no -n);
+        redraw st
+      end
+        
+        
   let find_xref tag default st =
     try Hashtbl.find st.dvi.Dvi.xrefs tag
     with Not_found ->
@@ -691,7 +709,6 @@ module Make(Dev : DEVICE) = struct
   exception Link
   let exec_xref link = 
     let call command =
-      prerr_endline command;
       let pid = Misc.fork_process command in
           (* only to launch embeded apps *)
       if Graphics.button_down() then
@@ -699,41 +716,41 @@ module Make(Dev : DEVICE) = struct
     if Misc.has_prefix "file:" link then
       begin
         try
-        let filename, arguments = 
-          match Misc.split_string (Misc.get_suffix "file:" link) '#' 0 with
-          | [ filename ; tag ] -> filename, ["-html"; tag ]
-          | [ filename ] -> filename, []
-          | _ ->
-              Misc.warning ("Invalid link "^link);
-              raise Link
-        in
-        if Sys.file_exists filename then
-          begin
-            if Misc.has_suffix ".dvi"  filename then
-              call  (String.concat " " ("advi" :: arguments @ [ filename ]))
-            else if (Misc.has_suffix ".txt"  filename
-                   || Misc.has_suffix ".tex"  filename) then
-              call ("xterm -e less "^ filename)
-            else if (Misc.has_suffix ".html"  filename
-                   || Misc.has_suffix ".htm"  filename) then
-              call (!browser ^" "^ link)
-            else
-              Misc.warning 
-                (Printf.sprintf
-                   "Don't know what to do with file %s"
-                   filename);
-          end
-        else
-          Misc.warning
-            (Printf.sprintf "File %s non-existent or not readable"
-               filename)
-      with
-        Misc.Match -> assert false
+          let filename, arguments = 
+            match Misc.split_string (Misc.get_suffix "file:" link) '#' 0 with
+            | [ filename ; tag ] -> filename, ["-html"; tag ]
+            | [ filename ] -> filename, []
+            | _ ->
+                Misc.warning ("Invalid link "^link);
+                raise Link
+          in
+          if Sys.file_exists filename then
+            begin
+              if Misc.has_suffix ".dvi"  filename then
+                call  (String.concat " " ("advi" :: arguments @ [ filename ]))
+              else if (Misc.has_suffix ".txt"  filename
+                     || Misc.has_suffix ".tex"  filename) then
+                call ("xterm -e less "^ filename)
+              else if (Misc.has_suffix ".html"  filename
+                     || Misc.has_suffix ".htm"  filename) then
+                call (!browser ^" "^ link)
+              else
+                Misc.warning 
+                  (Printf.sprintf
+                     "Don't know what to do with file %s"
+                     filename);
+            end
+          else
+            Misc.warning
+              (Printf.sprintf "File %s non-existent or not readable"
+                 filename)
+        with
+          Misc.Match -> assert false
         | Link -> ()
       end
     else if Misc.has_prefix "http:" link then
       call (!browser ^" "^ link)
-            
+        
   let page_start default st =   
     match !start_html with None -> default
     | Some html ->
@@ -777,9 +794,10 @@ module Make(Dev : DEVICE) = struct
       st.dvi <- dvi ;
       st.cdvi <- cdvi ;
       st.num_pages <- pages ;
-      st.page_stack <- clear_page_stack pages st.page_stack; 
-      st.page_no <- page_start (min st.page_no (st.num_pages - 1)) st;
-      st.pause_no <- 0 ;
+      st.page_stack <- clear_page_stack pages st.page_stack;
+      let page = page_start (min st.page_no (st.num_pages - 1)) st in
+      if page <> st.page_no then st.pause_no <- 0;
+      st.page_no <- page;
       st.frozen <- true;
       st.aborted <- true;
       update_dvi_size false st ;
@@ -791,10 +809,12 @@ module Make(Dev : DEVICE) = struct
           
   let changed st = reload_time st > st.last_modified
       
-  let goto_page n st = (* go to the begining of the page *) 
+  let goto_page n st = (* go to the begining of the page *)
     let new_page_no = max 0 (min n (st.num_pages - 1)) in
     if st.page_no <> new_page_no || st.aborted then
       begin
+        if st.page_no <> new_page_no then
+          st.exchange_page <- st.page_no;
         st.page_no <- new_page_no ;
         st.pause_no <- 0 ;
         redraw st
@@ -889,19 +909,15 @@ module Make(Dev : DEVICE) = struct
   module B =
     struct
       let nop st = ()
+      let push_next_page st = 
+        push_page false (st.page_no + max 1 st.num) st
       let next_pause st =
-        begin match st.cont with
-        | None -> 
-            push_page false  (st.page_no + max 1 st.num) st
-        | Some f ->
-            goto_next_pause f st
-        end
+        if st.cont = None then push_next_page st
+        else goto_next_pause (max 1 st.num) st
       let digit k st = 
         st.next_num <- st.num * 10 + k
       let next_page st = 
         goto_page (st.page_no + max 1 st.num) st
-      let push_next_page st = 
-        push_page false (st.page_no + max 1 st.num) st
       let goto st =
         push_page true (if st.num > 0 then st.num - 1 else st.num_pages) st
           
@@ -911,12 +927,18 @@ module Make(Dev : DEVICE) = struct
         goto_page (st.page_no - max 1 st.num) st
       let pop_previous_page st = 
         pop_page false (max 1 st.num) st
+      let previous_pause st =
+        if st.pause_no > 0
+        then goto_previous_pause (max 1 st.num) st
+        else pop_previous_page st
       let pop_page st =
         pop_page true 1 st
       let first_page st =
         goto_page 0 st
       let last_page st =
         goto_page max_int st
+      let exchange_page st =
+        goto_page st.exchange_page st
       let unfreeze_fonts st =
         Drv.unfreeze_fonts st.cdvi
       let unfreeze_glyphs st =
@@ -935,79 +957,79 @@ module Make(Dev : DEVICE) = struct
         attr.hmargin <- Px 0; attr.vmargin <- Px 0; 
         update_dvi_size true st;
         redraw st
-
+          
       let page_left st =
         match (move_within_margins_x st (attr.geom.width - 10)) with 
-            | Some n ->
-                if n > st.orig_x  then begin
-                  st.orig_x <- n;
-                  set_bbox st;
-                  redraw st
-                end
-            | None -> ()
-
+        | Some n ->
+            if n > st.orig_x  then begin
+              st.orig_x <- n;
+              set_bbox st;
+              redraw st
+            end
+        | None -> ()
+              
       let page_down st =
         let none () =
-            if st.page_no < st.num_pages - 1 then begin
+          if st.page_no < st.num_pages - 1 then begin
               (* the following test is necessary because of some
-               * floating point rounding problem
-               *)
-              if attr.geom.height < st.dvi_height + 2 * (get_size_in_pix st
-                attr.vmargin) then begin
-                  st.orig_y <- top_of_page st;
-                  set_bbox st;
-                end;
-              goto_page (st.page_no + 1) st
-            end
-          in
-          begin
-            match (move_within_margins_y st (10 - attr.geom.height)) with 
-            | Some n ->
-                (* this test is necessary because of rounding errors *)
-                if n > st.orig_y then none () 
-                else begin
-                  st.orig_y <- n;
-                  set_bbox st;
-                  redraw st
-                end
-            | None -> none ()
+                 * floating point rounding problem
+              *)
+            if attr.geom.height < st.dvi_height + 2 * (get_size_in_pix st
+                                                         attr.vmargin) then begin
+                                                           st.orig_y <- top_of_page st;
+                                                           set_bbox st;
+                                                         end;
+            goto_page (st.page_no + 1) st
           end
-
+        in
+        begin
+          match (move_within_margins_y st (10 - attr.geom.height)) with 
+          | Some n ->
+                (* this test is necessary because of rounding errors *)
+              if n > st.orig_y then none () 
+              else begin
+                st.orig_y <- n;
+                set_bbox st;
+                redraw st
+              end
+          | None -> none ()
+        end
+          
       let page_up st =
         let none () =
-            if st.page_no > 0 then begin
-              if attr.geom.height < st.dvi_height + 2 * (get_size_in_pix st
-                attr.vmargin) then begin
-                  st.orig_y <- bottom_of_page st;
-                  set_bbox st;
-                end;
-              goto_page (st.page_no -1) st
-            end
-          in
-          begin
-            match (move_within_margins_y st (attr.geom.height - 10)) with 
-            | Some n ->
-                if n < st.orig_y then none ()
-                else begin
-                  st.orig_y <- n;
-                  set_bbox st;
-                  redraw st
-                end
-            | None -> none ()
+          if st.page_no > 0 then begin
+            if attr.geom.height < st.dvi_height + 2 * (get_size_in_pix st
+                                                         attr.vmargin) then begin
+                                                           st.orig_y <- bottom_of_page st;
+                                                           set_bbox st;
+                                                         end;
+            goto_page (st.page_no -1) st
           end
-
+        in
+        begin
+          match (move_within_margins_y st (attr.geom.height - 10)) with 
+          | Some n ->
+              if n < st.orig_y then none ()
+              else begin
+                st.orig_y <- n;
+                set_bbox st;
+                redraw st
+              end
+          | None -> none ()
+        end
+          
       let page_right st =
         match (move_within_margins_x st (10 - attr.geom.width)) with 
-            | Some n ->
-                if n < st.orig_x then begin
-                  st.orig_x <- n;
-                  set_bbox st;
-                  redraw st
-                end
-            | None -> ()
-
-          
-      let redraw = redraw
+        | Some n ->
+            if n < st.orig_x then begin
+              st.orig_x <- n;
+              set_bbox st;
+              redraw st
+            end
+        | None -> ()
+              
+              
+      let redraw = redraw 
       let reload = reload
           
       let exit st = raise Exit
@@ -1019,10 +1041,10 @@ module Make(Dev : DEVICE) = struct
           | Plus x -> x
           | Minus y -> 0 - y in
         let pid = Misc.fork_process
-          (Printf.sprintf "advi -g %dx%d %s"
-             attr.geom.width
-             attr.geom.height
-             Config.splash_screen) in
+            (Printf.sprintf "advi -g %dx%d %s"
+               attr.geom.width
+               attr.geom.height
+               Config.splash_screen) in
         ()
     end
       
@@ -1047,6 +1069,7 @@ module Make(Dev : DEVICE) = struct
     '\r'	, B.push_next_page;
     '\t'	, B.push_page;
     'p' 	, B.previous_page;
+    'P' 	, B.previous_pause;
     '\b'	, B.pop_previous_page;
     '\027'	, B.pop_page; 
     ',' 	, B.first_page; 
@@ -1059,6 +1082,7 @@ module Make(Dev : DEVICE) = struct
     '<' 	, B.scale_down; 
     '>' 	, B.scale_up; 
     'g' 	, B.goto; 
+    'x' 	, B.exchange_page; 
     '#' 	, B.nomargin; 
     'q' 	, B.exit; 
     'C' 	, B.clear_image_cash; 
@@ -1094,12 +1118,12 @@ module Make(Dev : DEVICE) = struct
           set_bbox st;
           redraw st
       | Dev.Region (x, y, w, h) ->
-          selection Rectangle st x y w (-h)
+          selection Interval st x y w (-h)
             
       | Dev.Click (Dev.Top_left, _) -> B.pop_page st
-      | Dev.Click (_, Dev.Button1) -> B.pop_previous_page st
-      | Dev.Click (_, Dev.Button2) -> B.next_pause st
-      | Dev.Click (_, Dev.Button3) -> B.push_next_page st
+      | Dev.Click (_, Dev.Button1) -> B.previous_pause st
+      | Dev.Click (_, Dev.Button2) -> B.pop_previous_page st
+      | Dev.Click (_, Dev.Button3) -> B.next_pause st
             
 (*
    | Dev.Click (Dev.Bottom_right, _) -> B.next_pause st

@@ -16,7 +16,7 @@ type 'g symbol =
 type 'g set
 
 (* Empty set. *)
-val empty_set : pagewidth:int -> pageheight:int -> 'g set
+val empty_set : int -> int -> 'g set
 
 (* Rules and spaces are symbols with special fontnames *)
 val rulename  : string

@@ -299,10 +299,10 @@ This is sufficient for the proper documentclass
 (see \hyperlink {overlays}{below}).
 
 \end {itemize}
-Examples: 
+% Examples: 
 
-\Rnode {A}{A} \qquad \Rnode {B}{B}
-\ncline{->}{A}{B} \Aput{L}
+% \Rnode {A}{A} \qquad \Rnode {B}{B}
+% \ncline{->}{A}{B} \Aput{L}
 
 \newpage
 
@@ -322,16 +322,16 @@ material, which works well with \verb"advi".
 Some reimplementation of \verb"\overlay" for \verb"advi" to work with 
 seminar overlays might still be possible...  
 
-\subsection* {Batch mode}
+\subsection* {Ignore mode}
 
 The package \verb"advi" can be loaded with the \verb"batch" option:
 
 \smallskip
-{\verb"\usepackage[annot,batch]{advi}"}
+{\verb"\usepackage[annot,ignore]{advi}"}
 \smallskip
 
 The effect is to switch off some \verb"advi" gadgets and to render some others 
-in Postscript if possible. 
+in Postscript, if possible. 
 
 
 \newpage

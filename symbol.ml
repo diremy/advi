@@ -40,7 +40,7 @@ let spacename = "SPACE"
 let iter ff set = List.iter ff !set
 
 (* Empty set, we probably do not need to optimize according to page dimensions. *)
-let empty_set ~pagewidth:p_width ~pageheight:p_height = ref []
+let empty_set p_width p_height = ref []
   
 (* Add an element. *)
 let add el set = set := el :: !set

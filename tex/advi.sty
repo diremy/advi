@@ -16,9 +16,9 @@
 %% Options
 
 \newif \ifadvi@annot \advi@annotfalse
-\newif \ifadvi@batch \advi@batchfalse
+\newif \ifadvi@ignore \advi@ignorefalse
 \DeclareOption {annot}{\advi@annottrue}
-\DeclareOption {batch}{\advi@batchtrue}
+\DeclareOption {ignore}{\advi@ignoretrue}
 
 \ProcessOptions
 
@@ -26,42 +26,49 @@
 
 % Low level macros
 
-\def \advi@@start #1{\special {advi: proc=#1 record=start}}
-\def \advi@@end #1{\special {advi: proc=#1 record=end}}
-\def \advi@@startplay #1{\special {advi: proc=#1 record=start play}}
+\ifadvi@ignore
+\def \advi@special #1{\hbox{}}
+\else
+\let \advi@special \special
+\fi
+
+
+\def \advi@@start #1{\advi@special {advi: proc=#1 record=start}}
+\def \advi@@end #1{\advi@special {advi: proc=#1 record=end}}
+\def \advi@@startplay #1{\advi@special {advi: proc=#1 record=start play}}
 \def\advi@record #1#2{\advi@@start{#1}#2\advi@@end{#1}}
 \def\advi@recplay #1#2{\advi@@startplay{#1}#2\advi@@end{#1}}
 
-\def\advi@embed#1#2#3{\mbox{\special
+\def\advi@embed#1#2#3{\mbox{\advi@special
   {advi: embed type=embedded width=#1 height=#2 command="#3"}{\vbox to #2{\hbox to #1{}}}}}
 
-\def\advi@stickyembed#1#2#3#4{\mbox{\special
+\def\advi@embedsticky#1#2#3#4{\mbox{\advi@special
   {advi: embed name="#1" type=sticky width=#2 height=#3 command="#4"}{\vbox to #3{\hbox to #2{}}}}}
 
-\def\advi@persistentembed#1#2#3#4{\mbox{\special
+\def\advi@embedpersistent#1#2#3#4{\mbox{\advi@special
   {advi: embed name="#1" type=persistent width=#2 height=#3 command="#4"}{\vbox to #3{\hbox to #2{}}}}}
 
-\def\advi@pause{\special{advi: pause}}
-\def\advi@wait#1{\special{advi: wait sec=#1}}
-\def\advi@play#1{\special{advi: proc=#1 play}}
+\def\advi@pause{\advi@special{advi: pause}}
+\def\advi@wait#1{\advi@special{advi: wait sec=#1}}
+\def\advi@play#1{\advi@special{advi: proc=#1 play}}
 \def\advi@hilight#1#2{{\color{#2}\advi@play{#1}}}
 
 \def\advi@epstransparent
-   {\special{advi: epstransparent push true}\aftergroup\resetepstransparent}
+   {\advi@special{advi: epstransparent push true}\aftergroup\resetepstransparent}
 \def\advi@epswhite
-   {\special{advi: epstransparent push false}\aftergroup\resetepstransparent}
-\def\advi@resetepstransparent{\special{advi: epstransparent pop}}
-\def\advi@setalpha#1{\special{advi: alpha push #1}\aftergroup\resetalpha}
-\def\advi@resetalpha{\special{advi: alpha pop}}
-\def\advi@setblend#1{\special{advi: blend push #1}\aftergroup\resetblend}
-\def\advi@resetblend{\special{advi: blend pop}}
+   {\advi@special{advi: epstransparent push false}\aftergroup\resetepstransparent}
+\def\advi@resetepstransparent{\advi@special{advi: epstransparent pop}}
+\def\advi@setalpha#1{\advi@special{advi: alpha push #1}\aftergroup\resetalpha}
+\def\advi@resetalpha{\advi@special{advi: alpha pop}}
+\def\advi@setblend#1{\advi@special{advi: blend push #1}\aftergroup\resetblend}
+\def\advi@resetblend{\advi@special{advi: blend pop}}
 
-\def\advi@settransition#1{\special{advi: trans push #1}}
-\def\advi@resettransition{\special{advi: trans pop}}
+\def\advi@settransition#1{\advi@special{advi: trans push #1}}
+\def\advi@resettransition{\advi@special{advi: trans pop}}
 
 %%% For PS Tricks
 
-\def \advi@moveto {\special {advi: moveto}}
+\def \advi@moveto {\advi@special {advi: moveto}}
 \def \advi@set #1#2{\pst@Verb {#1 #2 advi@Dict begin printpos end}}
 \def\advi@psput@special#1{%
 \hbox{%
@@ -96,16 +103,16 @@ end
 \@ifundefined {psput@special}{}
 {\let \psput@special \advi@psput@special
  \@ifundefined {ncput@iii}{}{\let \ncput@iii \advi@ncput@iii}%
- \special {header=advi.pro}}
+ \advi@special {header=advi.pro}}
 
 %%% Active DVI
 
-\ifadvi@batch
+\ifadvi@ignore
   \def \advi@begin #1{}
   \def \advi@end  {}
 \else
-  \def \advi@begin #1{\special {html:<a advi="#1">}}
-  \def \advi@end {\special {html:</a>}}
+  \def \advi@begin #1{\advi@special {html:<a advi="#1">}}
+  \def \advi@end {\advi@special {html:</a>}}
 \fi
 \def \advi@active #1#2{\advi@begin {#1}{#2}\advi@end}
 
@@ -130,7 +137,7 @@ end
    fillstyle=solid,fillcolor=\advibulle@bg]
   {\psset {#1}\@ifnextchar({\annot@ii}{\annot@ii(1,1)}}
 
-\ifadvi@batch
+\ifadvi@ignore
 \def \annot@ii(#1)#2{\egroup}
 \else
 \def \annot@ii(#1)#2{%
@@ -154,7 +161,7 @@ end
    \renewcommand {\overlay}{\advi@overlay \advi@ignore}}
 \def \advi@ignore #1{}
 \@ifundefined {overlay}{}
-  {\ifadvi@batch
+  {\ifadvi@ignore
      \def \advi@@start #1{\bgroup \overlay 9}
      \def \advi@@startplay #1{\bgroup}
      \def \advi@@end #1{\egroup}
