@@ -186,6 +186,19 @@ formules de mathématiques dans cet environnement ne posent pas de
 problèmes pourvu que vous les entouriez des parenthèses spéciales
 <CODE>\(</CODE> et <CODE>\)</CODE>.</I>
 
+<DT><STRONG>Comment visualiser les fontes PostScript Adobe
+(comme <CODE>ptmr8t</CODE>) avec Active-DVI ?</STRONG>
+
+ <DD>Réponse: <I>Vous ne pouvez pas! Active-DVI ne peut utiliser que
+les fontes basées sur des fichiers PK, dont les sources sont des
+fichiers <CODE>.mf</CODE>. Les fontes Adobe n'ont pas de fichiers
+source <CODE>.mf</CODE> associés; c'est pourquoi METAFONT ne peut
+créer de fichiers <CODE>.pk</CODE> correspondants pour Active-DVI.
+
+ <DD>Pour s'en tirer, il suffit d'utiliser un équivalent de la fonte
+qui pose problème dans l'ensemble des fontes Computer-Modern, qui a
+été créé par Donald Knuth pour servir de fontes par défaut à TeX.</I>
+
 </DL>
 
 <H2 ALIGN=LEFT>Installation d'Active-DVI</H2>

@@ -158,8 +158,20 @@ let r = \{foo = 1; bar = "toto"\};;
 <DT><STRONG>How to write on my slides programs which have mathematical
 formulas in them ?</STRONG>
  <DD>Answer: <I>If you need mathematical formulas into your programs,
-use the environment \verb"alltt" and insert the formulas into fancy
+use the environment <CODE>alltt</CODE> and insert the formulas into fancy
 parens <CODE>\(</CODE> and <CODE>\)</CODE>.</I>
+
+
+<DT><STRONG>How to visualize Adobe PostScript fonts like
+<CODE>ptmr8t</CODE> using Active-DVI ?</STRONG>
+
+ <DD>Answer: <I>You cannot! Active-DVI can display only PK based fonts
+whose sources are provided in <CODE>.mf</CODE> files. Adobe fonts
+having no <CODE>.mf</CODE> source files, hence METAFONT cannot create
+the corresponding <CODE>.pk</CODE> files for Active-DVI.
+ <DD>The workaround is to use an equivalent of the problematic font
+in the Computer-Modern font set, that has been designed by Donald Knuth
+to be the default fonts for TeX.</I>
 
 </DL>
 
