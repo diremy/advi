@@ -395,7 +395,7 @@ let get_line_prefill =
           Buffer.clear b;
           while t.cursor_x > limx do backspace t done;
           read t
-      | '' | '' ->
+      | '' | '' | '' ->
          Buffer.clear b;
          ""
       | c ->
@@ -404,9 +404,10 @@ let get_line_prefill =
          read t in
     read in
   (fun t prefill ->
-     let read = get t in
+     Buffer.clear b;
      Buffer.add_string b prefill;
      print_str t prefill;
+     let read = get t in
      save_excursion t t.cursor_x t.cursor_y (t.width - t.cursor_x) 1
        read);;
 
