@@ -62,5 +62,3 @@ manual.html: manual.hva macros.hva
 
 .tex.html:
 	$(HEVEA) -fix macros.hva -o $*.html $*.tex
-#	if [ -f $<.image.tex ]; then mv $<.image.tex $*.image.tex; fi
-#	if [ -f $*.image.tex ]; then $(IMAGEN) $*; fi
