@@ -17,9 +17,6 @@
 
 open Format;;
 
-module Dev = Grdev;;
-module View = Dviview (* .Make(Dev) *);;
-
 (*** Parsing command-line arguments ***)
 
 let crop_flag = ref true;;
@@ -31,7 +28,7 @@ let geometry = ref "864x864";;
 let set_dim r s =
   r := Dimension.dimen_of_string s;;
 let set_geom g =
-  View.set_autoresize false; geometry := g;;
+  Dviview.set_autoresize false; geometry := g;;
 
 let spec_list = [
   ("-geometry", Arg.String set_geom,
@@ -77,23 +74,23 @@ let standalone_main () =
       end;
       name
   | Some s -> s in
-  View.set_crop !crop_flag;
-  View.set_hmargin !hmargin;
-  View.set_vmargin !vmargin;
-  View.set_geometry !geometry;
-  View.main_loop filename
+  Dviview.set_crop !crop_flag;
+  Dviview.set_hmargin !hmargin;
+  Dviview.set_vmargin !vmargin;
+  Dviview.set_geometry !geometry;
+  Dviview.main_loop filename
 
 let rec interactive_main () =
   printf "Dvi file name: @?";
   let filename = input_line stdin in
   if Sys.file_exists filename then begin
-    View.set_crop !crop_flag;
-    View.set_hmargin !hmargin;
-    View.set_vmargin !vmargin;
-    View.set_geometry !geometry;
+    Dviview.set_crop !crop_flag;
+    Dviview.set_hmargin !hmargin;
+    Dviview.set_vmargin !vmargin;
+    Dviview.set_geometry !geometry;
     try
-      View.main_loop filename
-    with View.Error s | Failure s | Graphics.Graphic_failure s ->
+      Dviview.main_loop filename
+    with Dviview.Error s | Failure s | Graphics.Graphic_failure s ->
       eprintf "Fatal error: %s@." s
   end else begin
     printf "File `%s' does not exists.@." filename;
@@ -107,10 +104,7 @@ at_exit Grdev.kill_all_embedded_apps;;
 let quit = 3;;
 Sys.set_signal quit (Sys.Signal_handle (fun _ -> Launch.exit 0));;
 
-let main =
-  if !Sys.interactive
-  then interactive_main
-  else standalone_main;;
+let main = if !Sys.interactive then interactive_main else standalone_main;;
 
 Unix.putenv "GHOSTVIEW" "Test";;
 
