@@ -15,9 +15,11 @@
 (*  Based on Mldvi by Alexandre Miquel.                                *)
 (***********************************************************************)
 
+let is_absolute path = not (Filename.is_relative path);;
+
 let normalize path =
-  let full = not (Filename.is_relative path) in
-  let finalslash = path.[String.length path-1] = '/' in
+  let full = is_absolute path in
+  let finalslash = path.[String.length path - 1] = '/' in
   let tks = Misc.split_string path (function '/' -> true | _ -> false) 0 in
   let rec remove = function
     | x :: xs -> 
@@ -35,37 +37,33 @@ let normalize path =
 
 let fullpath fromdir path =
   (* get full path (weaker than Junix.realpath) *)
-  if Filename.is_relative path then begin
-    normalize (Filename.concat fromdir path)
-  end else path
+  if is_absolute path then path else normalize (Filename.concat fromdir path)
 ;;
 
 (* Tilde substitution *)
 (* skip to next / *)
 let rec next_slash s n =
-  if  n >= String.length s or s.[n] = '/' 
-  then n
-  else next_slash s (succ n);;
+  if  n >= String.length s || s.[n] = '/' then n else
+  next_slash s (succ n)
+;;
 
 let tilde_subst s =
  try
-  if s = "" or s.[0] <> '~' then s 
-  else
-    let len = String.length s in
-    if len = 1 then Sys.getenv "HOME"
-    else match s.[1] with
-     | '/' -> 
-        Filename.concat (Sys.getenv "HOME") (String.sub s 2 (len - 2))
-     | _ ->
-       let final = next_slash s 1 in
-       let user = String.sub s 1 (pred final) in
-       let pwnam = Unix.getpwnam user in
-         if succ final >= len then pwnam.Unix.pw_dir
-         else
-          Filename.concat pwnam.Unix.pw_dir 
-               (String.sub s (succ final) (len - (succ final)))
+  if s = "" || s.[0] <> '~' then s else
+  let len = String.length s in
+  if len = 1 then Sys.getenv "HOME" else
+  match s.[1] with
+  | '/' -> 
+     Filename.concat (Sys.getenv "HOME") (String.sub s 2 (len - 2))
+  | _ ->
+     let final = next_slash s 1 in
+     let user = String.sub s 1 (pred final) in
+     let pwnam = Unix.getpwnam user in
+     if succ final >= len then pwnam.Unix.pw_dir else
+      Filename.concat pwnam.Unix.pw_dir 
+        (String.sub s (succ final) (len - succ final))
  with
-  | Unix.Unix_error(_, _, _) -> s
+  | Unix.Unix_error (_, _, _) -> s
   | Sys_error _ -> s
   | Not_found -> s
 ;;
@@ -124,5 +122,5 @@ let save_page_no n =
    close_out oc
  with _ ->
    Misc.warning 
-    (Printf.sprintf
-       "Cannot write file %s to record page number." advi_page_no_file);;
+     (Printf.sprintf
+        "Cannot write file %s to record page number." advi_page_no_file);;
