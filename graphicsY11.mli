@@ -16,6 +16,13 @@
 
 type color = Graphics.color;;
 
+val set_font : string -> unit;;
+val get_font : unit -> string;;
+
+val set_line_width : int -> unit;;
+val get_line_width : unit -> int;;
+(** Get the current line width. *)
+
 external get_color : unit -> color = "gr_get_color";;
 (** Get the current drawing color. *)
 

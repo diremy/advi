@@ -19,6 +19,15 @@
 
 type color = Graphics.color;;
 
+let current_font = ref "8x13";;
+let set_font s = Graphics.set_font s; current_font := s;;
+let get_font () = !current_font;;
+
+let current_line_width = ref 1;;
+
+let set_line_width n = current_line_width := n; Graphics.set_line_width n;;
+let get_line_width () = !current_line_width;;
+
 external get_color : unit -> color = "gr_get_color";;
 
 type window_id = string;;

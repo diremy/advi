@@ -94,19 +94,32 @@ and scratch_write x y =
         if c <> '' then scratch_write_char c x y
 ;;
 
+let save_excursion c f () =
+  let color = Graphics.get_color () in
+  let line_width = Graphics.get_line_width () in
+  let cursor = Graphics.get_cursor () in
+  let font = Graphics.get_font () in
+  let restore () =
+    G.set_color color;
+    Graphics.set_line_width line_width;
+    Graphics.set_font font;
+    set_cursor cursor;
+  in
+  G.set_color c;
+  Graphics.set_line_width !scratch_line_width;
+  Graphics.set_font !scratch_write_font;
+  set_cursor Cursor_pencil;
+  try f (); restore ()
+  with x -> restore (); raise x
+;;
+
 let do_write () =
- G.set_color !scratch_font_color;
- G.set_font !scratch_write_font;
- let cursor = get_cursor () in
- set_cursor Cursor_pencil;
- try
+ save_excursion !scratch_font_color
+ (fun () ->
    match Graphics.wait_next_event [Button_down; Key_pressed] with
    | {mouse_x = x; mouse_y = y; button = btn; key = c} ->
-       if btn
-       then scratch_write x y
-       else scratch_write_char c x y;
-       set_cursor cursor
- with x -> set_cursor cursor; raise x
+       if btn then scratch_write x y else scratch_write_char c x y)
+ ()
 ;;
 
 let write () = only_on_screen do_write ();;
@@ -124,17 +137,13 @@ and scratch_draw x y =
 ;;
 
 let do_draw () =
- G.set_color !scratch_line_color;
- G.set_line_width !scratch_line_width;
- let cursor = get_cursor () in
- set_cursor Cursor_pencil;
- try
+ save_excursion !scratch_line_color
+ (fun () ->
    match Graphics.wait_next_event [Button_down] with
    | {mouse_x = x; mouse_y = y} ->
        G.moveto x y;
-       scratch_draw x y;
-       set_cursor cursor
- with x -> set_cursor cursor; raise x
+       scratch_draw x y)
+ ()
 ;;
 
 let draw () = only_on_screen do_draw ();;
