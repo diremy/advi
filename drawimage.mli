@@ -15,6 +15,8 @@
 (*  Based on Mldvi by Alexandre Miquel.                                *)
 (***********************************************************************)
 
+(* $Id$ *)
+
 type ratiopts =
    | ScaleOriginal
       (* leave the image at its original native size  *)

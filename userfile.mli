@@ -41,7 +41,7 @@ val tilde_subst : Misc.file_name -> Misc.file_name;;
 (* Replaces the occurrences of "~/" or "~username" to the corresponding
    path names. *)
 
-val digdir : Misc.dir_name -> int -> unit;;
+val digdir : Misc.dir_name -> Unix.file_perm -> unit;;
 (* Same as [Unix.mkdir], but it also creates parent directories as needed *) 
 
 val prepare_file : Misc.file_name -> unit;;
