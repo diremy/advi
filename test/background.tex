@@ -295,8 +295,9 @@ Here is the command used to obtain this effect:
 
 \Newpage
 
-\special{color push white}
 \advibg{color=black}
+
+{\color{white}
 \advifooter\adviheader
 
 \subsection{Reverse video effect}
@@ -317,7 +318,7 @@ of the page to black and the text color to white, as follows:
 \item set the text color to white using
   \begin{quote}
     \begin{verbatim}
-        \special{color push white}
+        \color{white}
     \end{verbatim}
   \end{quote}
 at the beginning of the slide.
@@ -335,7 +336,7 @@ To revert to normal text color, use
 at the end of the slide. (Write \verb"\advibg{none}" at the
 beginning of next slide, if you also want to revert to normal background.)
 
-\special{color pop}
+}
 
 \newpage
 
