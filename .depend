@@ -1,0 +1,64 @@
+devfont.cmi: glyph.cmi table.cmi 
+driver.cmi: dvi.cmi 
+dvi.cmi: grdev.cmi 
+dviview.cmi: dimension.cmi 
+glyph.cmi: font.cmi 
+grdev.cmi: draw_image.cmo glyph.cmi transitions.cmi 
+graphicsY11.cmo: graphicsY11.cmi 
+graphicsY11.cmx: graphicsY11.cmi 
+misc.cmo: config.cmo graphicsY11.cmi misc.cmi 
+misc.cmx: config.cmx graphicsY11.cmx misc.cmi 
+input.cmo: input.cmi 
+input.cmx: input.cmi 
+symbol.cmo: misc.cmi symbol.cmi 
+symbol.cmx: misc.cmx symbol.cmi 
+search.cmo: config.cmo misc.cmi search.cmi 
+search.cmx: config.cmx misc.cmx search.cmi 
+drawps.cmo: graphicsY11.cmi misc.cmi search.cmi drawps.cmi 
+drawps.cmx: graphicsY11.cmx misc.cmx search.cmx drawps.cmi 
+draw_image.cmo: graphicsY11.cmi misc.cmi search.cmi 
+draw_image.cmx: graphicsY11.cmx misc.cmx search.cmx 
+table.cmo: table.cmi 
+table.cmx: table.cmi 
+pkfont.cmo: input.cmi pkfont.cmi 
+pkfont.cmx: input.cmx pkfont.cmi 
+ttfont.cmo: ttfont.cmi 
+ttfont.cmx: ttfont.cmi 
+jfm.cmo: input.cmi jfm.cmi 
+jfm.cmx: input.cmx jfm.cmi 
+font.cmo: jfm.cmi misc.cmi pkfont.cmi search.cmi table.cmi ttfont.cmi \
+    font.cmi 
+font.cmx: jfm.cmx misc.cmx pkfont.cmx search.cmx table.cmx ttfont.cmx \
+    font.cmi 
+glyph.cmo: font.cmi glyph.cmi 
+glyph.cmx: font.cmx glyph.cmi 
+devfont.cmo: font.cmi glyph.cmi table.cmi devfont.cmi 
+devfont.cmx: font.cmx glyph.cmx table.cmx devfont.cmi 
+units.cmo: units.cmi 
+units.cmx: units.cmi 
+dimension.cmo: units.cmi dimension.cmi 
+dimension.cmx: units.cmx dimension.cmi 
+gs.cmo: graphicsY11.cmi misc.cmi search.cmi gs.cmi 
+gs.cmx: graphicsY11.cmx misc.cmx search.cmx gs.cmi 
+transimpl.cmo: graphicsY11.cmi transitions.cmi 
+transimpl.cmx: graphicsY11.cmx transitions.cmi 
+grdev.cmo: draw_image.cmo drawps.cmi glyph.cmi graphicsY11.cmi gs.cmi \
+    misc.cmi symbol.cmi transimpl.cmo grdev.cmi 
+grdev.cmx: draw_image.cmx drawps.cmx glyph.cmx graphicsY11.cmx gs.cmx \
+    misc.cmx symbol.cmx transimpl.cmx grdev.cmi 
+dvi.cmo: grdev.cmi dvi.cmi 
+dvi.cmx: grdev.cmx dvi.cmi 
+driver.cmo: devfont.cmi dimension.cmi dvi.cmi dvicolor.cmo glyph.cmi \
+    grdev.cmi misc.cmi search.cmi table.cmi transitions.cmi units.cmi \
+    driver.cmi 
+driver.cmx: devfont.cmx dimension.cmx dvi.cmx dvicolor.cmx glyph.cmx \
+    grdev.cmx misc.cmx search.cmx table.cmx transitions.cmi units.cmx \
+    driver.cmi 
+dviview.cmo: config.cmo dimension.cmi driver.cmi dvi.cmi grdev.cmi misc.cmi \
+    dviview.cmi 
+dviview.cmx: config.cmx dimension.cmx driver.cmx dvi.cmx grdev.cmx misc.cmx \
+    dviview.cmi 
+main.cmo: config.cmo dimension.cmi dviview.cmi grdev.cmi gs.cmi misc.cmi 
+main.cmx: config.cmx dimension.cmx dviview.cmx grdev.cmx gs.cmx misc.cmx 
+events.o: events.c libgraph.h
+grY11.o: grY11.c libgraph.h image.h
