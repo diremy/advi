@@ -32,11 +32,11 @@ Press: \keymenu{n}ext page \keymenu{p}revious page
 \let \Newpage \newpage
 \def \newpage {\Newpage \advifooter\adviheader}
 
-\def\adviquitfooter{\adviwait\noindent
-\centerline{\Large{Press: \keymenu{q} to quit}}
-}
+\def\adviquitfooter{\vbox to 0em{\vbox to \vsize {\vfill
+{\centerline{\Large {Press: \keymenu{q} to quit}}}%
+} \vss}}
 
-\def\lastpage{\Newpage\adviheader}
+\def\lastpage{\Newpage\adviquitfooter\adviheader}
 
 \begin{document}
 
@@ -57,19 +57,19 @@ page. Variants \verb"right", \verb"left", \verb"top", and
 \verb"bottom" of this macro are available.
 \\
 This is now being generalised to an open framework to describe
-arbitrary paths for the box to follow in the animation.\\
-For example, the first effect is obtained via:
+arbitrary paths for the box to follow in the animation.
 
+\newpage
+
+For example, the first effect is obtained via:\\
+%
 \verb"\advitransbox{path,steps=100,startx=500,starty=1000,stopx=10,stopy=10,genpath=line}"
 
 Notice that, if start or stop is omitted, it is replaced by the actual
-coordinates 
-of the box in the dvi screen, so that the effect for the
-\textcolor{yellow}{yellow} line 
-lebow can be obtained by simply writing:\\
+coordinates of the box in the dvi screen, so that the effect for the
+\textcolor{yellow}{yellow} line below is obtained by writing:\\
 \verb"\advitransbox{path,steps=100,startx=500,starty=1000,genpath=line}{path}"
-{
-\Huge
+{\Huge
 \begin{itemize}
 \item \textcolor{red}{From \advitransbox{path,steps=100,startx=500,starty=1000,stopx=10,stopy=10,genpath=line}{path}}
 \item \textcolor{yellow}{From \advitransbox{path,steps=100,startx=500,starty=1000,genpath=line}{path}}
@@ -79,11 +79,13 @@ lebow can be obtained by simply writing:\\
 \end{itemize}
 }
 
-\adviwait
+\lastpage
+
 \paragraph {Note}
 The command is robust:
 \[
 \advitransbox{slide,from=down}
    {it may include \verb"verbatim" material}
 \]
+
 \end{document}
