@@ -841,6 +841,9 @@ module B =
              attr.geom.Ageometry.height
              Config.splash_screen) in
       ()
+
+     let scratch st =
+       Scratch.f ()
   end;;
 
 let bindings = Array.create 256 B.nop;;
@@ -913,6 +916,9 @@ let bind_keys () =
    'f', B.unfreeze_fonts;
    'F', B.unfreeze_glyphs;
    'C', B.clear_image_cache;
+
+   (* Scratching. *)
+   's', B.scratch;
   ];;
 
 bind_keys ();;
