@@ -92,7 +92,7 @@ dnl Camlimages version
 if test -f $CAMLIMAGESDIR/ci_ps.cma || $HAVE_CDK; then
 	AC_MSG_RESULT(found)
 	CAMLIMAGES_VERSION=`grep VERSION $CAMLIMAGESDIR/Makefile.config | sed -e 's/VERSION=//'`
-	if test `expr $CAMLIMAGES_VERSION \>= 2.10` = "1"; then
+	if test `expr $CAMLIMAGES_VERSION \>= 2.11` = "1"; then
 		HAVE_CAMLIMAGES="true"
 	        if $HAVE_CDK; then
 		        CAMLIMAGESLIBS="camlimages"
