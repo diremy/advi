@@ -92,8 +92,7 @@ external set_named_atom_property : string -> string -> unit
         (* make_atom_property ATOM STRING define an X atom ATOM with
            property STRING *)
 
-(* setting cursor *)
-(* check by fd -fn cursor *)
+(* Setting the cursor *)
 type cursor = 
   | Cursor_id of int
   | Cursor_X_cursor
@@ -174,6 +173,7 @@ type cursor =
   | Cursor_watch
   | Cursor_xterm
 ;;
+(* Cursors can be checked using command xfd -fn cursor. *)
 
 val set_cursor : cursor -> unit;;
  (** sets the cursor for the graphics on-screen window *)
