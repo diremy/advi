@@ -67,6 +67,13 @@ let push_key_event c ms = (!forward_push_key_event c ms: unit);;
 
 let set_forward_push_key_event f = forward_push_key_event := f;;
 
+let forward_push_char_event =
+  ref (fun (c : char) -> failwith "undefined forward push_char_event");;
+
+let push_char_event c = (!forward_push_char_event c: unit);;
+
+let set_forward_push_char_event f = forward_push_char_event := f;;
+
 (* To round properly a float to an int (round it to the nearest integer). *)
 let round_pos x = int_of_float (x +. 0.5);;
 let round_neg x = int_of_float (x -. 0.5);;

@@ -227,7 +227,6 @@ and state = {
 
 exception Duplex of (state -> unit) * state;;
 
-
 let set_page_number st n =
  Userfile.save_page_number n;
  Userfile.save_page_timing n;
@@ -421,8 +420,7 @@ let compatible st st' =
   st.size_x = st'.size_x &&
   st.size_y = st'.size_y
 *)
- true
-;;
+ true;;
 
 let set_bbox st =
   Grdev.set_bbox (Some (st.orig_x, st.orig_y, st.dvi_width, st.dvi_height));;

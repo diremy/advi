@@ -78,8 +78,7 @@ let split_record s =
       String.sub token 0 i,
       String.sub token (i + 1) (String.length token - i - 1)
     with
-    | Not_found -> token, "") tokens
-;;
+    | Not_found -> token, "") tokens;;
 
 module Dev = Grdev;;
 module Symbol = Dev.Symbol;;
@@ -1335,8 +1334,7 @@ let scan_special_line (_, _, lastline) s k =
   try lastline := Some (line_of_special s k)
   with Ill_formed_special s -> ill_formed_special s;;
 
-let save_page_image_special st =
- Shot.save_page_image ();;
+let save_page_image_special st = Shot.save_page_image ();;
 
 let get_file_name records =
   try unquote (List.assoc "file" records) with
@@ -1368,14 +1366,16 @@ let save_page_area_image_file_special st s =
     and h = int_of_string (List.assoc "h" records) in
     Shot.save_page_area_image_file fname x y w h with
   | Not_found | Failure _ ->
-     failwith (Printf.sprintf "advi_save_page: invalid special %s" s);;
+     failwith (Printf.sprintf "advi_save_page_area: invalid special %s" s);;
 
 let push_events_special st s =
- for i = String.length s - 1 to 0 do
-   match s.[i] with
-   | '' .. '' -> Misc.push_key_event s.[i] GraphicsY11.control
-   | _ -> Misc.push_key_event s.[i] GraphicsY11.nomod
- done;;
+  Misc.debug_endline (Printf.sprintf "push_events_special %S" s);
+  match split_string s 0 with
+  | ["advi:"; "pushevents"; keys] ->
+     let keys = unquote keys in
+     for i = String.length keys - 1 to 0 do Misc.push_char_event keys.[i] done
+  | _ ->
+     failwith (Printf.sprintf "advi_push_events: invalid special %s" s);;
 
 (* This function is iterated on the current DVI page BEFORE
    rendering it, to gather the information contained in some
@@ -1386,7 +1386,7 @@ let scan_special status (headers, xrefs, lastline as args) pagenum s =
      has_prefix "advi: embed " s then scan_embed_special status s else
   (* Embedded Postscript, better be first for speed when scanning *)
   let do_ps = Gs.get_do_ps () in
-  if has_prefix "\" " s || has_prefix "ps: " s 
+  if has_prefix "\" " s || has_prefix "ps: " s
   || has_prefix "psfile=" s || has_prefix "PSfile=" s then
     status.Cdvi.hasps <- do_ps else
   if has_prefix "!" s then

@@ -565,21 +565,22 @@ let mean_color c c' =
   let r', g', b' = rgb_of_color c' in
   Graphics.rgb ((r + r' + 1) / 2) ((g + g' + 1) / 2) ((b + b' + 1) / 2);;
 
+let point_color x y =
+  let x' = min (!size_x - 1) x and y' = min (!size_y - 1) y in
+  GraphicsY11.point_color x' y';;
+
 let get_bg_color x y w h =
   if !ignore_background then Graphics.white else begin
     sync dvi;
     if !psused || bkgd_data.bgimg <> None ||
-    bkgd_data.bggradient <> None || bkgd_data.bgviewport <> None then
-      let point_color x y =
-        let x' = min (!size_x - 1) x and y' = min (!size_y - 1) y in
-        GraphicsY11.point_color x' y' in
+       bkgd_data.bggradient <> None ||
+       bkgd_data.bgviewport <> None then
       let c = point_color (x + 1) (y + 1) in
       let c' = point_color (x + w - 1) (y + h - 1) in
-      if c = c' then c
-      else
-        if get_playing () > 0 then find_bg_color x y w h 
-        else mean_color c c' 
-    else find_bg_color x y w h 
+      if c = c' then c else 
+      if get_playing () > 0 then find_bg_color x y w h else
+      mean_color c c'
+    else find_bg_color x y w h
   end;;
 
 let get_color_table =
@@ -1287,6 +1288,10 @@ let push_key_event c m =
     modifiers = m;
   } in
   push_event status;;
+
+let push_char_event = function
+  | '' .. '' as c -> push_key_event c GraphicsY11.control
+  | c -> push_key_event c GraphicsY11.nomod;;
 
 let push_mouse_event mx my b =
   let status = {
