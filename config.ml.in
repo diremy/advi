@@ -19,8 +19,8 @@
 
 (* The current version of Active-DVI *)
 let advi_version_number = 1.5;;
-let advi_sub_version_number = 1;;
-let advi_version_date = "2003-10-02";;
+let advi_sub_version_number = 2;;
+let advi_version_date = "2003-10-03";;
 
 let advi_full_version =
   Printf.sprintf "%.2f+%i (%s)"

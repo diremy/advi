@@ -1,3 +1,9 @@
+Version 1.5+2
+2003/10/03
+        Long time standing bug of set_title has been fixed: the
+        Active-DVI window is now allocated by the Window Manager with
+        the expected correct name.
+
 Version 1.5
 2003/09/30:
         Introducing page timing dump to designated files for
