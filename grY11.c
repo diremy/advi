@@ -486,10 +486,11 @@ value gr_resize_window (value wid, value w, value h)
 
 /* screen is the screen number */
 
-value gr_reposition (value x, value y, value w, value h, value screen)
+value gr_reposition (value x, value y, value w, value h, value scr)
 {
   Window r;
-  int posx, posy, width, height;
+  int posx, posy, width, height, screen;
+  int xinerama_x=0, xinerama_y=0;
   Bool fullscreen;
   XWindowAttributes att;
 
@@ -499,6 +500,7 @@ value gr_reposition (value x, value y, value w, value h, value screen)
   posy = Int_val(y);
   width = Int_val(w);
   height = Int_val(h);
+  screen = Int_val(scr);
 
   /* create the X atoms: should be done only once */
   init_atoms(grdisplay);
@@ -512,11 +514,14 @@ value gr_reposition (value x, value y, value w, value h, value screen)
   XineramaScreenInfo *screens;
   int num_screens;
   int theScreen=0;
+
   screens = XineramaQueryScreens(grdisplay, &num_screens);
-  fprintf(stderr,"num_screens=%d\n",num_screens);
+  fprintf(stderr,"num_screens=%d, screen=%d\n",num_screens,screen);
   if (screen < num_screens) {theScreen=screen;}; 
   width=screens[theScreen].width;
   height=screens[theScreen].height;
+  xinerama_x=screens[theScreen].x_org;
+  xinerama_y=screens[theScreen].y_org;
   };
 #endif
     fullscreen = True;}
@@ -531,9 +536,12 @@ value gr_reposition (value x, value y, value w, value h, value screen)
   x11_fullscreen(grdisplay,grwindow.win,posx,posy,width,height, fullscreen ? True:False);
 
   XMoveResizeWindow(grdisplay, grwindow.win, posx, posy, width, height);
-  //#ifdef HAVE_XINERAMA
-  // x11_xinerama_move(dpy,w);
-  //#endif
+#ifdef HAVE_XINERAMA
+ if(XineramaIsActive(grdisplay))
+  {
+    if (fullscreen==True) {XMoveWindow(grdisplay,grwindow.win,xinerama_x,xinerama_y);};
+  }
+#endif
   XMapRaised(grdisplay,grwindow.win );
   XRaiseWindow(grdisplay,grwindow.win );
 
