@@ -13,12 +13,17 @@ Active-DVI FAQ
 <DL>
 
 <DT><STRONG>Existe-t-il une version Win32 ?</STRONG>
- <DD>Réponse: <I>Malheureusement, non.</I>
- Toutefois, vous pouvez utiliser le CD-ROM <I>DemoLinux</I> qui
-contient une version d'Active-DVI: si vous pouvez rebooter la machine
-windows, redémarrez-la depuis le CD-ROM et lancez advi. Après la
-présentation redémarrez simplement la machine: DemoLinux n'écrit rien
-sur le disque dur si bien que la machine repart sans aucune modification.
+ <DD>Réponse: <I>Malheureusement, il n'y a pas de version Windows native.
+ Toutefois, vous pouvez utiliser l'émulateur Cygwin and construire
+Active-DVI à partir des fichiers source, après avoir configurer le
+programme à l'aide de la commande spéciale
+<CODE>configure_Cygwin</CODE>.</I>
+ <DD>Réponse additionnelle: <I>vous pouvez aussi utiliser le CD-ROM
+<STRONG>DemoLinux</STRONG> qui contient une version d'Active-DVI: si
+vous pouvez rebooter la machine Windows, redémarrez-la depuis le
+CD-ROM et lancez advi. Après la présentation redémarrez simplement la
+machine: DemoLinux n'écrit rien sur le disque dur si bien que la
+machine repart sans aucune modification.
 
 <DT><STRONG>Comment obtenir une présentation plein écran ?</STRONG>
  <DD>Réponse: <I>Lancez Active-DVI et tapez <CODE>^F</CODE>
@@ -92,11 +97,13 @@ fait, nous avons travaillé de notre mieux pour que l'option
 il n'en demeure pas moins, que le style fait de son mieux pour remplir
 un contrat impossible.</I> 
 
-<DT><STRONG>Comment écrire sur un transparent au cours de la présentation ?</STRONG>
+<DT><STRONG>Comment écrire sur un transparent au cours de la
+présentation ?</STRONG>
  <DD>Réponse: <I>Tapez <CODE>s</CODE> pour écrire du texte et
 <CODE>S</CODE> pour dessiner.</I>
 
-<DT><STRONG>Comment écrire des programmes avec des couleurs dans mes présentations ?</STRONG>
+<DT><STRONG>Comment écrire des programmes avec des couleurs dans mes
+présentations ?</STRONG>
  <DD>Réponse: <I>Utilisez l'environnement <CODE>alltt</CODE>; les
 couleurs (et autres indications typographiques) sont alors disponibles avec
 une fonte machine à écrire. Par exemple:</I>
@@ -115,6 +122,19 @@ mathématiques dans ma présentation ?</STRONG>
 formules de mathématiques dans cet environnement ne posent pas de
 problèmes pourvu que vous les entouriez des parenthèses spéciales
 <CODE>\(</CODE> et <CODE>\)</CODE>.</I>
+
+<DT><STRONG>Certaines parties de mes transparents n'apparaissent pas
+avec advi (alors qu'elles sont imprimées par <CODE>xdvi</CODE>). Quer
+se passe-t-il?</STRONG>
+ <DD>Réponse: <I>Vous devez utiliser des fontes virtuelles et
+Active-DVI ne sait pas les traiter lui-même. Il faut donc préprocesser
+votre fichier DVI pour expanser les fontes virtuelles avec la commande
+<A HREF="http://www.ctan.org/tex-archive/dviware/dvicopy/">dvicopy</A>.
+Par exemple, la commande:</I>
+<PRE>
+        dvicopy foo.dvi foo.advi && advi foo.advi
+</PRE>
+<I>règle normalement ce problème.</I>
 
 <DT><STRONG>Comment visualiser les fontes PostScript Adobe
 (comme <CODE>ptmr8t</CODE>) avec Active-DVI ?</STRONG>
