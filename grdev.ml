@@ -121,10 +121,11 @@ let title = ref "Advi";;
 let set_title s = title := s;;
 
 let synchronize () =
+Misc.debug_stop "Dev.synchronize";
   Gs.flush ();
   Transimpl.synchronize_transition ();
   GraphicsY11.synchronize ();
-  Embed.launch_embedded_apps ();;
+  Launch.launch_embedded_apps ();;
 
 (* For refreshed signal on usr1 *)
 exception Usr1;;
@@ -817,7 +818,7 @@ module H =
       a ();
       flush_last ();
       GraphicsY11.synchronize ();
-      Embed.launch_embedded_apps ();
+      Launch.launch_embedded_apps ();
       Screen (ima, act, all_anchors)
 
     let light t =
@@ -893,11 +894,12 @@ let close_dev () =
 let clear_dev () =
   if not !opened then failwith "Grdev.clear_dev: no window";
   Embed.kill_ephemeral_apps ();
-  Embed.unmap_persistent_apps ();
+  Launch.unmap_persistent_apps ();
+Misc.debug_stop "subwindows of persistent apps unmapped";
   GraphicsY11.display_mode !Options.global_display_mode;
   Graphics.clear_graph ();
+Misc.debug_stop "graphics cleared";
   H.clear ();
-  (* Modifiable via \setbgcolor . RDC *)
   bg_color := bkgd_data.bgcolor;
   bg_colors := [];
   background_colors := [];
@@ -906,11 +908,11 @@ let clear_dev () =
   size_y := Graphics.size_y ();
   xmin := 0; xmax := !size_x;
   ymin := 0; ymax := !size_y;
-  (* Here we add the background setting. RDC *)
+  (* Here we add the background setting. *)
   Graphics.set_color !bg_color;
   if !bg_color <> Graphics.white
   then Graphics.fill_rect !xmin !ymin !xmax !ymax;
-  (* Now try to handle background images *)
+  (* Now try to handle background images. *)
   draw_bkgd_img (!xmax, !ymax) 0 0;;
 
 (*** Events ***)
@@ -964,13 +966,19 @@ let button_up = [
 let event = ref [];;
 let push_back_event ev =
   if List.length !event > 1 then Misc.warning "STACK";
-  event :=  ev :: !event;;
+  event := ev :: !event;;
 let event_waiting () =
   match !event with [] -> false | _ -> true;;
 let rec pop_event () =
   match !event with
   | [] -> assert false
   | h :: t -> event := t; h;;
+
+Misc.forward_push_back_event_key :=
+ (fun c m -> push_back_event (
+    {mouse_x = 0; mouse_y = 0;
+     button = false; keypressed = true; key = c;
+     modifiers = m}));;
 
 let mouse_x = ref 0;;
 let mouse_y = ref 0;;

@@ -61,7 +61,7 @@ let rec scratch x y =
        if btn then scratch nx ny
 ;;
 
-let scratch_from x y = on_screen_only (scratch x) y;;
+let scratch_from x y = only_on_screen (scratch x) y;;
 
 let rec f () =
  G.set_color !scratch_color;

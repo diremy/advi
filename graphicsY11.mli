@@ -245,18 +245,19 @@ val key_pressed : unit -> bool;;
         (* Return [true] if a keypress is available; that is, if [read_key]
            would not block. *)
 
+val global_display_mode : bool -> unit;;
 (** It enables/disables the command display_mode and synchronize according
  to the value [false]/[true]. When disable, [display_mode] and [synchronize]
  commands will be ignored. *)
-val global_display_mode : bool -> unit;;
-(** Same as [Graphics.synchronize] but according to [global_display_mode] *)
 val synchronize : unit -> unit;;
-(** Same as [Graphics.display_mode] but according to [global_display_mode] *)
+(** Same as [Graphics.synchronize] but according to [global_display_mode] *)
 val display_mode : bool -> unit;;
-(** As [point_color] but according to values of [global_display_mode] *)
-val point_color : int -> int -> color;;
+(** Same as [Graphics.display_mode] but according to [global_display_mode] *)
 
-val on_screen_only : ('a -> unit) -> 'a -> unit;;
+val point_color : int -> int -> color;;
+(** As [point_color] but according to values of [global_display_mode] *)
+
+val only_on_screen : ('a -> 'b) -> 'a -> 'b;;
 (** [on_screen_only f arg] performs [f arg] on the screen memory only,
      not affecting the backing store. *)
 

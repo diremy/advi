@@ -15,6 +15,37 @@
 (*  Based on Mldvi by Alexandre Miquel.                                *)
 (***********************************************************************)
 
+(* Embedded applications function handlers (thunks). *)
+let embeds = ref [];;
+let persists = ref [];;
+let unmap_embeds = ref [];;
+
+let add_embed f = embeds := f :: !embeds
+and add_persist f = persists := f :: !persists
+and add_unmap_embed f = unmap_embeds := f :: !unmap_embeds;;
+
+(* Execute thunks of the list in reverse order. *)
+let execute fs = List.iter (fun f -> f ()) (List.rev fs);;
+
+(* Evaluate f arg, while temporary unmapping persistent apps. *)
+let unmapping_persistent_apps f arg =
+  execute !unmap_embeds;
+  let res = f arg in
+  execute !persists;
+  res
+;;
+
+(* Unmap persitent apps windows (apps are still running). *)
+let unmap_persistent_apps () =
+  execute !unmap_embeds;
+  unmap_embeds := []
+;;
+
+(* Really launch embedded apps. *)
+let launch_embedded_apps () = 
+  execute !embeds; embeds := [];
+  execute !persists; persists := [];;
+
 (* Unix command line parser *)
 let parse_shell_command = Rc.argv_of_string;;
 
@@ -31,6 +62,7 @@ let exit code =
   if Unix.getpid () = advi_process then Pervasives.exit code
   else (* SUICIDE *) Unix.kill (Unix.getpid ()) 9;;
 
+(* The safety policy to launch applications. *)
 type policy =
    | Safer              (* No application is launched. *)
    | Exec               (* Application are automatically launched. *)
@@ -101,9 +133,7 @@ let ask_to_launch command command_invocation =
  let sx, sy = Graphics.text_size "X" in
  let wt, ht = sx * ncol, sy * nlines in
  let xc, yc =
-  (Graphics.size_x () - wt) / 2, (Graphics.size_y () - ht) / 2 in
-
- (*prerr_endline "Asking before launching";*)
+  (Graphics.size_x () - wt - 1) / 2, (Graphics.size_y () - ht - 1) / 2 in
 
  let t =
    make_term_gen
@@ -112,28 +142,38 @@ let ask_to_launch command command_invocation =
      0x6FFFFF
      xc yc nlines ncol in
  Gterm.set_title t (Printf.sprintf "Active-DVI alert for %s" command);
- draw_term t;
- ask_user t
-  "Attempt to launch the following command"
-  command_invocation
-  "Do you want to execute it ? <yes/no> ";;
+
+ unmapping_persistent_apps (fun () ->
+   draw_term t;
+
+   let res =
+   ask_user t
+    "Attempt to launch the following command"
+    command_invocation
+    "Do you want to execute it ? <yes/no> " in
+    res) ();;
 
 let can_launch command command_invocation =
   match !policy with
   | Exec -> true
   | Safer -> false
-  | Ask -> ask_to_launch command command_invocation;;
+  | Ask ->
+     let cursor = GraphicsY11.get_cursor () in
+     GraphicsY11.set_cursor GraphicsY11.Cursor_question_arrow;
+     let res = 
+       (ask_to_launch command) command_invocation in
+     GraphicsY11.set_cursor cursor;
+     !Misc.forward_push_back_event_key '' GraphicsY11.control;
+     res;;
 
 let can_execute_table = Hashtbl.create 11;;
 
 let can_execute command_invocation command_tokens =
   let command = command_tokens.(0) in
-  (*prerr_endline command;*)
   try Hashtbl.find can_execute_table command
   with
   | Not_found ->
       let b = can_launch command command_invocation in
-      (*prerr_endline (Printf.sprintf "can = %b" b);*)
       Hashtbl.add can_execute_table command b;
       b;;
 
@@ -147,7 +187,6 @@ let execute_command can_exec command_invocation command_tokens =
 
 let fork_proc command_invocation command_tokens =
   let can_exec = can_execute command_invocation command_tokens in
-  (*prerr_endline (Printf.sprintf "Can_exec %b" can_exec);*)
   let pid = Unix.fork () in
   if pid = 0 then
     begin (* child *)

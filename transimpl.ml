@@ -22,7 +22,7 @@ let prev_geom = ref None;;
 
 let init_sprite () = prev_geom := None;;
 
-let do_on_screen = GraphicsY11.on_screen_only;;
+let do_on_screen = GraphicsY11.only_on_screen;;
 
 let draw_sprite newimg x y width height =
   let orgimg = Graphics.get_image x y width height in

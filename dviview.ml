@@ -108,14 +108,14 @@ type state = {
     mutable dvi : Dvi.t;
     mutable cdvi : Driver.cooked_dvi;
     mutable num_pages : int;
-      (* Page layout *)
+    (* Page layout *)
     mutable base_dpi : float;
     mutable dvi_width : int;   (* in pixels *)
     mutable dvi_height : int;  (* in pixels *)
-      (* Window size *)
+    (* Window size *)
     mutable size_x : int;
     mutable size_y : int;
-      (* Current parameters *)
+    (* Current parameters *)
     mutable orig_x : int;
     mutable orig_y : int;
     mutable ratio : float;
@@ -127,19 +127,19 @@ type state = {
     mutable fullscreen : (int * int * int * int) option;
 
     mutable pause_number : int;
-      (* Attributes for Embedded postscript *)
+    (* Attributes for Embedded postscript *)
 
-      (* true when page was not completed: may need to redraw *)
+    (* true when page was not completed: may need to redraw *)
     mutable aborted : bool;
-      (* true when hrefs have not been processed *)
+    (* true when hrefs have not been processed *)
     mutable frozen : bool;
-      (* numeric value for keyboard interaction *)
+    (* numeric value for keyboard interaction *)
     mutable num : int;
-      (* next numeric value *)
+    (* next numeric value *)
     mutable next_num : int;
-      (* control the action of the mouse *)
+    (* control the action of the mouse *)
     mutable mode : mode;
-      (* Some of f when on a pause *)
+    (* Some of f when on a pause *)
     mutable cont : (unit -> bool) option;
   };;
 
@@ -434,7 +434,8 @@ let redraw ?trans st =
       Grdev.continue ();
       Driver.clear_symbols ();
       if !bounding_box then draw_bounding_box st;
-      let f = Driver.render_step st.cdvi st.page_number ?trans
+      let f =
+        Driver.render_step st.cdvi st.page_number ?trans
           (st.base_dpi *. st.ratio) st.orig_x st.orig_y in
       if !pauses then begin
         let current_pause = ref 0 in
@@ -446,8 +447,8 @@ let redraw ?trans st =
                 if !current_pause = st.pause_number then raise Driver.Pause
                 else begin incr current_pause; true end
           do () done;
-          if !current_pause < st.pause_number then
-            st.pause_number <- !current_pause
+          if !current_pause < st.pause_number
+          then st.pause_number <- !current_pause
         with
         | Driver.Pause -> st.cont <- Some f
       end else begin
@@ -455,11 +456,13 @@ let redraw ?trans st =
 	while try f () with Driver.Wait _ | Driver.Pause -> true 
 	do () done
       end
-    with Grdev.Stop ->
-      st.aborted <- true 
+    with
+    | Grdev.Stop -> st.aborted <- true 
   end;
   Grdev.synchronize ();
-  Grdev.set_busy (if st.cont = None then Grdev.Free else Grdev.Pause);;
+  Grdev.set_busy (if st.cont = None then Grdev.Free else Grdev.Pause);
+Misc.debug_stop "Page has been drawn\n";
+;;
 
 let redisplay st =
   st.pause_number <- 0;

@@ -317,7 +317,7 @@ let get_line =
     let limx = t.cursor_x
     and limy = t.cursor_y in
     let rec read t =
-      Graphics.synchronize ();
+   Graphics.synchronize ();
       let evt = Graphics.wait_next_event [Graphics.Key_pressed] in
       if evt.Graphics.keypressed then
       match evt.Graphics.key with

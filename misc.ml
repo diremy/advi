@@ -137,3 +137,14 @@ let warning s = if !warnings then emit_warning s;;
 let forward_debug_endline = ref (function (s : string) -> ());;
 
 let debug_endline s = !forward_debug_endline s;;
+
+let debug_stop s =
+  if false then begin
+   prerr_string (s ^ " --> Press return to go on");
+   flush stderr;
+   let _ = input_line stdin in
+   prerr_endline "Ok"
+  end;;
+
+let forward_push_back_event_key = ref (fun c ->
+  failwith "undefined forward push_back_event_key");;

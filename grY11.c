@@ -187,7 +187,6 @@ value gr_sync(void)
 /* The following is not the best, since it unsets the selection 
    It would be better to own the selection. However, the event loop should
    then be changed */
- 
 value gr_cut (value string) {
   /* The following, suggested by Fabrice does not work */
   /* 

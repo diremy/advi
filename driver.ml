@@ -742,7 +742,7 @@ let proc_special st s =
         | h :: rest ->
             visible := h; visible_stack := rest;
         | [] ->
-            (* Ill-formed DVI not recording error should have ben reproted
+            (* Ill-formed DVI not recording error should have ben reported
                right above *) 
             (); 
         end;
@@ -986,30 +986,27 @@ let tpic_specials st s =
       ();;
 (* End of TPIC hacks *)
 
- let moveto_special st b s =
-   if !Options.dops then
-     let x, y = Dev.current_pos() in
-     if b then
-       begin
-         st.h <- int_of_float (float (x - st.x_origin) /. st.conv);
-         st.v <- int_of_float (float (y - st.y_origin) /. st.conv);
-       end
-     else
-       begin
-         st.h <- st.h + int_of_float (float x /. st.conv);
-         st.v <- st.v + int_of_float (float y /. st.conv);
-       end;;
+let moveto_special st b s =
+  if !Options.dops then
+    let x, y = Dev.current_pos () in
+    if b then begin
+       st.h <- int_of_float (float (x - st.x_origin) /. st.conv);
+       st.v <- int_of_float (float (y - st.y_origin) /. st.conv);
+    end else begin
+       st.h <- st.h + int_of_float (float x /. st.conv);
+       st.v <- st.v + int_of_float (float y /. st.conv);
+    end;;
 
 let ps_special st s =
   if !Options.dops && st.status.Dvi.hasps then
-      let x = int_of_float (st.conv *. float st.h) in
-      let y = int_of_float (st.conv *. float st.v) in
-      if !visible then
-        begin try
-          Dev.exec_ps s x y
-        with Dev.GS ->
-          st.status.Dvi.hasps <- false
-        end;;
+     let x = int_of_float (st.conv *. float st.h) in
+     let y = int_of_float (st.conv *. float st.v) in
+     if !visible then
+       begin try
+         Dev.exec_ps s x y
+       with Dev.GS ->
+         st.status.Dvi.hasps <- false
+       end;;
 
 (* header are not "rendered", only stored during scan *)
 let header_special st s = ();;
@@ -1074,40 +1071,40 @@ let scan_special_html (headers,xrefs) page s =
 (* This function is iterated on the current DVI page BEFORE
    rendering it, to gather the information contained in some
    "asynchronous" specials (typically, PS headers, background
-   commands, html references) 
- *)
-
-let scan_special status (headers,xrefs) pagenum s =
-  if Launch.whiterun () && has_prefix "advi: embed " s
-  then scan_embed_special status s else
+   commands, html references) *)
+let scan_special status (headers, xrefs) pagenum s =
+  if Launch.whiterun () &&
+     has_prefix "advi: embed " s then scan_embed_special status s else
   (* Embedded Postscript, better be first for speed when scanning *)
   if has_prefix "\" " s || has_prefix "ps: " s then
     (if !Options.dops then status.Dvi.hasps <- true) else
   if has_prefix "header=" s then
-    (if !Options.dops then
-        headers := get_suffix "header=" s :: !headers) else
+    (if !Options.dops then headers := get_suffix "header=" s :: !headers) else
   if has_prefix "advi: setbg " s then scan_bkgd_special status s else
   if has_prefix "html:<A name=\"" s || has_prefix "html:<a name=\"" s then
     scan_special_html (headers, xrefs) pagenum s;;
 
+(* Scan a page calling function scan_special when seeing a special and
+   the function otherwise for other DVI stuff. *)
 let scan_special_page otherwise cdvi globals pagenum =
+Misc.debug_stop "Scanning specials";
    let page = cdvi.base_dvi.Dvi.pages.(pagenum) in
-       match page.Dvi.status with
-       | Dvi.Unknown ->
-           let status =
-             {Dvi.hasps = false;
-              Dvi.bkgd_local_prefs = [];
-              Dvi.bkgd_prefs =
-                (if !inherit_background_info
-                 then Dev.copy_of_bkgd_data ()
-                 else Dev.default_bkgd_data ())} in
-           let eval = function
-             | Dvi.C_xxx s -> scan_special status globals pagenum s
-             | x -> otherwise x in
-           Dvi.page_iter eval cdvi.base_dvi.Dvi.pages.(pagenum);
-           page.Dvi.status <- Dvi.Known status;
-           status
-       | Dvi.Known stored_status -> stored_status;;
+   match page.Dvi.status with
+   | Dvi.Unknown ->
+       let status =
+         {Dvi.hasps = false;
+          Dvi.bkgd_local_prefs = [];
+          Dvi.bkgd_prefs =
+            (if !inherit_background_info
+             then Dev.copy_of_bkgd_data ()
+             else Dev.default_bkgd_data ())} in
+       let eval = function
+         | Dvi.C_xxx s -> scan_special status globals pagenum s
+         | x -> otherwise x in
+       Dvi.page_iter eval cdvi.base_dvi.Dvi.pages.(pagenum);
+       page.Dvi.status <- Dvi.Known status;
+       status
+   | Dvi.Known stored_status -> stored_status;;
 
 let special st s =
   if has_prefix "\" " s || has_prefix "ps: " s then ps_special st s else
@@ -1180,9 +1177,10 @@ let eval_dvi_command st = function
   | Dvi.C_xxx s -> special st s
   | _ -> ();;
 
+(* Unused ???
 let scan_command st = function
   | Dvi.C_xxx s -> special st s
-  | _ -> ();;
+  | _ -> ();;*)
 
 let eval_command st c =
   let record r =
@@ -1251,8 +1249,7 @@ let render_step cdvi num ?trans dpi xorig yorig =
       draw_html = [];
       checkpoint = 0;
     } in
-  if st.status.Dvi.hasps then
-    newpage [] st  (mag *. dpi) xorig yorig;
+  if st.status.Dvi.hasps then newpage [] st  (mag *. dpi) xorig yorig;
   setup_bkgd st.status; (* apply the background preferences in Dev *)
   Dev.clear_dev ();     (* and redraw the background               *)
   Dev.set_color st.color;
@@ -1260,6 +1257,7 @@ let render_step cdvi num ?trans dpi xorig yorig =
   st.checkpoint <- 0;
   let check () =
     begin try Dev.continue () with
+    (* try with exn -> raise exn ?? What does that mean ? *)
     | Dev.Stop as exn -> raise exn
     end;
     st.checkpoint <- checkpoint_frequency in

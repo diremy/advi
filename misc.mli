@@ -40,10 +40,11 @@ val handle_fatal_error : (unit -> unit) -> unit -> unit;;
 val set_warnings : bool -> unit;;
 val warning : string -> unit;;
 
-(* 
-   [debug mes] prints mes to [stderr] if debug mode is on 
-*)
-    
+(* Explicit and temporary debugging. *)
+val debug_stop : string -> unit;;
+
+(* To print a message if debugging is on. *)
 val debug_endline : string -> unit;;
 
 val forward_debug_endline : (string -> unit) ref;;
+val forward_push_back_event_key : (char -> int -> unit) ref;;

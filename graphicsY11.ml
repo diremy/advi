@@ -363,8 +363,13 @@ let global_display_mode_status = ref false;;
 let global_display_mode b = global_display_mode_status :=  b;;
 let synchronize () =
   if not !global_display_mode_status then
+(Misc.debug_stop "Graphics.synchronize";
     Graphics.synchronize ()
-  else anti_synchronize ();;
+)
+  else
+(Misc.debug_stop "GraphicsY11.antisynchronize";
+ anti_synchronize ()
+);;
 
 let display_mode b =
   if not !global_display_mode_status then 
@@ -376,12 +381,13 @@ let point_color x y =
 
 (* This function performs f on the screen memory only,
    not affecting the backing store. *) 
-let on_screen_only f x =
+let only_on_screen f x =
   Graphics.remember_mode false;
   display_mode true;
-  f x;
+  let res = f x in
   Graphics.remember_mode true;
-  display_mode false;;
+  display_mode false;
+  res;;
 
 (* Graphics.sigio_signal is not exported. We declare it here again. *)
 external sigio_signal: unit -> int = "gr_sigio_signal";;
@@ -389,4 +395,3 @@ external sigio_signal: unit -> int = "gr_sigio_signal";;
 let init () =
   (* we disable the original Graphics event retrieveing system *)
   Sys.set_signal (sigio_signal ()) Sys.Signal_ignore;;
-

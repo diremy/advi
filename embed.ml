@@ -17,17 +17,7 @@
 
 (* Embedding applications (in particular tcl/tk) *)
 
-(* Applications function handlers. *)
-let embeds = ref [];;
-let persists = ref [];;
-let unmap_embeds = ref [];;
-
-let launch_embedded_apps () = 
-  List.iter (fun f -> f ()) (List.rev !embeds); embeds := [];
-  List.iter (fun f -> f ()) (List.rev !persists); persists := [];;
-
 type app_mode = Sticky | Persistent | Ephemeral;;
-(*type app_state =;;*)
 
 let app_table = Hashtbl.create 17;;
 
@@ -140,40 +130,34 @@ let embed_app command app_mode app_name width height x gry =
   match app_mode with
   | Sticky ->
      if not (already_launched app_name) then
-     embeds :=
+     Launch.add_embed
       (fun () ->
         (* prerr_endline ("Launching " ^ app_name); *)
-        raw_embed_app command app_mode app_name width height x gry) ::
-      !embeds else
-     persists :=
+        raw_embed_app command app_mode app_name width height x gry) else
+     Launch.add_persist
       (fun () ->
         (* prerr_endline ("Moving " ^ app_name); *)
         move_or_resize_persistent_app command app_mode app_name
-        width height x gry) ::
-      !persists
+        width height x gry)
   | Persistent ->
      if not (already_launched app_name) then
-     embeds :=
+     Launch.add_embed
       (fun () ->
         (* prerr_endline ("Launching " ^ app_name); *)
-        raw_embed_app command app_mode app_name width height x gry) ::
-      !embeds;
-     persists :=
+        raw_embed_app command app_mode app_name width height x gry);
+     Launch.add_persist
       (fun () ->
         (* prerr_endline ("Mapping " ^ app_name); *)
-        map_embed_app command app_mode app_name width height x gry) ::
-      !persists;
-     unmap_embeds :=
+        map_embed_app command app_mode app_name width height x gry);
+     Launch.add_unmap_embed
       (fun () ->
         (* prerr_endline ("Unmapping " ^ app_name); *)
-        unmap_embed_app command app_mode app_name width height x gry) ::
-      !unmap_embeds
+        unmap_embed_app command app_mode app_name width height x gry)
   | Ephemeral ->
-     embeds :=
+     Launch.add_embed
       (fun () ->
-         (* prerr_endline ("Launching " ^ app_name); *)
-         raw_embed_app command app_mode app_name width height x gry) ::
-      !embeds;;
+        (* prerr_endline ("Launching " ^ app_name); *)
+        raw_embed_app command app_mode app_name width height x gry);;
 
 let kill_app pid wid =
   (* prerr_endline (Printf.sprintf "kill_app (pid=%d, window=%s)" pid wid); *)
@@ -222,7 +206,8 @@ let signal_app sig_val pid wid =
         (Printf.sprintf
           "signal_app (pid=%d, window=%s) signal=%i: cannot signal process"
           pid wid sig_val); *)
-    ();;
+    ()
+;;
 
 let kill_embedded_app sig_val app_name =
   (* prerr_endline
@@ -234,22 +219,17 @@ let kill_embedded_app sig_val app_name =
     signal_app sig_val pid wid
   with
   | Not_found ->
-      Misc.warning (Printf.sprintf "application %s is not running" app_name);;
-
-let unmap_persistent_apps () =
-  List.iter (fun f -> f ()) (List.rev !unmap_embeds);
-  unmap_embeds := [];;
+      Misc.warning (Printf.sprintf "application %s is not running" app_name)
+;;
 
 let kill_ephemeral_apps () =
   kill_apps Ephemeral;;
 
 let kill_persistent_apps () =
   kill_apps Sticky;
-  unmap_persistent_apps ();
+  Launch.unmap_persistent_apps ();
   kill_apps Persistent;;
 
 let kill_all_embedded_apps () =
   kill_ephemeral_apps ();
   kill_persistent_apps ();;
-
-
