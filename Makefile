@@ -111,7 +111,10 @@ tex/splash.dvi: tex/splash.tex
 	cd tex; latex splash.tex
 
 test/demo.dvi: test/demo.tex
-	cd test; $(MAKE)
+	cd test; $(MAKE) demo.dvi
+
+test/trans.dvi: test/trans.tex
+	cd test; $(MAKE) trans.dvi
 
 install:: advi.opt tex/splash.dvi
 	cp advi.opt ${bindir}/advi
@@ -132,7 +135,7 @@ WEBSITEDIR=/net/pauillac/infosystems/www/advi
 splash:
 	cd tex; latex splash.tex
 
-distribute: tex/splash.dvi test/demo.dvi	
+distribute: tex/splash.dvi test/demo.dvi test/trans.dvi	
 	rm -rf release
 	rm -rf $(WEBSITEDIR)/*
 	- mkdir $(WEBSITEDIR)

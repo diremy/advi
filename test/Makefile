@@ -5,8 +5,13 @@ LATEX=TEXINPUTS=/usr/share/texmf//:$$TEXINPUTS; export TEXINPUTS; latex
 
 MLPROG=but taquin
 
-all: $(MLPROG)
+all: $(MLPROG) demo.dvi trans.dvi
+
+demo.dvi: demo.tex
 	$(LATEX) ./demo.tex
+
+trans.dvi: trans.tex
+	$(LATEX) ./trans.tex
 
 but: start_embed.ml
 	ocamlc -custom -o but -I +camltk camltk.cma start_embed.ml
