@@ -7,10 +7,9 @@
 %% Copyright Pierre Weis 2003.
 %% All rights reserved.
 
+% % $Id$
 %
 % advi-slides.sty: a package to easily write slide-shows with Active-DVI.
-%
-% % $Id$
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -80,17 +79,19 @@
 %%%%%%% End of slides.tex %%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{advi-slides}
+         [2003/02/05 v1.40 Active-DVI Slides Package for advi Previewer]
 
 % Packages to load
 \usepackage[latin1]{inputenc}
-\usepackage{color}
-\usepackage{graphicx}
-\usepackage{advi}
-\usepackage{alltt}
-\usepackage{xcolor}
 
-% The simple pause command
-\def\pause{\adviwait}
+\RequirePackage {color}
+\RequirePackage {graphicx}
+\RequirePackage {advi}
+\RequirePackage {alltt}
+\RequirePackage {xcolor}
+\RequirePackage {advi-annot}
 
 % To put a frame around an arbitrary amount of vertical material.
 % \begin{frame} ... \end{frame}
