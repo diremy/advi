@@ -109,8 +109,7 @@ Options.add
   "-watch-file"
   (Arg.Int (fun x -> watch_file_interval := x))
   "<int> watch for newer file every <int> second. \
-  \n\t 0 means do not watch (default value)"
-;;
+  \n\t 0 means do not watch (default value)";;
 
 let watch_file_check () = if !waiting then raise Watch_file;;
 
@@ -1275,13 +1274,15 @@ let rec pop_event () =
 
 let push_back_key_event c m =
   push_back_event {
-    modifiers = m;
-    keypressed = true; key = c;
     mouse_x = 0; mouse_y = 0;
     button = false;
+    keypressed = true;
+    key = c;
+    modifiers = m;
   };;
 
-Misc.forward_push_back_key_event := push_back_key_event;;
+(* Setting the forward in Misc. *)
+Misc.set_forward_push_back_key_event push_back_key_event;;
 
 let reposition ~x ~y ~w ~h ~screen =
   Gs.flush ();

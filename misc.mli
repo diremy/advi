@@ -72,6 +72,6 @@ val push_back_key_event : char -> modifiers -> unit;;
   with a given modifier list [ms] into the Active-DVI's events queue. *)
 
 (* The necessary forwards: not to be called directly. *)
-val forward_debug_endline : (string -> unit) ref;;
-val forward_push_back_key_event : (char -> int -> unit) ref;;
+val set_forward_debug_endline : (string -> unit) -> unit;;
+val set_forward_push_back_key_event : (char -> modifiers -> unit) -> unit;;
 

@@ -47,6 +47,8 @@ let forward_debug_endline =
 
 let debug_endline s = (!forward_debug_endline s : unit);;
 
+let set_forward_debug_endline f = forward_debug_endline := f;;
+
 let debug_stop s =
   if false then begin
    prerr_string (s ^ " --> Press return to go on");
@@ -62,6 +64,8 @@ let forward_push_back_key_event =
          failwith "undefined forward push_back_event_key");;
 
 let push_back_key_event c ms = (!forward_push_back_key_event c ms: unit);;
+
+let set_forward_push_back_key_event f = forward_push_back_key_event := f;;
 
 (* To round properly a float to an int (round it to the nearest integer). *)
 let round_pos x = int_of_float (x +. 0.5);;

@@ -19,7 +19,8 @@
 (* To print debugging messages. *)
 let debug_endline = Options.debug "--debug" " General debug";;
 
-Misc.forward_debug_endline := debug_endline;;
+(* Setting the forward in Misc. *)
+Misc.set_forward_debug_endline debug_endline;;
 
 (* Some global options for Active-DVI. *)
 
