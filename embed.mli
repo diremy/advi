@@ -58,10 +58,10 @@ type app_mode =
 
 type app_name = string;;
 type signal = int;;
-type command = string;;
+type app_command = string;;
 
 val embed_app :
-  command -> app_mode -> app_name -> int -> int -> int -> int -> unit;;
+  app_command -> app_mode -> app_name -> int -> int -> int -> int -> unit;;
 val map_embedded_app : app_name -> unit;;
 val map_all_embedded_app : app_name -> unit;;
 val unmap_embedded_app : app_name -> unit;;

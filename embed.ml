@@ -29,7 +29,7 @@ type app_mode = | Fake | Raw | Sticky | Persistent | Ephemeral;;
 
 type app_name = string;;
 type signal = int;;
-type command = string;;
+type app_command = string;;
 
 type app = {
   app_name : app_name;
