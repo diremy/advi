@@ -220,7 +220,7 @@ let rec wait_button_pressed f =
 
 (*** Scratching characters on the screen. *)
 
-let end_write () = raise Exit;;
+let end_write () = GraphicsY11.anti_synchronize (); raise Exit;;
 
 (* Scratch write settings:
    for each setting bound char we call the corresponding setting function.
@@ -377,7 +377,7 @@ let write () = only_on_screen do_write ();;
 
 (*** Scratching figures: drawing lines and figures on the screen. *)
 
-let end_draw () = raise Exit;;
+let end_draw = end_write;;
 
 type scratch_figure =
    | Point | Hline | Vline | Segment | Circle | Polygone | Finish | No_figure;;
@@ -385,7 +385,7 @@ let scratch_figure = ref No_figure;;
 let set_scratch_figure f = scratch_figure := f;;
 let clear_scratch_figure () = set_scratch_figure No_figure;;
 
-let scratch_draw_setting_handle_char c =
+let scratch_draw_settings_handle_char c =
   (match c with
    | '>' -> incr_scratch_line_width ()
    | '<' -> decr_scratch_line_width ()
@@ -412,7 +412,7 @@ let scratch_draw_setting_handle_char c =
    | '-' -> set_negative_color_increment ()
    | '?' -> Grdev.help_screen Config.scratch_draw_splash_screen
    | c ->
-      Misc.warning (Printf.sprintf "Unknown scratch draw setting key: %C" c));
+      Misc.warning (Printf.sprintf "Unknown scratch draw settings key: %C" c));
   Graphics.set_line_width (get_scratch_line_width ());
   G.set_color (get_scratch_line_color ());;
 
@@ -467,7 +467,7 @@ let draw_point x y =
 
 let draw_figure f =
   let (x0, y0 as p0) = G.mouse_pos () in
-  wait_button_pressed scratch_draw_setting_handle_char; 
+  wait_button_pressed scratch_draw_settings_handle_char; 
   let (x1, y1 as p1) = G.mouse_pos () in
   f p0 p1;;
 
@@ -544,8 +544,9 @@ and enter_draw () =
    scratch_draw00 ()
 
 and scratch_char_from scratch c =
-  scratch_draw_setting_handle_char c;
-  handle_figure scratch
+  if c = '' then end_draw () else begin
+  scratch_draw_settings_handle_char c;
+  handle_figure scratch end
 
 and handle_figure scratch =
   match !scratch_figure with
@@ -556,7 +557,7 @@ and handle_figure scratch =
   | Segment -> draw_figure draw_segment; handle_figure scratch
   | Circle -> draw_figure draw_circle; handle_figure scratch
   | Polygone | Finish ->
-      wait_button_pressed scratch_draw_setting_handle_char; 
+      wait_button_pressed scratch_draw_settings_handle_char; 
       let (x1, y1 as p1) = mouse_pos () in
       clear_scratch_figure ();
       handle_figure scratch
