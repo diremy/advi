@@ -61,16 +61,15 @@ Reference manual\\
 \def \abstractname {}
 \begin{abstract}
 {\bf\ActiveDVI} is a viewer for DVI files that also recognizes a new class of 
-\docdef \special's targeted to presentations via laptop computers:
+\docdef\special's targeted to presentations via laptop computers:
 various special effects can easily be incorporated to the presentation,
-via a companion \doctt{advi} {\LaTeX} package. 
+via a companion \doctt{advi.sty} {\LaTeX} package. 
 
 \bigskip
 {\ActiveDVI} is copyright \copyright\space 2001, {\adviyear} INRIA
 and distributed under the Gnu Library General Public License ---see the LGPL
 file included in the distribution.
 \end{abstract}
-
 
 \vfill
  \section*{Acknowledgements and contributors}
@@ -277,13 +276,13 @@ the default \doctt{\char126/.advirc}, \doctt{\char126/.advi/advirc}, or
 advi [options] dvifile
 \end{verbatim}
 
-\noindent The \verb"advi" commands recognized the following options:
+\noindent The \doctt{advi} commands recognized the following options:
 
 \subsubsection*{Help and info options}
 
 \medskip\noindent\begin{tabular}{ll}
-\verb"-v"         & Prints the {\tt advi} current version and exits \\
-\verb"--version"  & Prints the full {\tt advi} current version and
+\verb"-v"         & Prints the \doctt{advi} current version and exits \\
+\verb"--version"  & Prints the full \doctt{advi} current version and
 exits \\
 \verb"-help"      & Short command line options help
 \end{tabular}
@@ -383,9 +382,9 @@ Shift middle-click copies the current word.
 \item
 Shift right-click and drag copies the specified region. 
 \end {itemize}
-Moreover, Shift left-click dump an ASCII representation of click 
-in the source file. This expects the DVI to be instrumented with line
-numbers of the form
+Moreover, Shift left-click dump an ASCII representation of the region
+under the mouse pointer in the source file. This expects the DVI to
+have been instrumented with line numbers of the form
 \begin{quote}
 \doctt {line:} \docid {line} \docid {file}
 \end{quote}
@@ -398,19 +397,19 @@ The position is exported in ASCII in the form
 \doctt {<<}\docid{prefix}\doctt{>><<}\docid{suffix}\doctt{>>}
 \docid{file} 
 \end{quote}
-where \docid {before} and  \docid {after} are the enclosing line numbers, 
-\docid{prefix}\docid{suffix} are the word constituent surrounding the
-position, and  file is the current file. 
+where \docid{before} and \docid{after} are the enclosing line numbers, 
+\docid{prefix}\docid{suffix} the word constituent surrounding the
+mouse position, and file is the name of the current file. 
 
 Line numbers default to $0$ when not found. Note that line numbers may be
-inconsistent if they \docdef \special-line commands have not been inserted
+inconsistent if there \docdef\special-line commands have not been inserted
 close enough to the position.
 
 \subsection{Hyperref}
 
 {\ActiveDVI} supports the {\LaTeX} {\tt hyperref} package with both
 internal and cross-file references. For cross-file references, it
-launches a new \verb"advi" process to view the target.
+launches a new \doctt{advi} process to view the target.
 
 {\ActiveDVI} improves the treatment of hyperrefs over convential previewers,
 by emphasizing the hypertarget text of an hyperlink. Thus, an hypertarget
@@ -447,10 +446,10 @@ of the table of contents. Successive stokes will show the following
 pages. (As usual, prefix integer argument may be used to directly
 access a specific page of the table of contents.)
 
-The package \softlink{advi}{{\tt advi}} below redefines the macro
-{\docdef \tableofcontents} so that it automatically inserts the
+The package \softlink{advi}{\doctt{advi}} described below redefines the macro
+{\docdef\tableofcontents} so that it automatically inserts the
 reserved hypertargets markers around the table of contents. It also
-provides two new macros, {\docdef \advitoc} and \docdef \endadvitoc,
+provides two new macros, {\docdef\advitoc} and \docdef\endadvitoc,
 that serve to insert these markers when the table of contents is
 hand-made.
 
@@ -503,42 +502,44 @@ files, or by implementing extensions to the previewer itself.
 % community, please don't hesitate to drop a mail to the implementors
 % at \verb"advi@pauillac.inria.fr".
 
-\section{The \softtarget{advi} {{\tt advi.sty}} {\LaTeX} package}
+\section{The \softtarget{advi} {\doctt{advi.sty}} {\LaTeX} package}
 
 {\ActiveDVI} provides some {\LaTeX} packages to facilitate animations and
 interaction with the presenter from within your {\LaTeX} source text.
 
-The {\tt advi.sty} package is the main package to include when writing
+The \doctt{advi.sty} package is the main package to include when writing
 a presentation for {\ActiveDVI}. It defines the main set of interactive
 commands for {\ActiveDVI} to animate the show. However, there is no
 need to load the package if no {\ActiveDVI} special effects are
 required for the presentation.
 
-\paragraph{Warning!} Most commands of \verb$advi.sty$ use 
-the {\TeX} \verb"\special" command to insert special commands into the DVI
-output file, which commands are then interpreted by {\ActiveDVI} when while
-previewing.  Note that \verb$\special{bla bla}$ is equivalent to
-\verb$\hbox{}$ for {\TeX}'s mounth, which may alters the document layout
-accordingly.  Hence, be aware that most commands of \verb$advi.sty$ will
-also be equivalent to \verb$\hbox{}$ regarding the document layout.
+\paragraph{Warning!} Most commands of \doctt{advi.sty} use the {\TeX}
+\verb$\special$ command to insert into the DVI output file the
+{\ActiveDVI} specific commands that implement their
+semantics. Those commands are interpreted by {\ActiveDVI} afterwhile during
+the DVI file previewing. Note that a \verb$\special{bla bla}$ command
+is equivalent to a \verb$\hbox{}$ for {\TeX}'s mouth, hence it may alter
+the document layout accordingly. Thus, be aware that most commands of
+the \doctt{advi.sty} package are equivalent to a \verb$\hbox{}$
+command as far as the document layout is concerned.
 
 \subsection{Printing the presentation}
 
-The {\tt advi} package recognizes the special option \verb"ignore",
-which is devoted to help the production of a printable version of the
-presentation: the \verb"ignore" option makes the package not to
-produce {\tt advi} specials, so that the show can be previewed by
-other previewers or turned into Postscript with {\tt dvips}. Of
+The \doctt{advi.sty} package recognizes the special option \doctt{ignore},
+which helps the production of a printable version of the
+presentation: the \doctt{ignore} option makes the package not to
+produce {\ActiveDVI} specials, so that the show can be previewed by
+other DVI previewers or turned into Postscript using {\tt dvips}. Of
 course, this option disables most effects that cannot be printed,
 although some of them are still approximated.
 
-If the {\tt ignore} option is not set globally, it can be set
+If the \doctt{ignore} option is not set globally, it can be set
 locally with the commands {\docdef \adviignore}. However, this will not
 prevent all effects, since some decisions are taken when the package is
 loaded.
 
 The package also defines the conditional {\docdef \ifadvi} which
-evaluates its first argument if advi is not in ignore mode and its
+evaluates its first argument if {\doctt advi} is not in ignore mode and its
 second argument otherwise.
 
 \subsection{Pause, Record and Play}
@@ -574,7 +575,7 @@ fragile commands.
 \docdef \adviplay\docopt{color}\docarg{tag}
 \begin{quote}
 Replay the DVI previously recorded and bound to \docid{tag}.
-The optional argument changes the color to \docid{color} during replay. 
+The optional argument changes the text color to \docid{color} during replay. 
 \end{quote}
 
 \medskip\noindent
@@ -592,9 +593,7 @@ anchor is no more activated (the mouse leaves the anchor area or the
 button is released).
 
 If the environment form is used, \docid{text} may contain fragile commands. 
-
 \end{quote}
-
 
 \subsection{Images}
 
@@ -712,7 +711,7 @@ To give an idea, the names and colors available on a standard installation of
 You may also explicitely use a CMYK (Cyan, Magenta, Yellow, Black)
 specification. In this case the cyan, magenta, yellow and black values
 follow the \docid{cmyk} keyword, and are given as a list of four
-integers in the range 0 .. 255.
+integers in the range 0.0 .. 1.0.
 For instance, {\tt {\char92}color[cmyk]\{0,1,0,0\}} is a valid specification
 for {\color[cmyk]{0,1,0,0}{magenta}}.
 
@@ -782,14 +781,15 @@ one of the following keywords:
 \tt
 auto \hfill {\rm or} \hfill
 \begin{tabular}{l@{\qquad}c@{\qquad}r}
-topleft&   top& topright\\
-left&  center&  right \\
-bottomleft& bottom & bottomright\\
+topleft    & top     & topright\\
+left       & center  & right \\
+bottomleft & bottom  & bottomright\\
 \end{tabular}
 \end{center}
 The {\tt auto} fit style means scaling the image as desired in both directions
 so that it fits the entire page. Other styles only force the same scaling
 factor in both directions:
+
 \begin {itemize}
 
 \item Corner-styles means set the image in the corresponding corner
@@ -819,8 +819,7 @@ Set the blend mode to \docid{blend mode}, which are reminiscent of
 Ghostscript blending options. The blend mode should be one of the
 following: {\tt normal}, {\tt multiply}, {\tt screen}, {\tt overlay},
 {\tt dodge}, {\tt burn}, {\tt darken}, {\tt lighten}, {\tt
-difference}, {\tt exclusion},
-(\doctt{none} means unset).
+difference}, {\tt exclusion}, (\doctt{none} means unset).
 \end{quote}
 
 \goodbreak
@@ -851,14 +850,14 @@ selected).
 
 \dockey{from}{direction}
 \begin{quote}
-Make the transition come from \docid{direction}.  Directions should be
+Make the transition come from \docid{direction}. Directions should be
 one of the following:
 \begin{center}
 \tt
 \begin{tabular}{l@{\qquad}c@{\qquad}r}
-topleft&   top& topright\\
-left&  center&  right \\
-bottomleft& bottom & bottomright\\
+topleft    &  top     & topright\\
+left       &  center  & right \\
+bottomleft &  bottom  & bottomright\\
 \end{tabular}
 \end{center}
 \end{quote}
@@ -875,7 +874,7 @@ As for \docdef \advibg, the optional parameter \doctt{global} indicates that
 the definition is global and will affect the following pages, 
 as well as the current page. 
 
-By default, the transition definitions only affect the current page. 
+By default, the transition definitions affect the current page only. 
 \end{quote}
 
 \medskip\noindent
@@ -883,15 +882,15 @@ By default, the transition definitions only affect the current page.
 \begin{quote}
 where \docid {key=val list} is as above and \docarg{hbox material} is
 whatever can follow an \docdef \hbox{} command. In particular, the material
-may contain verbatim commands, since as for the \docdef\hbox{} it is 
+may contain verbatim commands, since as for the \docdef\hbox{} it is
 parsed incrementally.
 \end{quote}
 
-The optional parameter \doctt{global} indicates that
-the definition is global and will affect the following pages, 
-as well as the current page.
+The optional parameter \doctt{global} indicates that the definition is
+global and will affect the following pages, as well as the current
+page.
 
-By default, the transition affects only the current page.
+By default, the transition affects the current page only.
 
 \subsection{Embedded applications}
 
@@ -917,38 +916,41 @@ Anonymous applications have actually the default name \doctt{anonymous}.
 \dockey{ephemeral}{name}
 
 \begin{quote}
-This is the default case: the application is specific to a
-given page. Launched whenever the page is displayed, the application is
-killed when the page is turned.
+This is the default case: the application is specific to a given
+page. An \doctt{ephemeral} application is automatically launched
+whenever the page is displayed, and automatically killed when the page
+is turned.
 \end{quote}
 
 \dockey{persistent}{name}
 
 \begin{quote}
-Launched only once, the application keeps running in the background,
-but is only visible on the page where it has been launched.
+A \doctt{persistent} application is launched only once and keeps
+running in the background; however, {\ActiveDVI} automatically
+hides and shows the window where the application runs, so that the
+application is visible only on the page where it has been launched.
 \end{quote}
 
 \dockey{sticky}{name}
 \begin{quote}
-Launched only once, the application keeps running and remains visible
-when turning pages. It is also resized and moved as necessary to fit
-the page size.
+A \doctt{stiky} application is launched only once, keeps running, and
+remains visible when turning pages. It is also resized and moved as
+necessary to fit the page size.
 \end{quote}
 
 \dockey{raw}{name}
 \begin{quote}
-The application is launched each time its embedding command is
-encountered. A \doctt{raw} application is not {\em automatically}
-managed by {\ActiveDVI}, except for the initial launching and the
-final clean-up that occurs when {\ActiveDVI} exits. You can monitor
-\doctt{raw} applications with \doctt{advikillembed} and the associated
-window mapping facilities for \doctt{raw} applications (see below).
+A \doctt{raw} application is launched each time its embedding command
+is encountered. A \doctt{raw} application is not managed {\em
+automatically} by {\ActiveDVI}, except for the initial launching and
+the final clean-up that occurs when {\ActiveDVI} exits; hence, you can
+completely monitor the \doctt{raw} applications graphical behavior,
+using the \doctt{advikillembed} command and the window mapping
+facilities for \doctt{raw} applications described below.
 \end{quote}
 
 \dockey{width}{dim}\\
 \dockey{height}{dim}
-
 
 \begin{quote}
 The application takes \docid{dim} width (respectively height) space in 
@@ -987,13 +989,13 @@ Signal value defaults to -9.
 \medskip\noindent
 \docdef \advimapembed \docarg{name}
 \begin{quote}
-Map the window of the embedded applications named \docid{name}.
+Map the window of the (\doctt{raw}) embedded application named \docid{name}.
 \end{quote}
 
 \medskip\noindent
 \docdef \adviunmapembed \docarg{name}
 \begin{quote}
-Unmap the window of the embedded applications named \docid{name}.
+Unmap the window of the (\doctt{raw}) embedded application named \docid{name}.
 \end{quote}
 
 \subsubsection*{Monitoring a group of embedded applications}
@@ -1013,13 +1015,15 @@ but kill all the embedded applications named \docid{name}.
 \medskip\noindent
 \docdef \advimapallembed \docarg{name}
 \begin{quote}
-Map the windows of all the embedded applications named \docid{name}.
+Map the windows of all the (\doctt{raw}) embedded applications named
+\docid{name}.
 \end{quote}
 
 \medskip\noindent
 \docdef \adviunmapallembed \docarg{name}
 \begin{quote}
-Unmap the windows of all the embedded applications named \docid{name}.
+Unmap the windows of all the (\doctt{raw}) embedded applications named
+\docid{name}.
 \end{quote}
 
 \subsection{Active anchors}
