@@ -227,15 +227,16 @@ value caml_gr_origin_y(void)
   return Val_int(y);
 }
 
-/* Should be caml_gr_window_id and caml_gr_window_id should disapear. */
-value caml_gr_get_window(void)
+/* Should be caml_gr_window_id and caml_gr_window should disapear. */
+/* Graphics now uses the name caml_gr_window */
+value caml_gr_get_window_id(void)
 { unsigned int w; value res;
   caml_gr_check_open();
   w = caml_gr_window.win;
   return copy_int32 (w); 
 }
 
-value caml_gr_id_of_bstore(void)
+value caml_gr_get_bstore_id(void)
 { unsigned int w; value res;
   caml_gr_check_open();
   w = caml_gr_bstore.win;

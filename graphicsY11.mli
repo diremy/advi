@@ -68,11 +68,10 @@ val resize_subwindow : window_id -> int -> int -> unit;;
 
 val iter_subwindows : (window_id -> int -> unit) -> unit;;
 
-external bstore_id : unit -> int32 = "caml_gr_id_of_bstore";;
-        (* return the X pixmap of the bstore window as an integer *)
-external window_id : unit -> int32 = "caml_gr_window";;
-        (* return the X pixmap of the bstore window as an integer *)
-
+external bstore_id : unit -> int32 = "caml_gr_get_bstore_id"
+ (** return the X id of the bstore canvas pixmap as an integer *)
+external window_id : unit -> int32 = "caml_gr_get_window_id"
+ (** return the X id of the canvas of the on-screen window as an integer *)
 
 external flush : unit -> unit = "caml_gr_flush";;
         (* flush pending events *)

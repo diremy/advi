@@ -142,9 +142,9 @@ external set_named_atom_property : string -> string -> unit
         (* make_atom_property ATOM STRING define an X atom ATOM with
            property STRING *)
 
-external bstore_id : unit -> int32 = "caml_gr_id_of_bstore"
+external bstore_id : unit -> int32 = "caml_gr_get_bstore_id"
  (** return the X id of the bstore canvas pixmap as an integer *)
-external window_id : unit -> int32 = "caml_gr_window"
+external window_id : unit -> int32 = "caml_gr_get_window_id"
  (** return the X id of the canvas of the on-screen window as an integer *)
 
 (* Setting the cursor *)

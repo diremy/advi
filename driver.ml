@@ -1577,9 +1577,9 @@ let render_step cdvi num ?trans ?chst dpi xorig yorig =
     let s = scan_special_page otherwise cdvi (headers, xrefs) num in
     if !headers <> [] then Dev.add_headers (find_prologues !headers);
     s in
- (* Didier: why hell was it ``Gs.get_do_ps ()'' instead of false? 
+ (* Didier: should it be ``Gs.get_do_ps ()'' instead of ``false''? 
     and why has Dvi been chaned to Cdvi *)
-  status.Cdvi.hasps <- false;
+  status.Cdvi.hasps <- Gs.get_do_ps ();
   let orid = function Some f -> f | None -> fun x->x in
   let st =
     { cdvi = cdvi;
@@ -1606,7 +1606,7 @@ let render_step cdvi num ?trans ?chst dpi xorig yorig =
       draw_html = [];
       checkpoint = 0;
     } in
-  (* if st.status.Cdvi.hasps then *)
+  if st.status.Cdvi.hasps then
   newpage [] st (mag *. dpi) xorig yorig;
   setup_bkgd st.status; (* apply the background preferences in Dev *)
   Dev.clear_dev ();     (* and redraw the background               *)

@@ -172,4 +172,4 @@ let main = if !Sys.interactive then interactive_main else standalone_main;;
 
 Unix.putenv "GHOSTVIEW" "Test";;
 
-(Misc.handle_fatal_error main () : unit);;
+Printexc.catch (Misc.handle_fatal_error main) ();;

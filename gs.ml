@@ -113,6 +113,7 @@ let rec select fd_in fd_out fd_exn timeout =
 ;;
 
 class gs () =
+  let _ = GraphicsY11.window_id() in
   let gr = {
       display = 0;
       window = GraphicsY11.window_id ();
@@ -130,6 +131,7 @@ class gs () =
   let command = Config.gs_path in
   let command_args =
     [|
+      command; 
       "-dNOPLATFONTS"; "-dNOPAUSE";
       "-sDEVICE=" ^ (if !antialias then x11alpha else x11);
       "-q";
@@ -170,7 +172,7 @@ class gs () =
       with x -> Misc.fatal_error "Cannot set ``GHOSTVIEW'' property"
     end;
   (* Ignore signal SIGPIPE. *)
-  Unix.sigprocmask Unix.SIG_BLOCK [13] in
+  Unix.sigprocmask Unix.SIG_BLOCK [ Sys.sigpipe ] in
 
   let lpd_in, lpd_out = Unix.pipe () in
   let rpd_in, rpd_out = Unix.pipe () in
@@ -488,19 +490,21 @@ let kill () = gv # kill;;
 let draw s x y =
   if get_do_ps () then
     try
-(* prerr_endline (Printf.sprintf "Calling gv#ps with\n\t\t %s" s);*)
+(*
+   Misc.debug_endline (Printf.sprintf "Calling gv#ps with\n\t\t %s" s);
+ *)
       gv#ps (Misc.get_suffix  "ps: " s) x y with
     | Misc.Match ->
         try gv#special (Misc.get_suffix  "\" " s) x y with
         | Misc.Match ->
             try gv#def (Misc.get_suffix  "! " s) with
 (*
+   | Misc.Match ->
+   try gv#file (Misc.get_suffix  "psfile: " s) bbox size x y with
+ *)
             | Misc.Match ->
-              try gv#file (Misc.get_suffix  "psfile: " s) bbox size x y with
-*)
-              | Misc.Match ->
-                  Misc.warning
-                    (Printf.sprintf "Unknown PostScript commands\n\t\t %s" s)
+                Misc.warning
+                  (Printf.sprintf "Unknown PostScript commands\n\t\t %s" s)
 ;;
 let draw_file fname bbox ri x y =
   if get_do_ps () then gv#file fname bbox ri x y;;
