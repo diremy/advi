@@ -7,6 +7,7 @@ distribute: clean
 	   tar zxvf $(FTPSITEDIR)/caml-light/bazar-ocaml/camlimages-2.00.tgz; \
 	   tar zxvf $(FTPSITEDIR)/advi/advi-1.0.0.tar.gz)
 	tar zcvf adk-1.0.0.tar.gz --exclude .cvsignore --exclude CVS adk-1.0.0
+	cp adk-1.0.0.tar.gz $(FTPSITEDIR)/advi
 
 clean:
 	rm -f adk-1.0.0.tar.gz
