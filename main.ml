@@ -47,9 +47,6 @@ let spec_list = [
    "DIMEN\tHorizontal margin  (default: 1cm)");
   ("-vmargin", Arg.String (set_dim vmargin),
    "DIMEN\tVertical margin    (default: 1cm)");
-  ("-rcfile", Arg.String RC.cautious_parse_file,
-   "STRING\tThe path of advi initialization file (default: ~/.advirc)");
- 
 ];;
 
 let advi_options () =
@@ -68,8 +65,8 @@ let set_dvi_filename s =
 let init_arguments () =
  let options = advi_options () in
  let optfs = List.rev (Userfile.options_files ()) in
-prerr_endline "Init files :";
-List.iter prerr_endline optfs; prerr_endline "";
+ (*prerr_endline "Init files :";
+   List.iter prerr_endline optfs; prerr_endline "";*)
  List.iter
    (fun fname ->
       Rc.cautious_parse_file fname options set_dvi_filename usage_msg)
