@@ -735,7 +735,7 @@ let scale n st =
       if new_ratio >= 0.02 && new_ratio < 50.0 then
         begin
           st.ratio <- new_ratio ;
-          let (cx, cy) = (st.size_x/2, st.size_y/2) in
+          let (cx, cy) = (st.size_x / 2, st.size_y / 2) in
           st.orig_x <- int_of_float (float (st.orig_x - cx) *. factor) + cx ;
           st.orig_y <- int_of_float (float (st.orig_y - cy) *. factor) + cy ;
         end;
@@ -782,8 +782,8 @@ module B =
       Drv.unfreeze_glyphs st.cdvi (st.base_dpi *. st.ratio)
     let center st =
       st.ratio <- 1.0 ;
-      st.orig_x <- (st.size_x - st.dvi_width)/2 ;
-      st.orig_y <- (st.size_y - st.dvi_height)/2 ;
+      st.orig_x <- (st.size_x - st.dvi_width) / 2 ;
+      st.orig_y <- (st.size_y - st.dvi_height) / 2 ;
       update_dvi_size false st ;
       redraw st
         
@@ -896,7 +896,7 @@ let _ =
   List.iter bind [
     (* For instance *)
     (* Alan: I modified the bindings for hjkl to move the page around *)
-  'h'         , B.page_left;
+  'h'   , B.page_left;
   'i' 	, B.pop_page;
   'j' 	, B.page_down;
   'k' 	, B.page_up;
@@ -932,7 +932,7 @@ let main_loop filename =
   let st = init filename in
   let cont = ref None in (* drawing continuation *)
   Dev.set_title ("Advi: " ^ Filename.basename filename);
-  Dev.open_dev (Printf.sprintf " " ^ string_of_geometry attr.geom) ;
+  Dev.open_dev (" " ^ string_of_geometry attr.geom) ;
   set_bbox st;
   if st.page_no > 0 && !Misc.dops then
     Drv.scan_special_pages st.cdvi st.page_no
@@ -940,17 +940,17 @@ let main_loop filename =
     st.page_no <- page_start 0 st;
   redraw st;
   
-    (* num is the current number entered by keyboard *)
+  (* num is the current number entered by keyboard *)
   try while true do
-    let ev = if changed st then Dev.Refreshed else Dev.wait_event() in
+    let ev = if changed st then Dev.Refreshed else Dev.wait_event () in
     st.num <- st.next_num;
     st.next_num <- 0;
     match ev with
     | Dev.Refreshed -> reload st
-    | Dev.Resized (x,y) -> resize st x y
+    | Dev.Resized (x, y) -> resize st x y
     | Dev.Key c -> bindings.(Char.code c) st
     | Dev.Href h -> goto_href h st
-    | Dev.Advi (s,a) -> a()
+    | Dev.Advi (s, a) -> a ()
     | Dev.Move (w, h) ->
         st.orig_x <- st.orig_x + w ;
         st.orig_y <- st.orig_y + h ;
@@ -960,13 +960,13 @@ let main_loop filename =
     | Dev.Selection s -> selection s
     | Dev.Position (x, y) ->
         position st x y 
-    | Dev.Click (Dev.Top_left, _,_,_) ->
+    | Dev.Click (Dev.Top_left, _, _, _) ->
         if !click_turn_page then B.pop_page st
-    | Dev.Click (_, Dev.Button1,_,_) ->
+    | Dev.Click (_, Dev.Button1, _, _) ->
         if !click_turn_page then B.previous_pause st
-    | Dev.Click (_, Dev.Button2,_,_) ->
+    | Dev.Click (_, Dev.Button2, _, _) ->
         if !click_turn_page then B.pop_previous_page st
-    | Dev.Click (_, Dev.Button3,_,_) ->
+    | Dev.Click (_, Dev.Button3, _, _) ->
         if !click_turn_page then B.next_pause st
             
 (*
