@@ -790,6 +790,11 @@ let edit_special st s =
   match split_string s 0 with
   | "advi:" :: "edit" :: args ->
       let record = split_record (String.concat " " args) in
+      let first =
+        try
+          let assignable (x, v) = List.mem x [ "x"; "y"; "w"; "h"; "w"; ] in
+          Some (List.find assignable record)
+        with Not_found -> None in
       let field x =
         try List.assoc x record
         with Not_found -> 
@@ -840,6 +845,7 @@ let edit_special st s =
           Dev.E.name = field "name";
           Dev.E.line = field "line";
           Dev.E.file = field "file";
+          Dev.E.first = first;
           Dev.E.unit = unit;
           Dev.E.origin = r;
           Dev.E.action = m;

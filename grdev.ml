@@ -1066,7 +1066,9 @@ module H =
 module E =
   struct
     type info = {
-        comm : string; name : string; line : string; file : string;
+        comm : string; name : string;
+        first : (string * string) option; 
+        line : string; file : string;
         origin : float rect; action : bool rect; unit : float;
       }
     type figure = { rect : int rect; info : info; }
@@ -1123,6 +1125,11 @@ module E =
         if dz = 0 then "*"
         else Printf.sprintf "%.4f" (z +. (float dz  /. p.info.unit)) in
       let origin = p.info.origin in
+      let first =
+        match p.info.first with
+        | None -> ""
+        | Some (f, v) -> Printf.sprintf "%s=%s" f v
+      in
       let action, dx, dy =
         match a with
         | Move (dx, dy) ->
@@ -1132,8 +1139,8 @@ module E =
         | Resize (false, dx, dy) ->
             "resizebot", delta origin.rw dx, delta origin.rd dy
       in
-      Printf.sprintf "<edit %s %s #%s @%s %s %s,%s>"
-        p.info.comm p.info.name p.info.line p.info.file action dx dy
+      Printf.sprintf "<edit %s %s[%s] #%s @%s %s %s,%s>"
+        p.info.comm p.info.name first p.info.line p.info.file action dx dy
 
     let editing () = !editing
 
@@ -1502,8 +1509,8 @@ let wait_button_up m x y =
       else if (pressed m G.button3 || pressed m G.button1)
           && (action.rh || action.rd || action.rw) then
         let b = pressed m G.shift in
-        let action_h = action.rh && (not action.rd || b) in
-        let action_d = action.rd && (not action.rh || not b) in
+        let action_h = action.rh && (not action.rd || not b) in
+        let action_d = action.rd && (not action.rh || b) in
         let event dx dy = Edit (p, E.Resize (action_h, dx, dy)) in
         let action =
           { action with rx = false; ry = false;

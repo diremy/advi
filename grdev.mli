@@ -232,7 +232,9 @@ type status = {
 module E :
     sig
       type info = {
-          comm : string; name : string; line : string; file : string;
+          comm : string; name : string;
+          first : (string * string) option; 
+          line : string; file : string;
           origin : float rect; action : bool rect; unit : float;
         }
       type figure = { rect : int rect; info : info; }
