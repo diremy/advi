@@ -103,7 +103,7 @@ exception Usr1;;
 let waiting = ref false;;
 let usr1 = Sys.sigusr1;;
 let usr1_status = ref false;;
-exception Watch_file
+exception Watch_file;;
 let watch_file_interval = ref 0;;
 Options.add
   "-watch-file"
@@ -112,7 +112,7 @@ Options.add
   \n\t 0 means do not watch (default value)"
 ;;
 
-let watch_file_check() = if !waiting then raise Watch_file
+let watch_file_check () = if !waiting then raise Watch_file;;
 
 let clear_usr1 () = usr1_status := false;;
 let set_usr1 () =
@@ -122,9 +122,7 @@ let set_usr1 () =
 set_usr1 ();;
 
 let sleep_broken = ref false;;
-let clear_sleep () =
-  if GraphicsY11.key_pressed () then sleep_broken := true else
-  sleep_broken := false;;
+let clear_sleep () = sleep_broken := GraphicsY11.key_pressed ();;
 
 (* returns false if sleep is fully performed. returns true if interrupted *)
 let sleep_watch breakable sync n =
@@ -1154,6 +1152,7 @@ let open_dev geom =
   Timeout.init ();
   (* Fill the event queue *)
   Timeout.repeat 0.25 GraphicsY11.retrieve_events;
+  (* Watch if the DVI file is modified *)
   if !watch_file_interval > 0 then
     Timeout.repeat (float !watch_file_interval) watch_file_check; 
 
@@ -1251,18 +1250,14 @@ let rec pop_event () =
   | h :: t -> events := t; h;;
 
 let push_back_key_event c m =
-    push_back_event {
-      modifiers = m;
-      keypressed = true; key = c;
-      mouse_x = 0; mouse_y = 0;
-      button = false;
-    };;
+  push_back_event {
+    modifiers = m;
+    keypressed = true; key = c;
+    mouse_x = 0; mouse_y = 0;
+    button = false;
+  };;
 
 Misc.forward_push_back_key_event := push_back_key_event;;
-
-let mouse_x = ref 0;;
-let mouse_y = ref 0;;
-let button = ref false;;
 
 let reposition ~x ~y ~w ~h =
   Gs.flush ();
@@ -1289,30 +1284,29 @@ let rec wait_signal_event events =
   | _, true, _ -> clear_usr1 (); Final (Refreshed)
   | _, _, true -> Raw (pop_event ())
   | _, _, _ ->
-      let rec wait() = 
-        try
-          waiting := true;
-          let ev = GraphicsY11.wait_next_event events in
-          waiting := false;
-          match resized () with
-          | Some (x, y) ->
-              push_back_event ev;
-              Final (Resized (x, y))
-          | None ->
-              Raw ev
-        with
-        | Usr1 ->
-            waiting := false;
-            Final Refreshed
-        | Watch_file ->
-            waiting := false;
-            if List.mem GraphicsY11.Key_pressed events then Final Nil
-            else wait()
-        | exn ->
-            waiting := false;
-            raise exn in
-      wait()
-;;
+     let rec wait () =
+       try
+         waiting := true;
+         let ev = GraphicsY11.wait_next_event events in
+         waiting := false;
+         match resized () with
+         | Some (x, y) ->
+             push_back_event ev;
+             Final (Resized (x, y))
+         | None ->
+             Raw ev
+       with
+       | Usr1 ->
+           waiting := false;
+           Final Refreshed
+       | Watch_file ->
+           waiting := false;
+           if List.mem GraphicsY11.Key_pressed events then Final Nil
+           else wait ()
+       | exn ->
+           waiting := false;
+           raise exn in
+     wait ();;
 
 let wait_select_rectangle x y =
   let rec select dx dy =
@@ -1357,18 +1351,13 @@ let wait_select_button_up m x y =
         let y' = e.GraphicsY11.mouse_y in
         let r' = Symbol.new_region r x' (!size_y - y') in
         Symbol.iter_regions (draw_color true) (draw_color false) r r';
-        if e.GraphicsY11.button then select r'
-        else
-          let m = GraphicsY11.get_modifiers () in
-          if m land GraphicsY11.shift = 0 then
-            begin
-              Symbol.iter_region (draw_color true) r';
-              Final Nil
-            end
-          else
-            begin
-            Final (Selection (Symbol.region_to_ascii r'))
-                end;
+        if e.GraphicsY11.button then select r' else
+        let m = GraphicsY11.get_modifiers () in
+        if m land GraphicsY11.shift = 0 then begin
+          Symbol.iter_region (draw_color true) r';
+          Final Nil
+        end else
+          Final (Selection (Symbol.region_to_ascii r'))
     | x -> x in
   let color = (get_color ()) in
   GraphicsY11.synchronize ();
