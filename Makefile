@@ -131,6 +131,7 @@ test/demo.dvi: test/demo.tex
 test/trans.dvi: test/trans.tex
 	cd test; $(MAKE) trans.dvi
 
+installopt:install
 install:: advi.opt tex/splash.dvi
 	cp advi.opt ${bindir}/advi
 	- mkdir -p $(ADVI_LOC)
