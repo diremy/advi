@@ -17,7 +17,7 @@
 
 open Misc;;
 
-let active = 
+let active =
   Options.flag true "-passive" "Cancel all advi-effects";;
 let toggle_active () = active := not !active
 
@@ -27,19 +27,19 @@ let checkpoint_frequency = 10;;
 
 (*** Some utilities for specials ***)
 
-let split_string s start = 
+let split_string s start =
   Misc.split_string s (function ' ' -> true | _ -> false) start;;
 
-(* "hello world" is one world *)
+(* "hello world" is one word *)
 let rec split_string_quoted s start =
   let len = String.length s
   and i = ref start in
   (* find a space *)
-  while !i < len && s.[!i] = ' ' do incr i; done; 
+  while !i < len && s.[!i] = ' ' do incr i done;
   if !i >= len then [] else begin
     let i0 = !i in
     while !i < len && s.[!i] <> ' ' do
-      if s.[!i] = '"' then begin
+      if s.[!i] = '"' (* '"' *) then begin
         incr i;
         while !i < len && s.[!i] <> '"' do incr i done;
         if s.[!i] <> '"' then failwith "parse error (split_string_quoted)";
@@ -49,15 +49,14 @@ let rec split_string_quoted s start =
     let i1 = !i in
     String.sub s i0 (i1 - i0) :: split_string_quoted s i1
   end;;
-(* '"' *)
 
 (* "\"hello world\"" -> "hello world" *)
-let unquote v =
-  let s = if v.[0] = '"' then 1 else 0 in
+let unquote s =
+  let f = if s.[0] = '"' then 1 else 0 in
   let l =
-    if v.[String.length v - 1] = '"' then String.length v - 1 - s
-    else String.length v - s in
-  String.sub v s l;;
+    if s.[String.length s - 1] = '"' then String.length s - 1 - f
+    else String.length s - f in
+  String.sub s f l;;
 
 let split_record s =
   let tokens = split_string_quoted s 0 in
@@ -142,30 +141,30 @@ type reg_set = {
     reg_y : int;
     reg_z : int
   };;
-      
+     
 type state = {
     cdvi : cooked_dvi;
     sdpi : int;
     conv : float;
     x_origin : int;
     y_origin : int;
-      (* Current font attributes *)
+    (* Current font attributes *)
     mutable cur_font : cooked_font;
     mutable cur_mtable : (int * int) Table.t;
     mutable cur_gtable : Dev.glyph Table.t;
-      (* Registers *)
+    (* Registers *)
     mutable h : int;
     mutable v : int;
     mutable w : int;
     mutable x : int;
     mutable y : int;
     mutable z : int;
-      (* Register stack *)
+    (* Register stack *)
     mutable stack : reg_set list;
-      (* Color & Color stack *)
+    (* Color & Color stack *)
     mutable color : Dvicolor.color;
     mutable color_stack : Dvicolor.color list;
-      (* Other attributes *)
+    (* Other attributes *)
     mutable alpha : Drawimage.alpha;
     mutable alpha_stack : Drawimage.alpha list;
     mutable blend : Drawimage.blend;
@@ -175,11 +174,11 @@ type state = {
     mutable direction : Transitions.direction option;
     mutable transition : Transitions.t;
     mutable transition_stack : Transitions.t list;
-      (* TPIC specials state *)
+    (* TPIC specials state *)
     mutable tpic_pensize : float;
     mutable tpic_path : (float * float) list;
     mutable tpic_shading : float;
-      (* PS specials page state *)
+    (* PS specials page state *)
     mutable status : Dvi.known_status;
     mutable headers : (bool * string) list;
     mutable html : (Dev.H.tag * int) option;
@@ -308,19 +307,8 @@ let epstransparent_pop st =
       st.epstransparent_stack <- rest;;
 
 let transition_push st v =
-  (* st.transition_stack <- st.transition :: st.transition_stack; *)
   st.transition <- v;
   if !visible then Dev.set_transition v;;
-
-(*
-let transition_pop st =
-  match st.transition_stack with
-  | [] -> ()
-  | v :: rest ->
-      st.transition <- v;
-      if !visible then Dev.set_transition v; 
-     st.transition_stack <- rest;;
-*)
 
 let fnt st n =
   let (mtable, gtable, cfont) =
@@ -344,7 +332,7 @@ let put st code =
         | None -> ()
         end;
         Dev.draw_glyph (glyph : Dev.glyph) x y;
-	add_char st x y code glyph
+        add_char st x y code glyph
       end
   with _ -> ();;
 
@@ -354,7 +342,7 @@ let set st code =
     let (dx, dy) = Table.get st.cur_mtable code in
     st.h <- st.h + dx;
     st.v <- st.v + dy
-  with _ -> ();; 
+  with _ -> ();;
 
 let put_rule st a b =
   let x = st.x_origin + int_of_float (st.conv *. float st.h)
@@ -534,7 +522,6 @@ let app_mode_of_string = function
   | "ephemeral" -> Embed.Ephemeral
   | s -> raise (Failure ("Unknown embedding mode " ^ s));;
 
-
 let embed_special st s =
   (* advi: embed mode=? width=? height=? command="command string" *)
   let records = get_records s in
@@ -566,7 +553,7 @@ let embed_special st s =
     let dpi = ldexp (float st.sdpi) (-16) in
     let width_pixel = truncate (w *. dpi) in
     let height_pixel = truncate (h *. dpi) in
-   (* prerr_endline (Printf.sprintf "%d x %d pixel" width_pixel height_pixel);*)
+  (* prerr_endline (Printf.sprintf "%d x %d pixel" width_pixel height_pixel);*)
     width_pixel, height_pixel in
   let x = st.x_origin + int_of_float (st.conv *. float st.h)
   and y = st.y_origin + int_of_float (st.conv *. float st.v) in
@@ -574,7 +561,7 @@ let embed_special st s =
     Grdev.embed_app command app_mode app_name width_pixel height_pixel x y;;
 
 (* When scanning the page, we gather information on the embedded commands *)
-let scan_embed_special st s = 
+let scan_embed_special st s =
   let records = get_records s in
   let command =
     try unquote (List.assoc "command" records)
@@ -657,14 +644,14 @@ let transbox_save_special st s =
   match split_string s 0 with
   | "advi:" :: "transbox" :: "save" :: args ->
       let dpi = ldexp (float st.sdpi) (-16) in
-      let record = split_record (String.concat " " args) in 
+      let record = split_record (String.concat " " args) in
       let width = Dimension.dimen_of_string (List.assoc "width" record) in
       let height = Dimension.dimen_of_string (List.assoc "height" record) in
       let depth = Dimension.dimen_of_string (List.assoc "depth" record) in
       let pixels_of_dimen dim =
-	match Dimension.normalize dim with
-	| Dimension.Px x -> x
-	| Dimension.In x -> truncate (x *. dpi)
+        match Dimension.normalize dim with
+        | Dimension.Px x -> x
+        | Dimension.In x -> truncate (x *. dpi)
         | _ -> assert false
       in
       let width_pixel = pixels_of_dimen width
@@ -672,7 +659,7 @@ let transbox_save_special st s =
       and depth_pixel = pixels_of_dimen depth
       in
       let x = st.x_origin + int_of_float (st.conv *. float st.h)
-      and y = st.y_origin + int_of_float (st.conv *. float st.v) + depth_pixel 
+      and y = st.y_origin + int_of_float (st.conv *. float st.v) + depth_pixel
       in
       Dev.transbox_save x y width_pixel (height_pixel + depth_pixel)
   | _ -> raise (Failure "advi: transbox save special failed");;
@@ -680,12 +667,13 @@ let transbox_save_special st s =
 let transbox_go_special st s =
   match split_string s 0 with
   | "advi:" :: "transbox" :: "go" :: mode :: args ->
-      let record = split_record (String.concat " " args) in 
+      let record = split_record (String.concat " " args) in
       let trans = parse_transition None mode record in
       Dev.transbox_go trans
   | _ -> raise (Failure "advi: transbox go special failed");;
 
-exception Ignore
+exception Ignore;;
+
 let edit_special st s =
   try
   match split_string s 0 with
@@ -693,14 +681,14 @@ let edit_special st s =
       let record = split_record (String.concat " " args) in
       let field x =
         try List.assoc x record
-        with Not_found -> 
+        with Not_found ->
           warning (Printf.sprintf "Field %s missing in special %s" x s);
           raise Ignore in
       let dpi = ldexp (float st.sdpi) (-16) in
       let pixels dim =
-	match Dimension.normalize (Dimension.dimen_of_string dim) with
-	| Dimension.Px x -> float x
-	| Dimension.In x -> x *. dpi
+        match Dimension.normalize (Dimension.dimen_of_string dim) with
+        | Dimension.Px x -> float x
+        | Dimension.In x -> x *. dpi
         | _ -> assert false in
       let prop = function
         | "X" -> Dev.E.X | "Y" -> Dev.E.Y | "XY" -> Dev.E.XY | "Z" -> Dev.E.Z
@@ -719,12 +707,12 @@ let edit_special st s =
         Dev.w = float_field "w"; Dev.h = float_field "h";
       } in
       let rect = {
-        Dev.x = st.x_origin + int_of_float (st.conv *. float st.h) 
+        Dev.x = st.x_origin + int_of_float (st.conv *. float st.h)
           + float_to_pixel r.Dev.x;
         Dev.y = st.y_origin + int_of_float (st.conv *. float st.v)
           - float_to_pixel r.Dev.y;
-        Dev.w = float_to_pixel r.Dev.w; 
-        Dev.h = float_to_pixel r.Dev.h; 
+        Dev.w = float_to_pixel r.Dev.w;
+        Dev.h = float_to_pixel r.Dev.h;
       } in
       let info =
         { Dev.E.comm = field "comm";
@@ -732,7 +720,7 @@ let edit_special st s =
           Dev.E.line = field "line";
           Dev.E.file = field "file";
           Dev.E.unit = unit;
-          Dev.E.origin = r; 
+          Dev.E.origin = r;
           Dev.E.move =
             (try prop (List.assoc "move" record) with Not_found -> Dev.E.Z);
           Dev.E.resize =
@@ -775,25 +763,21 @@ let proc_special st s =
         visible_stack := !visible :: !visible_stack;
         visible := List.mem_assoc "play" records;
         if !playing = 0 then
-          begin
-            let recording =
-              { tag = procname;
-                unit = 
+          let recording =
+            { tag = procname;
+              unit =
                 { escaped_register = get_register_set st;
                   escaped_stack = st.stack;
                   escaped_cur_mtable = st.cur_mtable;
                   escaped_cur_gtable = st.cur_gtable;
                   escaped_cur_font = st.cur_font;
                   escaped_commands = [] }
-              } in
-            current_recording_proc := recording :: !current_recording_proc;
-          end;
+            } in
+          current_recording_proc := recording :: !current_recording_proc
     | "end" ->
-        if !playing = 0 then
-          begin match !current_recording_proc with
-          | [] ->
-              Misc.warning
-                (Printf.sprintf "'xxx %s' not recording" s)
+        if !playing = 0 then begin
+          match !current_recording_proc with
+          | [] -> Misc.warning (Printf.sprintf "'xxx %s' not recording" s)
           | recording :: rest ->
               let procname = recording.tag in
               current_recording_proc := rest;
@@ -802,14 +786,14 @@ let proc_special st s =
               match u.escaped_commands with
               | h :: rest -> u.escaped_commands <- List.rev rest
               | [] -> assert false
-          end;
+        end;
         begin match !visible_stack with
         | h :: rest ->
             visible := h; visible_stack := rest;
         | [] ->
             (* Ill-formed DVI not recording error should have ben reported
-               right above *) 
-            (); 
+               right above *)
+            ();
         end;
     | _ -> ill_formed_special s
   with
@@ -819,30 +803,29 @@ let proc_special st s =
         with Not_found -> raise (Failure "proc: invalid special") in
       try
         ignore (List.assoc "play" records);
-        if not (is_recording ()) then
-          begin
-            let us = Hashtbl.find_all procs procname in
-            let escaped_cur_font = st.cur_font
-            and escaped_cur_mtable = st.cur_mtable
-            and escaped_cur_gtable = st.cur_gtable in
-            let escaped_stack = push st; st.stack in
-            incr playing;
-            List.iter
-              (fun u ->
-                set_register_set st u.escaped_register;
-                st.stack <- u.escaped_stack;
-                st.cur_mtable <- u.escaped_cur_mtable;
-                st.cur_gtable <- u.escaped_cur_gtable;
-                st.cur_font <- u.escaped_cur_font;
-                List.iter (fun com -> !forward_eval_command st com)
-                  u.escaped_commands
-              ) us;
-            decr playing;
-            st.stack <- escaped_stack; pop st;
-            st.cur_mtable <- escaped_cur_mtable;
-            st.cur_gtable <- escaped_cur_gtable;
-            st.cur_font <- escaped_cur_font;
-          end
+        if not (is_recording ()) then begin
+          let us = Hashtbl.find_all procs procname in
+          let escaped_cur_font = st.cur_font
+          and escaped_cur_mtable = st.cur_mtable
+          and escaped_cur_gtable = st.cur_gtable in
+          let escaped_stack = push st; st.stack in
+          incr playing;
+          List.iter
+            (fun u ->
+               set_register_set st u.escaped_register;
+               st.stack <- u.escaped_stack;
+               st.cur_mtable <- u.escaped_cur_mtable;
+               st.cur_gtable <- u.escaped_cur_gtable;
+               st.cur_font <- u.escaped_cur_font;
+               List.iter (fun com -> !forward_eval_command st com)
+                 u.escaped_commands
+            ) us;
+          decr playing;
+          st.stack <- escaped_stack; pop st;
+          st.cur_mtable <- escaped_cur_mtable;
+          st.cur_gtable <- escaped_cur_gtable;
+          st.cur_font <- escaped_cur_font;
+        end
       with
       | Not_found ->
           Misc.warning
@@ -851,7 +834,7 @@ let proc_special st s =
 let wait_special st s =
   let records = get_records s in
   let second =
-    try parse_float (List.assoc "sec" records) 
+    try parse_float (List.assoc "sec" records)
     with
     | Not_found | Failure _ -> raise (Failure "wait: invalid special") in
   (* Wait is treated like Pause, as an exception *)
@@ -884,7 +867,7 @@ let ratios_alist = [
   ("bottomright", Drawimage.ScaleBottomRight);
   ("topright", Drawimage.ScaleTopRight);
   ("bottomleft", Drawimage.ScaleBottomLeft);
-] ;;
+];;
 
 (* The find_bgfuns should eventually handle dynamically
    loaded plugins *)
@@ -893,35 +876,35 @@ let bgfuns_alist = [
   ("hgradient", Addons.hgradient);
   ("vgradient", Addons.vgradient);
   ("dgradient", Addons.dgradient);
-] ;;
+];;
 
 let find_bgfun s =
    try Some (List.assoc (unquote s) bgfuns_alist)
    with _ -> None;;
 
 let bkgd_alist = [
-  ("color", fun s -> fun st ->
+  ("color", fun s st ->
      let c = Dvicolor.parse_color_args (split_string (unquote s) 0)
      in [Dev.BgColor c]);
-  ("image", fun s -> fun st ->
+  ("image", fun s st ->
      [Dev.BgImg s]);
-  ("reset", fun s -> fun st ->
+  ("reset", fun s st ->
      Dev.blit_bkgd_data (Dev.default_bkgd_data ()) st.Dvi.bkgd_prefs;
      []);
-  ("inherit", fun s -> fun st ->
+  ("inherit", fun s st ->
      inherit_background_info := true;
      []);
-  ("alpha", fun s -> fun st ->
+  ("alpha", fun s st ->
      let a = parse_float (unquote s) in
      [Dev.BgAlpha a]);
-  ("blend", fun s -> fun st ->
+  ("blend", fun s st ->
      let b = parse_blend (unquote s) in
      [Dev.BgBlend b]);
-  ("fit", fun s -> fun st ->
+  ("fit", fun s st ->
      let f =
        try List.assoc (unquote s) ratios_alist with _ -> Drawimage.ScaleAuto in
      [Dev.BgRatio f]);
-  ("fun", fun s -> fun st ->
+  ("fun", fun s st ->
      [Dev.BgFun (find_bgfun (unquote s))]);
 ];;
 
@@ -1116,8 +1099,8 @@ let html_special st html =
     begin match fields with
       ("name", link) :: _ ->
         open_html st link (fun x -> Dev.H.Name x) "Name"
-    | ("href", link) :: _ -> 
-        open_html st link (fun x -> Dev.H.Href x) "Href" 
+    | ("href", link) :: _ ->
+        open_html st link (fun x -> Dev.H.Href x) "Href"
     | (("advi" | "hdvi" as kind), link) :: rest ->
         let mode =
           if kind = "advi" then Dev.H.Over else Dev.H.Click_down in
@@ -1131,9 +1114,9 @@ let html_special st html =
                 warning ("Incorrect style in html suffix " ^ html);
                 Dev.H.Box
           with Not_found -> Dev.H.Box in
-        let color = 
-        (* try Some ??? (List.assoc "color" rest) with Not_found -> *)
-          None in
+        let color =
+          try Some (Dvicolor.parse_color (List.assoc "color" rest))
+          with Not_found -> None in
         let advi x =
           let play () = proc_special st ("advi: proc=" ^ x ^ " play") in
           Dev.H.Advi
@@ -1142,14 +1125,13 @@ let html_special st html =
              Dev.H.mode = mode;
              Dev.H.style = style;
              Dev.H.color = color;
-             Dev.H.area = None} in 
+             Dev.H.area = None} in
         open_html st link advi "Advi"
-    | _ -> 
+    | _ ->
         warning ("Incorrect html suffix" ^ html)
-    end
-  else if has_prefix "</A>" html || has_prefix "</a>" html then
-    close_html st
-  else warning ("Unknown html suffix" ^ html);;
+    end else
+  if has_prefix "</A>" html || has_prefix "</a>" html then close_html st else
+  warning ("Unknown html suffix" ^ html);;
 
 let scan_special_html (headers, xrefs) page s =
   let name = String.sub s 14 (String.length s - 16) in
@@ -1161,25 +1143,25 @@ let scan_special_html (headers, xrefs) page s =
    commands, html references) *)
 let scan_special status (headers, xrefs) pagenum s =
   if Launch.whiterun () &&
-     has_prefix "advi: embed " s then scan_embed_special status s
+     has_prefix "advi: embed " s then scan_embed_special status s else
   (* Embedded Postscript, better be first for speed when scanning *)
-  else if has_prefix "\" " s || has_prefix "ps: " s then
-    (if !Options.dops then status.Dvi.hasps <- true)
-  else if has_prefix "!" s then
+  if has_prefix "\" " s || has_prefix "ps: " s then
+    (if !Options.dops then status.Dvi.hasps <- true) else
+  if has_prefix "!" s then
     (if !Options.dops then
-      headers := (true, get_suffix "!" s) :: !headers)
+      headers := (true, get_suffix "!" s) :: !headers) else
   (* Embedded Postscript, better be first for speed when scanning *)
-  else if has_prefix "header=" s then
+  if has_prefix "header=" s then
     (if !Options.dops then
-      headers := (false, get_suffix "header=" s) :: !headers)
-  else if has_prefix "advi: setbg " s then scan_bkgd_special status s
-  else if has_prefix "html:<A name=\"" s || has_prefix "html:<a name=\"" s then
+      headers := (false, get_suffix "header=" s) :: !headers) else
+  if has_prefix "advi: setbg " s then scan_bkgd_special status s else
+  if has_prefix "html:<A name=\"" s || has_prefix "html:<a name=\"" s then
     scan_special_html (headers, xrefs) pagenum s;;
 
 (* Scan a page calling function scan_special when seeing a special and
    the function otherwise for other DVI stuff. *)
 let scan_special_page otherwise cdvi globals pagenum =
-Misc.debug_stop "Scanning specials";
+   Misc.debug_stop "Scanning specials";
    let page = cdvi.base_dvi.Dvi.pages.(pagenum) in
    match page.Dvi.status with
    | Dvi.Unknown ->
@@ -1201,58 +1183,56 @@ Misc.debug_stop "Scanning specials";
 let special st s =
   if has_prefix "\" " s || has_prefix "ps: " s || has_prefix "! " s then
     ps_special st s else
-    if has_prefix "advi: moveto" s then moveto_special st true s else
-    if has_prefix "advi: rmoveto" s then moveto_special st false s else
+  if has_prefix "advi: moveto" s then moveto_special st true s else
+  if has_prefix "advi: rmoveto" s then moveto_special st false s else
 
-    (* Other specials *)
-    if has_prefix "color " s then color_special st s else
-    if has_prefix "html:" s then html_special st (get_suffix "html:" s) else
-    if has_prefix "PSfile=" s || has_prefix "psfile=" s then
-      begin
-        try
-  	  let file, bbox, size = psfile_special st s in
-  	  let x = st.x_origin + int_of_float (st.conv *. float st.h)
-  	  and y = st.y_origin + int_of_float (st.conv *. float st.v) in
-  	  if !visible then 
-  	    let draw = 
-  	      if has_prefix "`" file then
-  	        Dev.draw_img (zap_to_char ' ' file)
-  	          Drawimage.ScaleAuto false 1.0 st.blend (Some bbox)
-  	      else Dev.draw_ps file bbox in
-  	    draw size x y
-        with
-        |	Failure s -> Misc.warning s
-        |	e -> Misc.warning (Printexc.to_string e)
-      end else
-      if has_prefix "advi: " s then begin
-        if has_prefix "advi: edit" s then edit_special st s else
-        if has_prefix "advi: alpha" s then alpha_special st s else
-        if has_prefix "advi: blend" s then blend_special st s else
-        if has_prefix "advi: epstransparent" s then epstransparent_special st s else
-        if has_prefix "advi: pause" s then raise Pause else
-        if has_prefix "advi: proc" s then proc_special st s else
-        if has_prefix "advi: setbg " s then bkgd_special st s else
-        (* all following have effect and should be ignore if active is false *)
-        if !active then begin
-          if has_prefix "advi: wait " s then wait_special st s 
-          else if has_prefix "advi: embed " s then
-            (if !visible then embed_special st s) 
-          else if has_prefix "advi: trans " s then transition_special st s 
-          else if has_prefix "advi: transbox save " s then
-            transbox_save_special st s 
-          else if has_prefix "advi: transbox go " s then
-            transbox_go_special st s 
-          else if has_prefix "advi: kill " s then
-              (if !visible then kill_embed_special st s) 
-          else Misc.warning ("unknown special: "^ s)
-        end
-        (* else we ignore it, whether well-formed or ill-formed *)
-      end else
-        if has_prefix "line: " s then line_special st s else
-        if has_prefix "pn " s || has_prefix "pa " s || s = "fp" || s = "ip" ||
-        has_prefix "da " s || has_prefix "dt " s || s = "sp" ||
-        has_prefix "sp " s || has_prefix "ar " s || has_prefix "ia " s ||
-        has_prefix "sh " s || s = "wh" || s = "bk" then tpic_specials st s;;
+  (* Other specials *)
+  if has_prefix "color " s then color_special st s else
+  if has_prefix "html:" s then html_special st (get_suffix "html:" s) else
+  if has_prefix "PSfile=" s || has_prefix "psfile=" s then begin
+    try
+      let file, bbox, size = psfile_special st s in
+      let x = st.x_origin + int_of_float (st.conv *. float st.h)
+      and y = st.y_origin + int_of_float (st.conv *. float st.v) in
+      if !visible then
+        let draw =
+          if has_prefix "`" file then
+            Dev.draw_img (zap_to_char ' ' file)
+              Drawimage.ScaleAuto false 1.0 st.blend (Some bbox)
+          else Dev.draw_ps file bbox in
+        draw size x y
+    with
+    | Failure s -> Misc.warning s
+    | e -> Misc.warning (Printexc.to_string e) end else
+  if has_prefix "advi: " s then begin
+    if has_prefix "advi: edit" s then edit_special st s else
+    if has_prefix "advi: alpha" s then alpha_special st s else
+    if has_prefix "advi: blend" s then blend_special st s else
+    if has_prefix "advi: epstransparent" s then
+       epstransparent_special st s else
+    if has_prefix "advi: pause" s then raise Pause else
+    if has_prefix "advi: proc" s then proc_special st s else
+    if has_prefix "advi: setbg " s then bkgd_special st s else
+    (* all following have effect and should be ignore if active is false *)
+    if !active then begin
+      if has_prefix "advi: wait " s then wait_special st s else
+      if has_prefix "advi: embed " s then
+         (if !visible then embed_special st s) else
+      if has_prefix "advi: trans " s then transition_special st s else
+      if has_prefix "advi: transbox save " s then
+         transbox_save_special st s else
+      if has_prefix "advi: transbox go " s then
+         transbox_go_special st s else
+      if has_prefix "advi: kill " s then
+         (if !visible then kill_embed_special st s) else
+      Misc.warning ("unknown special: "^ s) end
+    (* else we ignore it, whether well-formed or ill-formed *)
+    end else
+  if has_prefix "line: " s then line_special st s else
+  if has_prefix "pn " s || has_prefix "pa " s || s = "fp" || s = "ip" ||
+     has_prefix "da " s || has_prefix "dt " s || s = "sp" ||
+     has_prefix "sp " s || has_prefix "ar " s || has_prefix "ia " s ||
+     has_prefix "sh " s || s = "wh" || s = "bk" then tpic_specials st s;;
 
 (*** Page rendering ***)
 let eval_dvi_command st = function
@@ -1275,11 +1255,6 @@ let eval_dvi_command st = function
   | Dvi.C_fnt n -> fnt st n
   | Dvi.C_xxx s -> special st s
   | _ -> ();;
-
-(* Unused ???
-let scan_command st = function
-  | Dvi.C_xxx s -> special st s
-  | _ -> ();;*)
 
 let eval_command st c =
   let record r =
@@ -1306,18 +1281,12 @@ let find_prologues l =
     List.map
       (function b, s as p -> if b then p else b, List.assoc s table) l
   with
-    Invalid_argument _  -> 
+  | Invalid_argument _  ->
       Misc.warning
-        "Cannot find postscript prologue. Continuing without Postscript"; 
+        "Cannot find postscript prologue. Continuing without Postscript";
       Options.dops := false;
       []
-  | Not_found -> assert false
-;;
-
-(* function to be removed in the future, or replaced by
-   the proper iteration of render_step *)
-let render_page cdvi num dpi xorig yorig =
-  failwith "Render_page is deprecated.";;
+  | Not_found -> assert false;;
 
 let render_step cdvi num ?trans ?chst dpi xorig yorig =
   proc_clean ();
@@ -1335,7 +1304,7 @@ let render_step cdvi num ?trans ?chst dpi xorig yorig =
     s in
   if not !Options.dops then status.Dvi.hasps <- false;
   let orid = function Some f -> f | None -> fun x->x in
-  let st = 
+  let st =
     { cdvi = cdvi;
       sdpi = int_of_float (mag *. ldexp dpi 16);
       conv = mag *. dpi /. cdvi.dvi_res /. 65536.0;
