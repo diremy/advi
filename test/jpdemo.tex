@@ -34,7 +34,7 @@
 \def\advifooter{\vbox to 0em{\vbox to \vsize {\vfill
 押せ: \underline{n}:次頁 \underline{p}:前頁
 \underline{\textvisiblespace} 次停止%
-\hfill{\adviembed[mode=sticky,name=advianim]{1.56cm}{1.824cm}{animate -geometry !g! -window !p advilogo.anim.gif}}
+\hfill{\adviembed[sticky,name=advianim]{1.56cm}{1.824cm}{animate -geometry !g! -window !p advilogo.anim.gif}}
 } \vss}}
 
 \def\adviheader{\noindent
@@ -72,12 +72,14 @@ p\TeX の日本語 DVI ファイルの表示が可能です。
   を元にした括弧（「、」）や句読点などの位置補正
 \end {itemize}
 
+\subsection*{フォント設定}
+いまさらVFlib のインターフェースなんか書きたくないので、
+\verb+$(ADVILIB)/jpfonts.conf+ か \verb+~/.advi/jpfonts.conf+
+ファイルに自前の\TeX{}フォント $\rightarrow$ TrueTypeフォントの
+マップ情報を持っています。
+
 \subsection* {バグ}
-いくつかバグがある。
 \begin{itemize}
-\item Truetype フォントファイル名({\tt msmincho},{\tt msgothic})
-  がハードコーデッドされている
-  (でも、 VFlib のインターフェースなんか書きたくない。)
 \item Truetype フォントは kpsewhich で見えるようにしておく事 
 \end {itemize}
 
