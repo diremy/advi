@@ -176,7 +176,38 @@ else
   fi
 fi
 
-dnl LablTk
+dnl lablgl library -----------------------------------------------------------
+
+dnl used for Makefile.build
+LABLGLDIR=""
+
+AC_MSG_CHECKING(checking lablgl)
+
+if test -d "$CAMLDIR/lablGL"; then
+  LABLGLDIR="$CAMLDIR/lablGL"
+fi
+
+AC_ARG_WITH(lablgl, [  --with-lablgl=dir      specify lablgl library directory],
+  if test "$withval" != "no" ; then  
+	  if test -f $withval/lablgl.cma; then
+	    LABLGLDIR="$withval"
+	  else
+	    echo "**************** ERROR ******************"
+	    echo "lablgl.cma is not found in the directory \"$withval\", which you specified with --with-lablgl option."
+	    echo "*****************************************"
+	  fi
+  fi)
+
+if test "X$LABLGLDIR" = "X"; then
+  LABLGLDIR_MESSAGE="Not found"
+  AC_MSG_RESULT($LABLGLDIR_MESSAGE)
+else
+  LABLGLDIR_MESSAGE="found at $LABLGLDIR"
+  AC_MSG_RESULT($LABLGLDIR_MESSAGE)
+  HAVE_LABLGL="true"
+fi
+
+dnl LablTk -------------------------------------------------------------------
 
 LABLTKDIR=$CAMLDIR/labltk
 
@@ -261,6 +292,7 @@ AC_SUBST(CAMLIMAGESCONFIGINCLUDE)
 AC_SUBST(HAVE_CAMLIMAGES)
 AC_SUBST(CAMLIMAGESLIBS)
 AC_SUBST(LABLGTKDIR)
+AC_SUBST(LABLGLDIR)
 AC_SUBST(HAVE_LABLGTK)
 AC_SUBST(LABLGTKLIBS)
 AC_SUBST(HAVE_GS)
@@ -290,10 +322,14 @@ AC_OUTPUT(Makefile.config config.ml)
 
 echo "------------------------------------------------- Configuration finished"
 echo "Language:    $CAML version $CAMLVERSION"
-echo "cdk_config:  $HAVE_CDK"
-echo "Camlimages:  $HAVE_CAMLIMAGES"
-echo "LablTk:      $HAVE_LABLTK"
-echo "LablGtk:     $HAVE_LABLGTK"	
-echo "GS:          $GS_UPTO_DATE version $GS_VERSION at $PATH_GS"
+echo "Required libraries" 
+echo "  Camlimages:  $HAVE_CAMLIMAGES"
+echo "  LablGtk:     $HAVE_LABLGTK"
+echo "  LablGL:      $HAVE_LABLGL"
+echo "Optional libraries"
+echo "  LablTk:      $HAVE_LABLTK"
+echo "  GS:          $GS_UPTO_DATE version $GS_VERSION at $PATH_GS"
 echo "Resources:   $ADVI_LOC/"
 echo "------------------------------------------------------------------------"
+
+test "x$HAVE_LABLGTK" != xtrue && "x$HAVE_LABLGL" != xtrue && (echo You must install required libraries; exit 1)
