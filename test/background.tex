@@ -4,6 +4,7 @@
 \usepackage{../doc/manual}
 \usepackage{color}
 \usepackage{graphicx}
+\usepackage{advi-graphicx}
 \usepackage{alltt}
 
 \usepackage{pst-all}
@@ -256,11 +257,83 @@ Set the alpha factor for the background image to \docid{float}
 \dockey[none]{blend}{blend mode}
 \begin{quote}
 Set the blend mode to \docid{blend mode}, which should be one of the
-following: {\tt difference}, {\tt none}
+following: {\tt normal}, {\tt multiply}, {\tt screen},
+{\tt overlay}, {\tt dodge}, {\tt burn}, {\tt darken},
+{\tt lighten}, {\tt difference}, {\tt exclusion}, and {\tt none}
 (\doctt{none} means unset).
 \end{quote}
 
 \framebox{Here are a few example slides}
+\newpage
+
+\bigskip
+
+\def\exampleimage{
+ {\includegraphics[width=\textwidth]{../tex/bar.jpg.eps}}
+ {\includegraphics[width=0.2\textwidth]{dojojismall.jpg}}
+}
+
+{\large Normal mode}
+
+{\setblend{normal}{\exampleimage}}
+
+{\large Multiply mode}
+
+%{\setblend{multiply}{\exampleimage}}
+{\setblend{multiply}{\includegraphics[width=0.2\textwidth]{dojojismall.jpg}}}
+
+{\large Screen mode}
+
+{\setblend{screen}{\exampleimage}}
+
+\advibg{color=lightgray} 
+
+\newpage
+
+\bigskip
+
+{\large Overlay mode}
+
+{\setblend{overlay}{\exampleimage}}
+
+{\large Dodge mode}
+
+{\setblend{dodge}{\exampleimage}}
+
+{\large Burn mode}
+
+{\setblend{burn}{\exampleimage}}
+
+\advibg{color=lightgray} 
+
+\newpage
+
+\bigskip
+
+{\large Darken mode}
+
+{\setblend{darken}{\exampleimage}}
+
+{\large Lighten mode}
+
+{\setblend{lighten}{\exampleimage}}
+
+\advibg{color=lightgray} 
+
+\newpage
+
+\bigskip
+
+{\large Difference mode}
+
+{\setblend{difference}{\exampleimage}}
+
+{\large Exclusion mode}
+
+{\setblend{exclusion}{\exampleimage}}
+
+\advibg{color=lightgray} 
+
 \newpage
 
 \vfill
