@@ -445,23 +445,36 @@ launches a new \doctt{advi} process to view the target.
 
 {\ActiveDVI} improves the treatment of hyper-refs over conventional previewers,
 by emphasizing the hyper-target text of an hyper-link. Thus, an hyper-target
-definition
+definition:
 
 \docdef\hypertarget \docarg{tag}\docarg{text}
 
-should make the activation of the link \docid{tag} not only move to
-the page where \docid{text} occurs, but also emphasize the target \docid{text}.
+\noindent
+should make the activation of the link \docid{text} not only move to
+the page where \docid{tag} occurs, but also emphasize the destination
+target \docid{tag}.
 %
 However, since {\docdef\hypertarget} does include its second argument
 within the target, we use the following command instead:
 \begin{verbatim}
+\edef\hyper@quote{\string"}
+\edef\hyper@sharp{\string#}
+
 \newcommand{\softtarget}[2]%
-  {\special{html:<A name=\hyper@quote #1\hyperquote>}#2\special{html:</A>}}
+  {\special{html:<a name=\hyper@quote#1\hyper@quote>}#2%
+   \special{html:</a>}}
 \end{verbatim}
 
 (If you are viewing this document with {\softtarget{targethere}{\ActiveDVI}},
 you may move over \softlink{targethere}{this area} 
 or click on \softlink{otherpage}{this one} to see the effect.)
+
+Similarly, to define a link target we use:
+\begin{verbatim}
+\newcommand{\softlink}[2]%
+  {\special{html:<a href=\hyper@quote\hyper@sharp#1\hyper@quote>}#2%
+   \special{html:</a>}}
+\end{verbatim}
 
 \subsection{Floating table of contents and thumbnails}
 
@@ -1242,11 +1255,12 @@ will redraw text in a box colored with \docid{color}, which defaults to
 
 \subsection{Postscript specials}
 
-{\ActiveDVI} can deal with most of PStricks by calling {\tt ghostscript} on
-included Postscripts. Basic change of coordinates are implemented, but this
-feature remain fragile, as {\ActiveDVI} must in turn call {\tt ghostscript}
-to get the new coordinates. Also, rotations will definitely not work for
-text, which is rendered by {\ActiveDVI} and cannot be rotated.
+{\ActiveDVI} can deal with most of PStricks by calling {\tt
+ghostscript} on included Postscripts. Basic change of coordinates are
+implemented, but this feature remain fragile, as {\ActiveDVI} must in
+turn call {\tt ghostscript} to get the new coordinates. Also,
+rotations will definitely not work for text, which is rendered by
+{\ActiveDVI} and cannot be rotated.
 
 \subsubsection{Overlays}
 
