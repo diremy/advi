@@ -226,72 +226,8 @@ let make_glyph g =
 
 let get_glyph g = g.glyph;;
 
-(* Blending *)
-type blend =
-   | Normal | Multiply | Screen | Overlay (* | SoftLight | HardLight *)
-   | ColorDodge | ColorBurn | Darken | Lighten | Difference
-   | Exclusion (* | Luminosity | Color | Saturation | Hue *);;
-
-let blend = ref Normal;;
+let blend = ref Drawimage.Normal;;
 let set_blend b = blend := b;;
-
-(* look at gxblend.c of ghostscript *)
-let blend_func = function
-  | Normal -> raise Exit (* this case is optimized *)
-  | Multiply ->
-      fun dst src ->
-        let t = dst * src + 0x80 in
-        let t = t + t lsr 8 in
-        t lsr 8
-  | Screen ->
-      fun dst src ->
-        let t = (0xff - dst) * (0xff - src) + 0x80 in
-        let t = t + t lsr 8 in
-        0xff - t lsr 8
-  | Overlay ->
-      fun dst src ->
-        let t =
-          if dst < 0x80 then 2 * dst * src
-          else 0xf301 - 2 * (0xff - dst) * (0xff - src) in
-        let t = t + 0x80 in
-        let t = t + t lsr 8 in
-        t lsr 8
-(*
-   | SoftLight ->
-   if s < 0x80 then begin
-   let t = (0xff - (src lsl 1)) * art_blend_sq_diff_8[dst] in
-   let t = t + 0x8000 in
-   dst - t lsr 16
-   end else begin
-   let t = ((src lsl 1) - 0xff) * art_blend_soft_light_8[dst] in
-   let t = t + 0x80 in
-   let t = t + t lsr 8 in
-   dst + t lsr 8
-   end
-*)
-  | ColorDodge ->
-      fun dst src ->
-        if dst = 0 then 0 else if dst >= src then 0xff
-        else (0x1fe * dst + src) / (src lsl 1)
-  | ColorBurn ->
-      fun dst src ->
-        let dst = 0xff - dst in
-        if dst = 0 then 0xff else if dst >= src then 0
-        else 0xff - (0x1fe * dst + src) / (src lsl 1)
-  | Darken ->
-      fun dst src -> if dst < src then dst else src
-  | Lighten ->
-      fun dst src -> if dst > src then dst else src
-  | Difference ->
-      fun dst src ->
-        let t = dst - src in
-        if t < 0 then -t else t
-  | Exclusion ->
-      fun dst src ->
-        let t = (0xff - dst) * src + dst * (0xff - src) in
-        let t = t + 0x80 in
-        let t = t + t lsr 8 in
-        t lsr 8;;
 
 (* Background implementation *)
 type bkgd_prefs = {
@@ -299,8 +235,8 @@ type bkgd_prefs = {
   mutable bgimg : string option;
   mutable bgratio : Drawimage.ratiopts;
   mutable bgwhitetrans : bool;
-  mutable bgalpha : float;
-  mutable bgblend : blend;
+  mutable bgalpha : Drawimage.alpha;
+  mutable bgblend : Drawimage.blend;
 };;
 
 (* The Background preferences                    *)
@@ -336,7 +272,7 @@ let default_bkgd_data () =
     bgratio = Drawimage.ScaleAuto;
     bgwhitetrans = false;
     bgalpha = 1.0;
-    bgblend = Normal };;
+    bgblend = Drawimage.Normal };;
 
 let blit_bkgd_data s d =
   d.bgcolor <- s.bgcolor;
@@ -373,14 +309,14 @@ let draw_bkgd_img (w, h) x0 y0 =
       bkgd_data.bgratio
       bkgd_data.bgwhitetrans
       bkgd_data.bgalpha
-      (try Some (blend_func bkgd_data.bgblend) with _ -> None)
+      bkgd_data.bgblend
       None (w, h) x0 (!size_y - y0);;
 
 type bgoption =
    | BgColor of color
-   | BgImg of string
-   | BgAlpha of float
-   | BgBlend of blend
+   | BgImg of Misc.file_name
+   | BgAlpha of Drawimage.alpha
+   | BgBlend of Drawimage.blend
    | BgRatio of Drawimage.ratiopts;;
 
 let set_bg_option = function
@@ -603,8 +539,7 @@ let draw_ps file bbox (w, h) x0 y0 =
   if not !opened then failwith "Grdev.fill_rect: no window";
   let x = x0
   and y = !size_y - y0 + h in
-  try Drawimage.f file !epstransparent !alpha
-        (try Some (blend_func !blend) with _ -> None)
+  try Drawimage.f file !epstransparent !alpha !blend
         (Some bbox) Drawimage.ScaleAuto (w, h) (x, y - h)
   with
   | Not_found -> Misc.warning ("ps file " ^ file ^ " not found")

@@ -15,7 +15,6 @@
 (*  Based on Mldvi by Alexandre Miquel.                                *)
 (***********************************************************************)
 
-
 (* Private glyphs *)
 
 type glyph;;
@@ -32,15 +31,15 @@ module Symbol :
           { fontname : string;
             fontratio : float;
             glyph : glyph;
-          } 
+          }
       type symbol =
           Glyph of g
         | Space of int * int
         | Rule of int * int
         | Line of int * string option
       type element =
-          { color   : int; 
-            locx    : int; 
+          { color   : int;
+            locx    : int;
             locy    : int;
             code    : int;
             symbol : symbol }
@@ -56,7 +55,7 @@ module Symbol :
       val inzone : int -> int -> int -> int -> set
       val intime : int -> int -> int -> int -> set
       val iter : (element -> unit) -> set -> unit
-      val lines : int -> int -> 
+      val lines : int -> int ->
         (element * int * int *
            string * string * string * string * string option) option
     end;;
@@ -88,20 +87,16 @@ val draw_arc :
   x:int -> y:int -> rx:int -> ry:int ->
   start:int -> stop:int -> pensize:int -> unit;;
 val fill_arc :
-  x:int -> y:int -> rx:int -> ry:int -> 
+  x:int -> y:int -> rx:int -> ry:int ->
   start:int -> stop:int -> shade:float -> unit;;
 
 (* Alpha blending *)
-val set_alpha : float -> unit;; 
-val set_epstransparent : bool -> unit;; 
+val set_alpha : Drawimage.alpha -> unit;;
+val set_epstransparent : bool -> unit;;
 
-type blend =
-  | Normal | Multiply | Screen | Overlay (* | SoftLight | HardLight *)
-  | ColorDodge | ColorBurn | Darken | Lighten | Difference 
-  | Exclusion (* | Luminosity | Color | Saturation | Hue *)
-;;
+val set_blend : Drawimage.blend -> unit;;
+(** Fix the blending method (hence the blending function). *)
 
-val set_blend : blend -> unit;;
 val draw_ps :
   string -> (int * int * int * int) -> (int * int) -> int -> int -> unit;;
 val clean_ps_cache : unit -> unit;;
@@ -113,10 +108,17 @@ val draw_img :
   string ->
   Drawimage.ratiopts ->
   bool ->
-  float ->
-  (int -> int -> int) option ->
-  (int * int * int * int) option ->
+  Drawimage.alpha ->
+  Drawimage.blend ->
+  Drawimage.ps_bbox option ->
    int * int -> int -> int -> unit;;
+(** [draw_img fname ratio whitetrans alpha blend psbbox (width, height) x y]
+  draws the image contained in file [fname] at [x, y]. The image is
+  resized to [(width, height)], blended with the background
+  according to the blending option [blend], drawn with an alpha factor
+  of [alpha] and a transparency color [whitetrans]. The [psbbox]
+  argument is used to resize the image.
+*)
 
 (* Background information *)
 
@@ -126,7 +128,7 @@ type bkgd_prefs = {
   mutable bgratio : Drawimage.ratiopts;
   mutable bgwhitetrans : bool;
   mutable bgalpha : float;
-  mutable bgblend : blend;
+  mutable bgblend : Drawimage.blend;
 };;
 
 val blit_bkgd_data : bkgd_prefs -> bkgd_prefs -> unit;;
@@ -137,9 +139,9 @@ val get_playing : (unit -> int) ref;;
 
 type bgoption =
    | BgColor of color
-   | BgImg of string
-   | BgAlpha of float
-   | BgBlend of blend
+   | BgImg of Misc.file_name
+   | BgAlpha of Drawimage.alpha
+   | BgBlend of Drawimage.blend
    | BgRatio of Drawimage.ratiopts
 ;;
 
@@ -167,7 +169,7 @@ type event =
   | Selection of string
   | Position of int * int
   | Href of string
-  | Advi of string * (unit -> unit) 
+  | Advi of string * (unit -> unit)
   | Click of area * button * int * int
   | Nil;;
 
@@ -175,23 +177,23 @@ val wait_event : unit -> event;;
 
 module H :
     sig
-      type mode = Over | Click_down  
-      type link = 
+      type mode = Over | Click_down
+      type link =
           { link : string;
             action : (unit -> unit);
             mode : mode;
             color : color option;
             area : (int * int * int) option;
-          } 
+          }
       type tag =
-        | Name of string 
+        | Name of string
         | Href of string
         | Advi of link
 
       type anchor = {
           tag : tag;
           draw : (int * int * glyph) list
-        } 
+        }
 
       val add : anchor -> unit
       val flashlight : tag -> unit
@@ -206,7 +208,7 @@ val exec_ps : string -> int -> int -> unit;;
 val newpage : string list -> int -> float -> int -> int -> unit;;
 val add_headers : string list -> unit;;
 val current_pos : unit -> int * int;;
-val synchronize : unit -> unit;; 
+val synchronize : unit -> unit;;
 
 type busy = Free | Busy | Pause | Disk;;
 
