@@ -253,27 +253,31 @@ val key_pressed : unit -> bool;;
            would not block. *)
 
 val get_global_display_mode : unit -> bool;;
-
 (** [get_global_display_mode] returns the value of flag
-    [global_display_mode]. This flags enables/disables the command
-    [display_mode]. By default the flag is [false], meaning that
-    [display_mode] and [synchronize] commands will not be ignored. *)
+  [global_display_mode]. This flags enables/disables the command
+  [display_mode]. By default the flag is [true], meaning that
+  [display_mode] and [synchronize] commands are handled as usual.
+  Otherwise [display_mode] commands are simply ignored and
+  [synchronize] performs the inverse operation as the regular
+  [Graphics.synchronize] function since it copies the screen window
+  into the backing store. *)
 
 val set_global_display_mode : bool -> unit;;
 (** [set_global_display_mode] sets the [global_display_mode] flags. *)
 
 val synchronize : unit -> unit;;
 (** Same as [Graphics.synchronize] but according to [global_display_mode] *)
+
 val display_mode : bool -> unit;;
 (** Same as [Graphics.display_mode] but according to [global_display_mode] *)
 
 val point_color : int -> int -> color;;
 (** As [point_color] but according to values of [global_display_mode]
-Coordinates should be inside the limit. *)
+  Coordinates should be inside the limit. *)
 
 val only_on_screen : ('a -> 'b) -> 'a -> 'b;;
-(** [on_screen_only f arg] performs [f arg] on the screen memory only,
-     not affecting the backing store. *)
+(** [only_on_screen f arg] performs [f arg] on the screen window only,
+   not affecting the backing store. *)
 
 val init : unit -> unit;;
 (** We have to call this function to disable the original Graphics
