@@ -1,111 +1,126 @@
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
-<html> <head>
-<title>Active-DVI</title>
-</head>
+<HTML> <HEAD>
+<TITLE>Active-DVI</TITLE>
+</HEAD>
 
-<body bgcolor="white">
-<h1>Active-DVI -- A DVI presenter of <SUP>L</SUP><SUB>A</SUB><SUP>T</SUP><SUB>E</SUB><SUP>X</SUP> slides</h1>
+<BODY BGCOLOR="white">
 
-<center><img src="advilogo.gif"><br>
-<a href="advi.jpg">screen shot</a>
-</center>
+<H1>Active-DVI -- A DVI Presenter of <SUP>L</SUP><SUB>A</SUB><SUP>T</SUP><SUB>E</SUB><SUP>X</SUP> slides</H1>
 
-<p>
-Active-DVI is a DVI previewer and presenter written in <a
-href="http://caml.inria.fr/ocaml/">Objective Caml</a> with some eye
+<CENTER><IMG SRC="advilogo.gif"><BR>
+<A HREF="advi.jpg">screen shot</A>
+</CENTER>
+
+<P>Active-DVI is a DVI previewer and presenter written in <A
+HREF="http://caml.inria.fr/ocaml/">Objective Caml</A> with some eye
 candy effects for presentation.
 
-<p>
-Active-DVI is largely based on Mldvi version 1.0 written 
-by <a href="http://pauillac.inria.fr/~miquel/">Alexandre Miquel</a>.
+<P>Active-Dvi is largely based on Mldvi version 1.0 written by <A
+HREF="http://pauillac.inria.fr/~miquel/">Alexandre Miquel</A>.
 
-<hr>
-<center>
-<a href="#features">Features</a> |
-<a href="#requirements">Requirements</a> |
-<a href="#download">Download</a> |
-<a href="#copyright">Copyright</a> |
-<a href="#authors">Authors</a>
-</center>
-<hr>
+<HR>
+<CENTER>
+<A HREF="#features">Features</A> |
+<A HREF="#requirements">Requirements</A> |
+<A HREF="#download">Download</A> |
+<A HREF="#copyright">Copyright</A> |
+<A HREF="#authors">Authors</A>
+</CENTER>
+<HR>
 
-<h2><a name="features">Currently supported features</a></h2>
+<H2><A name="features">Currently supported features</A></H2>
 
-Active-DVI features
+<P>To preview DVI files, Active-DVI features:
+
 <UL>
+ <LI> Color anti-aliasing
+ <LI> Inclusion of images (via the Camlimages package) with alpha
+      channel and blending
  <LI> Encapsulated Postscript File inclusion (using graphics macros package)
- <LI> Some effects for presentation (pause, delay, text color change)
- <LI> Embedded applications (launched on demand)
- <LI> Hyper links from slide to slide
- <LI> Annotations displayed on demand (similar to pop-up balloons)
  <LI> Gpic specials to display pictures
- <LI> Japanese pTeX dvi extension support (<a href="advi-j.jpg">screen shot</a>)
+ <LI> Correct treatment of many (but not all) inlined-Postscript specials
+ <LI> Page background settings
+ <LI> Japanese pTeX dvi extension support (<A HREF="advi-j.jpg">screen shot</A>)
 </UL>
 
+<P>To present your DVI files, Active-DVI features:
 
-<h2>Installation of Active-DVI</h2>
+<UL>
+ <LI> Basic effects for presentation (pause, delay, text color change)
+ <LI> Annotations displayed on demand (similar to pop-up balloons)
+ <LI> Hyper links from slide to slide or to other files (including DVI files)
+ <LI> Replay of previously recorded parts of the display
+ <LI> Text movements
+ <LI> Page transitions
+ <LI> Embedded applications (launched and killed on demand)
+</UL>
 
-<h3><a name="requirements">Requirements</a></h3>
+<P>Active-DVI special effects are set and launched from within your
+LaTeX source file via the macros of the <CODE>advi.sty</CODE>
+LaTeX package provided by the distribution.
 
-You need Objective Caml 3.04 or higher to compile the sources.
+<P>In addition, Caml hackers can program new and fancy Active-DVI effects in the
+source code of the presenter.
 
-<p>
-You also need the `kpsewhich' utility of the `kpathsea' library
+<H2>Installation of Active-DVI</H2>
+
+<H3><A name="requirements">Requirements</A></H3>
+
+<P>You need Objective Caml 3.04 or higher to compile the sources.
+
+<P>You also need the `kpsewhich' utility of the `kpathsea' library
 provided by the TeX distributions.
 
-<p>
-For encapsulated postscript file inclusions, you need the
-<a href="http://pauillac.inria.fr/camlimages/">camlimages library</a>.
+<P>For encapsulated postscript file inclusions, you need the
+<A HREF="http://pauillac.inria.fr/camlimages/">camlimages library</A>.
 
-<h3><a name="download">Download</a></h3>
+<H3><A name="download">Download</A></H3>
 
 <H4>Source distribution</H4>
 
 <DL>
-
-  <DT><a href="ftp://ftp.inria.fr/INRIA/Projects/cristal/advi/advi-1.0.0.tar.gz">Version 1.0.0 tar ball</a> (You optionally need camltk and camlimages!)
-  <DD> For the maximum performance, it requires 
-	<a href="http://pauillac.inria.fr/camltk/">camltk</a>
-	and 
-	<a href="http://pauillac.inria.fr/camlimages/">camlimages</a>
+  <DT><A HREF="ftp://ftp.inria.fr/INRIA/Projects/cristal/advi/advi-1.0.0.tar.gz">Version 1.0.0 tar ball</a> (You optionally need camltk and camlimages!)
+  <DD> For the maximum performance, Active-DVI requires the
+	<A HREF="http://pauillac.inria.fr/camltk/">camltk</A>
+	and
+	<A HREF="http://pauillac.inria.fr/camlimages/">camlimages</A>
 	libraries.
-	If you have not installed these libraries yet, 
+	If you have not yet installed these libraries, 
 	we recommend to download the following ADK instead.
-
-  <DT><a href="ftp://ftp.inria.fr/INRIA/Projects/cristal/advi/adk-1.0.0.tar.gz">ADK, Advi Development Kit version 1.0.0 tar ball</a> (Active-DVI + camltk + camlimages)
+  <DT><A
+HREF="ftp://ftp.inria.fr/INRIA/Projects/cristal/advi/adk-1.0.0.tar.gz">ADK</A>,
+the Active-DVI Development Kit version 1.0.0 tar ball (Active-DVI +
+camltk + camlimages).
   <DD> It is a big tar ball of Active-DVI, camltk and camlimages,
-	with a full-automated-with-luck installation Makefile.
-
-  <DT><a href="http://camlcvs.inria.fr/cgi-bin/cvsweb.cgi/bazar-ocaml/advi/">
-      Current CVS version</a> at the
-      <a href="http://camlcvs.inria.fr/">Caml Anonymous CVS repository</a>
-
+	with a fully-automated-with-luck installation Makefile.
+  <DT><A HREF="http://camlcvs.inria.fr/cgi-bin/cvsweb.cgi/bazar-ocaml/advi/">
+      Current CVS version</A> is available at the
+      <A HREF="http://camlcvs.inria.fr/">Caml Anonymous CVS repository</A>.
 </DL>
 
-<h4>RPMS</h4>
+<H4>RPMS</H4>
 
 <UL>
-   <LI> <a href="advi-1.0.0-1.src.rpm"> SRPM </a>
-   <LI> RedHat7 <a href="advi-1.0.0-1.i386.rpm"> RPM </a>
+   <LI><A HREF="ftp://ftp.inria.fr/INRIA/Projects/cristal/advi/advi-1.0.0-1.src.rpm">SRPM</A>
+   <LI>RedHat7<A HREF="ftp://ftp.inria.fr/INRIA/Projects/cristal/advi/advi-1.0.0-1.i386.rpm">RPM</A>
 </UL>
       
-<h2><a name="copyright">COPYRIGHT</a></h2>
+<H2><A NAME="copyright">COPYRIGHT</A></H2>
 
-This program is distributed under the GNU LGPL. 
-See the enclosed file COPYING.
+This program is distributed under the GNU LGPL. See the enclosed file COPYING.
 
-<h2><a name="authors">AUTHORS</a></h2>
+<H2><A NAME="authors">AUTHORS</A></H2>
 
-<a href="http://pauillac.inria.fr/~furuse/">Jun Furuse</a>,
-<a href="http://pauillac.inria.fr/~weis/">Pierre Weis</a>,
-<a href="http://pauillac.inria.fr/~remy/">Didier Rémy</a>,
-<a href="http://pauillac.inria.fr/~xleroy/">Xavier Leroy</a>,
-<a href="http://pauillac.inria.fr/~lebotlan/">Didier Le Botlan</a>,
-<a href="http://pauillac.inria.fr/~aschmitt/">Alan Schmitt</a>,
+<A HREF="http://pauillac.inria.fr/~furuse/">Jun Furuse</A>,
+<A HREF="http://pauillac.inria.fr/~weis/">Pierre Weis</A>,
+<A HREF="http://pauillac.inria.fr/~remy/">Didier Rémy</A>,
+<A HREF="http://pauillac.inria.fr/~xleroy/">Xavier Leroy</A>,
+<A HREF="http://pauillac.inria.fr/~lebotlan/">Didier Le Botlan</A>,
+<A HREF="http://pauillac.inria.fr/~aschmitt/">Alan Schmitt</A>,
 Roberto Di Cosmo,
-<a href="http://pauillac.inria.fr/~miquel/">Alexandre Miquel</a>
+<A HREF="http://pauillac.inria.fr/~miquel/">Alexandre Miquel</A>
 
-<hr>
+<HR>
 <!-- hhmts start -->
 Last modified: Tue Feb  5 15:37:06 CET 2002
 <!-- hhmts end -->
