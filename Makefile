@@ -112,7 +112,7 @@ CFLAGS=$(EXTRA_X11) $(X11_INCLUDES) -O $(BYTCCCOMPOPTS)
 
 default: Makefile.config $(INSTALLTARGET) $(HELPFILES)
 
-all: $(INSTALLTARGET) documentation
+all: byt opt documentation
 allopt: opt documentation
 allbyt: byt documentation
 
@@ -130,11 +130,15 @@ i_want_opt:
 	@echo "**************************************************************"
 	@exit 1
 
-byt: $(COBJS) $(CMO_OBJS)
+byt: $(EXEC).byt
+
+$(EXEC).byt: $(COBJS) $(CMO_OBJS)
 	$(OCAMLC) -custom $(INCLUDES) $(BYT_OBJS) $(LINK_OPTS) -o $(EXEC).byt
 
-opt: $(COBJS) $(CMX_OBJS)
-	$(OCAMLOPT) $(INCLUDES) $(OPT_OBJS) $(LINK_OPTS) -o $(EXEC)
+opt: $(EXEC).opt
+
+$(EXEC).opt: $(COBJS) $(CMX_OBJS)
+	$(OCAMLOPT) $(INCLUDES) $(OPT_OBJS) $(LINK_OPTS) -o $(EXEC).opt
 
 config.ml: config.ml.in configure
 	./configure
