@@ -20,6 +20,7 @@
 exception Terminated;;
 val kill : unit -> unit;;
 val draw : string -> int -> int -> unit;;
+val draw_file : string -> int -> int -> unit;;
 val add_headers : (bool * string) list -> unit;;
 val newpage : (bool * string) list -> int -> float -> int -> int -> unit;;
 val flush : unit -> unit;;
@@ -30,5 +31,5 @@ val current_y : int ref;;
 val get_do_ps : unit -> bool;;
 val set_do_ps : bool -> unit;;
 val init_do_ps : unit -> unit;;
-(** Handling the [do_ps] flag that gouverns the use of gv
+(** Handling the [do_ps] flag that governs the use of gv
   to display PostScript. *)
