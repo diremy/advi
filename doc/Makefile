@@ -1,4 +1,6 @@
 LATEX=TEXINPUTS=.:../tex: latex
+DVIPS=TEXINPUTS=.:../tex: dvips
+
 all: manual.ps manual.pdf splash.dvi splash.ps
 
 manual.dvi: manual.tex
@@ -6,7 +8,7 @@ manual.dvi: manual.tex
 
 manual.ps: manual.tex
 	$(LATEX) '\def\driver{dvips}\input' $<
-	dvips -o $@ $*.dvi
+	$(DVIPS) -o $@ $*.dvi
 
 manual.html: manual.tex
 	hevea -o $*.html $*.tex
@@ -26,11 +28,9 @@ splash.dvi: splash.tex
 
 splash.ps: splash.tex
 	$(LATEX) '\def\driver{dvips}\input' $<
-	dvips -o $@ $*.dvi
+	$(DVIPS) -o $@ $*.dvi
 
 clean: 
-	rm -f manual.{aux,log,html,dvi,pdf,pdfm,ps,eps,ima,out} \
-	  manual.image.* manual0[0-9][0-9].{eps,gif,pdf} \
-	rm -f splash.{aux,log,html,dvi,pdf,pdfm,ps,eps,ima,out}
+	rm -f *.aux *.log *.html *.dvi *.pdf *.pdfm *.ps *.ima *.out *.toc
 
 .SUFFIXES: .tex .dvi .ps .pdf .pdfm .tex .html .out .ima
