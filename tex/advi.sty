@@ -92,18 +92,23 @@ Maybe you mean \@currenvir ing}}
 
 %%% Embedded applications
 
-\def \advi@embed@name{anonymous}
+\def \advi@embed@name {}
+\def \advi@embed@setname #1{%
+  \ifx \advi@embed@name \advi@empty \def \advi@embed@name {#1}\else
+  \else \advi@error
+            {adviembed: parameter name=\advi@embed@name already defined}%
+  \fi}
 \def \advi@embed@mode{ephemeral}
 \def \advi@embed@width{0pt}
 \def \advi@embed@height{0pt}
-\define@key {advi@embed}{name}{\def \advi@embed@name {#1}}
+\define@key {advi@embed}{name}{\advi@embed@setname {#1}}
 \define@key {advi@embed}{width}%
    {\@tempdima#1\relax \edef \advi@embed@width {\the\@tempdima}}
 \define@key {advi@embed}{height}%
    {\@tempdima#1\relax \edef \advi@embed@height {\the\@tempdima}}
 \def \advi@definemode #1{%
-  \define@key {advi@embed}{#1}[anonymous]{%
-     \def \advi@embed@mode {#1}\def\advi@embed@name {##1}%
+  \define@key {advi@embed}{#1}[]{%
+     \def \advi@embed@mode {#1}\advi@embed@setname {##1}%
   }}
 \advi@definemode{ephemeral}
 \advi@definemode{persistent}
@@ -116,6 +121,8 @@ Maybe you mean \@currenvir ing}}
 \def \advi@length #1{\@tempdima #1\relax \the\@tempdima}
 \newcommand{\advi@embed}[2][]{%
   \mbox {\setkeys {advi@embed}{#1}%
+         \message {/\advi@embed@name/}%
+         \advi@ifempty {\advi@embed@name}{\def \advi@embed@name{anonymous}}{}%
          \advi@embed@ {\advi@embed@name}{\advi@embed@mode}
              {\advi@embed@width}{\advi@embed@height}{#2}}}
 
@@ -176,11 +183,15 @@ Maybe you mean \@currenvir ing}}
     {\advi@global \edef \advi@bgcolor
          { color="\csname \string \color@#1\endcsname"}%
      \advi@global \advi@bgactivetrue}}
+% Apparently, named color may start with white space. 
+% \def \advi@nospace@tmp #1#2\relax {\def \advi@tmp {#1#2}}
 \def \advi@setbg@undeclared[#1]#2\relax{%
   \@ifundefined{color@#1}%
     {\c@lor@error{model `#1'}}%
     {\csname color@#1\endcsname\advi@tmp {#2}%
+%     \expandafter \advi@nospace@tmp \advi@tmp\relax
      \advi@global \edef \advi@bgcolor{ color="\advi@tmp"}%
+     \Meaning \advi@tmp
      \advi@global \advi@bgactivetrue}}
 
 \define@key {advi@bg}{color}[]{\advi@setbgcolor{#1}}

@@ -266,13 +266,13 @@ following: {\tt difference}, {\tt none}
 {\Huge Alpha channel}
 \vfill
 In this page, the background is filled with an image for which we specify an alpha
-value of less than 1.\\
+value of less than 1.\\ 
 Notice that this effect is nice, but expensive to realise.
 
 Here is the command used to obtain it:
 
 \begin{center}
-{\tt \ttadvibg\{alpha=0.25,image="dojoji.gif"\}}
+{\tt \char`\\advibg\{alpha=0.25,image="dojoji.gif"\}}
 \end{center}
 \advibg{alpha=0.25,image="dojoji.gif"}
 \vfill
@@ -287,11 +287,12 @@ in {\tt difference} mode with the image which is scaled to fit the available are
 Here is the command used to obtain this effect:
 
 \begin{center}
-{\tt \ttadvibg\{color=[named]{BlueViolet},alpha=0.1,blend=difference,
+{\tt \char`\\advibg\{color=[named]\{BlueViolet\},alpha=0.1,blend=difference,
  image="dojoji.gif"\}}
 \end{center}
-\advibg{color=[named]{BlueViolet},alpha=0.1,blend=difference,image="dojoji.gif"}
+\advibg{color=[named]{Blue},alpha=0.1,blend=difference,image="dojoji.gif"} 
 \vfill
+
 
 \Newpage
 
@@ -299,6 +300,8 @@ Here is the command used to obtain this effect:
 
 {\color{white}
 \advifooter\adviheader
+
+
 
 \section{Reverse video effect}
 
