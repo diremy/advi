@@ -885,7 +885,8 @@ let open_dev geom =
   GraphicsY11.display_mode !Options.global_display_mode;
   Graphics.set_window_title !title;
   color := !default_fgcolor;
-  opened := true;;
+  opened := true;
+  !size_x, !size_y;;
 
 let close_dev () =
   if !opened then begin

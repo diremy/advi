@@ -262,7 +262,8 @@ val display_mode : bool -> unit;;
 (** Same as [Graphics.display_mode] but according to [global_display_mode] *)
 
 val point_color : int -> int -> color;;
-(** As [point_color] but according to values of [global_display_mode] *)
+(** As [point_color] but according to values of [global_display_mode]
+Coordinates should be inside the limit. *)
 
 val only_on_screen : ('a -> 'b) -> 'a -> 'b;;
 (** [on_screen_only f arg] performs [f arg] on the screen memory only,

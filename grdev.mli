@@ -62,7 +62,7 @@ module Symbol :
 
 (* Device configuration *)
 
-val open_dev : string -> unit;;
+val open_dev : string -> int * int;;
 val close_dev : unit -> unit;;
 val clear_dev : unit -> unit;;
 val set_bbox : (int * int * int * int) option -> unit;;

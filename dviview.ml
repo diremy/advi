@@ -179,21 +179,16 @@ let set_hmargin d = attr.hmargin <- normalize d;;
 let set_vmargin d = attr.vmargin <- normalize d;;
 
 (*** Initialization ***)
-let init filename =
-  let dvi =
-    try Dvi.load filename
-    with
-    | Sys_error _ -> raise (Error ("cannot open `" ^ filename ^ "'"))
-    | Dvi.Error s -> raise (Error (filename ^ ": " ^ s))
-    | _ -> raise (Error ("error while loading `" ^ filename ^ "'")) in
-  let cdvi = Driver.cook_dvi dvi
-  and dvi_res = !dpi_resolution
+let init_geometry all st =
+  let dvi = st.dvi in
+  let dvi_res = !dpi_resolution
   and mag = float dvi.Dvi.preamble.Dvi.pre_mag /. 1000.0 in
   let w_sp = dvi.Dvi.postamble.Dvi.post_width
   and h_sp = dvi.Dvi.postamble.Dvi.post_height in
   let w_in = mag *. ldexp (float w_sp /. dvi_res) (-16)
   and h_in = mag *. ldexp (float h_sp /. dvi_res) (-16) in
-  let wdpi =
+
+  let wdpi = 
     match attr.hmargin with
     | Px n -> float (attr.geom.Ageometry.width - 2 * n) /. w_in
     | In f -> float attr.geom.Ageometry.width /. (w_in +. 2.0 *. f)
@@ -219,27 +214,48 @@ let init filename =
       (min attr.geom.Ageometry.width sx, min attr.geom.Ageometry.height sy)
     end else
       (attr.geom.Ageometry.width, attr.geom.Ageometry.height) in
-  attr.geom.Ageometry.width <- size_x;
-  attr.geom.Ageometry.height <- size_y;
-  let orig_x = (size_x - width) / 2
-  and orig_y = (size_y - height) / 2 in
+  if all then
+    begin
+      let orig_x = (size_x - width) / 2
+      and orig_y = (size_y - height) / 2 in
+      st.base_dpi <- base_dpi;
+      st.size_x <- size_x;
+      st.size_y <- size_y;
+      st.orig_x <- orig_x;
+      st.orig_y <- orig_y;
+    end;
+  st.dvi_width <- width;
+  st.dvi_height <- height;
+;;
+
+let init filename =
+  let dvi =
+    try Dvi.load filename
+    with
+    | Sys_error _ -> raise (Error ("cannot open `" ^ filename ^ "'"))
+    | Dvi.Error s -> raise (Error (filename ^ ": " ^ s))
+    | _ -> raise (Error ("error while loading `" ^ filename ^ "'")) in
+  let cdvi = Driver.cook_dvi dvi in
+  let int = 0 in
+  let float = 0. in
   let last_modified =
     try (Unix.stat filename).Unix.st_mtime
     with _ -> 0.0 in
   Options.dops := !Options.pson;
+  let npages =  Array.length dvi.Dvi.pages in
   let st =
     let npages = Array.length dvi.Dvi.pages in
     { filename = filename;
       dvi = dvi;
       cdvi = cdvi;
-      num_pages = npages;
-      base_dpi = base_dpi;
-      dvi_width = width;
-      dvi_height = height;
-      size_x = size_x;
-      size_y = size_y;
-      orig_x = orig_x;
-      orig_y = orig_y;
+      num_pages =  npages;
+      base_dpi = float;
+      dvi_width = int;
+      dvi_height = int;
+      size_x = int;
+      size_y = int;
+      orig_x = int;
+      orig_y = int;
       ratio = 1.0;
       page_stack = [];
       page_marks = [];
@@ -257,60 +273,18 @@ let init filename =
       num = 0;
       next_num = 0;
     } in
+  init_geometry true st;
+  attr.geom.Ageometry.width <- st.size_x;
+  attr.geom.Ageometry.height <- st.size_y;
   st;;
 
 let set_bbox st =
   Grdev.set_bbox (Some (st.orig_x, st.orig_y, st.dvi_width, st.dvi_height));;
 
-let update_dvi_size init ?dx ?dy st =
-  let dvi_res = !dpi_resolution
-  and mag = float st.dvi.Dvi.preamble.Dvi.pre_mag /. 1000.0
-  and w_sp = st.dvi.Dvi.postamble.Dvi.post_width
-  and h_sp = st.dvi.Dvi.postamble.Dvi.post_height in
-  let w_in = mag *. ldexp (float w_sp /. dvi_res) (-16)
-  and h_in = mag *. ldexp (float h_sp /. dvi_res) (-16) in
-
-  if init then
-    begin
-      let wdpi =
-        match attr.hmargin with
-        | Px n -> float (attr.geom.Ageometry.width - 2 * n) /. w_in
-        | In f -> float attr.geom.Ageometry.width /. (w_in +. 2.0 *. f)
-        | _ -> assert false
-      and hdpi =
-        match attr.vmargin with
-        | Px n -> float (attr.geom.Ageometry.height - 2 * n) /. h_in
-        | In f -> float attr.geom.Ageometry.height /. (h_in +. 2.0 *. f)
-        | _ -> assert false in
-      let base_dpi = if !fullwidth then wdpi else min wdpi hdpi in
-      let width = int_of_float (base_dpi *. w_in)
-      and height = int_of_float (base_dpi *. h_in) in
-      let (size_x, size_y) =
-        if attr.crop then begin
-          let sx = match attr.hmargin with
-          | Px n -> width + 2 * n
-          | In f -> width + int_of_float (base_dpi *. 2.0 *. f)
-          | _ -> assert false
-          and sy = match attr.vmargin with
-          | Px n -> height + 2 * n
-          | In f -> height + int_of_float (base_dpi *. 2.0 *. f)
-          | _ -> assert false in
-          (sx, sy)
-        end else
-          (attr.geom.Ageometry.width, attr.geom.Ageometry.height) in
-      (*
-      attr.geom.width <- size_x;
-      attr.geom.height <- size_y;
-      *)
-      st.base_dpi <- base_dpi;
-      st.size_x <- size_x;
-      st.size_y <- size_y;
-      let orig_x, orig_y = (size_x - width) / 2,  (size_y - height) / 2 in
-      st.orig_x <- begin match dx with None -> orig_x | Some z -> z end;
-      st.orig_y <- begin match dy with None -> orig_y | Some z -> z end;
-    end;
-  st.dvi_width <- int_of_float (st.base_dpi *. w_in *. st.ratio);
-  st.dvi_height <- int_of_float (st.base_dpi *. h_in *. st.ratio);
+let update_dvi_size all ?dx ?dy st =
+  init_geometry all st;
+  begin match dx with None -> () | Some z -> st.orig_x <- z end;
+  begin match dy with None -> () | Some z -> st.orig_y <- z end;
   set_bbox st;;
 
 (* incremental drawing *)
@@ -700,21 +674,29 @@ let scale n st =
   let factor =
     if n > 0 then !scale_step ** float n
     else  (1. /. !scale_step) ** float (0 - n) in
-  if !autoresize then begin
-     let scale x = int_of_float (float x *. factor) in
-     attr.geom.Ageometry.width <- scale st.size_x;
-     attr.geom.Ageometry.height <- scale st.size_y;
-     Grdev.close_dev ();
-     Grdev.open_dev (Printf.sprintf " " ^ Ageometry.to_string attr.geom);
-  end else begin
-     let new_ratio = factor *. st.ratio in
-     if new_ratio >= 0.02 && new_ratio < 50.0 then begin
-        st.ratio <- new_ratio;
-        let (cx, cy) = (st.size_x / 2, st.size_y / 2) in
-        st.orig_x <- int_of_float (float (st.orig_x - cx) *. factor) + cx;
-        st.orig_y <- int_of_float (float (st.orig_y - cy) *. factor) + cy;
-     end;
-  end;
+    if !autoresize then
+      begin
+        let scale x = int_of_float (float x *. factor) in
+        attr.geom.Ageometry.width <- scale st.size_x;
+        attr.geom.Ageometry.height <- scale st.size_y;
+        Grdev.close_dev ();
+        let x, y = 
+          Grdev.open_dev (Printf.sprintf " " ^ Ageometry.to_string attr.geom)
+        in
+        attr.geom.Ageometry.width <- x;
+        attr.geom.Ageometry.height <- y;
+      end
+    else
+      begin
+        let new_ratio = factor *. st.ratio in
+        if new_ratio >= 0.02 && new_ratio < 50.0 then
+          begin
+            st.ratio <- new_ratio;
+            let (cx, cy) = (st.size_x / 2, st.size_y / 2) in
+            st.orig_x <- int_of_float (float (st.orig_x - cx) *. factor) + cx;
+            st.orig_y <- int_of_float (float (st.orig_y - cy) *. factor) + cy;
+          end;
+      end;
   update_dvi_size true st;
   redraw st;;
 
@@ -976,7 +958,10 @@ let main_loop filename =
   else
     begin
       Grdev.set_title ("Advi: " ^ Filename.basename filename);
-      Grdev.open_dev (" " ^ Ageometry.to_string attr.geom);
+      let x, y = Grdev.open_dev (" " ^ Ageometry.to_string attr.geom) in
+      attr.geom.Ageometry.width <- x;
+      attr.geom.Ageometry.height <- y;
+      update_dvi_size true st;
       set_bbox st;
       if st.page_number > 0 && !Options.dops then
         Driver.scan_special_pages st.cdvi st.page_number
