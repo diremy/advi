@@ -44,4 +44,7 @@ clean:
 test_subwindow:
 	ocamlc -custom -I .. unix.cma graphics.cma -ccopt -L.. ../grY11.o ../events.o ../graphicsY11.cmo test_subwindow.ml 
 
+trigo.tex: trigo.pic
+	gpic -t trigo.pic > trigo.tex
+
 .SUFFIXES: .tex .sty .dvi .eps .advi
