@@ -12,20 +12,20 @@
 \usepackage {advi-annot}
 \usepackage {bubble}
 
-\title {{\ActiveDVI} manual\\
-\includegraphics[width=\textwidth]{../tex/bar.jpg.eps}}
+\title {{\ActiveDVI} \\ reference manual}
+%\includegraphics[width=\textwidth]{../tex/bar.jpg.eps}}
 
 \author {Didier R{\'{e}}my and Pierre Weis}
 
 \def\ActiveDVI{\textbf{Active-DVI}}
 
-\def\adviheader{\noindent
-{\bf\Large \ActiveDVI}\\
-\includegraphics[width=\textwidth]{../tex/bar.jpg.eps}\par}
+% \def\adviheader{\noindent
+% {\bf\Large \ActiveDVI}\\
+% \includegraphics[width=\textwidth]{../tex/bar.jpg.eps}\par}
 
-%\let \Newpage \newpage
-%\def \newpage {\Newpage \adviheader}
-\def \Newpage {\newpage \adviheader}
+% %\let \Newpage \newpage
+% %\def \newpage {\Newpage \adviheader}
+% \def \Newpage {\newpage \adviheader}
 
 \begin{document}
 
@@ -59,11 +59,16 @@ at \verb"advi@pauillac.inria.fr".
 
 \end{abstract}
 
-\Newpage
+\vfill 
+\section* {Acknowledgements}
 
+- List all implementors?
+
+- Special thank to Alexandre Miquel.
+
+\clearpage
 \tableofcontents
-
-\Newpage
+\clearpage
 
 \section {Installation}
 
@@ -78,13 +83,45 @@ advi -help
 
 \subsection {Cut and paste}
 
+Text can copied from the  {\ActiveDVI} previewer to an another application. 
+However, this currently uses {\tt XCutbuffer} than the {\\t XSelection}
+mechanism. 
+\begin {itemize}
+\item
+Shift middle-click copies the current word. 
+\item
+Shift right-click and drag copies the specified region. 
+\end {itemize}
+Moreove, Shift left-click dump an ascii representation of click 
+in the source file. This expects the dvi to be instrumented with line
+numbers of the form
+\begin{quote}
+\doctt {line:} \docid {line} \docid {file}
+\end{quote}
+where \docid {line} and \docid {file} are the current source line and
+current source file.
+
+The position is exported in ascii in the form
+\begin{quote}
+\verb"#line "\docid{before}, \docid{after} 
+\doctt {<<}\docid{prefix}\doctt{>><<}\docid{suffix}\doctt{>>}
+\docid{file} 
+\end{quote}
+where \docid {before} and  \docid {after} are the enclosing line numbers, 
+\docid{prefix}\docid{suffix} are the word constituant surrounding the
+position, and  file is the current file. 
+
+Line numbers default to $0$ when not found. Note that line numbers may be
+inconsistent if they \docdef \special-line commands have not been inserted
+close enough to the position.
+
+
 \subsection {Hyperrefs}
 
 \subsection {Moving around}
 
 See the key bindings in the appendix.
 
-\Newpage
 
 \section {The {\tt advi.sty} \LaTeX~package}
 
@@ -550,8 +587,6 @@ appears withing an active anchor.
 
 %Annotation location can also be invisible \advi{C}{\tt{ }}instead of visible.
 
-\Newpage
-
 \appendix
 
 \section {Known bugs}
@@ -574,7 +609,7 @@ correctly rendered.
 Unfortunately, some releases of version 6.5x also carry a small but
 fatal bug for \ActiveDVI, that will hopefully be fixed in future
 releases. A workaround is available here
-\url{http://cristal.pauillac.inria.fr/~remy/ghostscript/}.
+\url{http://cristal.inria.fr/~remy/ghostscript/}.
 
 \subsection*{Inlined postscript}
 
