@@ -1,4 +1,4 @@
-let debug = ref true
+let debug = ref false
 let debugs s = if !debug then prerr_endline s
 
 type ratiopts =
