@@ -37,7 +37,7 @@ MODULES	  = config misc input symbol search \
 	    units dimension \
 	    gs transimpl grdev dvi driver dviview main
 LIBRARIES = graphics unix str $(CAMLIMAGESLIBS)
-CLIBS	  = unix graphics
+CLIBS	  = graphics unix str
 
 COBJS	  = grY11.o
 
