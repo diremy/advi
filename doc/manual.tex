@@ -240,8 +240,12 @@ explicitly when the table of context is hand-made.
 \item
 If no table of content markers are found, then {\ActiveDVI} will
 compute thumbnails, {\em i.e.} will present pack several pages at a smaller 
-scale on a single page. The default scale of 5 will fit 25 thumbnails on a
-single page. This can be changed with the option \doctt{-thumbnail\_scale}. 
+scale on a single page. {\ActiveDVI} will calculate the scale needed to 
+fit all thumbnails on a single page, and will use it if it is 
+less or equal to a maximal value, or take the maximal value otherwise
+and use several pages. The default maximal scale value is 5, so that
+25 thumbnails can fit on the same page. This value can be changed with the
+option \doctt{-thumbnail\_scale}.  
 
 By default, thumbnails are made for all pages. However, thumbnail pages can
 be defined explicitly with an hypertarget whose anchor is of the form

@@ -106,7 +106,7 @@ type attr = {
 
 (*** The view state ***)
 type mode = Selection | Control;;
-type toc = Page of int | Thumbnails of (int * Graphics.image) array
+type toc = Page of int | Thumbnails of int * (int * Graphics.image) array
 type state = {
     (* DVI attributes *)
     filename : string;
@@ -460,11 +460,11 @@ let without_pauses f x =
   try pauses := false; let v = f x in pauses := p; v
   with x -> pauses := p; raise x
 
-let thumbnail_ratio = ref 5;;
+let thumbnail_limit = ref 5;;
 let _ =
   Options.add
     "-thumbnail_scale"
-    (Arg.Int (fun i -> thumbnail_ratio := i))
+    (Arg.Int (fun i -> thumbnail_limit := i))
     "INT\tSet the number of thumbname per line and column to INT";;
 
 let xrefs st =
@@ -492,9 +492,11 @@ let make_thumbnails st  =
           [] -> []
         | x :: l -> ucons x (unique l) in 
       Array.of_list (unique (List.sort compare xnails)) in
-  let r = !thumbnail_ratio in
+  let num_nails = Array.length page_nails in
+  let r_fit = int_of_float (ceil (sqrt (float num_nails))) in
+  let r = min r_fit !thumbnail_limit in
   let dx = st.size_x / r and dy = st.size_y / r in
-  let pages = st.num_pages -1 / r / r in
+  let pages = num_nails -1 / r / r in
   let ist =
     { st with
       (* size_x = dx; size_y = dy; *)
@@ -525,7 +527,7 @@ let make_thumbnails st  =
       (fun roll ->
         let first = roll * r * r in
         Thumbnails
-          (Array.sub all first (min (r * r) (Array.length all - first)))) in
+          (r, Array.sub all first (min (r * r) (Array.length all - first)))) in
   st.toc <- Some split;
 ;;
 
@@ -538,6 +540,19 @@ let make_toc st =
   with
     Not_found -> make_thumbnails st
 
+let show_thumbnails st r page =
+  let dx = st.size_x/r and dy = st.size_y/r in
+  let pages = Array.length page / r / r in
+  Array.iteri (fun p' (p, img) -> 
+    let x = st.size_x * (p' mod r) / r in
+    let y = st.size_y * (p' / r) / r in
+    Graphics.draw_image img x (st.size_y - y -dy);
+    Grdev.H.area
+      (Grdev.H.Href ("#/page." ^ string_of_int (p+1))) x
+      (st.size_y - y - dy) dx dy) page;
+  (* to force the page under thumbnails to be redrawn *)
+  st.aborted <- true;
+;;
 
 let show_toc st =
   if st.toc = None then make_toc st;
@@ -546,9 +561,6 @@ let show_toc st =
   match st.toc with
     None -> ()
   | Some rolls -> 
-      let r = !thumbnail_ratio in
-      let dx = st.size_x/r and dy = st.size_y/r in
-      let pages = st.page_number / r / r in
       let n = Array.length rolls in
       if st.num = n then redraw st
       else
@@ -556,16 +568,9 @@ let show_toc st =
         st.next_num <- succ st.num;
         begin match rolls.(roll) with
           Page p -> redraw { st with page_number = p }
-        | Thumbnails page -> 
-          Array.iteri (fun p' (p, img) -> 
-            let x = st.size_x * (p' mod r) / r in
-            let y = st.size_y * (p' / r) / r in
-            Graphics.draw_image img x (st.size_y - y -dy);
-            Grdev.H.area
-              (Grdev.H.Href ("#/page." ^ string_of_int (p+1))) x
-              (st.size_y - y - dy) dx dy) page;
+        | Thumbnails (r, page) -> show_thumbnails st r page
         end;
-      synchronize st;
+        synchronize st;
 ;;
         
 
@@ -738,7 +743,9 @@ let pop_page b n st =
         else pop (pred n) h t t in
   let npage, stack = pop n st.page_number st.page_stack st.page_stack in
   st.page_stack <- stack;
-  goto_page (if npage > 0 then npage else -1 - npage) st;;
+  let new_page = if npage > 0 then npage else -1 - npage in
+  if new_page = st.page_number then redraw st
+  else goto_page new_page st;;
 
 let mark_page st =
   let marks = 
@@ -762,7 +769,7 @@ let next_slice st =
 
 
 let goto_href link st = (* goto page of hyperref h *)
-  let npage =
+  let p =
     if Misc.has_prefix "#" link then
       let tag = Misc.get_suffix "#" link in
       find_xref tag st.page_number st
@@ -771,7 +778,7 @@ let goto_href link st = (* goto page of hyperref h *)
         exec_xref link;
         st.page_number
       end in
-  push_page true npage st;
+  push_page true p st;
   Grdev.H.flashlight (Grdev.H.Name link);;
 
 let goto_pageref n st =(* Go to hyperpage n if possible or page n otherwise *)
