@@ -273,11 +273,9 @@ let cmmi_encoding font code =
         "\\lambda"; "\\mu"; "\\nu"; "\\xi"; "\\pi";
         "\\rho"; "\\sigma"; "\\tau"; "\\upsilon"; "\\phi"; "\\chi"; "\\psi";
         "\\omega"; "\\varepsilon"; "\\vartheta"; "\\varpi"; "\\varrho";
-        "\\varsigma"; "\\varphi" ]
-    in
-    begin try List.nth alph (code - 11) with
-      Failure "nth" -> "[**unknown greek letter**]"
-    end
+        "\\varsigma"; "\\varphi" ] in
+    try List.nth alph (code - 11) with
+    | Failure "nth" -> "[**unknown greek letter**]"
   else default_encoding font code;;
 
 (* Math font. *)

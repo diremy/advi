@@ -69,7 +69,8 @@ let parse s =
     let xoffset = parse_offset () in
     let yoffset = parse_offset () in
     { width = width; height = height; xoffset = xoffset; yoffset = yoffset }
-    with Failure _ -> invalid_arg "Geometry.parse";;
+    with
+    | Failure _ -> invalid_arg "Geometry.parse";;
 
 let to_string g =
   let w = g.width

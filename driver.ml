@@ -421,7 +421,8 @@ let line_of_special s k =
         let l = int_of_string line in
         let f = match rest with | file :: _ -> Some file | _ -> None in
         (l, f)
-      with Failure _ -> raise (Ill_formed_special s)
+      with
+      | Failure _ -> raise (Ill_formed_special s)
       end
   | _ -> raise (Ill_formed_special s);;
 
@@ -443,7 +444,7 @@ let color_special st s =
 let parse_float s =
  try float_of_string s with
  | _ ->
-    failwith (Printf.sprintf "advi: cannot read a floating number in %S" s);;
+   failwith (Printf.sprintf "advi: cannot read a floating number in %S" s);;
 
 let parse_quoted_float s =
  parse_float (unquote s);;
@@ -488,7 +489,7 @@ let parse_bool s =
   match String.lowercase s with
   | "true" -> true
   | "false" -> false
-  | _ -> raise (Failure "invalid boolean");;
+  | _ -> failwith "invalid boolean";;
 
 let epstransparent_special st s =
   match split_string s 0 with
@@ -523,7 +524,7 @@ let psfile_special st s =
     let records = get_records s in
     let file =
       try unquote (List.assoc "psfile" records)
-      with Not_found -> raise (Failure "psfile: invalid special") in
+      with Not_found -> failwith "psfile: invalid special" in
     Misc.debug_endline ("PSFILE=" ^ file);
     (* bbox *)
     let llx, lly, urx, ury as bbox =
@@ -536,7 +537,7 @@ let psfile_special st s =
           (Printf.sprintf "BBOX=%d %d %d %d" llx lly urx ury);
         llx, lly, urx, ury
       with
-      | _ -> raise (Failure "psfile: no bbox") in
+      | _ -> failwith "psfile: no bbox" in
     let rwi = try int_of_string (List.assoc "rwi" records) with _ -> 0 in
     let rhi = try int_of_string (List.assoc "rhi" records) with _ -> 0 in
 
@@ -618,13 +619,13 @@ let kill_embed_special kill_fun st s =
   let records = get_records s in
   let app_name =
     try unquote (List.assoc "name" records)
-    with Not_found -> raise (Failure ("No command to kill in " ^ s)) in
+    with Not_found -> failwith ("No command to kill in " ^ s) in
   let signal = List.assoc "signal" records in
   (* prerr_endline (Printf.sprintf "Signal is ``%s''" signal); *)
   let sig_val =
     try int_of_signal (unquote signal) with
-    | Not_found -> raise (Failure ("No signal to kill command in " ^ s))
-    | Failure _ -> raise (Failure ("Cannot understand signal in " ^ s))  in
+    | Not_found -> failwith ("No signal to kill command in " ^ s)
+    | Failure _ -> failwith ("Cannot understand signal in " ^ s)  in
   Misc.debug_endline
     (Printf.sprintf "Killing %s, in special %s." app_name s);
   kill_fun sig_val app_name;;
@@ -639,9 +640,9 @@ let show_hide_embed_special show_fun st s =
   (* advi: [un]map[all]embed name=? *)
   let records = get_records s in
   let app_name =
-    try unquote (List.assoc "name" records)
-    with Not_found ->
-      raise (Failure ("No application, hence no window to operate in " ^ s)) in
+    try unquote (List.assoc "name" records) with
+    | Not_found ->
+      failwith ("No application, hence no window to operate in " ^ s) in
   Misc.debug_endline
     (Printf.sprintf "Showing or hiding %s, in special %s." app_name s);
   show_fun app_name;;
@@ -666,7 +667,7 @@ let app_mode_of_string = function
   | "sticky" -> Embed.Sticky
   | "persistent" -> Embed.Persistent
   | "ephemeral" -> Embed.Ephemeral
-  | s -> raise (Failure ("Unknown embedding mode " ^ s));;
+  | s -> failwith ("Unknown embedding mode " ^ s);;
 
 (* Parsing embedding applications commands and calling embed_app. *)
 let embed_special st s =
@@ -674,8 +675,7 @@ let embed_special st s =
   let records = get_records s in
   let app_mode =
     try app_mode_of_string (List.assoc "mode" records) with
-    | Not_found ->
-        raise (Failure ("embed: no embedding mode in special " ^ s)) in
+    | Not_found -> failwith ("embed: no embedding mode in special " ^ s) in
   let app_name =
     try unquote (List.assoc "name" records) with
     | Not_found -> "" in
@@ -683,7 +683,7 @@ let embed_special st s =
     try unquote (List.assoc "command" records) with
     | Not_found ->
         if app_mode = Embed.Fake then "" else
-        raise (Failure ("embed: no command to embed in special " ^ s)) in
+        failwith ("embed: no command to embed in special " ^ s) in
   (* prerr_endline ("embed command=" ^ command); *)
   let get_dim dim records =
     match Dimension.normalize
@@ -698,7 +698,7 @@ let embed_special st s =
         let height = get_dim "height" records in
         width, height
       with
-      | _ -> raise (Failure ("embed: no size in special " ^ s)) in
+      | _ -> failwith ("embed: no size in special " ^ s) in
     let dpi = ldexp (float st.sdpi) (-16) in
     let width_pixel = truncate (w *. dpi) in
     let height_pixel = truncate (h *. dpi) in
@@ -718,7 +718,7 @@ let scan_embed_special st s =
   let command =
     try unquote (List.assoc "command" records) with
     | Not_found ->
-        raise (Failure ("advi embed: no command to embed in special " ^ s)) in
+      failwith ("advi embed: no command to embed in special " ^ s) in
   Launch.add_white_run_command command;;
 
 let parse_transition dir mode record =
@@ -812,7 +812,7 @@ let transbox_save_special st s =
       and y = st.y_origin + Misc.round (st.conv *. float st.v) + depth_pixel
       in
       Dev.transbox_save x y width_pixel (height_pixel + depth_pixel)
-  | _ -> raise (Failure "advi: transbox save special failed");;
+  | _ -> failwith "advi: transbox save special failed";;
 
 let transbox_go_special st s =
   match split_string s 0 with
@@ -820,7 +820,7 @@ let transbox_go_special st s =
       let record = split_record (String.concat " " args) in
       let trans = parse_transition None mode record in
       Dev.transbox_go trans
-  | _ -> raise (Failure "advi: transbox go special failed");;
+  | _ -> failwith "advi: transbox go special failed";;
 
 exception Ignore;;
 
@@ -926,8 +926,8 @@ let proc_special st s =
     match v with
     | "start" ->
         let procname =
-          try unquote (List.assoc "proc" records)
-          with Not_found -> raise (Failure "proc: invalid special") in
+          try unquote (List.assoc "proc" records) with
+          | Not_found -> failwith "proc: invalid special" in
         visible_stack := !visible :: !visible_stack;
         visible := List.mem_assoc "play" records;
         if !playing = 0 then
@@ -967,8 +967,8 @@ let proc_special st s =
   with
   | Not_found ->
       let procname =
-        try unquote (List.assoc "proc" records)
-        with Not_found -> raise (Failure "proc: invalid special") in
+        try unquote (List.assoc "proc" records) with
+        | Not_found -> failwith "proc: invalid special" in
       try
         ignore (List.assoc "play" records);
         if not (is_recording ()) then begin
@@ -1003,7 +1003,7 @@ let wait_special st s =
   let second =
     try parse_float (List.assoc "sec" records) with
     | Not_found | Failure _ ->
-        raise (Failure (Printf.sprintf "wait: invalid special: [ %s ]" s)) in
+        failwith (Printf.sprintf "wait: invalid special: [ %s ]" s) in
   (* Wait is treated like Pause, as an exception *)
   if !visible then raise (Wait second);
   st.checkpoint <- 0;;
@@ -1346,8 +1346,7 @@ let save_page_image_special st = Shot.save_page_image ();;
 
 let get_file_name records =
   try unquote (List.assoc "file" records) with
-  | Not_found ->
-      raise (Failure "advi_save_page: invalid special (no file name)");;
+  | Not_found -> failwith "advi_save_page: invalid special (no file name)";;
 
 let save_page_image_file_special st s =
   let records = get_records s in
@@ -1362,7 +1361,7 @@ let save_page_area_image_special st s =
     and h = int_of_string (List.assoc "h" records) in
     Shot.save_page_area_image x y w h with
   | Not_found | Failure _ ->
-     failwith (Printf.sprintf "advi_save_page: invalid special %s" s);;
+    failwith (Printf.sprintf "advi_save_page: invalid special %s" s);;
 
 let save_page_area_image_file_special st s =
   let records = get_records s in
@@ -1374,7 +1373,7 @@ let save_page_area_image_file_special st s =
     and h = int_of_string (List.assoc "h" records) in
     Shot.save_page_area_image_file fname x y w h with
   | Not_found | Failure _ ->
-     failwith (Printf.sprintf "advi_save_page_area: invalid special %s" s);;
+    failwith (Printf.sprintf "advi_save_page_area: invalid special %s" s);;
 
 let push_keys_special st s =
   Misc.debug_endline (Printf.sprintf "push_keys_special %S" s);

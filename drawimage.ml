@@ -208,8 +208,7 @@ let cache_load file =
   let load ic =
     let s = String.create (String.length cache_key) in
     ignore (input ic s 0 (String.length cache_key));
-    if s <> cache_key then
-      raise (Failure (file ^ " has no proper header"));
+    if s <> cache_key then failwith (file ^ " has no proper header");
     let rgba = input_value ic in (* bool *)
     let width = input_value ic in
     let height = input_value ic in
@@ -374,8 +373,7 @@ let resize_and_make_transparent image whitetransp ratiopt (ow, oh) =
     | Index16 i -> Rgba32 (Index16.to_rgba32 i)
     | Rgb24 i -> image
     | Rgba32 i -> image
-    | _ -> raise (Failure "color model is not supported")
-  in
+    | _ -> failwith "color model is not supported" in
   (* Adding transparency if necessary *)
   let white_rgb = {r = 255; g = 255; b = 255} in
   let diff = 15 * 15 in
@@ -553,5 +551,4 @@ let f file whitetransp alpha blend psbbox ratiopt antialias (w, h) (x0, y0) =
   | Unix.Unix_error (e, s1, s2) ->
       Misc.warning (Printf.sprintf "%s %s: %s" s1 s2 (Unix.error_message e))
   | Failure s -> Misc.warning s
-  | e -> Misc.warning (Printexc.to_string e)
-;;
+  | e -> Misc.warning (Printexc.to_string e);;
