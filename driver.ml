@@ -735,6 +735,20 @@ let setup_bkgd status =
   Dev.blit_bkgd_data Dev.bkgd_data status.Dvi.bkgd_prefs
   (* recover modified preferences               *);;
 
+
+let ratios_alist = [
+  ("auto",   Drawimage.ScaleAuto);
+  ("center", Drawimage.ScaleCenter);
+  ("top", Drawimage.ScaleTop);
+  ("bottom", Drawimage.ScaleBottom);
+  ("left", Drawimage.ScaleLeft);
+  ("right", Drawimage.ScaleRight);
+  ("topleft", Drawimage.ScaleTopLeft);
+  ("bottomright", Drawimage.ScaleBottomRight);
+  ("topright", Drawimage.ScaleTopRight);
+  ("bottomleft", Drawimage.ScaleBottomLeft);
+] ;;
+
 let bkgd_alist = [
   ("color", fun s -> fun st ->
      let c = Dvicolor.parse_color_args (split_string (unquote s) 0)
@@ -753,6 +767,9 @@ let bkgd_alist = [
   ("blend", fun s -> fun st ->
      let b = parse_blend (unquote s) in
      [Dev.BgBlend b]);
+  ("fit", fun s -> fun st ->
+     let f = try List.assoc (unquote s) ratios_alist with _ -> Drawimage.ScaleAuto in
+     [Dev.BgRatio f]);
   (***RDC: is this code ---/\ doing the rest of data we want to see ? ***)
 ];;
 

@@ -1,8 +1,15 @@
 type ratiopts =
-   | ScaleX        (* scale x coords, but keep original Ratio *)
-   | ScaleY        (* scale y coords, but keep original Ratio *)
-   | Original      (* respect original size                   *)
-   | FreeScale     (* scale to fit requested area             *)
+   | ScaleOriginal    (* leave the image at its original native size  *)
+   | ScaleAuto        (* scale to fit requested area                  *)
+   | ScaleCenter      (* scale as needed to cover the image, keep original Ratio and center *)
+   | ScaleTop         (* scale x coords to align to top of the screen,    keep original Ratio  *)
+   | ScaleBottom      (* scale x coords to align to bottom of the screen, keep original Ratio  *)
+   | ScaleLeft        (* scale y coords to align to left of the screen,   keep original Ratio  *)
+   | ScaleRight       (* scale y coords to align to right of the screen,  keep original Ratio  *)
+   | ScaleTopLeft
+   | ScaleBottomLeft
+   | ScaleTopRight
+   | ScaleBottomRight
 ;;
 
 val f : string -> bool -> float -> (int -> int -> int) option ->

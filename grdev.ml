@@ -337,7 +337,7 @@ Misc.set_option
 let default_bkgd_data () =
   { bgcolor = !default_bgcolor;
     bgimg = None;
-    bgratio = Drawimage.ScaleY;
+    bgratio = Drawimage.ScaleAuto;
     bgwhitetrans = false;
     bgalpha = 1.0;
     bgblend = Normal };;
@@ -372,13 +372,17 @@ type bgoption =
    | BgColor of color
    | BgImg of string
    | BgAlpha of float
-   | BgBlend of blend;;
+   | BgBlend of blend
+   | BgRatio of Drawimage.ratiopts
+;;
 
 let set_bg_option = function
   | BgColor c -> bkgd_data.bgcolor <- c
   | BgImg file -> bkgd_data.bgimg <- Some file
   | BgAlpha a -> bkgd_data.bgalpha <- a
-  | BgBlend b -> bkgd_data.bgblend <- b;;
+  | BgBlend b -> bkgd_data.bgblend <- b
+  | BgRatio f -> bkgd_data.bgratio <- f
+;;
 
 let set_bg_options l = List.iter set_bg_option l;;
 
@@ -592,7 +596,7 @@ let draw_ps file bbox (w, h) x0 y0 =
   and y = !size_y - y0 + h in
   try Drawimage.f file !epstransparent !alpha
       (try Some (blend_func !blend) with _ -> None)
-      (Some bbox) Drawimage.FreeScale (w, h) (x, y - h)
+      (Some bbox) Drawimage.ScaleAuto (w, h) (x, y - h)
   with
   | Not_found -> Misc.warning ("ps file " ^ file ^ " not found")
   | _ ->

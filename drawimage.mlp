@@ -2,11 +2,19 @@ let debug = ref false
 let debugs s = if !debug then prerr_endline s
 
 type ratiopts =
-   | ScaleX        (* scale x coords, but keep original Ratio *)
-   | ScaleY        (* scale y coords, but keep original Ratio *)
-   | Original      (* respect original size                   *)
-   | FreeScale     (* scale to fit requested area             *)
+   | ScaleOriginal    (* leave the image at its original native size  *)
+   | ScaleAuto        (* scale to fit requested area                  *)
+   | ScaleCenter      (* scale as needed to cover the image, keep original Ratio and center *)
+   | ScaleTop         (* scale x coords to align to top of the screen,    keep original Ratio  *)
+   | ScaleBottom      (* scale x coords to align to bottom of the screen, keep original Ratio  *)
+   | ScaleLeft        (* scale y coords to align to left of the screen,   keep original Ratio  *)
+   | ScaleRight       (* scale y coords to align to right of the screen,  keep original Ratio  *)
+   | ScaleTopLeft
+   | ScaleBottomLeft
+   | ScaleTopRight
+   | ScaleBottomRight
 ;;
+
 
 ifdef HAVE_CAMLIMAGES then
 
@@ -48,10 +56,17 @@ module M = struct
     in
     let ratiopt_str = 
       match ratiopt with
-      |	ScaleX -> "-x"
-      |	ScaleY -> "-y"
-      |	Original -> "-o"
-      |	FreeScale -> ""
+      |	ScaleAuto        -> "-a"
+      |	ScaleCenter      -> "-c"
+      |	ScaleTop         -> "-t"
+      |	ScaleLeft        -> "-l"
+      |	ScaleOriginal    -> "-o"
+      |	ScaleBottom      -> "-b"
+      |	ScaleRight       -> "-r"
+      |	ScaleTopLeft     -> "-tl"
+      |	ScaleBottomLeft  -> "-bl"
+      |	ScaleTopRight    -> "-tr"
+      |	ScaleBottomRight -> "-br"
     in
     Filename.concat Userfile.cache_dir
       (Printf.sprintf "%s%s-%dx%d%s%s%s"
@@ -177,10 +192,17 @@ module M = struct
     let iw,ih = Image.size image in
     let w,h =
       match ratiopt with
-      |	ScaleX -> w, Pervasives.truncate (float ih *. float w /. float iw)
-      |	ScaleY -> Pervasives.truncate (float iw *. float h /. float ih), h
-      |	Original -> iw, ih
-      |	FreeScale -> w, h
+      |	ScaleAuto        -> w, h
+      |	ScaleCenter      -> w,h
+      |	ScaleTop         -> w, Pervasives.truncate (float ih *. float w /. float iw)        
+      |	ScaleBottom      -> Pervasives.truncate (float iw *. float h /. float ih), h
+      |	ScaleLeft        -> w,h
+      |	ScaleRight       -> w,h
+      |	ScaleTopLeft     -> w,h
+      |	ScaleBottomLeft  -> w,h
+      |	ScaleTopRight    -> w,h
+      |	ScaleBottomRight -> w,h
+      |	ScaleOriginal -> iw, ih
     in
     let image' =
       match image with

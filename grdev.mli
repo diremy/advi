@@ -121,7 +121,9 @@ type bgoption =
    | BgColor of color
    | BgImg of string
    | BgAlpha of float
-   | BgBlend of blend;;
+   | BgBlend of blend
+   | BgRatio of Drawimage.ratiopts
+;;
 
 val set_bg_options : bgoption list -> unit;;
 
