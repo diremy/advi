@@ -23,7 +23,7 @@
 type busy =
    | Free | Busy | Pause | Disk | Question | Selection | Move
    | Resize | Resize_w | Resize_h | Resize_d
-   | Change_Keymap
+   | Change_Keymap | Pointer
 (** Different states of the computation. *)
 
 val set : busy -> unit;;
@@ -39,6 +39,14 @@ val restore_cursor : unit -> unit;;
 val temp_set : busy -> unit;;
 (** Temporary set: sets but does not record the given cursor. *)
 
+val with_cursor : busy -> (unit -> unit) -> unit -> unit;;
+
+(** [with_cursor b f x] Executes the given function [f] with [x] as
+ argument. During the evaluation of [f x] the cursor is set to the
+ one corresponding to state [b]; the initial cursor is set back after
+ the call to [f]. *)
+
 val busy_exec : (unit -> unit) -> unit -> unit;;
-(** Executes the given function [f] starting a timer
+(** [busy_exec f x] Executes the given function call [f x], starting a timer
  to position the [Busy.Busy] cursor if necessary. *)
+

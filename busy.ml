@@ -35,7 +35,7 @@ Options.add
 type busy =
    | Free | Busy | Pause | Disk | Question | Selection | Move
    | Resize | Resize_w | Resize_h | Resize_d
-   | Change_Keymap
+   | Change_Keymap | Pointer
 ;;
 
 let free_cursor = GraphicsY11.Cursor_left_ptr;;
@@ -50,6 +50,7 @@ let resize_cursor_w = GraphicsY11.Cursor_sb_right_arrow;;
 let resize_cursor_h = GraphicsY11.Cursor_sb_up_arrow;;
 let resize_cursor_d = GraphicsY11.Cursor_sb_down_arrow;;
 let change_keymap_cursor = GraphicsY11.Cursor_plus;;
+let pointer_cursor = GraphicsY11.Cursor_crosshair;;
 
 let set_cursor, restore_cursor, last_cursor =
   let last_cursor = ref free_cursor in
@@ -92,7 +93,8 @@ let set = function
   | Resize_w -> set_cursor resize_cursor_w
   | Resize_h -> set_cursor resize_cursor_h
   | Resize_d -> set_cursor resize_cursor_d
-  | Change_Keymap -> set_cursor change_keymap_cursor;;
+  | Change_Keymap -> set_cursor change_keymap_cursor
+  | Pointer -> set_cursor pointer_cursor;;
 
 let temp_set c =
   stop_busy ();
@@ -110,11 +112,14 @@ let temp_set c =
     | Resize_h -> resize_cursor_h
     | Resize_d -> resize_cursor_d
     | Change_Keymap -> change_keymap_cursor
-  in
+    | Pointer -> pointer_cursor in
   GraphicsY11.set_cursor c;;
 
-let busy_exec f () =
- let c = last_cursor () in
- set Busy;
- try f (); non_busy c with
- | x -> non_busy c; raise x;;
+let with_cursor c f () =
+ let c0 = last_cursor () in
+ set c;
+ try f (); non_busy c0 with
+ | x -> non_busy c0; raise x;;
+
+let busy_exec f = with_cursor Busy f;;
+
