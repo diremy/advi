@@ -517,6 +517,7 @@ let embed_special st s =
     width_pixel, height_pixel in
   let x = st.x_origin + int_of_float (st.conv *. float st.h)
   and y = st.y_origin + int_of_float (st.conv *. float st.v) in
+  prerr_endline (Printf.sprintf "x=%d y=%d" x y);
   if not (is_hidden ()) then
     Dev.embed_app command app_type app_name width_pixel height_pixel x y;;
 
