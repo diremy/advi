@@ -66,7 +66,7 @@ Options.add
   "-exec"
   (Arg.Unit
     (fun () ->
-      Misc.debug_endline "Setting policy to -exec";
+      Misc.warning "Setting policy to -exec";
       set_policy Exec))
   "\tExec mode: allow all external applications to be executed";;
 
@@ -74,7 +74,7 @@ Options.add
   "-safer"
   (Arg.Unit
     (fun () ->
-      Misc.debug_endline "Setting policy to -safer";
+      Misc.warning "Setting policy to -safer";
       set_policy Safer))
   "\tSafer mode: external applications are never launched";;
 
@@ -82,7 +82,7 @@ Options.add
   "-ask"
   (Arg.Unit
     (fun () ->
-      Misc.debug_endline "Setting policy to -ask";
+      Misc.warning "Setting policy to -ask";
       set_policy Ask))
   "\tAsk mode: ask confirmation before launching an external application";;
 
@@ -98,7 +98,7 @@ let cannot_execute_command command_invocation =
          command_invocation);;
 
 let ask_user command_invocation =
- Misc.debug_endline ("Do you want to launch " ^ command_invocation); 
+ Misc.warning ("Do you want to launch " ^ command_invocation); 
  false;;
 
 let execute_command command_invocation command_tokens =

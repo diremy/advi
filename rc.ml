@@ -130,7 +130,7 @@ let string_of_file fname =
 let rec next_char i lim s =
   if i >= lim then raise End_of_file else
   match s.[i] with
-  | ' ' | '\t' | '\n' -> next_char (i + 1) lim s
+  | ' ' | '\t' | '\n' | '\r' -> next_char (i + 1) lim s
   | '#' -> skip_comment (i + 1) lim s
   | c -> i
 
@@ -193,7 +193,7 @@ let argv_of_file fname = argv_of_string (string_of_file fname);;
 let parse_argv_push_current progname argv speclist anonfun errmsg =
  let curr = !current in
  try
-   current := 0;
+   current := -1;
    parse_args progname argv speclist anonfun errmsg;
    current := curr
  with x -> current := curr; raise x;;
@@ -206,7 +206,7 @@ let cautious_parse_file fname speclist anonfun errmsg =
  try parse_file fname speclist anonfun errmsg with
  | Failure s
  | Lexical_error s
- | Sys_error s -> Misc.warning (Printf.sprintf "While loading %s" s);;
+ | Sys_error s -> Misc.warning (Printf.sprintf "Error while loading %s" s);;
 
 (*
 Example:
