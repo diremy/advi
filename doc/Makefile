@@ -63,10 +63,9 @@ endif
 .SUFFIXES: .tex .dvi .advi .ps .pdf .pdfm .html .ima
 
 .tex.dvi:
-	echo $<
-# was: 
-#	$(LATEX) $<
-# pour contourner le fichier hypertex.cfg s'il existe...
+        # To avoid default hypertex.cfg if it exists.
+        # Active-DVI really needs the hypertex driver...
+	$(LATEX) '\def\driver{hypertex}\input' $<
 	$(LATEX) '\def\driver{hypertex}\input' $<
 
 .tex.ps:
