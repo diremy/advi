@@ -1137,7 +1137,7 @@ let scan_special status (headers, xrefs) pagenum s =
   if Launch.whiterun () &&
      has_prefix "advi: embed " s then scan_embed_special status s else
   (* Embedded Postscript, better be first for speed when scanning *)
-  if has_prefix "\" " s || has_prefix "ps: " s then
+  if has_prefix "\" " s || has_prefix "ps: " s || has_prefix "! " s then
     (if !Options.dops then status.Dvi.hasps <- true) else
   if has_prefix "header=" s then
     (if !Options.dops then headers := get_suffix "header=" s :: !headers) else
@@ -1168,7 +1168,8 @@ Misc.debug_stop "Scanning specials";
    | Dvi.Known stored_status -> stored_status;;
 
 let special st s =
-  if has_prefix "\" " s || has_prefix "ps: " s then ps_special st s else
+  if has_prefix "\" " s || has_prefix "ps: " s || has_prefix "! " s then
+    ps_special st s else
   if has_prefix "advi: moveto" s then moveto_special st true s else
   if has_prefix "advi: rmoveto" s then moveto_special st false s else
 

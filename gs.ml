@@ -416,6 +416,9 @@ class gv =
       self # process # ps b;
       sync <- false
 
+    method def b =
+      self # send [ b ]
+
     method ps b (x:int) (y:int) =
       self # send [ texbegin; self # moveto x y; b; texend ];
       sync <- false
@@ -446,7 +449,8 @@ let kill () = gv # kill;;
 let draw s x y =
   if !Options.dops then
     try gv#ps (Misc.get_suffix  "ps: " s) x y  with Misc.Match ->
-      try gv#special (Misc.get_suffix  "\" " s) x y with Misc.Match -> ()
+      try gv#special (Misc.get_suffix  "\" " s) x y  with Misc.Match ->
+        try gv#def (Misc.get_suffix  "! " s) with Misc.Match -> ()
 ;;
 
 let add_headers = gv#add_headers;;
