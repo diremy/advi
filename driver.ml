@@ -713,7 +713,7 @@ let scan_embed_special st s =
     try unquote (List.assoc "command" records) with
     | Not_found ->
         raise (Failure ("embed: no command to embed in special " ^ s)) in
-  Launch.add_whiterun_command command;;
+  Launch.add_white_run_command command;;
 
 let parse_transition dir mode record =
   let default_dir =
@@ -1336,7 +1336,7 @@ let scan_special_line (_, _, lastline) s k =
    "asynchronous" specials (typically, PS headers, background
    commands, html references) *)
 let scan_special status (headers, xrefs, lastline as args) pagenum s =
-  if Launch.whiterun () &&
+  if Launch.white_run () &&
      has_prefix "advi: embed " s then scan_embed_special status s else
   (* Embedded Postscript, better be first for speed when scanning *)
   let do_ps = Gs.get_do_ps () in

@@ -1422,10 +1422,10 @@ let main_loop mastername clients =
              duplexname st.filename)
   | [] -> ()
   end;
-  (* Check if whiterun *)
-  if Launch.whiterun () then begin
+  (* Check if white run *)
+  if Launch.white_run () then begin
     Driver.scan_special_pages st.cdvi (st.num_pages - 1);
-    Launch.dump_whiterun_commands ()
+    Launch.dump_white_run_commands ()
   end else begin
     Grdev.set_title ("Advi: " ^ st.filename);
     let x, y = Grdev.open_dev (" " ^ Ageometry.to_string attr.geom) in
