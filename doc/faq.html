@@ -1,10 +1,17 @@
-<html>
-<head>
-<title>Active-DVI FAQ</title>
-</head>
-<body>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+            "http://www.w3.org/TR/REC-html40/loose.dtd">
+
+<HTML>
+<HEAD>
+  <TITLE>Active-DVI FAQ</TITLE>
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+</HEAD>
+
+<BODY BGCOLOR="white">
+
 <H1 ALIGN=LEFT><A name="FAQ">Frequently asked questions</A></H1>
-<p align=right><IMG SRC="advilogo.anim.gif"></p>
+
+<P ALIGN=RIGHT><IMG SRC="advilogo.anim.gif"></P>
 
 <DL>
 
@@ -105,21 +112,22 @@ parens <CODE>\(</CODE> and <CODE>\)</CODE>.</I>
 <DT><STRONG>How to visualize Adobe PostScript fonts like
 <CODE>ptmr8t</CODE> using Active-DVI ?</STRONG>
 
- <DD>Answer: <I>You cannot! Active-DVI can display only PK based fonts
+ <DD>Answer: <I>Tou have to preprocess the file with the command
+<A HREF="http://www.ctan.org/tex-archive/dviware/dvicopy/">dvicopy</A>
+which will expand virtual fonts:
+<PRE>
+        dvicopy foo.dvi foo.advi && advi foo.advi
+</PRE>
+usually works fine.
+</I>
+
+ <DD>Additional answer: <I>Active-DVI can display only PK based fonts
 whose sources are provided in <CODE>.mf</CODE> files. Adobe fonts
 having no <CODE>.mf</CODE> source files, hence METAFONT cannot create
 the corresponding <CODE>.pk</CODE> files for Active-DVI.</I>
  <DD><I>The workaround is to use an equivalent of the problematic font
 in the Computer-Modern font set, that has been designed by Donald Knuth
 to be the default fonts for TeX.</I>
-
- <DD>Another possibility is to preprocess the file with the command
-<A href="http://www.ctan.org/tex-archive/dviware/dvicopy/">dvicopy</a>
-which will expand virtual fonts:
-<pre>
-        dvicopy foo.dvi foo.advi && advi foo.advi
-</pre>
-usually works fine.
 
 <DT><STRONG>How to solve the margin problems of Active-DVI (margins
 are wrong with <CODE>advi</CODE> while <CODE>xdvi</CODE> works
@@ -136,5 +144,19 @@ relevant option on the command line when launching <CODE>advi</CODE>
 
 </DL>
 
-</body>
-</html>
+<HR>
+<!--#config timefmt="%A, %B %e, %Y" -->
+   <EM>Last modified: </EM>
+<!--#echo var="LAST_MODIFIED" -->
+
+<P><A HREF="http://pauillac.inria.fr/~weis/copyright-eng.html">Copyright</A>
+&#169; 2001, 2002 INRIA tous droits réservés.
+
+<P><ADDRESS>Contact <A HREF="mailto:Pierre.Weis@inria.fr">Pierre.Weis@inria.fr</A></ADDRESS>
+
+<P ALIGN=LEFT><IMG SRC="bar.gif"></P>
+
+<P ALIGN=CENTER><IMG SRC="inria.gif"></P>
+
+</BODY>
+</HTML>

@@ -1,6 +1,9 @@
-<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+            "http://www.w3.org/TR/REC-html40/loose.dtd">
+
 <HTML> <HEAD>
-<TITLE>Active-DVI</TITLE>
+  <TITLE>Active-DVI</TITLE>
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
 </HEAD>
 
 <BODY BGCOLOR="white">
@@ -190,7 +193,16 @@ problèmes pourvu que vous les entouriez des parenthèses spéciales
 <DT><STRONG>Comment visualiser les fontes PostScript Adobe
 (comme <CODE>ptmr8t</CODE>) avec Active-DVI ?</STRONG>
 
- <DD>Réponse: <I>Vous ne pouvez pas! Active-DVI ne peut utiliser que
+ <DD>Réponse: <I>Vous devez préprocesser votre fichier DVI avec la commande
+<A HREF="http://www.ctan.org/tex-archive/dviware/dvicopy/">dvicopy</A>
+qui expanse les fontes virtuelles:
+<PRE>
+        dvicopy foo.dvi foo.advi && advi foo.advi
+</PRE>
+règle normalement le problème.
+</I>
+
+ <DD>Réponse additionnelle: <I> Active-DVI ne peut utiliser que
 les fontes basées sur des fichiers PK, dont les sources sont des
 fichiers <CODE>.mf</CODE>. Les fontes Adobe n'ont pas de fichiers
 source <CODE>.mf</CODE> associés; c'est pourquoi METAFONT ne peut
@@ -300,7 +312,7 @@ d'Active-DVI, écrivez à
 <A HREF="http://pauillac.inria.fr/~xleroy/">Xavier Leroy</A>,
 <A HREF="http://pauillac.inria.fr/~lebotlan/">Didier Le Botlan</A>,
 <A HREF="http://pauillac.inria.fr/~aschmitt/">Alan Schmitt</A>,
-Roberto Di Cosmo,
+<A HREF="http://pauillac.inria.fr/~dicosmo/">Roberto Di Cosmo</A>,
 <A HREF="http://pauillac.inria.fr/~miquel/">Alexandre Miquel</A>
 
 <H2 ALIGN=LEFT>Remerciements</H2>
@@ -326,7 +338,7 @@ COPYING de la distribution.
 <P><A HREF="http://pauillac.inria.fr/~weis/copyright-fra.html">Copyright</A>
 &#169; 2001, 2002 INRIA tous droits réservés.
 
-<P><ADDRESS>Contacter l'auteur <A HREF="mailto:Pierre.Weis@inria.fr">Pierre.Weis@inria.fr</A></ADDRESS>
+<P><ADDRESS>Contact <A HREF="mailto:Pierre.Weis@inria.fr">Pierre.Weis@inria.fr</A></ADDRESS>
 
 <P ALIGN=LEFT><IMG SRC="bar.gif"></P>
 
