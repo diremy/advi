@@ -5,7 +5,7 @@
 \usepackage{advi}
 \usepackage{alltt}
 
-% Pour avoir des numéros de page
+% To get page numbers
 \pagestyle{plain}
 
 \def\advifooter{\vbox to 0em{\vbox to \vsize {\vfill
@@ -76,15 +76,14 @@ you can use predefined (or \verb"named") colors. Syntax is
 
 \subsection* {Writing program code}
 
-Environment \verb"allt" is nice to write type-writer text (presumably program
-samples). In environment \verb"allt" you can still use your favorite
-{\LaTeX} macros, hence coloring text and changing styles.
+The environment \verb"allt" is nice to write type-writer text
+(presumably program samples). In environment \verb"allt" you can still
+use your favorite {\LaTeX} macros, hence coloring text and changing
+styles.
 
 \begin{alltt}
 {\it(* Colors with rgb specification are still available. *)}
 \end{alltt}
-
-%\textcolor[rgb]{0.4,0.3,0.8}{let} x = 1;;
 
 \begin{alltt}
 {\it{(* Remark that double semi-colon is mandatory *)}}
@@ -123,9 +122,6 @@ for i = 0 to Array.lenght v - 1 do
 done;;
 \end{alltt}
 
-
-%\textcolor[rgb]{0.4,0.3,0.8}{let} x = 1;;
-
 \adviwait
 
 \vfill
@@ -135,4 +131,3 @@ done;;
 \vfill
 
 \end{document}
-
