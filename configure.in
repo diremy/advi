@@ -36,7 +36,11 @@ AC_ARG_WITH(camlimages, [  --with-camlimages=dir      specify camlimages library
 if test -f $CAMLIMAGESDIR/ps_img.cma || $HAVE_CDK; then
 	echo "Camlimages: ok"
 	HAVE_CAMLIMAGES="true"
-	CAMLIMAGESLIBS="camlimages"
+        if $HAVE_CDK; then
+	        CAMLIMAGESLIBS="camlimages"
+        else
+                CAMLIMAGESLIBS="img ppm_img ps_img graphic_image freetype"
+        fi
 else
 	echo "**************** Warning ******************"
 	echo "camlimages is not found or incomplete in the directory \"$CAMLIMAGESDIR\""
