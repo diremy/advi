@@ -44,22 +44,24 @@ Press: \underline{n}ext page \underline{p}revious page
  
 \newpage\adviback{red}
 
-\subsection* {Transitions}
+\subsection*{Transitions}
+
 Active dvi has transitions --- animated page display for each pause.
 You can specify the transition by \verb|\settransition{|%
 $mode~arg_1~\ldots~arg_n$\verb|}| advi macro.
 Currently the following transition modes are available:
 \begin{itemize}
 \item {\tt none } --- no transition animation  
-\item {\tt slide}  --- new page slides on the screen
+\item {\tt slide} --- new page slides on the screen
 \item {\tt wipe } --- new page wipes on the screen
-\item {\tt block}  --- new page is split into small pieces and 
-  they appear randomly
+\item {\tt block} --- new page is split into small pieces and they
+appear randomly
 \end{itemize}
 For example, if you want to slide the page, write
 \verb+\settransition{slide}+ in your document. 
 
 \subsection*{Notes}
+
 \begin{itemize}
 \item The transition state of advi is currently reset to \verb|none|
   at the beginning of each page.
@@ -72,7 +74,7 @@ For example, if you want to slide the page, write
 
 \newpage\adviback{green}
 
-\subsection* {Transitions parameters}
+\subsection*{Transitions parameters}
 Each transition mode has additional parameters to control its details. 
 Usually the followings are available:
 \begin{itemize}
@@ -85,7 +87,7 @@ write \verb+\settransition{slide from=left steps=30}+.
 
 \newpage\adviback{blue}
 
-\subsection* {Slide transition}
+\subsection*{Slide transition}
 \settransition{slide from=left steps=30}
 New pages appears sliding into the screen.
 
@@ -104,10 +106,12 @@ New pages appears sliding into the screen.
 \item \verb+\settransition{slide from=left steps=30}+
 \end{itemize}
 
+\flushright{\includegraphics[width=0.25\textwidth]{../tex/advilogo.eps}}
+
 \newpage\adviback{yellow}
 \settransition{wipe from=right steps=30}
 
-\subsection* {Wipe transition}
+\subsection*{Wipe transition}
 New pages appears wiping out the old graphics.
 
 \subsubsection*{Options}
@@ -128,7 +132,7 @@ New pages appears wiping out the old graphics.
 \newpage\adviback{magenta}
 \settransition{block from=topleft steps=20000}
 
-\subsection* {Block transition}
+\subsection*{Block transition}
 New pages appears gradually into small pieces.
 
 \subsubsection*{Options}
@@ -148,11 +152,24 @@ New pages appears gradually into small pieces.
 
 \lastpage
 
+\settransition{block from=center steps=50000}
+
+\wait{0.1}
+
 ~\vfill
 \begin{center}
 \includegraphics[width=0.5\textwidth]{../tex/advilogo.eps}\\
-{\Large \bf That's all, folks!!}
+\wait{0.1}
+\bigskip
+{\Huge \bf That's all, folks!!}
 \end{center}
+
+\wait{0.1}{\Huge \bf Allo }
+\wait{0.1}{\Huge \bf Hola }
+\wait{0.1}{\Huge \bf Salut }
+\wait{0.1}{\Huge \bf Au revoir}
+
 \vfill
+
 
 \end{document}

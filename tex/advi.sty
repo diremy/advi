@@ -35,10 +35,10 @@
 \def\advi@embed#1#2#3{\mbox{\special
   {advi: embed type=embedded width=#1 height=#2 command="#3"}{\vbox to #2{\hbox to #1{}}}}}
 
-\def\advi@embedsticky#1#2#3#4{\mbox{\special
+\def\advi@stickyembed#1#2#3#4{\mbox{\special
   {advi: embed name="#1" type=sticky width=#2 height=#3 command="#4"}{\vbox to #3{\hbox to #2{}}}}}
 
-\def\advi@embedpersistent#1#2#3#4{\mbox{\special
+\def\advi@persistentembed#1#2#3#4{\mbox{\special
   {advi: embed name="#1" type=persistent width=#2 height=#3 command="#4"}{\vbox to #3{\hbox to #2{}}}}}
 
 \def\advi@pause{\special{advi: pause}}
@@ -174,6 +174,8 @@ end
 \advi@export \recplay \advi@recplay
 \advi@export \play \advi@play
 \advi@export \embed \advi@embed
+\advi@export \stickyembed \advi@stickyembed
+\advi@export \persistentembed \advi@persistentembed
 
 \advi@export \pause \advi@pause
 \advi@export \wait \advi@wait

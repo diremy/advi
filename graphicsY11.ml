@@ -17,7 +17,7 @@
 
 (* Module [GraphicsX11]: additional graphics primitives for the X Windows system *)
 
-type window_id = GraphicsX11.window_id
+type window_id = string
 
 external flush : unit -> unit = "gr_flush"
         (* flush pending events *)
@@ -36,6 +36,7 @@ external raw_close_subwindow : window_id -> unit
 
 let open_subwindow ~x ~y ~width ~height =
   let wid = raw_open_subwindow x y width height in
+prerr_endline (Printf.sprintf "subwindow %s allocated" wid);
   Hashtbl.add subwindows wid ();
   wid;;
 
@@ -46,7 +47,7 @@ let check_window fname wid =
   if not (Hashtbl.mem subwindows wid) then no_such_window fname wid;;
 
 let close_subwindow wid =
-  check_window wid "close_subwindow";
+  check_window "close_subwindow" wid;
   raw_close_subwindow wid;
   Hashtbl.remove subwindows wid;;
 
@@ -54,11 +55,12 @@ external raw_map_subwindow : window_id  -> unit = "gr_map_subwindow";;
 external raw_unmap_subwindow : window_id -> unit = "gr_unmap_subwindow";;
 
 let map_subwindow wid =
-  check_window wid "map_subwindow";
+prerr_endline (Printf.sprintf "mapping subwindow %s" wid);
+  check_window "map_subwindow" wid;
   raw_map_subwindow wid;;
   
 let unmap_subwindow wid =
-  check_window wid "unmap_subwindow";
+  check_window "unmap_subwindow" wid;
   raw_unmap_subwindow wid;;
 
 external flush : unit -> unit = "gr_flush"

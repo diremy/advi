@@ -1242,7 +1242,7 @@ module Make(Dev : DEVICE) = struct
               h = 0 ; v = 0 ; w = 0 ; x = 0 ; y = 0 ; z = 0 ;
               stack = [] ; color = 0x000000 ; color_stack = [] } in
           Dev.clear_dev();
-          newpage headers st  (mag *. dpi) xorig yorig;
+          newpage headers st (mag *. dpi) xorig yorig;
           cdvi.base_dvi.Dvi.pages.(num).Dvi.status <- Dvi.PS true;
           check();
           Dvi.page_iter (eval st') page
@@ -1385,6 +1385,4 @@ module Make(Dev : DEVICE) = struct
       if !headers <> [] then
         Dev.add_headers (Search.true_file_names [] (List.rev !headers))
 
-end ;;
-
-
+end;;

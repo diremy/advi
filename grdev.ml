@@ -31,8 +31,6 @@ let _ = Misc.set_option
     (Arg.Float (fun x -> busy_delay := x))
     "FLOAT\tDelay before the watch cursor appears (default 0.2s)";;
 
-
-
 type color = int ;;
 let href_frame = 0x00ff00
 let advi_frame = 0xaaaaff
@@ -145,15 +143,18 @@ let sleep = sleep_watch true;;
 let set_transition trans = Transimpl.current_transition := trans
 ;;
 
-let embeds = ref [] 
+let embeds = ref [];;
+let persists = ref [];;
+let unmap_embeds = ref [];;
 
 let synchronize () =
   Gs.flush();
   Transimpl.synchronize_transition ();
   Graphics.synchronize();
   List.iter (fun f -> f ()) (List.rev !embeds);
-  embeds := []
-  ;;
+  embeds := [];
+  List.iter (fun f -> f ()) (List.rev !persists);
+  persists := [];;
 
 (*** Private glyphs ***)
 
@@ -461,7 +462,7 @@ let draw_ps file bbox (w,h) x0 y0 =
       bbox (w,h) x y 
   with 
   | Not_found -> Misc.warning ("ps file " ^ file ^ " not found")
-  | _ -> Misc.warning ("error happend in drawing ps file " ^ file)
+  | _ -> Misc.warning ("error happened while drawing ps file " ^ file)
           
 let clean_ps_cache () = Drawps.clean_cache ()
     
@@ -499,7 +500,7 @@ let raw_embed_app command app_type app_name width height x y =
     replace 0
   in
 
-  let wid = GraphicsX11.open_subwindow ~x ~y:(y - height) ~width ~height in
+  let wid = GraphicsY11.open_subwindow ~x ~y:(y - height) ~width ~height in
 
   (*** !x commands
     !p : embedding target window id (in digit)
@@ -549,28 +550,85 @@ let raw_embed_app command app_type app_name width height x y =
 		  (string_replace "!y" opt_y
 		     command0))))
   in
-  
   (* prerr_endline command; *)
   let pid = Misc.fork_process command in
   if Hashtbl.mem app_table pid then 
     raise (Failure (Printf.sprintf 
 		      "pid %d is already in the app_table!" pid));
-  Hashtbl.add app_table pid (app_type, wid)
+  prerr_endline (Printf.sprintf "%s launched in window %s" app_name wid);
+  Hashtbl.add app_table pid (app_type, app_name, wid)
+
+(* In hash table t, returns the first element that verifies p. *)
+let hashtbl_find t p =
+ let res = ref None in
+ try
+  Hashtbl.iter (fun _ x -> if p x then (res := Some x; raise Exit)) t;
+  raise Exit
+ with Exit ->
+  match !res with
+  | None -> raise Not_found
+  | Some x -> x;;
+
+let map_embed_app command app_type app_name width height x y =
+ let (app_type, app_name, wid) =
+  hashtbl_find app_table (fun (_, name, _) -> name = app_name) in
+ GraphicsY11.map_subwindow wid;;
+
+let unmap_embed_app command app_type app_name width height x y =
+ let (app_type, app_name, wid) =
+  hashtbl_find app_table (fun (_, name, _) -> name = app_name) in
+ GraphicsY11.unmap_subwindow wid;;
+
+(* In hash table t, verifies that at least one element verifies p. *)
+let hashtbl_exists t f =
+ try
+  Hashtbl.iter (fun _ x -> if f x then raise Exit) app_table;
+  false
+ with Exit -> true;;
 
 (* embedded apps must be displayed when synced *)
 let embed_app command app_type app_name width height x y =
-  embeds :=
-    (fun () -> raw_embed_app command app_type app_name width height x y) ::
-    !embeds;;
+  let already_launched app_name =
+    hashtbl_exists app_table (fun (ty, name, wid) -> name = app_name) in
+  match app_type with
+  | Sticky ->
+     if not (already_launched app_name) then
+     embeds :=
+      (fun () -> raw_embed_app command app_type app_name width height x y) ::
+      !embeds;
+(*     persists := 
+      (fun () -> map_embed_app command app_type app_name width height x y) ::
+      !persists;*)
+  | Persistent ->
+     if not (already_launched app_name) then
+     embeds :=
+      (fun () -> 
+prerr_endline ("Launching " ^ app_name);
+raw_embed_app command app_type app_name width height x y) ::
+      !embeds;
+     persists :=
+      (fun () ->
+prerr_endline ("Mapping " ^ app_name);
+ map_embed_app command app_type app_name width height x y) ::
+      !persists;
+     unmap_embeds :=
+      (fun () ->
+prerr_endline ("Unmapping " ^ app_name);
+ unmap_embed_app command app_type app_name width height x y) ::
+      !unmap_embeds;
+  | Embedded ->
+     embeds :=
+      (fun () -> raw_embed_app command app_type app_name width height x y) ::
+      !embeds;;
 
 let kill_app pid wid =
   (try Unix.kill pid 9 with _ -> ());
-  GraphicsX11.close_subwindow wid
+  GraphicsY11.close_subwindow wid
 ;;
 
 let kill_apps app_type = 
   let removed = ref [] in
-  Hashtbl.iter (fun pid (apt, wid) -> 
+  Hashtbl.iter (fun pid (apt, app_name, wid) -> 
     if app_type = apt then begin
       removed := pid :: !removed;
       kill_app pid wid
@@ -582,16 +640,18 @@ let kill_apps app_type =
       pid <> 0
     with
       Unix.Unix_error(Unix.ECHILD,_,_) -> false
-  do () done
-;;  
+  do () done;;
+
+let unmap_persistent_apps () =
+  List.iter (fun f -> f ()) (List.rev !unmap_embeds);
+  unmap_embeds := [];;
 
 let kill_embedded_apps () = 
-  kill_apps Embedded 
-;;
+  kill_apps Embedded;
+  unmap_persistent_apps ();;
 
-let kill_persistent_apps () = 
-  kill_apps Sticky; kill_apps Persistent
-;;
+let kill_persistent_apps () =
+  kill_apps Sticky; kill_apps Persistent;;
 
 (*** HTML interaction ***)
 
@@ -848,6 +908,7 @@ let clear_dev () =
   if not !opened then
     failwith "Grdev.clear_dev: no window" ;
   kill_embedded_apps ();
+  unmap_persistent_apps ();
   Graphics.display_mode !display_mode ;
   Graphics.clear_graph ();
   H.clear(); 

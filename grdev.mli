@@ -71,7 +71,7 @@ type app_type =
          that launched it. A [Persistent] application is launched once
          and only once and keeps running throughout the show.
          A [Persistent] application must be embeddable, since its
-         window must mapped ant unmapped. *)
+         window must be mapped and unmapped. *)
    | Embedded
       (* An [Embedded] is an application that is launched when the
          page it appears in is visualised. It is killed when going

@@ -18,6 +18,10 @@
 
 \pagestyle{empty}
 
+%\def\stickyembed#1#2#3#4{\mbox{\special {advi: embed name="#1" type=sticky width=#2 height=#3 command="#4"}{\vbox to #3{\hbox to #2{}}}}}
+
+%\def\persistentembed#1#2#3#4{\mbox{\special {advi: embed name="#1" type=persistent width=#2 height=#3 command="#4"}{\vbox to #3{\hbox to #2{}}}}}
+
 \definecolor{red}{rgb}{1.0,0.0,0.0}
 \definecolor{green}{rgb}{0.0,1.0,0.0}
 \definecolor{blue}{rgb}{0.0,0.0,1.0}
@@ -193,7 +197,8 @@ presentation using:\\
 \item Similarly, \verb|animate| can display animations\\
     \verb+animate -geometry !g -window !p file.gif+:\\
     \verb|\embed{2cm}{2cm}{animate -geometry !g -window !p mmm.anim.gif}|\\
-    \embed{2cm}{2cm}{animate -geometry !g -window !p mmm.anim.gif}
+    \stickyembed{xanim}{2cm}{2cm}{animate -geometry !g -window !p mmm.anim.gif}
+%    \embed{2cm}{2cm}{animate -geometry !g -window !p mmm.anim.gif}
 \end{itemize}
 
 % \newpage
@@ -214,11 +219,11 @@ presentation using:\\
    \verb+\embed{prog -geometry !g -use !p}+\\
    For instance \\
    \verb|\embed{3cm}{1cm}{./but -geometry !g -use !p}|\\
-   \embed{2.3cm}{0.71cm}{./but -geometry !g -use !p}
+   \persistentembed{button}{2.3cm}{0.71cm}{./but -geometry !g -use !p}
 
   \item Possibly interactive !\\
    \verb|\embed{6.5cm}{9.5cm}{./taquin -geometry !g -use !p dojoji.gif}|\\
-  \embed{7.5cm}{11cm}{./taquin -geometry !g -use !p dojoji.gif}
+  \persistentembed{taquin}{7.5cm}{11cm}{./taquin -geometry !g -use !p dojoji.gif}
 
 \end{itemize}
 

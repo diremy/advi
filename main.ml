@@ -78,7 +78,6 @@ let standalone_main () =
 	  exit 1
       end;
       name
-
   | Some s -> s in
   View.set_crop !crop_flag ;
   View.set_hmargin !hmargin ;
@@ -86,7 +85,7 @@ let standalone_main () =
   View.set_geometry !geometry ;
   try
     View.main_loop filename ; exit 0
-  with View.Error s | Failure s ->
+  with View.Error s | Failure s | Graphics.Graphic_failure s ->
     Format.printf "Fatal error: %s@." s; exit 1 ;;
 
 let rec interactive_main () =
