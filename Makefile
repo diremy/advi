@@ -96,6 +96,9 @@ ifdef.cmo: ifdef.ml
 grY11.o : grY11.c
 	$(OCAMLC) -ccopt "$(CFLAGS)" -c $<
 
+events.o : events.c
+	$(OCAMLC) -ccopt "$(CFLAGS)" -c $<
+
 .SUFFIXES: .ml .mli .cmo .cmi .cmx
 
 .mli.cmi:
