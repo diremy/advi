@@ -152,7 +152,7 @@ distribute: tex/splash.dvi
 	- mkdir $(WEBSITEDIR)
 	mkdir release
 	cd release; cvs co bazar-ocaml/advi; \
-	cp -p ../test/demo.dvi bazar-ocaml/advi/test/; \
+	cp -p ../test/*.dvi bazar-ocaml/advi/test/; \
 	cp -p ../tex/splash.dvi bazar-ocaml/advi/tex/; \
 	cp -p ../tex/advi.pro bazar-ocaml/advi/test/; \
 	find . -name '.cvsignore' -print | xargs rm; \
@@ -160,7 +160,7 @@ distribute: tex/splash.dvi
 	cp -pr bazar-ocaml/advi/doc/* $(WEBSITEDIR)
 	- chgrp -R caml $(WEBSITEDIR)
 	- chmod -R g+w $(WEBSITEDIR)
-	cp -pr bazar-ocaml/advi/LGPL bazar-ocaml/advi/README bazar-ocaml/advi/INDEX $(FTPSITEDIR)
+	cp -pr release/bazar-ocaml/advi/LGPL release/bazar-ocaml/advi/README release/bazar-ocaml/advi/INDEX $(FTPSITEDIR)
 	cd release; mv bazar-ocaml/advi $(ADVI); \
 	tar cvf $(ADVI).tar $(ADVI); \
 	gzip $(ADVI).tar; \
