@@ -12,10 +12,12 @@
 \usepackage {advi-annot}
 \usepackage {bubble}
 
-\title {{\ActiveDVI} manual}
+\title {{\ActiveDVI} manual\\
+\includegraphics[width=\textwidth]{../tex/bar.jpg.eps}}
+
 \author {Didier R{\'{e}}my and Pierre Weis}
 
-\def \ActiveDVI {\textbf {Active-DVI}}
+\def\ActiveDVI{\textbf{Active-DVI}}
 
 \def\adviheader{\noindent
 {\bf\Large \ActiveDVI}\\
@@ -23,24 +25,25 @@
 
 %\let \Newpage \newpage
 %\def \newpage {\Newpage \adviheader}
+\def \Newpage {\newpage \adviheader}
 
 \begin{document}
 
 \maketitle
 
 \begin{abstract}
-\ActiveDVI is a presentation graphics program to provide the highest
-quality slides presentation experience to the $\LaTeX$ users.
+\ActiveDVI~is a presentation graphics program to provide the highest
+quality slides presentation experience to \LaTeX~users.
 
-\ActiveDVI is a viewer and presenter for DVI files that is targeted to
-presentations via laptop computers: \ActiveDVI uses the computer
+\ActiveDVI~is a viewer and presenter for DVI files that is targeted to
+presentations via laptop computers: \ActiveDVI~uses the computer
 processing power to offer various special effects to animate the
 presentation.
 
-\ActiveDVI can be used as is, but will shine when driven by a user
+\ActiveDVI~can be used as is, but will shine when driven by a user
 with a bias towards programming: new special effects can easily be
 added and creative advanced users like to program the presenter at
-various levels, either via $\LaTeX$ macros or $\LaTeX$ package
+various levels, either via \LaTeX~macros or \LaTeX~package
 files. Brave souls can even directly modify \ActiveDVI's source code
 since that code is freely available.
 
@@ -49,14 +52,18 @@ Presentation examples can be found in the \verb"test" and
 to read their source code and copy the effects they provide.
 
 If you ever succeed at adding a nice special effect that could be of
-a general interest, or if you can provide a nice or fancy presentation
+a general interest, or if you can provide a nice and fancy presentation
 of your own that can serve as an example to the \ActiveDVI's users
 communauty, please don't hesitate to drop a mail to the implementors
 at \verb"advi@pauillac.inria.fr".
 
 \end{abstract}
 
+\Newpage
+
 \tableofcontents
+
+\Newpage
 
 \section {Installation}
 
@@ -77,15 +84,28 @@ advi -help
 
 See the key bindings in the appendix.
 
-\section {The {\tt advi} package}
+\Newpage
 
-This package provides interactive commands for {\ActiveDVI}.  There is
-no need to load the package if those {\ActiveDVI} special effects are
-not required. The package recognizes the option \verb"ignore", which
-makes it not to produce any {\tt advi} specials, so that the show can
-be previewed by other previewers or turned into Postscript with {\tt
-dvips}. Of course, this option disables most effects, although some of
-them are still approximated.
+\section {The {\tt advi.sty} \LaTeX~packages}
+
+\ActiveDVI~provides some \LaTeX~packages to facilitate animations and
+interaction with the presenter from within \LaTeX.
+
+The {\tt advi} package is the main package to use when writing
+presentations for \ActiveDVI. It provides the main set of interactive
+commands for {\ActiveDVI}. However, there is no need to load the
+package if no {\ActiveDVI} special effects are required for the
+presentation.
+
+\subsection{Printing the presentation}
+
+The {\tt advi} package recognizes the special option \verb"ignore", which
+is devoted help producing a printable version of the presentation: the
+\verb"ignore" option makes the package not to produce {\tt advi}
+specials, so that the show can be previewed by other previewers or
+turned into Postscript with {\tt dvips}. Of course, this option
+disables most effects that cannot be printed, although some of them
+are still approximated.
 
 If the {\tt ignore} option is not set globally, it can be set
 locally with the commands {\docdef \adviignore}. However, this will not
@@ -152,6 +172,9 @@ If the environment form is used, \docid{text} may contain fragile commands.
 
 
 \subsection {Images}
+
+Images can be encapsulated into the presentation using the package
+CamlImages provided with the distribution.
 
 \subsection {Backgrounds}
 
@@ -325,7 +348,7 @@ the current page.
 The application takes \docid{dim} width (respectively height) space in 
 latex. Both values default to 0pt.
 
-These dimentions are also substituted for all occurrences of \verb"!g" in
+These dimensions are also substituted for all occurrences of \verb"!g" in
 the command string.
 \end{quote}
 
@@ -416,9 +439,9 @@ Labels over arrows \verb"\Aput", \verb"Bput", etc.
 \end {itemize}
 
 
-\section {Auxiliary packages}
+\section {Auxiliary \LaTeX~packages}
 
-\subsection*{The superpose package}
+\subsection{The superpose package}
 
 This package allows to easily supperpose horizontal material, creating 
 the smallest horizontal box to fix all of supperpositions.
@@ -438,7 +461,7 @@ Items of the list must are sepated by \verb"\\" as in tabular environments.
 Each item should be horizontal material.
 \end{quote}
 
-\subsection*{The bubble package}
+\subsection{The bubble package}
 
 This package allows to easily draw bubbles over some text. 
 \begin{verbatim}
@@ -451,7 +474,7 @@ parameterization, bubble can also be drawn using the \doctt{ pst-node}
 package of the pstricks collection.  This is was the \doctt{ps} option
 does. 
 
-The package  defines a single command:
+The package defines a single command:
 
 \medskip\noindent
 \docdef \bubble \docopt{key=value list}\docarg{anchor}%
@@ -510,9 +533,9 @@ be set globally using the command:
 \medskip \noindent
 \docdef \setkeys\doctt{\{bubbleset\}}\docarg{key=value list}
 
-\subsection*{Annotations package}
+\subsection{The annotations package}
 
-This package uses active anchors and the package bubbles to 
+This package uses active anchors and the bubbles package to 
 allow annotations by raising a bulle when the cursor is over the anchor.
 
 The package provides a single command
@@ -522,14 +545,14 @@ The package provides a single command
     \docopt{ps options}\docpar {pos}\docarg{text}
 \begin{quote}
 whose options are identical to those of \docdef \bubble, but the bubble
-appear withing an active anchor. 
+appears withing an active anchor. 
 \end{quote}
 
 %Annotation location can also be invisible \advi{C}{\tt{ }}instead of visible.
 
+\Newpage
 
 \appendix
-
 
 \section {Known bugs}
 
@@ -537,25 +560,26 @@ appear withing an active anchor.
 
 PS relies on {\tt ghoscript} to display Postscript inlined specials.
 However, some earlier releases of {\tt ghostscript} 
-implements Postscript {\tt flushpage} command as a {\tt XFlush} 
-which does not force evaluations of commands, and make the 
-synchronization between {\tt ghostscrip} and {\tt advi} drawings 
-uncontrolable. In this case, the inerleaving of inlined postscript 
+implements Postscript {\tt flushpage} command as a {\tt XFlush} call
+which does not force the evaluation of commands, and thus makes the 
+synchronization between {\tt ghostscrip} and \ActiveDVI~drawings 
+uncontrolable. In this case, the interleaving of inlined postscript 
 and other material may be inconsistent. 
 
-Fortunately, it seems that recent version of ghostscript $(> 6.5)$ have
+Fortunately, recent versions of ghostscript $(> 6.5)$ have
 fixed this problem by using {\tt XSync(false)} instead.
-There, inline specials should be correctly rendered. 
+If you use those versions of ghostscript, inline specials should be
+correctly rendered.
 
-However, version some releases of 6.5x also carry a small but fatal bug for
-advi, that will be hopefully be fixed in future releases. This can easily be
-fixed, thoug (see \url{http://cristal.pauillac.inria.fr/~remy/ghostscript/}).
+Unfortunately, some releases of version 6.5x also carry a small but
+fatal bug for \ActiveDVI, that will hopefully be fixed in future
+releases. A workaround is available here
+\url{http://cristal.pauillac.inria.fr/~remy/ghostscript/}.
 
 \subsection*{Inlined postscript}
 
 So far, the implementation of inline Postscript does not correctly handle
 complex change of coordinates.  (See PStricks section). 
-
 
 \section {Future}
 
