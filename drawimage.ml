@@ -192,7 +192,8 @@ let cache_load file =
       open_in_bin, close_in
     else
       (fun file ->
-        let command = Printf.sprintf "%s -c -d %s" Config.gzip_path file in
+        let command = Printf.sprintf "%s -c -d %s" Config.gzip_path 
+	    (Filename.quote file) in
         Unix.open_process_in command),
       (fun ic -> ignore (Unix.close_process_in ic))
   in
@@ -229,7 +230,8 @@ let cache_save file img =
       open_out_bin, close_out
     else
       (fun file ->
-        let command = Printf.sprintf "%s > %s" Config.gzip_path file in
+        let command = Printf.sprintf "%s > %s" Config.gzip_path 
+	    (Filename.quote file) in
         Unix.open_process_out command),
       (fun oc -> Pervasives.flush oc; ignore (Unix.close_process_out oc))
   in
