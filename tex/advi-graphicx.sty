@@ -19,19 +19,18 @@
 
 %% More declarations
 
-%
 % These declarations allow to transparently include non eps images
 % into a LaTeX source file.
 % The current mechanism includes in the DVI file the necesary
 % commands to convert the foreign image to eps when running dvips.
 %
 % But if we use Advi as the previewer, no such costly conversion is
-% done: Advi will skip the command after the tick (`) and direclty
+% done: Advi will skip the command after the tick (`) and directly
 % display the image in its native format via CamlImages.
 %
 % Notice though that the list of filters is not complete . . .
 % we need to provide a converter for .png,.gif etc.
-%
+
 \DeclareGraphicsExtensions{.jpg,.eps,.tif,.tiff}
 \DeclareGraphicsRule{.jpg}{eps}{.bb}{`jpeg2ps #1} % this provides for a compact conversion in PS Level >=2
 \DeclareGraphicsRule{.tif,.tiff,.gif,.png}{eps}{.bb}{`convert #1 eps:-} % 
