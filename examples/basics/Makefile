@@ -1,6 +1,6 @@
 # To view the demo, use ../advi file.dvi
 
-TEXFILES= simple.tex moderate.tex
+TEXFILES= simple.tex moderate.tex semi-complex.tex
 
 ADVIDIR=../..
 
