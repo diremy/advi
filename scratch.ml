@@ -242,9 +242,13 @@ let scratch_write_settings_handle_char = function
   | 'k' -> set_scratch_font_color G.black
   | '+' -> set_positive_color_increment ()
   | '-' -> set_negative_color_increment ()
+  | '?' -> Grdev.help_screen Config.scratch_write_splash_screen
   | c ->
      Misc.warning (Printf.sprintf "Unknown scratch write setting key: %C" c);;
 
+(* The writing function:
+   write char c at position x y then computes next scratching position
+   and calls the main write scractching loop. *)
 let rec scratch_write_char =
   let prev_xs = ref [] in
   let prev_size_y = ref 0 in
@@ -269,6 +273,13 @@ let rec scratch_write_char =
      G.draw_char c;
      scratch_write (x + tx) y end
 
+(* Main scratch write loop:
+   - each button press changes the place where scratching occurs,
+   - Esc ends scratching.
+   - ^Q or ^Z enters scratch write settings mode.
+   - each key press is written at current scratching position using
+     scratch_write_char that tail calls back scratch_write
+     at the new scratching position. *)
 and scratch_write x y =
    match Graphics.wait_next_event [Button_down; Key_pressed] with
    | {mouse_x = nx; mouse_y = ny; button = btn;
@@ -276,12 +287,14 @@ and scratch_write x y =
        if kp then
         begin match c with
         | '' -> end_write ()
-        | '' -> scratch_write_settings ()
+        | '' | '' ->
+          set_cursor cursor_settings;
+          scratch_write_settings ()
         | c -> scratch_write_char c x y
         end else
        if btn then scratch_write nx ny else scratch_write x y
 
-and scratch_write00 () =
+and enter_scratch_write () =
   let x, y = G.mouse_pos () in
   G.moveto x y;
   set_font_to_scratch_font ();
@@ -289,35 +302,80 @@ and scratch_write00 () =
   set_cursor cursor_write;
   scratch_write x y
 
+(* Main write settings loop. *)
 and scratch_write_settings () =
-   set_cursor cursor_settings;
    match Graphics.wait_next_event [Button_down; Key_pressed] with
    | {mouse_x = nx; mouse_y = ny; button = btn;
       keypressed = kp; key = c} ->
        if kp then
         begin match c with
-        | '' | '' ->
+        | '' | '' | '' | 'q' ->
+        (* Esc, ^Q, ^Z, or q means quit the scratch write settings mode
+           and reenter scratch writing.
+           Hence, two successive ^Z just do nothing (except changing
+           the cursor chape). *)
            set_cursor cursor_write;
-           scratch_write00 ()
-        | c -> scratch_write_settings_handle_char c; scratch_write_settings ()
+           enter_scratch_write ()
+        | c ->
+        (* In any other case, treat the setting according to the character,
+           and go on write settings. *)
+           scratch_write_settings_handle_char c;
+           scratch_write_settings ()
         end
-
-and scratch_write_or_settings =
-  let in_settings = ref false in
-  (function
-   | '' -> in_settings:= false; end_write ()
-   | '' when !in_settings -> set_cursor cursor_write; in_settings := false
-   | '' -> set_cursor cursor_settings; in_settings := true
-   | c when !in_settings -> scratch_write_settings_handle_char c
-   | c -> Misc.warning "Click to start scratching")
 ;;
 
-let enter_write () =
-  wait_button_pressed scratch_write_or_settings;
-  scratch_write00 ();;
+(* Handling key presses while waiting for a mouse click
+   that designates the place where write scratching should begin:
+   - Esc, q, or s means quit write,
+   - ^Q or ^Z means toggle the scratch write settings mode,
+   - any other character when scratch write settings mode is on
+     means a setting (to handle with scratch_write_settings_handle_char),
+   - any other character when not in scratch write settings mode,
+     means warning the user that he must click somewhere. *)
+let waiting_to_enter_scratch_write =
+  let scratch_write_settings_mode = ref false in
+  (function c ->
+   if !scratch_write_settings_mode then begin
+     match c with
+     (* Esc, q, or s means quit scratch write. *)
+     | '' | 'q' | 's' ->
+       (* Quit preserving invariant. *)
+       Misc.warning "Esc q or s in waiting_to_enter";
+       scratch_write_settings_mode:= false;
+       set_cursor cursor_write
+     | '' | '' ->
+       (* Quit scratch write settings mode. *)
+       Misc.warning "^q or ^z in waiting_to_enter";
+       set_cursor cursor_write;
+       (* Toggle scratch write settings mode. *)
+       scratch_write_settings_mode := false
+     | c ->
+       scratch_write_settings_handle_char c
+   end else begin
+     match c with
+     (* Esc, q, or s means quit scratch write. *)
+     | '' | 'q' | 's' ->
+       (* Quit preserving invariant. *)
+       scratch_write_settings_mode:= false;
+       end_write ()
+     | '' | '' ->
+       Misc.warning "^q or ^z in waiting_to_enter";
+       (* Enter scratch write settings mode. *)
+       set_cursor cursor_settings;
+       scratch_write_settings_mode := true
+     | '?' -> Grdev.help_screen Config.scratch_write_splash_screen
+     | c -> Misc.warning "Click to start scratch writing"
+   end)
+;;
+
+(* The main routine to begin write scratching:
+   - wait for a click then enter scratching. *)
+let start_scratch_write () =
+  wait_button_pressed waiting_to_enter_scratch_write;
+  enter_scratch_write ();;
 
 let do_write () =
-  save_excursion cursor_write (get_scratch_font_color ()) enter_write;;
+  save_excursion cursor_write (get_scratch_font_color ()) start_scratch_write;;
 
 let write () = only_on_screen do_write ();;
 
@@ -356,6 +414,7 @@ let scratch_draw_setting_handle_char c =
    | ' ' -> clear_scratch_figure ()
    | '+' -> set_positive_color_increment ()
    | '-' -> set_negative_color_increment ()
+   | '?' -> Grdev.help_screen Config.scratch_draw_splash_screen
    | c ->
       Misc.warning (Printf.sprintf "Unknown scratch draw setting key: %C" c));
   Graphics.set_line_width (get_scratch_line_width ());
@@ -499,7 +558,8 @@ and handle_figure scratch =
   | Polygone | Finish ->
       wait_button_pressed scratch_draw_setting_handle_char; 
       let (x1, y1 as p1) = mouse_pos () in
-      clear_scratch_figure (); handle_figure scratch
+      clear_scratch_figure ();
+      handle_figure scratch
 
 and scratch_points scratch =
   wait_button_pressed (scratch_char_from scratch);
@@ -511,4 +571,3 @@ let do_draw () =
   save_excursion cursor_draw (get_scratch_line_color ()) enter_draw;;
 
 let draw () = only_on_screen do_draw ();;
-
