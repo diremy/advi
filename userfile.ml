@@ -145,9 +145,10 @@ let mk_user_advi_cache_dir dirname =
 let default_user_advi_cache_dir =
   let d0 = Filename.concat (Unix.getcwd ()) ".advi" in
   if can_be_cache_directory d0 then d0 else
-  let d1 = tilde_subst "~/.advi" in
+  let d1 = Filename.concat (tilde_subst "~") ".advi" in
   if can_be_cache_directory d1 then d1 else
-  let d2 = Filename.concat "" (Filename.concat "tmp" ".advi") in
+  let d2 =
+    Filename.concat (Filename.dirname (Filename.temp_file "" "")) ".advi" in
   if can_be_cache_directory d2 then d2 else
   try mk_user_advi_cache_dir d2 with
   | _ ->
