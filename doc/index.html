@@ -91,6 +91,25 @@ box where you want to.</I>
 <DT><STRONG>How to get online help for Active-DVI keys ?</STRONG>
  <DD>Answer: <I>Just press <CODE>?</CODE> in the Active-DVI window.</I>
 
+<DT><STRONG>How to print my slides for real on paper or slides for
+a retro-projector ?</STRONG>
+ <DD>Answer: <I>Easy. Just use the <CODE>ignore</CODE> option of the
+<CODE>advi.sty</CODE> package (write
+<CODE>usepackage[ignore]{advi}</CODE>). Then recompile your source
+file with LaTeX: the Active-DVI package will suppress some effects and
+render others using postscript emulations.</I>
+ <DD>Additional answer: <I>Impossible. How could you ever believe that
+somebody or something could render on a mere sheet of paper all those
+text dancing movements and those fancy, fascinating, and creative
+effects that your presentation features ? No hope: you really need
+Active-DVI to play your talk!</I>
+ <DD>Additional<SUP>2</SUP> preventive answer: <I>The additional
+answer which immediately precedes this one is a joke; in fact we
+worked hard such that the <CODE>ignore</CODE> option of
+<CODE>advi.sty</CODE> does a good job; however, it is clear that the
+Active-DVI style just tries to do its best to perform a
+task that cannot be entirely satisfactory.</I> 
+
 <DT><STRONG>How to get examples of talks ?</STRONG>
  <DD>Answer: <I>Look in the distribution, sub-directory
 <CODE>examples</CODE>. The sub-directories are
@@ -107,7 +126,8 @@ sub-directories to build the corresponding DVI presentations.</I>
  <DD>Answer: <I>Just type <CODE>s</CODE> to write text and
 <CODE>S</CODE> to draw lines.</I>
 
-<DT><STRONG>How to write on my slides programs with colored parts ?</STRONG>
+<DT><STRONG>How to write on my slides seom programs that have colored
+parts ?</STRONG>
  <DD>Answer: <I>Just use the environment <CODE>alltt</CODE>; then colors
 (and other text annotations and typographic indications) are available
 within a type-writter font setting. For instance:</I>
@@ -120,7 +140,7 @@ let r = \{foo = 1; bar = "toto"\};;
 \end{alltt}
 </PRE>
 
-<DT><STRONG>How to write on my slides programs with mathematical
+<DT><STRONG>How to write on my slides programs which have mathematical
 formulas in them ?</STRONG>
  <DD>Answer: <I>If you need mathematical formulas into your programs,
 use the environment \verb"alltt" and insert the formulas into fancy
