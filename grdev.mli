@@ -111,7 +111,7 @@ val draw_img :
   float ->
   (int -> int -> int) option ->
   (int * int * int * int) option ->
-   int * int -> int -> int -> unit                                                                                  
+   int * int -> int -> int -> unit;;
 
 (* Background information *)
 
@@ -128,6 +128,7 @@ val blit_bkgd_data : bkgd_prefs -> bkgd_prefs -> unit;;
 val copy_of_bkgd_data : unit -> bkgd_prefs;;
 val default_bkgd_data : unit -> bkgd_prefs;;
 val bkgd_data : bkgd_prefs;;
+val get_playing : (unit -> int) ref;;
 
 type bgoption =
    | BgColor of color

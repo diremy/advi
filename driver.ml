@@ -618,7 +618,12 @@ let transbox_go_special st s =
 let forward_eval_command = ref (fun _ _ -> ());;
 
 let playing = ref 0;;
-let hidden_stack = ref []
+
+(* Setting the forward function Grdev.get_playing. *)
+let play = Grdev.get_playing in
+play := (fun () -> !playing);;
+
+let hidden_stack = ref [];;
 
 let proc_clean () =
   current_recording_proc := [];
@@ -641,7 +646,7 @@ let proc_special st s =
         if !playing = 0 then
           begin
             let recording =
-              { tag =  procname;
+              { tag = procname;
                 unit = 
                 { escaped_register = get_register_set st;
                   escaped_stack = st.stack;
@@ -976,14 +981,14 @@ let html_special st html =
     open_html st html (fun x -> Dev.H.Href x) "Href" else
   if  has_prefix "<A advi=\"" html || has_prefix "<a advi=\"" html then
     let advi x =
-      let play() = proc_special st ("advi: proc="^x^" play") in
+      let play () = proc_special st ("advi: proc=" ^ x ^ " play") in
       Dev.H.Advi
         {Dev.H.link = x; Dev.H.action = play;
          Dev.H.mode = Dev.H.Over; Dev.H.color = None; Dev.H.area = None} in 
       open_html st html advi "Advi" else
   if  has_prefix "<A hdvi=\"" html || has_prefix "<a hdvi=\"" html then
     let advi x =
-      let play() = proc_special st ("advi: proc="^x^" play") in
+      let play () = proc_special st ("advi: proc=" ^ x ^ " play") in
       Dev.H.Advi
         {Dev.H.link = x; Dev.H.action = play;
          Dev.H.mode = Dev.H.Click_down;
@@ -994,7 +999,7 @@ let html_special st html =
 
 let scan_special_html (headers,xrefs) page s =
   let name = String.sub s 14 (String.length s - 16) in
-  Hashtbl.add  xrefs name page;;
+  Hashtbl.add xrefs name page;;
 
 let scan_special status (headers,xrefs) pagenum s =
   (* Embedded Postscript, better be first for speed when scanning *)
@@ -1002,7 +1007,7 @@ let scan_special status (headers,xrefs) pagenum s =
     (if !Misc.dops then status.Dvi.hasps <- true) else
   if has_prefix "header=" s then
     (if !Misc.dops then
-        headers := (get_suffix "header=" s) :: !headers) else
+        headers := get_suffix "header=" s :: !headers) else
   if has_prefix "advi: setbg " s then scan_bkgd_special status s else
   if has_prefix "html:<A name=\"" s || has_prefix "html:<a name=\"" s then
     scan_special_html (headers, xrefs) pagenum s;;

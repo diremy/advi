@@ -133,7 +133,7 @@ let synchronize () =
   Gs.flush ();
   Transimpl.synchronize_transition ();
   GY.synchronize ();
-  launch_embedded_apps();;
+  launch_embedded_apps ();;
 
 (* for refreshed signal on usr1 *)
 exception Usr1;;
@@ -385,16 +385,14 @@ type bgoption =
    | BgImg of string
    | BgAlpha of float
    | BgBlend of blend
-   | BgRatio of Drawimage.ratiopts
-;;
+   | BgRatio of Drawimage.ratiopts;;
 
 let set_bg_option = function
   | BgColor c -> bkgd_data.bgcolor <- c
   | BgImg file -> bkgd_data.bgimg <- Some file
   | BgAlpha a -> bkgd_data.bgalpha <- a
   | BgBlend b -> bkgd_data.bgblend <- b
-  | BgRatio f -> bkgd_data.bgratio <- f
-;;
+  | BgRatio f -> bkgd_data.bgratio <- f;;
 
 let set_bg_options l = List.iter set_bg_option l;;
 
@@ -423,13 +421,18 @@ let find_bg_color x y w h =
     | [] -> !bg_color in
   find_color !background_colors;;
 
+(* Forward to Driver.playing. *)
+let get_playing = ref (fun () -> 0);;
+
 let get_bg_color x y w h =
   if !ignore_background then Graphics.white else
+  if !get_playing () > 0 then !bg_color else
     begin
       sync dvi;
       if !psused || bkgd_data.bgimg <> None then
         let c = GY.point_color (x + 1) (y + 1) in
 	let c' = GY.point_color (x + w - 1) (y + h - 1) in
+        if c = c' then c else
 	let rgb_of_color c =
 	  let b = (c land 0x0000ff) in 
 	  let g = (c land 0x00ff00) lsr 8 in
@@ -437,8 +440,8 @@ let get_bg_color x y w h =
 	  r,g,b
 	in
 	let r, g, b  = rgb_of_color c  in
-	let r',g',b' = rgb_of_color c' in
-	Graphics.rgb ((r+r'+1)/2) ((g+g'+1)/2) ((b+b'+1)/2)
+	let r', g', b' = rgb_of_color c' in
+	Graphics.rgb ((r + r' + 1) / 2) ((g + g' + 1) / 2) ((b + b' + 1) / 2)
       else find_bg_color x y w h
     end;;
 
