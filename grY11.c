@@ -87,10 +87,10 @@ value gr_anti_synchronize(void)
             grwindow.w, grwindow.h,
             0, 0);
   XFlush(grdisplay);
-  return Val_unit ;
+  return Val_unit;
 }
 
-value gr_window_color(value vx, value vy)
+value gr_window_point_color(value vx, value vy)
 {
   int x = Int_val(vx);
   int y = Int_val(vy);
