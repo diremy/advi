@@ -32,7 +32,7 @@ all:: talk.dvi
 	advi talk.dvi
 
 clean::
-	/bin/rm -f *.z[io] *.aux *.dvi *.ps *.log *~ *.txt spelling
+	/bin/rm -f *.z[io] *.aux *.dvi talk.ps *.log *~ *.txt spelling
 
 scratch: clean
 	/bin/rm -f *.bbl
