@@ -17,18 +17,18 @@
 
 (* Module [GraphicsY11]: additional graphics primitives for the X Windows system *)
 
-type window_id = string
+type window_id = string;;
 
 let null_window = "-1";;
 
-external flush : unit -> unit = "gr_flush"
+external flush : unit -> unit = "gr_flush";;
         (* flush pending events *)
 
-external sync : unit -> unit = "gr_sync"
+external sync : unit -> unit = "gr_sync";;
         (* flush pending events and wait until all have been processed *)
 
 external raw_draw_area : Graphics.image -> (int * int * int * int) ->
-  int -> int -> unit = "gr_draw_area"
+  int -> int -> unit = "gr_draw_area";;
 
 let draw_area ~ima ~srcx ~srcy ~width ~height ~destx ~desty =
   if srcx < 0 || srcy < 0 then raise (Invalid_argument "draw_area")
@@ -59,7 +59,7 @@ let close_subwindow wid =
   if wid != null_window then begin
   check_window "close_subwindow" wid;
   raw_close_subwindow wid;
-  Hashtbl.remove subwindows wid end
+  Hashtbl.remove subwindows wid end;;
 
 external raw_map_window : window_id  -> unit = "gr_map_window";;
 external raw_unmap_window : window_id -> unit = "gr_unmap_window";;
@@ -93,7 +93,7 @@ let move_subwindow wid x y =
   let h = Hashtbl.find subwindows wid in
   raw_move_window wid x y h end;;
 
-external flush : unit -> unit = "gr_flush"
+external flush : unit -> unit = "gr_flush";;
         (* flush the content of the backing store *)
 
 external bsize_x : unit -> int = "gr_bsize_x"
@@ -198,6 +198,7 @@ type cursor =
   | Cursor_ur_angle
   | Cursor_watch
   | Cursor_xterm
+;;
 
 let glyph_of_cursor = function
   | Cursor_id x -> x / 2 * 2 (* must be even *) 
@@ -278,33 +279,32 @@ let glyph_of_cursor = function
   | Cursor_ur_angle -> 148
   | Cursor_watch -> 150
   | Cursor_xterm -> 152
-
-external set_cursor : int -> unit = "gr_set_cursor"
-external unset_cursor : unit -> unit = "gr_unset_cursor"
-
-let set_cursor c =
-  set_cursor (glyph_of_cursor c)
 ;;
 
-external get_geometry : unit -> int * int * int * int = "gr_get_geometry"
+external set_cursor : int -> unit = "gr_set_cursor";;
+external unset_cursor : unit -> unit = "gr_unset_cursor";;
+
+let set_cursor c = set_cursor (glyph_of_cursor c);;
+
+external get_geometry : unit -> int * int * int * int = "gr_get_geometry";;
         (* returns width, height, x, y of the graphics window *)
 
-external get_modifiers : unit -> int = "gr_get_modifiers"
+external get_modifiers : unit -> int = "gr_get_modifiers";;
         (* returns modifiers as an integer *)
 let button1 = 0x1
-let button2 = 0x2
-let button3 = 0x4
-let button4 = 0x8
-let button5 = 0x10
-let shift = 0x100
-let control = 0x200
-let mod1 = 0x400
-let mod2 = 0x800
-let mod3 = 0x1000
-let mod4 = 0x2000
-let mod5 = 0x4000
+and button2 = 0x2
+and button3 = 0x4
+and button4 = 0x8
+and button5 = 0x10
+and shift = 0x100
+and control = 0x200
+and mod1 = 0x400
+and mod2 = 0x800
+and mod3 = 0x1000
+and mod4 = 0x2000
+and mod5 = 0x4000;;
 
-external cut : string -> unit = "gr_cut"
+external cut : string -> unit = "gr_cut";;
         (* store string in the cut buffer *)
 
 (* Redefinition of the events loop *)
@@ -316,7 +316,8 @@ type status =
       keypressed : bool;
       key : char; 
       modifiers : int;
-    } 
+    }
+;;
 
 type event =
     Button_down
@@ -324,45 +325,47 @@ type event =
   | Key_pressed
   | Mouse_motion
   | Poll
+;;
 
-external wait_next_event : event list -> status = "gry_wait_event"
-external retrieve_events : unit -> unit = "gry_retrieve_events"
+external wait_next_event : event list -> status = "gry_wait_event";;
+external retrieve_events : unit -> unit = "gry_retrieve_events";;
 
 let mouse_pos () =
-  let e = wait_next_event [Poll] in (e.mouse_x, e.mouse_y)
+  let e = wait_next_event [Poll] in (e.mouse_x, e.mouse_y);;
 
 let button_down () =
-  let e = wait_next_event [Poll] in e.button
+  let e = wait_next_event [Poll] in e.button;;
 
 let read_key () =
-  let e = wait_next_event [Key_pressed] in e.key
+  let e = wait_next_event [Key_pressed] in e.key;;
 
 let key_pressed () =
-  let e = wait_next_event [Poll] in e.keypressed
+  let e = wait_next_event [Poll] in e.keypressed;;
 
 (** As [point_color] but read in window *)
-external window_color : int -> int -> Graphics.color = "gr_window_color"
+external window_color : int -> int -> Graphics.color = "gr_window_color";;
 
 (** Global_display mode allows to inhibit diplay_mode commands *)
-external anti_synchronize : unit -> unit = "gr_anti_synchronize"
-let global_display_mode_status = ref false
-let global_display_mode b = global_display_mode_status :=  b
-let synchronize ()=
+external anti_synchronize : unit -> unit = "gr_anti_synchronize";;
+let global_display_mode_status = ref false;;
+let global_display_mode b = global_display_mode_status :=  b;;
+let synchronize () =
   if not !global_display_mode_status then
     Graphics.synchronize()
   else anti_synchronize();;
+
 let display_mode b =
   if not !global_display_mode_status then 
-    Graphics.display_mode (b || !global_display_mode_status)
+    Graphics.display_mode (b || !global_display_mode_status);;
 
 let point_color x y =
   if !global_display_mode_status then window_color x y
-  else Graphics.point_color x y 
+  else Graphics.point_color x y;;
 
 (* Graphics.sigio_signal is not exported. We declare it here again. *)
-external sigio_signal: unit -> int = "gr_sigio_signal"
+external sigio_signal: unit -> int = "gr_sigio_signal";;
+
 let init () =
   (* we disable the original Graphics event retrieveing system *)
-  Sys.set_signal (sigio_signal ()) Sys.Signal_ignore
-;;
+  Sys.set_signal (sigio_signal ()) Sys.Signal_ignore;;
 

@@ -1,5 +1,22 @@
-type preamble
-type header
+(***********************************************************************)
+(*                                                                     *)
+(*                             Active-DVI                              *)
+(*                                                                     *)
+(*                   Projet Cristal, INRIA Rocquencourt                *)
+(*                                                                     *)
+(*  Copyright 2002 Institut National de Recherche en Informatique et   *)
+(*  en Automatique.  All rights reserved.  This file is distributed    *)
+(*  under the terms of the GNU Lesser General Public License.          *)
+(*                                                                     *)
+(*  Jun Furuse, Didier Rémy and Pierre Weis.                           *)
+(*  Contributions by Roberto Di Cosmo, Didier Le Botlan,               *)
+(*  Xavier Leroy, and Alan Schmitt.                                    *)
+(*                                                                     *)
+(*  Based on Mldvi by Alexandre Miquel.                                *)
+(***********************************************************************)
+
+type preamble;;
+type header;;
 
 type char_info = {
   width_index : int;
@@ -8,7 +25,7 @@ type char_info = {
   italic_index : int;
   tag : int;
   remainder : int;
-} 
+};;
 
 type jfm = {
   preamble : preamble;
@@ -23,9 +40,9 @@ type jfm = {
   glues : int array;
   kerns : int array;
   params : string;
-} 
+};;
 
-val load_jfm_file : string -> jfm
-val find_width : jfm -> int -> int
+val load_jfm_file : string -> jfm;;
+val find_width : jfm -> int -> int;;
 
-val monospace_fix : (int * float) list
+val monospace_fix : (int * float) list;;

@@ -1,3 +1,20 @@
+(***********************************************************************)
+(*                                                                     *)
+(*                             Active-DVI                              *)
+(*                                                                     *)
+(*                   Projet Cristal, INRIA Rocquencourt                *)
+(*                                                                     *)
+(*  Copyright 2002 Institut National de Recherche en Informatique et   *)
+(*  en Automatique.  All rights reserved.  This file is distributed    *)
+(*  under the terms of the GNU Lesser General Public License.          *)
+(*                                                                     *)
+(*  Jun Furuse, Didier Rémy and Pierre Weis.                           *)
+(*  Contributions by Roberto Di Cosmo, Didier Le Botlan,               *)
+(*  Xavier Leroy, and Alan Schmitt.                                    *)
+(*                                                                     *)
+(*  Based on Mldvi by Alexandre Miquel.                                *)
+(***********************************************************************)
+
 (* Reverse and filters list l according to f. (Pour faire plaisir à Gérard) *)
 let reverse_filter f l =
   let rec filter res = function
@@ -76,6 +93,8 @@ let catenate_sep sep = function
 let int_or_float_of_string s =
   try int_of_string s with _ -> truncate (float_of_string s);;
 
+let is_digit c = c >= '0' && c <= '9';;
+
 (* Fatal error in advi's code. *)
 exception Fatal_error of string;;
 let fatal_error x = raise (Fatal_error x);;
@@ -91,4 +110,3 @@ let warning mes =
 let forward_debug_endline = ref (function (s : string) -> ());;
 
 let debug_endline s = !forward_debug_endline s;;
-

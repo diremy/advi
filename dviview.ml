@@ -1,19 +1,19 @@
-(*
- * advi - A DVI previewer
- * Copyright (C) 2000  Alexandre Miquel
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- *
- * See the GNU Lesser General Public License version 2.1 for more
- * details (enclosed in the file LGPL).
- *)
+(***********************************************************************)
+(*                                                                     *)
+(*                             Active-DVI                              *)
+(*                                                                     *)
+(*                   Projet Cristal, INRIA Rocquencourt                *)
+(*                                                                     *)
+(*  Copyright 2002 Institut National de Recherche en Informatique et   *)
+(*  en Automatique.  All rights reserved.  This file is distributed    *)
+(*  under the terms of the GNU Lesser General Public License.          *)
+(*                                                                     *)
+(*  Jun Furuse, Didier Rémy and Pierre Weis.                           *)
+(*  Contributions by Roberto Di Cosmo, Didier Le Botlan,               *)
+(*  Xavier Leroy, and Alan Schmitt.                                    *)
+(*                                                                     *)
+(*  Based on Mldvi by Alexandre Miquel.                                *)
+(***********************************************************************)
 
 let pauses = Options.flag true "-nopauses" "Switch pauses off";;
 let fullwidth = Options.flag false "-fullwidth" "Adjust size to width";;
@@ -171,18 +171,16 @@ let set_page_no st n =
  st.page_no <- n;;
 
 (*** Setting the geometry ***)
-let is_digit c = c >= '0' && c <= '9';;
-
 let parse_geometry str =
   try
     let len = String.length str
     and i = ref 0 in
     let parse_int () =
-      if !i = len || not (is_digit str.[!i] || str.[!i] == '-') then
+      if !i = len || not (Misc.is_digit str.[!i] || str.[!i] == '-') then
         invalid_arg "set_geometry";
       let start = !i in
       if str.[!i] = '-' && !i < len+1 then incr i;
-      while !i < len && is_digit str.[!i] do incr i done;
+      while !i < len && Misc.is_digit str.[!i] do incr i done;
       let stop = !i in
       int_of_string (String.sub str start (stop - start)) in
     let parse_offset () =
@@ -191,7 +189,7 @@ let parse_geometry str =
       else begin
         let sgn = str.[!i] in
         incr i;
-        if !i = len || not (is_digit str.[!i] || str.[!i] == '-') then
+        if !i = len || not (Misc.is_digit str.[!i] || str.[!i] == '-') then
           No_offset
         else
           match sgn with
@@ -225,13 +223,13 @@ let attr =
   };;
 
 let set_autoresize b = autoresize := b
-let set_geometry geom = attr.geom <- parse_geometry geom
+let set_geometry geom = attr.geom <- parse_geometry geom;;
 
-let set_crop b = attr.crop <- b
+let set_crop b = attr.crop <- b;;
 
-let set_hmargin d = attr.hmargin <- normalize d
+let set_hmargin d = attr.hmargin <- normalize d;;
 
-let set_vmargin d = attr.vmargin <- normalize d
+let set_vmargin d = attr.vmargin <- normalize d;;
 
 (*** Initialization ***)
 let init filename =
@@ -352,14 +350,14 @@ let update_dvi_size init st =
           (sx, sy)
         end else
           (attr.geom.width, attr.geom.height) in
-(*
-   attr.geom.width <- size_x;
-   attr.geom.height <- size_y;
-*)
+      (*
+      attr.geom.width <- size_x;
+      attr.geom.height <- size_y;
+      *)
       st.base_dpi <- base_dpi;
       st.size_x <- size_x;
       st.size_y <- size_y;
-      let orig_x, orig_y = (size_x - width)/2,  (size_y - height)/2 in
+      let orig_x, orig_y = (size_x - width) / 2,  (size_y - height) / 2 in
       st.orig_x <- orig_x;
       st.orig_y <- orig_y;
     end;

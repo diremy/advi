@@ -1,20 +1,19 @@
-
-(*
- * advi - A DVI previewer
- * Copyright (C) 2000  Alexandre Miquel
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- *
- * See the GNU Lesser General Public License version 2.1 for more
- * details (enclosed in the file LGPL).
- *)
+(***********************************************************************)
+(*                                                                     *)
+(*                             Active-DVI                              *)
+(*                                                                     *)
+(*                   Projet Cristal, INRIA Rocquencourt                *)
+(*                                                                     *)
+(*  Copyright 2002 Institut National de Recherche en Informatique et   *)
+(*  en Automatique.  All rights reserved.  This file is distributed    *)
+(*  under the terms of the GNU Lesser General Public License.          *)
+(*                                                                     *)
+(*  Jun Furuse, Didier Rémy and Pierre Weis.                           *)
+(*  Contributions by Roberto Di Cosmo, Didier Le Botlan,               *)
+(*  Xavier Leroy, and Alan Schmitt.                                    *)
+(*                                                                     *)
+(*  Based on Mldvi by Alexandre Miquel.                                *)
+(***********************************************************************)
 
 let temp_filename = Filename.temp_file "advi" "" ;;
 let database_mtime = ref 0.0 ;;
@@ -35,7 +34,7 @@ let command_string com opt =
           close_in ch;
           res
         with x -> close_in ch; raise x
-      with _ -> 
+      with _ ->
         Misc.warning
           (Printf.sprintf "Error %d while executing %s %s"
              exit_status com opt);
@@ -47,7 +46,7 @@ let command_string com opt =
 
 let addpath elem var kind =
   let oldv =
-    try Unix.getenv var with Not_found -> 
+    try Unix.getenv var with Not_found ->
       try command_string Config.kpsewhich_path
           (Printf.sprintf "-show-path='%s'" kind)
       with Command -> "" in
@@ -110,7 +109,7 @@ let true_file_name options file =
   try command_string Config.kpsewhich_path args
   with
     Command ->
-      Misc.warning (Printf.sprintf "%s is not found" file); 
+      Misc.warning (Printf.sprintf "%s is not found" file);
       raise Not_found
 ;;
 

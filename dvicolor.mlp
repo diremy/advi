@@ -1,6 +1,23 @@
-open Graphics
+(***********************************************************************)
+(*                                                                     *)
+(*                             Active-DVI                              *)
+(*                                                                     *)
+(*                   Projet Cristal, INRIA Rocquencourt                *)
+(*                                                                     *)
+(*  Copyright 2002 Institut National de Recherche en Informatique et   *)
+(*  en Automatique.  All rights reserved.  This file is distributed    *)
+(*  under the terms of the GNU Lesser General Public License.          *)
+(*                                                                     *)
+(*  Jun Furuse, Didier Rémy and Pierre Weis.                           *)
+(*  Contributions by Roberto Di Cosmo, Didier Le Botlan,               *)
+(*  Xavier Leroy, and Alan Schmitt.                                    *)
+(*                                                                     *)
+(*  Based on Mldvi by Alexandre Miquel.                                *)
+(***********************************************************************)
 
-type color = Graphics.color
+open Graphics;;
+
+type color = Graphics.color;;
 
 let named_colors = [
   "black", black;
@@ -18,7 +35,7 @@ let cmyk c m y k =
   and g = 255 - m
   and b = 255 - y in
   (* k is ignored *)
-  rgb r g b ;;
+  rgb r g b;;
 
 let parse_color_args = function
   | ["rgb"; rs; gs; bs] ->
@@ -39,14 +56,14 @@ let parse_color_args = function
       begin
 	try 
 ifdef HAVE_CAMLIMAGES then
-	  let {Color.r=r; Color.g=g; Color.b=b} = Color.color_parse s in
+	  let {Color.r = r; Color.g = g; Color.b = b} = Color.color_parse s in
 	  rgb r g b
 else
           raise Exit
 	with _ ->
             try List.assoc (String.lowercase s) named_colors
             with Not_found ->
-              Format.eprintf "unknown color %s@." s ;
+              Format.eprintf "unknown color %s@." s;
               0x000000
       end
-  | _ -> 0x000000 ;;
+  | _ -> 0x000000;;

@@ -41,6 +41,8 @@ DELAYED AFTER RELEASE:
 
 LIMITATIONS:
 
+* Grdev.cut does not work ?
+
 * PStricks ne marche pas correctement avec \ncarc etc. (annotation sur les
   flèches). 
 

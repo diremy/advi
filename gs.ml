@@ -1,3 +1,21 @@
+(***********************************************************************)
+(*                                                                     *)
+(*                             Active-DVI                              *)
+(*                                                                     *)
+(*                   Projet Cristal, INRIA Rocquencourt                *)
+(*                                                                     *)
+(*  Copyright 2002 Institut National de Recherche en Informatique et   *)
+(*  en Automatique.  All rights reserved.  This file is distributed    *)
+(*  under the terms of the GNU Lesser General Public License.          *)
+(*                                                                     *)
+(*  Jun Furuse, Didier Rémy and Pierre Weis.                           *)
+(*  Contributions by Roberto Di Cosmo, Didier Le Botlan,               *)
+(*  Xavier Leroy, and Alan Schmitt.                                    *)
+(*                                                                     *)
+(*  Based on Mldvi by Alexandre Miquel.                                *)
+(***********************************************************************)
+
+
 let antialias =
   Options.flag false
     "-A"
@@ -35,10 +53,10 @@ let parse_pos s =
   let right = String.sub s (c+1) (String.length s -c-1) in
   let int_of_floatstring f = int_of_float (float_of_string f +. 0.5) in
   b, int_of_floatstring left, int_of_floatstring right;;
+
 let ack_request =
   String.concat ""
     [ "flushpage ("; ack_string; ") print flush "; ];;
-
 
 let timeout = 3.;;
 
@@ -417,7 +435,6 @@ class gv =
           process <- None
   end
 ;;
-
 
 let gv = new gv;;
 

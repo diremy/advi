@@ -2,7 +2,7 @@
 (*                                                                     *)
 (*                           Objective Caml                            *)
 (*                                                                     *)
-(*                 projet Cristal, INRIA Rocquencourt                  *)
+(*    Pierre Weis and Jun Furuse, projet Cristal, INRIA Rocquencourt   *)
 (*                                                                     *)
 (*  Copyright 2001 Institut National de Recherche en Informatique et   *)
 (*  en Automatique.  All rights reserved.  This file is distributed    *)
@@ -14,55 +14,55 @@
 
 (* Module [GraphicsX11]: additional graphics primitives for the X Windows system *)
 
-type window_id = string
+type window_id = string;;
 
-val get_window_id : unit -> window_id
+val get_window_id : unit -> window_id;;
         (* Return the unique identifier of the Caml graphics window.
            The returned string is an unsigned 32 bits integer 
            in decimal form. *)
 
-val open_subwindow : x:int -> y:int -> width:int -> height:int -> window_id
+val open_subwindow : x:int -> y:int -> width:int -> height:int -> window_id;;
          (* Create a sub-window of the current Caml graphics window
             and return its identifier. *)
 
-val close_subwindow : window_id -> unit
+val close_subwindow : window_id -> unit;;
          (* Close the sub-window having the given identifier. *)
 
-val map_subwindow : window_id -> unit
-val unmap_subwindow : window_id -> unit
+val map_subwindow : window_id -> unit;;
+val unmap_subwindow : window_id -> unit;;
          (* Map or unmap the sub-window having the given identifier. *)
 
-val move_subwindow : window_id -> int -> int -> unit
+val move_subwindow : window_id -> int -> int -> unit;;
          (* [move_subwindow wid x y] moves the sub-window having the
             given identifier to point [x, y]. *)
-val resize_subwindow : window_id -> int -> int -> unit
+val resize_subwindow : window_id -> int -> int -> unit;;
          (* [resize_subwindow wid w h] resizes the sub-window having
             the given identifier to height [h] and width [w]. *)
 
-external bstore_id : unit -> int32 = "gr_bstore"
+external bstore_id : unit -> int32 = "gr_bstore";;
         (* return the X pixmap of the bstore window as an integer *)
-external window_id : unit -> int32 = "gr_window"
+external window_id : unit -> int32 = "gr_window";;
         (* return the X pixmap of the bstore window as an integer *)
 
 
-external flush : unit -> unit = "gr_flush"
+external flush : unit -> unit = "gr_flush";;
         (* flush pending events *)
 
-external sync : unit -> unit = "gr_sync"
+external sync : unit -> unit = "gr_sync";;
         (* flush pending events and wait until all have been processed *)
 
-external bsize_x : unit -> int = "gr_bsize_x"
-external bsize_y : unit -> int = "gr_bsize_y"
+external bsize_x : unit -> int = "gr_bsize_x";;
+external bsize_y : unit -> int = "gr_bsize_y";;
         (* Idem, but return the size of the backing store. *)
-external screen_x : unit -> int = "gr_screen_x"
-external screen_y : unit -> int = "gr_screen_y"
-external origin_x : unit -> int = "gr_origin_x"
-external origin_y : unit -> int = "gr_origin_y"
+external screen_x : unit -> int = "gr_screen_x";;
+external screen_y : unit -> int = "gr_screen_y";;
+external origin_x : unit -> int = "gr_origin_x";;
+external origin_y : unit -> int = "gr_origin_y";;
         (* Return the size of the screen. *)
-external reposition : int -> int -> int -> int -> unit = "gr_reposition"
+external reposition : int -> int -> int -> int -> unit = "gr_reposition";;
 
 external set_named_atom_property : string -> string -> unit
-    = "gr_set_named_atom_property"
+    = "gr_set_named_atom_property";;
         (* make_atom_property ATOM STRING define an X atom ATOM with
            property STRING *)
 
@@ -147,39 +147,40 @@ type cursor =
   | Cursor_ur_angle
   | Cursor_watch
   | Cursor_xterm
+;;
 
-val set_cursor : cursor -> unit 
+val set_cursor : cursor -> unit;;
         (* set the cursor for the graphics window *)
 
-val unset_cursor : unit -> unit 
+val unset_cursor : unit -> unit;;
         (* unset the cursor (use the parent's cursor) *)
 
-external get_geometry : unit -> int * int * int * int = "gr_get_geometry"
+external get_geometry : unit -> int * int * int * int = "gr_get_geometry";;
         (* returns width, height, x, y of the graphics window *)
 
-external get_modifiers : unit -> int = "gr_get_modifiers"
+external get_modifiers : unit -> int = "gr_get_modifiers";;
         (* returns the list of modifiers as an integer *)
 
-val button1 : int
-val button2 : int
-val button3 : int
-val button4 : int
-val button5 : int
-val shift : int
-val control : int
-val mod1 : int
-val mod2 : int
-val mod3 : int
-val mod4 : int
-val mod5 : int
+val button1 : int;;
+val button2 : int;;
+val button3 : int;;
+val button4 : int;;
+val button5 : int;;
+val shift : int;;
+val control : int;;
+val mod1 : int;;
+val mod2 : int;;
+val mod3 : int;;
+val mod4 : int;;
+val mod5 : int;;
         (* mask for modifiers *)
 
-external cut : string -> unit = "gr_cut"
+external cut : string -> unit = "gr_cut";;
         (* paste string to the cut and paste buffer *)
 
 val draw_area : 
     ima:Graphics.image -> srcx:int -> srcy:int -> width:int -> height:int ->
-      destx:int -> desty:int -> unit
+      destx:int -> desty:int -> unit;;
 
 
 (* Redefinition of events *)
@@ -193,7 +194,7 @@ type status =
     keypressed : bool;          (* true if a key has been pressed *)
     key : char ;                (* the character for the key pressed *)
     modifiers : int;
-  } 
+  };;
 (* To report events. *)
 
 type event =
@@ -203,8 +204,9 @@ type event =
   | Mouse_motion                (* The mouse is moved *)
   | Poll                        (* Don't wait; return immediately *)
         (* To specify events to wait for. *)
+;;
 
-external wait_next_event : event list -> status = "gry_wait_event"
+external wait_next_event : event list -> status = "gry_wait_event";;
         (* Wait until one of the events specified in the given event list
            occurs, and return the status of the mouse and keyboard at
            that time. If [Poll] is given in the event list, return immediately
@@ -213,7 +215,7 @@ external wait_next_event : event list -> status = "gry_wait_event"
            outside the range [0..size_x()-1, 0..size_y()-1]. Keypresses
            are queued, and dequeued one by one when the [Key_pressed]
            event is specified. *)
-val retrieve_events : unit -> unit
+val retrieve_events : unit -> unit;;
         (* Instead of having the event retrieving periodically called by
 	   the interval timer like Graphics, we have this manual event 
 	   retrieving function. Call [initalize] first to disable 
@@ -221,31 +223,31 @@ val retrieve_events : unit -> unit
 
 (*** Mouse and keyboard polling *)
 
-val mouse_pos : unit -> int * int
+val mouse_pos : unit -> int * int;;
         (* Return the position of the mouse cursor, relative to the
            graphics window. If the mouse cursor is outside of the graphics
            window, [mouse_pos()] returns a point outside of the range
            [0..size_x()-1, 0..size_y()-1]. *)
-val button_down : unit -> bool
+val button_down : unit -> bool;;
         (* Return [true] if the mouse button is pressed, [false] otherwise. *)
-val read_key : unit -> char
+val read_key : unit -> char;;
         (* Wait for a key to be pressed, and return the corresponding
            character. Keypresses are queued. *)
-val key_pressed : unit -> bool
+val key_pressed : unit -> bool;;
         (* Return [true] if a keypress is available; that is, if [read_key]
            would not block. *)
 
 (** It enables/disables the command display_mode and synchronize according
  to the value [false]/[true]. When disable, [display_mode] and [synchronize]
  commands will be ignored. *)
-val global_display_mode : bool -> unit
+val global_display_mode : bool -> unit;;
 (** Same as [Graphics.synchronize] but according to [global_display_mode] *)
-val synchronize : unit -> unit 
+val synchronize : unit -> unit;;
 (** Same as [Graphics.display_mode] but according to [global_display_mode] *)
-val display_mode : bool -> unit
+val display_mode : bool -> unit;;
 (** As [point_color] but according to values of [global_display_mode] *)
-val point_color : int -> int -> int
+val point_color : int -> int -> int;;
 
-val init : unit -> unit
+val init : unit -> unit;;
 (** We have to call this function to disable the original Graphics
    event retrieving facility. *)

@@ -15,39 +15,5 @@
 (*  Based on Mldvi by Alexandre Miquel.                                *)
 (***********************************************************************)
 
-type 'a status =
-  | Unknown
-  | Known of 'a
-  | Error of exn;;
-
-type 'a t = {
-    table : 'a status array;
-    build : int -> 'a;
-    (* extension for japanese characters (id>255) *)
-    hash : (int, 'a) Hashtbl.t
-  };;
-
-let make f =
-  { table = Array.make 256 Unknown;
-    build = f;
-    hash = Hashtbl.create 1031 };;
-
-let get tbl n =
-  if n < 0 || n > 0xFF then begin
-    try Hashtbl.find tbl.hash n with Not_found ->
-      let v = tbl.build n in
-      Hashtbl.add tbl.hash n v;
-      v
-  end else
-  let table = tbl.table in
-  match table.(n) with
-  | Known v -> v
-  | Error e -> raise e
-  | Unknown ->
-      try
-        let v = tbl.build n in
-        table.(n) <- Known v; v
-      with e ->
-        table.(n) <- Error e;
-        raise e;;
-
+type color = Graphics.color;;
+val parse_color_args : string list -> color;;

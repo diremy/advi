@@ -1,7 +1,25 @@
-open Graphics
-open Transitions
+(***********************************************************************)
+(*                                                                     *)
+(*                             Active-DVI                              *)
+(*                                                                     *)
+(*                   Projet Cristal, INRIA Rocquencourt                *)
+(*                                                                     *)
+(*  Copyright 2002 Institut National de Recherche en Informatique et   *)
+(*  en Automatique.  All rights reserved.  This file is distributed    *)
+(*  under the terms of the GNU Lesser General Public License.          *)
+(*                                                                     *)
+(*  Jun Furuse, Didier Rémy and Pierre Weis.                           *)
+(*  Contributions by Roberto Di Cosmo, Didier Le Botlan,               *)
+(*  Xavier Leroy, and Alan Schmitt.                                    *)
+(*                                                                     *)
+(*  Based on Mldvi by Alexandre Miquel.                                *)
+(***********************************************************************)
 
-let sleep = ref (fun _ -> false)
+
+open Graphics;;
+open Transitions;;
+
+let sleep = ref (fun _ -> false);;
 
 let current_transition = ref TransNone;;
  
@@ -147,7 +165,7 @@ let synchronize_transition () =
   end
 ;;
 
-let prev_geom = ref None
+let prev_geom = ref None;;
 
 let init_sprite () = prev_geom := None;;
 
@@ -242,7 +260,7 @@ let box_transition trans oldimg newimg x y width height =
 		      (string_of_transmode trans))*)
 ;;
 
-let saved_transbox = ref None
+let saved_transbox = ref None;;
 
 let transbox_save x y width height =
   let x = x and y = y - 1 and width = width + 1 and height = height + 2 in

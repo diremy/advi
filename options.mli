@@ -1,11 +1,28 @@
-val all : unit -> (string * Arg.spec * string) list
-val set : string -> Arg.spec -> string -> unit
+(***********************************************************************)
+(*                                                                     *)
+(*                             Active-DVI                              *)
+(*                                                                     *)
+(*                   Projet Cristal, INRIA Rocquencourt                *)
+(*                                                                     *)
+(*  Copyright 2002 Institut National de Recherche en Informatique et   *)
+(*  en Automatique.  All rights reserved.  This file is distributed    *)
+(*  under the terms of the GNU Lesser General Public License.          *)
+(*                                                                     *)
+(*  Jun Furuse, Didier Rémy and Pierre Weis.                           *)
+(*  Contributions by Roberto Di Cosmo, Didier Le Botlan,               *)
+(*  Xavier Leroy, and Alan Schmitt.                                    *)
+(*                                                                     *)
+(*  Based on Mldvi by Alexandre Miquel.                                *)
+(***********************************************************************)
+
+val all : unit -> (string * Arg.spec * string) list;;
+val set : string -> Arg.spec -> string -> unit;;
 (* 
    [set_option opt spec man] add the option [opt] to the command line
    with specification [spec] and man info [man]   
 *)
     
-val pretty : ((string * Arg.spec * string) list as 'a) -> 'a
+val pretty : ((string * Arg.spec * string) list as 'a) -> 'a;;
 (* 
    To pretty print options, use '\t' in the info string, the part
    of the info message starting after tabulation will be aligned. 
@@ -13,8 +30,8 @@ val pretty : ((string * Arg.spec * string) list as 'a) -> 'a
    the argument to the option. If no '\t' is present, the message
    will not be aligned.
 *)
-    
-val debug : string -> string -> (string -> bool)
+
+val debug : string -> string -> (string -> bool);;
 (*
    [make_debug option message] create an option flag that is false by
    default and that can be set with [option] with info [message]; 
@@ -22,7 +39,7 @@ val debug : string -> string -> (string -> bool)
    but only when the [option] is set. 
 *) 
 
-val flag : bool -> string -> string -> bool ref
+val flag : bool -> string -> string -> bool ref;;
 (*
    [option_flag init opt mes] creates a boolean flag with [init] 
    as initial value declares the optional argument [opt] with info
@@ -35,4 +52,4 @@ val dops : bool ref;;
 (* temporary value, reset to pson when reloading the file. *)
 
 (** tells whether display must always happen in foreground *)
-val global_display_mode : bool ref
+val global_display_mode : bool ref;;

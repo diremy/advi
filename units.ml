@@ -1,19 +1,20 @@
-(*
- * advi - A DVI previewer
- * Copyright (C) 2000  Alexandre Miquel
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- *
- * See the GNU Lesser General Public License version 2.1 for more
- * details (enclosed in the file LGPL).
- *)
+(***********************************************************************)
+(*                                                                     *)
+(*                             Active-DVI                              *)
+(*                                                                     *)
+(*                   Projet Cristal, INRIA Rocquencourt                *)
+(*                                                                     *)
+(*  Copyright 2002 Institut National de Recherche en Informatique et   *)
+(*  en Automatique.  All rights reserved.  This file is distributed    *)
+(*  under the terms of the GNU Lesser General Public License.          *)
+(*                                                                     *)
+(*  Jun Furuse, Didier Rémy and Pierre Weis.                           *)
+(*  Contributions by Roberto Di Cosmo, Didier Le Botlan,               *)
+(*  Xavier Leroy, and Alan Schmitt.                                    *)
+(*                                                                     *)
+(*  Based on Mldvi by Alexandre Miquel.                                *)
+(***********************************************************************)
+
 
 type units =
   | PT
@@ -97,15 +98,3 @@ let from_to u1 u2 =
   let (n1, n2) = ratio u1 u2 in
   let f = float n2 /. float n1 in
   function x -> f *. x ;;
-
-(*
-Format.printf "*%s*@." (String.make 197 '-') ;;
-for i = 0 to 8 do
-  for j = 0 to 8 do
-    let (n1, n2) = matrix.(i).(j) in
-    Format.printf "| %9d/%-9d " n1 n2
-  done ;
-  Format.printf "|@."
-done ;;
-Format.printf "*%s*@." (String.make 197 '-') ;;
-*)

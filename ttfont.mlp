@@ -1,11 +1,28 @@
+(***********************************************************************)
+(*                                                                     *)
+(*                             Active-DVI                              *)
+(*                                                                     *)
+(*                   Projet Cristal, INRIA Rocquencourt                *)
+(*                                                                     *)
+(*  Copyright 2002 Institut National de Recherche en Informatique et   *)
+(*  en Automatique.  All rights reserved.  This file is distributed    *)
+(*  under the terms of the GNU Lesser General Public License.          *)
+(*                                                                     *)
+(*  Jun Furuse, Didier Rémy and Pierre Weis.                           *)
+(*  Contributions by Roberto Di Cosmo, Didier Le Botlan,               *)
+(*  Xavier Leroy, and Alan Schmitt.                                    *)
+(*                                                                     *)
+(*  Based on Mldvi by Alexandre Miquel.                                *)
+(***********************************************************************)
+
 ifdef HAVE_CAMLIMAGES then
 
 module M = struct
-  open Freetype
+  open Freetype;;
   
-  type face = Freetype.face
+  type face = Freetype.face;;
   
-  type bitmap = string
+  type bitmap = string;;
   
   type char_def = {
       code : int ;
@@ -84,9 +101,9 @@ end
 else
 
 module M = struct 
-  type face
+  type face;;
   
-  type bitmap = string
+  type bitmap = string;;
   
   type char_def = {
       code : int ;
@@ -99,7 +116,7 @@ module M = struct
       mutable bitmap : bitmap
     } ;;
   
-  let no_freetype _ = raise (Failure "no freetype library")
+  let no_freetype _ = raise (Failure "no freetype library");;
   let load_face = no_freetype;;
   let build = no_freetype;;
   
@@ -109,8 +126,8 @@ module M = struct
 end
 ;;
 
-type face = M.face
-type bitmap = M.bitmap
+type face = M.face;;
+type bitmap = M.bitmap;;
 type char_def = M.char_def = {
   code : int;
   dx : int;
@@ -120,8 +137,9 @@ type char_def = M.char_def = {
   hoffset : int;
   voffset : int;
   mutable bitmap : bitmap;
-} 
+} ;;
 
-let load_face = M.load_face
-let build = M.build
-let jis2uni = M.jis2uni
+let load_face = M.load_face;;
+let build = M.build;;
+let jis2uni = M.jis2uni;;
+

@@ -1,9 +1,27 @@
+(***********************************************************************)
+(*                                                                     *)
+(*                             Active-DVI                              *)
+(*                                                                     *)
+(*                   Projet Cristal, INRIA Rocquencourt                *)
+(*                                                                     *)
+(*  Copyright 2002 Institut National de Recherche en Informatique et   *)
+(*  en Automatique.  All rights reserved.  This file is distributed    *)
+(*  under the terms of the GNU Lesser General Public License.          *)
+(*                                                                     *)
+(*  Jun Furuse, Didier Rémy and Pierre Weis.                           *)
+(*  Contributions by Roberto Di Cosmo, Didier Le Botlan,               *)
+(*  Xavier Leroy, and Alan Schmitt.                                    *)
+(*                                                                     *)
+(*  Based on Mldvi by Alexandre Miquel.                                *)
+(***********************************************************************)
+
+
 (* jfm files are like tfm (tex font metric) files, but for japanese 
    characters *)
 
-open Input
+open Input;;
 
-type jfm_id = Horizontal | Vertical
+type jfm_id = Horizontal | Vertical;;
 
 type preamble = {
     id : jfm_id;
@@ -20,7 +38,7 @@ type preamble = {
     nk : int; (* size of kern table *)
     ng : int; (* size of glue table *)
     np : int; (* size of param table *)
-  } 
+  };;
 
 let input_int32_as_float ch =
   let n0 = input_byte ch in
@@ -75,8 +93,9 @@ let input_words ic num =
   array
 ;;
 
-type weight = Medium | Bold | Light
+type weight = Medium | Bold | Light;;
 type tai = Seitai | Choutai | Heitai (* ? *)
+;;
 
 type header = {
     checksum : string;
@@ -87,7 +106,7 @@ type header = {
     weight : weight option;
     slant : bool option;
     tai : tai option
-  } 
+  };;
 
 let string_of_header h = 
   let b = Buffer.create 100 in
@@ -192,7 +211,7 @@ type char_info = {
     italic_index : int;
     tag : int;
     remainder : int
-  } 
+  };;
 
 let input_char_infos ic bc ec = (* bc must be 0 *)
   let input_char_info ic =
@@ -229,7 +248,7 @@ type jfm =
       glues : int array;
       kerns : int array;
       params : string
-  } 
+  };;
 
 let input_jfm ic =
   let pre = input_preamble ic in
@@ -298,11 +317,10 @@ let find_width jfm kcode =
   jfm.widths.(char_info.width_index)
 ;;
 
+
 (* x fix of monospace fonts like true type fonts. 
    borrowed from vftools (@ ftp://ftp.math.s.chiba-u.ac.jp/tex).
 *)
-
-
 let monospace_fix = [ 
     0x2122,	0.0000;	        (* ¡¢ *)
     0x2123,	0.0000;	        (* ¡£ *)

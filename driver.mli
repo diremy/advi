@@ -1,27 +1,28 @@
-(*
- * advi - A DVI previewer
- * Copyright (C) 2000  Alexandre Miquel
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- *
- * See the GNU Lesser General Public License version 2.1 for more
- * details (enclosed in the file LGPL).
- *)
+(***********************************************************************)
+(*                                                                     *)
+(*                             Active-DVI                              *)
+(*                                                                     *)
+(*                   Projet Cristal, INRIA Rocquencourt                *)
+(*                                                                     *)
+(*  Copyright 2002 Institut National de Recherche en Informatique et   *)
+(*  en Automatique.  All rights reserved.  This file is distributed    *)
+(*  under the terms of the GNU Lesser General Public License.          *)
+(*                                                                     *)
+(*  Jun Furuse, Didier Rémy and Pierre Weis.                           *)
+(*  Contributions by Roberto Di Cosmo, Didier Le Botlan,               *)
+(*  Xavier Leroy, and Alan Schmitt.                                    *)
+(*                                                                     *)
+(*  Based on Mldvi by Alexandre Miquel.                                *)
+(***********************************************************************)
 
-exception Pause
-type cooked_dvi
-val cook_dvi : Dvi.t -> cooked_dvi
-val render_page : cooked_dvi -> int -> float -> int -> int -> unit
+
+exception Pause;;
+type cooked_dvi;;
+val cook_dvi : Dvi.t -> cooked_dvi;;
+val render_page : cooked_dvi -> int -> float -> int -> int -> unit;;
 val render_step : cooked_dvi -> int -> ?trans:Transitions.direction -> 
-        float -> int -> int -> (unit -> bool)
-val unfreeze_fonts : cooked_dvi -> unit
-val unfreeze_glyphs : cooked_dvi -> float -> unit
-val scan_special_pages : cooked_dvi -> int -> unit
-val clear_symbols : unit -> unit
+        float -> int -> int -> (unit -> bool);;
+val unfreeze_fonts : cooked_dvi -> unit;;
+val unfreeze_glyphs : cooked_dvi -> float -> unit;;
+val scan_special_pages : cooked_dvi -> int -> unit;;
+val clear_symbols : unit -> unit;;

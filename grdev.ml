@@ -1,21 +1,20 @@
-(*
- * advi - A DVI previewer
- * Copyright (C) 2000  Alexandre Miquel
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- *
- * See the GNU Lesser General Public License version 2.1 for more
- * details (enclosed in the file LGPL).
- *)
+(***********************************************************************)
+(*                                                                     *)
+(*                             Active-DVI                              *)
+(*                                                                     *)
+(*                   Projet Cristal, INRIA Rocquencourt                *)
+(*                                                                     *)
+(*  Copyright 2002 Institut National de Recherche en Informatique et   *)
+(*  en Automatique.  All rights reserved.  This file is distributed    *)
+(*  under the terms of the GNU Lesser General Public License.          *)
+(*                                                                     *)
+(*  Jun Furuse, Didier Rémy and Pierre Weis.                           *)
+(*  Contributions by Roberto Di Cosmo, Didier Le Botlan,               *)
+(*  Xavier Leroy, and Alan Schmitt.                                    *)
+(*                                                                     *)
+(*  Based on Mldvi by Alexandre Miquel.                                *)
+(***********************************************************************)
 
-module GY = GraphicsY11;;
 
 let ignore_background = Options.flag false
     "--ignore_background"
@@ -63,15 +62,15 @@ let flush_ps () =
   if not !psused then psused := true;
   Gs.flush ();;
 
-let flush_dvi () = GY.flush ();;
+let flush_dvi () = GraphicsY11.flush ();;
 let flush_last () = if !last_is_dvi then flush_dvi () else flush_ps ();;
 
 let sync b =
   if !last_is_dvi <> b then begin flush_last (); last_is_dvi := b end;;
 
-let control_cursor = GY.Cursor_left_ptr;;
-let move_cursor = GY.Cursor_fleur;;
-let select_cursor = GY.Cursor_xterm;;
+let control_cursor = GraphicsY11.Cursor_left_ptr;;
+let move_cursor = GraphicsY11.Cursor_fleur;;
+let select_cursor = GraphicsY11.Cursor_xterm;;
 let free_cursor = ref control_cursor;;
 
 type busy = Free | Busy | Pause | Disk;;
@@ -83,9 +82,9 @@ let last_cursor = ref control_cursor;;
 let busy_set_cursor cursor =
   busy_timeout := 0.;
   last_cursor := cursor;
-  GY.set_cursor cursor;;
+  GraphicsY11.set_cursor cursor;;
 
-let reset_cursor () = GY.set_cursor !last_cursor;;
+let reset_cursor () = GraphicsY11.set_cursor !last_cursor;;
 
 (* To be called before system calls that make take a long time *)
 let busy_timeout = ref None;;
@@ -93,7 +92,7 @@ let busy_start () =
   try
     busy_timeout := 
       Some (Timeout.add !busy_delay 
-              (fun () -> busy_set_cursor GY.Cursor_watch))
+              (fun () -> busy_set_cursor GraphicsY11.Cursor_watch))
   with
   | _ -> ();;
 
@@ -108,12 +107,12 @@ let set_busy sw =
     match sw with
     | Pause ->
         busy_end ();
-        busy_set_cursor GY.Cursor_right_side
+        busy_set_cursor GraphicsY11.Cursor_right_side
     | Free ->
         busy_end ();
         busy_set_cursor !free_cursor
     | Disk ->
-        busy_set_cursor GY.Cursor_exchange
+        busy_set_cursor GraphicsY11.Cursor_exchange
     | Busy ->
         busy_start ();;
 
@@ -132,7 +131,7 @@ let launch_embedded_apps () =
 let synchronize () =
   Gs.flush ();
   Transimpl.synchronize_transition ();
-  GY.synchronize ();
+  GraphicsY11.synchronize ();
   launch_embedded_apps ();;
 
 (* for refreshed signal on usr1 *)
@@ -157,9 +156,10 @@ let clear_sleep () = sleep_broken := false;;
 let sleep_watch breakable sync n =
   let start = Unix.gettimeofday () in
   let interrupted () = 
-    if breakable && (!usr1_status || !sleep_broken || GY.key_pressed ())
+    if breakable &&
+       (!usr1_status || !sleep_broken || GraphicsY11.key_pressed ())
     then begin
-      if GY.key_pressed () then ignore (GY.read_key ());
+      if GraphicsY11.key_pressed () then ignore (GraphicsY11.read_key ());
       sleep_broken := true;
       true
     end else false
@@ -438,8 +438,8 @@ let get_bg_color x y w h =
   if !ignore_background then Graphics.white else begin
     sync dvi;
     if !psused || bkgd_data.bgimg <> None then
-      let c = GY.point_color (x + 1) (y + 1) in
-      let c' = GY.point_color (x + w - 1) (y + h - 1) in
+      let c = GraphicsY11.point_color (x + 1) (y + 1) in
+      let c' = GraphicsY11.point_color (x + w - 1) (y + h - 1) in
       if c = c' then c else
       if !get_playing () > 0 then find_bg_color x y w h else
       mean_color c c'
@@ -651,7 +651,7 @@ let raw_embed_app command app_mode app_name width height x y =
   (* Use graphics coordinates for subwindows *)
   let gry = !size_y - y in
 
-  let wid = GY.open_subwindow ~x ~y:gry ~width ~height in
+  let wid = GraphicsY11.open_subwindow ~x ~y:gry ~width ~height in
 
   (*** !x commands
     !p : embedding target window id (in digit)
@@ -679,7 +679,7 @@ let raw_embed_app command app_mode app_name width height x y =
       let against_root = command0 = command in
       if against_root then
         (* fix the geometry *)
-        let (ww, wh, wx, wy) = GY.get_geometry () in
+        let (ww, wh, wx, wy) = GraphicsY11.get_geometry () in
         x + wx, y - height + wy
       else 0, 0 in
     Printf.sprintf "%dx%d+%d+%d" width height px py,
@@ -716,17 +716,17 @@ let find_embedded_app app_name =
 
 let map_embed_app command app_mode app_name width height x y =
   let _, (app_mode, app_name, wid) = find_embedded_app app_name in
-  GY.map_subwindow wid;;
+  GraphicsY11.map_subwindow wid;;
 
 let unmap_embed_app command app_mode app_name width height x y =
  let _, (app_mode, app_name, wid) = find_embedded_app app_name in
- GY.unmap_subwindow wid;;
+ GraphicsY11.unmap_subwindow wid;;
 
 let move_or_resize_persistent_app command app_mode app_name width height x y =
   let _, (app_mode, app_name, wid) = find_embedded_app app_name in
-  GY.resize_subwindow wid width height;
+  GraphicsY11.resize_subwindow wid width height;
   let gry = !size_y - y + height - width in
-  GY.move_subwindow wid x gry;
+  GraphicsY11.move_subwindow wid x gry;
 ;;
 
 (* In hash table t, verifies that at least one element verifies p. *)
@@ -793,7 +793,7 @@ let kill_app pid wid =
   do () done;
   (* prerr_endline (Printf.sprintf "kill_app (pid=%d, window=%s)" pid wid); *)
   (* if this is the forked process, do not close the window!!! *)
-  if Unix.getpid () = Launch.advi_process then GY.close_subwindow wid
+  if Unix.getpid () = Launch.advi_process then GraphicsY11.close_subwindow wid
 ;;
 
 let kill_apps app_mode =
@@ -1004,42 +1004,42 @@ module H =
     let deemphasize now emph =
       match emph with
       | Rect (ima, act, l) ->
-          GY.display_mode now;
+          GraphicsY11.display_mode now;
           List.iter
             (function ima, act -> Graphics.draw_image ima act.A.x act.A.y) l;
           Graphics.draw_image ima act.A.x act.A.y;
-          GY.set_cursor !free_cursor;
-          GY.display_mode false
+          GraphicsY11.set_cursor !free_cursor;
+          GraphicsY11.display_mode false
       | Screen (ima, act, all_anchors) ->
-          GY.display_mode true;
+          GraphicsY11.display_mode true;
           anchors := all_anchors;
           Gs.flush ();
           (* long delay to be safe *)
           ignore (sleep_watch false false 0.1);
           Graphics.draw_image ima 0 0;
-          GY.set_cursor !free_cursor;
-          GY.flush ();
-          GY.display_mode false
+          GraphicsY11.set_cursor !free_cursor;
+          GraphicsY11.flush ();
+          GraphicsY11.display_mode false
       | Nil -> ()
 
     let emphasize c act =
       let ima = Graphics.get_image act.A.x act.A.y act.A.w act.A.h in
       Graphics.set_color c;
-      GY.display_mode true;
+      GraphicsY11.display_mode true;
       Graphics.fill_rect act.A.x act.A.y act.A.w act.A.h;
       Graphics.set_color !color;
       push_bg_color c;
       List.iter (function x, y, g -> draw_glyph g x y) act.A.action.draw;
       pop_bg_color ();
-      GY.set_cursor GY.Cursor_hand2;
-      GY.display_mode false;
+      GraphicsY11.set_cursor GraphicsY11.Cursor_hand2;
+      GraphicsY11.display_mode false;
       Rect (ima, act, [])
 
     let save_screen_exec act a =
       Gs.flush ();
       (* get image take the image from the backing store *)
       let ima = Graphics.get_image 0 0 !size_x !size_y in
-      GY.sync ();
+      GraphicsY11.sync ();
       (* wait until all events have been processed, flush should suffice *)
 (*
    Graphics.set_color (Graphics.point_color 0 0);
@@ -1050,7 +1050,7 @@ module H =
       let all_anchors = !anchors in
       a ();
       flush_last ();
-      GY.synchronize ();
+      GraphicsY11.synchronize ();
       launch_embedded_apps ();
       Screen (ima, act, all_anchors)
 
@@ -1090,18 +1090,18 @@ module Symbol = Symbol.Make (Glyph);;
 let cut s =
   (*  print_string s; print_newline (); *)
   (* cut does not work yet *)
-  GY.cut s;;
+  GraphicsY11.cut s;;
 
 let open_dev geom =
   if !opened then Graphics.close_graph ();
   Graphics.open_graph geom;
 
-  GY.init (); (* we disable Graphics's event retrieving *)
+  GraphicsY11.init (); (* we disable Graphics's event retrieving *)
   Timeout.init ();
   (* Fill the event queue *)
   let rec f () =
     Timeout.add 0.25 (fun () -> 
-      GY.retrieve_events (); ignore (f ()))
+      GraphicsY11.retrieve_events (); ignore (f ()))
   in
   ignore (f ());
 
@@ -1110,7 +1110,7 @@ let open_dev geom =
   xmin := 0; xmax := !size_x;
   ymin := 0; ymax := !size_y;
   Graphics.remember_mode true;
-  GY.display_mode !Options.global_display_mode;
+  GraphicsY11.display_mode !Options.global_display_mode;
   Graphics.set_window_title !title;
   color := !default_fgcolor;
   opened := true;;
@@ -1127,7 +1127,7 @@ let clear_dev () =
   if not !opened then failwith "Grdev.clear_dev: no window";
   kill_ephemeral_apps ();
   unmap_persistent_apps ();
-  GY.display_mode !Options.global_display_mode;
+  GraphicsY11.display_mode !Options.global_display_mode;
   Graphics.clear_graph ();
   H.clear ();
   bg_color := bkgd_data.bgcolor; (* modifiable via \setbgcolor . RDC *)
@@ -1146,7 +1146,7 @@ let clear_dev () =
 
 (*** Events ***)
 
-type status = GY.status = {
+type status = GraphicsY11.status = {
     mouse_x : int;
     mouse_y : int;
     button : bool;
@@ -1177,19 +1177,19 @@ type option_event =
    | Raw of status;;
 
 let all_events = [
-  GY.Button_down;
-  GY.Button_up;
-  GY.Mouse_motion; 
-  GY.Key_pressed;
+  GraphicsY11.Button_down;
+  GraphicsY11.Button_up;
+  GraphicsY11.Mouse_motion; 
+  GraphicsY11.Key_pressed;
 ];;
 
 let button_up_motion = [
-  GY.Button_up;
-  GY.Mouse_motion; 
+  GraphicsY11.Button_up;
+  GraphicsY11.Mouse_motion; 
 ];;
 
 let button_up = [
-  GY.Button_up;
+  GraphicsY11.Button_up;
 ];;
 
 let event = ref [];;
@@ -1208,7 +1208,7 @@ let mouse_y = ref 0;;
 let button = ref false;;
 
 let reposition ~x ~y ~w ~h =
-  GY.reposition x y w h;
+  GraphicsY11.reposition x y w h;
   let x = Graphics.size_x () and y = Graphics.size_y() in
   size_x := x;
   size_y := y;
@@ -1265,8 +1265,8 @@ let rec draw_rectangle x y dx dy =
   Graphics.lineto (x) (y);;
 
 let wait_button_down () = 
-  if GY.button_down () then
-    ignore (GY.wait_next_event [ GY.Button_up ]);;
+  if GraphicsY11.button_down () then
+    ignore (GraphicsY11.wait_next_event [ GraphicsY11.Button_up ]);;
 
 
 let rec wait_signal_event events =
@@ -1277,7 +1277,7 @@ let rec wait_signal_event events =
     | _, _, _ ->
         try
           waiting := true;
-          let ev = GY.wait_next_event events in
+          let ev = GraphicsY11.wait_next_event events in
           waiting := false;
           match resized () with
           | Some (x, y) ->
@@ -1301,19 +1301,19 @@ let wait_select_rectangle x y =
     restore_rectangle buf x y dx dy;
     match ev with
     | Raw e ->
-        let dx' = e.GY.mouse_x - x in 
-        let dy' = e.GY.mouse_y - y in 
-        if e.GY.button then select dx' dy'
+        let dx' = e.GraphicsY11.mouse_x - x in 
+        let dy' = e.GraphicsY11.mouse_y - y in 
+        if e.GraphicsY11.button then select dx' dy'
         else Final (Region (x, y, dx', 0 - dy'))
     | x -> x
   in
   set_color !default_fgcolor;
-  GY.display_mode true;
-  GY.set_cursor select_cursor;
+  GraphicsY11.display_mode true;
+  GraphicsY11.set_cursor select_cursor;
   let restore () =
-    GY.display_mode false;
+    GraphicsY11.display_mode false;
     set_color !color;
-    GY.set_cursor !free_cursor
+    GraphicsY11.set_cursor !free_cursor
   in
   try let e = select 0 0 in restore(); e
   with exn -> restore(); raise exn;;
@@ -1328,14 +1328,14 @@ let wait_select_button_up m x y =
     let ev = wait_signal_event button_up_motion in
     match ev with
     | Raw e ->
-        let x' = e.GY.mouse_x in 
-        let y' = e.GY.mouse_y in
+        let x' = e.GraphicsY11.mouse_x in 
+        let y' = e.GraphicsY11.mouse_y in
         let r' = Symbol.new_region r x' (!size_y - y') in
         Symbol.iter_regions (draw_color true) (draw_color false) r r';
-        if e.GY.button then select r'
+        if e.GraphicsY11.button then select r'
         else
-          let m = GY.get_modifiers () in
-          if m land GY.shift = 0 then
+          let m = GraphicsY11.get_modifiers () in
+          if m land GraphicsY11.shift = 0 then
             begin
               Symbol.iter_region (draw_color true) r';
               Final Nil
@@ -1344,18 +1344,18 @@ let wait_select_button_up m x y =
             Final (Selection (Symbol.region_to_ascii r'))
     | x -> x in
   let color = !color in
-  GY.synchronize ();
-  GY.display_mode true;
+  GraphicsY11.synchronize ();
+  GraphicsY11.display_mode true;
   Graphics.remember_mode false;
-  GY.set_cursor select_cursor;
+  GraphicsY11.set_cursor select_cursor;
   let restore () =
-    GY.display_mode false;
+    GraphicsY11.display_mode false;
     Graphics.remember_mode true;
     set_color color;
-    GY.set_cursor !free_cursor in
+    GraphicsY11.set_cursor !free_cursor in
   try
     let e =
-      if m land GY.button2 = 0 then
+      if m land GraphicsY11.button2 = 0 then
         let r = Symbol.position x (!size_y - y) in
         select r
       else
@@ -1384,19 +1384,19 @@ let wait_move_button_up x y =
     restore_rectangle buf x' y' w h;
     match ev with
     | Raw e ->
-        let dx' = e.GY.mouse_x - x in 
-        let dy' = e.GY.mouse_y - y in 
-        if e.GY.button then move dx' dy'
+        let dx' = e.GraphicsY11.mouse_x - x in 
+        let dy' = e.GraphicsY11.mouse_y - y in 
+        if e.GraphicsY11.button then move dx' dy'
         else Final (Move (dx', 0 - dy'))
     | x -> x in
   let color = !color in
   set_color !default_fgcolor;
-  GY.set_cursor move_cursor;
-  GY.display_mode true;
+  GraphicsY11.set_cursor move_cursor;
+  GraphicsY11.display_mode true;
   let restore () =
-    GY.display_mode false;
+    GraphicsY11.display_mode false;
     set_color color;
-    GY.set_cursor !free_cursor in
+    GraphicsY11.set_cursor !free_cursor in
   try let e = move 0 0 in restore (); e
   with exn -> restore (); raise exn;;
 
@@ -1414,20 +1414,20 @@ let click_area x y =
   else Middle;;
 
 let button m =
-  if m land GY.button1 <> 0 then Button1 else
-  if m land GY.button2 <> 0 then Button2 else
-  if m land GY.button3 <> 0 then Button3
+  if m land GraphicsY11.button1 <> 0 then Button1 else
+  if m land GraphicsY11.button2 <> 0 then Button2 else
+  if m land GraphicsY11.button3 <> 0 then Button3
   else Button2;;
 
 let wait_button_up m x y =
-  if m land GY.control <> 0 then wait_move_button_up x y else
-  if m land GY.shift <> 0 && m land GY.button1 = 0 then
+  if m land GraphicsY11.control <> 0 then wait_move_button_up x y else
+  if m land GraphicsY11.shift <> 0 && m land GraphicsY11.button1 = 0 then
     wait_select_button_up m x y
   else
     begin
       match wait_signal_event button_up with
       | Raw e ->
-          if m land GY.shift <> 0
+          if m land GraphicsY11.shift <> 0
           then Final (Position (x, !size_y - y))
           else Final (Click (click_area x y, button m, x, !size_y - y))
       | x -> x
@@ -1444,22 +1444,22 @@ let wait_event () =
     match wait_signal_event all_events with
     | Raw ev ->
         begin
-          if ev.GY.keypressed then begin
-            send (Key ev.GY.key)
+          if ev.GraphicsY11.keypressed then begin
+            send (Key ev.GraphicsY11.key)
           end else
             let ev' = 
-              { mouse_x = ev.GY.mouse_x;
-                mouse_y = !size_y - ev.GY.mouse_y;
-                button = ev.GY.button;
-                keypressed = ev.GY.keypressed;
-                key = ev.GY.key; 
-                modifiers = ev.GY.modifiers; } in
+              { mouse_x = ev.GraphicsY11.mouse_x;
+                mouse_y = !size_y - ev.GraphicsY11.mouse_y;
+                button = ev.GraphicsY11.button;
+                keypressed = ev.GraphicsY11.keypressed;
+                key = ev.GraphicsY11.key; 
+                modifiers = ev.GraphicsY11.modifiers; } in
             begin try
               begin match H.find ev.mouse_x ev.mouse_y with
               | {A.action = {H.tag = H.Href h; H.draw = d }} as act ->
                   if ev.button then
                     begin
-                      let ev' = GY.wait_next_event button_up in
+                      let ev' = GraphicsY11.wait_next_event button_up in
                       send (Href h)
                     end
                   else if H.up_to_date act emph then
@@ -1500,7 +1500,7 @@ let wait_event () =
             with
             | Not_found ->
                 if ev'.button then begin
-                  let m = GY.get_modifiers () in
+                  let m = GraphicsY11.get_modifiers () in
                   match wait_button_up m ev.mouse_x ev.mouse_y with
                   | Final (Region (x, y, dx, dy) as e) -> send e
                   | Final (Selection s as e) -> send e
@@ -1513,10 +1513,10 @@ let wait_event () =
                       send e
                   | Raw _ -> rescan ()
                 end else begin
-                  let m = GY.get_modifiers () in
-                  if m land GY.shift <> 0 then
+                  let m = GraphicsY11.get_modifiers () in
+                  if m land GraphicsY11.shift <> 0 then
                      (if not !temp_cursor then
-                       (temp_cursor:= true; GY.set_cursor select_cursor))
+                       (temp_cursor:= true; GraphicsY11.set_cursor select_cursor))
                   else if !temp_cursor then
                     (temp_cursor:= false; reset_cursor ());
                   rescan ()
@@ -1533,7 +1533,7 @@ let resized () =
   Graphics.size_x () <> !size_x || Graphics.size_y () <> !size_y;;
 
 let continue () =
-  if resized () || GY.key_pressed () (*  || !usr1_status *) then
+  if resized () || GraphicsY11.key_pressed () (*  || !usr1_status *) then
     begin
       Gs.flush ();
       raise Stop

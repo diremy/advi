@@ -1,23 +1,23 @@
-(*
- * advi - A DVI previewer
- * Copyright (C) 2000  Alexandre Miquel
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- *
- * See the GNU Lesser General Public License version 2.1 for more
- * details (enclosed in the file LGPL).
- *)
+(***********************************************************************)
+(*                                                                     *)
+(*                             Active-DVI                              *)
+(*                                                                     *)
+(*                   Projet Cristal, INRIA Rocquencourt                *)
+(*                                                                     *)
+(*  Copyright 2002 Institut National de Recherche en Informatique et   *)
+(*  en Automatique.  All rights reserved.  This file is distributed    *)
+(*  under the terms of the GNU Lesser General Public License.          *)
+(*                                                                     *)
+(*  Jun Furuse, Didier Rémy and Pierre Weis.                           *)
+(*  Contributions by Roberto Di Cosmo, Didier Le Botlan,               *)
+(*  Xavier Leroy, and Alan Schmitt.                                    *)
+(*                                                                     *)
+(*  Based on Mldvi by Alexandre Miquel.                                *)
+(***********************************************************************)
 
 open Misc;;
 
-(* number of steps before checking for user interrutions *)
+(* number of steps before checking for user interruptions *)
 let checkpoint_frequency = 10;;
 
 (*** Some utilities for specials ***)
@@ -62,12 +62,13 @@ let split_record s =
       String.sub token 0 i,
       String.sub token (i + 1) (String.length token - i - 1)
     with
-      _ -> token, "") tokens
+    | _ -> token, "") tokens
 ;;
 
 module Dev = Grdev;;
 module Symbol = Dev.Symbol;;
 module DFont = Devfont.Make(Dev);;
+
 let base_dpi = 600;;
 
 (*** Cooked fonts ***)
@@ -301,9 +302,7 @@ let epstransparent_pop st =
       st.epstransparent_stack <- rest;;
 
 let transition_push st v =
-(*
-  st.transition_stack <- st.transition :: st.transition_stack;
-*)
+  (* st.transition_stack <- st.transition :: st.transition_stack; *)
   st.transition <- v;
   if !visible then Dev.set_transition v;;
 
@@ -1140,10 +1139,8 @@ let eval_command st c =
   let record r =
     let u = r.unit in
     match c with
-      (* The advi: proc specials are not recorded *)
-(*
-    | Dvi.C_xxx s when has_prefix "advi: proc" s -> ()
-*)
+    (* The advi: proc specials are not recorded *)
+    (* | Dvi.C_xxx s when has_prefix "advi: proc" s -> () *)
     | _ -> u.escaped_commands <- c :: u.escaped_commands in
   List.iter record !current_recording_proc;
   eval_dvi_command st c;;
