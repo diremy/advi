@@ -14,7 +14,7 @@
 (*                                                                     *)
 (***********************************************************************)
 
-(* $Id $ *)
+(* $Id$ *)
 
 val hgradient : Grdev.viewport -> unit;;
 val vgradient : Grdev.viewport -> unit;;

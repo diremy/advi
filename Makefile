@@ -40,7 +40,7 @@ EXEC	  = advi
 
 MODULES	  = config misc graphicsY11 timeout \
             options global_options busy rc \
-            gterm launch \
+            gradient gterm launch \
             userfile input symbol search \
             shot drawimage dvicolor \
 	    table pkfont ttfont jfm font glyph devfont \
