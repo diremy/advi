@@ -37,12 +37,12 @@ let pstricks =
     "  ask Active-DVI to show moveto,\
     \n\t (the default is not to show moveto).";;
 
-let showing_ps = ref false;;
+let showps_ref = ref false;;
 let showps s =
-  if !showing_ps then (print_string s; print_newline ());;
+  if !showps_ref then (prerr_endline (Printf.sprintf "SHOWPS: %s" s));;
 
 Options.add
-  "--showps" (Arg.Set showing_ps)
+  "--showps" (Arg.Set showps_ref)
   "  ask advi to print to stdout a copy\
   \n\t of the PostScript program sent to gs.";;
 
@@ -69,8 +69,7 @@ let parse_pos s =
     | _ -> assert false in
   let left = String.sub s 4 (c - 4) in
   let right = String.sub s (c + 1) (String.length s - c - 1) in
-  let int_of_floatstring f = int_of_float (float_of_string f +. 0.5) in
-  b, int_of_floatstring left, int_of_floatstring right;;
+  b, Misc.round (float_of_string left), Misc.round (float_of_string right);;
 
 let ack_request =
   String.concat ""
@@ -150,7 +149,7 @@ class gs () =
        then Printf.sprintf "%lu " gr.window
        else Printf.sprintf "%lu %lu " gr.window gr.pixmap) in
 
-  let iof = int_of_float and foi = float_of_int in
+  let iof = Misc.round (* int_of_float *) and foi = float_of_int in
   let lx = iof ( (foi (gr.x * dpi)) /. gr.xdpi)
   and ly = iof ( (foi (gr.y * dpi)) /. gr.ydpi)
   and ux = iof ( (foi ((gr.x + gr.bwidth)  * dpi)) /. gr.xdpi )
@@ -162,7 +161,7 @@ class gs () =
       "0" (* no backing pixmap for the window *)
       0   (* Rotation : 0 90 180 270 *)
       lx ly ux uy
-      (* lower-left x y , upper-right x y :
+      (* lower-left x y, upper-right x y :
          Bounding box in default user coordinates. *)
       gr.xdpi gr.ydpi (* Resolution x y. *)
       0 0 0 0 (* Margins left, bottom, top, right. *) in
@@ -227,7 +226,7 @@ class gs () =
                       raise (Killed "gs in strange state")
                   end
               | _, _, _ ->
-                  input_line rightin  in
+                  input_line rightin in
           if Misc.has_prefix s ack_string then ack <- ack - 1 else
           if Misc.has_prefix pos_string s then
             begin
@@ -236,21 +235,18 @@ class gs () =
                 let x, y =
                   if b then x, y else x + !current_x, y + !current_y in
                 if !pstricks then
-                  begin
-                    Printf.fprintf stderr "<-- %s %d %d"
-                      (if b then "-" else "+") x y;
-                    prerr_newline ();
-                  end;
+                  Printf.fprintf stderr "<-- %s %d %d\n"
+                    (if b then "-" else "+") x y;
                 current_x := x; current_y := y
               with
-              | Not_found | Failure _ -> prerr_endline s
+              | Not_found | Failure _ -> Misc.warning s
             end else
           if Misc.has_prefix err_string s then
             begin
-              prerr_endline s;
+              Misc.warning s;
               raise (Killed "Error in Postscript");
             end else
-          prerr_endline s;
+          Misc.warning s;
           self # ack
         end;
 
@@ -264,13 +260,13 @@ class gs () =
     method line l =
       try
         showps l;
+(*prerr_endline (Printf.sprintf "Calling GS#LINE with\n\t\t %s" l);*)
         output_string leftout l;
         output_char leftout '\n';
       with exc ->
-        prerr_endline (Printexc.to_string exc);
+        Misc.warning (Printexc.to_string exc);
         self # kill;
-        prerr_endline "GS Terminated";
-        flush stderr
+        Misc.warning "GS Terminated"
 
     method sync =
       try self # ack_request;
@@ -278,11 +274,10 @@ class gs () =
         Killed s ->
           self # kill;
           set_do_ps false;
-          prerr_endline s;
-          prerr_endline "Continuing without gs\n";
-          flush stderr
+          Misc.warning (Printf.sprintf "%s\nContinuing without gs\n" s)
 
     method ps b =
+(*prerr_endline (Printf.sprintf "Calling GS#PS with\n\t\t %s" (String.concat " " b));*)
       List.iter self#line b;
 
     method load_header (b, h) =
@@ -294,12 +289,9 @@ class gs () =
 let texbegin = "TeXDict begin";;
 let texend = "flushpage end";;
 let moveto x y =
-  if !current_x = x && !current_y = y then ""
-   else
-    begin
-      current_x := x; current_y := y; 
-      Printf.sprintf "%d %d moveto" x y
-    end;;
+  current_x := x; current_y := y; 
+  Printf.sprintf "%d %d moveto" x y
+;;
 
 let texc_special_pro gv =
   let l = [ "texc.pro"; "special.pro" ] in
@@ -334,11 +326,7 @@ class gv =
     method moveto x y =
       let x' = xorig + x in
       let y' = y - yorig  in
-      if !pstricks then
-        begin
-          Printf.fprintf stderr "--> %d %d" x' y';
-          prerr_newline();
-        end;
+      if !pstricks then Printf.fprintf stderr "--> %d %d\n" x' y';
       moveto x' y'
     method check_size =
       begin
@@ -409,6 +397,7 @@ class gv =
     method process =
       match process with
       | None ->
+(*prerr_endline (Printf.sprintf "Launching new gs interpreter");*)
           if not (get_do_ps ()) then raise Terminated;
           let gs = new gs () in
           if headers = [] then headers <-  texc_special_pro self;
@@ -423,9 +412,12 @@ class gv =
           gs # line "/SI save def gsave";
           process <- Some gs;
           gs
-      | Some gs -> gs
+      | Some gs ->
+(*prerr_endline (Printf.sprintf "Calling existing gs interpreter");*)
+ gs
 
     method send b  =
+(*prerr_endline (Printf.sprintf "Calling gv#SEND with\n\t\t %s" (String.concat " " b));*)
       self # check_size;
       self # process # ps b;
       sync <- false
@@ -436,16 +428,21 @@ class gv =
       (* does not draw---no flushpage *)
       self # send [ b ]
 
-    method ps b (x:int) (y:int) =
-      (* insert non postscript, typically with ``ps:'' 
+    method file b x y =
+      (* does not draw---no flushpage *)
+      self # send [ "grestore"; self#moveto x y; b; "gsave" ]
+
+    method ps b (x : int) (y : int) =
+(*prerr_endline (Printf.sprintf "Calling gv#PS with\n\t\t %s" b);*)
+      (* insert non postscript, typically with ``ps:''
          may change graphic parameters *)
       self # send [ texbegin; self # moveto x y; b; texend ];
       sync <- false
 
-    method special b (x:int) (y:int) =
+    method special b (x : int) (y : int) =
       (* insert protected postscript, typically with '"'
          does not change graphic parameters *)
-      self # send [ texbegin; (* self # moveto x y; *)
+      self # send [ texbegin; self # moveto x y;
                     "@beginspecial @setspecial";
                     b;
                     "@endspecial"; texend;
@@ -470,13 +467,22 @@ let kill () = gv # kill;;
 
 let draw s x y =
   if get_do_ps () then
-    try gv#ps (Misc.get_suffix  "ps: " s) x y with
+    try
+(* prerr_endline (Printf.sprintf "Calling gv#ps with\n\t\t %s" s);*)
+ gv#ps (Misc.get_suffix  "ps: " s) x y with
     | Misc.Match ->
         try gv#special (Misc.get_suffix  "\" " s) x y with
         | Misc.Match ->
             try gv#def (Misc.get_suffix  "! " s) with
-            | Misc.Match -> ()
+            | Misc.Match ->
+               try gv#file (Misc.get_suffix  "psfile: " s) x y with
+               | Misc.Match ->
+                   Misc.warning
+                    (Printf.sprintf "Unknown ps commands\n\t\t %s" s)
 ;;
+
+let draw_file fname x y =
+  draw (Printf.sprintf "psfile: (%s) run" fname) x y;;
 
 let add_headers = gv#add_headers;;
 
