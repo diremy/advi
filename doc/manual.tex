@@ -86,26 +86,26 @@ See the key bindings in the appendix.
 
 \Newpage
 
-\section {The {\tt advi.sty} \LaTeX~packages}
+\section {The {\tt advi.sty} \LaTeX~package}
 
 \ActiveDVI~provides some \LaTeX~packages to facilitate animations and
-interaction with the presenter from within \LaTeX.
+interaction with the presenter from within your \LaTeX source text.
 
-The {\tt advi} package is the main package to use when writing
-presentations for \ActiveDVI. It provides the main set of interactive
-commands for {\ActiveDVI}. However, there is no need to load the
-package if no {\ActiveDVI} special effects are required for the
-presentation.
+The {\tt advi} package is the main package to include when writing
+a presentation for \ActiveDVI. It provides the main set of interactive
+commands for {\ActiveDVI} to animate the show. However, there is no
+need to load the package if no {\ActiveDVI} special effects are
+required for the presentation.
 
 \subsection{Printing the presentation}
 
-The {\tt advi} package recognizes the special option \verb"ignore", which
-is devoted help producing a printable version of the presentation: the
-\verb"ignore" option makes the package not to produce {\tt advi}
-specials, so that the show can be previewed by other previewers or
-turned into Postscript with {\tt dvips}. Of course, this option
-disables most effects that cannot be printed, although some of them
-are still approximated.
+The {\tt advi} package recognizes the special option \verb"ignore",
+which is devoted to help the production of a printable version of the
+presentation: the \verb"ignore" option makes the package not to
+produce {\tt advi} specials, so that the show can be previewed by
+other previewers or turned into Postscript with {\tt dvips}. Of
+course, this option disables most effects that cannot be printed,
+although some of them are still approximated.
 
 If the {\tt ignore} option is not set globally, it can be set
 locally with the commands {\docdef \adviignore}. However, this will not
@@ -443,22 +443,22 @@ Labels over arrows \verb"\Aput", \verb"Bput", etc.
 
 \subsection{The superpose package}
 
-This package allows to easily supperpose horizontal material, creating 
-the smallest horizontal box to fix all of supperpositions.
+This package allows to easily superpose horizontal material, creating 
+the smallest horizontal box to fit all of the superpositions.
 \begin{verbatim}
 \usepackage{superpose}
 \end{verbatim}
-The package  defines a single environment:
+The package defines a single environment:
 
 \medskip\noindent
 \docdef\begin\doctt{\{superpose\}}\docopt{alignment}\docid {list}%
 \docdef\end\doctt{\{superpose\}}
 \begin{quote}
-The \docid{alignment} can one the letters \doctt c (default value), \doctt
+The \docid{alignment} can be one the letters \doctt c (default value), \doctt
 l, or \doctt r.
 
-Items of the list must are sepated by \verb"\\" as in tabular environments.
-Each item should be horizontal material.
+Items of the list are separated by \verb"\\" as in tabular environments.
+Each item should be a horizontal material.
 \end{quote}
 
 \subsection{The bubble package}
@@ -470,9 +470,9 @@ This package allows to easily draw bubbles over some text.
 \end{verbatim}
 By default bubbles are produced using the \doctt{epic} and \doctt{eepic}
 packages, for portability. However, for better rendering and easier 
-parameterization, bubble can also be drawn using the \doctt{ pst-node}
-package of the pstricks collection.  This is was the \doctt{ps} option
-does. 
+parameterization, bubbles can also be drawn using the \doctt{ pst-node}
+package of the pstricks collection. This is what the \doctt{ps} option
+is designed for.
 
 The package defines a single command:
 
@@ -521,13 +521,13 @@ P\docid{w} &  \doctt{col=\{>\{\$\}p\docarg{w}<\{\$\}\}}\\
 \end{tabular}
 \end{quote}
 
-\docid{pos} is the optional relative position of the annotation 
-defaults to $1,1$ and is counted in the package unit. 
+\docid{pos} is the optional relative position of the annotation, 
+it defaults to $1,1$, and is counted in the package units. 
 
-\docid{ps options} are passed to  the command \docdef\psset) 
+\docid{ps options} are passed to the command \docdef\psset) 
 in \doctt{ps} mode and ignored otherwise. 
 \end{quote}
-Parameters (color and tabular column specification) can also 
+Parameters (color and tabular columns specifications) can also 
 be set globally using the command:
 
 \medskip \noindent
