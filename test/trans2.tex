@@ -1,12 +1,9 @@
-\documentclass{article}
+\documentclass[12pt]{article}
 
 \usepackage{advi}
 
 \usepackage{color}
 \usepackage{graphicx}
-\def\adviheader{\noindent
-{\bf\Large Active dvi}\\
-\includegraphics[width=\textwidth]{../tex/bar.jpg.eps}}
 
 \pagestyle{empty}
 
@@ -29,13 +26,13 @@ Press: \keymenu{n}ext page \keymenu{p}revious page
 } \vss}}
 
 \def\adviheader{\noindent
-{\bf\Large Active dvi}\\
+{\bf\Large Active dvi --- moving text}\\
 \includegraphics[width=\textwidth]{../tex/bar.jpg.eps}}
 
 \let \Newpage \newpage
 \def \newpage {\Newpage \advifooter\adviheader}
 
-\def\adviquitfooter{\noindent
+\def\adviquitfooter{\adviwait\noindent
 \centerline{\Large{Press: \keymenu{q} to quit}}
 }
 
@@ -48,12 +45,13 @@ Press: \keymenu{n}ext page \keymenu{p}revious page
 \section*{Text movements}
 
 \noindent
-Text movements are possible using the \verb"\advitransbox" \TeX macro.
-For instance,
+You can move texts around with the \verb"\advitransbox" \TeX~macro.
+
+\noindent For instance,
 
 \verb"\advitransbox{slide,from=right}{coming from the right}}"
 
-\noindent move the text {\em coming from the right} from the
+\noindent moves the text {\em coming from the right} from the
 right edge of the slide to its correct position into the
 page. Variants \verb"right", \verb"left", \verb"top", and
 \verb"bottom" of this macro are available.
@@ -82,11 +80,13 @@ $$
 
 \noindent
 You can specify the number of,steps of the animation with the
-extra optional \verb"steps=int" argument. For instance,
+extra optional \verb"steps=int" argument.
+
+\noindent For instance,
 
 \verb"\advitransbox{slide,from=right,steps=70}{coming from the right}"
 
-\noindent move the text {\em coming from the right} at a peaceful
+\noindent moves the text {\em coming from the right} at a peaceful
 pace.
 
 \adviwait
@@ -112,10 +112,13 @@ pace.
 
 \lastpage
 \section*{Other effects}
+
+\verb"\advitransbox" can also animate the apparition of non moving texts:
+
 {\Large
 \begin{itemize}
-\item Wipe: \advitransbox{wipe,steps=50,from=left}{\verb"\advitransbox{wipe}{text}"}
-\item Block: \advitransbox{block,steps=50}{\verb"\advitransbox{block}{text}"}
+\item Wipe \adviwait : \advitransbox{wipe,steps=50,from=left}{\verb"\advitransbox{wipe}{text}"}
+\item Block\adviwait : \advitransbox{block,steps=50}{\verb"\advitransbox{block}{text}"}
 \end{itemize}
 }
 ~\vfill~

@@ -7,7 +7,8 @@
 \usepackage{advi}
 \pagestyle{empty}
 
-\definecolor{red}{rgb}{1.0,0.8,0.8}
+\definecolor{red}{rgb}{1.0,0.0,0.0}
+\definecolor{salmon}{rgb}{1.0,0.8,0.8}
 \definecolor{green}{rgb}{0.8,1.0,0.8}
 \definecolor{blue}{rgb}{0.8,0.8,1.0}
 \definecolor{yellow}{rgb}{1.0,1.0,0.8}
@@ -16,9 +17,17 @@
 
 \def\smallpause{0.3}
 
+\def\keymenu#1{\textcolor{red}{\underline{#1}}}
+
 \def\advifooter{\vbox to 0em{\vbox to \vsize {\vfill
-Press: \underline{n}ext page \underline{p}revious page
-\underline{\textvisiblespace} next pause} \vss}}
+Press: %
+\keymenu{n}ext page %
+\keymenu{p}revious page %
+\keymenu{\textvisiblespace} next pause%
+\hfill\vspace*{-0.6cm}{\adviembed[sticky=advianim]{1.56cm}{1.824cm}%
+{animate -geometry !g! -window !p advilogo.anim.gif}}
+}
+\vss}}
 
 \def\adviheader{\noindent
 {\bf\Large Active dvi --- transitions}\\
@@ -33,7 +42,7 @@ Press: \underline{n}ext page \underline{p}revious page
 \def\newpage{\Newpage\advifooter\adviheader}
 
 \def\adviemptyfooter{\vbox to 0em{\vbox to \vsize {\vfill
-~~} \vss}}
+~~} \vss\advikillembed{advianim}}}
 
 \def\lastpage{\Newpage\adviemptyfooter\adviheader}
 
@@ -42,7 +51,7 @@ Press: \underline{n}ext page \underline{p}revious page
 
 \begin{document}
 
-\newpage\pstricksback{red}
+\newpage\pstricksback{salmon}
 
 \subsection*{Transitions}
 
