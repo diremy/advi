@@ -192,7 +192,7 @@ Maybe you mean \@currenvir ing}}
   \do \advi@bgxstart \do \advi@bgystart
   \do \advi@bgwidth \do \advi@bgheight
   \do \advi@bgxcenter \do \advi@bgycenter
-  \do \advi@bgfun
+  \do \advi@bggradient
   \do \advi@bgimage \do \advi@bgalpha \do \advi@bgblend}
 
 \def \advi@auto@ { fit=auto}
@@ -282,7 +282,7 @@ Maybe you mean \@currenvir ing}}
 \define@key {advi@bg}{height}[]{\advi@setbg{\advi@bgheight}{height}{#1}}
 \define@key {advi@bg}{xcenter}[]{\advi@setbg{\advi@bgxcenter}{xcenter}{#1}}
 \define@key {advi@bg}{ycenter}[]{\advi@setbg{\advi@bgycenter}{ycenter}{#1}}
-\define@key {advi@bg}{fun}[]{\advi@setbg{\advi@bgfun}{fun}{#1}}
+\define@key {advi@bg}{gradient}[]{\advi@setbg{\advi@bggradient}{gradient}{#1}}
 \define@key {advi@bg}{image}[]{\advi@setbg{\advi@bgimage}{image}{#1}}
 \define@key {advi@bg}{alpha}[]{\advi@setbg{\advi@bgalpha}{alpha}{#1}}
 \define@key {advi@bg}{blend}[]{\advi@setbg{\advi@bgblend}{blend}{#1}}
@@ -302,7 +302,7 @@ Maybe you mean \@currenvir ing}}
       \advi@bgcolorstart \advi@bgcolorstop
       \advi@bgxstart \advi@bgystart \advi@bgheight \advi@bgwidth
       \advi@bgxcenter \advi@bgycenter
-      \advi@bgfun
+      \advi@bggradient
       \advi@bgimage \advi@bgalpha \advi@bgblend \advi@bgfit 
       }}
 \newif \ifadvi@bglocal
