@@ -37,7 +37,7 @@ MODULES	  = config timeout graphicsY11 misc rc options \
             shot drawimage dvicolor \
 	    table pkfont ttfont jfm font glyph devfont \
 	    units dimension \
-	    gs transimpl grdev dvi driver dviview \
+	    gs transimpl embed grdev dvi driver dviview \
             main
 LIBRARIES = graphics unix str $(CAMLIMAGESLIBS)
 CLIBS	  = graphics unix str
