@@ -16,8 +16,9 @@
 
 (* $Id$ *)
 
-open Grdev;;
 open Graphics;;
+open Gradient;;
+open Grdev;;
 
 (* Return the color of a valid point (i.e. inside the graphics window). *)
 let point_color x y =
@@ -27,16 +28,16 @@ let point_color x y =
 
 (* Gradients *)
 let hgradient {v_size_x = w; v_size_y = h; v_off_x = xoff; v_off_y = yoff} =
-  let c1 = point_color xoff yoff in
+  let c1 = white in
   let c2 = point_color (xoff + w) (yoff + h) in
-  grad_rect (Rect_Horizontal (c1, c2)) xoff yoff w h;;
+  Gradient.grad_rect (Rect_Horizontal (c1, c2)) xoff yoff w h;;
 
 let vgradient {v_size_x = w; v_size_y = h; v_off_x = xoff; v_off_y = yoff} =
-  let c1 = point_color xoff yoff in
+  let c1 = white in
   let c2 = point_color (xoff + w) (yoff + h) in
   grad_rect (Rect_Vertical (c1, c2)) xoff yoff w h;;
 
 let dgradient {v_size_x = w; v_size_y = h; v_off_x = xoff; v_off_y = yoff} =
-  let c1 = point_color xoff yoff in
+  let c1 = white in
   let c2 = point_color (xoff + w) (yoff + h) in
   grad_rect (Rect_Diagonal1 (c1, c2)) xoff yoff w h;;

@@ -1275,7 +1275,6 @@ let filter trans event dx dy =
 let wait_move_button_up rect trans_type event x y =
   let trans = transform_rect trans_type in
   let cursor = transform_cursor trans_type in
-(*  let w = rect.w and h = rect.h in*)
   let rec move dx dy =
     let r = trans rect dx dy in
     let buf = save_rectangle r.x r.y r.w r.h in
