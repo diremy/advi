@@ -38,8 +38,12 @@ val split_string : string -> (char -> bool) -> int -> string list;;
 val zap_to_char : char -> string -> string;;
 val int_or_float_of_string : string -> int;;
 val is_digit : char -> bool;;
-val string_replace : string -> string -> string -> string;;
-
+val string_substitute_var : (char -> string) -> string -> string;;
+ (** [string_substitute_var env s] Substitute any [@] one character long
+     variable into string [s] according to valuation [env].*)
+val contains_string : string -> string -> bool;;
+ (** [contains_string s pat] Checks if string [s] contains the string pattern
+     [pat]. *)
 val string_prefix : char -> string -> string;;
 val string_suffix : char -> string -> string;;
 val filename_extension : file_name -> string;;

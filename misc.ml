@@ -17,11 +17,48 @@
 
 (* $Id$ *)
 
+(* General type abbrevs. *)
 type file_name = string;;
 type dir_name = string;;
 type line_number = int;;
 
-(* To round properly a float to an int. *)
+(* Fatal error in advi's code. *)
+exception Fatal_error of string;;
+let fatal_error x = raise (Fatal_error x);;
+
+let handle_fatal_error f () =
+  try f () with Fatal_error s -> prerr_endline s; exit 1;;
+
+(* To emit a warning. *)
+let emit_warning mes =
+  Printf.fprintf stderr "Warning: %s" mes;
+  prerr_newline ();;
+
+(* To set up and output warnings. *)
+let set_warnings, warning =
+  let warnings = ref true in
+  (fun b -> warnings := b),
+  (fun s -> if !warnings then emit_warning s);;
+
+(* Debugging. *)
+let forward_debug_endline =
+  ref (function (_ : string) -> failwith "undefined forward debug_endline");;
+
+let debug_endline s = !forward_debug_endline s;;
+
+let debug_stop s =
+  if false then begin
+   prerr_string (s ^ " --> Press return to go on");
+   flush stderr;
+   let _ = input_line stdin in
+   prerr_endline "Ok"
+  end;;
+
+(* Pushing a key (a char) in advi's events queue. *)
+let forward_push_back_key_event =
+  ref (fun (c : char) -> failwith "undefined forward push_back_event_key");;
+
+(* To round properly a float to an int (round it to the nearest integer). *)
 let round_pos x = int_of_float (x +. 0.5);;
 let round_neg x = int_of_float (x -. 0.5);;
 
@@ -45,8 +82,7 @@ let rec reverse_concat l1 = function
   | [] -> l1
   | a :: b -> reverse_concat (a :: l1) b;;
 
-(* Strings *)
-
+(* Strings auxilliaries. *)
 let string_prefix char s =
  let l = String.length s in
  let i = String.index s char in
@@ -59,6 +95,29 @@ let string_suffix char s =
 
 let filename_extension = string_suffix '.';;
 
+(* Check if string s contains string p at occurrence i,
+   or, equivalently, if we have:
+   String.sub s i (String.length p) = p. *)
+let contains_string_from s i p =
+ let lp = String.length p
+ and ls = String.length s in
+ let rec has i j =
+   j >= lp ||
+   i < ls && s.[i] = p.[j] && has (i + 1) (j + 1) in
+ i >= 0 && has i 0;;
+
+let contains_string s p =
+ let ls = String.length s in
+ let rec contains i =
+   i < ls &&
+   (contains_string_from s i p || contains (i + 1)) in
+ contains 0;;
+
+let has_prefix pre s = contains_string_from s 0 pre;;
+let has_suffix suf s =
+  contains_string_from s (String.length s - String.length suf) suf;;
+
+(*
 exception False;;
 
 let has_prefix pre str =
@@ -83,7 +142,7 @@ let has_suffix suf str =
       true;
     with False -> false
   end;;
-
+*)
 exception Match;;
 
 let get_suffix pre str =
@@ -115,6 +174,23 @@ let int_or_float_of_string s =
 
 let is_digit c = c >= '0' && c <= '9';;
 
+let string_substitute_var f s =
+  let b = Buffer.create (String.length s * 2) in
+  let len = String.length s in
+  let rec loop ib =
+    Scanf.bscanf ib "%c" (function
+    | '@'
+    | '!' (* Keeping this obsolete syntax. *) as c ->
+        Scanf.bscanf ib "%c" (fun id ->
+        begin
+          try Buffer.add_string b (f id) with
+          | Not_found -> Buffer.add_char b c; Buffer.add_char b id
+        end;
+        loop ib)
+    | c -> Buffer.add_char b c; loop ib) in
+  try loop (Scanf.Scanning.from_string s); Buffer.contents b with
+  | _ -> Buffer.contents b;;
+
 let string_replace pat templ str =
   let result = Buffer.create (String.length str * 2) in
   let patlen = String.length pat in
@@ -137,41 +213,4 @@ let string_replace pat templ str =
   replace 0;;
 
 (* lift a function to an option type *)
-
 let lift f a = match a with None -> () | Some v -> f v;;
-
-(* Fatal error in advi's code. *)
-exception Fatal_error of string;;
-let fatal_error x = raise (Fatal_error x);;
-
-let handle_fatal_error f () =
-  try f () with Fatal_error s -> prerr_endline s; exit 1;;
-
-(* To emit a warning. *)
-let emit_warning mes =
-  Printf.fprintf stderr "Warning: %s" mes;
-  prerr_newline ();;
-
-let warnings = ref true;;
-
-let set_warnings b = warnings := b;;
-
-let warning s = if !warnings then emit_warning s;;
-
-let forward_debug_endline = ref (function (s : string) ->
-  failwith "undefined forward debug_endline");;
-
-let debug_endline s = !forward_debug_endline s;;
-
-let debug_stop s =
-  if false then begin
-   prerr_string (s ^ " --> Press return to go on");
-   flush stderr;
-   let _ = input_line stdin in
-   prerr_endline "Ok"
-  end;;
-
-let forward_push_back_key_event = ref (fun c ->
-  failwith "undefined forward push_back_event_key");;
-
-
