@@ -38,10 +38,10 @@ val edit : term -> unit;;
 val make_term_gen :
  Graphics.color -> Graphics.color ->
  int -> Graphics.color ->
- Graphics.color ->
+ Graphics.color -> Graphics.color ->
  int -> int -> int -> int -> term;;
 
- (** [make_term_gen fg bg bw bc x y nl ncol] build a terminal at
+ (** [make_term_gen fg bg bw bc tc x y nl ncol] build a terminal at
   position [x, y] with [nl] lines and [ncol] columns.  Colors [fg],
-  [bg], [bc], and [cc] are respectively the background, foreground,
-  border, and cursor colors. [bw] is the width of the border width. *)
+  [bg], [bc], [tc], and [cc] are respectively the background, foreground,
+  border, title, and cursor colors. [bw] is the width of the border width. *)

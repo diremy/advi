@@ -44,6 +44,7 @@ type term = {
  (* Decorations *)
  mutable border_width : int;
  mutable title : string;
+ mutable title_color : Graphics.color;
  (* Font *)
  mutable font : string;
  mutable font_size_x : int;
@@ -103,8 +104,9 @@ let draw_border t =
    if hmargin >= 0 then title
    else String.sub title 0 t.width in
  Graphics.moveto (x - w + max 0 hmargin) (y + gh + vmargin);
- Graphics.set_color t.foreground;
- Graphics.draw_string title;;
+ Graphics.set_color t.title_color;
+ Graphics.draw_string title;
+ Graphics.set_color t.foreground;;
 
 let draw_term t =
  Graphics.set_color t.background;
@@ -195,7 +197,7 @@ let print_chr t c =
  | '\n' -> print_nl t
  | _ -> print_str t (String.make 1 c);;
 
-let make_term_gen fg bg bw bwc cc x y h w =
+let make_term_gen fg bg bw bwc tc cc x y h w =
  let font_size_x = 6
  and font_size_y = 13 in
  let t = {
@@ -217,6 +219,7 @@ let make_term_gen fg bg bw bwc cc x y h w =
    border_width_color = bwc;
    border_width = bw;
    title = Printf.sprintf "Gterm %ix%i" w h;
+   title_color = tc;
 
    font = Printf.sprintf "%ix%i" font_size_x font_size_y;
    font_size_x = 6;
@@ -224,15 +227,24 @@ let make_term_gen fg bg bw bwc cc x y h w =
   } in
  t;;
 
-let set_title t s =
+let rec set_title t s =
  let tx, ty = Graphics.text_size s in
- if tx <= t.width then t.title <- s
- else invalid_arg (Printf.sprintf "set_title: ``%s'' is too long" s);;
+ if tx <= t.gwidth then t.title <- s else
+ (* String s is too long: truncate it to fit it in the terminal. *)
+ let l = String.length s in
+ let b = Buffer.create 30 in
+ let rec loop i rest =
+   if i < l then
+   let c = s.[i] in
+   let tx, ty = Graphics.text_size (String.make 1 c) in
+   if tx <= rest then begin Buffer.add_char b c; loop (i + 1) (rest - tx) end in
+ loop 0 t.gwidth;
+ set_title t (Buffer.contents b);;
 
 let make_term =
   make_term_gen
   Graphics.black Graphics.white
-  10 Graphics.black
+  10 Graphics.black Graphics.white
   0x6FFFFF;;
 
 (* Basic functions to edit. *)
@@ -323,6 +335,10 @@ let get_line =
              if nl > 0 then Buffer.add_string b (String.sub s 0 nl);
              backspace t;
            end;
+          read t
+      | '' ->
+          Buffer.clear b;
+          while t.cursor_x > limx do backspace t done;
           read t
       | c ->
          Buffer.add_char b c;
