@@ -17,27 +17,31 @@
 
 (* $Id$ *)
 
-type ratiopts =
+type white_is_transparent = bool;;
+(** Specifies wheter white pixels (pixels whose color is 0XFFFFFF)
+    have to be considered as transparent when drawing an image. *)
+
+type ratiopt =
    | ScaleOriginal
-      (* leave the image at its original native size  *)
+      (* Leave the image at its original native size. *)
    | ScaleAuto
-      (* scale to fit requested area *)
+      (* Scale to fit requested area. *)
    | ScaleCenter
-      (* scale as needed to cover the image, keep original Ratio and center *)
+      (* Scale as needed to cover the image, keep original ratio and center. *)
    | ScaleTop
-      (* scale x coords to align to top of the screen, keep original Ratio  *)
+      (* Scale x coords to align to top of the screen, keep original ratio. *)
    | ScaleBottom
-      (* scale x coords to align to bottom of the screen,
-         keep original Ratio  *)
+      (* Scale x coords to align to bottom of the screen,
+         keep original ratio. *)
    | ScaleLeft
-      (* scale y coords to align to left of the screen, keep original Ratio  *)
+      (* Scale y coords to align to left of the screen, keep original ratio. *)
    | ScaleRight
-      (* scale y coords to align to right of the screen, keep original Ratio  *)
+      (* Scale y coords to align to right of the screen, keep original ratio. *)
    | ScaleTopLeft
    | ScaleBottomLeft
    | ScaleTopRight
-   | ScaleBottomRight
-;;
+   | ScaleBottomRight;;
+(** Options to resize images before drawing. *)
 
 (* Blending *)
 type blend =
@@ -51,13 +55,19 @@ type alpha = float;;
 type image_size = int * int;;
 (** The size of an image in pixels. *)
 
+type position = int * int;;
+(** The position where to draw the image. *)
+
+type antialias = bool;;
+(** Have pixels' color to be antialised when drawing images ? *)
+
 type ps_bbox = int * int * int * int;;
 (** The PostScript bounding box of an image as recorded in an
    encapsulated PostScript file that contains it. *)
 
-val f : string -> bool -> float -> blend ->
-        ps_bbox option -> 
-        ratiopts -> bool -> image_size -> (int * int) -> unit;;
+val f : Misc.file_name -> white_is_transparent -> alpha -> blend ->
+        ps_bbox option ->
+        ratiopt -> antialias -> image_size -> position -> unit;;
 (** [f filename whitetransp alpha blend 
       (llx, lly, urx, ury) antialias (width, height) (x0, y0)]
    draws an eps [filename] with bounding box [(llx,lly,urx,ury)]
