@@ -121,14 +121,16 @@ installopt: install
 install:: $(INSTALLTARGET) doc/splash.dvi
 	cp $(INSTALLTARGET) ${bindir}/advi
 	- mkdir -p $(ADVI_LOC)
-	cp doc/splash.dvi tex/advilogo.eps tex/caml.eps tex/bar.jpg.eps tex/*.sty tex/advi.pro $(ADVI_LOC)
+	cp doc/splash.dvi tex/advilogo.eps tex/caml.eps tex/bar.jpg.eps \
+		tex/*.sty tex/advi.pro $(ADVI_LOC)
 	if [ -f conf/jpfonts.conf ]; then cp conf/jpfonts.conf $(ADVI_LOC); fi
 
 MLFILES = $(addsuffix .ml, $(MODULES))
 
 .depend:: *.mli $(MLFILES) Makefile
 	$(OCAMLDEP) *.mli $(MLFILES) > .depend
-	gcc -MM -I$(CAMLDIR) $(CFLAGS) $(COBJS:.o=.c) | sed -e 's|$(CAMLDIR)/[^ ]*||' >> .depend
+	gcc -MM -I$(CAMLDIR) $(CFLAGS) $(COBJS:.o=.c) \
+		| sed -e 's|$(CAMLDIR)/[^ ]*||' >> .depend
 
 # just for the authors
 ADVI=advi-$(VERSION)
@@ -165,7 +167,9 @@ tar_and_web: tex/splash.dvi
 	cp -pr bazar-ocaml/advi/doc/* $(WEBSITEDIR)
 	- chgrp -R caml $(WEBSITEDIR)
 	- chmod -R g+w $(WEBSITEDIR)
-	cp -pr release/bazar-ocaml/advi/LGPL release/bazar-ocaml/advi/README release/bazar-ocaml/advi/INDEX $(FTPSITEDIR)
+	cp -pr release/bazar-ocaml/advi/LGPL \
+		release/bazar-ocaml/advi/README \
+		release/bazar-ocaml/advi/INDEX $(FTPSITEDIR)
 	cd release; mv bazar-ocaml/advi $(ADVI); \
 	tar cvf $(ADVI).tar $(ADVI); \
 	gzip $(ADVI).tar; \
@@ -203,7 +207,8 @@ rpm:
 	if test "X$$rpmdir" = "X"; then \
 		echo "cannot create rpm"; exit 2; fi; \
 	echo YOU NEED TO SU ROOT; \
-	su root -c "cp $(FTPSITEDIR)/$(ADVI).tar.gz $$rpmdir/SOURCES/; rpm -ba --clean ./advi.spec"; \
+	su root -c "cp $(FTPSITEDIR)/$(ADVI).tar.gz $$rpmdir/SOURCES/; \
+	rpm -ba --clean ./advi.spec"; \
 	cp $$rpmdir/SRPMS/advi-$(VERSION)-1.src.rpm \
 	   $$rpmdir/RPMS/*/advi-$(VERSION)-1.*.rpm $(FTPSITEDIR)
 
