@@ -23,7 +23,8 @@ HTMLC=htmlc -I Includes -env Includes/env
 
 # The list of source files
 FILES=advi-index.html advi-fra.html advi-eng.html \
-advi-faq-eng.html advi-faq-fra.html
+advi-faq-eng.html advi-faq-fra.html \
+advi-screen-shots-fra.html advi-screen-shots-eng.html
 
 ######## This part should automatically handle the generation of
 ######## object files
