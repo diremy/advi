@@ -96,16 +96,20 @@ let usr1 = Sys.sigusr1;;
 let usr1_status = ref false;;
 
 let clear_usr1 () = usr1_status := false;;
-
 let set_usr1 () =
   Sys.set_signal usr1
     (Sys.Signal_handle
        (fun _ -> usr1_status := true; if !waiting then raise Usr1));;
-
 set_usr1 ();;
 
 let sleep_broken = ref false;;
-let clear_sleep () = sleep_broken := false;;
+let clear_sleep () =
+  if GraphicsY11.key_pressed() then sleep_broken := true
+  else sleep_broken := false;;
+(* let _ = *)
+(*   Sys.set_signal Sys.sigint*)
+(*     (Sys.Signal_handle (fun _ -> sleep_broken := true))*)
+
 
 (* returns false if sleep is fully performed. returns true if interrupted *)
 let sleep_watch breakable sync n =
@@ -248,6 +252,11 @@ let fgcolor () = !default_fgcolor;;
 
 let set_default_color_string r s =
   r := Dvicolor.parse_color (String.lowercase s);;
+
+Options.add
+  "-fgcolor"
+  (Arg.String set_fgcolor_string)
+  "STRING\tSet default foreground color (Named or RGB)";;
 
 let default_bkgd_data () =
   { bgcolor = !default_bgcolor;
@@ -753,7 +762,7 @@ module H =
       in
       let rec split draw (x, y as orig) w h voff = function
         | [] -> make_anchor draw orig w h voff
-        | (x1, y1, g1 as d) :: rest ->
+        | (x1, y1, g1 as d) :: rest as all ->
             if x1 + width g1 > x then
               split (d :: draw) orig
                 (max w ((x1 - x) + width g1))
@@ -761,8 +770,8 @@ module H =
                 (max voff (voffset g1)) rest
             else
               begin
-                make_anchor (d :: draw) orig w h voff;
-                start rest
+                make_anchor draw orig w h voff;
+                start all
               end
       and start = function
         | [] -> ()
@@ -1086,8 +1095,14 @@ let reposition ~x ~y ~w ~h =
   Gs.flush ();
   Gs.kill ();
   GraphicsY11.reposition x y w h;
+<<<<<<< grdev.ml
+  let w = Graphics.size_x () and h = Graphics.size_y () in
+  size_x := w; size_y := h;
+  w, h;;
+=======
   update_device_geometry ();
   !size_x, !size_y;;
+>>>>>>> 1.107
 
 let resized () =
   let x = Graphics.size_x () and y = Graphics.size_y () in

@@ -233,6 +233,8 @@ let set_hmargin d = attr.hmargin <- normalize d;;
 
 let set_vmargin d = attr.vmargin <- normalize d;;
 
+let round x = int_of_float (x +. 0.5);;
+
 (*** Initialization ***)
 let init_geometry all st =
   let dvi = st.dvi in
@@ -258,23 +260,25 @@ let init_geometry all st =
   and height = int_of_float (base_dpi *. h_in)
   and real_width = int_of_float (base_dpi *. w_in *. st.ratio)
   and real_height = int_of_float (base_dpi *. h_in *. st.ratio) in
+  let fwidth = base_dpi *. w_in
+  and fheight = base_dpi *. h_in in
   let (size_x, size_y) =
     if attr.crop then begin
       let sx = match attr.hmargin with
-      | Px n -> width + 2 * n
-      | In f -> width + int_of_float (base_dpi *. 2.0 *. f)
+      | Px n -> round fwidth + 2 * n
+      | In f -> round (fwidth +. 2.0 *. base_dpi *. f)
       | _ -> assert false
       and sy = match attr.vmargin with
-      | Px n -> height + 2 * n
-      | In f -> height + int_of_float (base_dpi *. 2.0 *. f)
+      | Px n -> round fheight + 2 * n
+      | In f -> round (fheight +. 2.0 *. base_dpi *. f)
       | _ -> assert false in
       (min attr.geom.Ageometry.width sx, min attr.geom.Ageometry.height sy)
     end else
       (attr.geom.Ageometry.width, attr.geom.Ageometry.height) in
   if all then
     begin
-      let orig_x = (size_x - width) / 2
-      and orig_y = (size_y - height) / 2 in
+      let orig_x = round ((float size_x -. fwidth) *. 0.5)
+      and orig_y = round ((float size_y -. fheight) *. 0.5) in
       st.base_dpi <- base_dpi;
       st.size_x <- size_x;
       st.size_y <- size_y;
@@ -1044,18 +1048,21 @@ module B =
 
     let fullscreen st =
       let b = (st.fullscreen = None) in
-      let (x, y), (dx, dy) =
+      let (size_x, size_y), (dx, dy) =
         match st.fullscreen with
         | None ->
             let x = GraphicsY11.origin_x () in
             let y = GraphicsY11.origin_y () in
             st.fullscreen <-
               Some (x, y, st.size_x, st.size_y, (st.orig_x, st.orig_y));
-            Grdev.reposition ~x:0 ~y:0 ~w:(-1) ~h:(-1), (0, 0);
+            (* negative width and height mean fullscreen *)
+            Grdev.reposition ~x:0 ~y:0 ~w:(-1) ~h:(-1),
+            (0, 0);
         | Some (x, y, w, h, dxy) ->
             st.fullscreen <- None;
-            Grdev.reposition ~x ~y ~w ~h, dxy in
-      resize st ~dx ~dy x y;
+            Grdev.reposition ~x ~y ~w ~h,
+            dxy in
+      resize st ~dx ~dy size_x size_y;
       if b then center st
 
     let exit st = raise Exit

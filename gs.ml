@@ -239,7 +239,8 @@ class gs () =
             begin
               try
                 let b, y, x = parse_pos s in
-                let y = (if b then gr.height else 0) + y in
+                let x, y =
+                  if b then x, y else x + !current_x, y + !current_y in
                 if !pstricks then
                   begin
                     Printf.fprintf stderr "<-- %s %d %d"
@@ -298,7 +299,13 @@ class gs () =
 
 let texbegin = "TeXDict begin";;
 let texend = "flushpage end";;
-let moveto x y = Printf.sprintf "%d %d moveto" x y;;
+let moveto x y =
+  if !current_x = x && !current_y = y then ""
+   else
+    begin
+      current_x := x; current_y := y; 
+      Printf.sprintf "%d %d moveto" x y
+    end;;
 
 let texc_special_pro gv =
   let l = [ "texc.pro"; "special.pro" ] in
@@ -430,14 +437,21 @@ class gv =
       sync <- false
 
     method def b =
+      (* insert into postscript into user dictionnary, typically with '!'
+         should not change graphic parameters *)
+      (* does not draw---no flushpage *)
       self # send [ b ]
 
     method ps b (x:int) (y:int) =
+      (* insert non postscript, typically with ``ps:'' 
+         may change graphic parameters *)
       self # send [ texbegin; self # moveto x y; b; texend ];
       sync <- false
 
     method special b (x:int) (y:int) =
-      self # send [ texbegin; self # moveto x y; 
+      (* insert protected postscript, typically with '"'
+         does not change graphic parameters *)
+      self # send [ texbegin; (* self # moveto x y; *)
                     "@beginspecial @setspecial";
                     b;
                     "@endspecial"; texend;

@@ -421,13 +421,14 @@ Maybe you mean \@currenvir ing}}
 %%% For PS Tricks
 
 \def \advi@moveto {\advi@special {moveto}}
+\def \advi@rmoveto {\advi@special {rmoveto}}
 \def\advi@psput@special#1{%
 \hbox{%
 \pst@Verb{{ \pst@coor }
 dup exec 2 copy moveto advi@Dict begin printpos end
 \tx@PutCoor
 \tx@PutBegin}
-\hbox {\advi@moveto \box#1}%
+\hbox {\advi@rmoveto \box#1}%
 \pst@Verb{\tx@PutEnd}}}
 
 \def\advi@ncput@iii{%
