@@ -111,6 +111,12 @@ and scratch_write x y =
         end else
        if btn then scratch_write nx ny else
        scratch_write x y
+
+and scratch_write00 () =
+  let x, y = G.mouse_pos () in
+  G.moveto x y;
+  G.set_color !scratch_font_color;
+  scratch_write x y
 ;;
 
 let save_excursion curs col f =
@@ -142,23 +148,25 @@ let save_excursion curs col f =
 let rec wait_button_pressed f =
   match Graphics.wait_next_event [Button_down; Key_pressed] with
   | {mouse_x = x; mouse_y = y; button = btn; keypressed = kp; key = c} ->
-      if kp then
-        begin match c with
-        | '' -> end_write ()
-        | c -> f c; wait_button_pressed f
-        end else
+      if kp then begin f c; wait_button_pressed f end else
       if not btn then wait_button_pressed f;;
 
 let write_handle_char c =
   (match c with
    | '' -> end_write ()
+   | 'b' -> set_scratch_font_color "blue"
+   | 'g' -> set_scratch_font_color "green"
+   | 'w' -> set_scratch_font_color "white"
+   | 'c' -> set_scratch_font_color "cyan"
+   | 'm' -> set_scratch_font_color "magenta"
+   | 'r' -> set_scratch_font_color "red"
+   | 'y' -> set_scratch_font_color "yellow"
+   | 'k' -> set_scratch_font_color "black"
    | _ -> ());;
 
 let enter_write () =
   wait_button_pressed write_handle_char;
-  let x, y = G.mouse_pos () in
-  G.moveto x y;
-  scratch_write x y;;
+  scratch_write00 ();;
 
 let do_write () = save_excursion Cursor_pencil !scratch_font_color enter_write;;
 
