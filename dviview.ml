@@ -775,7 +775,6 @@ module B =
             redraw st
           end
       | None -> none ()
-      end
 
     let page_up st =
       let none () =
@@ -812,7 +811,6 @@ module B =
             st.fullscreen <- None;
             Grdev.reposition ~x ~y ~w ~h in
       resize st x y
-
     let exit st = raise Exit
     let clear_image_cache st = (* clear image cache *)
       Grdev.clean_ps_cache ()
