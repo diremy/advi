@@ -9,6 +9,15 @@
 \usepackage[latin1]{inputenc}
 \usepackage[T1]{fontenc}
 
+\usepackage{argv}
+\defargv {ps2pdf}[]{
+%  \rundriver{ps2pdf}
+  \usepackage {times}
+  \PassOptionsToPackage {psbubble}{xprosper}
+  \PassOptionsToPackage {ignore}{advi}
+}
+\runargv
+
 \usepackage {xprosper}
 
 \usepackage {amssymb}
