@@ -431,30 +431,25 @@ let get_size_in_pix st = function
   | In f -> int_of_float (st.base_dpi *. f)
   | _ -> assert false;;
 
+let vmargin_size st = get_size_in_pix st attr.vmargin;;
+let hmargin_size st = get_size_in_pix st attr.hmargin;;
+
 (* The next four functions returns the position that correspond to the top,
    the bottom, the left and right of the page *)
-let top_of_page st =
-  let vmargin_size = get_size_in_pix st attr.vmargin in
-  vmargin_size;;
+let top_of_page = vmargin_size;;
 
-let bottom_of_page st =
-  let vmargin_size = get_size_in_pix st attr.vmargin in
-  attr.geom.height - st.dvi_height - vmargin_size;;
+let bottom_of_page st = attr.geom.height - st.dvi_height - vmargin_size st;;
 
-let left_of_page st =
-  let hmargin_size = get_size_in_pix st attr.hmargin in
-  hmargin_size;;
+let left_of_page = hmargin_size;;
 
-let right_of_page st =
-  let hmargin_size = get_size_in_pix st attr.hmargin in
-  attr.geom.width - st.dvi_width - hmargin_size;;
+let right_of_page st = attr.geom.width - st.dvi_width - hmargin_size st;;
 
 (* the two following functions move the displayed part of the page while
    staying inside the margins *)
 let move_within_margins_y st movey =
-  let vmargin_size = get_size_in_pix st attr.vmargin in
   let tmp_orig_y = st.orig_y + movey in
   let new_orig_y =
+    let vmargin_size = vmargin_size st in
     if movey < 0 then begin
       if tmp_orig_y + st.dvi_height + vmargin_size < attr.geom.height
       then attr.geom.height - st.dvi_height - vmargin_size
@@ -469,9 +464,9 @@ let move_within_margins_y st movey =
   else None;;
 
 let move_within_margins_x st movex =
-  let hmargin_size = get_size_in_pix st attr.hmargin in
   let tmp_orig_x = st.orig_x + movex in
   let new_orig_x =
+    let hmargin_size = hmargin_size st in
     if movex < 0 then begin
       if tmp_orig_x + st.dvi_width + hmargin_size < attr.geom.width
       then attr.geom.width - st.dvi_width - hmargin_size
@@ -810,7 +805,7 @@ module B =
              * floating point rounding problem
              *)
           if attr.geom.height <
-            st.dvi_height + 2 * (get_size_in_pix st attr.vmargin) then
+            st.dvi_height + 2 * vmargin_size st then
             begin
               st.orig_y <- top_of_page st;
               set_bbox st;
@@ -835,12 +830,12 @@ module B =
       let none () =
         if st.page_no > 0 then begin
           if attr.geom.height <
-            st.dvi_height + 2 * (get_size_in_pix st attr.vmargin) then
+            st.dvi_height + 2 * vmargin_size st then
             begin
               st.orig_y <- bottom_of_page st;
               set_bbox st;
             end;
-          goto_page (st.page_no -1) st
+          goto_page (st.page_no - 1) st
         end
       in
       begin
