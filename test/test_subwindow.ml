@@ -57,9 +57,9 @@ move_subwindow s2 200 200;;
 wait ();;
 
 for i = 0 to 200 do
- move_subwindow s3 (100 +i) (100 + i);
+ move_subwindow s3 (100 + i) (100 + i);
  Graphics.synchronize ();
-(* sleep 1.0;*)
+ (* sleep 1.0;*)
 done;;
 
 move_subwindow s3 100 10;;

@@ -228,6 +228,8 @@ rerooted, it is truely embeddable into {\ActiveDVI} (meaning it is
 really a part of the {\ActiveDVI} window). Otherwise the application
 is not embeddable.
 
+\newpage
+
 \subsubsection*{Not embeddable applications}
 
 If the application cannot be rerooted (or if the \verb"!p" parameter
@@ -249,12 +251,12 @@ Examples:
 presentation using:\\
 \verb|\adviembed[width=3cm,height=3.3cm]|\\
 \verb|          {display -geometry !g! -window !p logo.gif}|\\
-\adviembed[width=3cm, height=3.3260869cm]{display -geometry !g! -window !p advilogo.gif}
+\adviembed[ephemeral=advilogo,width=3cm, height=3.3260869cm]{display -geometry !g! -window !p advilogo.gif}
 
 \item Similarly, \verb|animate| can display animations with:\\
         \verb|\adviembed[width=2cm,height=2cm]|\\
         \verb|          {animate -geometry !g! -window !p anim.gif}|\\
-        \adviembed[width=2cm,height=2cm]{animate -geometry !g! -window !p mmm.anim.gif}
+        \adviembed[ephemeral=animate,width=2cm,height=2cm]{animate -geometry !g! -window !p mmm.anim.gif}
 \end{itemize}
 
 % \newpage
@@ -275,10 +277,10 @@ presentation using:\\
    For instance, using wish:\\
    \verb|\adviembed[persistent,width=5cm,height=1cm]|\\
    \verb|          {wish ./watch -geometry !g -use !p}|\\
-   \adviembed[persistent,width=5cm,height=0.71cm]{wish ./watch -geometry !g -use !p}
+   \adviembed[persistent=wish,width=5cm,height=0.71cm]{wish ./watch -geometry !g -use !p}
 \adviwait
   \item Possibly interactive ! (we use CamlTk here)\\
-   \verb|\adviembed[persistent,width=6.5cm,height=9.5cm]|\\
+   \verb|\adviembed[persistent=taquin,width=6.5cm,height=9.5cm]|\\
    \verb|          {./taquin -geometry !g -use !p dojoji.gif}|\\
   \adviembed[persistent=taquin,width=8.5cm,height=10cm]{./taquin.sh -geometry !g -use !p dojoji.gif}
 
