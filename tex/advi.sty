@@ -148,10 +148,10 @@
 \define@key {advi@trans}{block}[]{\def \advi@transmode {block}}
 \define@key {advi@trans}{wipe}[]{\def \advi@transmode {wipe}}
 \define@key {advi@trans}{from}{\def \advi@transfrom { from=#1}}
-\define@key {advi@trans}{steps}{\def \advi@transsteps { step=#1}}
+\define@key {advi@trans}{steps}{\def \advi@transsteps { steps=#1}}
 \def\advi@transition #1{%
   \begingroup \setkeys {advi@trans}{#1}%
-      \advi@special{trans push \advi@transmode \advi@transfrom
+      \advi@special{trans \advi@transmode \advi@transfrom
                     \advi@transsteps}%
   \endgroup}
 % not used anymore
@@ -166,9 +166,6 @@
    \def \advi@afterbox 
       {\hbox {\advi@transbox@save{\the\wd0 }{\the\ht0 }{\the\dp0}%
               \unhbox0\setkeys {advi@trans}{#1}%
-              \ifx \advi@transmode \advi@transslide\else
-              \advi@error
-                 {Transbox mode \advi@transmode \space is not supported}\fi
               \advi@transbox@go
                   {slide\advi@transfrom \advi@transsteps}}}%
    \def \advi@@afterbox {\aftergroup \advi@afterbox} 
