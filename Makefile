@@ -79,7 +79,7 @@ $(EXEC).opt: $(COBJS) $(CMX_OBJS)
 	$(OCAMLOPT) $(INCLUDES) $(OPT_OBJS) $(LINK_OPTS) -o $(EXEC).opt
 
 config.ml: config.ml.in
-	configure
+	./configure
  
 dvicolor.ml: Makefile.config dvicolor.mlp ifdef.cmo
 	camlp4o pa_ifdef.cmo ./ifdef.cmo -impl dvicolor.mlp > $@
