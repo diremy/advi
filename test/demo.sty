@@ -24,8 +24,6 @@
 
 \def\smallpause{0.3}
 
-\def\keymenu#1{\textcolor{red}{\underline{#1}}}
-
 \edef \theSharp {\string#}
 \AtEndDocument {\immediate\write \@auxout
 {\string \gdef \string \LastPage{\thepage}}} 
@@ -33,16 +31,22 @@
   {\@tempcnta #1\advance \@tempcnta by #3
    \advi@special@ {html:<a href="\theSharp page.\the\@tempcnta">}#2%
    \advi@special@ {html:</a>}}
+
+\def\keymenu#1{\textcolor{red}{\underline{#1}}}
+
 \def\advifooter{\vbox to 0em{\vbox to \vsize {\vfill
-Press: \keymenu{n}ext page \keymenu{p}revious page
+Press: %
+\keymenu{n}ext page %
+\keymenu{p}revious page %
 \keymenu{\textvisiblespace} next pause%
-\hfill{\adviembed[sticky=advianim]{1.56cm}{1.824cm}{animate -geometry !g! -window !p advilogo.anim.gif}}
+\hfill{\adviembed[sticky=advianim]{1.56cm}{1.824cm}%
+{animate -geometry !g! -window !p advilogo.anim.gif}}
 }\medskip \leftline
  {\hbox to 3em {\ifnum \thepage >1\theTarget [0]{First}{1}\fi\hfil}
   \hbox to 3em {\ifnum \thepage >1\theTarget {Prev}{-1}\fi\hfil}
   \@ifundefined {LastPage}{}
    {\ifnum \thepage <\LastPage \hbox to 3em {\theTarget {Next}{1}\hfil}
-   \theTarget[0]{Last}{\LastPage}\fi}} 
+   \theTarget[0]{Last}{\LastPage}\fi}}
 \vss}}
 
 \def\adviheader{\noindent
