@@ -55,7 +55,7 @@ file included in the distribution.
 
 
 \vfill
- \section* {Acknowledgements and contributors}
+ \section*{Acknowledgements and contributors}
 
 {\ActiveDVI} is based on Mldvi, written by Alexandre~Miquel, which
 constitutes its core. Mldvi alone is distributed 
@@ -71,9 +71,9 @@ Xavier~Leroy, and Alan~Schmitt.
 \endadvitoc
 \clearpage
 
-\section {Installation}
+\section{Installation}
 
-\section {Safety concerns when using the {\ActiveDVI} previewer}
+\section{Safety concerns when using the {\ActiveDVI} previewer}
 
 \paragraph {\bf Warning!}
 
@@ -81,7 +81,6 @@ Xavier~Leroy, and Alan~Schmitt.
 Hence, when playing a DVI file from an untrusted source,
 you should run \doctt{advi} with the \doctt{-safer} option, 
 that inhibits the execution of embedded applications. 
-
 This warning applies in particular if you choose {\ActiveDVI} as your default 
 {\tt meta-mail} previewer for the {\tt application/x-dvi} mime-type.
 
@@ -94,16 +93,15 @@ application. (Note that in such a case {\ActiveDVI} asks only once to
 launch a given application: it remembers your previous decisions
 concerning a command and acts accordingly for the rest of the
 presentation.) 
-
 The safe \doctt{-ask} option is set by default. It can also be set for
 all the users by the machine administrator or on a local scale by
-individual users, and even via a per directory setting ! (Conveninient
+individual users, and even via a per directory setting ! (Convenient
 to gracefully run your talks, while still be cautious when running
 talks from others.)
 
-\section {Using the {\ActiveDVI} previewer}
+\section{Using the {\ActiveDVI} previewer}
 
-\subsection {Command line options}
+\subsection{Command line options}
 
 {\ActiveDVI} is invoked with the following command syntax
 \begin{verbatim}
@@ -164,10 +162,10 @@ original TeX source.
 \subsubsection*{Debugging options}
 
 \medskip\noindent\begin{tabular}{ll}
-\verb"--debug" & \\
-\verb"--debug_pages" & \\
-\verb"--show_ps" & \\
-\verb"--verbose_image_access" & \\
+\verb"--debug" & General debug option \\
+\verb"--debug_pages" & Debug page motion \\
+\verb"--show_ps" & Print a copy of Postscript sent to gs to stdout \\
+\verb"--verbose_image_access" & Change the cursor while loading images\\
 \end{tabular}
 
 \subsubsection*{Rendering options}
@@ -180,26 +178,26 @@ original TeX source.
 
 \subsubsection*{Safety options}
 \medskip\noindent\begin{tabular}{ll}
-\verb"-exec" & Set automatic execution safety policy \\
-\verb"-ask" & Set automatic execution safety policy \\
-\verb"-safer" & Set no execution of embedded aplications safety policy \\
+\verb"-exec" & Set safety policy to ``automatic execution'' \\
+\verb"-ask" & Set safety policy to ``ask user before execution'' \\
+\verb"-safer" & Set safety policy to ``no execution of embedded aplications''
 \end{tabular}
 
 \subsubsection*{Option files option}
 \medskip\noindent\begin{tabular}{ll}
 \verb"-option-file <filename>" & Load {\tt filename} as a file containing a list of options \\
-& as given on the command line to \doctt{advi} \\
+& as given on the command line to \doctt{advi}. \\
 \end{tabular}
 
 
-\subsection {Cut and paste}
+\subsection{Cut and paste}
 
 Text can be copied from the {\ActiveDVI} previewer to an another application.
 However, this uses the \doctt{XBuffer} and not the \doctt{XSelection}
 mechanism.
 \begin {itemize}
 \item
-Shift middle-click copies the current word. 
+Shift middle-click copies the current word.
 \item
 Shift right-click and drag copies the specified region. 
 \end {itemize}
@@ -226,7 +224,7 @@ Line numbers default to $0$ when not found. Note that line numbers may be
 inconsistent if they \docdef \special-line commands have not been inserted
 close enough to the position.
 
-\subsection {Hyperref}
+\subsection{Hyperref}
 
 {\ActiveDVI} supports {\LaTeX} {\tt hyperref} package 
 with both internal and cross-file references. For cross-file
@@ -249,9 +247,9 @@ withing the target, we use the following command instead:
 (If you are viewing this document with \softtarget{a}{\ActiveDVI}, you may
 move over or click on \hyperlink{a}{this area} to see the effect.) 
 
-\subsection {Floating table of content and thumbnails}
+\subsection{Floating table of contents and thumbnails}
 
-There are two ways to include a floating table of content while previewing. 
+There are two ways to include a floating table of contents while previewing. 
 \begin {itemize}
 
 \item
@@ -260,17 +258,17 @@ and \doctt{/toc.last} as markers for the first and last page of the table
 of contents, which will become floating pages, {\em i.e.} accessible from
 anywhere in the document with the default keybinding \verb't'.
 The first stroke on \verb't' will show the first page of the table of
-content. Successive stokes will show the following pages. Prefix argument 
+contents. Successive stokes will show the following pages. Prefix argument 
 may also be used to directly access second of third pages. 
 
 The package \softlink{advi}{{\tt advi}} below redefines
 {\docdef \tableofcontents} so that it automatically inserts the above
-markers around the table of content. It also provides two macros, {\docdef
+markers around the table of contents. It also provides two macros, {\docdef
 \advitoc} and \docdef \endadvitoc, that can be used to insert these markers
 explicitly when the table of context is hand-made.
 
 \item
-If no table of content markers are found, then {\ActiveDVI} will
+If no table of contents markers are found, then {\ActiveDVI} will
 compute thumbnails, {\em i.e.} will present pack several pages at a smaller 
 scale on a single page. {\ActiveDVI} will calculate the scale needed to 
 fit all thumbnails on a single page, and will use it if it is 
@@ -287,16 +285,16 @@ given.
 \end {itemize}
 By default, the binding \doctt{T} processes thumbnails and the binding
 \doctt{t}  displays thumbnails if already processed or show the table of
-content if available, otherwise does nothing. Thumbnails must be made
+contents if available, otherwise does nothing. Thumbnails must be made
 explicitlty, to prevent accidental hit of the key, which may then 
 take some time.
 
 
-\subsection {Moving around}
+\subsection{Moving around}
 
 See the key bindings in the appendix.
 
-\subsection {Using and making special effects}
+\subsection{Using and making special effects}
 
 Presentation examples can be found in the 
 \verb"examples" directory. Don't miss to play them! Then, feel free
@@ -304,11 +302,11 @@ to read their source code and copy the effects they provide.
 
 {\ActiveDVI} can be used as is, but will shine when driven by a user
 with a bias toward programming: special effects can easily 
-be realized by using the \LaTeX package provided with the distribution. 
+be realized by using the {\LaTeX} package provided with the distribution. 
 
 Creative advanced users may program the presenter at various levels, either
 using or defining simple {\LaTeX} macros, writing new {\LaTeX} package
-files, or by implementing extension to the previewer itself.
+files, or by implementing extensions to the previewer itself.
 
 % If you ever succeed at adding a nice special effect that could be of
 % a general interest, or if you can provide a nice and fancy presentation
@@ -316,15 +314,14 @@ files, or by implementing extension to the previewer itself.
 % community, please don't hesitate to drop a mail to the implementors
 % at \verb"advi@pauillac.inria.fr".
 
-
-\section {The \softtarget{advi}{{\tt advi.sty}} \LaTeX~package}
+\section{The \softtarget{advi}{{\tt advi.sty}} \LaTeX~package}
 
 
 {\ActiveDVI} provides some {\LaTeX} packages to facilitate animations and
 interaction with the presenter from within your {\LaTeX} source text.
 
-The  advi package is the main package to include when writing
-a presentation for {\ActiveDVI}. It provides the main set of interactive
+The {\tt advi.sty} package is the main package to include when writing
+a presentation for {\ActiveDVI}. It defines the main set of interactive
 commands for {\ActiveDVI} to animate the show. However, there is no
 need to load the package if no {\ActiveDVI} special effects are
 required for the presentation.
@@ -348,7 +345,7 @@ The package also defines the conditional {\docdef \ifadvi} which
 evaluates its first argument if advi is not in ignore mode and its
 second argument otherwise.
 
-\subsection {Pause, Record and Play}
+\subsection{Pause, Record and Play}
 
 \medskip\noindent
 \docdef \adviwait\docopt{seconds}
@@ -403,13 +400,13 @@ If the environment form is used, \docid{text} may contain fragile commands.
 \end{quote}
 
 
-\subsection {Images}
+\subsection{Images}
 
 Images can be encapsulated into the presentation using the package
 CamlImages provided with the distribution
 (see section~\ref {advi-grahicx})
 
-\subsection {Background}
+\subsection{Background}
 
 Background of pages can be set in the {\LaTeX} source of the page,
 either as a plain color or as an image (or both!).
@@ -434,7 +431,7 @@ where \docid{decl} is a list of settings of the following from:
 Set the background color to \docid{color}.
 If \docid{color} is \doctt{none} this unsets the background color. 
 Otherwise, \docid{color} must follow the convention of the package 
-\doctt{color}, that is, it should either be a previously declared color or 
+\doctt{color}, that is, it should either be a previously defined color or 
 of the form \docopt{model}\docarg{model color specification}. 
 
 For example, the following specifications are all correct:
@@ -491,8 +488,11 @@ image covers the background.
 
 \dockey[none]{blend}{blend mode}
 \begin{quote}
-Set the blend mode to \docid{blend mode}, which should be one of the
-following (unchecked): {\tt difference}, XXX?
+Set the blend mode to \docid{blend mode}, which are reminiscent of
+Ghostscript blending options. The blend mode should be one of the
+following: {\tt normal}, {\tt multiply}, {\tt screen}, {\tt overlay},
+{\tt dodge}, {\tt burn}, {\tt darken}, {\tt lighten}, {\tt
+difference}, {\tt exclusion},
 (\doctt{none} means unset).
 \end{quote}
 
@@ -509,7 +509,7 @@ as well as the current page.
 By default, the background settings only affect the current page.
 \end{quote}
 
-\subsection {Transitions}
+\subsection{Transitions}
 
 \docdef \advitransition \doctt {[global]}\docarg {decl}
 \begin{quote}
@@ -518,14 +518,14 @@ where \docid{decl} is a list of settings of the following from:
 \dockey{none}{} or \dockey{slide}{} or \dockey{block}{} or \dockey{wipe}{}
 \begin{quote}
 Set the transition mode to the corresponding key.
-One of this key is mandatory (several is should be illegal, but in fact
-overrides the previous one). 
+One of this key is mandatory (if several are provided the last one is
+selected).
 \end{quote}
 
 \dockey{from}{direction}
 \begin{quote}
-Make the transition come from \docid{direction}.  Directions are not checked
-but should be one of the following: 
+Make the transition come from \docid{direction}.  Directions should be
+one of the following:
 \begin{center}
 \tt
 \begin{tabular}{l@{\qquad}c@{\qquad}r}
@@ -537,7 +537,7 @@ bottomleft& bottom & bottomright\\
 \end{quote}
 The default direction, to be used when no local or global direction has been
 specified, is determined dynamically: \verb"right" when coming from
-previsous page, \verb"left" when coming from next page, and \verb"top"
+previous page, \verb"left" when coming from next page, and \verb"top"
 otherwise.
 
 \dockey{steps}{n}
@@ -566,12 +566,12 @@ as well as the current page.
 
 By default, the transition affects only the current page.
 
-\subsection {Embedded applications}
+\subsection{Embedded applications}
 
-{\ActiveDVI} can launch arbitrary applications you need to animate the
+{\ActiveDVI} can launch arbitrary applications you need to animate your
 show.
 
-The {\LaTeX} command is 
+The {\LaTeX} command to launch an application during the presentation is 
 
 \medskip\noindent
 \docdef \adviembed\docopt{key=value list}\docarg{command} 
@@ -610,8 +610,8 @@ The application keeps running and remains visible when turning pages.
 The application takes \docid{dim} width (respectively height) space in 
 latex. Both values default to 0pt.
 
-These dimensions are also substituted for all occurrences of \verb"!g!" in
-the command string. 
+These dimensions are also substituted for all occurrences of \verb"!g" in
+the command string.
 \end{quote}
 
 \end{quote}
@@ -621,17 +621,18 @@ the command string.
 \begin{quote}
 Kill all embedded applications named \docid{name}.
 An optional signal value or symbolic name can be given to send to the
-designed process: for instance \verb"\advikillembed[SIGUSR1]{clock}"
-will send the \verb"SIGUSR1" signal to the embedded application named
-\verb"clock".
+designed process: for instance, {\tt {\char92}advikillembed[SIGUSR1]\{clock\}}
+will send the {\tt SIGUSR1} signal to the embedded application named
+{\tt clock}.
 
 Signal value defaults to -9.
 \end{quote}
 
 
-\subsection {Active anchors}
+\subsection{Active anchors}
 
-The command is 
+Active anchors are annotated pieces of text that gets associated
+activation records.  To define an active anchor, the command is
 
 \medskip\noindent
 \docdef \advianchor \docopt{decl}\docarg{tag}\docarg {text}
@@ -641,7 +642,7 @@ The command is
 \begin{quote}
 The text is first display as usual, then the anchor is drawn
 according to the style given by \docid{decl}, and made active. 
-It's acctivation, which depends on the mode give by \docid{decl}, 
+Its activation, which depends on the mode given by \docid{decl}, 
 will play record \docid{tag}. 
 
 The declarations \docid{decl} are of the following form:
@@ -665,35 +666,37 @@ will redraw text in a box colored with \docid{color}, which defaults to
 \doctt{yellow}. 
 \end{quote}
 
-\subsection {Postscript specials}
+\subsection{Postscript specials}
 
-{\ActiveDVI} can deal with most of PStricks calling {\tt ghostscript} on
-included Postscripts. However, the interactive between {\ActiveDVI} and
-Postscripts is not always working.
-\begin {itemize}
+{\ActiveDVI} can deal with most of PStricks by calling {\tt
+ghostscript} on included Postscripts. However, the interactivity
+between {\ActiveDVI} and Postscripts is not always properly working.
 
-\item
-Since characters are rendered by {\ActiveDVI}, some PStricks are not allowed.
-\item
-Some change of repairs are also not yet correctly performed.  
+\begin{itemize}
+
+\item Since characters are rendered by {\ActiveDVI}, some PStricks are
+not allowed.
+
+\item Some change of repairs are also not yet correctly performed.  
+
 \end {itemize}
 
-\subsubsection {Overlays}
+\subsubsection{Overlays}
 
 \index{overlays}
 
-The {\tt overlay} class implements overlays with PStricks.  Instead,
+The {\tt overlay} class implements overlays with PStricks. By contrast,
 {\ActiveDVI} implements overlays directly, using records and plays.
 This is more efficient, and of course more natural.
-(In fact, {\ActiveDVI} chooses the cumulative semantics of overlays
-display if all layers below the current overlay.)
+(In fact, {\ActiveDVI} chooses the cumulative semantics of overlays,
+displaying all layers below the current overlay.)
 
-The {\tt xprosper} style derived from the {\tt prosper} class uses 
-the {\tt overlay} class and also work with {\ActiveDVI} in exactly the same
+The {\tt xprosper} style, derived from the {\tt prosper} class, uses 
+the {\tt overlay} class and works with {\ActiveDVI} in exactly the same
 way (relaxing the \overlay@loop macro inhibits all layers, but the first
-page). 
+page).
 
-\subsubsection {PStricks}
+\subsubsection{PStricks}
 
 {\ActiveDVI} can deal with most of PStricks. 
 \begin {itemize}
@@ -717,17 +720,17 @@ Labels over arrows \verb"\Aput", \verb"Bput", etc.
 
 \item[--]
 {\tt pspicture}
-(idem, but drawings that are not embedded in pspictures works)
+(idem, but drawings that are not embedded in pspictures work).
 
 \end {itemize}
 
 
-\section {Auxiliary \LaTeX~packages}
+\section{Auxilliary \LaTeX~packages}
 
 \subsection{The superpose package}
 
-This package allows to easily superpose horizontal material, creating 
-the smallest horizontal box to fit all of the superpositions.
+This package allows superposition of horizontal material, creating 
+the smallest horizontal box that fits all of the superpositions.
 \begin{verbatim}
 \usepackage{superpose}
 \end{verbatim}
@@ -746,7 +749,7 @@ Each item should be a horizontal material.
 
 \subsection{The bubble package}
 
-This package allows to easily draw bubbles over some text. 
+This package draws bubbles over some text. 
 \begin{verbatim}
 \usepackage{bubble}
 \usepackage[ps]{bubble}
@@ -819,42 +822,46 @@ be set globally using the command:
 \subsection{The annotations package}
 
 This package uses active anchors and the bubbles package to 
-allow annotations by raising a bubble when the cursor is over the anchor.
+provide annotations by raising a bubble when the cursor is over the anchor.
 
-The package provides a single command
+The package defines a single command
 
 \medskip\noindent
 \docdef \adviannot \docopt{key=value list}\docarg{anchor}%
     \docopt{ps options}\docpar {pos}\docarg{text}
 \begin{quote}
-whose options are identical to those of \docdef \bubble, but the bubble
-appears withing an active anchor. 
+whose options are identical to those of the \docdef \bubble macro; however
+the bubble appears within an active anchor.
 \end{quote}
 
 %Annotation location can also be invisible \advi{C}{\tt{ }}instead of visible.
 
 \subsection{\label {advi-grahicx}The advi-graphicx package}
 
-This 3-line package provides loads the graphicx prackage and provides
+This 3-lines long package loads the {\tt graphicx.sty} package and provides
 declarations so that JPEG, EPS, TIF, TIFF source images can be embedded:
-{\ActiveDVI} will preview these directly while other drivers will translate
-them on demand. 
+{\ActiveDVI} will preview these images directly while other drivers
+will translate them on demand. 
 
 \appendix
 
-\section {Limitations}
+\section{Limitations}
 
 \subsection*{Postscript Fonts}
 
-Postscript fonts are not currently supported. 
+Postscript fonts are not natively handled by {\ActiveDVI}. You must
+use the command {\tt dvicopy} to expand those virtual fonts to base
+fonts before visualization with {\ActiveDVI}.
+(For instance, {\tt dvicopy talk.dvi talk.expanded; advi talk.expanded} very
+often does the trick.)
 
 \subsection*{Inlined Postscript and Ghostscript}
 
 PS relies on {\tt ghostscript} to display Postscript inlined specials.
 However, some earlier releases of {\tt ghostscript} 
-implements Postscript {\tt flushpage} command as a {\tt XFlush} call
+implements the Postscript {\tt flushpage} command as a {\tt XFlush} call
 which does not force the evaluation of commands, and thus makes the 
-synchronization between {\tt ghostscript} and {\ActiveDVI} drawings 
+synchronization between {\tt ghostscript} and {\ActiveDVI} drawings
 uncontrollable. In this case, the interleaving of inlined postscript 
 and other material may be inconsistent. 
 
@@ -873,7 +880,7 @@ releases. A workaround is available here
 So far, the implementation of inlined Postscript does not correctly handle
 complex change of coordinates.  (See PStricks section). 
 
-\section {Bug Reports}
+\section{Reporting bugs}
 
 Please, send bug reports to 
 \url{mailto:advi@pauillac.inria.fr}. 
@@ -881,7 +888,7 @@ Please, send bug reports to
 See \url{http://pauillac.inria.fr/advi} for up to date information.
 
 
-\section {Key bindings}
+\section{Key bindings}
 
 % Macros specific to splash.tex
 \definecolor{red}{rgb}{1.0,0.0,0.0}
@@ -896,7 +903,7 @@ See \url{http://pauillac.inria.fr/advi} for up to date information.
 \input{splash_contents.tex}
 \def \newpage{\Newpage}
 
-\section {Index}
+\section{Index}
 
 \printindex
 
