@@ -1215,12 +1215,12 @@ module B =
             let y = GraphicsY11.origin_y () in
             st.fullscreen <-
               Some (x, y, st.size_x, st.size_y, (st.orig_x, st.orig_y));
-            (* negative width and height mean fullscreen *)
-            Grdev.reposition ~x:0 ~y:0 ~w:(-1) ~h:(-1),
+            (* negative width and height mean fullscreen, last parameter is screen number *)
+            Grdev.reposition ~x:0 ~y:0 ~w:(-1) ~h:(-1) ~screen:st.num,
             (0, 0);
         | Some (x, y, w, h, dxy) ->
             st.fullscreen <- None;
-            Grdev.reposition ~x ~y ~w ~h,
+            Grdev.reposition ~x ~y ~w ~h ~screen:0,
             dxy in
       resize st ~dx ~dy size_x size_y;
       if b then center st

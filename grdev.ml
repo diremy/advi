@@ -1279,10 +1279,10 @@ let push_back_key_event c m =
 
 Misc.forward_push_back_key_event := push_back_key_event;;
 
-let reposition ~x ~y ~w ~h =
+let reposition ~x ~y ~w ~h ~screen =
   Gs.flush ();
   Gs.kill ();
-  GraphicsY11.reposition x y w h 0;
+  GraphicsY11.reposition x y w h screen; (* screen is protected to 0 in the C layer *)
   update_device_geometry ();
   !size_x, !size_y;;
 
