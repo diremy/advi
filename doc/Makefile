@@ -35,8 +35,8 @@ all: manual.html manual.dvi manual.ps manual.pdf \
     mathmode.dvi
 
 clean: 
-	rm -f *.aux *.log manual.html *.dvi *.pdf *.pdfm *.ps *.ima *.out *.toc
-	rm -f *.haux *.htoc
+	rm -f *~ *.aux *.log manual.html *.dvi *.pdf *.pdfm *.ps \
+		*.ima *.out *.toc *.haux *.htoc
 	$(MAKE) -f MakeHTML clean
 
 distribute: clean all web
