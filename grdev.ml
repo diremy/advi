@@ -22,7 +22,7 @@ open Misc;;
 let ignore_background =
     Options.flag false
     "--ignore_background"
-    ": ignore background for antialiasing,\
+    "  ignore background for antialiasing,\
     \n\t (the default is to look at the background during antialiasing).";;
 
 let glyph_gamma = ref 1.0;;
@@ -33,7 +33,7 @@ Options.add
     if x <= 0.0 then Misc.warning "gamma value must be positive"
     else glyph_gamma := 1.0 /. x))
   (Printf.sprintf
-     "<float> (>0): set to <float> the gamma correction of glyphs,\
+     "<float> (>0)  set to <float> the gamma correction of glyphs,\
      \n\t (the default correction is %f)." !glyph_gamma)
 ;;
 
@@ -588,7 +588,7 @@ let clean_ps_cache () = Drawimage.clean_cache ();;
 
 (*** HTML interaction ***)
 
-(* pour sauver une image_rectiligne *)
+(* To save a rectangular image *)
 type rectangular_image = {
     north : Graphics.image;
     south : Graphics.image;
@@ -681,7 +681,7 @@ module A : ACTIVE =
 (* *)
 let editing =
   Options.flag false "-edit"
-  ": start Active-DVI in edit mode,\
+  "  start Active-DVI in edit mode,\
   \n\t (the default is not to start in edit mode).";;
 
 module H =
@@ -753,7 +753,7 @@ module H =
         | Advi link ->
             draw_anchor
               link.style
-              (match link.color with None ->  advi_frame | Some c -> c)
+              (match link.color with None -> advi_frame | Some c -> c)
               1 a
         | _ -> ()
       in
@@ -789,13 +789,13 @@ module H =
 
 
     type backup =
-      | Nil
-      | Rect of Graphics.image * anchor A.active *
-            (Graphics.image * anchor A.active) list
-      | Screen of Graphics.image * anchor A.active * anchor A.t
+       | Nil
+       | Rect of Graphics.image * anchor A.active *
+             (Graphics.image * anchor A.active) list
+       | Screen of Graphics.image * anchor A.active * anchor A.t
 
     let up_to_date act = function
-      | Rect (_, a, l) -> A.same_location a  act
+      | Rect (_, a, l) -> A.same_location a act
       | Screen (_, a, _) -> A.same_location a act
       | Nil -> false
 
@@ -803,15 +803,15 @@ module H =
     let deemphasize now emph =
       match emph with
       | Rect (ima, act, l) ->
-          GraphicsY11.display_mode now;
+          GraphicsY11.display_mode (not now);
           List.iter
             (function ima, act -> Graphics.draw_image ima act.A.x act.A.y) l;
           Graphics.draw_image ima act.A.x act.A.y;
           Busy.set
             (if !editing then Busy.Selection else Busy.Free);
-          GraphicsY11.display_mode false
+          GraphicsY11.display_mode true
       | Screen (ima, act, all_anchors) ->
-          GraphicsY11.display_mode true;
+          GraphicsY11.display_mode false;
           anchors := all_anchors;
           Gs.flush ();
           (* long delay to be safe *)
@@ -820,21 +820,22 @@ module H =
           Busy.set
             (if !editing then Busy.Selection else Busy.Free);
           GraphicsY11.flush ();
-          GraphicsY11.display_mode false
+          GraphicsY11.display_mode true
       | Nil -> ()
 
     let emphasize fill c act =
       let ima = Graphics.get_image act.A.x act.A.y act.A.w act.A.h in
       Graphics.set_color c;
-      GraphicsY11.display_mode true;
-      if fill then Graphics.fill_rect act.A.x act.A.y act.A.w act.A.h
-      else Graphics.draw_rect (act.A.x+1) (act.A.y+1) (act.A.w-2) (act.A.h-2);
+      GraphicsY11.display_mode false;
+      if fill then Graphics.fill_rect act.A.x act.A.y act.A.w act.A.h else
+      Graphics.draw_rect
+        (act.A.x + 1) (act.A.y + 1) (act.A.w - 2) (act.A.h - 2);
       Graphics.set_color !color;
       push_bg_color c;
       List.iter (function x, y, g -> draw_glyph g x y) act.A.action.draw;
       pop_bg_color ();
       GraphicsY11.set_cursor GraphicsY11.Cursor_hand2;
-      GraphicsY11.display_mode false;
+      GraphicsY11.display_mode true;
       Rect (ima, act, [])
 
     let save_screen_exec act a =
@@ -867,7 +868,7 @@ module H =
       | Not_found | Misc.Match -> Nil
 
     let flashlight t =
-      deemphasize false (light t)
+      deemphasize true (light t)
 
     let emphasize_and_flash color act =
       let fill, color =
@@ -885,7 +886,7 @@ module H =
       | x, _ -> x
 
     let reemphasize emph act =
-      deemphasize true emph;
+      deemphasize false emph;
       emphasize_and_flash href_emphasize act
   end;;
 
@@ -1157,7 +1158,8 @@ let wait_select_rectangle x y =
     let e = select 0 0 in
     restore ();
     e
-  with exn -> restore (); raise exn;;
+  with
+  | exn -> restore (); raise exn;;
 
 let wait_select_button_up m x y =
   let draw_color b =
@@ -1270,9 +1272,9 @@ let wait_move_button_up rect trans_type event x y =
   let color = !color in
   set_color !default_fgcolor;
   Busy.temp_set (trans_cursor trans_type);
-  GraphicsY11.display_mode true;
+  GraphicsY11.display_mode false;
   let restore () =
-    GraphicsY11.display_mode false;
+    GraphicsY11.display_mode true;
     set_color color;
     Busy.restore_cursor () in
   try let e = move 0 0 in restore (); e
@@ -1346,8 +1348,8 @@ let wait_event () =
   (* We reached a pause. Now we can reset the sleep break *)
   clear_sleep ();
   let rec event emph b =
-    let send ev = H.deemphasize true emph; ev in
-    let rescan () = H.deemphasize true emph; event H.Nil false in
+    let send ev = H.deemphasize false emph; ev in
+    let rescan () = H.deemphasize false emph; event H.Nil false in
     match wait_signal_event all_events with
     | Final e -> send e
     | Raw ev ->
@@ -1358,23 +1360,23 @@ let wait_event () =
               let ev' = GraphicsY11.wait_next_event button_up in
               send (Href h) else
             if H.up_to_date act emph then event emph b else begin
-              H.deemphasize true emph;
+              H.deemphasize false emph;
               event (H.emphasize_and_flash href_emphasize act) b end
         | {A.action =
            {H.tag = H.Advi {H.link = s; H.action = a; H.mode = H.Over};
             H.draw = d}} as act ->
               if H.up_to_date act emph then event emph b else begin
-                H.deemphasize true emph;
+                H.deemphasize false emph;
                 event (H.save_screen_exec act a) b end
         | {A.action =
            {H.tag = H.Advi {H.link = s; H.action = a; H.mode = H.Click_down};
             H.draw = d}} as act ->
               if ev.button && not b then begin
-                H.deemphasize true emph;
+                H.deemphasize false emph;
                 event (H.save_screen_exec act a) true end else
               if ev.button then event emph b else
               if H.up_to_date act emph then event emph b else begin
-                H.deemphasize true emph;
+                H.deemphasize false emph;
                 event (H.emphasize_and_flash href_emphasize act) b end
         | _ -> rescan ()
         with Not_found ->
