@@ -131,7 +131,7 @@
 
 \def \advi@bg@do
  {\do\advi@bgcolor \do\advi@bgimage \do \advi@bgalpha \do\advi@bgblend}
-\def \advi@auto@ {auto}
+\def \advi@auto@ { fit=auto}
 \def \advi@bgreset 
  {\def \do ##1{\expandafter \advi@global
                   \expandafter \let \noexpand ##1\advi@empty}\advi@bg@do
@@ -165,7 +165,7 @@
 \def \advi@bgemit 
   {\advi@special 
      {setbg \advi@bgcolor \advi@bgimage \advi@bgalpha \advi@bgblend
-      %\advi@bgfit
+      \advi@bgfit
       }}
 \newif \ifadvi@bglocal
 
