@@ -11,7 +11,7 @@ DVIFILES= $(TEXFILES:%.tex=%.dvi)
 ADVI=TEXPSHEADERS=../tex: ../advi
 
 ifeq ($(HAVE_CAMLTK),true)
-MLPROG=taquin
+MLPROG=taquin clock
 else
 MLPROG=
 endif
@@ -19,7 +19,6 @@ endif
 all: $(DVIFILES) $(MLPROG) 
 
 $(DVIFILES): ../tex/bar.jpg.eps demo.sty ../tex/advi.sty ../tex/advi-annot.sty
-
 
 .dvi.advi:
 	$(ADVI) $<
@@ -34,6 +33,13 @@ ifeq ($(HAVE_CDK),true)
 	ocamlc -custom -o taquin `cdk_config camltk` taquin_embed.ml
 else
 	ocamlc -custom -o taquin -I $(CAMLTKDIR) camltk.cma taquin_embed.ml
+endif
+
+clock: clock.ml
+ifeq ($(HAVE_CDK),true)
+	ocamlc -custom -o taquin `cdk_config camltk` clock.ml
+else
+	ocamlc -custom -o taquin unix.cma -I $(CAMLTKDIR) camltk.cma clock.ml
 endif
 
 clean:
