@@ -91,7 +91,13 @@ Maybe you mean \@currenvir ing}}
 
 \def \advi@embed@name{anonymous}
 \def \advi@embed@mode{ephemeral}
+\def \advi@embed@width{0pt}
+\def \advi@embed@height{0pt}
 \define@key {advi@embed}{name}{\def \advi@embed@name {#1}}
+\define@key {advi@embed}{width}%
+   {\@tempdima#1\relax \edef \advi@embed@width {\the\@tempdima}}
+\define@key {advi@embed}{height}%
+   {\@tempdima#1\relax \edef \advi@embed@height {\the\@tempdima}}
 \def \advi@definemode #1{%
   \define@key {advi@embed}{#1}[anonymous]{%
      \def \advi@embed@mode {#1}\def\advi@embed@name {##1}%
@@ -105,12 +111,10 @@ Maybe you mean \@currenvir ing}}
           {embed name="#1" mode=#2 width=#3 height=#4 command="#5"}%
           {\vbox to #4{\hbox to #3{}}}}}
 \def \advi@length #1{\@tempdima #1\relax \the\@tempdima}
-\newcommand{\advi@embed}[4][]{%
+\newcommand{\advi@embed}[2][]{%
   \mbox {\setkeys {advi@embed}{#1}%
-         \@tempdima#2\relax \edef \advi@embed@w {\the\@tempdima}%
-         \@tempdima#3\relax \edef \advi@embed@h {\the\@tempdima}%
          \advi@embed@ {\advi@embed@name}{\advi@embed@mode}
-             {\advi@embed@w}{\advi@embed@h}{#4}}}
+             {\advi@embed@width}{\advi@embed@height}{#2}}}
 \newcommand{\advi@killembed}[1]{\advi@special {kill name="#1"}}
 \advi@export \adviembed \advi@embed
 \advi@export \advikillembed \advi@killembed 

@@ -4,7 +4,7 @@
 \def \docarg #1{{\tt \{\docid {#1}\}}}
 \def \docopt #1{{\tt [\docid {#1}]}}
 \def \docpar #1{{\tt (\docid {#1})}}
-\def \empty {}
-\newcommand \dockey[3][]{{\tt #2\def \test {#3}\ifx \test \empty \else
-  =\docid{#3}\fi} \def \test {#1}\ifx \test \empty \else
+\def \doc@empty {}
+\newcommand \dockey[3][]{{\tt #2\def \@test {#3}\ifx \@test \doc@empty \else
+  =\docid{#3}\fi} \def \@test {#1}\ifx \@test \doc@empty \else
   \quad (default value is {\tt #1})\fi}

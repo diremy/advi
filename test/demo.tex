@@ -180,7 +180,7 @@ This is convenient to add a demo into your presentation.
 \noindent
 You launch a command using
 
-\verb+\adviembed{w}{h}{command -geometry !g -use !p}+
+\verb+\adviembed[width=w,height=h]{command -geometry !g -use !p}+
 
 \noindent
 where \verb"!g" specifies the required geometry, \verb"!p" the Active dvi
@@ -193,14 +193,14 @@ dvi and passed as arguments to the specified \verb"command".
 \begin{itemize}
 \item The \verb"display" command (from ImageMagick) can show any image into your
 presentation using:\\
-\verb|\adviembed{3cm}{3.3cm}|\\
+\verb|\adviembed[width=3cm,height=3.3cm]|\\
 \verb|          {display -geometry !g! -window !p logo.gif}|\\
 \adviembed{3cm}{3.3260869cm}{display -geometry !g! -window !p advilogo.gif}
 
 \item Similarly, \verb|animate| can display animations:\\
-        \verb|\adviembed{2cm}{2cm}|\\
+        \verb|\adviembed[width=2cm,height=2cm]|\\
         \verb|          {animate -geometry !g! -window !p anim.gif}|\\
-        \adviembed{2cm}{2cm}{animate -geometry !g! -window !p mmm.anim.gif}
+        \adviembed[width=2cm,height=2cm]{animate -geometry !g! -window !p mmm.anim.gif}
 \end{itemize}
 
 % \newpage
@@ -208,7 +208,7 @@ presentation using:\\
 % \begin{center}
 % {\large\bf I have four words for you!}\\[3mm]
 % 
-% \adviembed{10.62cm}{7.92cm}{xanim +W!p +Sx!w +Sy!h +Zpe -Zr dancemonkeyboy.avi}
+% \adviembed[width=10.62cm,height=7.92cm]{xanim +W!p +Sx!w +Sy!h +Zpe -Zr dancemonkeyboy.avi}
 % \end{center}
 
 
@@ -218,16 +218,16 @@ presentation using:\\
 
 \begin{itemize}
   \item Any CamlTk application using\\
-   \verb+\adviembed{w}{h}{prog -geometry !g -use !p}+\\
+   \verb+\adviembed[width=w,height=h]{prog -geometry !g -use !p}+\\
    For instance (using wish)\\
-   \verb|\adviembed[persistent]{5cm}{1cm}|\\
+   \verb|\adviembed[persistent,width=5cm,height=1cm]|\\
    \verb|          {wish ./watch -geometry !g -use !p}|\\
-   \adviembed[persistent]{5cm}{0.71cm}{wish ./watch -geometry !g -use !p}
+   \adviembed[persistent,width=5cm,height=0.71cm]{wish ./watch -geometry !g -use !p}
 \adviwait
   \item Possibly interactive ! (using CamlTk)\\
-   \verb|\adviembed[persistent]{6.5cm}{9.5cm}|\\
+   \verb|\adviembed[persistent,width=6.5cm,height=9.5cm]|\\
    \verb|          {./taquin -geometry !g -use !p dojoji.gif}|\\
-  \adviembed[persistent=taquin]{7.5cm}{11cm}{./taquin.sh -geometry !g -use !p dojoji.gif}
+  \adviembed[persistent=taquin,width=7.5cm,height=11cm]{./taquin.sh -geometry !g -use !p dojoji.gif}
 
 \end{itemize}
 
@@ -243,12 +243,12 @@ their placements may not obey your geometry specifications.
 
 \begin{itemize}
  \item Xeyes using the macro command \verb|embed|:\\
-   \verb|\adviembed{2cm}{2cm}{xeyes -bw 0 -shape -geometry !g}|\\
-   \adviembed{2cm}{2cm}{xeyes -bw 0 -shape -geometry !g}
+   \verb|\adviembed[width=2cm,height=2cm]{xeyes -bw 0 -shape -geometry !g}|\\
+   \adviembed[width=2cm,height=2cm]{xeyes -bw 0 -shape -geometry !g}
 
  \item An Xterm running an interesting application:\\
-   \verb|\adviembed{10cm}{5cm}{xterm -geometry 50x7+!x+!y -e ocaml}|\\
-   \adviembed{10cm}{4cm}{xterm -geometry 50x7+!x+!y -e ocaml}
+   \verb|\adviembed[width=10cm,height=5cm]{xterm -geometry 50x7+!x+!y -e ocaml}|\\
+   \adviembed[width=10cm,height=4cm]{xterm -geometry 50x7+!x+!y -e ocaml}
 \end{itemize}
 
 The \verb|embed| macro can launch any executable system command during
@@ -256,10 +256,10 @@ the presentation.
 \begin{itemize}
  \item You can add music to your presentation, if you have a music
   player available:\\
-  \verb|\adviembed{1mm}{1mm}{mpg123 -q music.mp3}|
+  \verb|\adviembed[width=1mm,height=1mm]{mpg123 -q music.mp3}|
 \end{itemize}
 
-\advirecord{play}{\adviembed[name=mpg123]{1mm}{1mm}{mpg123 -q music.mp3}}
+\advirecord{play}{\adviembed[name=mpg123,width=1mm,height=1mm]{mpg123 -q music.mp3}}
 \advirecord {stop}{\advikillembed {mpg123}}
 \advianchor[click]{play}{Play}
 \advianchor[click]{stop}{Stop}

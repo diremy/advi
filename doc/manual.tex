@@ -250,8 +250,7 @@ Explain \verb"<a name>aaa</a>"
 The commands are 
 
 \medskip\noindent
-\docdef \adviembed\docopt{key=value 
-list}\docarg{width}\docarg{height}\docarg{command} 
+\docdef \adviembed\docopt{key=value list}\docarg{command} 
 
 \begin{quote}
 where \docid{key=value list} is a list of bindings of the following kind:
@@ -274,6 +273,16 @@ is turned.
 \begin{quote}
 The application keeps running in the background, but will only be visible in
 the current page.
+\end{quote}
+
+\dockey{width}{dim}\\
+\dockey{height}{dim}
+\begin{quote}
+The application takes \docid{dim} width (respectively height) space in 
+latex. Both values default to 0pt.
+
+These dimentions are also substituted for all occurrences of \verb"!g" in
+the command string.
 \end{quote}
 
 \dockey{sticky}{name}

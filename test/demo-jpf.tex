@@ -162,19 +162,19 @@ Press any key to launch  the demo:
 \begin{tabular}{ll}
   \begin{minipage}[t]{0.4\textwidth}
     {\bf Simple clock}\\[2mm]
-    \adviembed[persistent=clock]{5cm}{0.71cm}{wish ./watch -geometry !g -use !p}
+    \adviembed[persistent=clock,width=5cm,height=0.71cm]{wish ./watch -geometry !g -use !p}
 
     \vspace{2cm}
 
     {\bf Animation}\\[2mm]
-    \adviembed{2cm}{2cm}{animate -geometry !g! -window !p mmm.anim.gif}
+    \adviembed[width=2cm,height=2cm]{animate -geometry !g! -window !p mmm.anim.gif}
 
     \vspace{2cm}
 
 
     {\bf Music}\\[1mm]
     Click the following buttons!
-\advirecord{play}{\adviembed[name=mpg123]{1mm}{1mm}{mpg123 -q music.mp3}}
+\advirecord{play}{\adviembed[name=mpg123,width=1mm,height=1mm]{mpg123 -q music.mp3}}
 \advirecord {stop}{\advikillembed {mpg123}}
 \advianchor[click]{play}{Play}
 \advianchor[click]{stop}{Stop}
@@ -183,7 +183,7 @@ Press any key to launch  the demo:
 
   \begin{minipage}[t]{0.5\textwidth}
     {\bf Puzzle}\\[2mm]
-    \adviembed[persistent=taquin]{7.5cm}{11cm}{./taquin.sh -geometry !g -use !p dojoji.gif}
+    \adviembed[persistent=taquin,width=7.5cm,height=11cm]{./taquin.sh -geometry !g -use !p dojoji.gif}
   \end{minipage}
 \end{tabular}
 
@@ -191,11 +191,11 @@ Press any key to launch  the demo:
 \advitransition{slide,from=left}
 
 \subsection*{WM managed applications}
-\verb|\adviembed{|%
+\verb|\adviembed[width=|%
 {\em width}%
-\verb|}{|%
+\verb|,height=|%
 {\em height}%
-\verb|}{|%
+\verb|]{|%
 {\em command}%
 \verb|}|
 
@@ -209,13 +209,13 @@ remember the window positions.
 
 \noindent
 {\bf Eyes}\\[2mm]
-\adviembed{3cm}{3cm}{xeyes -bw 0 -shape -geometry !g}
+\adviembed[width=3cm,height=3cm]{xeyes -bw 0 -shape -geometry !g}
 
 \vfill
 
 \noindent
 {\bf O'Caml toplevel}\\[2mm]
-\adviembed{10cm}{2cm}{xterm -geometry 50x5+!x+!y -e ocaml}
+\adviembed[width=10cm,height=2cm]{xterm -geometry 50x5+!x+!y -e ocaml}
 
 \vfill
 
