@@ -22,13 +22,6 @@ CAMLVERSION=`"$CAML"c -v | grep "compiler" | sed 's/.* version //' | sed 's/ .*$
 AC_MSG_RESULT(version $CAMLVERSION at $CAMLDIR)
 
 CAMLOPT="$CAML"opt
-dnl Checking cdk_config
-AC_PATH_PROG(PATH_CDK, cdk_config, "nope")
-if test "X$PATH_CDK" != "Xnope"; then
-  HAVE_CDK="true"
-else
-  HAVE_CDK="false"
-fi
   
 dnl TeX 
 
@@ -75,17 +68,13 @@ AC_ARG_WITH(camlimages, [  --with-camlimages=dir      specify camlimages library
 
 dnl Camlimages version
 
-if test -f $CAMLIMAGESDIR/ci_ps.cma || $HAVE_CDK; then
+if test -f $CAMLIMAGESDIR/ci_ps.cma; then
 	AC_MSG_RESULT(found)
 	CAMLIMAGES_VERSION=`grep VERSION $CAMLIMAGESDIR/Makefile.config | sed -e 's/VERSION=//'`
 	if test `expr $CAMLIMAGES_VERSION \>= 2.11` = "1"; then
 		HAVE_CAMLIMAGES="true"
-	        if $HAVE_CDK; then
-		        CAMLIMAGESLIBS="camlimages"
-	        else
-			CAMLIMAGESCONFIGINCLUDE="include $CAMLIMAGESDIR/Makefile.config"
-	                CAMLIMAGESLIBS='$(WITH_CAMLIMAGES:.cma=)'
-	        fi
+		CAMLIMAGESCONFIGINCLUDE="include $CAMLIMAGESDIR/Makefile.config"
+                CAMLIMAGESLIBS='$(WITH_CAMLIMAGES:.cma=)'
 	else
 		AC_MSG_RESULT(found, but bit too old)
 		echo "***************** Error *******************"
@@ -107,28 +96,21 @@ else
 	exit 1
 fi
 
-dnl CamlTk
+dnl LablTk
 
-CAMLTKDIR=$CAMLDIR/labltk
+LABLTKDIR=$CAMLDIR/labltk
 
-AC_MSG_CHECKING(for camltk+)
-AC_ARG_WITH(camltk, [  --with-camltk+=dir      specify camltk+ library directory],
-  if test "$withval" != "no" ; then  
-	CAMLTKDIR=$withval
-  else
-	AC_MSG_RESULT(no)
-	CAMLTKDIR=nope
-  fi)
+AC_MSG_CHECKING(for labltk)
 
-if test -f $CAMLTKDIR/cTk.cmi || $HAVE_CDK; then
+if test -f $LABLTKDIR/cTk.cmi; then
 	AC_MSG_RESULT(found)
-	HAVE_CAMLTK="true"
-	CAMLTKLIB=$CAMLTKDIR/labltk.cma
+	HAVE_LABLTK="true"
+	LABLTKLIB=$LABLTKDIR/labltk.cma
 else
 	AC_MSG_RESULT(no)
-	HAVE_CAMLTK="false"
+	HAVE_LABLTK="false"
 	echo "***************** Warning *******************"
-	echo "Your camltk library is too old. Use the latest one,"
+	echo "Your labltk library is too old. Use the latest one,"
 	echo "found in the O'Caml CVS tree"
 	echo "*******************************************"
 fi
@@ -209,8 +191,6 @@ AC_SUBST(CAML)
 AC_SUBST(CAMLDIR)
 AC_SUBST(CAMLVERSION)
 
-AC_SUBST(HAVE_CDK)
-
 AC_SUBST(CAMLIMAGESDIR)
 AC_SUBST(CAMLIMAGESCONFIGINCLUDE)
 AC_SUBST(HAVE_CAMLIMAGES)
@@ -220,9 +200,9 @@ AC_SUBST(PATH_GS)
 AC_SUBST(TEXMFMAIN)
 AC_SUBST(PATH_KPSEWHICH)
 AC_SUBST(PATH_GZIP)
-AC_SUBST(HAVE_CAMLTK)
-AC_SUBST(CAMLTKDIR)
-AC_SUBST(CAMLTKLIB)
+AC_SUBST(HAVE_LABLTK)
+AC_SUBST(LABLTKDIR)
+AC_SUBST(LABLTKLIB)
 AC_SUBST(INSTALLTARGET)
 
 dnl BUILD OUR OWN LIBDIR
@@ -247,9 +227,8 @@ AC_OUTPUT(Makefile.config config.ml)
 
 echo "------------------------------------------------- Configuration finished"
 echo "Language:    $CAML version $CAMLVERSION"
-echo "cdk_config:  $HAVE_CDK"
 echo "Camlimages:  $HAVE_CAMLIMAGES"
-echo "CamlTk:      $HAVE_CAMLTK"
+echo "LablTk:      $HAVE_LABLTK"
 echo "GS:          $GS_UPTO_DATE version $GS_VERSION at $PATH_GS"
 echo "Resources:   $ADVI_LOC/"
 echo "------------------------------------------------------------------------"

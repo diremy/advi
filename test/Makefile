@@ -32,7 +32,7 @@ color.tex demo_raw.tex
 DVIFILES= $(TEXFILES:%.tex=%.dvi)
 ADVI=TEXPSHEADERS=../tex: ../advi
 
-ifeq ($(HAVE_CAMLTK),true)
+ifeq ($(HAVE_LABLTK),true)
 MLPROG=taquin adviclock
 else
 MLPROG=
@@ -54,18 +54,10 @@ background.dvi: background.tex
 	$(LATEX) $<; $(LATEX) $<;
 
 taquin: taquin_embed.ml
-ifeq ($(HAVE_CDK),true)
-	ocamlc -custom -o taquin `cdk_config camltk` taquin_embed.ml
-else
-	ocamlc -custom -o taquin -I $(CAMLTKDIR) $(CAMLTKLIB) taquin_embed.ml
-endif
+	ocamlc -o taquin -I $(LABLTKDIR) $(LABLTKLIB) taquin_embed.ml
 
 adviclock: adviclock.ml
-ifeq ($(HAVE_CDK),true)
-	ocamlc -custom -o adviclock `cdk_config camltk` adviclock.ml
-else
-	ocamlc -custom -o adviclock unix.cma -I $(CAMLTKDIR) $(CAMLTKLIB) adviclock.ml
-endif
+	ocamlc -o adviclock unix.cma -I $(LABLTKDIR) $(LABLTKLIB) adviclock.ml
 
 bar.eps: ../tex/bar.eps
 	cp -p ../tex/bar.eps .

@@ -40,7 +40,7 @@ clean:
 distribute: clean all web
 
 web:
-	$(MAKE) -f MakeHTML all
+	# $(MAKE) -f MakeHTML all
 
 manual.dvi: splash_contents.tex scratch_write_splash_contents.tex \
 	 scratch_draw_splash_contents.tex
