@@ -841,39 +841,6 @@ let find_xref tag default st =
   with Not_found -> find_xref_master tag default st 
 ;;
 
-let find_page_before_position (pos, file) st =
-  let rec find p =
-    if p < 0 then raise Not_found
-    else
-      match st.dvi.Dvi.pages.(p).Dvi.line with
-      | Some (pos', file') when pos' <= pos && file = file' -> p
-      | _ -> find (pred p) in
-  find (st.num_pages -1)
-
-let duplex_switch sync st =
-  match st.duplex with
-  | Alone -> ()
-  | Client st' -> raise (Duplex (redraw, st'))
-  | Master st' when not sync -> raise (Duplex (redraw, st'))
-  | Master st' ->
-      match st.dvi.Dvi.pages.(st.page_number).Dvi.line with
-      | None ->
-          raise (Duplex (redraw, st'))
-      | Some (q, _ as pos) ->
-          try
-            if changed st' then reload false st';
-            (* should rather find the page with the linenumber *)
-            begin try
-              let p' = find_page_before_position pos st' in
-              st'.page_number <- p';
-              st'.page_stack <- (-1) :: st'.page_stack;
-            with Not_found -> ()
-            end;
-            raise (Duplex (redraw, st'))
-          with Not_found (* launched by reload *) ->
-            ()
-;;
-
 let redisplay st =
   st.pause_number <- 0;
   redraw st;;
@@ -958,6 +925,40 @@ let goto_page n st =
       st.pause_number <- 0;
       redraw ?trans st
     end;;
+
+let find_page_before_position (pos, file) st =
+  let rec find p =
+    if p < 0 then raise Not_found
+    else
+      match st.dvi.Dvi.pages.(p).Dvi.line with
+      | Some (pos', file') when pos' <= pos && file = file' -> p
+      | _ -> find (pred p) in
+  find (st.num_pages -1)
+
+let duplex_switch sync st =
+  let find_sync_page master client = 
+    match master.dvi.Dvi.pages.(master.page_number).Dvi.line with
+    | None -> raise Not_found
+    | Some (q, _ as pos) -> find_page_before_position pos client in 
+  match st.duplex with
+  | Alone -> ()
+  | (Client st' | Master st') when not sync -> raise (Duplex (redraw, st'))
+  | Client master ->
+      begin try goto_page (find_sync_page master st) st with Not_found -> ()
+      end
+  | Master client ->
+      try 
+        if changed client then reload false client;
+        (* should rather find the page with the linenumber *)
+        begin try
+          let q = find_sync_page st client in
+          client.page_number <- q;
+          client.page_stack <- (-1) :: client.page_stack;
+        with Not_found -> ()
+        end;
+        raise (Duplex (redraw, client))
+      with Not_found -> ()
+;;
 
 let push_stack b n st =
   match st.page_stack with
