@@ -18,7 +18,7 @@
 val user_dir : string;;
 (* Advi user directory. *)
 
-val cache_dir : string;;
+val get_cache_dir : unit -> string;;
 (* Advi cache directory. *)
 
 val default_option_file : string;;
