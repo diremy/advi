@@ -31,7 +31,7 @@ let set_geom g =
   Dviview.set_autoresize false; Dviview.set_autoscale false; geometry := g
 ;;
 
-let set_dim r s = r := Dimension.dimen_of_string s;;
+let set_dimen r s = r := Dimension.dimen_of_string s;;
 
 let print_advi_version () =
   prerr_endline
@@ -68,11 +68,11 @@ let spec_list = [
   ("-nocrop", Arg.Clear crop_flag,
    "\tDisable cropping");
   ("-nomargins", Arg.Unit
-     (fun () -> set_dim hmargin "0cm"; set_dim vmargin "0cm"),
+     (fun () -> set_dimen hmargin "0cm"; set_dimen vmargin "0cm"),
    "\tSuppress horizontal and vertical margins");
-  ("-hmargin", Arg.String (set_dim hmargin),
+  ("-hmargin", Arg.String (set_dimen hmargin),
    "DIMEN\tHorizontal margin (default: 1cm)");
-  ("-vmargin", Arg.String (set_dim vmargin),
+  ("-vmargin", Arg.String (set_dimen vmargin),
    "DIMEN\tVertical margin (default: 1cm)");
   version_spec "-v";
   version_spec "--version";
@@ -110,8 +110,8 @@ let get_advi_options () =
 let advi_options = get_advi_options ();;
 
 let init_arguments () =
- Userfile.load_init_files advi_options Userfile.set_dvi_filename usage_msg;
- Arg.parse advi_options Userfile.set_dvi_filename usage_msg
+  Userfile.load_init_files advi_options Userfile.set_dvi_filename usage_msg;
+  Arg.parse advi_options Userfile.set_dvi_filename usage_msg
 ;;
 
 let set_dvi_geometry () =
@@ -125,12 +125,14 @@ let treat_file filename =
   Rc.init ();
   set_dvi_geometry ();
   try Dviview.main_loop filename with
-  | Dviview.Error s | Failure s | Graphics.Graphic_failure s ->
+  | Dviview.Error s | Sys_error s
+  | Failure s | Graphics.Graphic_failure s ->
       eprintf "Fatal error when running: %s@." s;
 ;;
 
 let standalone_main () =
   init_arguments ();
+  (* Find the file to view. *)
   let filename =
     try Userfile.get_dvi_filename () with
     | Not_found -> Config.splash_screen in
@@ -140,12 +142,14 @@ let standalone_main () =
       eprintf "%s@.Try %s -help for more information@." usage_msg Sys.argv.(0);
       Launch.exit 1
   end;
+  (* Let's go! *)
   treat_file filename
 ;;
 
 let interactive_main () =
   (* Load the .advirc file ... *)
   Userfile.load_init_files advi_options Userfile.set_dvi_filename usage_msg;
+  (* Find the file to view. *)
   let filename =
     try Userfile.get_dvi_filename () with
     | Not_found ->
@@ -159,13 +163,14 @@ let interactive_main () =
            usage_msg Sys.argv.(0);
            Config.splash_screen in
   Userfile.set_dvi_filename filename;
+  (* Let's go! *)
   treat_file filename
 ;;
 
 (* To quit nicely, killing all embedded processes. *)
 at_exit Gs.kill;;
 at_exit Embed.kill_all_embedded_apps;;
-(* Even in case of signal, we kill embedded processes. *)
+(* Even in case of signal, we must kill embedded processes. *)
 Sys.set_signal Sys.sigquit (Sys.Signal_handle (fun _ -> Launch.exit 0));;
 
 let main = if !Sys.interactive then interactive_main else standalone_main;;

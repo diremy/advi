@@ -186,6 +186,7 @@ type state = {
 
 let set_page_number st n =
  Userfile.save_page_number n;
+ Userfile.save_page_timing n;
  Thumbnails.save n;
  st.page_number <- n;;
 
