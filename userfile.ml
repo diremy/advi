@@ -261,7 +261,7 @@ Rc.at_init init_advi_cache_dir;;
 (* Writing page current number to the file advi_page_number_file. *)
 let write_page_number =
  Options.flag false "-page-number"
-  ": ask Active-DVI to write the current page number in a file,\
+  "  ask Active-DVI to write the current page number in a file,\
   \n\t (the default is to skip writing page number).";;
 
 let advi_page_number_file = ref None;;

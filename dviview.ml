@@ -19,15 +19,15 @@
 
 let pauses =
   Options.flag true "-nopauses"
-  ": switch pauses off,\
+  "  switch pauses off,\
   \n\t (the default is to wait for specified pauses).";;
 let fullwidth =
   Options.flag false "-fullwidth"
-  ": adjust size to full width,\
+  "  adjust size to full width,\
    \n\t (the default is not to adjust to full width).";;
 let bounding_box =
   Options.flag false "-bbox"
-  ": show the bounding box,\
+  "  show the bounding box,\
   \n\t (the default is to hide the bounding box).";;
 
 let start_page = ref 0;;
@@ -48,7 +48,7 @@ Options.add
 let debug_pages =
   Options.debug
     "--debug_pages"
-    ": debug page motion.";;
+    "  debug page motion.";;
 
 let browser = ref "netscape-communicator";;
 Options.add
@@ -95,7 +95,7 @@ Options.add
 let click_turn_page =
   Options.flag false
     "-click-turn"
-    ": turn pages with mouse clicks (see the doc).";;
+    "  turn pages with mouse clicks (see the doc).";;
 
 let page_stack_to_string page stack =
   let stack = String.concat " " (List.map string_of_int stack) in
@@ -118,7 +118,7 @@ let autoresize = ref true;;
 Options.add
   "-noautoresize"
   (Arg.Clear autoresize)
-  ": prevents scaling the page from resizing the window,\
+  "  prevents scaling the page from resizing the window,\
   \n\t (automatically set when the geometry is specified)."
 ;;
 
@@ -126,7 +126,7 @@ let autoscale = ref true;;
 Options.add
   "-noautoscale"
   (Arg.Clear autoscale)
-  ": prevents resizing the window from scaling the page,\
+  "  prevents resizing the window from scaling the page,\
   \n\t (automatically set when the geometry is specified)."
 ;;
 

@@ -92,7 +92,7 @@ Options.add
     (fun () ->
       if !policy <> Exec then Misc.warning "Setting policy to -exec";
       set_policy Exec))
-  ": set the security policy to \"Exec\" mode, i.e.\
+  "  set the security policy to \"Exec\" mode, i.e.\
   \n\t all embedded applications are automatically executed.\
   \n\t Unless explicitely required, this mode does not apply.";;
 
@@ -102,7 +102,7 @@ Options.add
     (fun () ->
       if !policy <> Safer then Misc.warning "Setting policy to -safer";
       set_policy Safer))
-  ": set the security policy to \"Safer\" mode, i.e.\
+  "  set the security policy to \"Safer\" mode, i.e.\
   \n\t external applications are simply ignored.\
   \n\t Unless explicitely required, this mode does not apply.";;
 
@@ -112,7 +112,7 @@ Options.add
     (fun () ->
       if !policy <> Ask then Misc.warning "Setting policy to -ask";
       set_policy Ask))
-  ": set the security policy to \"Ask\" mode, i.e.\
+  "  set the security policy to \"Ask\" mode, i.e.\
   \n\t launching an external application requires explicit confirmation\
   \n\t (this is the default policy).";;
 
@@ -256,6 +256,6 @@ let dump_whiterun_commands () =
 Options.add
   "-n"
   (Arg.Unit (fun () -> whiterun_flag := true))
-  ": ask Active-DVI to run in \"fake mode\", i.e.\
+  "  ask Active-DVI to run in \"fake mode\", i.e.\
   \n\t to just echo the name of embedded commands\
   \n\t (there is no previewing nor embedded commands execution).";;

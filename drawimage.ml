@@ -145,13 +145,13 @@ let cache_key = "advicache";;
 let verbose_image_access =
   Options.flag false
     "--verbose-image-access"
-    ": change the cursor while loading images,\
+    "  change the cursor while loading images,\
     \n\t (the default is to keep the same cursor).";;
 
 let image_aa =
   Options.flag true
     "-disable-image-anti-aliasing"
-    ": disable eps inclusion anti-aliasing,\
+    "  disable eps inclusion anti-aliasing,\
     \n\t (the default is to use anti-aliasing).";;
 
 let images_camlimages = Hashtbl.create 107;;

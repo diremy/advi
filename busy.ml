@@ -20,7 +20,7 @@
 let show_busy =
     Options.flag true
     "-nowatch"
-    ": don't display a watch when busy,\
+    "  don't display a watch when busy,\
     \n\t (the default is to display it).";;
 
 let busy_delay = ref 0.5;;

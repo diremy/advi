@@ -31,7 +31,7 @@ let save_gr_image fname x y nw nh =
 
 let thumbnails =
  Options.flag false "-thumbnails"
- ": create thumbnails for your slides\
+ "  create thumbnails for your slides\
  \n\t and write them into cachedir,\
  \n\t (the default is to skip thumbnails construction).";;
 

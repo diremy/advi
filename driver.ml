@@ -21,7 +21,7 @@ open Misc;;
 
 let active =
   Options.flag true "-passive"
-  ": cancel all Active-DVI effects,\
+  "  cancel all Active-DVI effects,\
   \n\t (the default is to play all effects).";;
 let toggle_active () = active := not !active;;
 
