@@ -293,7 +293,7 @@ let set_bbox bb =
   | None ->
       bbox := nobbox; 
   | Some(x0, y0, w, h) ->
-      bbox := { x = x0; y = y0; w = w; h = h}
+      bbox := { x = x0; y = !size_y - y0; w = w; h = -h}
  ;;
 
 (*** Drawing ***)

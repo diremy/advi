@@ -539,7 +539,7 @@ module Make(Dev : DEVICE) = struct
   
   let bottom_of_page st =
     let vmargin_size = get_size_in_pix st attr.vmargin in
-    st.size_y - st.dvi_height - vmargin_size
+    attr.geom.height - st.dvi_height - vmargin_size
     
   let left_of_page st =
     let hmargin_size = get_size_in_pix st attr.hmargin in
@@ -547,7 +547,7 @@ module Make(Dev : DEVICE) = struct
     
   let right_of_page st =
     let hmargin_size = get_size_in_pix st attr.hmargin in
-    st.size_x - st.dvi_width - hmargin_size
+    attr.geom.width - st.dvi_width - hmargin_size
   
   (* the two following functions move the displayed part of the page while
    * staying inside the margins
@@ -557,8 +557,8 @@ module Make(Dev : DEVICE) = struct
     let tmp_orig_y = st.orig_y + movey in
     let new_orig_y =
       if movey < 0 then begin
-        if tmp_orig_y + st.dvi_height + vmargin_size < st.size_y
-        then st.size_y - st.dvi_height - vmargin_size
+        if tmp_orig_y + st.dvi_height + vmargin_size < attr.geom.height 
+        then attr.geom.height - st.dvi_height - vmargin_size
         else tmp_orig_y
       end else begin
         if tmp_orig_y - vmargin_size > 0
@@ -574,8 +574,8 @@ module Make(Dev : DEVICE) = struct
     let tmp_orig_x = st.orig_x + movex in
     let new_orig_x =
       if movex < 0 then begin
-        if tmp_orig_x + st.dvi_width + hmargin_size < st.size_x
-        then st.size_x - st.dvi_width - hmargin_size
+        if tmp_orig_x + st.dvi_width + hmargin_size < attr.geom.width
+        then attr.geom.width - st.dvi_width - hmargin_size
         else tmp_orig_x
       end else begin
         if tmp_orig_x - hmargin_size > 0
@@ -895,10 +895,13 @@ module Make(Dev : DEVICE) = struct
         redraw st
 
       let page_left st =
-        match (move_within_margins_x st (st.size_x - 10)) with 
+        match (move_within_margins_x st (attr.geom.width - 10)) with 
             | Some n ->
-                st.orig_x <- n;
-                redraw st
+                if n > st.orig_x  then begin
+                  st.orig_x <- n;
+                  set_bbox st;
+                  redraw st
+                end
             | None -> ()
 
       let page_down st =
@@ -907,19 +910,22 @@ module Make(Dev : DEVICE) = struct
               (* the following test is necessary because of some
                * floating point rounding problem
                *)
-              if st.size_y < st.dvi_height + 2 * (get_size_in_pix st
-                attr.vmargin) then
-                st.orig_y <- top_of_page st;
+              if attr.geom.height < st.dvi_height + 2 * (get_size_in_pix st
+                attr.vmargin) then begin
+                  st.orig_y <- top_of_page st;
+                  set_bbox st;
+                end;
               goto_page (st.page_no + 1) st
             end
           in
           begin
-            match (move_within_margins_y st (10 - st.size_y)) with 
+            match (move_within_margins_y st (10 - attr.geom.height)) with 
             | Some n ->
                 (* this test is necessary because of rounding errors *)
                 if n > st.orig_y then none () 
                 else begin
                   st.orig_y <- n;
+                  set_bbox st;
                   redraw st
                 end
             | None -> none ()
@@ -928,28 +934,34 @@ module Make(Dev : DEVICE) = struct
       let page_up st =
         let none () =
             if st.page_no > 0 then begin
-              if st.size_y < st.dvi_height + 2 * (get_size_in_pix st
-                attr.vmargin) then
-                st.orig_y <- bottom_of_page st;
+              if attr.geom.height < st.dvi_height + 2 * (get_size_in_pix st
+                attr.vmargin) then begin
+                  st.orig_y <- bottom_of_page st;
+                  set_bbox st;
+                end;
               goto_page (st.page_no -1) st
             end
           in
           begin
-            match (move_within_margins_y st (st.size_y - 10)) with 
+            match (move_within_margins_y st (attr.geom.height - 10)) with 
             | Some n ->
                 if n < st.orig_y then none ()
                 else begin
                   st.orig_y <- n;
+                  set_bbox st;
                   redraw st
                 end
             | None -> none ()
           end
 
       let page_right st =
-        match (move_within_margins_x st (10 - st.size_x)) with 
+        match (move_within_margins_x st (10 - attr.geom.width)) with 
             | Some n ->
-                st.orig_x <- n;
-                redraw st
+                if n < st.orig_x then begin
+                  st.orig_x <- n;
+                  set_bbox st;
+                  redraw st
+                end
             | None -> ()
 
           
