@@ -702,25 +702,33 @@ let edit_special st s =
         | "X" -> Dev.E.X | "Y" -> Dev.E.Y | "XY" -> Dev.E.XY | "Z" -> Dev.E.Z
         | _ -> ill_formed_special s; Dev.E.Z in
       let unit = pixels (field "unit") in
-      let float_to_pixel_field x =
+      let float_field x =
         let fx = field x in
-        try truncate (float_of_string fx *. unit)
-        with Invalid_argument _  ->
+        try float_of_string fx
+        with _  ->
           warning
-            (Printf.sprintf "Field %s=%s not a float ins special %s" x fx s);
+            (Printf.sprintf "Field %s=%s not a float in special %s" x fx s);
             raise Ignore in
-      let cv z = truncate (z *. unit) in
-      let dx = float_to_pixel_field "x" in
-      let dy = float_to_pixel_field "y" in
+      let float_to_pixel f = truncate (f *. unit) in
+      let  r = {
+        Dev.x = float_field "x"; Dev.y = float_field "y";
+        Dev.w = float_field "w"; Dev.h = float_field "h";
+      } in
       let rect = {
-        Dev.x =  st.x_origin + int_of_float (st.conv *. float st.h) + dx;
-        Dev.y = st.y_origin + int_of_float (st.conv *. float st.v) - dy;
-        Dev.w =  float_to_pixel_field "w"; 
-        Dev.h =  float_to_pixel_field "h";
+        Dev.x = st.x_origin + int_of_float (st.conv *. float st.h) 
+          + float_to_pixel r.Dev.x;
+        Dev.y = st.y_origin + int_of_float (st.conv *. float st.v)
+          - float_to_pixel r.Dev.y;
+        Dev.w = float_to_pixel r.Dev.w; 
+        Dev.h = float_to_pixel r.Dev.h; 
       } in
       let info =
-        { Dev.E.name = field "name";
+        { Dev.E.comm = field "comm";
+          Dev.E.name = field "name";
+          Dev.E.line = field "line";
+          Dev.E.file = field "file";
           Dev.E.unit = unit;
+          Dev.E.origin = r; 
           Dev.E.move =
             (try prop (List.assoc "move" record) with Not_found -> Dev.E.Z);
           Dev.E.resize =

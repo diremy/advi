@@ -73,7 +73,7 @@ val embed_app :
 
 (* Drawing *)
 
-type rect = { x : int; y : int; h : int; w : int };;
+type 'a rect = { x : 'a; y : 'a; h : 'a; w : 'a };;
 
 type color = int;;
 val fgcolor : unit -> color;;
@@ -161,19 +161,22 @@ type status = {
   };;
 
 module E : 
- sig
-    type direction = X | Y | XY | Z
-    type info = { name : string; unit : float;
-                  move : direction; resize : direction; }
-    type figure = { rect : rect; info : info; }
-    type action = Move of int * int | Resize of int * int
+    sig
+      type direction = X | Y | XY | Z
+      type info = { comm : string; name : string;
+                    line : string; file : string; 
+                    origin : float rect; unit : float;
+                    move : direction; resize : direction; }
+      type figure = { rect : int rect; info : info; }
+      type action = Move of int * int | Resize of int * int
 
-    val clear : unit -> unit
-    val add : rect -> info -> unit
-    val inside : int -> int -> figure -> bool
-    val find : int -> int -> figure
-    val tostring : figure -> action -> string
- end;;
+      val clear : unit -> unit
+      val switch_edit_mode : unit -> unit
+      val add : int rect -> info -> unit
+      val inside : int -> int -> figure -> bool
+      val find : int -> int -> figure
+      val tostring : figure -> action -> string
+    end;;
 
 module H :
     sig

@@ -815,7 +815,11 @@ module B =
             st.fullscreen <- None;
             Grdev.reposition ~x ~y ~w ~h in
       resize st x y
+
     let exit st = raise Exit
+    let switch_edit_mode st =
+      Grdev.E.switch_edit_mode ();
+      redraw st
     let clear_image_cache st = (* clear image cache *)
       Grdev.clean_ps_cache ()
     let help st =
@@ -904,6 +908,9 @@ let bind_keys () =
    'f', B.unfreeze_fonts;
    'F', B.unfreeze_glyphs;
    'C', B.clear_image_cache;
+
+   (* Edit mode. *)
+   'e', B.switch_edit_mode;
 
    (* Scratching. *)
    's', B.scratch_write;

@@ -486,13 +486,30 @@ end
 \define@keyset {advi@edit}{h}
 \define@key {advi@edit}{move}[XY]{\def \advi@edit@move{#1}}
 \define@key {advi@edit}{resize}[XY]{\def \advi@edit@resize{#1}}
-\newcommand{\advi@edit}[4][]{%
+
+\def \advi@edit@comm {\string\adviedit}
+\def \advi@edit@line {\the \inputlineno}
+\def \advi@edit@file {\jobname}
+\define@key {advi@edit}{comm}{\def \advi@edit@comm {\string #1}}
+\define@key {advi@edit}{line}{\def \advi@edit@line {#1}}
+\define@key {advi@edit}{file}{\def \advi@edit@file {#1}}
+
+\newcommand{\advi@edit}[3][\adviedit]{%
   \begingroup 
+    \def \advi@edit@comm{\string#1}%
+    \def \advi@edit@name{#2}%
+    \setkeys {advi@edit}{#3}%
+    \advi@@edit}
+\newcommand{\advi@@edit}[4][]{%
     \setkeys {advi@edit}{#1}%
+    #2%
     \setkeys {advi@edit}{#3}%
     \advi@mandatory{edit}{w}\advi@mandatory{edit}{h}%
     \advi@special 
-      {edit name=#2
+      {edit 
+       comm="\advi@edit@comm" name="\advi@edit@name"
+       line=\advi@edit@line\space
+       file=\advi@edit@file\space
        unit=\the\advi@edit@unit\space
        x=\advi@edit@x\space
        y=\advi@edit@y\space
@@ -506,6 +523,25 @@ end
 \def \adviy {\advi@edit@y \advi@edit@unit}
 \def \adviw {\advi@edit@w \advi@edit@unit}
 \def \advih {\advi@edit@h \advi@edit@unit}
+
+\newcount \advi@count
+\newdimen \advi@dim
+\def \advi@E{\advi@count\advi@dim \divide \advi@count by \advi@edit@unit
+        \advance \advi@dim by -\advi@count\advi@edit@unit
+        \edef \advi@tmp {\advi@tmp \the \advi@count}}
+\def \advi@D{\advi@dim 10\advi@dim \advi@E}
+
+\def \advi@setdim #1#2{%
+   \advi@dim #2
+   \ifnum \advi@dim <0\advi@dim-\advi@dim 
+        \def \advi@tmp{-}\else \def \advi@tmp{}\fi
+   \advi@E \edef \advi@tmp {\advi@tmp.}\advi@D \advi@D \advi@D \advi@D 
+   \edef #1{\advi@tmp}}
+\def \advisetx {\advi@setdim {\advi@edit@x}}
+\def \advisety {\advi@setdim {\advi@edit@y}}
+\def \advisetw {\advi@setdim {\advi@edit@w}}
+\def \adviseth {\advi@setdim {\advi@edit@h}}
+
 \advi@export \adviedit \advi@edit
 
 %%% End

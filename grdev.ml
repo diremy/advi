@@ -444,7 +444,7 @@ let get_image g col =
       img;;
 
 (*** Device manipulation ***)
-type rect = { x : int; y : int; h : int; w : int };;
+type 'a rect = { x : 'a; y : 'a; h : 'a; w : 'a };;
 let nobbox =  { x = 0; y = 0; w = 10; h = 10 };;
 let bbox = ref nobbox;;
 
@@ -588,12 +588,20 @@ let rec restore_rectangle r x y dx dy =
   Graphics.draw_image r.east (x + dx) y;
   Graphics.draw_image r.north x (y + dy);;
 
-let rec draw_rectangle x y dx dy =
+let draw_rectangle x y dx dy =
   Graphics.moveto x y;
   Graphics.lineto (x + dx) y;
   Graphics.lineto (x + dx) (y + dy);
   Graphics.lineto x (y + dy);
   Graphics.lineto x y;;
+
+let draw_line x y dx dy =
+  Graphics.moveto x y;
+  Graphics.lineto (x + dx) (y + dy);;
+
+let draw_point x y =
+  Graphics.draw_circle x y 3;;
+  
 
 (* Should be improve later using quad-tree or similar 2d structure *)
 module type ACTIVE =
@@ -640,37 +648,6 @@ module A : ACTIVE =
       a.x <= b.x && a.y <= b.y &&
       a.w >= b.x - a.x + b.w && a.h >= b.y - a.y + b.h
 
-  end;;
-
-module E =
-  struct
-    type direction = X | Y | XY | Z
-    type info = { name : string; unit : float;
-                  move : direction; resize : direction; }
-    type figure = { rect : rect; info : info; }
-    type action = Move of int * int | Resize of int * int
-
-    let figures : figure list ref = ref []
-    let clear() = figures := []
-    let add rect info =
-      let r = { rect with y = !size_y - rect.y; } in
-      figures := { rect = r; info = info} :: !figures;
-      draw_rectangle r.x r.y r.w r.h
-
-
-    let inside x y p  =
-      let a = p.rect in
-      a.x <= x && a.y <= y && x <= a.x + a.w && y <= a.y + a.h
-    let find x y = List.find (inside x y) !figures
-
-    let tostring p a =
-      let inverse x = float x  /. p.info.unit in
-      let action, dx, dy =
-        match a with
-        | Move (dx, dy) -> "move", inverse dx, inverse (0-dy)
-        | Resize (dx, dy) -> "resize", inverse dx, inverse (0-dy) in
-      Printf.sprintf "<edit %s %s dx=%.4f dy=%.4f>"
-        p.info.name action dx dy
   end;;
 
 module H =
@@ -854,6 +831,73 @@ module H =
     let reemphasize emph act =
       deemphasize true emph;
       emphasize_and_flash href_emphasize act
+  end;;
+
+module E =
+  struct
+    type direction = X | Y | XY | Z
+    type info = { comm : string; name : string;
+                  line : string; file : string; 
+                  origin : float rect; unit : float;
+                  move : direction; resize : direction; }
+    type figure = { rect : int rect; info : info; }
+    type action = Move of int * int | Resize of int * int
+
+    let figures : figure list ref = ref []
+    let screen = ref None
+    let editing = ref false
+    let switch_edit_mode() =
+      editing := not !editing;
+      free_cursor := (if !editing then select_cursor else control_cursor)
+          
+    let clear() = figures := []; screen := None
+        (*
+           let save_screen cont =
+           screen := Graphics.get_image 0 0 !size_x !size_y
+           let restore_screen () = ()
+         *)
+        
+
+    let add rect info =
+      let r = { rect with y = !size_y - rect.y; } in
+      figures := { rect = r; info = info} :: !figures;
+      if !editing then
+        begin
+          Graphics.set_color Graphics.red;
+          draw_rectangle r.x r.y r.w r.h;
+          let cv z = truncate (z *. info.unit) in
+          let ox = cv info.origin.x in
+          let oy = cv info.origin.y in
+          let x0 = r.x - ox in
+          let y0 = r.y - oy in
+          draw_line x0 y0 ox oy;
+          draw_point x0 y0;
+          Graphics.set_color !color;
+        end
+
+
+    let inside x y p  =
+      let a = p.rect in
+      (if a.w > 0 then a.x <= x && x <= a.x + a.w
+      else  a.x + a.w <= x && x <= a.x) &&
+      (if a.h > 0 then a.y <= y && y <= a.y + a.h
+      else a.y + a.h <= y && y <= a.y)
+    let find x y = List.find (inside x y) !figures
+
+    let tostring p a =
+      (* should memorize the origin *)
+      let delta z dz =
+        if dz = 0 then "*"
+        else Printf.sprintf "%.4f" (z +. (float dz  /. p.info.unit)) in
+      let origin = p.info.origin in
+      let action, dx, dy =
+        match a with
+        | Move (dx, dy) ->
+            "moveto", delta origin.x dx, delta origin.y (0-dy)
+        | Resize (dx, dy) ->
+            "resizeto", delta origin.w dx, delta origin.h (0-dy) in
+      Printf.sprintf "<edit %s %s #%s @%s %s %s,%s>"
+        p.info.comm p.info.name p.info.line p.info.file action dx dy
   end;;
 
 (*** Clearing device ***)
@@ -1130,6 +1174,10 @@ let move_y rect dx dy = { rect with y = rect.y + dy }
 let resize rect dx dy = { rect with w = rect.w + dx; h = rect.h + dy }
 let resize_x rect dx dy = { rect with w = rect.w + dx }
 let resize_y rect dx dy = { rect with h = rect.h + dy }
+let filter trans event dx dy =
+  let r = trans { x = 0; y = 0; w = 0; h = 0; } dx dy in
+  event (r.x + r.w) (r.y + r.h)
+  
 
 let wait_move_button_up rect trans event x y =
   let w = rect.w and h = rect.h in
@@ -1144,7 +1192,7 @@ let wait_move_button_up rect trans event x y =
         let dx' = e.GraphicsY11.mouse_x - x in
         let dy' = e.GraphicsY11.mouse_y - y in
         if e.GraphicsY11.button then move dx' dy'
-        else Final (event dx' (0 - dy'))
+        else Final (filter trans event dx' (0 - dy'))
     | z -> z in
   let color = !color in
   set_color !default_fgcolor;
@@ -1180,7 +1228,17 @@ let button m =
   else Button2;;
 
 let wait_button_up m x y =
-  if pressed m G.control then
+    let wait_position () = 
+    match wait_signal_event button_up with
+    | Raw e ->
+        if !E.editing || pressed m G.shift
+        then Final (Position (x, !size_y - y))
+        else Final (Click (click_area x y, button m, x, !size_y - y))
+    | x -> x
+    in
+  if !E.editing && pressed m G.button1 then
+    wait_position()
+  else if !E.editing || pressed m G.control then
     begin
       try 
         let p = E.find x y in
@@ -1199,18 +1257,13 @@ let wait_button_up m x y =
         else Final Nil
       with
         Not_found ->
-          let event dx dy = Move (dx, dy) in
-          wait_move_button_up !bbox move event x y 
+            let event dx dy = Move (dx, dy) in
+            wait_move_button_up !bbox move event x y 
     end
   else if pressed m G.shift && released m G.button1 then
     wait_select_button_up m x y
   else
-    match wait_signal_event button_up with
-    | Raw e ->
-        if pressed m G.shift
-        then Final (Position (x, !size_y - y))
-        else Final (Click (click_area x y, button m, x, !size_y - y))
-    | x -> x
+    wait_position ()
 ;;
 
 let wait_event () =
