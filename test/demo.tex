@@ -30,9 +30,11 @@
 
 \def\smallpause{0.3}
 
+\def\keymenu#1{\textcolor{red}{\underline{#1}}}
+
 \def\advifooter{\vbox to 0em{\vbox to \vsize {\vfill
-Press: \underline{n}ext page \underline{p}revious page
-\underline{\textvisiblespace} next pause} \vss}}
+Press: \keymenu{n}ext page \keymenu{p}revious page
+\keymenu{\textvisiblespace} next pause} \vss}}
 
 \def\adviheader{\noindent
 {\bf\Large Active dvi}\\
@@ -216,7 +218,7 @@ presentation using:\\
 
   \item Possibly interactive !\\
    \verb|\embed{6.5cm}{9.5cm}{./taquin -geometry !g -use !p dojoji.gif}|\\
-  \embed{6.5cm}{9.5cm}{./taquin -geometry !g -use !p dojoji.gif}
+  \embed{7.5cm}{11cm}{./taquin -geometry !g -use !p dojoji.gif}
 
 \end{itemize}
 
