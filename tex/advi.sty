@@ -149,12 +149,13 @@
 \define@key {advi@trans}{steps}{\advi@settrans \advi@transsteps { steps=#1}}
 
 \def \advi@transemit
-   {\advi@special{trans \advi@transmode \advi@transfrom \advi@transsteps}}
+   {\advi@special{trans \advi@transmode \advi@transfrom \advi@transsteps}%
+    \message {[\advi@transmode \advi@transfrom \advi@transsteps]}}
 \def \advi@global {global}
 \newif \ifadvi@translocal 
 \newcommand {\advi@transition}[2][]{%
   \def \@test {#1}\ifx \@test \advi@global
-     \let \advi@settrans \gdef \setkeys {advi@trans}{#2}%
+     \begingroup \let \advi@settrans \gdef \setkeys {advi@trans}{#2}\endgroup
   \else
      \global \advi@translocaltrue
      \begingroup \setkeys {advi@trans}{#2}\advi@transemit \endgroup
@@ -166,9 +167,9 @@
         {\ifadvi@translocal\else \advi@transemit \fi}%
    \global \advi@translocalfalse}
 
-\@ifundefined {@thehead}{}
-{\expandafter\def\expandafter\@thehead\expandafter{%
-    \@thehead\advi@setpagestyle}}
+\let \latex@begindvi \@begindvi
+\def \@begindvi
+  {\latex@begindvi \global \let \@begindvi \advi@setpagestyle \@begindvi}
 
 % not used anymore
 % \def\advi@resettransition{\advi@special{trans pop}}
