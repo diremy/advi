@@ -15,6 +15,8 @@
 #  Based on Mldvi by Alexandre Miquel.                                #
 #*********************************************************************#
 
+# $Id$
+
 include Makefile.config
 
 VERSION=1.2
