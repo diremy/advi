@@ -15,7 +15,7 @@
  * details (enclosed in the file LGPL).
  *)
 
-module G = GraphicsY11
+module GY = GraphicsY11
 
 let ignore_background = Misc.option_flag false
     "--ignore_background"
@@ -36,6 +36,7 @@ let href_frame = 0x00ff00
 let advi_frame = 0xaaaaff
 let href_emphasize = 0xffff00
 let name_emphasize = 0xffaaaa
+let cut_emphasize = Graphics.cyan
 
 (*** Device configuration ***)
 
@@ -62,42 +63,45 @@ let psused = ref false;;
 let last_is_dvi = ref true
 
 let flush_ps() = if not !psused then psused := true;  Gs.flush();;
-let flush_dvi() = G.flush();;
+let flush_dvi() = GY.flush();;
 let flush_last() = if !last_is_dvi then flush_dvi() else flush_ps();;
 
 let sync b =
   if !last_is_dvi = b then ()
   else begin flush_last(); last_is_dvi := b end;;
 
-let control_cursor = G.Cursor_left_ptr
-let move_cursor = G.Cursor_fleur
-let select_cursor = G.Cursor_xterm
+let control_cursor = GY.Cursor_left_ptr
+let move_cursor = GY.Cursor_fleur
+let select_cursor = GY.Cursor_xterm
 let free_cursor = ref control_cursor
 
 type busy = Free | Busy | Pause | Disk
 let busy_timeout = ref 0.
+let last_cursor = ref control_cursor
 let busy_set_cursor cursor =
   busy_timeout := 0.;
-  G.set_cursor cursor;;
+  last_cursor := cursor;
+  GY.set_cursor cursor;;
+let reset_cursor() = GY.set_cursor !last_cursor;;
 let busy_check_timer() =
   let t = !busy_timeout in
   if t > 0. && Unix.gettimeofday() > t then
-      busy_set_cursor G.Cursor_watch;;
+      busy_set_cursor GY.Cursor_watch;;
 let busy_start() =
   if !busy_timeout > 0. then busy_check_timer()
   else busy_timeout := Unix.gettimeofday() +. !busy_delay
 
 (* To be called before system calls that make take a long time *)
 let busy_now() =
-  if !busy_timeout > 0. then busy_set_cursor G.Cursor_watch;;
+  if !busy_timeout > 0. then busy_set_cursor GY.Cursor_watch;;
 
 let set_busy sw =
   if !show_busy then
     match sw with
     | Pause ->
-        busy_set_cursor G.Cursor_right_side
+        busy_set_cursor GY.Cursor_right_side
     | Disk ->
-        busy_set_cursor G.Cursor_exchange
+        busy_set_cursor GY.Cursor_exchange
     | Busy ->
         busy_start()
     | Free ->
@@ -161,17 +165,31 @@ let synchronize () =
 type cache =
   | No_cache
   | Cached of (color * color) * Graphics.image ;;
+            
+module Glyph =
+  struct 
+    type t = {
+        glyph : Glyph.t ;
+        mutable cache : cache ;
+        mutable img_list : ((color * color) * Graphics.image) list
+      } 
+          
+    let width g = g.glyph.Glyph.width 
+    let height g = g.glyph.Glyph.height 
+    let hoffset g = g.glyph.Glyph.hoffset 
+    let voffset g = g.glyph.Glyph.voffset 
+    let graymap g = g.glyph.Glyph.graymap 
+  end ;;
+type glyph = Glyph.t
+open Glyph
+    
+let make_glyph g =
+  { glyph = g ;
+    cache = No_cache ;
+    img_list = [] } ;;
+    
+let get_glyph g = g.glyph;;
 
-type glyph = {
-    width : int ;
-    height : int ;
-    hoffset : int ;
-    voffset : int ;
-    graymap : string ;
-    glyph : Glyph.t ;
-    mutable cache : cache ;
-    mutable img_list : ((color * color) * Graphics.image) list
-  } ;;
 
 let default_bg_color = Graphics.white;;
 let bg_color = ref  default_bg_color;;
@@ -241,9 +259,9 @@ let get_image g col =
       let img =
 	try List.assoc col g.img_list
 	with Not_found ->
-	  let gmap = g.graymap
-	  and w = g.width
-	  and h = g.height in
+	  let gmap = graymap g
+	  and w = Glyph.width g
+	  and h = Glyph.height g in
          (* We enforce [h <> 0] and [w <> 0] because
 	    Caml graphics don't like zero-sized pixmaps. *)
 	  let dst = Array.make_matrix (max 1 h) (max 1 w) Graphics.transp
@@ -260,18 +278,6 @@ let get_image g col =
 	  img in
       g.cache <- Cached(col, img) ;
       img ;;
-
-let make_glyph g =
-  { width = g.Glyph.width ;
-    height = g.Glyph.height ;
-    hoffset = g.Glyph.hoffset ;
-    voffset = g.Glyph.voffset ;
-    graymap = g.Glyph.graymap ;
-    glyph = g ;
-    cache = No_cache ;
-    img_list = [] } ;;
-
-let get_glyph g = g.glyph
 
 (*** Device manipulation ***)
 type rect = { x : int; y : int; h : int; w : int };;
@@ -298,10 +304,10 @@ let set_color col =
 let draw_glyph g x0 y0 =
   if not !opened then
     failwith "Grdev.draw_glyph: no window" ;
-  let w = g.width
-  and h = g.height in
-  let x = x0 - g.hoffset
-  and y = !size_y - y0 + g.voffset - h in
+  let w = Glyph.width g
+  and h = Glyph.height g in
+  let x = x0 - hoffset g
+  and y = !size_y - y0 + voffset g - h in
   if x + w > !xmin && x < !xmax && y + h > !ymin && y < !ymax
   then begin
     let bg = get_bg_color x y w h in
@@ -531,7 +537,7 @@ let raw_embed_app command app_type app_name width height x y =
       let against_root = (command0 = command) in
       if against_root then begin
         (* fix the geometry *)
-	let (ww,wh,wx,wy) = G.get_geometry () in
+	let (ww,wh,wx,wy) = GY.get_geometry () in
 	x+wx, y - height + wy
       end else begin
 	0,0
@@ -741,7 +747,7 @@ module H =
       Graphics.set_color !color
         
     let rec make_anchors tag all_draw =
-      let make_anchor  draw (x, y as orig) width height voffset = 
+      let make_anchor  draw (x, y as orig) w h voff = 
         let anchor = {tag = tag; draw = List.rev draw } in
         let e =
           match tag with
@@ -749,13 +755,13 @@ module H =
           | Advi (s,f) -> 0
           | Name s -> 0
         in
-        let y' = y - voffset -1 in
-        let height' = height + 2 in
+        let y' = y - voff -1 in
+        let h' = h + 2 in
         let a = 
           { A.x = x - e;
-            A.y =  (!size_y - y' - height') - e ;
-            A.w = width + e + e;
-            A.h = height' + e + e;
+            A.y =  (!size_y - y' - h') - e ;
+            A.w = w + e + e;
+            A.h = h' + e + e;
             A.action = anchor;
           } in
         anchors := A.add a !anchors; 
@@ -764,25 +770,24 @@ module H =
         | Advi _ -> draw_anchor advi_frame 1 a
         | _ -> ()
       in
-      let rec split draw (x, y as orig) width height voffset = function
-        | [] ->
-            make_anchor  draw orig width height voffset 
+      let rec split draw (x, y as orig) w h voff = function
+        | [] -> make_anchor  draw orig w h voff
               
         | (x1, y1, g1 as d):: rest ->
-            if x1 + g1.width > x then 
+            if x1 + width g1 > x then 
               split (d::draw) orig
-                (max width ((x1-x)+g1.width))
-                (max height g1.height)
-                (max voffset g1.voffset) rest
+                (max w ((x1-x) + width g1))
+                (max h (height g1))
+                (max voff (voffset g1)) rest
             else
               begin
-                make_anchor  (d::draw) orig width height voffset;
+                make_anchor  (d::draw) orig w h voff;
                 start rest
               end
       and start = function
           [] -> ()
         | (x, y, g as d)::rest ->
-            split [d] (x,y) g.width g.height g.voffset rest
+            split [d] (x,y) (width g) (height g) (voffset g) rest
       in
       start all_draw
         
@@ -814,7 +819,7 @@ module H =
             List.iter
               (function ima, act -> Graphics.draw_image ima act.A.x act.A.y) l;
             Graphics.draw_image ima act.A.x act.A.y;
-	    G.set_cursor !free_cursor;
+	    GY.set_cursor !free_cursor;
 	    Graphics.display_mode false
 	| Screen (ima, act, all_anchors) ->
             Graphics.display_mode true;
@@ -823,8 +828,8 @@ module H =
             (* long delay to be safe *)
             sleep_watch false 0.1;
             Graphics.draw_image ima 0 0;
-	    G.set_cursor !free_cursor;
-	    G.flush();
+	    GY.set_cursor !free_cursor;
+	    GY.flush();
 	    Graphics.display_mode false
 	| Nil -> ()
         
@@ -837,7 +842,7 @@ module H =
       push_bg_color c;
       List.iter (function x, y, g -> draw_glyph g x y) act.A.action.draw;
       pop_bg_color();
-      G.set_cursor G.Cursor_hand2;
+      GY.set_cursor GY.Cursor_hand2;
       Graphics.display_mode false;
       Rect (ima, act, []) 
         
@@ -845,7 +850,7 @@ module H =
       Gs.flush();
       (* get image take the image from the backing store *)
       let ima = Graphics.get_image 0 0 !size_x !size_y in
-      G.sync();
+      GY.sync();
       (* wait until all events have been processed, flush should suffice *)
 (*
       let _ = Graphics.set_color (Graphics.point_color 0 0) in
@@ -891,6 +896,8 @@ module H =
         
 (*** Clearing device ***)
 
+module Symbol = Symbol.Make (Glyph);;
+
 let cut s =
   print_string s; print_newline ();
   (* cut does not work yet *)
@@ -928,6 +935,7 @@ let clear_dev () =
   bg_color := default_bg_color;
   bg_colors := [];
   background_colors := [];
+  Symbol.clear();
   size_x := Graphics.size_x () ;
   size_y := Graphics.size_y () ;
   xmin := 0 ; xmax := !size_x ;
@@ -944,7 +952,6 @@ type status = Graphics.status = {
     key : char
   } ;;
 
-
 type area = Bottom_right | Bottom_left | Top_right | Top_left | Middle
 type button = Button1 | Button2 | Button3
 type event =
@@ -953,6 +960,7 @@ type event =
   | Key of char
   | Move of int * int
   | Region of int * int * int * int
+  | Selection of string
   | Position of int * int
   | Href of string
   | Advi of string * (unit -> unit)
@@ -1067,7 +1075,7 @@ let rec wait_signal_event events =
             waiting := false;
             raise exn
           ;;
-
+(*
 let wait_select_button_up x y =
   let rec select dx dy =
     let buf = save_rectangle x y dx dy in
@@ -1084,15 +1092,74 @@ let wait_select_button_up x y =
   in
   set_color Graphics.black;
   Graphics.display_mode true;
-  G.set_cursor select_cursor;
+  GY.set_cursor select_cursor;
   let restore() =
     Graphics.display_mode false;
     set_color !color;
-    G.set_cursor !free_cursor
+    GY.set_cursor !free_cursor
   in
   try let e = select 0 0 in restore(); e
   with exn -> restore(); raise exn
         ;;  
+*)
+
+let wait_select_button_up m x y =
+  let draw_color b =
+    let draw s c x y =
+      set_color (if b then c else cut_emphasize);
+      draw_glyph s x y in
+    Symbol.apply draw in
+  let rec select r =
+    let ev = wait_signal_event button_up_motion in
+    match ev with
+    | Raw e ->
+        let x' = e.Graphics.mouse_x in 
+        let y' = e.Graphics.mouse_y in
+        let r' = Symbol.new_region r x' (!size_y - y') in
+        Symbol.iter_regions (draw_color true) (draw_color false) r r';
+        if e.Graphics.button then select r'
+        else
+          let m = GY.get_modifiers() in
+          if m land GY.shift = 0 then
+            begin
+              Symbol.iter_region (draw_color true) r';
+              Final Nil
+            end
+          else
+            Final (Selection (Symbol.region_to_ascii r'))
+    | x -> x
+  in
+  let color = !color in
+  Graphics.synchronize();
+  Graphics.display_mode true;
+  Graphics.remember_mode false;
+  GY.set_cursor select_cursor;
+  let restore() =
+    Graphics.display_mode false;
+    Graphics.remember_mode true;
+    set_color color;
+    GY.set_cursor !free_cursor
+  in
+  try
+    let e = 
+      if m land GY.button2 = 0 then
+        let r = Symbol.position x (!size_y - y) in
+        select r
+      else
+        match Symbol.word x (!size_y - y) with
+          Some (r, w) ->
+            Symbol.iter_region (draw_color false) r;
+            Final (Selection w)
+        | None -> Final Nil
+    in
+    restore(); e
+  with
+    exn ->
+      restore();
+      match exn with
+      | Not_found -> Final Nil
+      | _ -> raise exn
+            ;;  
 
 let wait_move_button_up x y =
   let bbox = !bbox in
@@ -1112,12 +1179,12 @@ let wait_move_button_up x y =
     | x -> x
   in
   set_color Graphics.black;
-  G.set_cursor move_cursor;
+  GY.set_cursor move_cursor;
   Graphics.display_mode true;
   let restore() =
     Graphics.display_mode false;
     set_color !color;
-    G.set_cursor !free_cursor
+    GY.set_cursor !free_cursor
   in
   try let e = move 0 0 in restore(); e
   with exn -> restore(); raise exn
@@ -1136,29 +1203,29 @@ let click_area x y =
   else Middle
 
 let button m =
-  if m land G.button1 <> 0 then Button1
-  else if m land G.button2 <> 0 then Button2
-  else if m land G.button3 <> 0 then Button3
+  if m land GY.button1 <> 0 then Button1
+  else if m land GY.button2 <> 0 then Button2
+  else if m land GY.button3 <> 0 then Button3
   else Button2
 
 let test() = 
   for i = 1 to 76
   do
     print_int (i+i); print_newline();
-    G.set_cursor (G.Cursor_id (i + i));
+    GY.set_cursor (GY.Cursor_id (i + i));
     ignore (wait_signal_event [ Graphics.Button_up ]);
     ignore (wait_signal_event [ Graphics.Button_down ]);
   done
 
 let wait_button_up m x y =
-  if m land G.control <> 0 then wait_move_button_up x y
-  else if m land G.shift <> 0 && m land G.button1 = 0 then
-    wait_select_button_up x y
+  if m land GY.control <> 0 then wait_move_button_up x y
+  else if m land GY.shift <> 0 && m land GY.button1 = 0 then
+    wait_select_button_up m x y
   else
     begin
       match wait_signal_event button_up with
         Raw e ->
-          if m land G.shift <> 0 then
+          if m land GY.shift <> 0 then
             Final (Position (x, !size_y - y))
           else
             Final (Click (click_area x y, button m, x, !size_y - y))
@@ -1166,12 +1233,11 @@ let wait_button_up m x y =
     end
 
 let wait_event () =
+  let temp_cursor = ref false in
+  reset_cursor();
   let rec event emph =
-    
-    let send ev =
-      H.deemphasize true emph; ev in
-    let rescan() =
-      H.deemphasize true emph; event H.Nil in
+    let send ev = H.deemphasize true emph; ev in
+    let rescan() = H.deemphasize true emph; event H.Nil in
     match wait_signal_event all_events with
     | Raw ev ->
         begin
@@ -1209,19 +1275,28 @@ let wait_event () =
 
               | _ ->
                   rescan()
+
               end with Not_found ->
                 if ev'.button then
-                  let m = G.get_modifiers() in
+                  let m = GY.get_modifiers() in
                   match wait_button_up m ev.mouse_x ev.mouse_y with
                   | Final (Region (x, y, dx, dy) as e) -> send e
+                  | Final (Selection s as e) -> send e
                   | Final (Position (x, y) as e) -> send e
                   | Final (Move (dx, dy) as e) -> send e
                   | Final (Click (_,_,_,_) as e) -> send e
+                  | Final Nil -> send Nil
                   | Final e ->
                       push_back_event ev; 
                       send e
                   | Raw _ -> rescan()
                 else
+                  let m = GY.get_modifiers() in
+                  if m land GY.shift <> 0 then
+                     (if not !temp_cursor then
+                       (temp_cursor:= true; GY.set_cursor select_cursor))
+                  else if !temp_cursor then
+                    (temp_cursor:= false; reset_cursor());
                   rescan()
             end
         end

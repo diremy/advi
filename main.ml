@@ -18,7 +18,7 @@
 open Format ;;
 
 module Dev = Grdev ;;
-module View = Dviview.Make(Dev) ;;
+module View = Dviview (* .Make(Dev) *) ;;
 
 (*** Parsing command-line arguments ***)
 

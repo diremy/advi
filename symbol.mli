@@ -1,43 +1,73 @@
-(* Symbols information. *)
-type 'g symbol =
+module Make
+    (G :
+       sig
+         type t
+         val hoffset : t -> int
+         val voffset : t -> int
+         val width : t -> int
+         val height : t -> int
+       end) : 
+    sig 
+
+
+type glyph = G.t
+type fontname = string
+type fontratio = float
+type g =
+    { fontname : string;
+      fontratio : float;
+      glyph : glyph;
+    } 
+type symbol =
+    Glyph of g
+  | Space of int * int
+  | Rule of int * int
+  | Line of int * string option
+type element =
     { color   : int ; 
       locx    : int ; 
       locy    : int ;
-      voffset : int ;
-      hoffset : int ;
-      width   : int ;
-      height  : int ;
       code    : int ;
-      fontname  : string ;
-      fontratio : float ;
-      glyph   : 'g option }
-
-(* Sets of symbol. *)
-type 'g set
-
-(* Empty set. *)
-val empty_set : int -> int -> 'g set
-
-(* Rules, spaces and positions are symbols with special fontnames *)
-val rulename  : string
-val spacename : string
-val linename : string
-
-(* Add an element, imperative. *)
-val add : 'g symbol -> 'g set -> unit
-
+      symbol : symbol }
+type set = element list
+      
+val voffset : element -> int
+val hoffset : element -> int
+val height : element -> int
+val width : element -> int
+    
+val clear : unit -> unit
+(* color -> locx -> locy -> code -> symbol -> unit *)
+val add : int -> int -> int -> int -> symbol -> unit
+    
 (* to_ascii returns a string representing the symbols that are in the set. *)
 (* Could be done with a pretty printer... *)
-val to_ascii   : 'g set -> string
-val to_escaped : 'g set -> string
-
+val to_ascii   : set -> string
+val to_escaped : set -> string
+    
 (* Gives a copy of set where only symbols in zone x1 y1 x2 y2 are kept. *)
-val inzone : int -> int -> int -> int -> 'g set -> 'g set
-
+val inzone : int -> int -> int -> int -> set
+    
 (* Idem where but the resulting set is time-convex (intermediate symbols are also kept). *)
-val intime : int -> int -> int -> int -> 'g set -> 'g set
-
+val intime : int -> int -> int -> int -> set
+    
 (* Iterates function ff over the set of symbols. *)
-val iter : ('g symbol -> unit) -> 'g set -> unit
+val iter : (element -> unit) -> set -> unit
+    
+type region
+val position : int -> int -> region
+val new_region : region -> int -> int -> region
+val iter_region : (element -> unit) -> region -> unit
+val iter_regions :
+    (element -> unit) -> (element -> unit) -> region -> region -> unit 
+val apply : (glyph -> int -> int -> int -> unit) -> element -> unit
 
-val lines : int -> int -> 'g set -> int * int * string * string
+val lines : int -> int -> (element * int * int * string * string) option
+val word : int -> int -> (region * string) option
+val region_to_ascii : region -> string
+end
+        
+        
+        
+        
+        

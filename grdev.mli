@@ -21,9 +21,45 @@ type glyph ;;
 
 val make_glyph : Glyph.t -> glyph ;;
 val get_glyph  : glyph -> Glyph.t
+val draw_glyph : glyph -> int -> int -> unit ;;
 
+module Symbol :
+    sig
+      type fontname = string
+      type fontratio = float
+      type g =
+          { fontname : string;
+            fontratio : float;
+            glyph : glyph;
+          } 
+      type symbol =
+          Glyph of g
+        | Space of int * int
+        | Rule of int * int
+        | Line of int * string option
+      type element =
+          { color   : int ; 
+            locx    : int ; 
+            locy    : int ;
+            code    : int ;
+            symbol : symbol }
+      type set
+      val voffset : element -> int
+      val hoffset : element -> int
+      val height : element -> int
+      val width : element -> int
+      val clear : unit -> unit
+      val add : int -> int -> int -> int -> symbol -> unit
+      val to_ascii   : set -> string
+      val to_escaped : set -> string
+      val inzone : int -> int -> int -> int -> set
+      val intime : int -> int -> int -> int -> set
+      val iter : (element -> unit) -> set -> unit
+      val lines : int -> int -> (element * int * int * string * string) option
+    end
+    
 (* Device configuration *)
-
+    
 val open_dev : string -> unit ;;
 val close_dev : unit -> unit ;;
 val clear_dev : unit -> unit ;;
@@ -36,7 +72,6 @@ type color = int ;;
 val set_color : int -> unit ;;
 val push_bg_color : int -> unit;;
 val pop_bg_color : unit -> unit;;
-val draw_glyph : glyph -> int -> int -> unit ;;
 val fill_rect : int -> int -> int -> int -> unit ;;
 
 val draw_path: (int * int) array -> pensize:int -> unit
@@ -100,6 +135,7 @@ type event =
   | Key of char
   | Move of int * int
   | Region of int * int * int * int
+  | Selection of string
   | Position of int * int
   | Href of string
   | Advi of string * (unit -> unit)

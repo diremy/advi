@@ -30,13 +30,13 @@ OCAMLDEP  = $(CAML)dep
 MLINCDIRS = $(CAMLIMAGESDIR)
 
 EXEC      = advi
+
 MODULES   = config misc input symbol search \
 	    graphicsY11 drawps \
-            table pkfont \
-	    ttfont jfm \
-	    font glyph devfont dvi \
-	    units dimension driver\
-	    gs transimpl grdev dviview main
+            table pkfont ttfont jfm font glyph devfont dvi \
+	    units dimension \
+	    gs transimpl grdev  driver dviview main
+
 LIBRARIES = graphics unix str $(CAMLIMAGESLIBS)
 CLIBS     = unix graphics
 

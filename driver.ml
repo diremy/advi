@@ -15,105 +15,12 @@
  * details (enclosed in the file LGPL).
  *)
 
-(****************)
-(*  Signatures  *)
-(****************)
-
 open Misc
 
 (* number of steps before checking for user interrutions *)
 let checkpoint_frequency = 10
 
-module type DEVICE = sig
-  type color = int
-  type glyph
-  val make_glyph : Glyph.t -> glyph
-  val get_glyph  : glyph -> Glyph.t
-  val set_color : int -> unit
-  val draw_glyph : glyph -> int -> int -> unit
-  val fill_rect : int -> int -> int -> int -> unit
-
-  val draw_path: (int * int) array -> pensize:int -> unit
-  val fill_path: (int * int) array -> shade:float -> unit
-  val draw_arc: x:int -> y:int -> rx:int -> ry:int -> 
-                start:int -> stop:int -> pensize:int -> unit
-  val fill_arc: x:int -> y:int -> rx:int -> ry:int -> 
-                start:int -> stop:int -> shade:float -> unit
-
-  val set_epstransparent : bool -> unit
-  val set_alpha : float -> unit
-  type blend =
-    | Normal | Multiply | Screen | Overlay (* | SoftLight | HardLight *)
-    | ColorDodge | ColorBurn | Darken | Lighten | Difference 
-    | Exclusion (* | Luminosity | Color | Saturation | Hue *)
-  val set_blend : blend -> unit
-  val draw_ps : string -> (int * int * int * int) -> (int * int) -> int -> int -> unit
-  val clean_ps_cache : unit -> unit
-  val sleep : float -> unit
-  val synchronize : unit -> unit
-
-  type busy = Free | Busy | Pause | Disk
-  val set_busy : busy -> unit;;
-
-  val set_title : string -> unit
-
-  val set_transition : Transitions.t -> unit
-
-  type app_type = Sticky | Persistent | Embedded
-  val embed_app : string -> app_type -> string -> int -> int -> int -> int -> unit
-  val kill_embedded_apps : unit -> unit 
-  val kill_embedded_app : string -> unit 
-
-  module H :
-      sig 
-        type tag =
-          | Name of string 
-          | Href of string
-          | Advi of string * (unit -> unit)
-
-        type anchor = {
-            tag : tag;
-            draw : (int * int * glyph) list
-          } 
-
-        val add : anchor -> unit
-      end
-
-  exception Stop
-  exception GS
-  val continue : unit -> unit
-  val clear_dev : unit -> unit
-  val current_pos : unit -> int * int
-  val newpage : string list -> int -> float -> int -> int -> unit
-  val exec_ps : string -> int -> int -> unit
-  val add_headers : string list -> unit
-end ;;
-
-module type DRIVER =
-    functor (Dev : DEVICE) ->
-  sig
-    exception Pause
-    type cooked_dvi
-    val cook_dvi : Dvi.t -> cooked_dvi
-    val render_page : cooked_dvi -> int -> float -> int -> int -> unit
-    val render_step : cooked_dvi -> int -> float -> int -> int -> (unit -> bool)
-    val unfreeze_fonts : cooked_dvi -> unit
-    val unfreeze_glyphs : cooked_dvi -> float -> unit
-    val scan_specials : cooked_dvi -> int -> unit 
-    val clear_symbols : int -> int -> int -> int -> unit
-    val give_symbols : unit -> Dev.glyph Symbol.set
-  end ;;
-    
 (*** Some utilities for specials ***)
-
-(*
-(* define in Misc used everywhere *)
-let has_prefix pre str =
-  let len = String.length pre in
-  String.length str >= len &&
-  String.sub str 0 len = pre ;;
-*)
-
 
 let split_string s start = Misc.split_string s ' ' start;;
 
@@ -207,367 +114,307 @@ let parse_color_args = function
       end
   | _ -> 0x000000 ;;
 
-(*****************)
-(*  The Functor  *)
-(*****************)
 
-module Make(Dev : DEVICE) = struct
-  
-  module DFont = Devfont.Make(Dev)
-  let base_dpi = 600
-      
-  (*** Cooked fonts ***)
-      
-  exception Pause
-      
-  type cooked_font = {
-      name : string ;
-      ratio : float ;
-      mtable : (int * int) Table.t ;
-      mutable gtables : (int * Dev.glyph Table.t) list
-    }
-        
-  let dummy_mtable = Table.make (fun _ -> raise Not_found)
-  let dummy_gtable = Table.make (fun _ -> raise Not_found)
-  let dummy_font =
-    { name = "--nofont--" ; ratio = 1.0 ; mtable = dummy_mtable ; gtables = [] }
-      
-  let cook_font fdef dvi_res =
-    let name = fdef.Dvi.name
-    and sf = fdef.Dvi.scale_factor
-    and ds = fdef.Dvi.design_size in
-    let ratio = float sf /. float ds in
-    let mtable =
-      try DFont.find_metrics name (dvi_res *. ratio)
-      with Not_found -> dummy_mtable in
-    { name = name ;
-      ratio = ratio ;
-      mtable = mtable ;
-      gtables = [] }
-      
-  let get_gtable cfont sdpi =
-    try List.assoc sdpi cfont.gtables
-    with Not_found ->
-      let dpi = ldexp (float sdpi) (-16) in
-      let table =
-	try DFont.find_glyphs cfont.name (dpi *. cfont.ratio)
-	with Not_found -> dummy_gtable in
-      cfont.gtables <- (sdpi, table) :: cfont.gtables ;
-      table
-        
-  (*** Cooked DVI's ***)
-        
-  type cooked_dvi = {
-      base_dvi : Dvi.t ;
-      dvi_res : float ;
-      font_table : cooked_font Table.t
-    }
-        
-  let cook_dvi dvi =
-    let dvi_res = 72.27 in
-    let build n =
-      cook_font (List.assoc n dvi.Dvi.font_map) dvi_res in
-    { base_dvi = dvi ;
-      dvi_res = dvi_res ;
-      font_table = Table.make build }
-      
-  (*** The rendering state ***)
-      
-  type reg_set = {
-      reg_h : int ;
-      reg_v : int ;
-      reg_w : int ;
-      reg_x : int ;
-      reg_y : int ;
-      reg_z : int
-    }
-        
-  type color = int
-        
-  type state = {
-      cdvi : cooked_dvi ;
-      sdpi : int ;
-      conv : float ;
-      x_origin : int ;
-      y_origin : int ;
-      (* Current font attributes *)
-      mutable cur_font : cooked_font ;
-      mutable cur_mtable : (int * int) Table.t ;
-      mutable cur_gtable : Dev.glyph Table.t ;
-      (* Registers *)
-      mutable h : int ;
-      mutable v : int ;
-      mutable w : int ;
-      mutable x : int ;
-      mutable y : int ;
-      mutable z : int ;
-      (* Register stack *)
-      mutable stack : reg_set list ;
-      (* Color & Color stack *)
-      mutable color : color ;
-      mutable color_stack : color list;
-      (* Other attributes *)
-      mutable alpha : float;
-      mutable alpha_stack : float list;
-      mutable blend : Dev.blend;
-      mutable blend_stack : Dev.blend list;
-      mutable epstransparent : bool;
-      mutable epstransparent_stack : bool list;
-      mutable transition : Transitions.t;
-      mutable transition_stack : Transitions.t list;
-      (* TPIC specials state *)
-      mutable tpic_pensize : float;
-      mutable tpic_path : (float * float) list;
-      mutable tpic_shading : float;
-      (* PS specials page state *)
-      mutable status : status; 
-      mutable headers : string list;
-      mutable html : (Dev.H.tag * int) option ;
-      mutable draw_html : (int * int * Dev.glyph) list;
-      mutable checkpoint : int; 
-    }
-        
-  type proc_unit = {
-      escaped_register : reg_set;
-      escaped_cur_font : cooked_font ;
-      escaped_cur_mtable : (int * int) Table.t;
-      escaped_cur_gtable : Dev.glyph Table.t;
-      mutable escaped_commands : Dvi.command list
-    }	
-	
-  let procs = Hashtbl.create 107
-  let current_recording_proc_name = ref None
-  let current_recording_proc_unit = ref None
-  let hidden = ref false	
-  let is_hidden () = !hidden	
-  let is_recording () = !current_recording_proc_name <> None
-      
-  (*** Rendering primitives ***)
-      
-  let drawn_symbols = ref (Symbol.empty_set 1 1)
-  let last_height = ref 0 
-      
-  let give_symbols () = !drawn_symbols
-  let clear_symbols page_w page_h blank_w blank_h =
-    last_height := 2 ;
-    drawn_symbols := Symbol.empty_set page_w page_h;
-    ()
-      
-  let add_char st x y glyph code =
-    let dev_glyph = Dev.get_glyph glyph in
-    let symbol =
-      { Symbol.color = st.color ;
-	Symbol.locx = x ;
-	Symbol.locy = y ;
-	Symbol.voffset = dev_glyph.Glyph.voffset ;
-	Symbol.hoffset = dev_glyph.Glyph.hoffset ;
-	Symbol.width = dev_glyph.Glyph.width ;
-	Symbol.height = dev_glyph.Glyph.height ;
-	Symbol.code = code ;
-	Symbol.fontname = st.cur_font.name ;
-	Symbol.fontratio = st.cur_font.ratio ;
-	Symbol.glyph = Some glyph }
-    in
-    last_height := symbol.Symbol.voffset ;
-    Symbol.add symbol !drawn_symbols ;
-    ()
-
-  let add_line st (line, file) =
-    let x = st.x_origin + int_of_float (st.conv *. float st.h)
-    and y = st.y_origin + int_of_float (st.conv *. float st.v) in
-    let symbol =
-      { Symbol.color = st.color ;
-	Symbol.locx = x ;
-	Symbol.locy = y ;
-	Symbol.voffset = 0 ;
-	Symbol.hoffset = 0 ;
-	Symbol.width = 0 ;
-	Symbol.height = 0 ;
-	Symbol.code = line ;
-	Symbol.fontname = Symbol.linename ;
-	Symbol.fontratio = 0.0 ;
-	Symbol.glyph = None }
-    in
-    Symbol.add symbol !drawn_symbols ;
-    ()
-      
-  let add_blank nn st width =
+module Dev= Grdev
+module Symbol = Dev.Symbol
+module DFont = Devfont.Make(Dev)
+let base_dpi = 600
     
+  (*** Cooked fonts ***)
+    
+exception Pause
+    
+type cooked_font = {
+    name : string ;
+    ratio : float ;
+    mtable : (int * int) Table.t ;
+    mutable gtables : (int * Dev.glyph Table.t) list
+  }
+      
+let dummy_mtable = Table.make (fun _ -> raise Not_found)
+let dummy_gtable = Table.make (fun _ -> raise Not_found)
+let dummy_font =
+  { name = "--nofont--" ; ratio = 1.0 ; mtable = dummy_mtable ; gtables = [] }
+    
+let cook_font fdef dvi_res =
+  let name = fdef.Dvi.name
+  and sf = fdef.Dvi.scale_factor
+  and ds = fdef.Dvi.design_size in
+  let ratio = float sf /. float ds in
+  let mtable =
+    try DFont.find_metrics name (dvi_res *. ratio)
+    with Not_found -> dummy_mtable in
+  { name = name ;
+    ratio = ratio ;
+    mtable = mtable ;
+    gtables = [] }
+    
+let get_gtable cfont sdpi =
+  try List.assoc sdpi cfont.gtables
+  with Not_found ->
+    let dpi = ldexp (float sdpi) (-16) in
+    let table =
+      try DFont.find_glyphs cfont.name (dpi *. cfont.ratio)
+      with Not_found -> dummy_gtable in
+    cfont.gtables <- (sdpi, table) :: cfont.gtables ;
+    table
+      
+  (*** Cooked DVI's ***)
+      
+type cooked_dvi = {
+    base_dvi : Dvi.t ;
+    dvi_res : float ;
+    font_table : cooked_font Table.t
+  }
+      
+let cook_dvi dvi =
+  let dvi_res = 72.27 in
+  let build n =
+    cook_font (List.assoc n dvi.Dvi.font_map) dvi_res in
+  { base_dvi = dvi ;
+    dvi_res = dvi_res ;
+    font_table = Table.make build }
+    
+  (*** The rendering state ***)
+    
+type reg_set = {
+    reg_h : int ;
+    reg_v : int ;
+    reg_w : int ;
+    reg_x : int ;
+    reg_y : int ;
+    reg_z : int
+  }
+      
+type color = int
+      
+type state = {
+    cdvi : cooked_dvi ;
+    sdpi : int ;
+    conv : float ;
+    x_origin : int ;
+    y_origin : int ;
+      (* Current font attributes *)
+    mutable cur_font : cooked_font ;
+    mutable cur_mtable : (int * int) Table.t ;
+    mutable cur_gtable : Dev.glyph Table.t ;
+      (* Registers *)
+    mutable h : int ;
+    mutable v : int ;
+    mutable w : int ;
+    mutable x : int ;
+    mutable y : int ;
+    mutable z : int ;
+      (* Register stack *)
+    mutable stack : reg_set list ;
+      (* Color & Color stack *)
+    mutable color : color ;
+    mutable color_stack : color list;
+      (* Other attributes *)
+    mutable alpha : float;
+    mutable alpha_stack : float list;
+    mutable blend : Dev.blend;
+    mutable blend_stack : Dev.blend list;
+    mutable epstransparent : bool;
+    mutable epstransparent_stack : bool list;
+    mutable transition : Transitions.t;
+    mutable transition_stack : Transitions.t list;
+      (* TPIC specials state *)
+    mutable tpic_pensize : float;
+    mutable tpic_path : (float * float) list;
+    mutable tpic_shading : float;
+      (* PS specials page state *)
+    mutable status : status; 
+    mutable headers : string list;
+    mutable html : (Dev.H.tag * int) option ;
+    mutable draw_html : (int * int * Dev.glyph) list;
+    mutable checkpoint : int; 
+  }
+      
+type proc_unit = {
+    escaped_register : reg_set;
+    escaped_cur_font : cooked_font ;
+    escaped_cur_mtable : (int * int) Table.t;
+    escaped_cur_gtable : Dev.glyph Table.t;
+    mutable escaped_commands : Dvi.command list
+  }	
+      
+let procs = Hashtbl.create 107
+let current_recording_proc_name = ref None
+let current_recording_proc_unit = ref None
+let hidden = ref false	
+let is_hidden () = !hidden	
+let is_recording () = !current_recording_proc_name <> None
+    
+  (*** Rendering primitives ***)
+    
+let last_height = ref 0 
+let clear_symbols() = last_height := 2 
+    
+let add_char st x y code glyph =
+  let g : Symbol.g = 
+    { Symbol.fontname = st.cur_font.name ;
+      Symbol.fontratio = st.cur_font.ratio ;
+      Symbol.glyph = glyph
+    } in
+  last_height := (Dev.get_glyph glyph).Glyph.voffset ;
+  let s : Symbol.symbol = Symbol.Glyph g in
+  Symbol.add st.color x y code s;
+  ()
+
+let add_line st (line, file) =
+  let x = st.x_origin + int_of_float (st.conv *. float st.h)
+  and y = st.y_origin + int_of_float (st.conv *. float st.v) in
+  Symbol.add st.color x y 0 (Symbol.Line (line, file))
+    
+let add_blank nn st width =
+  let x = st.x_origin + int_of_float (st.conv *. float st.h)
+  and y = st.y_origin + int_of_float (st.conv *. float st.v)
+  and w = int_of_float (st.conv *. float width) in
+  Symbol.add st.color x y nn (Symbol.Space (w, !last_height))
+    
+let add_rule st x y w h =
+  Symbol.add st.color x y 0 (Symbol.Rule (w, h))
+    
+let get_register_set st =
+  { reg_h = st.h ; reg_v = st.v ;
+    reg_w = st.w ; reg_x = st.x ;
+    reg_y = st.y ; reg_z = st.z }
+    
+let set_register_set st rset =
+  st.h <- rset.reg_h ;
+  st.v <- rset.reg_v ;
+  st.w <- rset.reg_w ;
+  st.x <- rset.reg_x ;
+  st.y <- rset.reg_y ;
+  st.z <- rset.reg_z
+      
+let push st =
+  st.stack <- (get_register_set st) :: st.stack
+                                        
+let pop st =
+  match st.stack with
+  | [] -> ()
+  | rset :: rest ->
+      set_register_set st rset;
+      st.stack <- rest
+          
+let color_push st col =
+  st.color_stack <- st.color :: st.color_stack ;
+  st.color <- col ;
+  if not (is_hidden ()) then Dev.set_color col
+      
+let color_pop st =
+  match st.color_stack with
+  | [] -> ()
+  | col :: rest ->
+      st.color <- col ;
+      if not (is_hidden ()) then Dev.set_color col ;
+      st.color_stack <- rest
+          
+let alpha_push st v =
+  st.alpha_stack <- st.alpha :: st.alpha_stack ;
+  st.alpha <- v ;
+  if not (is_hidden ()) then Dev.set_alpha v
+      
+let alpha_pop st =
+  match st.alpha_stack with
+  | [] -> ()
+  | v :: rest ->
+      st.alpha <- v ;
+      if not (is_hidden ()) then Dev.set_alpha v ;
+      st.alpha_stack <- rest
+          
+let blend_push st v =
+  st.blend_stack <- st.blend :: st.blend_stack ;
+  st.blend <- v ;
+  if not (is_hidden ()) then Dev.set_blend v
+      
+let blend_pop st =
+  match st.blend_stack with
+  | [] -> ()
+  | v :: rest ->
+      st.blend <- v ;
+      if not (is_hidden ()) then Dev.set_blend v ;
+      st.blend_stack <- rest
+          
+let epstransparent_push st v =
+  st.epstransparent_stack <- st.epstransparent :: st.epstransparent_stack ;
+  st.epstransparent <- v ;
+  if not (is_hidden ()) then Dev.set_epstransparent v
+      
+let epstransparent_pop st =
+  match st.epstransparent_stack with
+  | [] -> ()
+  | v :: rest ->
+      st.epstransparent <- v ;
+      if not (is_hidden ()) then Dev.set_epstransparent v ;
+      st.epstransparent_stack <- rest
+          
+let transition_push st v =
+  st.transition_stack <- st.transition :: st.transition_stack ;
+  st.transition <- v ;
+  if not (is_hidden ()) then Dev.set_transition v
+      
+let transition_pop st =
+  match st.transition_stack with
+  | [] -> ()
+  | v :: rest ->
+      st.transition <- v ;
+      if not (is_hidden ()) then Dev.set_transition v ;
+      st.transition_stack <- rest
+          
+let fnt st n =
+  let (mtable, gtable, cfont) =
+    try
+      let cfont = Table.get st.cdvi.font_table n in
+      (cfont.mtable, get_gtable cfont st.sdpi, cfont)
+    with Not_found -> (dummy_mtable, dummy_gtable, dummy_font) in
+  st.cur_mtable <- mtable ;
+  st.cur_gtable <- gtable ;
+  st.cur_font <- cfont ;
+  ()
+    
+let put st code =
+  try
     let x = st.x_origin + int_of_float (st.conv *. float st.h)
     and y = st.y_origin + int_of_float (st.conv *. float st.v)
-    in
-    let symbol =
-      { Symbol.color = st.color ; (* Color of a blank space he he he. *)
-	Symbol.locx = x ;
-	Symbol.locy = y ;
-	Symbol.voffset = !last_height ;
-	Symbol.hoffset = 0 ;
-	Symbol.width = int_of_float (st.conv *. float width);
-	Symbol.height = !last_height ;
-	Symbol.code = nn ;
-	Symbol.fontname = Symbol.spacename ;
-	Symbol.fontratio = 0.0 ;
-	Symbol.glyph = None } 
-    in
-    Symbol.add symbol !drawn_symbols ;
-    ()
+    and glyph = Table.get st.cur_gtable code in
+    if not (is_hidden ()) then
+      begin
+        begin match st.html with
+        | Some _ -> 
+            st.draw_html <- (x, y, glyph) :: st.draw_html
+        | None -> ()
+        end;
+        Dev.draw_glyph (glyph : Dev.glyph) x y;
+	add_char st x y code glyph ;
+      end
+  with _ -> ()
       
-  let add_rule st x y w h =
-    let symbol =
-      { Symbol.color = st.color ;
-	Symbol.locx = x ;
-	Symbol.locy = y ;
-	Symbol.voffset = 0 ;
-	Symbol.hoffset = 0 ;
-	Symbol.width = w ;
-	Symbol.height = h ;
-	Symbol.code = 0 ;
-	Symbol.fontname = Symbol.rulename ;
-	Symbol.fontratio = 0.0 ;
-	Symbol.glyph = None }
-    in
-    Symbol.add symbol !drawn_symbols ;
-    ()
+let set st code =
+  put st code ;
+  try
+    let (dx, dy) = Table.get st.cur_mtable code in
+    st.h <- st.h + dx ;
+    st.v <- st.v + dy
+  with _ -> ()
       
-  let get_register_set st =
-    { reg_h = st.h ; reg_v = st.v ;
-      reg_w = st.w ; reg_x = st.x ;
-      reg_y = st.y ; reg_z = st.z }
+let put_rule st a b =
+  let x = st.x_origin + int_of_float (st.conv *. float st.h)
+  and y = st.y_origin + int_of_float (st.conv *. float st.v)
+  and w = int_of_float (ceil (st.conv *. float b))
+  and h = int_of_float (ceil (st.conv *. float a)) in
+  add_rule st x (y-h) w h ;
+  if not (is_hidden ()) then Dev.fill_rect x (y - h) w h
       
-  let set_register_set st rset =
-    st.h <- rset.reg_h ;
-    st.v <- rset.reg_v ;
-    st.w <- rset.reg_w ;
-    st.x <- rset.reg_x ;
-    st.y <- rset.reg_y ;
-    st.z <- rset.reg_z
-        
-  let push st =
-    st.stack <- (get_register_set st) :: st.stack
-                                          
-  let pop st =
-    match st.stack with
-    | [] -> ()
-    | rset :: rest ->
-	set_register_set st rset;
-	st.stack <- rest
-            
-  let color_push st col =
-    st.color_stack <- st.color :: st.color_stack ;
-    st.color <- col ;
-    if not (is_hidden ()) then Dev.set_color col
-        
-  let color_pop st =
-    match st.color_stack with
-    | [] -> ()
-    | col :: rest ->
-	st.color <- col ;
-	if not (is_hidden ()) then Dev.set_color col ;
-	st.color_stack <- rest
-            
-  let alpha_push st v =
-    st.alpha_stack <- st.alpha :: st.alpha_stack ;
-    st.alpha <- v ;
-    if not (is_hidden ()) then Dev.set_alpha v
-        
-  let alpha_pop st =
-    match st.alpha_stack with
-    | [] -> ()
-    | v :: rest ->
-	st.alpha <- v ;
-	if not (is_hidden ()) then Dev.set_alpha v ;
-	st.alpha_stack <- rest
-            
-  let blend_push st v =
-    st.blend_stack <- st.blend :: st.blend_stack ;
-    st.blend <- v ;
-    if not (is_hidden ()) then Dev.set_blend v
-        
-  let blend_pop st =
-    match st.blend_stack with
-    | [] -> ()
-    | v :: rest ->
-	st.blend <- v ;
-	if not (is_hidden ()) then Dev.set_blend v ;
-	st.blend_stack <- rest
-            
-  let epstransparent_push st v =
-    st.epstransparent_stack <- st.epstransparent :: st.epstransparent_stack ;
-    st.epstransparent <- v ;
-    if not (is_hidden ()) then Dev.set_epstransparent v
-        
-  let epstransparent_pop st =
-    match st.epstransparent_stack with
-    | [] -> ()
-    | v :: rest ->
-	st.epstransparent <- v ;
-	if not (is_hidden ()) then Dev.set_epstransparent v ;
-	st.epstransparent_stack <- rest
-            
-  let transition_push st v =
-    st.transition_stack <- st.transition :: st.transition_stack ;
-    st.transition <- v ;
-    if not (is_hidden ()) then Dev.set_transition v
-        
-  let transition_pop st =
-    match st.transition_stack with
-    | [] -> ()
-    | v :: rest ->
-	st.transition <- v ;
-	if not (is_hidden ()) then Dev.set_transition v ;
-	st.transition_stack <- rest
-            
-  let fnt st n =
-    let (mtable, gtable, cfont) =
-      try
-	let cfont = Table.get st.cdvi.font_table n in
-	(cfont.mtable, get_gtable cfont st.sdpi, cfont)
-      with Not_found -> (dummy_mtable, dummy_gtable, dummy_font) in
-    st.cur_mtable <- mtable ;
-    st.cur_gtable <- gtable ;
-    st.cur_font <- cfont ;
-    ()
+let set_rule st a b =
+  put_rule st a b ;
+  st.h <- st.h + b
       
-  let put st code =
-    try
-      let x = st.x_origin + int_of_float (st.conv *. float st.h)
-      and y = st.y_origin + int_of_float (st.conv *. float st.v)
-      and glyph = Table.get st.cur_gtable code in
-      if not (is_hidden ()) then
-        begin
-          begin match st.html with
-          | Some _ -> 
-              st.draw_html <- (x, y, glyph) :: st.draw_html
-          | None -> ()
-          end;
-          Dev.draw_glyph glyph x y;
-	  add_char st x y glyph code ;
-        end
-    with _ -> ()
-        
-  let set st code =
-    put st code ;
-    try
-      let (dx, dy) = Table.get st.cur_mtable code in
-      st.h <- st.h + dx ;
-      st.v <- st.v + dy
-    with _ -> ()
-        
-  let put_rule st a b =
-    let x = st.x_origin + int_of_float (st.conv *. float st.h)
-    and y = st.y_origin + int_of_float (st.conv *. float st.v)
-    and w = int_of_float (ceil (st.conv *. float b))
-    and h = int_of_float (ceil (st.conv *. float a)) in
-    add_rule st x (y-h) w h ;
-    if not (is_hidden ()) then Dev.fill_rect x (y - h) w h
-        
-  let set_rule st a b =
-    put_rule st a b ;
-    st.h <- st.h + b
-        
   (*** Specials ***)
-        
-  let line_special st s =
+      
+    let line_special st s =
       match split_string s 0 with
       | key :: line :: rest ->
           begin try
@@ -579,16 +426,16 @@ module Make(Dev : DEVICE) = struct
               (Printf.sprintf "Ill formed special <<%s>>" s)
           end
       | _ -> Misc.warning "Ill formed line: special" 
-
-      
-  let color_special st s =
-    match split_string s 0 with
-    | "color" :: "push" :: args ->
-        color_push st (parse_color_args args)
-    | "color" :: "pop" :: [] ->
-        color_pop st
-    | _ -> ()
-          ;;
+            
+            
+    let color_special st s =
+      match split_string s 0 with
+      | "color" :: "push" :: args ->
+          color_push st (parse_color_args args)
+      | "color" :: "pop" :: [] ->
+          color_pop st
+      | _ -> ()
+            ;;
 
   let alpha_special st s =
     match split_string s 0 with
@@ -1439,4 +1286,4 @@ module Make(Dev : DEVICE) = struct
       if !headers <> [] then
         Dev.add_headers (Search.true_file_names [] (List.rev !headers))
 
-end;;
+

@@ -1,6 +1,6 @@
 devfont.cmi: glyph.cmi table.cmi 
-driver.cmi: dvi.cmi glyph.cmi symbol.cmi transitions.cmi 
-dviview.cmi: dimension.cmi glyph.cmi transitions.cmi 
+driver.cmi: dvi.cmi 
+dviview.cmi: dimension.cmi 
 glyph.cmi: font.cmi 
 grdev.cmi: glyph.cmi transitions.cmi 
 misc.cmo: config.cmo misc.cmi 
@@ -35,22 +35,22 @@ units.cmo: units.cmi
 units.cmx: units.cmi 
 dimension.cmo: units.cmi dimension.cmi 
 dimension.cmx: units.cmx dimension.cmi 
-driver.cmo: devfont.cmi dimension.cmi dvi.cmi glyph.cmi misc.cmi search.cmi \
-    symbol.cmi table.cmi transitions.cmi units.cmi driver.cmi 
-driver.cmx: devfont.cmx dimension.cmx dvi.cmx glyph.cmx misc.cmx search.cmx \
-    symbol.cmx table.cmx transitions.cmi units.cmx driver.cmi 
 gs.cmo: graphicsY11.cmi misc.cmi search.cmi gs.cmi 
 gs.cmx: graphicsY11.cmx misc.cmx search.cmx gs.cmi 
 transimpl.cmo: transitions.cmi 
 transimpl.cmx: transitions.cmi 
-grdev.cmo: drawps.cmi glyph.cmi graphicsY11.cmi gs.cmi misc.cmi transimpl.cmo \
-    grdev.cmi 
-grdev.cmx: drawps.cmx glyph.cmx graphicsY11.cmx gs.cmx misc.cmx transimpl.cmx \
-    grdev.cmi 
-dviview.cmo: config.cmo dimension.cmi driver.cmi dvi.cmi glyph.cmi grdev.cmi \
-    misc.cmi symbol.cmi transitions.cmi dviview.cmi 
-dviview.cmx: config.cmx dimension.cmx driver.cmx dvi.cmx glyph.cmx grdev.cmx \
-    misc.cmx symbol.cmx transitions.cmi dviview.cmi 
+grdev.cmo: drawps.cmi glyph.cmi graphicsY11.cmi gs.cmi misc.cmi symbol.cmi \
+    transimpl.cmo grdev.cmi 
+grdev.cmx: drawps.cmx glyph.cmx graphicsY11.cmx gs.cmx misc.cmx symbol.cmx \
+    transimpl.cmx grdev.cmi 
+driver.cmo: devfont.cmi dimension.cmi dvi.cmi glyph.cmi grdev.cmi misc.cmi \
+    search.cmi table.cmi transitions.cmi units.cmi driver.cmi 
+driver.cmx: devfont.cmx dimension.cmx dvi.cmx glyph.cmx grdev.cmx misc.cmx \
+    search.cmx table.cmx transitions.cmi units.cmx driver.cmi 
+dviview.cmo: config.cmo dimension.cmi driver.cmi dvi.cmi grdev.cmi misc.cmi \
+    dviview.cmi 
+dviview.cmx: config.cmx dimension.cmx driver.cmx dvi.cmx grdev.cmx misc.cmx \
+    dviview.cmi 
 main.cmo: config.cmo dimension.cmi dviview.cmi grdev.cmi gs.cmi misc.cmi 
 main.cmx: config.cmx dimension.cmx dviview.cmx grdev.cmx gs.cmx misc.cmx 
 grY11.o: grY11.c libgraph.h image.h

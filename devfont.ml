@@ -59,9 +59,8 @@ module Make (Dev : DEVICE) = struct
 	and ratio = dpi /. float base_dpi in
 	let build code =
 	  let cdef = Font.find_char_def font code in
-	  Dev.make_glyph (Glyph.from_char_def cdef ratio) in
+          Dev.make_glyph (Glyph.from_char_def cdef ratio) in
 	let table = Table.make build in
 	Hashtbl.add htable (fontname, sdpi) table ;
 	table
-
 end ;;
