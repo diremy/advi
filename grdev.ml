@@ -184,6 +184,10 @@ let make_glyph g =
 
 let get_glyph g = g.glyph;;
 
+(* Alpha channel. *)
+let alpha = ref 1.0;;
+let set_alpha a = alpha := a;;
+
 (* Blending *)
 type blend =
    | Normal | Multiply | Screen | Overlay (* | SoftLight | HardLight *)
@@ -193,18 +197,39 @@ type blend =
 let blend = ref Drawimage.Normal;;
 let set_blend b = blend := b;;
 
-(* Viewport type definition *)
-type viewport = int * int * int * int;;
+let epstransparent = ref true;;
+let set_epstransparent s = epstransparent := s;;
+
+let epsbygs = ref true;;
+let set_epsbygs s = epsbygs := s;;
+
+let epswithantialiasing = ref true;;
+let set_epswithantialiasing a = epswithantialiasing := a;;
 
 (* Background implementation *)
+
+(* Viewport type definition *)
+type viewport = {
+  v_size_x : int;
+  v_size_y : int;
+  v_off_x : int;
+  v_off_y : int
+};;
+(** Viewports: size_x, size_y, off_x, off_y in advi coordinates. *)
+
+let full_screen_view () =
+  {v_size_x = !size_x;
+   v_size_y = !size_y;
+   v_off_x = !xmin;
+   v_off_y = !ymin};;
 
 (* The Background preferences                    *)
 (* to be extended, should contain gradients etc. *)
 type bkgd_prefs = {
   mutable bgcolor : color;
   mutable bgimg : string option;
-  mutable bgratio : Drawimage.ratiopts;
-  mutable bgwhitetrans : bool;
+  mutable bgratiopt : Drawimage.ratiopt;
+  mutable bgwhitetransp : bool;
   mutable bgalpha : Drawimage.alpha;
   mutable bgblend : Drawimage.blend;
   mutable bgviewport: viewport option;
@@ -216,19 +241,14 @@ let default_bgcolor = ref Graphics.white;;
 let default_fgcolor = ref Graphics.black;;
 let fgcolor () = !default_fgcolor;;
 
-let set_default_color r s = r := Dvicolor.parse_color (String.lowercase s);;
-let set_fgcolor_string = set_default_color default_fgcolor;;
-
-Options.add
-  "-fgcolor"
-  (Arg.String set_fgcolor_string)
-  "STRING\tSet default foreground color (Named or RGB)";;
+let set_default_color_string r s =
+  r := Dvicolor.parse_color (String.lowercase s);;
 
 let default_bkgd_data () =
   { bgcolor = !default_bgcolor;
     bgimg = None;
-    bgratio = Drawimage.ScaleAuto;
-    bgwhitetrans = false;
+    bgratiopt = Drawimage.ScaleAuto;
+    bgwhitetransp = false;
     bgalpha = 1.0;
     bgblend = Drawimage.Normal;
     bgviewport = None;
@@ -236,8 +256,12 @@ let default_bkgd_data () =
 
 let bkgd_data = default_bkgd_data ();;
 
+let set_bgcolor c =
+  default_bgcolor := c;
+  bkgd_data.bgcolor <- !default_bgcolor;;
+
 let set_bgcolor_string s =
-  set_default_color default_bgcolor s;
+  set_default_color_string default_bgcolor s;
   bkgd_data.bgcolor <- !default_bgcolor;;
 
 Options.add
@@ -245,10 +269,17 @@ Options.add
   (Arg.String set_bgcolor_string)
   "STRING\tSet default background color (Named or RGB)";;
 
+let set_fgcolor_string = set_default_color_string default_fgcolor;;
+
+Options.add
+  "-fgcolor"
+  (Arg.String set_fgcolor_string)
+  "STRING\tSet default foreground color (Named or RGB)";;
+
 let reverse_colors () =
   let c = fgcolor () in
   default_fgcolor := !default_bgcolor;
-  default_bgcolor := c;;
+  set_bgcolor c;;
 
 Options.add
   "-rv"
@@ -258,9 +289,9 @@ Options.add
 
 let blit_bkgd_data s d =
   d.bgcolor <- s.bgcolor;
-  d.bgimg   <- s.bgimg;
-  d.bgratio <- s.bgratio;
-  d.bgwhitetrans <- s.bgwhitetrans;
+  d.bgimg <- s.bgimg;
+  d.bgratiopt <- s.bgratiopt;
+  d.bgwhitetransp <- s.bgwhitetransp;
   d.bgalpha <- s.bgalpha;
   d.bgblend <- s.bgblend;
   d.bgviewport <- s.bgviewport;
@@ -274,49 +305,44 @@ let copy_of_bkgd_data () =
 let bg_color = ref bkgd_data.bgcolor;;
 let bg_colors = ref [];;
 
-let draw_img file ratio whitetrans alpha blend psbbox antialias (w, h) x0 y0 =
+let draw_img file whitetransp alpha blend
+      psbbox ratiopt antialias (w, h) x0 y0 =
   if not !opened then failwith "Grdev.draw_img: no window";
-  let x = x0
-  and y = !size_y - y0 in
-  Drawimage.f
-    file
-    whitetrans
-    alpha
-    blend
-    psbbox ratio antialias (w, h) (x, y);;
+  Drawimage.f file whitetransp alpha blend
+    psbbox ratiopt antialias (w, h) (x0, y0)
+;;
 
 let draw_bkgd () =
   (* find the viewport *)
-  let (w, h, xoff, yoff) as viewport =
+  let viewport =
     match bkgd_data.bgviewport with
-    | None -> (!size_x, !size_y, !xmin, !ymin)
+    | None -> full_screen_view ()
     | Some v -> v in
+  let {v_size_x = w; v_size_y = h; v_off_x = x; v_off_y = y} = viewport in
   (* Background: color. *)
   bg_color := bkgd_data.bgcolor;
   Graphics.set_color !bg_color;
-  if !bg_color <> Graphics.white
-  then Graphics.fill_rect xoff yoff w h;
+(*  Graphics.set_color Graphics.blue;*)
+  (* Fix me: why this test ? could have a white bg, no ? *)
+(*  if !bg_color <> Graphics.white then *)Graphics.fill_rect x y w h;
+Graphics.synchronize ();
   (* Background: image. *)
-  lift (fun file ->
-     draw_img
-      file
-      bkgd_data.bgratio
-      bkgd_data.bgwhitetrans
-      bkgd_data.bgalpha
-      bkgd_data.bgblend
-      None
+  let draw_bg file =
+    draw_img file bkgd_data.bgwhitetransp bkgd_data.bgalpha
+      bkgd_data.bgblend None
+      bkgd_data.bgratiopt
       true (* antialias *)
-      (w, h) xoff (!size_y - yoff)
-  ) bkgd_data.bgimg;
+      (w, h) x y in
+  lift draw_bg bkgd_data.bgimg;
   (* Background: function. *)
-  lift (fun draw -> draw  viewport) bkgd_data.bgfunction;;
+  lift (fun draw -> draw viewport) bkgd_data.bgfunction;;
 
 type bgoption =
    | BgColor of color
    | BgImg of Misc.file_name
    | BgAlpha of Drawimage.alpha
    | BgBlend of Drawimage.blend
-   | BgRatio of Drawimage.ratiopts
+   | BgRatio of Drawimage.ratiopt
    | BgViewport of viewport option
    | BgFun of (viewport -> unit) option;;
 
@@ -325,7 +351,7 @@ let set_bg_option = function
   | BgImg file -> bkgd_data.bgimg <- Some file
   | BgAlpha a -> bkgd_data.bgalpha <- a
   | BgBlend b -> bkgd_data.bgblend <- b
-  | BgRatio f -> bkgd_data.bgratio <- f
+  | BgRatio f -> bkgd_data.bgratiopt <- f
   | BgViewport v -> bkgd_data.bgviewport <- v
   | BgFun f -> bkgd_data.bgfunction <- f;;
 
@@ -362,7 +388,7 @@ let mean_color c c' =
     let g = (c land 0x00ff00) lsr 8 in
     let r = (c land 0xff0000) lsr 16 in
     r, g, b in
-  let r, g, b  = rgb_of_color c  in
+  let r, g, b = rgb_of_color c in
   let r', g', b' = rgb_of_color c' in
   Graphics.rgb ((r + r' + 1) / 2) ((g + g' + 1) / 2) ((b + b' + 1) / 2);;
 
@@ -536,24 +562,18 @@ let fill_arc ~x ~y ~rx ~ry ~start:s ~stop:e ~shade =
   Graphics.fill_arc x (!size_y - y) rx ry (- s) (- e);
   Graphics.set_color !color;;
 
-let epstransparent = ref true;;
-let set_epstransparent s = epstransparent := s;;
-
-let alpha = ref 1.0;;
-let set_alpha a = alpha := a;;
-
-let epswithantialiasing = ref true;;
-let set_epswithantialiasing a = epswithantialiasing := a;;
-
 let draw_ps file bbox (w, h) x0 y0 =
-  if not !opened then failwith "Grdev.fill_rect: no window";
+  if not !opened then failwith "Grdev.draw_ps: no window";
   let x = x0
   and y = !size_y - y0 + h in
   try Drawimage.f file !epstransparent !alpha !blend
         (Some bbox) Drawimage.ScaleAuto !epswithantialiasing (w, h) (x, y - h)
   with
-  | Not_found -> Misc.warning ("ps file " ^ file ^ " not found")
-  | _ -> Misc.warning ("error happened while drawing ps file " ^ file)
+  | Not_found -> Misc.warning ("ps file " ^ file ^ " was not found")
+  | exc ->
+      Misc.warning
+        (Printf.sprintf "error happened while drawing ps file %s: %s"
+           file (Printexc.to_string exc))
 ;;
 
 let clean_ps_cache () = Drawimage.clean_cache ();;
