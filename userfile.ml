@@ -119,16 +119,18 @@ cache directory name, etc.
 
 *)
 (* The DVI file currently read. *)
-let dvi_filename = ref None;;
-let set_dvi_filename fname = dvi_filename := Some fname;;
-let get_dvi_filename () =
-  match !dvi_filename with
-  | None -> raise Not_found
-  | Some fname -> fname;;
+(* first file is master, other files are clients *)
+let dvi_filenames = ref [];;
+let dvi_mastername = ref None;;
+let set_dvi_filename fname =
+  dvi_filenames :=  fname :: !dvi_filenames;
+  if !dvi_mastername = None then dvi_mastername := Some fname
+
+let get_dvi_filenames () = List.rev !dvi_filenames
 
 (* Its directory name. *)
 let get_dvi_file_dirname () =
-  match !dvi_filename with
+  match !dvi_mastername with
   | None -> raise Not_found
   | Some dirname -> Filename.dirname dirname;;
 

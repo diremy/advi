@@ -57,5 +57,5 @@ val save_page_timing : int -> unit;;
     [cache_dir ^ "/advi_page_timing". *)
 
 val set_dvi_filename : Misc.file_name -> unit;;
-val get_dvi_filename : unit -> Misc.file_name;;
+val get_dvi_filenames : unit -> Misc.file_name list;;
 

@@ -27,4 +27,4 @@ val set_vmargin : dimen -> unit;;
 
 exception Error of string;;
 
-val main_loop : string -> unit;;
+val main_loop : string -> string list -> unit;;

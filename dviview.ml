@@ -139,15 +139,6 @@ Options.add
   "<float>: set the dpi resolution of the screen,\
   \n\t (the default (and minimum value) is 72.27))).";;
 
-let duplex = ref None;;
-let set_duplex f = duplex := Some f;;
-let _ = 
-  Options.add
-    "-duplex"
-    (Arg.String set_duplex)
-    "<string>: make file <string> be a duplex view.
-    \n\t (it must have the same the same page setting).";;
-
 module Symbol = Grdev.Symbol;;
 
 open Dimension;;
@@ -190,7 +181,10 @@ and state = {
     mutable orig_x : int;
     mutable orig_y : int;
     mutable ratio : float;
+    (* the current page number *)
     mutable page_number : int;
+    (* the history of pages used by forward and backward.
+       negative numbers are used to mark pages used by pop *)
     mutable page_stack : int list;
     mutable page_marks : int list;
     mutable exchange_page : int;
@@ -216,7 +210,7 @@ and state = {
     mutable toc : toc array option;
     synchronize : bool;
 };;
-exception Duplex of state
+exception Duplex of (state -> unit) * state
 
 
 let set_page_number st n =
@@ -424,6 +418,32 @@ let update_dvi_size all ?dx ?dy st =
       st'.orig_y <- st.orig_y;
       set_bbox st';
   | Alone -> ()
+
+(* Reloading *)
+
+let reload_time st =
+  try let s = Unix.stat st.filename in s.Unix.st_mtime
+  with _ -> st.last_modified;;
+
+let changed st =
+  reload_time st > st.last_modified;;
+
+let rec clear_page_stack max stack =
+  let pages = Array.create max false in
+  let rec clear = function
+    | p :: stack ->
+        let s = clear stack in
+        if p = -1 then s
+        else 
+          let pa = if p < 0 then -2 - p else p in
+          if pa < max && not pages.(pa) then
+            begin
+              pages.(pa) <- true;
+              p :: s
+            end
+          else s
+    | _ -> [] in
+  clear stack;;
 
 (* Incremental drawing *)
 let synchronize st =
@@ -730,17 +750,55 @@ let show_toc st =
         st.aborted <- true
 ;;
 
-let redisplay st =
-  st.pause_number <- 0;
-  redraw st;;
 
-let goto_previous_pause n st =
-  if n > 0 then begin
-    st.pause_number <- max 0 (st.pause_number - n);
-    redraw st
-  end;;
+(* foreground if drawing is needed after reloading *)
+let rec reload foreground st =
+  try
+    Grdev.clear_usr1 ();
+    st.last_modified <- reload_time st;
+    let dvi = Dvi.load st.filename in
+    let cdvi = Driver.cook_dvi dvi in
+    let dvi_res = !dpi_resolution
+    and mag = float dvi.Dvi.preamble.Dvicommands.pre_mag /. 1000.0 in
+    let w_sp = dvi.Dvi.postamble.Dvicommands.post_width
+    and h_sp = dvi.Dvi.postamble.Dvicommands.post_height in
+    let w_in = mag *. ldexp (float w_sp /. dvi_res) (-16)
+    and h_in = mag *. ldexp (float h_sp /. dvi_res) (-16) in
+    let width = Misc.round (w_in *. st.base_dpi *. st.ratio)
+    and height = Misc.round (h_in *. st.base_dpi *. st.ratio) in
+    let npages =  Array.length dvi.Dvi.pages in
+    st.dvi <- dvi;
+    st.cdvi <- cdvi;
+    st.num_pages <- npages;
+    st.toc <- None;
+    st.page_stack <- clear_page_stack npages st.page_stack;
+    let npage = page_start (min st.page_number (st.num_pages - 1)) st in
+    if npage <> st.page_number then
+      begin
+        st.pause_number <- 0;
+        st.exchange_page <- st.page_number;
+      end;
+    set_page_number st npage;
+    st.frozen <- true;
+    st.aborted <- true;
+    match st.duplex with
+      Client st' when not (compatible st st') -> 
+        Misc.warning
+          (Printf.sprintf
+             "Dropping master %s (incompatible with client %s)"
+             st.filename st'.filename);
+        st'.duplex <- Alone;
+        raise (if foreground then Duplex (redraw, st') else Not_found)
+    | _ -> 
+        update_dvi_size false st;
+        Gs.init_do_ps ();
+        if foreground then redraw ?trans:(Some Transitions.DirTop) st
+  with x ->
+    Misc.warning
+      (Printf.sprintf "exception while reloading %s" (Printexc.to_string x));
+    st.cont <- None 
 
-let find_xref tag default st =
+and find_xref tag default st =
   try
     let p = int_of_string (Misc.get_suffix "/page." tag) in
     if p > 0 && p <= st.num_pages then p - 1 else default
@@ -750,13 +808,34 @@ let find_xref tag default st =
       match st.duplex with
       | Client _ | Alone -> default
       | Master st' ->
-          try
-            st'.page_number <- Hashtbl.find (xrefs st') tag;
-            Printf.eprintf "Switching to %s!\n%!" st'.filename;
-            raise (Duplex st')
-          with
-            Not_found -> default
+            try
+              if changed st' then reload false st';
+              st'.page_number <- Hashtbl.find (xrefs st') tag;
+              (* so as to pop to current view automatically *)
+              st'.page_stack <- (-1) :: st'.page_stack;
+              raise (Duplex (redraw, st'))
+            with
+              Not_found -> default
+
+and page_start default st =
+  match !start_html with
+  | None -> default
+  | Some html ->
+      Driver.scan_special_pages st.cdvi max_int;
+      find_xref html default st
+
 ;;
+
+
+let redisplay st =
+  st.pause_number <- 0;
+  redraw st;;
+
+let goto_previous_pause n st =
+  if n > 0 then begin
+    st.pause_number <- max 0 (st.pause_number - n);
+    redraw st
+  end;;
 
 exception Link;;
 
@@ -807,88 +886,14 @@ let exec_xref link =
       Misc.warning (Printf.sprintf "Don't know what to do with link %s" link);;
 
 
-let page_start default st =
-  match !start_html with
-  | None -> default
-  | Some html ->
-      Driver.scan_special_pages st.cdvi max_int;
-      find_xref html default st;;
-
-let rec clear_page_stack max stack =
-  let pages = Array.create max false in
-  let rec clear = function
-    | p :: stack ->
-        let s = clear stack in
-        let pa = if p < 0 then -1 - p else p in
-        if pa < max && not pages.(pa) then
-          begin
-            pages.(pa) <- true;
-            p :: s
-          end
-        else s
-    | _ -> [] in
-  clear stack;;
-
-let reload_time st =
-  try let s = Unix.stat st.filename in s.Unix.st_mtime
-  with _ -> st.last_modified;;
-
-let reload st =
-  let master, clientp = 
-    match st.duplex with
-      Client st -> st, true
-    | Master _ | Alone -> st, false in
-  try
-    Grdev.clear_usr1 ();
-    st.last_modified <- reload_time st;
-    let dvi = Dvi.load st.filename in
-    let cdvi = Driver.cook_dvi dvi in
-    let dvi_res = !dpi_resolution
-    and mag = float dvi.Dvi.preamble.Dvicommands.pre_mag /. 1000.0 in
-    let w_sp = dvi.Dvi.postamble.Dvicommands.post_width
-    and h_sp = dvi.Dvi.postamble.Dvicommands.post_height in
-    let w_in = mag *. ldexp (float w_sp /. dvi_res) (-16)
-    and h_in = mag *. ldexp (float h_sp /. dvi_res) (-16) in
-    let width = Misc.round (w_in *. st.base_dpi *. st.ratio)
-    and height = Misc.round (h_in *. st.base_dpi *. st.ratio) in
-    let npages =  Array.length dvi.Dvi.pages in
-    st.dvi <- dvi;
-    st.cdvi <- cdvi;
-    st.num_pages <- npages;
-    st.toc <- None;
-    st.page_stack <- clear_page_stack npages st.page_stack;
-    let npage = page_start (min st.page_number (st.num_pages - 1)) st in
-    if npage <> st.page_number then
-      begin
-        st.pause_number <- 0;
-        st.exchange_page <- st.page_number;
-      end;
-    set_page_number st npage;
-    st.frozen <- true;
-    st.aborted <- true;
-    if clientp && not (compatible st master) then
-      begin
-        Misc.warning
-          (Printf.sprintf
-             "Dropping master %s (incompatible with client %s)"
-             st.filename master.filename);
-        master.duplex <- Alone;
-        raise (Duplex master)
-      end;
-    update_dvi_size false st;
-    Gs.init_do_ps ();
-    Printf.eprintf "Reloaded %s!\n%!" st.filename;
-    redraw ?trans:(Some Transitions.DirTop) st
-  with x ->
-    Misc.warning
-      (Printf.sprintf "exception while reloading %s" (Printexc.to_string x));
-    st.cont <- None;;
-
-let changed st =
-  reload_time st > st.last_modified;;
+let pop_duplex st =
+  match st.duplex with
+  | Client st' -> raise (Duplex (redraw, st'))
+  | Alone | Master _ -> ()
 
 (* Go to the begining of the page. *)
 let goto_page n st =
+  if n < 0 (* then n = -1 *) then pop_duplex st else
   let new_page_number = max 0 (min n (st.num_pages - 1)) in
   if st.page_number <> new_page_number || st.aborted then
     begin
@@ -896,12 +901,12 @@ let goto_page n st =
       then st.exchange_page <- st.page_number;
       let trans =
         if new_page_number = succ st.page_number
-           then Some Transitions.DirRight else
-        if new_page_number = pred st.page_number
-           then Some Transitions.DirLeft else
-        if new_page_number = st.page_number
-           then Some Transitions.DirTop else
-        None in
+        then Some Transitions.DirRight else
+          if new_page_number = pred st.page_number
+          then Some Transitions.DirLeft else
+            if new_page_number = st.page_number
+            then Some Transitions.DirTop else
+              None in
       set_page_number st new_page_number;
       st.pause_number <- 0;
       redraw ?trans st
@@ -909,9 +914,9 @@ let goto_page n st =
 
 let push_stack b n st =
   match st.page_stack with
-  | p :: rest when p = n -> if b then st.page_stack <- ( -1 - n ) :: rest
-  | p :: rest when p = -1 - n -> ()
-  | all -> st.page_stack <- (if b then -1 - n else n) :: all;;
+  | p :: rest when p = n -> if b then st.page_stack <- ( -2 - n ) :: rest
+  | p :: rest when p = -2 - n -> ()
+  | all -> st.page_stack <- (if b then -2 - n else n) :: all;;
 
 let push_page b n st =
   let new_page_number = max 0 (min n (st.num_pages - 1)) in
@@ -941,7 +946,7 @@ let pop_page b n st =
         else pop (pred n) h t t in
   let npage, stack = pop n st.page_number st.page_stack st.page_stack in
   st.page_stack <- stack;
-  let new_page = if npage > 0 then npage else -1 - npage in
+  let new_page = if npage > 0 then npage else -2 - npage in
   if new_page = st.page_number then redraw st
   else goto_page new_page st;;
 
@@ -1147,7 +1152,7 @@ module B =
     let toggle_active st =
       Driver.toggle_active(); redraw st
 
-    let reload = reload
+    let reload = reload true
     let redisplay = redisplay
 
     let fullscreen st =
@@ -1243,7 +1248,7 @@ module B =
         
     let duplex st =
       match st.duplex with
-        Master st' | Client st' -> raise (Duplex st')
+        Master st' | Client st' -> raise (Duplex (redraw, st'))
       | Alone -> ()
   end;;
 
@@ -1345,15 +1350,15 @@ let bind_keys () =
    't', B.show_toc;
 
     (* Duplex *)
-   '', B.duplex;
+   '', B.duplex;
   ];;
 
 bind_keys ();;
 
-let main_loop filename =
-  let st = init true filename in
-  begin match !duplex with
-    Some duplexname ->
+let main_loop mastername clients =
+  let st = init true mastername in
+  begin match clients with
+    duplexname :: _ ->
       let st' = init false duplexname in
       if compatible st st' then
         begin
@@ -1366,7 +1371,7 @@ let main_loop filename =
              "Ignoring client %s incompatible with master file %s"
              duplexname st.filename
           )
-  | None -> ()
+  | [] -> ()
   end;
   (* Check if whiterun *)
   if Launch.whiterun () then begin
@@ -1379,12 +1384,12 @@ let main_loop filename =
     attr.geom.Ageometry.height <- y;
     update_dvi_size true st;
     set_bbox st;
-    let rec duplex st =
+    let rec duplex idraw st =
       Graphics.set_window_title  ("Advi: " ^ st.filename);
       if st.page_number > 0 && Gs.get_do_ps () then
         Driver.scan_special_pages st.cdvi st.page_number
       else set_page_number st (page_start 0 st);
-      redraw st;
+      idraw st;
       (* num is the current number entered by keyboard *)
       try while true do
         st.num <- st.next_num;
@@ -1435,6 +1440,6 @@ let main_loop filename =
       done
       with
       | Exit -> Grdev.close_dev ()
-      | Duplex st' -> duplex st'
-    in duplex st            
+      | Duplex (action, st') -> duplex action st'
+    in duplex redraw st            
   end;;
