@@ -468,7 +468,6 @@ let embed_app command app_type width height x y =
 	 (string_replace "!w" (string_of_int width)
 	    (string_replace "!h" (string_of_int height) command)))
   in
-  prerr_endline command;
   let command_tokens = Misc.parse_shell_command command in
   let pid = Unix.fork () in
   if pid = 0 then begin (* child *)
