@@ -1360,7 +1360,7 @@ let scan_special status (headers, xrefs, lastline as args) pagenum s =
 let scan_special_page otherwise cdvi globals pagenum =
    Misc.debug_stop "Scanning specials";
    let page = cdvi.base_dvi.Cdvi.pages.(pagenum) in
-   match page.Cdvi.status with
+   match page.Cdvi.page_status with
    | Cdvi.Unknown ->
        let status =
          {Cdvi.hasps = false;
@@ -1377,7 +1377,7 @@ let scan_special_page otherwise cdvi globals pagenum =
          | x -> otherwise x in
        Cdvi.page_iter eval cdvi.base_dvi.Cdvi.pages.(pagenum);
        page.Cdvi.line <- !lastline;
-       page.Cdvi.status <- Cdvi.Known status;
+       page.Cdvi.page_status <- Cdvi.Known status;
        status
    | Cdvi.Known stored_status -> stored_status;;
 
