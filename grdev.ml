@@ -288,9 +288,6 @@ let draw_bkgd () =
   ) bkgd_data.bgimg;
   (* Background: function. *)
   lift (fun draw -> draw  viewport) bkgd_data.bgfunction;
-(*
-  synchronize()
-*)
 ;;
 
 type bgoption =
