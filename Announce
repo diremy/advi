@@ -40,7 +40,7 @@ this release introduces a lot of new features
 
    * A manual
 
-   * A lot of examples, including talks using populat LaTeX packages seminar
+   * A lot of examples, including talks using popular LaTeX packages seminar
      and prosper.
 
    * New package xprosper.sty, an extended version of the prosper package from
