@@ -60,17 +60,24 @@ Press: \keymenu{n}ext page \keymenu{p}revious page
 
 \newpage
 
-\subsection* {Active dvi supports background effects}
+\subsection* {Modifying the page backround}
 
-This file demonstrates a simple showcase for background effects.
+It is now possible to modify the background of your presentations, and
+this file is a simple showcase for the current background effects:
 
+  \begin{itemize}
+    \item changing the color background,
+    \item defining a background image,
+    \item inheriting background settings,
+    \item resetting background settings
+  \end{itemize}
 \newpage
 
-You can perform some simple background effects, that
-allow to fix a background color and/or image in your slides.
+\subsection* {Setting the background color}
 
-For example, this page has a yellow background because we included
-in the LaTeX source of the page the command:
+This page has a yellow background because we included
+in the LaTeX source of the page the following command:
+
   \begin{quote}
     \begin{verbatim}
 	\setbgcolor{Yellow} 
@@ -80,12 +87,12 @@ in the LaTeX source of the page the command:
 
 \newpage
 
+\subsection* {Setting the background image}
+
 \setbgimage{world.jpg} 
 
-But we can also set a background image, like \verb|world.jpg| which
-is now in the test directory.
-
-We included in this page the command
+Wee can also set a background image, like \verb|world.jpg| which
+is now in the test directory, by including in the page the command
 
   \begin{quote}
     \begin{verbatim}
@@ -93,6 +100,11 @@ We included in this page the command
     \end{verbatim}
   \end{quote}
 
+\parindent 0pt Note: the image formats supported depend on the variable
+  \begin{quote}
+CAMLIMAGESLIBS
+  \end{quote}
+in Advi's Makefile.config 
 \newpage
 
 \subsection* {Inheriting page backgrounds}
@@ -106,25 +118,49 @@ For example, this page has still the background image, even if no
 command is included, because it inherits the background of the
 previous page.
 
-If you do not like this behaviour, and prefer to have only the
-background explicitly declared in a page, run advi with the
-\verb|--reset_bkgd| option.
+\newpage
 
-%\setbgcolor{Red}
+\subsection* {Resetting page backgrounds}
+
+If you do not like the implicit inheritance of the background configuration, and you
+want to see obeyed only the background directives explicitly declared in a page, you 
+have two options:
+
+  \begin{itemize}
+    \item run advi with the \verb|--reset_bkgd| option: this way, background inheritance
+          is disabled in all the file, or
+    \item you can locally issue a \verb|\resetbg| command, that resets the background 
+          eliminating everything which is inherited. This is how we got rid of
+          the background image in this page, that only sports a nice Cyan background color.
+  \end{itemize}
+
+\resetbg
+
+\setbgcolor{Cyan} 
+
+Of course, you can use the usual LaTeX colors (or define new ones the usual way) for backgrounds.
 
 \newpage
 
-Otherwise, you can locally issue a \verb|\resetbg| command, that 
-\resetbg
-resets the background eliminating everything which is inherited. This
-is how we got rid of the background image in this page, that only
-sports a nice Cyan background color.
+\subsection* {TODO:}
 
-\setbgcolor{Cyan}
+  \begin{itemize}
+    \item implement command options to \verb|\setbgimg| to allow various scaling preferences
+    \item anybody willing to add support for color gradients?
+    \item implement command options to \verb|\setbgimg| to support partially transparent background
+  \end{itemize}
 
-Ah, of course, you can use the usual LaTeX colors (or define new ones
-the usual way) for backgrounds.
+\lastpage
 
-Anybody willing to add support for color gradients?
+\subsection* {Design considerations:}
+  \begin{itemize}
+    \item background preferences are ``asynchronous'', in the sense that they can imply rendering modifications
+          in a part of the page that has already been displayed; this is why we first scan a page, looking for
+          background specials (example, a red background), and only after we render it (setting the background to red
+          before everything else). By the way, this mechanism was already in place for
+          handling PostScript headers, that also appear asynchronously.
+    \item is it worthwhile to consider the possibility of making a ``synchronous'' variant? This would allow
+          for example to change the background color after a pause. But at what price?
+  \end{itemize}
 
 \end{document}
