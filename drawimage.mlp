@@ -232,7 +232,6 @@ module M = struct
                             else Some(max 0 (w-ow),0,0,0,min w ow,min h oh)
       |	ScaleBottomRight -> if oh = h & ow = w then None
                             else Some(max 0 (w-ow),max 0 (h-oh),0,0,min w ow,min h oh)
-      |	_  -> (Misc.warning "Unfinished case in drawimage.ml(blitinfo)";None)
     in
     let image' =
       match image with

@@ -101,6 +101,16 @@ val draw_ps :
 val clean_ps_cache : unit -> unit;;
 val sleep : float -> bool;; (* true= interrupted, false= fully performed *)
 
+(* generic image drawing function *)
+
+val draw_img :
+  string ->
+  bool ->
+  float ->
+  (int -> int -> int) option ->
+  (int * int * int * int) option ->
+  Drawimage.ratiopts -> int * int -> int -> int -> unit                                                                                  
+
 (* Background information *)
 
 type bkgd_prefs = {
