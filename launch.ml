@@ -17,6 +17,11 @@
 
 (* $Id$ *)
 
+type app_name = string;;
+type app_command = string;;
+type geometry = string;;
+type argument = string;;
+
 (* Embedded applications function handlers (thunks). *)
 let embeds = ref [];;
 let persists = ref [];;
@@ -216,6 +221,17 @@ let without_launching f x =
   let restore () = set_policy p in
   try set_policy Safer; let r = f x in restore (); r
   with x -> restore (); raise x;;
+
+(* Support for no launching at all during an arbitrary function call. *)
+let with_launching f x =
+  let p = !policy in
+  let restore () = set_policy p in
+  try set_policy Exec; let r = f x in restore (); r
+  with x -> restore (); raise x;;
+
+let fork_me geom arg =
+  with_launching
+  fork_process (Printf.sprintf "%s %s %s" Sys.argv.(0) geom arg);;
 
 (* Support for white run via -n option *)
 

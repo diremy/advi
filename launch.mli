@@ -17,6 +17,11 @@
 
 (* $Id$ *)
 
+type app_name = string;;
+type app_command = string;;
+type geometry = string;;
+type argument = string;;
+
 val add_embed : (unit -> unit) -> unit;;
 val add_persist : (unit -> unit) -> unit;;
 val add_unmap_embed : (unit -> unit) -> unit;;
@@ -24,12 +29,13 @@ val add_unmap_embed : (unit -> unit) -> unit;;
 val unmap_persistent_apps : unit -> unit;;
 val launch_embedded_apps : unit -> unit;;
 
-val can_execute_command : string -> bool;;
-val fork_process : string -> int;;
+val can_execute_command : app_command -> bool;;
+val fork_process : app_command -> int;;
+val fork_me : geometry -> argument -> int;;
 val advi_process : int;;
 
 val whiterun : unit -> bool;;
-val add_whiterun_command : string -> unit;;
+val add_whiterun_command : app_name -> unit;;
 val dump_whiterun_commands : unit -> unit;;
 
 val without_launching : ('a -> 'b) -> 'a -> 'b;;
