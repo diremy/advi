@@ -72,17 +72,20 @@ let rec digdir dir perm =
   (* try to create the directory dir *)
   if not (Sys.file_exists dir) then
     let pdir = Filename.dirname dir in
+    Misc.debug_endline ("Creating directory " ^ pdir ^ "... " );
     digdir pdir perm;
-    Unix.mkdir dir perm
+    Unix.mkdir dir perm;
+    Misc.debug_endline "done"
 ;;
+
+(* cautious_perm_digdir digs a directory with cautious permissions,
+   i.e. drwx------ *)
+let cautious_perm_digdir dir =  digdir dir 0o0700;;
 
 let prepare_file file =
   let dirname = Filename.dirname file in
   if not (Sys.file_exists dirname) then begin
-    Misc.debug_endline ("Creating directory " ^ dirname ^ "... " );
-    try 
-      digdir dirname 0o700;
-      Misc.debug_endline "done"
+    try cautious_perm_digdir dirname
     with
     | Unix.Unix_error (e, _, _) ->
 	Misc.warning (Unix.error_message e)
@@ -126,23 +129,37 @@ let load_init_files options set_dvi_filename usage_msg =
 (* test is the directory dirname can serve as a cache directory;
    if it does not exist try to create it. *)
 let can_be_cache_directory dirname =
-   if not (Sys.file_exists dirname) then
-     (try Unix.mkdir dirname 700 with _ -> ());
-   try Unix.access dirname
-         [Unix.R_OK; Unix.W_OK; Unix.X_OK; Unix.F_OK];
-       true with
+   Sys.file_exists dirname &&
+   try
+     Unix.access dirname [Unix.R_OK; Unix.W_OK; Unix.X_OK; Unix.F_OK];
+     true
+   with
    | Unix.Unix_error _ -> false;;
+
+let mk_user_advi_cache_dir dirname =
+  cautious_perm_digdir dirname;
+  if can_be_cache_directory dirname then dirname else raise Not_found;;
 
 let default_user_advi_cache_dir =
   let d0 = Filename.concat (Unix.getcwd ()) ".advi" in
   if can_be_cache_directory d0 then d0 else
-  let d1 = Filename.concat "" (Filename.concat "tmp" ".advi") in
-  if can_be_cache_directory d1 then d1 else begin
-    Misc.warning "Cannot find a cache directory";
-    d0
-  end;;
+  let d1 = tilde_subst "~/.advi" in
+  if can_be_cache_directory d1 then d1 else
+  let d2 = Filename.concat "" (Filename.concat "tmp" ".advi") in
+  if can_be_cache_directory d2 then d2 else
+  try mk_user_advi_cache_dir d2 with
+  | _ ->
+    try mk_user_advi_cache_dir d1 with
+    | _ ->
+      try mk_user_advi_cache_dir d0 with
+      | _ ->
+        Misc.warning "Cannot find a cache directory";
+        d0;;
 
-let advi_cache_dir = ref default_user_advi_cache_dir;;
+let advi_cache_dir =
+  let d = default_user_advi_cache_dir in
+  Misc.debug_endline (Printf.sprintf "Using %s as cache directory." d);
+  ref d;;
 
 let set_advi_cache_dir s =
   if can_be_cache_directory s then advi_cache_dir := s else
