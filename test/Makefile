@@ -36,14 +36,14 @@ taquin: taquin_embed.ml
 ifeq ($(HAVE_CDK),true)
 	ocamlc -custom -o taquin `cdk_config camltk` taquin_embed.ml
 else
-	ocamlc -custom -o taquin -I $(CAMLTKDIR) camltk.cma taquin_embed.ml
+	ocamlc -custom -o taquin -I $(CAMLTKDIR) $(CAMLTKLIB) taquin_embed.ml
 endif
 
 adviclock: adviclock.ml
 ifeq ($(HAVE_CDK),true)
 	ocamlc -custom -o adviclock `cdk_config camltk` adviclock.ml
 else
-	ocamlc -custom -o adviclock unix.cma -I $(CAMLTKDIR) camltk.cma adviclock.ml
+	ocamlc -custom -o adviclock unix.cma -I $(CAMLTKDIR) $(CAMLTKLIB) adviclock.ml
 endif
 
 clean:

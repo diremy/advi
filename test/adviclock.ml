@@ -9,7 +9,7 @@
 (*                                                                     *)
 (***********************************************************************)
 
-open Tk
+open Camltk
 
 (** Diameter of the circle. *)
 let diametre = ref 200
@@ -118,7 +118,7 @@ end
   
 let opencamltk () =
   Args.parse ();
-  opentk_with_parsed_args ()
+  opentk ()
 
 type clock = {
     widget : Widget.widget;

@@ -15,7 +15,7 @@
 (*  Based on Mldvi by Alexandre Miquel.                                *)
 (***********************************************************************)
 
-open Tk;;
+open Camltk;;
 
 let taquin_color = ref (NamedColor "white");;
 
@@ -24,7 +24,7 @@ let filename = ref "";;
 let opencamltk () =
  Arg.parse keywords (fun s -> filename := s)
   "Specify an image file name to use";
- opentk_with_parsed_args ();;
+ opentk ();;
 
 let découpe_image img nx ny =
   let l = Imagephoto.width img
