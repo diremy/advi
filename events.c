@@ -21,6 +21,7 @@
 #include <sys/select.h>
 #endif
 
+/* from byterun/signals.h */
 extern void enter_blocking_section (void);
 extern void leave_blocking_section (void);
 extern void (*enter_blocking_section_hook)(void);
@@ -222,7 +223,7 @@ static value gry_wait_event_blocking(long mask)
 #endif
   XEvent event;
   fd_set readfds;
-  value res;
+  value res = Val_false;
 
   /* First see if we have a matching event in the queue */
   res = gry_wait_event_in_queue(mask);
@@ -235,6 +236,7 @@ static value gry_wait_event_blocking(long mask)
   }
 
   /* Block or deactivate the EVENT signal */
+/*
 #ifdef POSIX_SIGNALS
   sigemptyset(&sigset);
   sigaddset(&sigset, EVENT_SIGNAL);
@@ -242,6 +244,7 @@ static value gry_wait_event_blocking(long mask)
 #else
   oldsig = signal(EVENT_SIGNAL, SIG_IGN);
 #endif
+*/
 
   /* Replenish our event queue from that of X11 */
   while (1) {
@@ -262,11 +265,13 @@ static value gry_wait_event_blocking(long mask)
   }
 
   /* Restore the EVENT signal to its initial state */
+/*
 #ifdef POSIX_SIGNALS
   sigprocmask(SIG_UNBLOCK, &sigset, NULL);
 #else
   signal(EVENT_SIGNAL, oldsig);
 #endif
+*/
 
   /* Return result */
   return res;
@@ -299,4 +304,19 @@ value gry_wait_event(value eventlist) /* ML */
     return gry_wait_event_poll();
   else
     return gry_wait_event_blocking(mask);
+}
+
+/* In Graphics, XEvents are retrieved from the sever 
+   by calling gr_sigio_handler periodically using interval timer.
+   Instead, here we have the following function, which manually
+   retrieves X11 events.
+*/
+value gry_retrieve_events(void)
+{
+  XEvent grevent;
+
+  while (XCheckMaskEvent(grdisplay, -1 /*all events*/, &grevent)) {
+    gry_handle_event(&grevent);
+  }
+  return Val_unit;
 }
