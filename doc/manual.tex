@@ -59,11 +59,10 @@ file included in the distribution.
 
 {\ActiveDVI} is based on Mldvi, written by Alexandre~Miquel, which
 constitutes its core. Mldvi alone is distributed 
-under LGPL license and is available at 
-\url{http://pauillac.inria.fr/~miquel/}. 
+under LGPL license and is available at \url{http://pauillac.inria.fr/~miquel/}. 
 
 {\ActiveDVI} has been developed by Jun~Furuse, Didier~R{\'{e}}my and
-Pierre~Weis with also contributions by  Roberto~Di~Cosmo, Didier~Le~Botlan,
+Pierre~Weis with also contributions by Roberto~Di~Cosmo, Didier~Le~Botlan,
 Xavier~Leroy, and Alan~Schmitt.
 
 \clearpage
@@ -72,10 +71,9 @@ Xavier~Leroy, and Alan~Schmitt.
 \endadvitoc
 \clearpage
 
-
 \section {Installation}
 
-\section {Using the {\ActiveDVI} previewer}
+\section {Safety concerns when using the {\ActiveDVI} previewer}
 
 \paragraph {\bf Warning!}
 
@@ -86,6 +84,24 @@ that inhibits the execution of embedded applications.
 
 This warning applies in particular if you choose {\ActiveDVI} as your default 
 {\tt meta-mail} previewer for the {\tt application/x-dvi} mime-type.
+
+Conversely, you may run \doctt{advi} with the \doctt{-exec} option to
+automatically launch embedded applications.
+
+The last safety option is the default one: the \doctt{-ask} option
+tells {\ActiveDVI} to ask the user each time it has to launch an
+application. (Note that in such a case {\ActiveDVI} asks only once to
+launch a given application: it remembers your previous decisions
+concerning a command and acts accordingly for the rest of the
+presentation.) 
+
+The safe \doctt{-ask} option is set by default. It can also be set for
+all the users by the machine administrator or on a local scale by
+individual users, and even via a per directory setting ! (Conveninient
+to gracefully run your talks, while still be cautious when running
+talks from others.)
+
+\section {Using the {\ActiveDVI} previewer}
 
 \subsection {Command line options}
 
@@ -141,8 +157,8 @@ original TeX source.
 \subsubsection*{Helpers specification}
 
 \medskip\noindent\begin{tabular}{ll}
-\verb"-pager" & \\
-\verb"-browser" & \\
+\verb"-pager" & Specify the name of the pager to launch on a \verb"txt" link\\
+\verb"-browser" & Specify the name of the browser to a \verb"html" link\\
 \end{tabular}
 
 \subsubsection*{Debugging options}
@@ -159,6 +175,20 @@ original TeX source.
 \medskip\noindent\begin{tabular}{ll}
 \verb"-A" & Set Postscript antialiasing \\
 \end{tabular}
+
+\subsubsection*{Safety options}
+\medskip\noindent\begin{tabular}{ll}
+\verb"-exec" & Set automatic execution safety policy \\
+\verb"-ask" & Set automatic execution safety policy \\
+\verb"-safer" & Set no execution of embedded aplications safety policy \\
+\end{tabular}
+
+\subsubsection*{Option files option}
+\medskip\noindent\begin{tabular}{ll}
+\verb"-option-file <filename>" & Load {\tt filename} as a file containing a list of options \\
+& as given on the command line to \doctt{advi} \\
+\end{tabular}
+
 
 \subsection {Cut and paste}
 
@@ -587,7 +617,13 @@ the command string.
 \medskip\noindent
 \docdef \advikillembed \docarg{name}
 \begin{quote}
-Kill all embedded applications named \docid{name}
+Kill all embedded applications named \docid{name}.
+An optional signal value or symbolic name can be given to send to the
+designed process: for instance \verb"\advikillembed[SIGUSR1]{clock}"
+will send the \verb"SIGUSR1" signal to the embedded application named
+\verb"clock".
+
+Signal value defaults to -9.
 \end{quote}
 
 
