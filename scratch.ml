@@ -210,8 +210,7 @@ let save_excursion cursor color f =
   set_cursor cursor;
 
   try f (); restore ()
-  with x -> restore (); if x <> Exit then raise x
-;;
+  with x -> restore (); if x <> Exit then raise x;;
 
 let rec wait_button_pressed f =
   match Graphics.wait_next_event [Button_down; Key_pressed] with

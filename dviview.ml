@@ -8,7 +8,7 @@
 (*  en Automatique.  All rights reserved.  This file is distributed    *)
 (*  under the terms of the GNU Lesser General Public License.          *)
 (*                                                                     *)
-(*  Jun Furuse, Didier R~y and Pierre Weis.                           *)
+(*  Jun Furuse, Didier Rémy and Pierre Weis.                           *)
 (*  Contributions by Roberto Di Cosmo, Didier Le Botlan,               *)
 (*  Xavier Leroy, and Alan Schmitt.                                    *)
 (*                                                                     *)
@@ -16,8 +16,6 @@
 (***********************************************************************)
 
 (* $Id$ *)
-
-open Cdvi;;
 
 let pauses =
   Options.flag true "-nopauses"
@@ -252,7 +250,7 @@ let set_page_number st n =
   different shape;
 
    - they can be both higher when the window size is fixed and when drawing at
-  a  higher scale.
+  a higher scale.
 
   We always have st.orig_x + st.width + st.orig_x = st.size_x
   and the same for y coordinates
@@ -287,9 +285,9 @@ let set_vmargin d = attr.vmargin <- normalize d;;
 let init_geometry all st =
   let dvi = st.dvi in
   let dvi_res = !dpi_resolution
-  and mag = float dvi.preamble.Dvicommands.pre_mag /. 1000.0 in
-  let w_sp = dvi.postamble.Dvicommands.post_width
-  and h_sp = dvi.postamble.Dvicommands.post_height in
+  and mag = float dvi.Cdvi.preamble.Dvicommands.pre_mag /. 1000.0 in
+  let w_sp = dvi.Cdvi.postamble.Dvicommands.post_width
+  and h_sp = dvi.Cdvi.postamble.Dvicommands.post_height in
   let w_in = mag *. ldexp (float w_sp /. dvi_res) (-16)
   and h_in = mag *. ldexp (float h_sp /. dvi_res) (-16) in
 
@@ -355,9 +353,9 @@ let init master filename =
     try (Unix.stat filename).Unix.st_mtime
     with _ -> 0.0 in
   Gs.init_do_ps ();
-  let npages =  Array.length dvi.pages in
+  let npages =  Array.length dvi.Cdvi.pages in
   let st =
-    let npages = Array.length dvi.pages in
+    let npages = Array.length dvi.Cdvi.pages in
     { filename = filename;
       duplex = Alone;
       dvi = dvi;
@@ -445,21 +443,18 @@ let rec clear_page_stack max stack =
   let rec clear = function
     | p :: stack ->
         let s = clear stack in
-        if p = -1 then s
-        else
-          let pa = if p < 0 then -2 - p else p in
-          if pa < max && not pages.(pa) then
-            begin
-              pages.(pa) <- true;
-              p :: s
-            end
-          else s
+        if p = -1 then s else
+        let pa = if p < 0 then -2 - p else p in
+        if pa < max && not pages.(pa) then begin
+          pages.(pa) <- true;
+          p :: s end
+        else s
     | _ -> [] in
   clear stack;;
 
 (* Incremental drawing *)
 let synchronize st =
-  if st.synchronize then Grdev.synchronize()
+  if st.synchronize then Grdev.synchronize ();;
 
 let goto_next_pause n st =
   let rec aux n st =
@@ -490,7 +485,6 @@ let goto_next_pause n st =
   Busy.set (if st.cont = None then Busy.Free else Busy.Pause);;
 
 let draw_bounding_box st =
-  Misc.warning "Draw_bounding box";
   Grdev.set_color 0xcccccc;
   Grdev.fill_rect st.orig_x st.orig_y st.dvi_width 1;
   Grdev.fill_rect st.orig_x st.orig_y 1 st.dvi_height;
@@ -604,7 +598,7 @@ let redraw ?trans ?chst st =
         with
         | Driver.Pause -> st.cont <- Some f
       end else begin
-        Misc.debug_endline("Pauses are disabled: overriding transitions!");
+        Misc.debug_endline ("Pauses are disabled: overriding transitions!");
         Transimpl.sleep := (fun _ -> true); (* always breaks *)
         while try f () with Driver.Wait _ | Driver.Pause -> true
         do () done
@@ -633,7 +627,7 @@ let xrefs st =
       Driver.scan_special_pages st.cdvi max_int;
       st.frozen <- false;
     end;
-  st.dvi.xrefs;;
+  st.dvi.Cdvi.xrefs;;
 
 let make_thumbnails st =
   let xnails =
@@ -676,9 +670,9 @@ let make_thumbnails st =
          (fun p ->
            let chgvp s =
              {s with
-	      Cdvi.bkgd_prefs =
-               {s.bkgd_prefs with
-	        Grdev.bgviewport =
+              Cdvi.bkgd_prefs =
+               {s.Cdvi.bkgd_prefs with
+                Grdev.bgviewport =
                   Some {
                    Grdev.vx = 0;
                    Grdev.vy = size_y - dy;
@@ -749,14 +743,14 @@ let rec reload foreground st =
     let dvi = Cdvi.load st.filename in
     let cdvi = Driver.cook_dvi dvi in
     let dvi_res = !dpi_resolution
-    and mag = float dvi.preamble.Dvicommands.pre_mag /. 1000.0 in
-    let w_sp = dvi.postamble.Dvicommands.post_width
-    and h_sp = dvi.postamble.Dvicommands.post_height in
+    and mag = float dvi.Cdvi.preamble.Dvicommands.pre_mag /. 1000.0 in
+    let w_sp = dvi.Cdvi.postamble.Dvicommands.post_width
+    and h_sp = dvi.Cdvi.postamble.Dvicommands.post_height in
     let w_in = mag *. ldexp (float w_sp /. dvi_res) (-16)
     and h_in = mag *. ldexp (float h_sp /. dvi_res) (-16) in
     let width = Misc.round (w_in *. st.base_dpi *. st.ratio)
     and height = Misc.round (h_in *. st.base_dpi *. st.ratio) in
-    let npages =  Array.length dvi.pages in
+    let npages =  Array.length dvi.Cdvi.pages in
     st.dvi <- dvi;
     st.cdvi <- cdvi;
     st.num_pages <- npages;
@@ -786,8 +780,7 @@ let rec reload foreground st =
   with x ->
     Misc.warning
       (Printf.sprintf "exception while reloading %s" (Printexc.to_string x));
-    st.cont <- None
-;;
+    st.cont <- None;;
 
 let find_xref_master tag default st =
   try
@@ -799,12 +792,11 @@ let find_xref_master tag default st =
         (* so as to pop to current view automatically *)
         st'.page_stack <- (-1) :: st'.page_stack;
         raise (Duplex (redraw, st'))
-  with Not_found -> default
-;;
+  with Not_found -> default;;
+
 let find_xref tag default st =
   try find_xref_here tag st
-  with Not_found -> find_xref_master tag default st
-;;
+  with Not_found -> find_xref_master tag default st;;
 
 let redisplay st =
   st.pause_number <- 0;
@@ -815,7 +807,6 @@ let goto_previous_pause n st =
     st.pause_number <- max 0 (st.pause_number - n);
     redraw st
   end;;
-
 
 let show_thumbnails st r page =
   let size_x = Graphics.size_x () in
@@ -833,8 +824,7 @@ let show_thumbnails st r page =
          (size_y - y - dy) dx dy)
     page;
   (* To force the page under thumbnails to be redrawn *)
-  st.aborted <- true
-;;
+  st.aborted <- true;;
 
 let rec show_toc st =
   if st.toc = None then make_toc st;
@@ -869,10 +859,7 @@ let rec show_toc st =
       | _ -> ()
       end
   | Some rolls ->
-      show st rolls st; 
-;;
-
-
+      show st rolls st;;
 
 exception Link;;
 
@@ -922,7 +909,6 @@ let exec_xref link =
   | _ ->
       Misc.warning (Printf.sprintf "Don't know what to do with link %s" link);;
 
-
 let pop_duplex st =
   match st.duplex with
   | Client st' -> raise (Duplex (redraw, st'))
@@ -933,35 +919,32 @@ let goto_page n st =
   (* now controlled by pop_page *)
   (*   if n < 0 (* then n = -1 *) then pop_duplex st else *)
   let new_page_number = max 0 (min n (st.num_pages - 1)) in
-  if st.page_number <> new_page_number || st.aborted then
-    begin
-      if st.page_number <> new_page_number
-      then st.exchange_page <- st.page_number;
-      let trans =
-        if new_page_number = succ st.page_number
-        then Some Transitions.DirRight else
-          if new_page_number = pred st.page_number
-          then Some Transitions.DirLeft else
-            if new_page_number = st.page_number
-            then Some Transitions.DirTop else
-              None in
-      set_page_number st new_page_number;
-      st.pause_number <- 0;
-      redraw ?trans st
-    end;;
+  if st.page_number <> new_page_number || st.aborted then begin
+    if st.page_number <> new_page_number then
+      st.exchange_page <- st.page_number;
+    let trans =
+      if new_page_number = succ st.page_number then
+        Some Transitions.DirRight else
+      if new_page_number = pred st.page_number then
+        Some Transitions.DirLeft else
+      if new_page_number = st.page_number then Some Transitions.DirTop
+      else None in
+    set_page_number st new_page_number;
+    st.pause_number <- 0;
+    redraw ?trans st
+  end;;
 
 let find_page_before_position (pos, file) st =
   let rec find p =
-    if p < 0 then raise Not_found
-    else
-      match st.dvi.pages.(p).line with
-      | Some (pos', file') when pos' <= pos && file = file' -> p
-      | _ -> find (pred p) in
-  find (st.num_pages -1)
+    if p < 0 then raise Not_found else
+    match st.dvi.Cdvi.pages.(p).Cdvi.line with
+    | Some (pos', file') when pos' <= pos && file = file' -> p
+    | _ -> find (pred p) in
+  find (st.num_pages -1);;
 
 let duplex_switch sync st =
   let find_sync_page master client =
-    match master.dvi.pages.(master.page_number).line with
+    match master.dvi.Cdvi.pages.(master.page_number).Cdvi.line with
     | None -> raise Not_found
     | Some (q, _ as pos) -> find_page_before_position pos client in
   match st.duplex with
@@ -1026,19 +1009,20 @@ let mark_page st =
     if List.length st.page_marks > 9
     then List.rev (List.tl (List.rev  st.page_marks))
     else st.page_marks in
-  st.page_marks <- st.page_number :: marks
+  st.page_marks <- st.page_number :: marks;;
 
 let goto_mark n st =
-  try goto_page (List.nth st.page_marks n) st
-  with Failure _ | Invalid_argument _ -> ()
+  try goto_page (List.nth st.page_marks n) st with
+  | Failure _
+  | Invalid_argument _ -> ();;
 
 let previous_slice st =
   print_string "#line 0, 0 <<<<>><<>>Next-Slice>> ";
-  print_newline ()
+  print_newline ();;
 
 let next_slice st =
   print_string "#line 0, 0 <<Previous-Slice<<>><<>>>> ";
-  print_newline ()
+  print_newline ();;
 
 (* goto page of hyperref h *)
 let goto_href link st =
@@ -1046,11 +1030,10 @@ let goto_href link st =
     if Misc.has_prefix "#" link then
       let tag = Misc.get_suffix "#" link in
       find_xref tag st.page_number st
-    else
-      begin
-        exec_xref link;
-        st.page_number
-      end in
+    else begin
+      exec_xref link;
+      st.page_number
+    end in
   push_page true p st;
   Grdev.H.flashlight (Grdev.H.Name link);;
 
@@ -1059,7 +1042,7 @@ let goto_pageref n st =
   let tag = Printf.sprintf "#page.%d" n in
   let alt = if st.num > 0 then st.num - 1 else st.num_pages in
   let p = find_xref tag alt st in
-  push_page true p st
+  push_page true p st;;
 
 let goto_next_page st =
   if st.page_number <> st.num_pages - 1 then goto_page (st.page_number + 1) st;;
@@ -1078,33 +1061,28 @@ let scale n st =
   let factor =
     if n > 0 then !scale_step ** float n
     else  (1. /. !scale_step) ** float (0 - n) in
-    if !autoresize then
-      begin
-        let scale x = Misc.round (float x *. factor) in
-        attr.geom.Ageometry.width <- scale st.size_x;
-        attr.geom.Ageometry.height <- scale st.size_y;
-        Grdev.close_dev ();
-        let x, y =
-          Grdev.open_dev (Printf.sprintf " " ^ Ageometry.to_string attr.geom)
-        in
-        attr.geom.Ageometry.width <- x;
-        attr.geom.Ageometry.height <- y;
-      end
-    else
-      begin
-        let new_ratio = factor *. st.ratio in
-        if new_ratio >= 0.02 && new_ratio < 50.0 then
-          begin
-            st.ratio <- new_ratio;
-            let (cx, cy) = (st.size_x / 2, st.size_y / 2) in
-            st.orig_x <- Misc.round (float (st.orig_x - cx) *. factor) + cx;
-            st.orig_y <- Misc.round (float (st.orig_y - cy) *. factor) + cy;
-          end;
-      end;
+  if !autoresize then begin
+    let scale x = Misc.round (float x *. factor) in
+    attr.geom.Ageometry.width <- scale st.size_x;
+    attr.geom.Ageometry.height <- scale st.size_y;
+    Grdev.close_dev ();
+    let x, y =
+      Grdev.open_dev (Printf.sprintf " " ^ Ageometry.to_string attr.geom) in
+    attr.geom.Ageometry.width <- x;
+    attr.geom.Ageometry.height <- y;
+  end else begin
+    let new_ratio = factor *. st.ratio in
+    if new_ratio >= 0.02 && new_ratio < 50.0 then begin
+      st.ratio <- new_ratio;
+      let (cx, cy) = (st.size_x / 2, st.size_y / 2) in
+      st.orig_x <- Misc.round (float (st.orig_x - cx) *. factor) + cx;
+      st.orig_y <- Misc.round (float (st.orig_y - cy) *. factor) + cy;
+    end;
+  end;
   update_dvi_size true st;
   redraw st;;
 
-(* Keymaps kinds for Active-DVI:
+(* Keymap kinds for Active-DVI:
    - Default_keymap is for normal key bindings.
    - Control_x_keymap is for ^X prefixed key bindings. *)
 type keymap =
@@ -1122,8 +1100,7 @@ let set_keymap, get_keymap =
      | Control_x_keymap ->
          Busy.temp_set Busy.Change_Keymap;
          map := km in
-  (set_keymap, get_keymap)
-;;
+  (set_keymap, get_keymap);;
 
 module B =
   struct
@@ -1195,7 +1172,7 @@ module B =
       | None -> ()
 
     let page_right st =
-      match (move_within_margins_x st (10 - attr.geom.Ageometry.width)) with
+      match move_within_margins_x st (10 - attr.geom.Ageometry.width) with
       | Some n ->
           if n < st.orig_x then begin
             st.orig_x <- n;
@@ -1248,7 +1225,7 @@ module B =
     let redraw = redraw ?trans:(Some Transitions.DirNone) ?chst:None
 
     let toggle_active st =
-      Driver.toggle_active(); redraw st
+      Driver.toggle_active (); redraw st
 
     let reload = reload true
     let redisplay = redisplay
@@ -1292,6 +1269,7 @@ module B =
 
     let scratch_draw st =
       Scratch.draw ()
+ 
     let scratch_write st =
       Scratch.write ()
 
@@ -1301,15 +1279,15 @@ module B =
     let goto_mark st = goto_mark st.num st
 
     let make_thumbnails st =
-       Launch.without_launching
-         (Busy.busy_exec
-           (fun () ->
-              make_thumbnails st;
-              if not st.aborted then show_toc st))
-         ()
+      Launch.without_launching
+        (Busy.busy_exec
+          (fun () ->
+             make_thumbnails st;
+             if not st.aborted then show_toc st))
+        ()
 
     let show_toc st =
-       Launch.without_launching show_toc st
+      Launch.without_launching show_toc st
 
     let ask_to_search =
       let prefill = ref "" in
@@ -1586,8 +1564,7 @@ let main_loop mastername clients =
         | Grdev.Click (_, Grdev.Button3, _, _) ->
             if !click_turn_page then B.next_pause st
         | Grdev.Nil -> ()
-      done
-      with
+        done with
       | Exit -> Grdev.close_dev ()
       | Duplex (action, st') -> duplex action st' in
     duplex redraw st
