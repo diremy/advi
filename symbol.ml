@@ -464,6 +464,7 @@ let position x y =
   else raise Not_found
       
 let valid position i = i >= 0 && i < Array.length position.history;;
+
 let around b x y =
   try 
     let position = position x y in
@@ -513,6 +514,12 @@ let around b x y =
   | Invalid_argument _ -> assert false
       ;;
 
+let rec least l min =
+  match l with 
+    {symbol = Line (l,_)} :: rest -> least rest (if l < min then l else min)
+  | _ :: rest -> least rest min
+  | [] -> min
+
 let lines x y =
   match around true x y with
   | None -> None
@@ -527,6 +534,7 @@ let lines x y =
       let space_ref = region.history.(region.first) in
       let l1, f1 = find_line succ (succ i1) in
       let l2, f2 = find_line pred (pred i2) in
+      let l1 = if l1 > l2 && l2 > 0 then least !set l2 else l1 in
       let f = match f1 with Some _ -> f1 | _ -> f2 in
       Some (space_ref, l1, l2, w1, w2, f) 
         ;;

@@ -399,14 +399,14 @@ let document_xy st x y =
 let position st x y =
   match Symbol.lines x y with
   | Some (s, line, bound, before, after, file) ->
-      if bound >= 0 then
-        let line = max 0 line in
-        let file = match file with Some f ->  f | _ -> "" in
-        begin
-          Printf.printf "#line %d, %d <<%s>><<%s>> %s"
-            line bound before after file;
-          print_newline()
-        end
+      let line = max 0 line in
+      let bound = max 0 bound in
+      let file = match file with Some f ->  f | _ -> "" in
+      begin
+        Printf.printf "#line %d, %d <<%s>><<%s>> %s"
+          line bound before after file;
+        print_newline()
+      end
   | None -> ();;
 
 (* User has selected a region with the mouse. We dump characters. *)
