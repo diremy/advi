@@ -214,6 +214,10 @@ let copy_bkgd_data s d = d.bgcolor <- s.bgcolor;
 let bkgd_data = default_bkgd_data ()
 ;;
 
+let copy_of_bkgd_data () = let c = default_bkgd_data () 
+                           in copy_bkgd_data bkgd_data c; c
+
+
 (* TODO: handle ratio and whitetransparent preferences *)
 
 let draw_bkgd_img (w,h) x0 y0 = 

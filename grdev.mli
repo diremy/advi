@@ -21,6 +21,7 @@
 type bkgd_prefs = { mutable bgcolor: int; mutable bgimg: string option; mutable bgratio: Draw_image.ratiopts; mutable bgwhitetrans:bool}
 
 val copy_bkgd_data : bkgd_prefs -> bkgd_prefs -> unit
+val copy_of_bkgd_data : unit -> bkgd_prefs
 val default_bkgd_data : unit -> bkgd_prefs
 val bkgd_data : bkgd_prefs
 

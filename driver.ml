@@ -1012,7 +1012,7 @@ let set_rule st a b =
                              Dvi.bkgd_prefs=
                               (if !reset_bkgd_info 
                                then Dev.default_bkgd_data ()
-                               else Dev.bkgd_data)} in
+                               else Dev.copy_of_bkgd_data ())} in
                let eval = function
                   Dvi.C_xxx s -> scan_special status globals pagenum s
                   | _ -> () 
