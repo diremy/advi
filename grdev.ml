@@ -379,7 +379,7 @@ let set_bbox bb =
 (*** Drawing ***)
 let set_color col =
   if not !opened then failwith "Grdev.set_color: no window";
-prerr_endline "set_color";
+  (*prerr_endline "set_color";*)
   color := col;
   Graphics.set_color col;;
 
@@ -749,7 +749,7 @@ let kill_persistent_apps () =
   unmap_persistent_apps ();
   kill_apps Persistent;;
 
-let kill_all_embeds () =
+let kill_all_embedded_apps () =
   kill_ephemeral_apps ();
   kill_persistent_apps ();;
 

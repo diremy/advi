@@ -130,6 +130,7 @@ type app_type =
 
 val embed_app : string -> app_type -> string -> int -> int -> int -> int -> unit
 val kill_embedded_app : string -> unit 
+val kill_all_embedded_apps : unit -> unit 
 
 (* Events *)
 
