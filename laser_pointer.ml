@@ -25,14 +25,24 @@ let pointer_color = Graphics.red;;
 let not_pointer_color = Graphics.background;;
 
 (* Pointer size is at least 4 *)
-let pointer_size = 40;;
+let get_pointer_size, set_pointer_size =
+  let pointer_size = ref 40 in
+  (fun () -> !pointer_size),
+  (fun sz -> pointer_size := sz);;
+
+Options.add
+  "-laser-pointer-size"
+  (Arg.Int set_pointer_size)
+  (Printf.sprintf
+     "<size>: set the size of the ``laser'' pointer in points,\
+     \n\t (the default delay is %d points)." (get_pointer_size ()));;
 
 type pointer = {
   mutable bkg_img : image;
   mutable ptr_img : image;
   mutable x : int;
   mutable y : int;
-  size : int;
+  half_size : int;
 };;
 
 (* Creating the pointer image. *)
@@ -87,33 +97,38 @@ let create_pointer x y w =
   draw_image bkg_img x y;
   { bkg_img = bkg_img;
     ptr_img = pointer_image;
-    x = x; y = y; size = w;
+    x = x; y = y; half_size = w / 2;
   };;
 
 (* Clear the actual pointer. *)
 let clear_pointer ptr = draw_image ptr.bkg_img ptr.x ptr.y;;
 
+let xptr_x = 1
+and xptr_y = 5;;
+
 (* Show the pointer: first save the background, then draw the pointer. *)
 let show_pointer ptr x y =
+  clear_pointer ptr;
+  let r = ptr.half_size in
+  (* Compute the actual lower left corner of the pointer. *)
+  let x = (x - r + xptr_x)
+  and y = y + xptr_y in
   (* Save actual background. *)
-  blit_image ptr.bkg_img x y; 
+  blit_image ptr.bkg_img x y;
   (* Move the pointer. *)
   ptr.x <- x; ptr.y <- y;
   draw_image ptr.ptr_img x y;
 ;;
 
-let move_pointer ptr x y =
-  if x <> ptr.x || y <> ptr.y then begin
-    clear_pointer ptr;
-    show_pointer ptr x y;
-  end;;
-
 let switch_on_laser_beam () =
  
- let (x, y) = mouse_pos () in
+ let x0 = Graphics.size_x () / 2
+ and y0 = Graphics.size_y () / 2 in
  let laser_pointer =
-   GraphicsY11.only_on_backing_store (create_pointer x y) pointer_size in
+   GraphicsY11.only_on_backing_store
+     (create_pointer x0 y0) (get_pointer_size ()) in
 
+ let x, y = mouse_pos () in
  show_pointer laser_pointer x y;
 
  try while true do
@@ -124,7 +139,7 @@ let switch_on_laser_beam () =
        button = btn;
        keypressed = kp;
        key = c; } ->
-       move_pointer laser_pointer x y;
+       show_pointer laser_pointer x y;
        if kp then begin
          match c with
          | '' -> raise Exit
@@ -135,4 +150,6 @@ let switch_on_laser_beam () =
    done with
  | Exit -> clear_pointer laser_pointer;;
 
-let laser_beam = GraphicsY11.only_on_screen switch_on_laser_beam;;
+let laser_beam =
+  Busy.with_cursor Busy.Pointer
+   (GraphicsY11.only_on_screen switch_on_laser_beam);;
