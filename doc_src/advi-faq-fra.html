@@ -205,15 +205,15 @@ MOZILLA=`which mozilla`
 
 case $# in
  1) 
-   if $MOZILLA -remote "ping()" 2>/dev/null
+   if \$MOZILLA -remote "ping()" 2>/dev/null
    then 
-     $MOZILLA -remote "openURL($1,new-window)" || \
-     $MOZILLA "$@" 
+     \$MOZILLA -remote "openURL($1,new-window)" || \
+     \$MOZILLA "$@" 
    else
-     $MOZILLA "$@" 
+     \$MOZILLA "$@" 
    fi;;
  *)
-   $MOZILLA "$@";;
+   \$MOZILLA "$@";;
 esac
 </PRE>
 <I>(À la place de la spécification de comportement

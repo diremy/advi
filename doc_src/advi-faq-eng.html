@@ -131,7 +131,7 @@ virtual fonts using the command
 HREF="http://www.ctan.org/tex-archive/dviware/dvicopy/">dvicopy</A>.
 For instance:
 <PRE>
-        dvicopy foo.dvi foo.advi && advi foo.advi
+        dvicopy foo.dvi foo.advi &amp;&amp; advi foo.advi
 </PRE>
 usually works fine.
 </I>
@@ -143,7 +143,7 @@ usually works fine.
 <A HREF="http://www.ctan.org/tex-archive/dviware/dvicopy/">dvicopy</A>
 which expands virtual fonts. For instance:
 <PRE>
-        dvicopy foo.dvi foo.advi && advi foo.advi
+        dvicopy foo.dvi foo.advi &amp;&amp; advi foo.advi
 </PRE>
 usually works fine.
 </I>
@@ -205,15 +205,15 @@ MOZILLA=`which mozilla`
 
 case $# in
  1) 
-   if $MOZILLA -remote "ping()" 2>/dev/null
+   if \$MOZILLA -remote "ping()" 2>/dev/null
    then 
-     $MOZILLA -remote "openURL($1,new-window)" || \
-     $MOZILLA "$@" 
+     \$MOZILLA -remote "openURL($1,new-window)" || \
+     \$MOZILLA "$@" 
    else
-     $MOZILLA "$@" 
+     \$MOZILLA "$@" 
    fi;;
  *)
-   $MOZILLA "$@";;
+   \$MOZILLA "$@";;
 esac
 </PRE>
 <I>(Instead of the <CODE>new-window</CODE> behavior specification, you

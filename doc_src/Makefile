@@ -43,6 +43,8 @@ OBJS=$(HOBJS) $(MOBJS)
 
 all: $(OBJS)
 
+$(OBJS): Includes/env Includes/advi-version.html
+
 clean:
 	$(RM) $(OBJS)
 	cd Includes; $(RM) *~

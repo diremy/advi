@@ -250,6 +250,7 @@ dnl BUILD OUR OWN LIBDIR
 myprefix=$prefix
 myexec_prefix=$exec_prefix
 mylibdir=$libdir
+
 test "x$myprefix" = xNONE && myprefix=$ac_default_prefix
 test "x$myexec_prefix" = xNONE && myexec_prefix=${myprefix}
 mylibdir=$libdir
