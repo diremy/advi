@@ -55,6 +55,8 @@
 
 %% More declarations
 
+\def \ppp@error #1{\PackageError {xprosper}{#1}{Type <RETURN> to proceed.}}
+
 %% Redefinition of the slide environment
 \newcounter{trueSlideCounter}
 \def\thetrueslideCounter{\arabic{trueSlideCounter}}
@@ -115,7 +117,7 @@
        \ifnum#1=3
           \gdef\@prosperItemiii{#2}%
        \else
-          \ClassError{prosper}{Undefined item level}{Available levels: 1,2,3}%
+          \ppp@Error{Undefined item level}%
        \fi
     \fi
   \fi
@@ -470,8 +472,11 @@
 
 \def \lpause #1{\advance \c@pause by #1\relax}
 
+
 \def \step@pause #1{\global \advance \c@pause by #1\relax}
-\newcommand {\normal@pause}[1][1]{\step@pause{#1}\FromSlide{\c@pause}}
+\newcommand {\normal@pause}[1][1]{\ifInOverlays\else
+\ppp@error {\string \pause\space can only be used in slides with overlays}\fi
+\step@pause{#1}\FromSlide{\c@pause}}
 \def \rowemph {\ifnum \c@overlaysCount=\c@pause \rowcolor {yellow}\fi}
 \newcommand {\rowpause}{\noalign{\step@pause{1}}}
 \def \rowemphi{\rowpause\rowemph}
