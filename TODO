@@ -1,13 +1,4 @@
-BUGS:
-
-* PStricks ne marche pas correctement avec \SpecialCoor
-
-* Chase all uncaught exceptions (using  Pessaux's tool?)
-For instance:
-
-  Fatal error: unknown special: advi: setbg col=Yellow
-
-This should not be fatal, but a warning.
+KNOWN BUGS:
 
 * It seems that advi does not find EPS files correctly.
 I haven't tried to localized the bug, but my example was: 
@@ -19,6 +10,26 @@ while from the same path:
 
      % advi cely.dvi
      Warning: Logo-INRIA-Rocq.eps is not found. (Error while executing kpsewhich Logo-INRIA-Rocq.eps > /tmp/advi48)
+
+Probably textdir-path is in cause: the way tex tools work is to use the
+environment variable YYYINPUTS where YYY is the name of the command
+(e.g. TEX, LATEX, DVI, etc) which some inheritance between them. 
+
+In search.ml, the use of "/usr/share/texmf/ls-R" is erroneously plug as the
+only place for tex data base. I use TEXINPUTS with several subdirectories, 
+each of which ending with // which means not to look for ls-R bur
+recursively to look through the whole directory, recursively.
+
+Unless this semantics is implemented, we should expect bug reports 
+
+  - from people who install texmf in another directory
+  - from people who personalized their TEXINPUTS
+
+
+LIMITATIONS:
+
+* PStricks ne marche pas correctement avec \ncarc etc. (annotation sur les
+  flèches). 
 
 
 CLEANING: 
