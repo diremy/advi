@@ -10,6 +10,8 @@ val get_suffix : string -> string -> string
 val split_string : string -> char -> int -> string list
     
 val parse_shell_command : string -> string array
+val fork_process : string -> int
+
     
 val all_options : unit -> (string * Arg.spec * string) list
 val set_option : string -> Arg.spec -> string -> unit

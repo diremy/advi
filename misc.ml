@@ -70,6 +70,17 @@ let parse_shell_command str =
   let arglist = split_string str ' ' 0 in
   Array.of_list arglist
 ;;
+let fork_process command = 
+  let command_tokens = parse_shell_command command in
+  let pid = Unix.fork () in
+  if pid = 0 then
+    begin (* child *)
+      try
+        Unix.execvp command_tokens.(0) command_tokens
+      with
+      | _ -> exit 127
+    end;
+  pid;;
 
 (* Command line options and debugging *)
 

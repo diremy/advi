@@ -29,7 +29,7 @@ let busy_delay = ref 0.2
 let _ = Misc.set_option
     "-watch"
     (Arg.Float (fun x -> busy_delay := x))
-    "FLOAT\time delay before showing the watch when busy (default 0.2s)";;
+    "FLOAT\tDelay before the watch cursor appears (default 0.2s)";;
 
 
 
@@ -561,20 +561,11 @@ let raw_embed_app command app_type width height x y =
   in
   
   (* prerr_endline command; *)
-
-  let command_tokens = Misc.parse_shell_command command in
-  let pid = Unix.fork () in
-  if pid = 0 then begin (* child *)
-    try
-      Unix.execvp command_tokens.(0) command_tokens
-    with
-    | _ -> exit 127
-  end else begin
-    if Hashtbl.mem app_table pid then 
-      raise (Failure (Printf.sprintf 
-			"pid %d is already in the app_table!" pid));
-    Hashtbl.add app_table pid (app_type, wid)
-  end
+  let pid = Misc.fork_process command in
+  if Hashtbl.mem app_table pid then 
+    raise (Failure (Printf.sprintf 
+		      "pid %d is already in the app_table!" pid));
+  Hashtbl.add app_table pid (app_type, wid)
 
 (* embedded apps must be displayed when synced *)
 let embed_app command app_type width height x y =
@@ -806,7 +797,7 @@ module H =
 *)
       let all_anchors = !anchors in
       a();
-      Gs.flush();
+      flush_last();
       Graphics.synchronize();
       Screen (ima, act, all_anchors)
         

@@ -34,6 +34,12 @@ let _ = Misc.set_option
 let debug_pages = Misc.debug_option
     "--debug_pages"
     "Debug page motion"
+let browser = ref "netscape-communicator"
+let _ = Misc.set_option
+    "-browser"
+    (Arg.String (fun s -> browser := s))
+    "STRING\tCommand to call the browser";;
+
 let page_stack_to_string page stack =
   let stack = String.concat " " (List.map string_of_int stack) in
   Printf.sprintf "Page no: %d Page_stack: %s"
@@ -642,9 +648,15 @@ module Make(Dev : DEVICE) = struct
           
   exception Link
   let exec_xref link = 
-      (* -- check that files exist; use mine and mailcap; etc. *)
+    let call command =
+      prerr_endline command;
+      let pid = Misc.fork_process command in
+          (* only to launch embeded apps *)
+      if Graphics.button_down() then
+        ignore (Graphics.wait_next_event [ Graphics.Button_up ]) in
     if Misc.has_prefix "file:" link then
-      try
+      begin
+        try
         let filename, arguments = 
           match Misc.split_string (Misc.get_suffix "file:" link) '#' 0 with
           | [ filename ; tag ] -> filename, ["-html"; tag ]
@@ -653,21 +665,16 @@ module Make(Dev : DEVICE) = struct
               Misc.warning ("Invalid link "^link);
               raise Link
         in
-        let call command =
-          Dev.embed_app command Dev.Sticky
-            attr.geom.width
-            attr.geom.height
-            (int_of_offset attr.geom.xoffset)
-            (int_of_offset attr.geom.yoffset); 
-          if Graphics.button_down() then
-            ignore (Graphics.wait_next_event [ Graphics.Button_up ]) in
         if Sys.file_exists filename then
           begin
             if Misc.has_suffix ".dvi"  filename then
               call  (String.concat " " ("advi" :: arguments @ [ filename ]))
             else if (Misc.has_suffix ".txt"  filename
                    || Misc.has_suffix ".tex"  filename) then
-              call ("xterm -e more "^ filename)
+              call ("xterm -e less "^ filename)
+            else if (Misc.has_suffix ".html"  filename
+                   || Misc.has_suffix ".htm"  filename) then
+              call (!browser ^" "^ link)
             else
               Misc.warning 
                 (Printf.sprintf
@@ -680,8 +687,10 @@ module Make(Dev : DEVICE) = struct
                filename)
       with
         Misc.Match -> assert false
-      | Link ->
-          ()
+        | Link -> ()
+      end
+    else if Misc.has_prefix "http:" link then
+      call (!browser ^" "^ link)
             
   let page_start default st =   
     match !start_html with None -> default
@@ -976,11 +985,12 @@ module Make(Dev : DEVICE) = struct
             No_offset -> 0
           | Plus x -> x
           | Minus y -> 0 - y in
-        Dev.embed_app ("advi "^ Config.splash_screen) Dev.Embedded
-          attr.geom.width
-          attr.geom.height
-          (int_of_offset attr.geom.xoffset)
-          (int_of_offset attr.geom.yoffset)
+        let pid = Misc.fork_process
+          (Printf.sprintf "advi -g %dx%d %s"
+             attr.geom.width
+             attr.geom.height
+             Config.splash_screen) in
+        ()
     end
       
   let bindings = Array.create 256 B.nop
