@@ -153,9 +153,9 @@ Maybe you mean \@currenvir ing}}
 \newif \ifadvi@bgactive
 
 \def \advi@bg@do
- {\do\advi@bgcolor \do\advi@bgimage \do \advi@bgalpha \do\advi@bgblend}
+ {\do \advi@bgcolor \do \advi@bgimage \do \advi@bgalpha \do \advi@bgblend}
 \def \advi@auto@ { fit=auto}
-\def \advi@bgreset 
+\def \advi@bgreset
  {\def \do ##1{\expandafter \advi@global
                   \expandafter \let \noexpand ##1\advi@empty}\advi@bg@do
   \advi@global \let \advi@bgfit \advi@auto@
@@ -183,7 +183,7 @@ Maybe you mean \@currenvir ing}}
     {\advi@global \edef \advi@bgcolor
          { color="\csname \string \color@#1\endcsname"}%
      \advi@global \advi@bgactivetrue}}
-% Apparently, named color may start with white space. 
+% Apparently, named color may start with white space.
 % \def \advi@nospace@tmp #1#2\relax {\def \advi@tmp {#1#2}}
 \def \advi@setbg@undeclared[#1]#2\relax{%
   \@ifundefined{color@#1}%
@@ -193,7 +193,7 @@ Maybe you mean \@currenvir ing}}
      \advi@global \edef \advi@bgcolor{ color="\advi@tmp"}%
      \advi@global \advi@bgactivetrue}}
 
-%% two abstract colors set by advi. Defaut to back and white
+%% two abstract colors set by advi. Defaut to black and white
 \DefineNamedColor{named}{background}{rgb}{1,1,1} %white
 \definecolor{bgcolor}{named}{background}
 \DefineNamedColor{named}{foreground}{rgb}{0,0,0} %black
@@ -215,7 +215,7 @@ Maybe you mean \@currenvir ing}}
 
 \def \advi@bgemit 
   {\advi@special 
-     {setbg\advi@bgcolor \advi@bgimage \advi@bgalpha \advi@bgblend
+     {setbg \advi@bgcolor \advi@bgimage \advi@bgalpha \advi@bgblend
       \advi@bgfit
       }}
 \newif \ifadvi@bglocal
