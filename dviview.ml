@@ -21,10 +21,17 @@ let pauses =
   Options.flag true "-nopauses"
   "  switch pauses off,\
   \n\t (the default is to wait for specified pauses).";;
+
+let without_pauses f x =
+  let p = !pauses in
+  try pauses := false; let v = f x in pauses := p; v
+  with x -> pauses := p; raise x;;
+
 let fullwidth =
   Options.flag false "-fullwidth"
   "  adjust size to full width,\
    \n\t (the default is not to adjust to full width).";;
+
 let bounding_box =
   Options.flag false "-bbox"
   "  show the bounding box,\
@@ -198,6 +205,8 @@ and state = {
     mutable fullscreen : (int * int * int * int * (int * int)) option;
 
     mutable pause_number : int;
+    mutable last_pause_number : int;
+
     (* Attributes for Embedded postscript *)
 
     (* True when page was not completed: may need to redraw *)
@@ -378,6 +387,8 @@ let init master filename =
       fullscreen = None;
 
       pause_number = 0;
+      last_pause_number = 0;
+
       frozen = true;
       aborted = false;
       cont = None;
@@ -467,6 +478,7 @@ let goto_next_pause n st =
             begin try
               while f () do () done;
               st.pause_number <- st.pause_number + 1;
+              st.last_pause_number <- st.last_pause_number + 1;
             with
             | Driver.Wait sec ->
                 ignore (Grdev.sleep sec);
@@ -474,12 +486,12 @@ let goto_next_pause n st =
                 aux n st
             | Driver.Pause ->
                 st.pause_number <- st.pause_number + 1;
+                st.last_pause_number <- st.last_pause_number + 1;
                 st.cont <- Some f;
                 aux (pred n) st
             end;
           with Grdev.Stop -> st.aborted <- true;
-      end
-  in
+      end in
   aux n st;
   synchronize st;
   Busy.set (if st.cont = None then Busy.Free else Busy.Pause);;
@@ -590,8 +602,12 @@ let redraw ?trans ?chst st =
                   ignore (Grdev.sleep sec);
                 true
             | Driver.Pause ->
-                if !current_pause = st.pause_number then raise Driver.Pause
-                else begin incr current_pause; true end
+                if !current_pause = st.pause_number
+                then raise Driver.Pause
+                else begin
+                  incr current_pause; 
+                  st.last_pause_number <- !current_pause;
+                  true end
           do () done;
           if !current_pause < st.pause_number
           then st.pause_number <- !current_pause
@@ -600,7 +616,10 @@ let redraw ?trans ?chst st =
       end else begin
         Misc.debug_endline ("Pauses are disabled: overriding transitions!");
         Transimpl.sleep := (fun _ -> true); (* always breaks *)
-        while try f () with Driver.Wait _ | Driver.Pause -> true
+        while
+          try f () with
+          | Driver.Wait _ | Driver.Pause ->
+              true
         do () done
       end
     with
@@ -608,8 +627,13 @@ let redraw ?trans ?chst st =
   end;
   synchronize st;
   Busy.set (if st.cont = None then Busy.Free else Busy.Pause);
-  Misc.debug_stop "Page has been drawn\n";
-;;
+  Misc.debug_stop "Page has been drawn\n";;
+
+let goto_previous_pause n st =
+  if n > 0 then begin
+    st.pause_number <- max 0 (st.pause_number - n);
+    redraw st
+  end;;
 
 let thumbnail_limit = ref 5;;
 
@@ -681,10 +705,6 @@ let make_thumbnails st =
                   }
                }
              } in
-           let without_pauses f x =
-             let p = !pauses in
-             try pauses := false; let v = f x in pauses := p; v
-             with x -> pauses := p; raise x in
            without_pauses(redraw ?chst:(Some chgvp))
              {ist with page_number = p};
            (* Interrupt thumbnail computation in case of user interaction. *)
@@ -704,8 +724,7 @@ let make_thumbnails st =
         let first = roll * r * r in
         Thumbnails
           (r, Array.sub all first (min (r * r) (Array.length all - first)))) in
-  st.toc <- Some split
-;;
+  st.toc <- Some split;;
 
 let make_toc st =
   try
@@ -714,17 +733,14 @@ let make_toc st =
     let last = Hashtbl.find refs "/toc.last" in
     st.toc <- Some (Array.init (last - first + 1) (fun p -> Page (p + first)))
   with
-  | Not_found -> ()
-;;
+  | Not_found -> ();;
 
 let find_xref_here tag st =
   try
     let p = int_of_string (Misc.get_suffix "/page." tag) in
     if p > 0 && p <= st.num_pages then p - 1 else raise Not_found
   with Misc.Match ->
-    Hashtbl.find (xrefs st) tag
-
-;;
+    Hashtbl.find (xrefs st) tag;;
 
 let page_start default st =
   match !start_html with
@@ -732,8 +748,7 @@ let page_start default st =
   | Some html ->
       Driver.scan_special_pages st.cdvi max_int;
       try find_xref_here html st
-      with Not_found -> default
-;;
+      with Not_found -> default;;
 
 (* foreground if drawing is needed after reloading *)
 let rec reload foreground st =
@@ -801,12 +816,6 @@ let find_xref tag default st =
 let redisplay st =
   st.pause_number <- 0;
   redraw st;;
-
-let goto_previous_pause n st =
-  if n > 0 then begin
-    st.pause_number <- max 0 (st.pause_number - n);
-    redraw st
-  end;;
 
 let show_thumbnails st r page =
   let size_x = Graphics.size_x () in
@@ -915,30 +924,35 @@ let pop_duplex st =
   | Alone | Master _ -> ();;
 
 (* Go to the begining of the page. *)
-let goto_page n st =
+let set_page_pause_num n pause_num st =
   (* now controlled by pop_page *)
   (*   if n < 0 (* then n = -1 *) then pop_duplex st else *)
   let new_page_number = max 0 (min n (st.num_pages - 1)) in
-  if st.page_number <> new_page_number || st.aborted then begin
-    if st.page_number <> new_page_number then
-      st.exchange_page <- st.page_number;
-    let trans =
-      if new_page_number = succ st.page_number then
-        Some Transitions.DirRight else
-      if new_page_number = pred st.page_number then
-        Some Transitions.DirLeft else
-      if new_page_number = st.page_number then Some Transitions.DirTop
-      else None in
-    set_page_number st new_page_number;
-    st.pause_number <- 0;
-    redraw ?trans st
-  end;;
+  let trans =
+    if new_page_number = succ st.page_number then
+      Some Transitions.DirRight else
+    if new_page_number = pred st.page_number then
+      Some Transitions.DirLeft else
+    if new_page_number = st.page_number then Some Transitions.DirTop
+    else None in
+  let page_is_new = st.page_number <> new_page_number in
+  (* We have to redraw if we have to go to another page. *)
+  let have_to_redraw = page_is_new || st.aborted in
+  if page_is_new then st.exchange_page <- st.page_number;
+  if have_to_redraw then set_page_number st new_page_number;
+  (* We also have to redraw if we have to go to another pause. *)
+  let have_to_redraw = st.pause_number <> pause_num || have_to_redraw in
+  st.pause_number <- pause_num;
+  if have_to_redraw then redraw ?trans st;;
 
-let find_page_before_position (pos, file) st =
+let goto_page n st = set_page_pause_num n 0 st;;
+
+(* Fin the coocked DVI page that corresponds to a position in a source file. *)
+let find_page_before_position (pos, fname) st =
   let rec find p =
     if p < 0 then raise Not_found else
     match st.dvi.Cdvi.pages.(p).Cdvi.line with
-    | Some (pos', file') when pos' <= pos && file = file' -> p
+    | Some (pos', fname') when pos' <= pos && fname = fname' -> p
     | _ -> find (pred p) in
   find (st.num_pages -1);;
 
@@ -1133,7 +1147,8 @@ module B =
     let previous_pause st =
       if st.pause_number > 0
       then goto_previous_pause (max 1 st.num) st
-      else pop_previous_page st
+      else set_page_pause_num
+            (st.page_number - max 1 st.num) (st.last_pause_number) st
     let pop_page st =
       pop_page true 1 st
     let first_page st =
