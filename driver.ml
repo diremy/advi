@@ -231,21 +231,24 @@ let add_char st x y code glyph =
     } in
   last_height := (Dev.get_glyph glyph).Glyph.voffset;
   let s : Symbol.symbol = Symbol.Glyph g in
-  Symbol.add st.color x y code s;;
+  Symbol.add_to_global_display_set st.color x y code s;;
 
 let add_line st (line, file) =
   let x = st.x_origin + Misc.round (*int_of_float*) (st.conv *. float st.h)
   and y = st.y_origin + Misc.round (*int_of_float*) (st.conv *. float st.v) in
-  Symbol.add st.color x y 0 (Symbol.Line (line, file));;
+  Symbol.add_to_global_display_set st.color x y 0
+    (Symbol.Line (line, file));;
 
 let add_blank nn st width =
   let x = st.x_origin + Misc.round (*int_of_float*) (st.conv *. float st.h)
   and y = st.y_origin + Misc.round (*int_of_float*) (st.conv *. float st.v)
   and w = Misc.round (*int_of_float*) (st.conv *. float width) in
-  Symbol.add st.color x y nn (Symbol.Space (w, !last_height));;
+  Symbol.add_to_global_display_set st.color x y nn
+    (Symbol.Space (w, !last_height));;
 
 let add_rule st x y w h =
-  Symbol.add st.color x y 0 (Symbol.Rule (w, h));;
+  Symbol.add_to_global_display_set st.color x y 0
+    (Symbol.Rule (w, h));;
 
 let get_register_set st =
   { reg_h = st.h; reg_v = st.v;
@@ -409,31 +412,32 @@ let line_special st s =
   | key :: line :: rest ->
       begin try
         let l = int_of_string line in
-        let f = match rest with
-                | file :: _ -> Some file | _ -> None in
-        add_line st (l, f)
-      with Failure _ -> ill_formed_special s
+        let f =
+          match rest with
+          | file :: _ -> Some file
+          | _ -> None in
+        add_line st (l, f) with
+      | Failure _ -> ill_formed_special s
       end
   | _ -> ill_formed_special s;;
 
 let color_special st s =
   match split_string s 0 with
   | "color" :: "push" :: args ->
-      color_push st (Dvicolor.parse_color_args args)
+     color_push st (Dvicolor.parse_color_args args)
   | "color" :: "pop" :: [] ->
-      color_pop st
+     color_pop st
   | "color" :: args ->
-      let c = Dvicolor.parse_color_args args in
-      Misc.warning "global color special is not supported"
+     let c = Dvicolor.parse_color_args args in
+     Misc.warning "global color special is not supported"
   | _ -> ill_formed_special s;;
 
 let parse_float s =
  try float_of_string s with
- | _ -> failwith
-         (Printf.sprintf "advi: cannot read a floating number in %S" s)
-;;
+ | _ ->
+    failwith (Printf.sprintf "advi: cannot read a floating number in %S" s);;
 
-let option_parse_float s r =
+let parse_float_option s r =
   try Some (parse_float (List.assoc s r)) with _ -> None;;
 
 let alpha_special st s =
@@ -687,8 +691,8 @@ let parse_transition dir mode record =
         warning "special: trans push: genpath function not found";
         "spiral" in
   let parse_pathelem s =
-      (option_parse_float (s ^ "x") record,
-       option_parse_float (s ^ "y") record,
+      (parse_float_option (s ^ "x") record,
+       parse_float_option (s ^ "y") record,
        None,
        None) (* to complete with parsed scale and rotation *) in
   let parse_steps =
