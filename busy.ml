@@ -50,7 +50,7 @@ let set_cursor, restore_cursor, last_cursor =
   (function () -> GraphicsY11.set_cursor !last_cursor),
   (function () -> !last_cursor);;
 
-(* To be called before system calls that make take a long time *)
+(* To be called before system calls that may take a long time *)
 let busy_timeout = ref None;;
 let set_busy_cursor () = set_cursor GraphicsY11.Cursor_watch;;
 
@@ -73,7 +73,7 @@ let non_busy cursor =
   stop_busy (); 
   set_cursor cursor;;
 
-(* Set the cursor when we want to refect the state as a cursor modification. *)
+(* Set the cursor when we want to reflect the state as a cursor modification. *)
 let set = function
   | Pause -> non_busy pause_cursor
   | Free -> non_busy free_cursor
@@ -89,7 +89,7 @@ let set = function
 let temp_set c =
   stop_busy ();
   let c =
-    match c with 
+    match c with
     | Pause -> pause_cursor
     | Free -> free_cursor
     | Disk -> disk_cursor

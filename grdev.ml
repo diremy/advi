@@ -179,7 +179,7 @@ let set_blend b = blend := b;;
 
 (* Viewport type definition *)
 
-type viewport = int*int*int*int;; 
+type viewport = int * int * int * int;; 
 
 (* Background implementation *)
 
@@ -266,9 +266,9 @@ let draw_img file ratio whitetrans alpha blend psbbox (w, h) x0 y0 =
 
 let draw_bkgd () = 
   (* find the viewport *)
-  let (w,h,xoff,yoff) as viewport =
+  let (w, h, xoff, yoff) as viewport =
     match bkgd_data.bgviewport with
-      None -> (!size_x,!size_y,!xmin,!ymin)
+    | None -> (!size_x, !size_y, !xmin, !ymin)
     | Some v -> v
   in 	  
   (* Background: color. *)
@@ -287,8 +287,7 @@ let draw_bkgd () =
       None (w, h) xoff (!size_y - yoff)
   ) bkgd_data.bgimg;
   (* Background: function. *)
-  lift (fun draw -> draw  viewport) bkgd_data.bgfunction;
-;;
+  lift (fun draw -> draw  viewport) bkgd_data.bgfunction;;
 
 type bgoption =
    | BgColor of color
@@ -297,8 +296,7 @@ type bgoption =
    | BgBlend of Drawimage.blend
    | BgRatio of Drawimage.ratiopts
    | BgViewport of viewport option
-   | BgFun of (viewport -> unit) option
-;;
+   | BgFun of (viewport -> unit) option;;
 
 let set_bg_option = function
   | BgColor c -> bkgd_data.bgcolor <- c
@@ -307,8 +305,7 @@ let set_bg_option = function
   | BgBlend b -> bkgd_data.bgblend <- b
   | BgRatio f -> bkgd_data.bgratio <- f
   | BgViewport v -> bkgd_data.bgviewport <- v
-  | BgFun f -> bkgd_data.bgfunction <- f
-;;
+  | BgFun f -> bkgd_data.bgfunction <- f;;
 
 let set_bg_options l = List.iter set_bg_option l;;
 
@@ -350,9 +347,10 @@ let mean_color c c' =
 let get_bg_color x y w h =
   if !ignore_background then Graphics.white else begin
     sync dvi;
-    if !psused || bkgd_data.bgimg <> None || bkgd_data.bgfunction <> None || bkgd_data.bgviewport <> None then
+    if !psused || bkgd_data.bgimg <> None ||
+       bkgd_data.bgfunction <> None || bkgd_data.bgviewport <> None then
       let point_color x y =
-        let x' = min (!size_x-1) x and y' = min (!size_y-1) y in
+        let x' = min (!size_x - 1) x and y' = min (!size_y - 1) y in
         GraphicsY11.point_color x' y' in
       let c = point_color (x + 1) (y + 1) in
       let c' = point_color (x + w - 1) (y + h - 1) in
@@ -450,7 +448,6 @@ let draw_glyph g x0 y0 =
     let img = get_glyph_image g (bg, !color) in
     Graphics.draw_image img x y;
   end;;
-
 
 let fill_rect x0 y0 w h =
   if not !opened then failwith "Grdev.fill_rect: no window";
@@ -669,7 +666,7 @@ module H =
     let draw_anchor style c e a =
       Graphics.set_color c;
       begin match style with
-        Box -> frame_rect e a.A.x a.A.y a.A.w a.A.h
+      | Box -> frame_rect e a.A.x a.A.y a.A.w a.A.h
       | Underline -> frame_rect e a.A.x a.A.y a.A.w e
       | Invisible -> ()
       end;
@@ -858,7 +855,6 @@ module E =
            screen := Graphics.get_image 0 0 !size_x !size_y
            let restore_screen () = ()
          *)
-        
 
     let add rect info =
       let r = { rect with y = !size_y - rect.y; } in
@@ -878,7 +874,6 @@ module E =
           Graphics.set_color !color;
         end
 
-
     let inside x y p  =
       let a = p.rect in
       (if a.w > 0 then a.x <= x && x <= a.x + a.w
@@ -896,13 +891,13 @@ module E =
       let action, dx, dy =
         match a with
         | Move (dx, dy) ->
-            "moveto", delta origin.x dx, delta origin.y (0-dy)
+            "moveto", delta origin.x dx, delta origin.y (0 - dy)
         | Resize (dx, dy) ->
-            "resizeto", delta origin.w dx, delta origin.h (0-dy) in
+            "resizeto", delta origin.w dx, delta origin.h (0 - dy) in
       Printf.sprintf "<edit %s %s #%s @%s %s %s,%s>"
         p.info.comm p.info.name p.info.line p.info.file action dx dy
 
-    let editing() = !editing
+    let editing () = !editing
 
   end;;
 
@@ -1174,12 +1169,12 @@ let wait_select_button_up m x y =
       | _ -> raise exn;;
 
 type trans =
-    Move_xy
+  | Move_xy
   | Move_x
   | Move_y
   | Resize_xy
   | Resize_x
-  | Resize_y
+  | Resize_y;;
 
 let move rect dx dy = { rect with x = rect.x + dx; y = rect.y + dy };;
 let move_x rect dx dy = { rect with x = rect.x + dx };;
@@ -1194,8 +1189,7 @@ let trans  = function
   | Move_y -> move_y
   | Resize_xy -> resize
   | Resize_x -> resize_x
-  | Resize_y -> resize_y
-;;
+  | Resize_y -> resize_y;;
 
 let trans_cursor = function
   | Move_xy -> Busy.Move
@@ -1203,9 +1197,7 @@ let trans_cursor = function
   | Move_y -> Busy.Move
   | Resize_xy -> Busy.Resize
   | Resize_x -> Busy.Resize_x
-  | Resize_y -> Busy.Resize_y
-;;
-
+  | Resize_y -> Busy.Resize_y;;
 
 let filter trans event dx dy =
   let r = trans { x = 0; y = 0; w = 0; h = 0; } dx dy in
@@ -1255,57 +1247,52 @@ let click_area near x y =
 let pressed m b = m land b <> 0;;
 let released m b = m land b = 0;;
 
-module G = GraphicsY11
+module G = GraphicsY11;;
+
 let button m =
-  if pressed m G.button1 then Button1
-  else if pressed m G.button3 then Button3
-  else Button2;;
+  if pressed m G.button1 then Button1 else
+  if pressed m G.button3 then Button3 else
+  Button2;;
 
 let wait_button_up m x y =
-    let wait_position () = 
+  let wait_position () =
     match wait_signal_event button_up with
     | Raw e ->
-        if !editing || pressed m G.shift
-        then
-          begin match click_area close x y with
-            Middle -> Final (Position (x, !size_y - y))
+        if !editing || pressed m G.shift then begin
+          match click_area close x y with
+          | Middle -> Final (Position (x, !size_y - y))
           | c -> Final (Click (c, button m, x, !size_y - y))
           end
         else Final (Click (click_area near x y, button m, x, !size_y - y))
-    | x -> x
-    in
-  if !editing && pressed m G.button1 then
-    wait_position()
-  else if !editing || pressed m G.control then
-    begin
-      try 
-        let p = E.find x y in
-        let rect = p.E.rect in
-        let info = p.E.info in
-        if pressed m G.button2 && info.E.move <> E.Z then
-          let event dx dy = Edit (p, E.Move (dx, dy)) in
-          let action = match info.E.move with
-            E.X -> Move_x | E.Y -> Move_y | _ -> Move_xy in
-          wait_move_button_up rect action event x y 
-        else if pressed m G.button3 && info.E.resize <> E.Z then
-          let event dx dy = Edit (p, E.Resize (dx, dy)) in
-          let action = match info.E.resize with
-            E.X -> Resize_x | E.Y -> Resize_y | _ -> Resize_xy in
-          wait_move_button_up rect action event x y 
-        else Final Nil
-      with
-        Not_found ->
-          if pressed m G.control then
-            let event dx dy = Move (dx, dy) in
-            wait_move_button_up !bbox Move_xy event x y 
-          else
-            wait_position()
-    end
-  else if pressed m G.shift && released m G.button1 then
-    wait_select_button_up m x y
-  else
-    wait_position ()
-;;
+    | x -> x in
+  if !editing && pressed m G.button1 then wait_position () else
+  if !editing || pressed m G.control then begin
+    try
+      let p = E.find x y in
+      let rect = p.E.rect in
+      let info = p.E.info in
+      if pressed m G.button2 && info.E.move <> E.Z then
+        let event dx dy = Edit (p, E.Move (dx, dy)) in
+        let action =
+          match info.E.move with
+          | E.X -> Move_x | E.Y -> Move_y | _ -> Move_xy in
+        wait_move_button_up rect action event x y else
+      if pressed m G.button3 && info.E.resize <> E.Z then
+        let event dx dy = Edit (p, E.Resize (dx, dy)) in
+        let action =
+          match info.E.resize with
+          | E.X -> Resize_x | E.Y -> Resize_y | _ -> Resize_xy in
+        wait_move_button_up rect action event x y 
+      else Final Nil
+    with
+    | Not_found ->
+        if pressed m G.control then
+          let event dx dy = Move (dx, dy) in
+          wait_move_button_up !bbox Move_xy event x y 
+        else wait_position ()
+  end else
+  if pressed m G.shift && released m G.button1 then wait_select_button_up m x y
+  else wait_position ();;
 
 let wait_event () =
   (* We reached a pause. Now we can reset the sleep break *)
@@ -1322,9 +1309,9 @@ let wait_event () =
             if ev.button then
               let ev' = GraphicsY11.wait_next_event button_up in
               send (Href h) else
-              if H.up_to_date act emph then event emph b else begin
-                H.deemphasize true emph;
-                event (H.emphasize_and_flash href_emphasize act) b end
+            if H.up_to_date act emph then event emph b else begin
+              H.deemphasize true emph;
+              event (H.emphasize_and_flash href_emphasize act) b end
         | {A.action =
            {H.tag = H.Advi {H.link = s; H.action = a; H.mode = H.Over};
             H.draw = d}} as act ->
@@ -1337,10 +1324,10 @@ let wait_event () =
               if ev.button && not b then begin
                 H.deemphasize true emph;
                 event (H.save_screen_exec act a) true end else
-                if ev.button then event emph b else
-                if H.up_to_date act emph then event emph b else begin
-                  H.deemphasize true emph;
-                  event (H.emphasize_and_flash href_emphasize act) b end
+              if ev.button then event emph b else
+              if H.up_to_date act emph then event emph b else begin
+                H.deemphasize true emph;
+                event (H.emphasize_and_flash href_emphasize act) b end
         | _ -> rescan ()
         with Not_found ->
           if ev.button then
@@ -1403,7 +1390,7 @@ let embed_app command app_mode app_name width_pixel height_pixel x y =
    command app_mode app_name width_pixel height_pixel x (!size_y - y);;
 
 let wait_button_up () =
-  if GraphicsY11.button_down () then
-    ignore (GraphicsY11.wait_next_event [GraphicsY11.Button_up]);;
+  if GraphicsY11.button_down ()
+  then ignore (GraphicsY11.wait_next_event [GraphicsY11.Button_up]);;
 
 
