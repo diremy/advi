@@ -368,7 +368,6 @@ let set_rule st a b =
 let ill_formed_special s =
   Misc.warning (Printf.sprintf "Ill formed special <<%s>>" s);;
 
-
 let line_special st s =
   match split_string s 0 with
   | key :: line :: rest ->
