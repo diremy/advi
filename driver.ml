@@ -814,6 +814,7 @@ let edit_special st s =
       let r = {
         Dev.rx = float_field "x"; Dev.ry = float_field "y";
         Dev.rw = float_field "w"; Dev.rh = float_field "h";
+        Dev.rd = float_field "d"; 
       } in
       let rect = {
         Dev.rx = st.x_origin + Misc.round (st.conv *. float st.h)
@@ -822,6 +823,7 @@ let edit_special st s =
           - float_to_pixel r.Dev.ry;
         Dev.rw = float_to_pixel r.Dev.rw;
         Dev.rh = float_to_pixel r.Dev.rh;
+        Dev.rd = float_to_pixel r.Dev.rd;
       } in
       let info =
         { Dev.E.comm = field "comm";

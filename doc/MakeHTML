@@ -52,14 +52,14 @@ AUTO=.Makefile.auto
 all: $(AUTO) expand $(FILES) thumbnails
 
 thumbnails:
-	cd pngs; $(MAKE) all
+	cd pngs && $(MAKE) all
 
 expand:
-	cd $(SRC); $(MAKE)
+	cd $(SRC) && $(MAKE)
 
 clean: $(AUTO)
-	cd $(SRC); $(MAKE) clean
-	cd pngs; $(MAKE) clean
+	cd $(SRC) && $(MAKE) clean
+	cd pngs && $(MAKE) clean
 	/bin/rm -f $(FILES)
 
 #  Note: make auto regenerates the rules into file .Makefile.auto.

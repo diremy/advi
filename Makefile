@@ -25,7 +25,15 @@ PACKAGEVERSIONFILE=config.ml
 DOCVERSIONFILES=tex/advi.sty doc_src/Includes/advi-version.html doc/advi.1
 
 HELPFILES=doc/splash.dvi \
-doc/scratch_write_splash.dvi doc/scratch_draw_splash.dvi
+    doc/scratch_write_splash.dvi doc/scratch_draw_splash.dvi
+
+TEXSTYFILES= \
+    advi-annot.sty advi-slides.sty argv.sty tex/superpose.sty \
+    advi-graphicx.sty advi.sty bubble.sty xcolor.sty
+
+STYFILES= $(addprefix tex/, $(STY))
+
+
 
 COPTIONS = -warn-error A -g
 COPTOPTIONS = -warn-error A -unsafe -inline 9
@@ -80,6 +88,8 @@ LINK_OPTS = $(addprefix -ccopt -L, $(CLIBDIRS)) \
 X11_INCLUDES=-I/usr/X11R6/include
 BYTECCCOMPOPTS=-fno-defer-pop -Wall -Wno-unused
 CFLAGS=$(X11_INCLUDES) -O $(BYTECCCOMPOPTS)
+
+default: $(INSTALLTARGET) $(HELPFILES)
 
 all: $(INSTALLTARGET) documentation
 allopt: opt documentation
@@ -155,7 +165,7 @@ install:: $(INSTALLTARGET) $(HELPFILES)
 	- install -d $(ADVI_LOC)
 	install -m 644 $(HELPFILES) tex/advilogo.eps tex/caml.eps \
 		tex/bar.jpg.eps \
-		tex/*.sty $(ADVI_LOC)
+		$(STYFILES) $(ADVI_LOC)
 	if [ -f conf/jpfonts.conf ]; then \
 		install -m 644 conf/jpfonts.conf $(ADVI_LOC); fi
 	texhash

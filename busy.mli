@@ -22,7 +22,7 @@
 
 type busy =
    | Free | Busy | Pause | Disk | Question | Selection | Move
-   | Resize | Resize_x | Resize_y;;
+   | Resize | Resize_w | Resize_h | Resize_d
 (** Different states of the computation. *)
 
 val start_timer : unit -> unit;;

@@ -100,7 +100,7 @@ val help_screen : Misc.file_name -> unit;;
 
 (* Drawing *)
 
-type 'a rect = { rx : 'a; ry : 'a; rh : 'a; rw : 'a };;
+type 'a rect = { rx : 'a; ry : 'a; rh : 'a; rw : 'a; rd : 'a };;
 
 val get_fgcolor : unit -> color;;
 
@@ -237,7 +237,7 @@ module E :
                     origin : float rect; unit : float;
                     move : direction; resize : direction; }
       type figure = { rect : int rect; info : info; }
-      type action = Move of int * int | Resize of int * int
+      type action = Move of int * int | Resize of bool * int * int
 
       val clear : unit -> unit
       val switch_edit_mode : unit -> unit

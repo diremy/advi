@@ -34,7 +34,7 @@ Options.add
 
 type busy =
    | Free | Busy | Pause | Disk | Question | Selection | Move
-   | Resize | Resize_x | Resize_y
+   | Resize | Resize_w | Resize_h | Resize_d
 ;;
 
 let free_cursor = GraphicsY11.Cursor_left_ptr;;
@@ -45,8 +45,9 @@ let question_cursor = GraphicsY11.Cursor_question_arrow;;
 let selection_cursor = GraphicsY11.Cursor_xterm;;
 let move_cursor = GraphicsY11.Cursor_fleur;;
 let resize_cursor = GraphicsY11.Cursor_diamond_cross;;
-let resize_cursor_x = GraphicsY11.Cursor_sb_h_double_arrow;;
-let resize_cursor_y = GraphicsY11.Cursor_sb_v_double_arrow;;
+let resize_cursor_w = GraphicsY11.Cursor_sb_right_arrow;;
+let resize_cursor_h = GraphicsY11.Cursor_sb_up_arrow;;
+let resize_cursor_d = GraphicsY11.Cursor_sb_down_arrow;;
 
 let set_cursor, restore_cursor, last_cursor =
   let last_cursor = ref free_cursor in
@@ -87,8 +88,9 @@ let set = function
   | Selection -> non_busy selection_cursor
   | Move -> set_cursor move_cursor
   | Resize -> set_cursor resize_cursor
-  | Resize_x -> set_cursor resize_cursor_x
-  | Resize_y -> set_cursor resize_cursor_y;;
+  | Resize_w -> set_cursor resize_cursor_w
+  | Resize_h -> set_cursor resize_cursor_h
+  | Resize_d -> set_cursor resize_cursor_d;;
 
 let temp_set c =
   stop_busy ();
@@ -102,8 +104,10 @@ let temp_set c =
     | Selection -> selection_cursor
     | Move -> move_cursor
     | Resize -> resize_cursor
-    | Resize_x -> resize_cursor_x
-    | Resize_y -> resize_cursor_y in
+    | Resize_w -> resize_cursor_w
+    | Resize_h -> resize_cursor_h
+    | Resize_d -> resize_cursor_d
+  in
   GraphicsY11.set_cursor c;;
 
 let stop () =

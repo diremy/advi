@@ -1,3 +1,9 @@
+ - new engine
+ - input foo.ps in gs
+ - draw gpic in gs
+
+
+
 BEFORE RELEASE:
 ===============
 Of course, I know it.

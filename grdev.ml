@@ -631,8 +631,8 @@ let get_glyph_image g col =
       img;;
 
 (*** Device manipulation ***)
-type 'a rect = { rx : 'a; ry : 'a; rh : 'a; rw : 'a };;
-let nobbox =  { rx = 0; ry = 0; rw = 10; rh = 10 };;
+type 'a rect = { rx : 'a; ry : 'a; rh : 'a; rw : 'a; rd : 'a };;
+let nobbox =  { rx = 0; ry = 0; rw = 10; rh = 10; rd = 0 };;
 let bbox = ref nobbox;;
 
 let set_bbox bb =
@@ -641,7 +641,8 @@ let set_bbox bb =
   | None ->
       bbox := nobbox;
   | Some (x0, y0, w, h) ->
-      bbox := {rx = x0; ry = !size_y - y0; rw = w; rh = -h};;
+      (* rd is always zero for bounding box *)
+      bbox := {rx = x0; ry = !size_y - y0; rw = w; rh = -h; rd = 0};;
 
 (*** Drawing ***)
 let get_color, set_color =
@@ -1067,7 +1068,7 @@ module E =
                   origin : float rect; unit : float;
                   move : direction; resize : direction; }
     type figure = { rect : int rect; info : info; }
-    type action = Move of int * int | Resize of int * int
+    type action = Move of int * int | Resize of bool * int * int
 
     let figures : figure list ref = ref []
     let screen = ref None
@@ -1089,7 +1090,8 @@ module E =
       if !editing then
         begin
           Graphics.set_color Graphics.blue;
-          draw_rectangle r.rx r.ry r.rw r.rh;
+          draw_rectangle r.rx (r.ry - r.rd) r.rw (r.rh + r.rd);
+          draw_line r.rx r.ry r.rw 0; 
           let cv z = truncate (z *. info.unit) in
           let ox = cv info.origin.rx in
           let oy = cv info.origin.ry in
@@ -1103,10 +1105,14 @@ module E =
 
     let inside x y p  =
       let a = p.rect in
-      (if a.rw > 0 then a.rx <= x && x <= a.rx + a.rw
-      else a.rx + a.rw <= x && x <= a.rx) &&
-      (if a.rh > 0 then a.ry <= y && y <= a.ry + a.rh
-      else a.ry + a.rh <= y && y <= a.ry)
+      let ax = a.rx in
+      let aw = a.rw in
+      let ay = a.ry - a.rd in
+      let ah = a.rh + a.rd in
+      (if aw > 0 then ax <= x && x <= ax + aw
+      else ax + aw <= x && x <= ax) &&
+      (if ah > 0 then ay <= y && y <= ay + ah
+      else ay + ah <= y && y <= ay)
     let find x y = List.find (inside x y) !figures
 
     let tostring p a =
@@ -1118,9 +1124,12 @@ module E =
       let action, dx, dy =
         match a with
         | Move (dx, dy) ->
-            "moveto", delta origin.rx dx, delta origin.ry (0 - dy)
-        | Resize (dx, dy) ->
-            "resizeto", delta origin.rw dx, delta origin.rh (0 - dy) in
+            "moveto", delta origin.rx dx, delta origin.ry dy
+        | Resize (false, dx, dy) ->
+            "resizetop", delta origin.rw dx, delta origin.rh dy
+        | Resize (true, dx, dy) ->
+            "resizebot", delta origin.rw dx, delta origin.rd dy
+      in
       Printf.sprintf "<edit %s %s #%s @%s %s %s,%s>"
         p.info.comm p.info.name p.info.line p.info.file action dx dy
 
@@ -1394,48 +1403,59 @@ type rect_transformation =
   | Move_xy
   | Move_x
   | Move_y
-  | Resize_xy
-  | Resize_x
-  | Resize_y;;
+  | Resize_hw
+  | Resize_dw
+  | Resize_w
+  | Resize_h
+  | Resize_d
+;;
 
 (* Their implementations. *)
-let move_rect r dx dy = { r with rx = r.rx + dx; ry = r.ry + dy };;
-let move_rect_x r dx dy = { r with rx = r.rx + dx };;
-let move_rect_y r dx dy = { r with ry = r.ry + dy };;
-let resize_rect r dx dy = { r with rw = r.rw + dx; rh = r.rh + dy };;
-let resize_rect_x r dx dy = { r with rw = r.rw + dx };;
-let resize_rect_y r dx dy = { r with rh = r.rh + dy };;
+let move_rect r dx dy = { r with rx = r.rx + dx; ry = r.ry + dy }
+let move_rect_x r dx dy = { r with rx = r.rx + dx }
+let move_rect_y r dx dy = { r with ry = r.ry + dy }
+let resize_rect_hw r dx dy = { r with rw = r.rw + dx; rh = r.rh + dy }
+let resize_rect_dw r dx dy = { r with rw = r.rw + dx; rd = r.rd - dy }
+let resize_rect_w r dx dy = { r with rw = r.rw + dx }
+let resize_rect_h r dx dy = { r with rh = r.rh + dy }
+let resize_rect_d r dx dy = { r with rd = r.rd - dy }
 
 let transform_rect = function
   | Move_xy -> move_rect
   | Move_x -> move_rect_x
   | Move_y -> move_rect_y
-  | Resize_xy -> resize_rect
-  | Resize_x -> resize_rect_x
-  | Resize_y -> resize_rect_y;;
+  | Resize_hw -> resize_rect_hw
+  | Resize_dw -> resize_rect_dw
+  | Resize_h -> resize_rect_h
+  | Resize_d -> resize_rect_d
+  | Resize_w -> resize_rect_w
 
 let transform_cursor = function
   | Move_xy -> Busy.Move
   | Move_x -> Busy.Move
   | Move_y -> Busy.Move
-  | Resize_xy -> Busy.Resize
-  | Resize_x -> Busy.Resize_x
-  | Resize_y -> Busy.Resize_y;;
+  | Resize_hw -> Busy.Resize
+  | Resize_dw -> Busy.Resize
+  | Resize_w -> Busy.Resize_w
+  | Resize_h -> Busy.Resize_h
+  | Resize_d -> Busy.Resize_d
 
 (* ?? *)
 let filter trans event dx dy =
-  let r = trans { rx = 0; ry = 0; rw = 0; rh = 0; } dx dy in
-  event (r.rx + r.rw) (r.ry + r.rh);;
+  let r = trans { rx = 0; ry = 0; rw = 0; rh = 0; rd = 0} dx dy in
+  event (r.rx + r.rw) (0 - r.ry - r.rh - r.rd);;
 
 let wait_move_button_up rect trans_type event x y =
   let trans = transform_rect trans_type in
   let cursor = transform_cursor trans_type in
   let rec move dx dy =
     let r = trans rect dx dy in
-    let buf = save_rectangle r.rx r.ry r.rw r.rh in
-    draw_rectangle r.rx r.ry r.rw r.rh;
+    let rx = r.rx in let ry = r.ry - r.rd in
+    let rw = r.rw in let rh = r.rh + r.rd in
+    let buf = save_rectangle rx ry rw rh in
+    draw_rectangle rx ry rw rh;
     let ev = wait_signal_event button_up_motion in
-    restore_rectangle buf r.rx r.ry r.rw r.rh;
+    restore_rectangle buf rx ry rw rh;
     match ev with
     | Raw e ->
         let dx' = e.GraphicsY11.mouse_x - x in
@@ -1501,11 +1521,16 @@ let wait_button_up m x y =
           match info.E.move with
           | E.X -> Move_x | E.Y -> Move_y | _ -> Move_xy in
         wait_move_button_up rect action event x y else
-      if pressed m G.button3 && info.E.resize <> E.Z then
-        let event dx dy = Edit (p, E.Resize (dx, dy)) in
+      if (pressed m G.button3 || pressed m G.button1)
+        && info.E.resize <> E.Z then
+        let b = pressed m G.shift in
+        let event dx dy = Edit (p, E.Resize (b, dx, dy)) in
         let action =
           match info.E.resize with
-          | E.X -> Resize_x | E.Y -> Resize_y | _ -> Resize_xy in
+          | E.X -> Resize_w
+          | E.Y -> if b then Resize_d else Resize_h
+          | _ -> if b then Resize_dw else Resize_hw
+        in
         wait_move_button_up rect action event x y
       else Final Nil
     with
