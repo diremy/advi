@@ -157,10 +157,11 @@ type cursor =
 ;;
 
 val set_cursor : cursor -> unit;;
-        (* set the cursor for the graphics window *)
-
+        (* sets the cursor for the graphics window *)
+val get_cursor : unit -> cursor;;
+        (* returns the current cursor of the graphics window *)
 val unset_cursor : unit -> unit;;
-        (* unset the cursor (use the parent's cursor) *)
+        (* unsets the cursor (use the parent's cursor) *)
 
 external get_geometry : unit -> int * int * int * int = "gr_get_geometry";;
         (* returns width, height, x, y of the graphics window *)

@@ -290,7 +290,13 @@ let glyph_of_cursor = function
 external set_cursor : int -> unit = "gr_set_cursor";;
 external unset_cursor : unit -> unit = "gr_unset_cursor";;
 
-let set_cursor c = set_cursor (glyph_of_cursor c);;
+let cursor = ref Cursor_left_ptr;;
+
+let set_cursor c =
+ cursor := c;
+ set_cursor (glyph_of_cursor c);;
+
+let get_cursor () = !cursor;;
 
 external get_geometry : unit -> int * int * int * int = "gr_get_geometry";;
         (* returns width, height, x, y of the graphics window *)
