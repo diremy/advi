@@ -1,10 +1,14 @@
 TOPDIR=../../..
 FILES=tools.tex
+
 include ../../lib/Makefile
+
+all::
+	advi tools.dvi
 
 EPS=bar.jpg.eps cameleon.eps cameleon2.eps hump.eps logo.gif.eps ocaml.eps ocamldoc.eps ODBC.eps
 
-tools.dvi: $(EPS) tools.tex
+tools.dvi: uncompress $(EPS) tools.tex
 	ln -sf ../../../tex/advi.pro advi.pro
 	$(LATEX) tools.tex
 
@@ -13,13 +17,19 @@ tools.pdf: $(EPS) tools.tex
 	dvips -o $*.ps $*.dvi && ps2pdf $*.ps $*.pdf
 	rm $*.dvi 
 
-.SUFFIXES: .eps_gz .eps
+uncompress:
+	gunzip *.eps.gz
 
-clean:
-	rm -f *.eps *.dvi *.pdf *.aux *.log *.ps *~
-
-%.eps:%.eps.gz
-	gunzip -c $< > $@
+clean::
+	for i in $(EPS); do \
+	  if test -f $$i; \
+	then \
+	 gzip $$i; \
+	else \
+	 echo $$i; \
+	fi; \
+	done
+	rm -f *.dvi *.pdf *.aux *.log *.ps *~
 
 .phony: show
 
