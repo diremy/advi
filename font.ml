@@ -98,7 +98,7 @@ module Japanese = struct
 	with _ -> open_in sys_conffile, sys_conffile in
       try while true do 
 	let line = input_line ic in
-	if not (try line.[0] = '#' with _ -> true) then begin
+	if not (String.length line = 0 || line.[0] = '#') then begin
 	  let tks = 
 	    Misc.split_string line 
 	      (function ' ' | '\t' -> true | _ -> false) 0 
