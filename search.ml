@@ -17,75 +17,53 @@
 
 (* $Id$ *)
 
-(* -Why use an auxilliary file that may be left as garbage with abrupt 
-   exit here? removed all occurrences of this. -Didier *) 
-
-(* let temp_filename = Filename.temp_file "advi" "";; *)
 let database_mtime = ref 0.0;;
 let database_table = Hashtbl.create 257;;
 
-(* Add local path to search environment. *)
-
-exception Command;;
-
-(*
-let command_string com opt =
-  let command = Printf.sprintf "%s %s > %s" com opt temp_filename in
-  let exit_status = Sys.command command in
-  if exit_status <> 0 then raise Command else
-  try
-    let ch = open_in temp_filename in
-    try
-      let res = input_line ch in
-      close_in ch;
-      res
-    with x -> close_in ch; raise x
-  with _ ->
-    Misc.warning
-      (Printf.sprintf "Error %d while executing %s %s" exit_status com opt);
-    raise Command
-;;
-*)
-
 let unwind_protect f x g y =
-  try let v = f x in g y; v with z -> g y; raise z 
+  try let v = f x in g y; v with
+  | exc -> g y; raise exc;;
 
 let open_process_in cmd =
-  let (in_read, in_write) = Unix.pipe() in
+  let (in_read, in_write) = Unix.pipe () in
   let pid =
     Unix.create_process "/bin/sh" [| "/bin/sh"; "-c"; cmd |]
       Unix.stdin in_write Unix.stderr in
   Unix.close in_write;
   let inchan = Unix.in_channel_of_descr in_read in
-  pid, inchan
+  pid, inchan;;
 
 let close_process_in (pid, inchan) =
   close_in inchan;
-  let rec wait() =
-    try snd(Unix.waitpid [] pid)
-    with Unix.Unix_error(Unix.EINTR, _, _) -> wait() in
-  wait()
+  let rec wait () =
+    try snd (Unix.waitpid [] pid) with
+    | Unix.Unix_error(Unix.EINTR, _, _) -> wait () in
+  wait ();;
 
-let command_string com opt = 
+exception Command;;
+
+let command_string com opt =
   let command = Printf.sprintf "%s %s" com opt in
-  Misc.debug_endline command;
-  try 
+  Misc.debug_endline (Printf.sprintf "command_string: launching %s" command);
+  try
     let pid, chan as pidchan = open_process_in command in
-    unwind_protect input_line chan close_process_in pidchan
-  with Unix.Unix_error(c,_,_) -> 
-    Misc.warning
-      (Printf.sprintf "Error %s while executing %s %s"
-         (Unix.error_message c) com opt);
-    raise Command
+    unwind_protect input_line chan close_process_in pidchan with
+  | Unix.Unix_error (c, _, _) ->
+      Misc.warning
+        (Printf.sprintf "Error %s while executing %s %s"
+          (Unix.error_message c) com opt);
+      raise Command
   | End_of_file -> ""
+;;
 
+(* Add local path to search environment. *)
 let addpath elem var kind =
   let oldv =
     try Unix.getenv var with
     | Not_found ->
         try command_string Config.kpsewhich_path
-              (Printf.sprintf "-show-path='%s'" kind)
-        with Command -> "" in
+              (Printf.sprintf "-show-path='%s'" kind) with
+        | Command -> "" in
   let newv = oldv ^ ":" ^ elem in
   Unix.putenv var newv
 ;;
@@ -93,9 +71,6 @@ let addpath elem var kind =
 addpath Config.advi_loc "PSHEADERS" Config.psheaders_kind;
 addpath Config.advi_loc "TEXPICTS"  Config.texpicts_kind;;
 
-(*
-at_exit (fun () -> try Sys.remove temp_filename with _ -> ());;
-*)
 let is_space = function
   | ' ' | '\n' | '\r' | '\t' -> true
   | _ -> false
@@ -147,13 +122,13 @@ let database_font_path fontname dpi =
 
 let true_file_name options file =
   let args = String.concat " " (options @ [file]) in
-  try 
+  try
     let s = command_string Config.kpsewhich_path args in
     if s = "" then raise Command;
     s
   with
   | Command ->
-      Misc.warning (Printf.sprintf "%s is not found" file);
+      Misc.warning (Printf.sprintf "file %s is not found" file);
       raise Not_found
 ;;
 
