@@ -107,155 +107,149 @@ class gs () =
     s in
   let int32_string x = Int32.format "%u" x in
 
-let _ =
-  Unix.putenv "GHOSTVIEW"
-    (Printf.sprintf "%s %s "
-       (int32_string gr.window)
-       (if  !Misc.global_display_mode then "" else int32_string gr.pixmap)
-    ) in
-let _ =
-  Printf.printf "%s wid=%s pid=%s"
-    (Unix.getenv "GHOSTVIEW")
-    (Int32.format "0x%x" gr.window)
-    (Int32.format "0x%x" gr.pixmap);
-  print_newline () in
+  let _ =
+    Unix.putenv "GHOSTVIEW"
+      (Printf.sprintf "%s %s "
+         (int32_string gr.window)
+         (if  !Misc.global_display_mode then "" else int32_string gr.pixmap)
+      ) in
 
-let iof = int_of_float and foi = float_of_int in
-let lx = iof ( (foi (gr.x * dpi)) /. gr.xdpi)
-and ly = iof ( (foi (gr.y * dpi)) /. gr.ydpi)
-and ux = iof ( (foi ((gr.x + gr.bwidth)  * dpi)) /. gr.xdpi )
-and uy = iof ( (foi ((gr.y + gr.bheight) * dpi)) /. gr.ydpi)
+  let iof = int_of_float and foi = float_of_int in
+  let lx = iof ( (foi (gr.x * dpi)) /. gr.xdpi)
+  and ly = iof ( (foi (gr.y * dpi)) /. gr.ydpi)
+  and ux = iof ( (foi ((gr.x + gr.bwidth)  * dpi)) /. gr.xdpi )
+  and uy = iof ( (foi ((gr.y + gr.bheight) * dpi)) /. gr.ydpi)
 
-in
+  in
 
   (* Set ghostscript property. *)
-let content = Printf.sprintf "%s %d %d %d %d %d %f %f %d %d %d %d"
-    "0" (* no backing pixmap for the window *)
-    0   (* Rotation : 0 90 180 270 *)
-    lx ly ux uy
+  let content = Printf.sprintf "%s %d %d %d %d %d %f %f %d %d %d %d"
+      "0" (* no backing pixmap for the window *)
+      0   (* Rotation : 0 90 180 270 *)
+      lx ly ux uy
       (* lower-left x y , upper-right x y :
          Bounding box in default user coordinates. *)
-    gr.xdpi gr.ydpi (* Resolution x y. *)
-    0 0 0 0 (* Margins left, bottom, top, right. *)
-in
+      gr.xdpi gr.ydpi (* Resolution x y. *)
+      0 0 0 0 (* Margins left, bottom, top, right. *)
+  in
 
-let _ =
-  begin
-    try GraphicsY11.set_named_atom_property  "GHOSTVIEW"  content;
-    with x -> Misc.fatal_error "Cannot set ``GHOSTVIEW'' property"
-  end;
-in
+  let _ =
+    begin
+      try GraphicsY11.set_named_atom_property  "GHOSTVIEW"  content;
+      with x -> Misc.fatal_error "Cannot set ``GHOSTVIEW'' property"
+    end;
+  in
 
   (* Ignore signal SIGPIPE. *)
-let _ =  Unix.sigprocmask Unix.SIG_BLOCK [13] in
+  let _ =  Unix.sigprocmask Unix.SIG_BLOCK [13] in
 
-let lpd_in, lpd_out = Unix.pipe () in
-let rpd_in, rpd_out = Unix.pipe () in
-let leftout = Unix.out_channel_of_descr lpd_out in
-let rightin = Unix.in_channel_of_descr rpd_in in
-let close_all () =
-  let tryc f x = try f x with _ -> () in
-  tryc close_out leftout;
-  tryc close_in rightin;
-  tryc Unix.close lpd_in;
-  tryc Unix.close rpd_in
-in
-let pid =
-  Unix.create_process command command_args lpd_in rpd_out
+  let lpd_in, lpd_out = Unix.pipe () in
+  let rpd_in, rpd_out = Unix.pipe () in
+  let leftout = Unix.out_channel_of_descr lpd_out in
+  let rightin = Unix.in_channel_of_descr rpd_in in
+  let close_all () =
+    let tryc f x = try f x with _ -> () in
+    tryc close_out leftout;
+    tryc close_in rightin;
+    tryc Unix.close lpd_in;
+    tryc Unix.close rpd_in
+  in
+  let pid =
+    Unix.create_process command command_args lpd_in rpd_out
       (* Unix.stdout *) Unix.stderr
-in
-object (self)
-  val pid = pid
-  val mutable ack = 0
-  method gr = gr
+  in
+  object (self)
+    val pid = pid
+    val mutable ack = 0
+    method gr = gr
 
-  method ack_request =
-    try
-      ack <- ack + 1;
-      self # line ack_request;
-      flush leftout;
-      self # ack;
-    with Killed s ->
-      self # kill;
-      Misc.warning s;
-      raise Terminated
-    | exn ->
-        Misc.warning (Printexc.to_string exn);
+    method ack_request =
+      try
+        ack <- ack + 1;
+        self # line ack_request;
+        flush leftout;
+        self # ack;
+      with Killed s ->
         self # kill;
+        Misc.warning s;
         raise Terminated
+      | exn ->
+          Misc.warning (Printexc.to_string exn);
+          self # kill;
+          raise Terminated
 
-  method ack =
-    if ack > 0 then
-      begin
-        let s =
-          try input_line rightin
-          with End_of_file ->
-            match select [ rpd_in ] [] [] 1.0 with
-            | [], _, _ ->
-                begin match Unix.waitpid [ Unix.WNOHANG ] pid with
-                | x, Unix.WEXITED y when x > 0 ->
-                    raise (Killed "gs exited")
-                | 0, _ ->
-                    raise (Killed "gs alive but not responding")
-                | _, _ ->
-                    raise (Killed "gs in strange state")
-                end
-            | _, _, _ ->
-                input_line rightin  in
-        if Misc.has_prefix s ack_string
-        then ack <- ack -1
-        else if Misc.has_prefix pos_string s then
-          begin
-            try
-              let y, x = parse_pos s in
-              let y = gr.height + y in
-              current_x := x; current_y := y
-            with
-            | Not_found | Failure _ -> prerr_endline s
-          end
-        else if Misc.has_prefix err_string s then
-          begin
-            prerr_endline s;
-            raise (Killed "Error in Postscript");
-          end
-        else prerr_endline s;
-        self # ack
-      end;
+    method ack =
+      if ack > 0 then
+        begin
+          let s =
+            try input_line rightin
+            with End_of_file ->
+              match select [ rpd_in ] [] [] 1.0 with
+              | [], _, _ ->
+                  begin match Unix.waitpid [ Unix.WNOHANG ] pid with
+                  | x, Unix.WEXITED y when x > 0 ->
+                      raise (Killed "gs exited")
+                  | 0, _ ->
+                      raise (Killed "gs alive but not responding")
+                  | _, _ ->
+                      raise (Killed "gs in strange state")
+                  end
+              | _, _, _ ->
+                  input_line rightin  in
+          if Misc.has_prefix s ack_string
+          then ack <- ack -1
+          else if Misc.has_prefix pos_string s then
+            begin
+              try
+                let y, x = parse_pos s in
+                let y = gr.height + y in
+                current_x := x; current_y := y
+              with
+              | Not_found | Failure _ -> prerr_endline s
+            end
+          else if Misc.has_prefix err_string s then
+            begin
+              prerr_endline s;
+              raise (Killed "Error in Postscript");
+            end
+          else prerr_endline s;
+          self # ack
+        end;
 
-  method kill =
-    try
-      Unix.kill pid 3;
-      close_all ();
-    with Unix.Unix_error (_, _, _) -> ()
+    method kill =
+      try
+        Unix.kill pid 3;
+        close_all ();
+      with Unix.Unix_error (_, _, _) -> ()
 
-  method line l =
-    try
-      output_string leftout l;
-      output_char leftout '\n';
-      if !showps then print_endline l;
-    with x ->
-      prerr_endline  (Printexc.to_string x);
-      self # kill;
-      prerr_endline "GS Terminated";
-      flush stderr
-
-  method sync =
-    try self # ack_request;
-    with
-      Killed s ->
+    method line l =
+      try
+        output_string leftout l;
+        output_char leftout '\n';
+        if !showps then print_endline l;
+      with x ->
+        prerr_endline  (Printexc.to_string x);
         self # kill;
-        Misc.dops := false;
-        prerr_endline s;
-        prerr_endline "Continuing without gs\n";
+        prerr_endline "GS Terminated";
         flush stderr
 
-  method ps b =
-    List.iter self#line b;
+    method sync =
+      try self # ack_request;
+      with
+        Killed s ->
+          self # kill;
+          Misc.dops := false;
+          prerr_endline s;
+          prerr_endline "Continuing without gs\n";
+          flush stderr
 
-  method load_header h =
-    self # line (String.concat "" [ "("; h; ") run"; ]);
+    method ps b =
+      List.iter self#line b;
 
-end;;
+    method load_header h =
+      self # line (String.concat "" [ "("; h; ") run"; ]);
+
+  end;;
 
 let texbegin = "TeXDict begin";;
 let texend = "flushpage end";;

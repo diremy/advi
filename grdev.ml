@@ -552,9 +552,6 @@ type app_type = Sticky | Persistent | Ephemeral;;
 let app_table = Hashtbl.create 17;;
 
 let raw_embed_app command app_type app_name width height x y =
-  prerr_endline
-    (Printf.sprintf "Launching %s (w=%i, h=%i) at %i %i"
-       app_name width height x y);
   let string_replace pat templ str =
     let result = Buffer.create (String.length str * 2) in
     let patlen = String.length pat in
@@ -578,10 +575,6 @@ let raw_embed_app command app_type app_name width height x y =
 
   (* Use graphics coordinates for subwindows *)
   let gry = !size_y - y in
-  prerr_endline (Printf.sprintf "size_y %i, y %i" !size_y y);
-  prerr_endline
-    (Printf.sprintf "Launching %s (w=%i, h=%i) at x=%i gry=%i"
-       app_name width height x gry);
 
   let wid = GraphicsY11.open_subwindow ~x ~y:gry ~width ~height in
 
@@ -647,25 +640,17 @@ let find_embedded_app app_name =
   hashtbl_find app_table (fun (_, name, _) -> name = app_name);;
 
 let map_embed_app command app_type app_name width height x y =
-  prerr_endline
-    (Printf.sprintf "Mapping %s (w=%i, h=%i) at %i %i"
-       app_name width height x y);
   let _, (app_type, app_name, wid) = find_embedded_app app_name in
   GraphicsY11.map_subwindow wid;;
 
 let unmap_embed_app command app_type app_name width height x y =
- prerr_endline ("Unmapping " ^ app_name);
  let _, (app_type, app_name, wid) = find_embedded_app app_name in
- GraphicsY11.unmap_subwindow wid;
- prerr_endline (app_name ^ " unmapped");;
+ GraphicsY11.unmap_subwindow wid;;
 
 let move_or_resize_persistent_app command app_type app_name width height x y =
   let _, (app_type, app_name, wid) = find_embedded_app app_name in
-  prerr_endline (Printf.sprintf "Resizing %s to %i, %i" app_name width height);
   GraphicsY11.resize_subwindow wid width height;
-  prerr_endline (Printf.sprintf "size_y %i, y %i" !size_y y);
   let gry = !size_y - y + height - width in
-  prerr_endline (Printf.sprintf "Moving %s to x=%i, gry=%i" app_name x gry);
   GraphicsY11.move_subwindow wid x gry;;
 
 (* In hash table t, verifies that at least one element verifies p. *)
@@ -745,9 +730,7 @@ let kill_embedded_app app_name =
       Misc.warning (Printf.sprintf "application %s is not running" app_name);;
 
 let unmap_persistent_apps () =
-  prerr_endline "Unmapping persistent apps";
   List.iter (fun f -> f ()) (List.rev !unmap_embeds);
-  prerr_endline "Persistent apps unmapped";
   unmap_embeds := [];;
 
 let kill_ephemeral_apps () =
@@ -1009,7 +992,6 @@ let open_dev geom =
   opened := true;;
 
 let close_dev () =
-  prerr_endline "Closing dev";
   if !opened then begin
     kill_ephemeral_apps ();
     kill_persistent_apps ();

@@ -1,5 +1,7 @@
 BUGS:
 
+* PStricks ne marche pas correctement avec \SpecialCoor
+
 * Chase all uncaught exceptions (using  Pessaux's tool?)
 For instance:
 
@@ -24,6 +26,8 @@ CLEANING:
 WISH LIST: 
 
 - adapter la résolution aux vrai dpy de l'écran
+
+- traiter directement les images gifs avec camlimage.
 
 - fullscreen mode (en graphics?)
 ==> DONE, à tester.
