@@ -70,8 +70,13 @@ clean::
 test_subwindow: test_subwindow.ml
 	ocamlc -custom -I .. unix.cma graphics.cma -ccopt -L.. ../grY11.o ../events.o ../graphicsY11.cmo test_subwindow.ml 
 
+clean::
+	$(RM) test_cursors
 test_cursors: test_cursors.ml
-	ocamlc -custom -I .. unix.cma graphics.cma -ccopt -L.. ../grY11.o ../events.o ../misc.cmo ../grwm.o ../graphicsY11.cmo test_cursors.ml -cclib "$(WITH_X)" -o	test_cursors
+	ocamlc -custom -I .. unix.cma graphics.cma -ccopt \
+	-L.. ../grY11.o ../events.o ../misc.cmo ../grwm.o \
+	../graphicsY11.cmo test_cursors.ml -cclib "$(WITH_X)" \
+	-o test_cursors 
 
 trigo.tex: trigo.pic
 	gpic -t trigo.pic > trigo.tex

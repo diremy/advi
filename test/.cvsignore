@@ -1,6 +1,7 @@
 taquin
 but
 adviclock
+test_cursors
 *.log
 *.dvi
 *.aux
