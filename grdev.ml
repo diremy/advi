@@ -152,10 +152,11 @@ let sleep_watch b n =
 
 let sleep = sleep_watch true;;
 
-let _ = Transimpl.sleep := sleep;;
+Transimpl.sleep := sleep;;
 
 let set_transition trans = Transimpl.current_transition := trans;;
 
+(* Applications function handlers. *)
 let embeds = ref [];;
 let persists = ref [];;
 let unmap_embeds = ref [];;
@@ -172,15 +173,12 @@ let synchronize () =
 let transbox_save x y width height = 
   synchronize ();
   let x' = x and y' = !size_y - y in
-  Transimpl.transbox_save x' y' width height;
-;;
-  
+  Transimpl.transbox_save x' y' width height;;
   
 let transbox_go trans = 
   Gs.flush ();
   Transimpl.transbox_go trans;
-  synchronize ()
-;;
+  synchronize ();;
 
 (*** Private glyphs ***)
 
@@ -627,8 +625,8 @@ let unmap_embed_app command app_type app_name width height x y =
 
 let move_or_resize_persistent_app command app_type app_name width height x y =
   let _, (app_type, app_name, wid) = find_embedded_app app_name in
-  (* To be refined *)
-  ();;
+  prerr_endline (Printf.sprintf "Moving %s to %i, %i" app_name x y);
+  GraphicsY11.move_subwindow wid x y;;
 
 (* In hash table t, verifies that at least one element verifies p. *)
 let hashtbl_exists t f =
@@ -646,8 +644,9 @@ let embed_app command app_type app_name width height x y =
       (fun () -> raw_embed_app command app_type app_name width height x y) ::
       !embeds else
      persists :=
-      (fun () -> move_or_resize_persistent_app command
-         app_type app_name width height x y) ::
+      (fun () ->
+         move_or_resize_persistent_app command
+           app_type app_name width height x y) ::
       !persists
   | Persistent ->
      if not (already_launched app_name) then
