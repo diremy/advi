@@ -1,5 +1,5 @@
 LATEX=TEXINPUTS=.:../tex: latex
-DVIPS=TEXINPUTS=.:../tex: dvips
+DVIPS=TEXPSHEADERS=.:../tex: dvips
 
 all: manual.ps manual.pdf splash.dvi splash.ps
 
