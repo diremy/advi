@@ -644,11 +644,11 @@ end
 % \def \adviw {\advi@edit@w \advi@edit@unit}
 % \def \advih {\advi@edit@h \advi@edit@unit}
 % \def \advid {\advi@edit@d \advi@edit@unit}
-\let \advicx \advi@edit@x
-\let \advicy \advi@edit@y
-\let \advicw \advi@edit@w
-\let \advich \advi@edit@h
-\let \advicd \advi@edit@d
+\def \advicx {\advi@edit@x}
+\def \advicy {\advi@edit@y}
+\def \advicw {\advi@edit@w}
+\def \advich {\advi@edit@h}
+\def \advicd {\advi@edit@d}
 
 \def \advi@edit@defaults{%
   \advi@edit@unit 1em\relax
@@ -683,6 +683,7 @@ end
 \define@key {advi@edit}{d}[1]{\def \advi@edit@d{#1}\def\advi@edit@D{d}}
 
 \def \advi@edit@comm {\string\adviedit}
+\let \advi@edit@makelineno \relax
 \def \advi@edit@line {\the \inputlineno}
 \def \advi@edit@file {\jobname}
 \define@key {advi@edit}{comm}{\def \advi@edit@comm {\string #1}}
@@ -715,7 +716,7 @@ end
        \setbox0=\hbox {\raise \adviy \hbox {\kern \advix\box0}}%
        \dp0=0pt\wd0=0pt\ht0=0pt
     \fi
-    \box0%
+    \advi@edit@makelineno
     \advi@special
       {edit\space
        comm="\advi@edit@comm"\space
@@ -729,6 +730,7 @@ end
        \advi@edit@H=\advi@edit@h\space
        \advi@edit@D=\advi@edit@d\space
        }%
+    \box0%
   \egroup
 }
 

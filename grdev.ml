@@ -1038,7 +1038,8 @@ module H =
         match t with
         | Name n ->
             let t = Name (Misc.get_suffix "#" n) in
-            emphasize Draw name_emphasize_color (find_tag t)
+            emphasize Fill (* do not put Draw here -Didier *)
+              name_emphasize_color (find_tag t)
         | _ -> Nil
       with
       | Not_found | Misc.Match -> Nil
