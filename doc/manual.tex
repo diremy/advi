@@ -96,14 +96,15 @@ file included in the distribution.
 \end{abstract}
 
 \vfill
- \section*{Acknowledgments and contributors}
+\section*{Acknowledgments and contributors}
 
 {\ActiveDVI} is based on Mldvi which constitutes its core rendering
-engine. Alexandre~Miquel wrote Mldvi and distributes it under the LGPL
-license at URL \url{http://pauillac.inria.fr/~miquel/}.
+engine. \\
+Alexandre~Miquel wrote Mldvi and distributes it under the LGPL
+license at URL\\ {\url{http://pauillac.inria.fr/~miquel/}}.
 
-{\ActiveDVI} has been developed by Jun~Furuse, Didier~R{\'{e}}my and
-Pierre~Weis with also contributions by Roberto~Di~Cosmo, Didier~Le~Botlan,
+{\ActiveDVI} has been developed by Jun~Furuse, Didier~R{\'{e}}my, and
+Pierre~Weis, with contributions by Roberto~Di~Cosmo, Didier~Le~Botlan,
 Xavier~Leroy, and Alan~Schmitt.
 
 \clearpage
@@ -354,8 +355,8 @@ original TeX source.
 \medskip\noindent\begin{tabular}{ll}
 \verb"-fgcolor <color>" & Specify the color of the foreground color \\
 \verb"-bgcolor <color>" & Specify the color of the background color \\
-\verb"-rv" & Specify that reverse video should be simulated by
-exchanging the background and foreground colors \\
+\verb"-rv" & Specify that reverse video should be simulated by exchanging \\
+& the background and foreground colors \\
 \verb"-gamma <float>" & Specify gamma correction ($>0.0$) of glyphs\\
 \end{tabular}
 
@@ -404,7 +405,7 @@ implicit switch to master \\& on \texttt{usr1} signal (default if off).\\
 
 \subsection{Cut and paste}
 
-Text can be copied from the {\ActiveDVI} previewer to an another application.
+Text can be copied from the {\ActiveDVI} previewer to another application.
 However, this uses the \doctt{XBuffer} and not the \doctt{XSelection}
 mechanism.
 \begin {itemize}
@@ -422,7 +423,7 @@ have been instrumented with line numbers of the form
 where \docid {line} and \docid {file} are the current source line and
 current source file.
 
-The position is exported in ASCII in the form
+The position is exported in ASCII, in the form
 \begin{quote}
 \verb"#line "\docid{before}, \docid{after} 
 \doctt {<<}\docid{prefix}\doctt{>><<}\docid{suffix}\doctt{>>}
@@ -458,10 +459,9 @@ within the target, we use the following command instead:
   {\special{html:<A name=\hyper@quote #1\hyperquote>}#2\special{html:</A>}}
 \end{verbatim}
 
-(If you are viewing this document with \softtarget{activedvi}{{\ActiveDVI}},
-you may move over \softlink{activedvi}{this area} 
-or click on \softlink{otherpage}{this one} to see
-the effect.)
+(If you are viewing this document with \softtarget{targethere}{{\ActiveDVI}},
+you may move over \softlink{targethere}{this area} 
+or click on \softlink{otherpage}{this one} to see the effect.)
 
 \subsection{Floating table of contents and thumbnails}
 
@@ -478,12 +478,12 @@ of the table of contents. Successive stokes will show the following
 pages. (As usual, prefix integer argument may be used to directly
 access a specific page of the table of contents.)
 
-The package \softlink{advi}{\doctt{advi}} described below redefines the macro
-{\docdef\tableofcontents} so that it automatically inserts the
-reserved hyper-targets markers around the table of contents. It also
-provides two new macros, {\docdef\advitoc} and \docdef\endadvitoc,
-that serve to insert these markers when the table of contents is
-hand-made.
+The package \softlink{advistyle}{\doctt{advi}} described below
+redefines the macro {\docdef\tableofcontents} so that it automatically
+inserts the reserved hyper-targets markers around the table of
+contents. It also provides two new macros, {\docdef\advitoc} and
+{\docdef\endadvitoc}, that serve to insert these markers when the table
+of contents is hand-made.
 
 \item If no table of contents markers are found, then {\ActiveDVI}
 will compute thumbnails, {\em i.e.} will show the whole set of pages
@@ -564,7 +564,7 @@ master, whenever {\ActiveDVI} receives signal \doctt{usr1} (to mean
 immediate refresh). 
 
 
-\section{The \softtarget{advi} {\doctt{advi.sty}} {\LaTeX} package}
+\section{The \softtarget{advistyle} {\doctt{advi.sty}} {\LaTeX} package}
 
 {\ActiveDVI} provides some {\LaTeX} packages to facilitate animations and
 interaction with the presenter from within your {\LaTeX} source text.
@@ -1462,8 +1462,7 @@ Please, send bug reports to
 \\
 See \url{http://pauillac.inria.fr/advi} for up to date information.
 
-
-\softtarget{activedvikeys}{\section{Key bindings}}
+\section{\softtarget{activedvikeys}{Key bindings}}
 
 % Macros specific to splash.tex
 \definecolor{red}{rgb}{1.0,0.0,0.0}
@@ -1478,11 +1477,11 @@ See \url{http://pauillac.inria.fr/advi} for up to date information.
 
 \input{splash_contents.tex}
 
-\softtarget{writingkeys}{\section{Key bindings for scratch writings}}
+\section{\softtarget{writingkeys}{Key bindings for scratch writings}}
 
 \input{scratch_write_splash_contents.tex}
 
-\softtarget{drawingkeys}{\section{Key bindings for scratch drawings}}
+\section{\softtarget{drawingkeys}{Key bindings for scratch drawings}}
 
 \input{scratch_draw_splash_contents.tex}
 
