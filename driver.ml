@@ -930,7 +930,7 @@ let reset_bkgd_info =
     "\tReset background options at each new page";;
 
 
-let scan_special_page cdvi globals pagenum =
+let scan_special_page otherwise cdvi globals pagenum =
    let page = cdvi.base_dvi.Dvi.pages.(pagenum) in
        match page.Dvi.status with
         | Dvi.Unknown ->
@@ -942,7 +942,7 @@ let scan_special_page cdvi globals pagenum =
                            else Dev.copy_of_bkgd_data ())} in
            let eval = function
              | Dvi.C_xxx s -> scan_special status globals pagenum s
-             | _ -> () in
+             | x -> otherwise x in
            Dvi.page_iter eval cdvi.base_dvi.Dvi.pages.(pagenum);
            page.Dvi.status <- Dvi.Known status;
            status
@@ -1047,10 +1047,11 @@ let render_step cdvi num dpi xorig yorig =
     invalid_arg "Driver.render_step";
   let mag = float cdvi.base_dvi.Dvi.preamble.Dvi.pre_mag /. 1000.0
   and page = cdvi.base_dvi.Dvi.pages.(num) in
+  let otherwise _ = () in
   let status =
     let headers = ref []
     and xrefs = cdvi.base_dvi.Dvi.xrefs in
-    let s = scan_special_page cdvi (headers, xrefs) num in
+    let s = scan_special_page otherwise cdvi (headers, xrefs) num in
     if !headers <> [] then Dev.add_headers (find_prologues (List.rev !headers));
     s in
   if not !Misc.dops then status.Dvi.hasps <- false;
@@ -1107,8 +1108,9 @@ let unfreeze_fonts cdvi =
 let scan_special_pages cdvi lastpage =
   let headers = ref []
   and xrefs = cdvi.base_dvi.Dvi.xrefs in
+  let otherwise _ = () in
   for n = 0 to min lastpage (Array.length cdvi.base_dvi.Dvi.pages) - 1 do
-    ignore (scan_special_page cdvi (headers,xrefs) n);
+    ignore (scan_special_page otherwise cdvi (headers,xrefs) n);
   done;
   if !headers <> [] then
     Dev.add_headers (find_prologues (List.rev !headers));;
@@ -1120,7 +1122,7 @@ let unfreeze_glyphs cdvi dpi =
   and gtable = ref dummy_gtable in
   let headers = ref []
   and xrefs = cdvi.base_dvi.Dvi.xrefs in
-  let eval page = function
+  let otherwise = function
     | Dvi.C_fnt n ->
         let (mt, gt) =
           try
@@ -1132,16 +1134,15 @@ let unfreeze_glyphs cdvi dpi =
     | Dvi.C_set code ->
         begin try ignore (Table.get !mtable code) with _ -> () end;
         begin try ignore (Table.get !gtable code) with _ -> () end
-    | Dvi.C_xxx s ->
-        prerr_endline
-          "Scan_special is not yet properly implemented inside \
-           unfreeze_glyphs: should merge with scan_special_pages"
-        (* scan_special cdvi page headers s *)
     | _ -> () in
+  
+  let headers = ref []
+  and xrefs = cdvi.base_dvi.Dvi.xrefs in
+  let globals = headers, xrefs in
   for n = 0 to Array.length cdvi.base_dvi.Dvi.pages - 1 do
     mtable := dummy_mtable;
     gtable := dummy_gtable;
-    Dvi.page_iter (eval n) cdvi.base_dvi.Dvi.pages.(n);
+    ignore (scan_special_page otherwise cdvi globals n);
   done;
   if !headers <> [] then
     Dev.add_headers (Search.true_file_names [] (List.rev !headers));;

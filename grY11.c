@@ -121,6 +121,37 @@ value gr_screen_y(void)
   return Val_int(att.height);
 }
 
+void gr_origin(int* x, int* y)
+{
+  Window win, root, r;
+  Window* children;
+  int dx, dy, h, w, b, d; 
+  gr_check_open();
+  win = grwindow.win;
+  root = DefaultRootWindow(grdisplay);
+  *x = 0; *y = 0;
+  while (win != root) {
+    XGetGeometry (grdisplay, win, &r, &dx, &dy, &w, &h, &b, &d);
+    *x = *x + dx;
+    *y = *y + dy;
+    XQueryTree (grdisplay, win, &r, &win, &children, &b);
+  }
+  return;
+}
+
+value gr_origin_x(void)
+{
+  int x, y;
+  gr_origin (&x, &y); 
+  return Val_int(x);
+}
+value gr_origin_y(void)
+{
+  int x, y;
+  gr_origin (&x, &y); 
+  return Val_int(y);
+}
+
 value gr_window(void)
 { unsigned int w; value res;
   gr_check_open();
@@ -371,6 +402,26 @@ value gr_resize_window (value wid, value w, value h)
   gr_check_open();
   sscanf( String_val(wid), "%lu", (unsigned long *)(&win) );
   XResizeWindow(grdisplay, win, Int_val(w), Int_val(h));
+  XFlush(grdisplay);
+  return Val_unit;
+}
+
+value gr_reposition (value x, value y, value w, value h)
+{
+  Window win;
+  XWindowAttributes att;
+  int width, height;
+
+  gr_check_open();
+  width = Int_val(w); height = Int_val(h);
+  if (width < 0) { 
+    XGetWindowAttributes (grdisplay, DefaultRootWindow(grdisplay), &att);
+    width = att.width; height = att.height;
+  }; 
+  XMoveResizeWindow(grdisplay, grwindow.win, 
+                    Int_val(x), Int_val(y), width, height);
+  /* Not sufficient, should tell the manager not to decorate the window */
+  XSetWindowBorderWidth(grdisplay, grwindow.win, width<0 ? 0 : BORDER_WIDTH);
   XFlush(grdisplay);
   return Val_unit;
 }

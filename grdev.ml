@@ -1101,6 +1101,15 @@ let mouse_x = ref 0;;
 let mouse_y = ref 0;;
 let button = ref false;;
 
+let reposition ~x ~y ~w ~h =
+  GraphicsY11.reposition x y w h;
+  let x = Graphics.size_x () and y = Graphics.size_y() in
+  size_x := x;
+  size_y := y;
+  Gs.kill ();
+  x, y
+;;
+
 let resized () =
   let x = Graphics.size_x () and y = Graphics.size_y () in
   let b = x <> !size_x || y <> !size_y in

@@ -19,11 +19,14 @@ while from the same path:
      Warning: Logo-INRIA-Rocq.eps is not found. (Error while executing kpsewhich Logo-INRIA-Rocq.eps > /tmp/advi48)
 
 
+CLEANING: 
+
 WISH LIST: 
 
 - adapter la résolution aux vrai dpy de l'écran
 
 - fullscreen mode (en graphics?)
+==> DONE, à tester.
 
 - fork? (i.e. lancer un dvi identique à celui qui tourne)
 

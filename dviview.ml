@@ -72,9 +72,7 @@ Misc.set_option
   "\tPrevents scaling from resizing the window (done if geometry is provided)"
 ;;
 
-module Drv = Driver;;
-module Dev = Grdev;;
-module Symbol = Dev.Symbol;;
+module Symbol = Grdev.Symbol;;
 
 open Dimension;;
 
@@ -129,7 +127,7 @@ type state = {
       (* DVI attributes *)
     filename : string ;
     mutable dvi : Dvi.t ;
-    mutable cdvi : Drv.cooked_dvi ;
+    mutable cdvi : Driver.cooked_dvi ;
     mutable num_pages : int ;
       (* Page layout *)
     mutable base_dpi : float ;
@@ -147,6 +145,7 @@ type state = {
     mutable exchange_page : int;
     mutable last_modified : float ;
     mutable button : (int * int) option ;
+    mutable fullscreen : (int * int * int * int) option; 
 
     mutable pause_no : int;
       (* Attributes for Embedded postscript *)
@@ -236,7 +235,7 @@ let init filename =
     | Sys_error _ -> raise (Error ("cannot open `" ^ filename ^ "'"))
     | Dvi.Error s -> raise (Error (filename ^ ": " ^ s))
     | _ -> raise (Error ("error while loading `" ^ filename ^ "'")) in
-  let cdvi = Drv.cook_dvi dvi
+  let cdvi = Driver.cook_dvi dvi
   and dvi_res = 72.27
   and mag = float dvi.Dvi.preamble.Dvi.pre_mag /. 1000.0 in
   let w_sp = dvi.Dvi.postamble.Dvi.post_width
@@ -296,6 +295,7 @@ let init filename =
       page_no = if !start_page > 0 then min !start_page pages - 1 else 0;
       last_modified = last_modified ;
       button = None;
+      fullscreen = None;
 
       pause_no = 0;
       frozen = true;
@@ -308,7 +308,7 @@ let init filename =
   st;;
 
 let set_bbox st =
-  Dev.set_bbox (Some (st.orig_x, st.orig_y, st.dvi_width, st.dvi_height));;
+  Grdev.set_bbox (Some (st.orig_x, st.orig_y, st.dvi_width, st.dvi_height));;
 
 let update_dvi_size init st =
   let dvi_res = 72.27
@@ -372,21 +372,21 @@ let rec goto_next_pause n st =
             try
               while f () do () done;
               st.pause_no <- st.pause_no + 1;
-            with Drv.Pause ->
+            with Driver.Pause ->
               st.pause_no <- st.pause_no + 1;
               st.cont <- Some f in
           goto_next_pause (pred n) st
-        with Dev.Stop -> st.aborted <- true;
+        with Grdev.Stop -> st.aborted <- true;
     end;
-  Dev.synchronize(); 
-  Dev.set_busy (if st.cont = None then Dev.Free else Dev.Pause);;
+  Grdev.synchronize(); 
+  Grdev.set_busy (if st.cont = None then Grdev.Free else Grdev.Pause);;
 
 let draw_bounding_box st =
-  Dev.set_color 0xcccccc ;
-  Dev.fill_rect st.orig_x st.orig_y st.dvi_width 1 ;
-  Dev.fill_rect st.orig_x st.orig_y 1 st.dvi_height ;
-  Dev.fill_rect st.orig_x (st.orig_y + st.dvi_height) st.dvi_width 1 ;
-  Dev.fill_rect (st.orig_x + st.dvi_width) st.orig_y 1 st.dvi_height;;
+  Grdev.set_color 0xcccccc ;
+  Grdev.fill_rect st.orig_x st.orig_y st.dvi_width 1 ;
+  Grdev.fill_rect st.orig_x st.orig_y 1 st.dvi_height ;
+  Grdev.fill_rect st.orig_x (st.orig_y + st.dvi_height) st.dvi_width 1 ;
+  Grdev.fill_rect (st.orig_x + st.dvi_width) st.orig_y 1 st.dvi_height;;
 
 (* Input : a point in window coordinates, relative to lower-left corner. *)
 (* Output : a point in document coordinates, relative to upper-right corner. *)
@@ -472,47 +472,47 @@ let move_within_margins_x st movex =
 
 let redraw st =
     (* draws until the current pause_no or page end *)
-  Dev.set_busy Dev.Busy;
+  Grdev.set_busy Grdev.Busy;
   st.cont <- None;
   st.aborted <- false;
   let () =
     try
-      Dev.continue ();
-(*      Dev.clear_dev () ;
+      Grdev.continue ();
+(*      Grdev.clear_dev () ;
         (* RDC: moved inside render_step to properly handle backgrounds *) *)
 (*
    let blank_w = 20
    and blank_h = 20 in
 *)
-      Drv.clear_symbols ();
+      Driver.clear_symbols ();
       if !bounding_box then draw_bounding_box st;
       if !pauses then
-        let f = Drv.render_step st.cdvi st.page_no
+        let f = Driver.render_step st.cdvi st.page_no
             (st.base_dpi *. st.ratio) st.orig_x st.orig_y in
         let current_pause = ref 0 in
         begin
           try
             while
               try f () with
-                | Drv.Pause ->
-                    if !current_pause = st.pause_no then raise Drv.Pause
+                | Driver.Pause ->
+                    if !current_pause = st.pause_no then raise Driver.Pause
                     else begin incr current_pause; true end
             do () done;
             if !current_pause < st.pause_no then
               st.pause_no <- !current_pause
           with
-          | Drv.Pause ->
+          | Driver.Pause ->
               st.cont <- Some f;
         end
       else
         begin
-          Drv.render_page  st.cdvi st.page_no
+          Driver.render_page  st.cdvi st.page_no
             (st.base_dpi *. st.ratio) st.orig_x st.orig_y;
         end;
-    with Dev.Stop ->
+    with Grdev.Stop ->
       st.aborted <- true in
-  Dev.synchronize();
-  Dev.set_busy (if st.cont = None then Dev.Free else Dev.Pause);;
+  Grdev.synchronize();
+  Grdev.set_busy (if st.cont = None then Grdev.Free else Grdev.Pause);;
 
 let goto_previous_pause n st =
   if n > 0 then
@@ -526,7 +526,7 @@ let find_xref tag default st =
   with Not_found ->
     if st.frozen then
       begin
-        Drv.scan_special_pages st.cdvi max_int;
+        Driver.scan_special_pages st.cdvi max_int;
         st.frozen <- false;
         try Hashtbl.find st.dvi.Dvi.xrefs tag
         with Not_found -> default
@@ -539,7 +539,7 @@ let exec_xref link =
   let call command =
     let pid = Misc.fork_process command in
     (* I don't understand this change -Didier: it was 
-    Dev.wait_button_down() in *)
+    Grdev.wait_button_down() in *)
     (* only to launch embeded apps *)
     if Graphics.button_down () then
       ignore (Graphics.wait_next_event [ Graphics.Button_up ]) in
@@ -585,7 +585,7 @@ let page_start default st =
   match !start_html with
   | None -> default
   | Some html ->
-      Drv.scan_special_pages st.cdvi max_int;
+      Driver.scan_special_pages st.cdvi max_int;
       find_xref html default st;;
 
 let rec clear_page_stack max stack =
@@ -611,7 +611,7 @@ let reload st =
   try
     st.last_modified <- reload_time st;
     let dvi = Dvi.load st.filename in
-    let cdvi = Drv.cook_dvi dvi in
+    let cdvi = Driver.cook_dvi dvi in
     let dvi_res = 72.27
     and mag = float dvi.Dvi.preamble.Dvi.pre_mag /. 1000.0 in
     let w_sp = dvi.Dvi.postamble.Dvi.post_width
@@ -696,7 +696,7 @@ let goto_href link st = (* goto page of hyperref h *)
         st.page_no
       end in
   push_page true page st;
-  Dev.H.flashlight (Dev.H.Name link);;
+  Grdev.H.flashlight (Grdev.H.Name link);;
 
 let goto_next_page st =
   if st.page_no <> st.num_pages - 1 then goto_page (st.page_no + 1) st;;
@@ -720,8 +720,8 @@ let scale n st =
       let scale x = int_of_float (float x *. factor) in
       attr.geom.width <- scale st.size_x;
       attr.geom.height <- scale st.size_y;
-      Dev.close_dev();
-      Dev.open_dev (Printf.sprintf " " ^ string_of_geometry attr.geom);
+      Grdev.close_dev();
+      Grdev.open_dev (Printf.sprintf " " ^ string_of_geometry attr.geom);
     end
   else
     begin
@@ -737,149 +737,162 @@ let scale n st =
   update_dvi_size true st;
   redraw st;;
 
-module B =
-  struct
-    let nop st = ()
-    let push_next_page st =
-      push_page false (st.page_no + max 1 st.num) st
-    let next_pause st =
-      if st.cont = None then push_next_page st
-      else goto_next_pause (max 1 st.num) st
-    let digit k st =
-      st.next_num <- st.num * 10 + k
-    let next_page st =
-      goto_page (st.page_no + max 1 st.num) st
-    let goto st =
-      push_page true (if st.num > 0 then st.num - 1 else st.num_pages) st
+  module B =
+    struct
+      let nop st = ()
+      let push_next_page st =
+        push_page false (st.page_no + max 1 st.num) st
+      let next_pause st =
+        if st.cont = None then push_next_page st
+        else goto_next_pause (max 1 st.num) st
+      let digit k st =
+        st.next_num <- st.num * 10 + k
+      let next_page st =
+        goto_page (st.page_no + max 1 st.num) st
+      let goto st =
+        push_page true (if st.num > 0 then st.num - 1 else st.num_pages) st
 
-    let push_page st =
-      push_stack true st.page_no st
-    let previous_page st =
-      goto_page (st.page_no - max 1 st.num) st
-    let pop_previous_page st =
-      pop_page false (max 1 st.num) st
-    let previous_pause st =
-      if st.pause_no > 0
-      then goto_previous_pause (max 1 st.num) st
-      else pop_previous_page st
-    let pop_page st =
-      pop_page true 1 st
-    let first_page st =
-      goto_page 0 st
-    let last_page st =
-      goto_page max_int st
-    let exchange_page st =
-      goto_page st.exchange_page st
-    let unfreeze_fonts st =
-      Drv.unfreeze_fonts st.cdvi
-    let unfreeze_glyphs st =
-      Drv.unfreeze_glyphs st.cdvi (st.base_dpi *. st.ratio)
-    let center st =
-      st.ratio <- 1.0 ;
-      st.orig_x <- (st.size_x - st.dvi_width) / 2 ;
-      st.orig_y <- (st.size_y - st.dvi_height) / 2 ;
-      update_dvi_size false st ;
-      redraw st
+      let push_page st =
+        push_stack true st.page_no st
+      let previous_page st =
+        goto_page (st.page_no - max 1 st.num) st
+      let pop_previous_page st =
+        pop_page false (max 1 st.num) st
+      let previous_pause st =
+        if st.pause_no > 0
+        then goto_previous_pause (max 1 st.num) st
+        else pop_previous_page st
+      let pop_page st =
+        pop_page true 1 st
+      let first_page st =
+        goto_page 0 st
+      let last_page st =
+        goto_page max_int st
+      let exchange_page st =
+        goto_page st.exchange_page st
+      let unfreeze_fonts st =
+        Driver.unfreeze_fonts st.cdvi
+      let unfreeze_glyphs st =
+        Driver.unfreeze_glyphs st.cdvi (st.base_dpi *. st.ratio)
+      let center st =
+        st.ratio <- 1.0 ;
+        st.orig_x <- (st.size_x - st.dvi_width) / 2 ;
+        st.orig_y <- (st.size_y - st.dvi_height) / 2 ;
+        update_dvi_size false st ;
+        redraw st
 
-    let scale_up st = scale (max 1 st.num) st
-    let scale_down st = scale (0 - max 1 st.num) st
+      let scale_up st = scale (max 1 st.num) st
+      let scale_down st = scale (0 - max 1 st.num) st
 
-    let nomargin st =
-      attr.hmargin <- Px 0; attr.vmargin <- Px 0;
-      update_dvi_size true st;
-      redraw st
+      let nomargin st =
+        attr.hmargin <- Px 0; attr.vmargin <- Px 0;
+        update_dvi_size true st;
+        redraw st
 
-    let page_left st =
-      match (move_within_margins_x st (attr.geom.width - 10)) with
-      | Some n ->
-          if n > st.orig_x  then begin
-            st.orig_x <- n;
-            set_bbox st;
-            redraw st
-          end
-      | None -> ()
+      let page_left st =
+        match (move_within_margins_x st (attr.geom.width - 10)) with
+        | Some n ->
+            if n > st.orig_x  then begin
+              st.orig_x <- n;
+              set_bbox st;
+              redraw st
+            end
+        | None -> ()
 
-    let page_down st =
-      let none () =
-        if st.page_no < st.num_pages - 1 then begin
+      let page_down st =
+        let none () =
+          if st.page_no < st.num_pages - 1 then begin
               (* the following test is necessary because of some
-                 * floating point rounding problem
-              *)
-          if attr.geom.height <
-             st.dvi_height + 2 * (get_size_in_pix st attr.vmargin) then
-            begin
-              st.orig_y <- top_of_page st;
-              set_bbox st;
-            end;
-          goto_page (st.page_no + 1) st
-        end
-      in
-      begin
-        match (move_within_margins_y st (10 - attr.geom.height)) with
-        | Some n ->
-                (* this test is necessary because of rounding errors *)
-            if n > st.orig_y then none ()
-            else begin
-              st.orig_y <- n;
-              set_bbox st;
-              redraw st
-            end
-        | None -> none ()
-      end
-
-    let page_up st =
-      let none () =
-        if st.page_no > 0 then begin
-          if attr.geom.height <
-             st.dvi_height + 2 * (get_size_in_pix st attr.vmargin) then
-            begin
-              st.orig_y <- bottom_of_page st;
-              set_bbox st;
-            end;
-          goto_page (st.page_no -1) st
-        end
-      in
-      begin
-        match (move_within_margins_y st (attr.geom.height - 10)) with
-        | Some n ->
-            if n < st.orig_y then none ()
-            else begin
-              st.orig_y <- n;
-              set_bbox st;
-              redraw st
-            end
-        | None -> none ()
-      end
-
-    let page_right st =
-      match (move_within_margins_x st (10 - attr.geom.width)) with
-      | Some n ->
-          if n < st.orig_x then begin
-            st.orig_x <- n;
-            set_bbox st;
-            redraw st
+               * floating point rounding problem
+               *)
+            if attr.geom.height <
+              st.dvi_height + 2 * (get_size_in_pix st attr.vmargin) then
+              begin
+                st.orig_y <- top_of_page st;
+                set_bbox st;
+              end;
+            goto_page (st.page_no + 1) st
           end
-      | None -> ()
+        in
+        begin
+          match (move_within_margins_y st (10 - attr.geom.height)) with
+          | Some n ->
+                (* this test is necessary because of rounding errors *)
+              if n > st.orig_y then none ()
+              else begin
+                st.orig_y <- n;
+                set_bbox st;
+                redraw st
+              end
+          | None -> none ()
+        end
+
+      let page_up st =
+        let none () =
+          if st.page_no > 0 then begin
+            if attr.geom.height <
+              st.dvi_height + 2 * (get_size_in_pix st attr.vmargin) then
+              begin
+                st.orig_y <- bottom_of_page st;
+                set_bbox st;
+              end;
+            goto_page (st.page_no -1) st
+          end
+        in
+        begin
+          match (move_within_margins_y st (attr.geom.height - 10)) with
+          | Some n ->
+              if n < st.orig_y then none ()
+              else begin
+                st.orig_y <- n;
+                set_bbox st;
+                redraw st
+              end
+          | None -> none ()
+        end
+
+      let page_right st =
+        match (move_within_margins_x st (10 - attr.geom.width)) with
+        | Some n ->
+            if n < st.orig_x then begin
+              st.orig_x <- n;
+              set_bbox st;
+              redraw st
+            end
+        | None -> ()
 
 
-    let redraw = redraw
-    let reload = reload
+      let redraw = redraw
+      let reload = reload
 
-    let exit st = raise Exit
-    let clear_image_cash st = (* clear image cache *)
-      Dev.clean_ps_cache ()
-    let help st =
-      let int = function
-        | No_offset -> 0
-        | Plus x -> x
-        | Minus y -> - y in
-      let pid = Misc.fork_process
-          (Printf.sprintf "advi -g %dx%d %s"
-             attr.geom.width
-             attr.geom.height
-             Config.splash_screen) in
-      ()
-  end;;
+      let fullscreen st =
+        let x, y = 
+          match st.fullscreen with
+            None ->
+              let x = GraphicsY11.origin_x() in
+              let y = GraphicsY11.origin_y() in
+              st.fullscreen <- Some (x, y, st.size_x, st.size_y);
+              Grdev.reposition ~x:0 ~y:0 ~w:(-1) ~h:(-1);
+          | Some (x, y, w, h) -> 
+              st.fullscreen <- None;
+              Grdev.reposition ~x ~y ~w ~h in
+        resize st x y
+        
+      let exit st = raise Exit
+      let clear_image_cash st = (* clear image cache *)
+        Grdev.clean_ps_cache ()
+      let help st =
+        let int = function
+          | No_offset -> 0
+          | Plus x -> x
+          | Minus y -> - y in
+        let pid = Misc.fork_process
+            (Printf.sprintf "advi -g %dx%d %s"
+               attr.geom.width
+               attr.geom.height
+               Config.splash_screen) in
+        ()
+    end;;
 
 let bindings = Array.create 256 B.nop;;
 for i = 0 to 9 do
@@ -908,6 +921,7 @@ List.iter bind [
   '.' 	, B.last_page; 
   'f' 	, B.unfreeze_fonts; 
   'F' 	, B.unfreeze_glyphs; 
+  ''   , B.fullscreen;
   'r' 	, B.redraw; 
   'R' 	, B.reload; 
   'c' 	, B.center; 
@@ -924,48 +938,48 @@ List.iter bind [
 let main_loop filename =
   let st = init filename in
   let cont = ref None in (* drawing continuation *)
-  Dev.set_title ("Advi: " ^ Filename.basename filename);
-  Dev.open_dev (" " ^ string_of_geometry attr.geom) ;
+  Grdev.set_title ("Advi: " ^ Filename.basename filename);
+  Grdev.open_dev (" " ^ string_of_geometry attr.geom) ;
   set_bbox st;
   if st.page_no > 0 && !Misc.dops then
-    Drv.scan_special_pages st.cdvi st.page_no
+    Driver.scan_special_pages st.cdvi st.page_no
   else
     st.page_no <- page_start 0 st;
   redraw st;
   (* num is the current number entered by keyboard *)
   try while true do
-    let ev = if changed st then Dev.Refreshed else Dev.wait_event () in
+    let ev = if changed st then Grdev.Refreshed else Grdev.wait_event () in
     st.num <- st.next_num;
     st.next_num <- 0;
     match ev with
-    | Dev.Refreshed -> reload st
-    | Dev.Resized (x, y) -> resize st x y
-    | Dev.Key c -> bindings.(Char.code c) st
-    | Dev.Href h -> goto_href h st
-    | Dev.Advi (s, a) -> a ()
-    | Dev.Move (w, h) ->
+    | Grdev.Refreshed -> reload st
+    | Grdev.Resized (x, y) -> resize st x y
+    | Grdev.Key c -> bindings.(Char.code c) st
+    | Grdev.Href h -> goto_href h st
+    | Grdev.Advi (s, a) -> a ()
+    | Grdev.Move (w, h) ->
         st.orig_x <- st.orig_x + w ;
         st.orig_y <- st.orig_y + h ;
         set_bbox st;
         redraw st
-    | Dev.Region (x, y, w, h) -> ()
-    | Dev.Selection s -> selection s
-    | Dev.Position (x, y) ->
+    | Grdev.Region (x, y, w, h) -> ()
+    | Grdev.Selection s -> selection s
+    | Grdev.Position (x, y) ->
         position st x y
-    | Dev.Click (Dev.Top_left, _,_,_) ->
+    | Grdev.Click (Grdev.Top_left, _,_,_) ->
         if !click_turn_page then B.pop_page st
-    | Dev.Click (_, Dev.Button1, _, _) ->
+    | Grdev.Click (_, Grdev.Button1, _, _) ->
         if !click_turn_page then B.previous_pause st
-    | Dev.Click (_, Dev.Button2, _, _) ->
+    | Grdev.Click (_, Grdev.Button2, _, _) ->
         if !click_turn_page then B.pop_previous_page st
-    | Dev.Click (_, Dev.Button3, _, _) ->
+    | Grdev.Click (_, Grdev.Button3, _, _) ->
         if !click_turn_page then B.next_pause st
 
 (*
-   | Dev.Click (Dev.Bottom_right, _) -> B.next_pause st
-   | Dev.Click (Dev.Bottom_left, _) -> B.pop_previous_page st
-   | Dev.Click (Dev.Top_right, _) -> B.push_page st
+   | Grdev.Click (Grdev.Bottom_right, _) -> B.next_pause st
+   | Grdev.Click (Grdev.Bottom_left, _) -> B.pop_previous_page st
+   | Grdev.Click (Grdev.Top_right, _) -> B.push_page st
 *)
     | _ -> ()
 
-  done with Exit -> Dev.close_dev ();;
+  done with Exit -> Grdev.close_dev ();;

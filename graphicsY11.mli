@@ -56,7 +56,10 @@ external bsize_y : unit -> int = "gr_bsize_y"
         (* Idem, but return the size of the backing store. *)
 external screen_x : unit -> int = "gr_screen_x"
 external screen_y : unit -> int = "gr_screen_y"
+external origin_x : unit -> int = "gr_origin_x"
+external origin_y : unit -> int = "gr_origin_y"
         (* Return the size of the screen. *)
+external reposition : int -> int -> int -> int -> unit = "gr_reposition"
 
 external set_named_atom_property : string -> string -> unit
     = "gr_set_named_atom_property"
@@ -237,3 +240,4 @@ val synchronize : unit -> unit
 val display_mode : bool -> unit
 (** As [point_color] but according to values of [global_display_mode] *)
 val point_color : int -> int -> int
+
