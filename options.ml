@@ -33,7 +33,7 @@ let flag initial option_name message =
     ("\t" ^ message);
   r;;
 
-(* A special case: debug options *)
+(* Another special case: debug options *)
 let make_debug r s =
   if !r then prerr_endline s;
   true;;
