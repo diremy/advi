@@ -37,15 +37,31 @@ type ratiopts =
    | ScaleBottomRight
 ;;
 
-val f : string -> bool -> float -> (int -> int -> int) option ->
-        (int * int * int * int) option -> 
-        ratiopts -> (int * int) -> (int * int) -> unit;;
-(* [f filename whitetransp alpha blend 
+(* Blending *)
+type blend =
+   | Normal | Multiply | Screen | Overlay (* | SoftLight | HardLight *)
+   | ColorDodge | ColorBurn | Darken | Lighten | Difference
+   | Exclusion (* | Luminosity | Color | Saturation | Hue *);;
+
+type alpha = float;;
+(** Alpha channel specification. *)
+
+type image_size = int * int;;
+(** The size of an image in pixels. *)
+
+type ps_bbox = int * int * int * int;;
+(** The PostScript bounding box of an image as recorded in an
+   encapsulated PostScript file that contains it. *)
+
+val f : string -> bool -> float -> blend ->
+        ps_bbox option -> 
+        ratiopts -> image_size -> (int * int) -> unit;;
+(** [f filename whitetransp alpha blend 
       (llx, lly, urx, ury) (width, height) (x0, y0)]
    draws an eps [filename] with bounding box [(llx,lly,urx,ury)]
    in the size [(width, height)] pixels at [x0, y0] (top-left corner).
    If [whitetransp] is true, white pixels are treated as transparent.
    [alpha] specifies the alpha level of the image.
-   [blend] is the color blending function for rendering *)
+   [blend] is the color blending function for rendering. *)
 
 val clean_cache : unit -> unit;;

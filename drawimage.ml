@@ -36,6 +36,75 @@ type ratiopts =
    | ScaleBottomRight
 ;;
 
+(* Blending *)
+type blend =
+   | Normal | Multiply | Screen | Overlay (* | SoftLight | HardLight *)
+   | ColorDodge | ColorBurn | Darken | Lighten | Difference
+   | Exclusion (* | Luminosity | Color | Saturation | Hue *);;
+
+type alpha = float;;
+
+(* look at gxblend.c of ghostscript *)
+let blend_func = function
+  | Normal -> raise Exit (* this case is optimized *)
+  | Multiply ->
+      fun dst src ->
+        let t = dst * src + 0x80 in
+        let t = t + t lsr 8 in
+        t lsr 8
+  | Screen ->
+      fun dst src ->
+        let t = (0xff - dst) * (0xff - src) + 0x80 in
+        let t = t + t lsr 8 in
+        0xff - t lsr 8
+  | Overlay ->
+      fun dst src ->
+        let t =
+          if dst < 0x80 then 2 * dst * src
+          else 0xf301 - 2 * (0xff - dst) * (0xff - src) in
+        let t = t + 0x80 in
+        let t = t + t lsr 8 in
+        t lsr 8
+(*
+   | SoftLight ->
+   if s < 0x80 then begin
+   let t = (0xff - (src lsl 1)) * art_blend_sq_diff_8[dst] in
+   let t = t + 0x8000 in
+   dst - t lsr 16
+   end else begin
+   let t = ((src lsl 1) - 0xff) * art_blend_soft_light_8[dst] in
+   let t = t + 0x80 in
+   let t = t + t lsr 8 in
+   dst + t lsr 8
+   end
+*)
+  | ColorDodge ->
+      fun dst src ->
+        if dst = 0 then 0 else if dst >= src then 0xff
+        else (0x1fe * dst + src) / (src lsl 1)
+  | ColorBurn ->
+      fun dst src ->
+        let dst = 0xff - dst in
+        if dst = 0 then 0xff else if dst >= src then 0
+        else 0xff - (0x1fe * dst + src) / (src lsl 1)
+  | Darken ->
+      fun dst src -> if dst < src then dst else src
+  | Lighten ->
+      fun dst src -> if dst > src then dst else src
+  | Difference ->
+      fun dst src ->
+        let t = dst - src in
+        if t < 0 then -t else t
+  | Exclusion ->
+      fun dst src ->
+        let t = (0xff - dst) * src + dst * (0xff - src) in
+        let t = t + 0x80 in
+        let t = t + t lsr 8 in
+        t lsr 8;;
+
+type image_size = int * int;;
+
+type ps_bbox = int * int * int * int;; 
 
 open Image
 open Color
@@ -366,6 +435,8 @@ let load_and_resize file whitetransp psbbox ratiopt (w, h) =
 ;;
 
 let draw_image image cache_name alpha blend (w, h) (x0, y0) =
+  let blend =
+    try Some (blend_func blend) with _ -> None in
   (* load_and_resize may not return exactly the same size
      we specified as (w, h) *)
   let iw, ih = Image.size image in
@@ -431,7 +502,7 @@ let f file whitetransp alpha blend psbbox ratiopt (w, h) (x0, y0) =
     (* load_and_resize may not return exactly the same size
        we specified as (w, h) *)
     debugs (Printf.sprintf "Draw %s (alpha=%f blend=%s)" file
-              alpha (if blend = None then "NONE" else "SOME"));
+              alpha "Don't know");
     draw_image image cache_name alpha blend (w, h) (x0, y0);
     debugs "Success Draw!";
   with
