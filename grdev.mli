@@ -179,7 +179,7 @@ type bkgd_prefs = {
   mutable bgycenter : yratio option;
   mutable bgviewport: viewport option;
   (* hook for sophisticated programmed graphics backgrounds *)
-  mutable bgfunction: (bgfunarg -> unit) option;
+  mutable bggradient: (bgfunarg -> unit) option;
 }
 
 and bgfunarg = {
@@ -208,7 +208,7 @@ type bgoption =
    | BgHeight of yratio
    | BgXCenter of xratio
    | BgYCenter of yratio
-   | BgFun of (bgfunarg -> unit) option;;
+   | BgGradient of (bgfunarg -> unit) option;;
 
 val blit_bkgd_data : bkgd_prefs -> bkgd_prefs -> unit;;
 val copy_of_bkgd_data : unit -> bkgd_prefs;;

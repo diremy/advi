@@ -981,9 +981,9 @@ let ratios_alist = [
   ("bottomleft", Drawimage.ScaleBottomLeft);
 ];;
 
-(* The find_bgfuns function should eventually handle dynamically
+(* The find_bgfun function should eventually handle dynamically
    loaded plugins *)
-let bgfuns_alist = [
+let bggradients_alist = [
   ("hgradient", Addons.hgradient);
   ("vgradient", Addons.vgradient);
   ("dgradient", Addons.dgradient);
@@ -993,8 +993,8 @@ let bgfuns_alist = [
   ("circgradient", Addons.circgradient);
 ];;
 
-let find_bgfun s =
-   try Some (List.assoc (unquote s) bgfuns_alist) with _ -> None;;
+let find_bggradient s =
+   try Some (List.assoc (unquote s) bggradients_alist) with _ -> None;;
 
 let bkgd_alist = [
   ("color", fun s st ->
@@ -1042,8 +1042,8 @@ let bkgd_alist = [
   ("ycenter", fun s st ->
      let y = parse_float (unquote s) in
      [Dev.BgYCenter y]);
-  ("fun", fun s st ->
-     [Dev.BgFun (find_bgfun (unquote s))]);
+  ("gradient", fun s st ->
+     [Dev.BgGradient (find_bggradient (unquote s))]);
 ];;
 
 let filter_alist alist falist =

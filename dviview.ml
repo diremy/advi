@@ -787,7 +787,7 @@ let reload_time st =
 let reload st =
   Misc.warning "reloading DVI file";
   try
-    Grdev.clear_usr1();
+    Grdev.clear_usr1 ();
     st.last_modified <- reload_time st;
     let dvi = Dvi.load st.filename in
     let cdvi = Driver.cook_dvi dvi in

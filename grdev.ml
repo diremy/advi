@@ -263,9 +263,12 @@ type bkgd_prefs = {
   mutable bgycenter : yratio option;
   mutable bgviewport: viewport option;
   (* hook for sophisticated programmed graphics backgrounds *)
-  mutable bgfunction: (bgfunarg -> unit) option;
+  mutable bggradient: (bgfunarg -> unit) option;
 }
 
+(* Argument to a function that operates on the background.
+   Suitable either for predefined gradient colors, or
+   (in the future) for user's defined dynamically loadable functions.  *)
 and bgfunarg = {
  argcolor : color;
  argcolorstart : color option;
@@ -292,7 +295,7 @@ type bgoption =
    | BgHeight of yratio
    | BgXCenter of xratio
    | BgYCenter of yratio
-   | BgFun of (bgfunarg -> unit) option;;
+   | BgGradient of (bgfunarg -> unit) option;;
 
 let full_ratio = 1.0
 and null_ratio = 0.0;;
@@ -315,7 +318,7 @@ let default_bkgd_prefs c = {
     bgheight = full_ratio;
     bgxcenter = None;
     bgycenter = None;
-    bgfunction = None;
+    bggradient = None;
 };;
 
 let bkgd_data = default_bkgd_prefs Graphics.white;;
@@ -380,7 +383,7 @@ let blit_bkgd_data s d =
   d.bgheight <- s.bgheight;
   d.bgxcenter <- s.bgxcenter;
   d.bgycenter <- s.bgycenter;
-  d.bgfunction <- s.bgfunction;;
+  d.bggradient <- s.bggradient;;
 
 let copy_of_bkgd_data () =
   let c = default_bkgd_data () in
@@ -485,9 +488,9 @@ let draw_bkgd () =
   if !bg_color <> Graphics.white then Graphics.fill_rect x y w h;
 
   (* Background: apply the gradient function if any. *)
-  begin match bkgd_data.bgfunction with
+  begin match bkgd_data.bggradient with
   | None -> ()
-  | Some bgfunction ->
+  | Some bggradient ->
       let funviewport = make_funviewport bkgd_data bgviewport in
       let bgfunarg = make_funarg bkgd_data bgviewport funviewport in
       let string_of_color_opt = function 
@@ -497,7 +500,7 @@ let draw_bkgd () =
         "colors are {argcolor = %d; argcolorstart = %s; argcolorstop = %s}."
         bkgd_data.bgcolor (string_of_color_opt bkgd_data.bgcolorstart)
                           (string_of_color_opt bkgd_data.bgcolorstop));
-      bgfunction bgfunarg end;
+      bggradient bgfunarg end;
 
   (* Background: now draw the image. *)
   let draw_bg file =
@@ -523,7 +526,7 @@ let set_bg_option = function
   | BgHeight h -> bkgd_data.bgheight <- h
   | BgXCenter xc -> bkgd_data.bgxcenter <- Some xc
   | BgYCenter yc -> bkgd_data.bgycenter <- Some yc
-  | BgFun f -> bkgd_data.bgfunction <- f;;
+  | BgGradient f -> bkgd_data.bggradient <- f;;
 
 let set_bg_options l = List.iter set_bg_option l;;
 
@@ -566,7 +569,7 @@ let get_bg_color x y w h =
   if !ignore_background then Graphics.white else begin
     sync dvi;
     if !psused || bkgd_data.bgimg <> None ||
-       bkgd_data.bgfunction <> None || bkgd_data.bgviewport <> None then
+       bkgd_data.bggradient <> None || bkgd_data.bgviewport <> None then
       let point_color x y =
         let x' = min (!size_x - 1) x and y' = min (!size_y - 1) y in
         GraphicsY11.point_color x' y' in
