@@ -14,7 +14,7 @@
 %% must occur after packages using PStricks macros 
 %% (it redefines some of them) 
 
-\def\mathsym#1{\ifmmode{#1}\else$#1$\fi}
+%\def\mathsym#1{\ifmmode{#1}\else$#1$\fi}
 
 \pagestyle{empty}
 
@@ -368,7 +368,7 @@ Issue a warning if the extension is not recognized or if the
 file is non-existent:
 \hyperref{nonexistent.dvi}{}{}{\tt nonexistent.dvi}
 or
-\hyperref{../advi.sty}{}{}{\tt ../advi.sty}
+\hyperref{../tex/advi.sty}{}{}{\tt ../tex/advi.sty}
 
 
 
@@ -496,11 +496,12 @@ the \verb"gpic" command into a list of \TeX~ \verb"\special" commands.
 \bigskip
 
 To obtain a figure, you first write commands for the language
-\verb"pic" into a file; from this \verb"pic" file, generate a \TeX
-file using a \verb"pic" compiler, e.g. \verb"gpic"; then include this
-file into your presentation, and Active dvi will nicely display it.
+{\em pic} into a file; from this pic file, you can generate a \TeX
+file using a {\em pic compiler}, e.g. \verb"gpic"; then include this
+compiled file into your presentation, and Active dvi will nicely display it.
 
-Let's consider the source file \verb"trigo.pic" given here; we obtain
+Let's consider the \verb"pic" source file \verb"trigo.pic" given
+\hyperref{trigo_source.dvi}{}{}{here}; we obtain
 \verb"trigo.tex" using the command 
 \begin{verbatim}
 gpic -t trigo.pic > trigo.tex
