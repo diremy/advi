@@ -42,7 +42,7 @@
 {\string \gdef \string \LastPage{\thepage}}} 
 \newcommand \theTarget[3][\thepage]%
   {\@tempcnta #1\advance \@tempcnta by #3
-   \advi@special@ {html:<a href="\theSharp page.\the\@tempcnta">}#2%
+   \advi@special@ {html:<a href="\theSharp /page.\the\@tempcnta">}#2%
    \advi@special@ {html:</a>}}
 
 \def\keymenu#1{\textcolor{red}{\underline{#1}}}
@@ -73,7 +73,7 @@ Press: %
 \includegraphics[width=\textwidth]{bar.eps}\par}
 
 \let \Newpage \newpage
-\def \newpage {\Newpage \advifooter\adviheader}
+\def \newpage {\Newpage \advifooter\adviheader\advithumbnail[\thepage]}
 
 \def\adviemptyfooter{\vbox to 0em{\vbox to \vsize {\vfill
 ~~\vss\advikillembed{advianim}}}}
