@@ -25,6 +25,13 @@ let prev_geom = ref None;;
 let init_sprite () = prev_geom := None;;
 
 let do_on_screen = GraphicsY11.only_on_screen;;
+let do_on_screen f x =
+  Graphics.remember_mode false;
+  GraphicsY11.display_mode true;
+  let res = f x in
+  Graphics.remember_mode true;
+  GraphicsY11.display_mode false;
+  res;;
 
 let draw_sprite newimg x y width height =
   let orgimg = Graphics.get_image x y width height in
@@ -206,11 +213,11 @@ let rescale_grimage img w h nw nh =
 (* Rendering function for sprites along a path *)
 let render newimg w h
     (nextx, nexty, nextscale, nextrot) =
-    let nw = int_of_float (float w *. nextscale)
-    and nh = int_of_float (float h *. nextscale) in
+    let nw = Misc.round (* int_of_float *) (float w *. nextscale)
+    and nh = Misc.round (* int_of_float *) (float h *. nextscale) in
     let newimg = rescale_grimage newimg w h nw nh in
     draw_sprite newimg
-      (int_of_float nextx) (int_of_float nexty)
+      (Misc.round (* int_of_float *) nextx) (Misc.round (* int_of_float *) nexty)
       nw nh
 ;;
 
