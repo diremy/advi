@@ -67,7 +67,6 @@ dnl Camlimages version
 if test -f $CAMLIMAGESDIR/ci_ps.cma || $HAVE_CDK; then
 	AC_MSG_RESULT(found)
 	CAMLIMAGES_VERSION=`grep VERSION $CAMLIMAGESDIR/Makefile.config | sed -e 's/VERSION=//'`
-	echo camlimages-version $CAMLIMAGES_VERSION
 	if test `expr $CAMLIMAGES_VERSION \>= 2.10` = "1"; then
 		HAVE_CAMLIMAGES="true"
 	        if $HAVE_CDK; then
@@ -78,21 +77,23 @@ if test -f $CAMLIMAGESDIR/ci_ps.cma || $HAVE_CDK; then
 	        fi
 	else
 		AC_MSG_RESULT(found, but bit too old)
-		echo "**************** Warning ******************"
+		echo "***************** Error *******************"
 		echo "camlimages is found in the directory \"$CAMLIMAGESDIR\"",
 		echo "but bit too old. (make sure install the latest version 2.10)"
 		echo "*******************************************"
 		HAVE_CAMLIMAGES="false"
 		CAMLIMAGESLIBS=""
+		exit 1
 	fi
 else
 	AC_MSG_RESULT(not found, or too old)
-	echo "**************** Warning ******************"
+	echo "***************** Error *******************"
 	echo "camlimages is not found or incomplete in the directory \"$CAMLIMAGESDIR\""
 	echo "(make sure install the latest version 2.10)"
 	echo "*******************************************"
 	HAVE_CAMLIMAGES="false"
 	CAMLIMAGESLIBS=""
+	exit 1
 fi
 
 dnl CamlTk
@@ -195,7 +196,7 @@ ADVI_LOC=$mylibdir/advi
 AC_SUBST(ADVI_LOC)
 AC_SUBST(WITH_X)
 AC_SUBST(HAVE_GS)
-AC_OUTPUT(Makefile.config config.ml ifdef.ml)
+AC_OUTPUT(Makefile.config config.ml)
 
 echo "------------------------------------------------- Configuration finished"
 echo "Language:    $CAML version $CAMLVERSION"

@@ -1,12 +1,8 @@
-ttfont.ml
 advi
 advi.opt
-drawimage.ml
 config.log
 config.cache
 config.status
 Makefile.config
 config.ml
-dvicolor.ml
-ifdef.ml
 .depend

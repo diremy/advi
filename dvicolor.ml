@@ -55,11 +55,8 @@ let parse_color_args = function
   | [s] ->
       begin
 	try 
-ifdef HAVE_CAMLIMAGES then
 	  let {Color.r = r; Color.g = g; Color.b = b} = Color.color_parse s in
 	  rgb r g b
-else
-          raise Exit
 	with _ ->
             (* Try known colors *)
             try List.assoc (String.lowercase s) named_colors

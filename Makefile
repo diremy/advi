@@ -83,18 +83,6 @@ $(EXEC).opt: $(COBJS) $(CMX_OBJS)
 config.ml: config.ml.in configure
 	./configure
 
-dvicolor.ml: Makefile.config dvicolor.mlp ifdef.cmo
-	camlp4o pa_ifdef.cmo ./ifdef.cmo -impl dvicolor.mlp > $@
-
-drawimage.ml: Makefile.config drawimage.mlp ifdef.cmo
-	camlp4o pa_ifdef.cmo ./ifdef.cmo -impl drawimage.mlp > $@
-
-ttfont.ml: Makefile.config ttfont.mlp ifdef.cmo
-	camlp4o pa_ifdef.cmo ./ifdef.cmo -impl ttfont.mlp > $@
-
-ifdef.cmo: ifdef.ml
-	$(OCAMLC) -c $(CAMLP4_FLAG) $<
-
 grY11.o : grY11.c
 	$(OCAMLC) -ccopt "$(CFLAGS)" -c $<
 
@@ -135,7 +123,8 @@ install:: opt doc/splash.dvi
 	if [ -f conf/jpfonts.conf ]; then cp conf/jpfonts.conf $(ADVI_LOC); fi
 
 MLFILES = $(addsuffix .ml, $(MODULES))
-.depend:: *.mli $(MLFILES) Makefile 
+
+.depend:: *.mli $(MLFILES) Makefile
 	$(OCAMLDEP) *.mli $(MLFILES) > .depend
 	gcc -MM -I$(CAMLDIR) $(CFLAGS) $(COBJS:.o=.c) | sed -e 's|$(CAMLDIR)/[^ ]*||' >> .depend
 
