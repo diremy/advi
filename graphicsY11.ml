@@ -362,15 +362,23 @@ let read_key () =
 let key_pressed () =
   let e = wait_next_event [Poll] in e.keypressed;;
 
-(** As [point_color] but read in window *)
-external window_color : int -> int -> Graphics.color = "gr_window_color";;
+external window_point_color : int -> int -> Graphics.color
+  = "gr_window_point_color";;
+(** As [point_color] but read the information in the window display. *)
 
-(** Global_display mode allows to inhibit display_mode commands *)
 external anti_synchronize : unit -> unit = "gr_anti_synchronize";;
-let global_display_mode_status = ref false;;
-let global_display_mode b = global_display_mode_status :=  b;;
+(** Synchronize the backing store drawings from the window display:
+  performs just the inverse operation as the regular [synchornize] function. *)
+
+let global_display_mode = ref false;;
+(** Global_display mode allows to inhibit display_mode commands *)
+let set_global_display_mode b = global_display_mode :=  b;;
+let get_global_display_mode () = !global_display_mode;;
+
+(** Synchronize according to [global_display_mode]. *)
 let synchronize () =
-  if not !global_display_mode_status then (
+  let status = get_global_display_mode () in
+  if not status then (
     Misc.debug_stop "Graphics.synchronize";
     Graphics.synchronize ()
   ) else (
@@ -378,13 +386,30 @@ let synchronize () =
     anti_synchronize ()
   );;
 
+(** [display_mode] according to [global_display_mode]. *)
 let display_mode b =
-  if not !global_display_mode_status then 
-    Graphics.display_mode (b || !global_display_mode_status);;
+  let status = get_global_display_mode () in
+  if not status then Graphics.display_mode b;;
+(*
+Was: if not status then Graphics.display_mode (b || status);;
+But could be simplified to
+ if not status then Graphics.display_mode b;;
 
+In effect:
+if status = true => do nothing
+if status = false =>
+  b is true => true || false = true
+    => Graphics.display_mode true
+    => Graphics.display_mode b
+  b is false => false || false = false
+    => Graphics.display_mode false
+    => Graphics.display_mode b
+*)
+
+(** [point_color] according to [global_display_mode]. *)
 let point_color x y =
-  if !global_display_mode_status then window_color x y
-  else Graphics.point_color x y;;
+  let status = get_global_display_mode () in
+  if status then window_point_color x y else Graphics.point_color x y;;
 
 (* This function performs f on the screen memory only,
    not affecting the backing store. *) 
