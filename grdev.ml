@@ -23,14 +23,6 @@ let usr1_status = ref false;;
 let clear_usr1 () = usr1_status :=  false;;
 let waiting = ref false;;
 
-let test_usr1 () =
-  if !usr1_status then
-    begin
-      clear_usr1 ();
-      true
-    end
-  else false;;
-
 let usr1 = 10;;
 
 let set_usr1 () =
@@ -154,6 +146,19 @@ let title = ref "Advi";;
 let set_title s = title := s;;
 
 (* Transitions *)
+let sleep_watch b n =
+  let start = Unix.gettimeofday () in
+  let rec delay t =
+    try
+      if b && (!usr1_status || Graphics.key_pressed ()) then ()
+      else ignore (Unix.select [] [] [] t)
+    with Unix.Unix_error(Unix.EINTR, _, _) ->
+      let now = Unix.gettimeofday () in
+      let remaining = start +. n -. now in
+      if remaining > 0.0 then delay remaining in
+  delay n;;
+
+let sleep = sleep_watch true;;
 
 Transimpl.sleep := sleep;;
 
@@ -218,10 +223,10 @@ let get_glyph g = g.glyph;;
 (* to be extended, should contain the image, gradients etc. RDC *)
 
 type bkgd_prefs = {
-  mutable bgcolor: int;
-  mutable bgimg: string option;
-  mutable bgratio: Draw_image.ratiopts;
-  mutable bgwhitetrans:bool
+  mutable bgcolor : int;
+  mutable bgimg : string option;
+  mutable bgratio : Draw_image.ratiopts;
+  mutable bgwhitetrans : bool
 };;
 
 let default_bkgd_data () =
@@ -243,18 +248,17 @@ let copy_of_bkgd_data () =
   copy_bkgd_data bkgd_data c;
   c;;
 
-let copy_bkgd_data s d = d.bgcolor <- s.bgcolor;
-                         d.bgimg   <- s.bgimg;
-                         d.bgratio <- s.bgratio;
-                         d.bgwhitetrans <- s.bgwhitetrans
-;;
+let copy_bkgd_data s d =
+  d.bgcolor <- s.bgcolor;
+  d.bgimg   <- s.bgimg;
+  d.bgratio <- s.bgratio;
+  d.bgwhitetrans <- s.bgwhitetrans;;
 
-let bkgd_data = default_bkgd_data ()
-;;
+let bkgd_data = default_bkgd_data ();;
 
-let copy_of_bkgd_data () = let c = default_bkgd_data () 
-                           in copy_bkgd_data bkgd_data c; c
-
+let copy_of_bkgd_data () =
+  let c = default_bkgd_data () in
+  copy_bkgd_data bkgd_data c; c;;
 
 (* TODO: handle ratio and whitetransparent preferences *)
 
@@ -270,13 +274,8 @@ type bgoption =
    | BgImg of string;;
 
 let set_bg_option = function
-    BgColor c ->bkgd_data.bgcolor <- c
-  | BgImg fn -> bkgd_data.bgimg <- Some fn
-;;
-
-let set_bg_options l = 
-     List.iter set_bg_option l
-;;
+  | BgColor c ->bkgd_data.bgcolor <- c
+  | BgImg fn -> bkgd_data.bgimg <- Some fn;;
 
 let set_bg_options l = List.iter set_bg_option l;;
 
@@ -289,7 +288,7 @@ let push_bg_color c =
 
 let pop_bg_color () =
   match !bg_colors with
-  | h::t -> bg_color := h; bg_colors := t
+  | h :: t -> bg_color := h; bg_colors := t
   | [] -> bg_color := bkgd_data.bgcolor;;
 
 let background_colors = ref [];;
@@ -380,6 +379,7 @@ let set_bbox bb =
 (*** Drawing ***)
 let set_color col =
   if not !opened then failwith "Grdev.set_color: no window";
+prerr_endline "set_color";
   color := col;
   Graphics.set_color col;;
 
@@ -552,6 +552,9 @@ type app_type = Sticky | Persistent | Ephemeral;;
 let app_table = Hashtbl.create 17;;
 
 let raw_embed_app command app_type app_name width height x y =
+  prerr_endline
+    (Printf.sprintf "Launching %s (w=%i, h=%i) at %i %i"
+       app_name width height x y);
   let string_replace pat templ str =
     let result = Buffer.create (String.length str * 2) in
     let patlen = String.length pat in
@@ -573,7 +576,7 @@ let raw_embed_app command app_type app_name width height x y =
           Buffer.contents result in
     replace 0 in
 
-  let wid = GraphicsY11.open_subwindow ~x ~y:(y - height) ~width ~height in
+  let wid = GraphicsY11.open_subwindow ~x ~y ~width ~height in
 
   (*** !x commands
     !p : embedding target window id (in digit)
@@ -637,15 +640,23 @@ let find_embedded_app app_name =
   hashtbl_find app_table (fun (_, name, _) -> name = app_name);;
 
 let map_embed_app command app_type app_name width height x y =
+  prerr_endline
+    (Printf.sprintf "Mapping %s (w=%i, h=%i) at %i %i"
+       app_name width height x y);
   let _, (app_type, app_name, wid) = find_embedded_app app_name in
   GraphicsY11.map_subwindow wid;;
 
 let unmap_embed_app command app_type app_name width height x y =
+ prerr_endline ("Unmapping " ^ app_name);
  let _, (app_type, app_name, wid) = find_embedded_app app_name in
- GraphicsY11.unmap_subwindow wid;;
+ GraphicsY11.unmap_subwindow wid;
+ prerr_endline (app_name ^ " unmapped");;
 
 let move_or_resize_persistent_app command app_type app_name width height x y =
   let _, (app_type, app_name, wid) = find_embedded_app app_name in
+  prerr_endline (Printf.sprintf "Resizing %s to %i, %i" app_name width height);
+  GraphicsY11.resize_subwindow wid width height;
+  prerr_endline (Printf.sprintf "Moving %s to %i, %i" app_name x y);
   GraphicsY11.move_subwindow wid x y;;
 
 (* In hash table t, verifies that at least one element verifies p. *)
@@ -675,18 +686,15 @@ let embed_app command app_type app_name width height x y =
      if not (already_launched app_name) then
      embeds :=
       (fun () ->
-         (* prerr_endline ("Launching " ^ app_name); *)
-         raw_embed_app command app_type app_name width height x y) ::
+        raw_embed_app command app_type app_name width height x y) ::
       !embeds;
      persists :=
       (fun () ->
-         (* prerr_endline ("Mapping " ^ app_name);*)
-         map_embed_app command app_type app_name width height x y) ::
+        map_embed_app command app_type app_name width height x y) ::
       !persists;
      unmap_embeds :=
       (fun () ->
-         (* prerr_endline ("Unmapping " ^ app_name);*)
-         unmap_embed_app command app_type app_name width height x y) ::
+        unmap_embed_app command app_type app_name width height x y) ::
       !unmap_embeds;
   | Ephemeral ->
      embeds :=
@@ -724,18 +732,27 @@ let kill_embedded_app app_name =
     let pid, (app_type, app_name, wid) = find_embedded_app app_name in
     kill_app pid wid
   with
-  | Not_found -> 
+  | Not_found ->
       Misc.warning (Printf.sprintf "application %s is not running" app_name);;
 
 let unmap_persistent_apps () =
+  prerr_endline "Unmapping persistent apps";
   List.iter (fun f -> f ()) (List.rev !unmap_embeds);
+  prerr_endline "Persistent apps unmapped";
   unmap_embeds := [];;
 
-let kill_ephemeral_apps () = kill_apps Ephemeral;;
+let kill_ephemeral_apps () =
+  kill_apps Ephemeral;;
 
 let kill_persistent_apps () =
   kill_apps Sticky;
+  unmap_persistent_apps ();
   kill_apps Persistent;;
+
+let kill_all_embeds () =
+  kill_ephemeral_apps ();
+  kill_persistent_apps ();;
+
 
 (*** HTML interaction ***)
 
@@ -824,7 +841,7 @@ module H =
           | Href s -> 0
           | Advi (s, f) -> 0
           | Name s -> 0 in
-        let y' = y - voff -1 in
+        let y' = y - voff - 1 in
         let h' = h + 2 in
         let a =
           { A.x = x - e;
@@ -983,6 +1000,7 @@ let open_dev geom =
   opened := true;;
 
 let close_dev () =
+  prerr_endline "Closing dev";
   if !opened then begin
     kill_ephemeral_apps ();
     kill_persistent_apps ();
@@ -1014,10 +1032,10 @@ let clear_dev () =
 (*** Events ***)
 
 type status = GY.status = {
-    mouse_x : int ;
-    mouse_y : int ;
-    button : bool ;
-    keypressed : bool ;
+    mouse_x : int;
+    mouse_y : int;
+    button : bool;
+    keypressed : bool;
     key : char;
     modifiers : int;
   };;
@@ -1044,20 +1062,20 @@ type option_event =
    | Raw of status;;
 
 let all_events = [
-  GY.Button_down ;
-  GY.Button_up ;
+  GY.Button_down;
+  GY.Button_up;
   GY.Mouse_motion; 
-  GY.Key_pressed ;
-] ;;
+  GY.Key_pressed;
+];;
 
 let button_up_motion = [
-  GY.Button_up ;
+  GY.Button_up;
   GY.Mouse_motion; 
-] ;;
+];;
 
 let button_up = [
-  GY.Button_up ;
-] ;;
+  GY.Button_up;
+];;
 
 let event = ref [];;
 let push_back_event ev =
@@ -1094,37 +1112,37 @@ type rectangular_image =
       west : Graphics.image; };;
 
 let rec save_rectangle x y dx dy =
-  let x = min x (x+dx) in
-  let y = min y (y+dy) in
+  let x = min x (x + dx) in
+  let y = min y (y + dy) in
   let dx = max 1 (abs dx) in
   let dy = max 1 (abs dy) in
   { south = Graphics.get_image x y dx 1;
     west = Graphics.get_image x y 1 dy;
-    east = Graphics.get_image (x+dx) y 1 dy;
-    north =  Graphics.get_image x (y+dy) (succ dx) 1;
+    east = Graphics.get_image (x + dx) y 1 dy;
+    north =  Graphics.get_image x (y + dy) (succ dx) 1;
   };;
 
 let rec restore_rectangle r x y dx dy =
-  let x = min x (x+dx) in
-  let y = min y (y+dy) in
+  let x = min x (x + dx) in
+  let y = min y (y + dy) in
   let dx = max 1 (abs dx) in
   let dy = max 1 (abs dy) in
   begin
     Graphics.draw_image r.south x y;
     Graphics.draw_image r.west x y;
-    Graphics.draw_image r.east (x+dx) y;
-    Graphics.draw_image r.north x (y+dy);
+    Graphics.draw_image r.east (x + dx) y;
+    Graphics.draw_image r.north x (y + dy);
   end;;
 
 let rec draw_rectangle x y dx dy =
   Graphics.moveto x y;
-  Graphics.lineto (x+dx) y;
-  Graphics.lineto (x+dx) (y+dy);
-  Graphics.lineto (x) (y+dy);
+  Graphics.lineto (x + dx) y;
+  Graphics.lineto (x + dx) (y + dy);
+  Graphics.lineto (x) (y + dy);
   Graphics.lineto (x) (y);;
 
-let wait_button_down() = 
-  if GY.button_down() then
+let wait_button_down () = 
+  if GY.button_down () then
     ignore (GY.wait_next_event [ GY.Button_up ])
 
 
@@ -1150,8 +1168,8 @@ let rec wait_signal_event events =
             Final Refreshed
         | exn ->
             waiting := false;
-            raise exn
-          ;;
+            raise exn;;
+
 let wait_select_rectangle x y =
   let rec select dx dy =
     let buf = save_rectangle x y dx dy in
@@ -1175,8 +1193,7 @@ let wait_select_rectangle x y =
     GY.set_cursor !free_cursor
   in
   try let e = select 0 0 in restore(); e
-  with exn -> restore(); raise exn
-        ;;  
+  with exn -> restore(); raise exn;;
 
 let wait_select_button_up m x y =
   let draw_color b =
@@ -1257,7 +1274,7 @@ let wait_move_button_up x y =
     set_color !color;
     GY.set_cursor !free_cursor in
   try let e = move 0 0 in restore (); e
-  with exn -> restore (); raise exn
+  with exn -> restore (); raise exn;;
 
 let near x x' = abs (x - x') < !size_x / 4;;
 
@@ -1305,10 +1322,10 @@ let wait_event () =
             send (Key ev.GY.key)
           else
             let ev' = 
-              { mouse_x = ev.GY.mouse_x ;
-                mouse_y = !size_y - ev.GY.mouse_y ;
-                button = ev.GY.button ;
-                keypressed = ev.GY.keypressed ;
+              { mouse_x = ev.GY.mouse_x;
+                mouse_y = !size_y - ev.GY.mouse_y;
+                button = ev.GY.button;
+                keypressed = ev.GY.keypressed;
                 key = ev.GY.key; 
                 modifiers = ev.GY.modifiers; } in
             begin try
@@ -1335,7 +1352,6 @@ let wait_event () =
                     end
               | _ ->
                   rescan ()
-
               end
             with
             | Not_found ->
