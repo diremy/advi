@@ -84,7 +84,7 @@ let standalone_main () =
   View.set_vmargin !vmargin ;
   View.set_geometry !geometry ;
   try
-    View.main_loop filename ; exit 0
+    View.main_loop filename; exit 0
   with View.Error s | Failure s | Graphics.Graphic_failure s ->
     Format.printf "Fatal error: %s@." s; exit 1 ;;
 

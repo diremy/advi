@@ -437,7 +437,7 @@ let fill_arc ~x ~y ~rx ~ry ~start:s ~stop:e ~shade =
   Graphics.fill_arc x (!size_y - y) rx ry (- s) (- e);
   Graphics.set_color !color;;
 
-let epstransparent = ref false;;
+let epstransparent = ref true;;
 let set_epstransparent s = epstransparent := s;;
 
 let alpha = ref 1.0;;

@@ -57,7 +57,7 @@ let unquote v =
 let rec split_record s =
   let tokens = split_string_quoted s 0 in
   List.map (fun token ->
-    try 
+    try
       let i = String.index token '=' in
       String.sub token 0 i,
       String.sub token (i+1) (String.length token - i - 1)
@@ -65,17 +65,16 @@ let rec split_record s =
       _ -> token, "") tokens
 ;;
 
-
 let named_colors = [
-  "Black", 0x000000 ;
-  "White", 0xffffff ;
-  "Red", 0xff0000 ;
-  "Green", 0x00ff00 ;
-  "Blue", 0x0000ff ;
-  "Cyan", 0x00ffff ;
-  "Magenta", 0xff00ff ;
-  "Yellow", 0xffff00
-] ;;
+  "black", 0x000000;
+  "white", 0xffffff;
+  "red", 0xff0000;
+  "green", 0x00ff00;
+  "blue", 0x0000ff;
+  "yellow", 0xffff00;
+  "cyan", 0x00ffff;
+  "magenta", 0xff00ff;
+];;
 
 let rgb r g b =
   (r lsl 16) + (g lsl 8) + b ;;
@@ -110,7 +109,6 @@ let parse_color_args = function
           0x000000
       end
   | _ -> 0x000000 ;;
-
 
 module Dev = Grdev
 module Symbol = Dev.Symbol
@@ -1149,7 +1147,7 @@ let set_rule st a b =
 	stack = [] ; color = 0x000000 ; color_stack = [];
 	alpha = 1.0; alpha_stack = [];
 	blend = Dev.Normal; blend_stack = [];
-	epstransparent = false; epstransparent_stack = [];
+	epstransparent = true; epstransparent_stack = [];
 	transition= Transitions.TransNone; transition_stack = [];
         tpic_pensize = 0.0; tpic_path = []; tpic_shading = 0.0;
         status = status;
