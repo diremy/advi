@@ -302,7 +302,7 @@ Labels over arrows \verb"\Aput", \verb"Bput", etc.
 (idem, but drawings that are not embedded in pspictures works)
 
 \item[-]
-Advi only recognizer binary overlays (display if 0, hide otherwise). 
+Advi only recognizes binary overlays (display if 0, hide otherwise). 
 This is sufficient for the proper documentclass
 (see \hyperlink {overlays}{below}).
 
@@ -335,7 +335,7 @@ seminar overlays might still be possible...
 The package \verb"advi" can be loaded with the \verb"batch" option:
 
 \smallskip
-{\verb"\usepackage[annot,ignore]{advi}"}
+{\verb"\usepackage[ignore]{advi}"}
 \smallskip
 
 The effect is to switch off some \verb"advi" gadgets and to render some others 
@@ -484,11 +484,11 @@ The command
 
 \verb"\usepackage{advi}"
 
-\verb"\usepackage[annot]{advi}"
+\verb"\usepackage{advi-annot}"
 
 \end{quote}
 must appear after other packages that uses PS tricks, since it redefines
-some macros.  The option \verb"annot" must be passed to the package to get
+some macros.  The package \verb"advi-annot" is necessary to get
 the annotation macros.
 
 \newpage
