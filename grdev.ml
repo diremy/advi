@@ -74,17 +74,7 @@ let sync b =
 let control_cursor = G.Cursor_left_ptr
 let move_cursor = G.Cursor_fleur
 let select_cursor = G.Cursor_xterm
-
-type mode = Control | Selection
 let free_cursor = ref control_cursor
-let mode = ref Control
-let set_selection_mode m =
-  mode := m; 
-  free_cursor :=
-    begin match m with
-    | Control ->  control_cursor
-    | Selection -> select_cursor
-    end
 
 type busy = Free | Busy | Pause | Disk
 let busy_timeout = ref 0.

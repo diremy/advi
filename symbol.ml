@@ -1,14 +1,16 @@
 (* Symbols information. *)
-type symbol = { color   : int ; 
-	       locx    : int ; 
-	       locy    : int ;
-	       voffset : int ;
-	       hoffset : int ;
-	       width   : int ;
-	       height  : int ;
-	       code    : int ;
-	       fontname : string ;
-	       fontratio : float }
+type 'g symbol =
+    { color   : int ; 
+      locx    : int ; 
+      locy    : int ;
+      voffset : int ;
+      hoffset : int ;
+      width   : int ;
+      height  : int ;
+      code    : int ;
+      fontname  : string ;
+      fontratio : float ;
+      glyph   : 'g option }
 
 let dummy_symbol =
   { color = 0 ;
@@ -20,14 +22,18 @@ let dummy_symbol =
     height = 0 ;
     code   = 0 ;
     fontname = "" ;
-    fontratio = 1.0 }
+    fontratio = 1.0 ;
+    glyph = None }
 
-type set = (symbol list) ref
+type 'g set = ('g symbol list) ref
 
 let draw_symbol s c =
   Graphics.set_color c;
   Graphics.draw_rect (s.locx-s.hoffset) (s.locy-s.voffset) s.width s.height;
   Graphics.synchronize()
+
+(* Iterates ff over the set. *)
+let iter ff set = List.iter ff !set
 
 (* Empty set, we probably do not need to optimize according to page dimensions. *)
 let empty_set ~pagewidth:p_width ~pageheight:p_height = ref []

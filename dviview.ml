@@ -150,8 +150,6 @@ module type DEVICE = sig
   val exec_ps : string -> int -> int -> unit
   val add_headers : string list -> unit
   val synchronize : unit -> unit
-  type mode = Control | Selection
-  val set_selection_mode : mode -> unit ;;
   type busy = Free | Busy | Pause | Disk
   val set_busy : busy -> unit;;
   val set_title : string -> unit
@@ -500,12 +498,8 @@ module Make(Dev : DEVICE) = struct
   (* The output depends on the ratio st.ratio. *)
   let document_xy st x y =
     (* x and y are relative to lower-left corner, *)
-    (* but orig_x and orig_y are relative to upper-right corner !!! *)
-    (* So we change y to comply to orig_y coordinates. *)
     let y = st.size_y - y in
-    let docx = int_of_float (float (x - st.orig_x))
-    and docy = int_of_float (float (y - st.orig_y))
-    in docx, docy
+    x, y
       
   (* User has selected a region with the mouse. We dump characters. *)
   let selection mode st x y dx dy =
@@ -518,6 +512,17 @@ module Make(Dev : DEVICE) = struct
       |	Interval -> Symbol.intime docx docy docx2 docy2 symbols
       |	Rectangle -> Symbol.inzone docx docy docx2 docy2 symbols
     in
+    (* Show the selection. *)
+    let show_glyph s =
+	match s.Symbol.glyph with
+	| None -> ()
+	| Some g -> Dev.draw_glyph g s.Symbol.locx s.Symbol.locy
+    in
+    Dev.set_color Graphics.cyan;
+    Dev.draw_path [| docx,docy ; docx2,docy ; docx2,docy2 ; docx,docy2 ; docx,docy |] 1;
+    Symbol.iter show_glyph input ;
+    Dev.synchronize();
+
     let output = Symbol.to_ascii input in
     print_string output;
     print_newline ();
@@ -879,15 +884,6 @@ module Make(Dev : DEVICE) = struct
         Drv.unfreeze_fonts st.cdvi
       let unfreeze_glyphs st =
         Drv.unfreeze_glyphs st.cdvi (st.base_dpi *. st.ratio)
-      let switch_mode st =
-        begin
-          st.mode <-
-            match st.mode with
-            | Selection -> Dev.set_selection_mode Dev.Control; Control
-            | Control -> Dev.set_selection_mode Dev.Selection; Selection
-        end;
-        if st.cont = None then Dev.set_busy Dev.Free
-            
       let center st =
         st.ratio <- 1.0 ;
         update_dvi_size false st ;
@@ -1022,7 +1018,6 @@ module Make(Dev : DEVICE) = struct
     'F' 	, B.unfreeze_glyphs; 
     'r' 	, B.redraw; 
     'R' 	, B.reload; 
-    'm' 	, B.switch_mode; 
     'c' 	, B.center; 
     '<' 	, B.scale_down; 
     '>' 	, B.scale_up; 
@@ -1046,8 +1041,6 @@ module Make(Dev : DEVICE) = struct
     redraw st;
     
     (* num is the current number entered by keyboard *)
-    let selection_mode = ref false in
-    
     try while true do
       let ev = if changed st then Dev.Refreshed else Dev.wait_event() in
       st.num <- st.next_num;

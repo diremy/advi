@@ -78,17 +78,19 @@ module type DEVICE = sig
   val add_headers : string list -> unit
 end ;;
 
-module type DRIVER = sig
-  exception Pause
-  type cooked_dvi
-  val cook_dvi : Dvi.t -> cooked_dvi
-  val render_page : cooked_dvi -> int -> float -> int -> int -> unit
-  val render_step : cooked_dvi -> int -> float -> int -> int -> (unit -> bool)
-  val unfreeze_fonts : cooked_dvi -> unit
-  val unfreeze_glyphs : cooked_dvi -> float -> unit
-  val scan_specials : cooked_dvi -> int -> unit
-  val clear_symbols : int -> int -> int -> int -> unit
-  val give_symbols : unit -> Symbol.set
-end ;;
-
-module Make(Dev : DEVICE) : DRIVER ;;
+module type DRIVER =
+    functor (Dev : DEVICE) ->
+    sig
+      exception Pause
+      type cooked_dvi
+      val cook_dvi : Dvi.t -> cooked_dvi
+      val render_page : cooked_dvi -> int -> float -> int -> int -> unit
+      val render_step : cooked_dvi -> int -> float -> int -> int -> (unit -> bool)
+      val unfreeze_fonts : cooked_dvi -> unit
+      val unfreeze_glyphs : cooked_dvi -> float -> unit
+      val scan_specials : cooked_dvi -> int -> unit
+      val clear_symbols : int -> int -> int -> int -> unit
+      val give_symbols : unit -> Dev.glyph Symbol.set
+    end ;;
+    
+module Make : DRIVER ;;

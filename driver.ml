@@ -88,19 +88,21 @@ module type DEVICE = sig
   val add_headers : string list -> unit
 end ;;
 
-module type DRIVER = sig
-  exception Pause
-  type cooked_dvi
-  val cook_dvi : Dvi.t -> cooked_dvi
-  val render_page : cooked_dvi -> int -> float -> int -> int -> unit
-  val render_step : cooked_dvi -> int -> float -> int -> int -> (unit -> bool)
-  val unfreeze_fonts : cooked_dvi -> unit
-  val unfreeze_glyphs : cooked_dvi -> float -> unit
-  val scan_specials : cooked_dvi -> int -> unit 
-  val clear_symbols : int -> int -> int -> int -> unit
-  val give_symbols : unit -> Symbol.set
-end ;;
-
+module type DRIVER =
+    functor (Dev : DEVICE) ->
+  sig
+    exception Pause
+    type cooked_dvi
+    val cook_dvi : Dvi.t -> cooked_dvi
+    val render_page : cooked_dvi -> int -> float -> int -> int -> unit
+    val render_step : cooked_dvi -> int -> float -> int -> int -> (unit -> bool)
+    val unfreeze_fonts : cooked_dvi -> unit
+    val unfreeze_glyphs : cooked_dvi -> float -> unit
+    val scan_specials : cooked_dvi -> int -> unit 
+    val clear_symbols : int -> int -> int -> int -> unit
+    val give_symbols : unit -> Dev.glyph Symbol.set
+  end ;;
+    
 (*** Some utilities for specials ***)
 
 (*
@@ -348,22 +350,22 @@ module Make(Dev : DEVICE) = struct
     drawn_symbols := Symbol.empty_set page_w page_h;
     ()
 
-  let add_char st glyph code =
+  let add_char st x y glyph code =
 
-    let x = int_of_float (st.conv *. float st.h)
-    and y = int_of_float (st.conv *. float st.v) in
+    let dev_glyph = Dev.get_glyph glyph in
 
     let symbol =
       { Symbol.color = st.color ;
 	Symbol.locx = x ;
 	Symbol.locy = y ;
-	Symbol.voffset = glyph.Glyph.voffset ;
-	Symbol.hoffset = glyph.Glyph.hoffset ;
-	Symbol.width = glyph.Glyph.width ;
-	Symbol.height = glyph.Glyph.height ;
+	Symbol.voffset = dev_glyph.Glyph.voffset ;
+	Symbol.hoffset = dev_glyph.Glyph.hoffset ;
+	Symbol.width = dev_glyph.Glyph.width ;
+	Symbol.height = dev_glyph.Glyph.height ;
 	Symbol.code = code ;
 	Symbol.fontname = st.cur_font.name ;
-	Symbol.fontratio = st.cur_font.ratio }
+	Symbol.fontratio = st.cur_font.ratio ;
+	Symbol.glyph = Some glyph }
     in
     Symbol.add symbol !drawn_symbols ;
     ()
@@ -480,7 +482,7 @@ module Make(Dev : DEVICE) = struct
           | None -> ()
           end;
           Dev.draw_glyph glyph x y;
-	  add_char st (Dev.get_glyph glyph) code ;
+	  add_char st x y glyph code ;
         end
     with _ -> ()
 

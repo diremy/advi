@@ -20,7 +20,7 @@
 type glyph ;;
 
 val make_glyph : Glyph.t -> glyph ;;
-  val get_glyph  : glyph -> Glyph.t
+val get_glyph  : glyph -> Glyph.t
 
 (* Device configuration *)
 
@@ -132,9 +132,6 @@ val add_headers : string list -> unit
 val current_pos : unit -> int * int;;
 val set_mode : bool -> unit ;;
 val synchronize : unit -> unit ;; 
-
-type mode = Control | Selection
-val set_selection_mode : mode -> unit ;;
 
 type busy = Free | Busy | Pause | Disk
 val set_busy : busy -> unit;;

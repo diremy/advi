@@ -95,8 +95,6 @@ module type DEVICE = sig
   val exec_ps : string -> int -> int -> unit
   val add_headers : string list -> unit
   val synchronize : unit -> unit
-  type mode = Control | Selection
-  val set_selection_mode : mode -> unit ;;
   type busy = Free | Busy | Pause | Disk
   val set_busy : busy -> unit;;
   val set_title : string -> unit
