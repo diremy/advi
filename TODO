@@ -77,6 +77,14 @@ WISH LIST:
 
  - transbox: replace steps by a timer
    ==>PW to wish list
+   ==>PW simplify implementation ??
+      (transbox_save should not
+       be called from within tex but as the first action of trans_go ???)
+ - transbox: add general path specification
+   ==> PW started implementation with RDC
+   ==> PW still todo: * allow loading of .cmo files to generate paths
+                      * documentation
+                      * revise advi.sty implementation
 
  - alpha, blend, etc. for images: keep track within text and emit the info
    at every image?
@@ -168,6 +176,8 @@ vscale=100.0 hoffset=-228.0 voffset=-368.0 hscale=100.0
 
  -PW add a new -n flag to advi, that would list the commands that could
 possibly be launched from a dvi file.
+ ==> Done with RDC
+     -PW should document it!
 
 Bindings
 --------
