@@ -32,7 +32,8 @@ all: manual.html manual.dvi manual.ps manual.pdf \
     splash.dvi splash.ps \
     scratch_write_splash.dvi scratch_write_splash.ps \
     scratch_draw_splash.dvi scratch_draw_splash.ps \
-    mathmode.dvi
+    mathmode.dvi \
+    advi_remote.html advi_remote.dvi
 
 clean: 
 	rm -f *~ *.aux *.log manual.html *.dvi *.pdf *.pdfm *.ps \
