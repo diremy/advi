@@ -24,19 +24,24 @@ let advi_version_date = "2003-02-27";;
 
 let advi_full_version =
   Printf.sprintf "%.2f+%i (%s)"
-    advi_version_number advi_sub_version_number advi_version_date
-;;
+    advi_version_number advi_sub_version_number advi_version_date;;
 
+(* Can we use gs ? *)
 let have_gs = @HAVE_GS@;;
+
+(* Various commands paths. *)
+let kpsewhich_path = "@PATH_KPSEWHICH@";;
+let gs_path = "@PATH_GS@";;
+let gzip_path = "@PATH_GZIP@";;
+
+(* Various configurations for PS and TeX *)
+let texpicts_kind = "graphic/figure";;
+let psheaders_kind = "PostScript header";;
+
+(* Data files directory paths. *)
+let texdir_path = "@TEXMFMAIN@";;
+let database_path = Filename.concat texdir_path "ls-R";;
 
 (* Location of splash.dvi and test/caml.eps *)
 let advi_loc = "@ADVI_LOC@";;
 let splash_screen = Filename.concat advi_loc "splash.dvi";;
-(* In the future, these could be automatically generated *)
-let kpsewhich_path = "@PATH_KPSEWHICH@";;
-let gs_path = "@PATH_GS@";;
-let gzip_path = "@PATH_GZIP@";;
-let texpicts_kind = "graphic/figure";;
-let psheaders_kind = "PostScript header";;
-let texdir_path = "@TEXMFMAIN@";;
-let database_path = Filename.concat texdir_path "ls-R";;
