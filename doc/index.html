@@ -4,14 +4,14 @@
 </head>
 
 <body bgcolor="white">
-<h1>Active dvi -- A dvi Presenter of \LaTeX slides</h1>
+<h1>Active-DVI -- A dvi Presenter of \LaTeX slides</h1>
 
 <center><img src="advilogo.gif"><br>
 <a href="advi.jpg">screen shot</a>
 </center>
 
 <p>
-Active dvi is a DVI previewer and presenter written in <a
+Active-DVI is a DVI previewer and presenter written in <a
 href="http://caml.inria.fr/ocaml/">Objective Caml</a> with some eye
 candy effects for presentation.
 
@@ -45,7 +45,7 @@ Active dvi features
 </UL>
 
 
-<h2>Installation of Active dvi</h2>
+<h2>Installation of Active-DVI</h2>
 
 <a name="requirements">
 <h3>Requirements</h3>
@@ -64,13 +64,31 @@ For encapsulated postscript file inclusions, you need the
 <a name="download">
 <h3>Download</h3></a>
 
-<UL>
-  <LI><a href="advi-1.0.0.tar.gz">Version 1.0.0 </a>
-  <LI><a href="http://camlcvs.inria.fr/cgi-bin/cvsweb.cgi/bazar-ocaml/advi/">
+<H4>Source distribution</H4>
+<DL>
+  <DT><a href="ftp://ftp.inria.fr/INRIA/Projects/cristal/advi/advi-1.0.0.tar.gz">Version 1.0.0 tar ball</a> (You optionally need camltk and camlimages!)
+  <DD> For the maximum performance, 
+       it requires 
+	<a href="http://pauillac.inria.fr/camltk/">camltk</a>
+	and 
+	<a href="http://pauillac.inria.fr/camlimages/">camlimages</a>
+	libraries.
+	If you have not installed these libraries yet, 
+	we recommend to download the following ADK instead.
+  <DT><a href="ftp://ftp.inria.fr/INRIA/Projects/cristal/advi/adk-1.0.0.tar.gz">ADK, Advi Development Kit version 1.0.0 tar ball</a> (Active-DVI + camltk + camlimages)
+  <DD> It is a big tar ball of Active-DVI, camltk and camlimages,
+	with a full-automated-with-luck installation Makefile.
+  <DT><a href="http://camlcvs.inria.fr/cgi-bin/cvsweb.cgi/bazar-ocaml/advi/">
       Current CVS version</a> at the
       <a href="http://camlcvs.inria.fr/">Caml Anonymous CVS repository</a>
-</UL>
+</DL>
 
+<h4>RPMS</h4>
+<UL>
+   <LI> <a href="advi-1.0.0-1.src.rpm"> SRPM </a>
+   <LI> RedHat7 <a href="advi-1.0.0-1.i386.rpm"> RPM </a>
+</UL>
+      
 <a name="copyright">
 <h2>COPYRIGHT</h2></a>
 
@@ -91,6 +109,6 @@ Roberto Di Cosmo,
 
 <hr>
 <!-- hhmts start -->
-Last modified: Mon Feb  4 16:40:20 CET 2002
+Last modified: Tue Feb  5 15:37:06 CET 2002
 <!-- hhmts end -->
 </body> </html>
