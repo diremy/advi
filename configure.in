@@ -98,10 +98,10 @@ fi
 
 dnl CamlTk
 
-CAMLTKDIR=$CAMLDIR/camltk
+CAMLTKDIR=$CAMLDIR/labltk
 
-AC_MSG_CHECKING(for camltk)
-AC_ARG_WITH(camltk, [  --with-camltk=dir      specify camltk library directory],
+AC_MSG_CHECKING(for camltk+)
+AC_ARG_WITH(camltk, [  --with-camltk+=dir      specify camltk+ library directory],
   if test "$withval" != "no" ; then  
 	CAMLTKDIR=$withval
   else
@@ -109,9 +109,10 @@ AC_ARG_WITH(camltk, [  --with-camltk=dir      specify camltk library directory],
 	CAMLTKDIR=nope
   fi)
 
-if test -f $CAMLTKDIR/camltk.cma || $HAVE_CDK; then
+if test -f $CAMLTKDIR/cTk.cmi || $HAVE_CDK; then
 	AC_MSG_RESULT(found)
 	HAVE_CAMLTK="true"
+	CAMLTKLIB=$CAMLTKDIR/labltk.cma
 else
 	AC_MSG_RESULT(no)
 	HAVE_CAMLTK="false"
@@ -182,6 +183,7 @@ AC_SUBST(PATH_KPSEWHICH)
 AC_SUBST(PATH_GZIP)
 AC_SUBST(HAVE_CAMLTK)
 AC_SUBST(CAMLTKDIR)
+AC_SUBST(CAMLTKLIB)
 
 dnl BUILD OUR OWN LIBDIR
 myprefix=$prefix
