@@ -30,7 +30,7 @@ if test "$PATH_KPSEXPAND" = "nope"; then
   echo "*******************************************"
   TEXMFMAIN="/usr/share/texmf"
 else
-  AC_MSG_CHECKING(checking TeX root path)
+  AC_MSG_CHECKING(TeX root path)
   TEXMFMAIN=`kpsexpand '$TEXMFMAIN'`
   AC_MSG_RESULT($TEXMFMAIN)
 fi
@@ -39,12 +39,10 @@ AC_PATH_PROG(PATH_KPSEWHICH, kpsewhich, "nope")
 if test "$PATH_KPSEWHICH" = "nope"; then
   PATH_KPSEWHICH="kpsewhich"
 fi
-AC_MSG_RESULT($PATH_KPSEWHICH)
 
 dnl Gzip
 
 AC_PATH_PROG(PATH_GZIP, gzip, "nope") 
-AC_MSG_RESULT($PATH_GZIP)
 if test "$PATH_GZIP" = "nope"; then
   PATH_GZIP=""
 fi
@@ -55,7 +53,7 @@ dnl CamlImages
 
 CAMLIMAGESDIR=$CAMLDIR/camlimages
 
-AC_MSG_CHECKING(checking camlimages)
+AC_MSG_CHECKING(for camlimages)
 AC_ARG_WITH(camlimages, [  --with-camlimages=dir      specify camlimages library directory],
   if test "$withval" != "no" ; then  
 	CAMLIMAGESDIR=$withval
@@ -87,7 +85,7 @@ dnl CamlTk
 
 CAMLTKDIR=$CAMLDIR/camltk
 
-AC_MSG_CHECKING(checking camltk)
+AC_MSG_CHECKING(for camltk)
 AC_ARG_WITH(camltk, [  --with-camltk=dir      specify camltk library directory],
   if test "$withval" != "no" ; then  
 	CAMLTKDIR=$withval
@@ -107,7 +105,7 @@ fi
 dnl Checking gs:
 
 PATH_GS="nope"
-AC_MSG_CHECKING(checking gs)
+AC_MSG_CHECKING(for gs)
 AC_ARG_WITH(gs, [  --with-gs=path          specify gs path],
   if test "$withval" != "no" ; then  
 	PATH_GS=$withval
