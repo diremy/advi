@@ -31,8 +31,9 @@ MLINCDIRS = $(CAMLIMAGESDIR)
 
 EXEC	  = advi
 
-MODULES	  = config timeout graphicsY11 misc userfile input symbol search \
-		shot drawimage dvicolor \
+MODULES	  = config timeout graphicsY11 misc options launch \
+            userfile input symbol search \
+            shot drawimage dvicolor \
 	    table pkfont ttfont jfm font glyph devfont \
 	    units dimension \
 	    gs transimpl grdev dvi driver dviview main

@@ -1,32 +1,70 @@
 BEFORE RELEASE:
+===============
 
- * Fixé les  KNOWN BUGS
+ * Fixer les KNOWN BUGS
 
- * compléter manual.tex (la plupart des morceaux manquants existent mais
+ * complèter manual.tex (la plupart des morceaux manquants existent mais
    sont dispersés)
+ ==> en cours ...
 
  * merger camlimages avec activedvi
+ ==> fait dans le sens où camlimages est dans le même RPM
+ * distribuer camltk avec advi (la seule GUI actuellement embeddable.)
+ ==> fait dans la même mesure que camlimages (RPM livré avec advi).
 
  * refaire la page WEB.
 
     . transformer advi@pauillac en advi-bugs@pauillac
+    ==> oui, il faut créer une adresse advi-bugs@pauillac pour les
+        rapports de bugs, mais l'adresse advi@pauillac doit rester la
+        liste des implementeurs.
     . mettre advi@pauillac comme liste d'abonnés avec Majordomo ?
+    ==> oui, mais il faut la nommer advi-list@pauillac.inria.fr comme
+    d'habitude avec les softs bat8.
 
  * packagifier pour Linux?
 
    . pour gagner de l'audience
-   . pour dimuner le nombre de problèmes d'installation.
+   . pour diminuer le nombre de problèmes d'installation.
 
+   ==> c'est fait pour RedHat.
+
+ * fixer partout dans la distribution le nom d'Active-DVI en utilisant
+la macro du manuel \def\ActiveDVI{Active-DVI}
 
 KNOWN BUGS:
+===========
 
 * Advi is unsafe!
-==> Put an option -safe that will not launch any applets
-                  -safe=ask should open a dialog and allow
+  Put an option -safe that will not launch any applets
+                -safe=ask should open a dialog and allow
 
         This one?  yes/no
         Other applets of this file? yes/no
 
+  ==> Seulement l'option paranoiaque (safer) ?
+
+* Once, advi went looping... I could not find what was going on (I was not
+able to reproduce). It was in a phase between clicking (on an active anchor)
+reloading of the file and recording. 
+  ==> it was a bug in play/record; it has been fixed by Didier.
+
+* embedded applications are not killed when advi is killed.
+  ==> Is this fixed?
+  --> I don't know of any example were an embedded application was not
+  killed when advi quits.
+
+* we must give some unique names to persistent apps without explicit names
+  ==> Is this done?
+  --> No, since it was once supposed to be part of the latex
+  interface syntax (embed_persistent needed an explicit name as
+  argument), and moreover I don't know what you can do with an
+  automatically generated unique name. Should it be better to enforce
+  this property from within Latex ?
+
+
+DELAYED AFTER RELEASE:
+======================
 
 LIMITATIONS:
 
@@ -41,9 +79,11 @@ variable accordingly.
 CLEANING: 
 
 * transbox: replace steps by a timer
+  ==> to wish list
 
 * alpha, blend, etc. for images: keep track within text and emit the info
   at every image?
+  ==> to wish list
 
 WISH LIST: 
 
@@ -57,10 +97,12 @@ WISH LIST:
 
     . reload would not kill/restart applets that are the same string command
       after reloading (this is also an interesting feature)
+    ==> could you explain ?
 
 - Adapter la résolution aux vrai dpy de l'écran
 
 - traiter directement les images gifs avec camlimage.
+  ==> already done ?
 
 ==> tester fullscreen mode
 
@@ -73,15 +115,5 @@ WISH LIST:
       -> générer des footnotes (avec un cadre ou dans une mini-bulle)
 
   * exporter \ifadvi et \Ifadvi
+  ==> done ?
 
-  BUGS:
-
-* Once, advi when looping... I could not find what was going on (I was not
-able to reproduce). It was in a phase between clicking (on an active anchor)
-reloading of the file and recording. 
-
-* embedded applications are not killed when advi is killed.
-==> Is this fixed?
-
-* we must give some unique names to persistent apps without explicit names
-==> If this done?

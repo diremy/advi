@@ -451,10 +451,10 @@ let psfile_special st s =
   (* bbox *)
   let llx, lly, urx, ury =
     try
-      let llx = int_of_int_or_float_string (List.assoc "llx" records)
-      and lly = int_of_int_or_float_string (List.assoc "lly" records)
-      and urx = int_of_int_or_float_string (List.assoc "urx" records)
-      and ury = int_of_int_or_float_string (List.assoc "ury" records) in
+      let llx = int_or_float_of_string (List.assoc "llx" records)
+      and lly = int_or_float_of_string (List.assoc "lly" records)
+      and urx = int_or_float_of_string (List.assoc "urx" records)
+      and ury = int_or_float_of_string (List.assoc "ury" records) in
       (* prerr_endline
          ("BBOX=" ^ Printf.sprintf "%d %d %d %d" llx lly urx ury); *)
       llx, lly, urx, ury
@@ -760,7 +760,7 @@ let wait_special st s =
 (* Background object configuration. RDC *)
 
 let inherit_background_info =
-  Misc.option_flag false
+  Options.flag false
     "-inherit_background"
     "\tBackground options are inherited from previous page\n\t\t\
      \t(default is to reset background options at each new page)";;
@@ -953,7 +953,7 @@ let tpic_specials st s =
 (* End of TPIC hacks *)
 
  let moveto_special st b s =
-   if !Misc.dops then
+   if !Options.dops then
      let x, y = Dev.current_pos() in
      if b then
        begin
@@ -967,7 +967,7 @@ let tpic_specials st s =
        end;;
 
 let ps_special st s =
-  if !Misc.dops && st.status.Dvi.hasps then
+  if !Options.dops && st.status.Dvi.hasps then
       let x = int_of_float (st.conv *. float st.h) in
       let y = int_of_float (st.conv *. float st.v) in
       if !visible then
@@ -1040,9 +1040,9 @@ let scan_special_html (headers,xrefs) page s =
 let scan_special status (headers,xrefs) pagenum s =
   (* Embedded Postscript, better be first for speed when scanning *)
   if has_prefix "\" " s || has_prefix "ps: " s then
-    (if !Misc.dops then status.Dvi.hasps <- true) else
+    (if !Options.dops then status.Dvi.hasps <- true) else
   if has_prefix "header=" s then
-    (if !Misc.dops then
+    (if !Options.dops then
         headers := get_suffix "header=" s :: !headers) else
   if has_prefix "advi: setbg " s then scan_bkgd_special status s else
   if has_prefix "html:<A name=\"" s || has_prefix "html:<a name=\"" s then
@@ -1161,7 +1161,7 @@ let find_prologues l =
   if List.length l <> List.length l' then begin
     Misc.warning
       "Cannot find postscript prologue. Continuing without Postscript specials";
-    dops := false;
+    Options.dops := false;
     []
   end else l';;
 
@@ -1183,7 +1183,7 @@ let render_step cdvi num ?trans dpi xorig yorig =
     let s = scan_special_page otherwise cdvi (headers, xrefs) num in
     if !headers <> [] then Dev.add_headers (find_prologues (List.rev !headers));
     s in
-  if not !Misc.dops then status.Dvi.hasps <- false;
+  if not !Options.dops then status.Dvi.hasps <- false;
   let st =
     { cdvi = cdvi;
       sdpi = int_of_float (mag *. ldexp dpi 16);

@@ -26,7 +26,7 @@ module M = struct
   let cache_prefix= "cache";;
   let cache_key = "advicache";;
 
-  let verbose_image_access = Misc.option_flag false
+  let verbose_image_access = Options.flag false
       "--verbose_image_access"
       "\tChange the cursor while image loadings";;
   

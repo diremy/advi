@@ -17,17 +17,17 @@
 
 module GY = GraphicsY11;;
 
-let ignore_background = Misc.option_flag false
+let ignore_background = Options.flag false
     "--ignore_background"
     "\tIgnore background for antialiasing";;
 
-let show_busy = Misc.option_flag true
+let show_busy = Options.flag true
     "-nowatch"
     "\tDon't display a watch when busy";;
 
 let busy_delay = ref 0.5;;
 
-Misc.set_option
+Options.set
   "-watch"
   (Arg.Float (fun x -> busy_delay := x))
   "FLOAT\tDelay before the watch cursor appears (default 0.5s)";;
@@ -125,7 +125,7 @@ let embeds = ref [];;
 let persists = ref [];;
 let unmap_embeds = ref [];;
 
-let launch_embedded_apps() = 
+let launch_embedded_apps () = 
   List.iter (fun f -> f ()) (List.rev !embeds); embeds := [];
   List.iter (fun f -> f ()) (List.rev !persists); persists := [];;
 
@@ -329,7 +329,7 @@ let fgcolor () = !default_fgcolor;;
 
 let color = ref !default_fgcolor;;
 
-Misc.set_option
+Options.set
   "-fgcolor"
   (Arg.String (set_default_color default_fgcolor))
   "STRING\tSet default foreground color (Named or RGB)";;
@@ -445,7 +445,7 @@ let get_bg_color x y w h =
       else find_bg_color x y w h
     end;;
 
-Misc.set_option
+Options.set
   "-bgcolor"
   (Arg.String
      (fun s ->
@@ -693,12 +693,11 @@ let raw_embed_app command app_mode app_name width height x y =
                   (string_replace "!y" opt_y
                      command0)))) in
   (* prerr_endline command; *)
-  let pid = Misc.fork_process command in
+  let pid = Launch.fork_process command in
   if Hashtbl.mem app_table pid then
     raise (Failure (Printf.sprintf
                       "pid %d is already in the app_table!" pid));
-  Hashtbl.add app_table pid (app_mode, app_name, wid);
-;;
+  Hashtbl.add app_table pid (app_mode, app_name, wid);;
 
 (* In hash table t, returns the first element that verifies p. *)
 let hashtbl_find t p =
@@ -774,12 +773,14 @@ let embed_app command app_mode app_name width height x y =
       !embeds;;
 
 let kill_app pid wid =
-  (*prerr_endline (Printf.sprintf "kill_app (pid=%d,window=%s)" pid wid);*)
+  (*prerr_endline (Printf.sprintf "kill_app (pid=%d, window=%s)" pid wid);*)
   begin try Hashtbl.remove app_table pid with _ -> 
     prerr_endline "kill_app failed to remove application..."
   end;
   begin try Unix.kill pid 9 with _ -> 
-    (* prerr_endline (Printf.sprintf "kill_app (pid=%d,window=%s): process already dead" pid wid); *)
+    (* prerr_endline
+       (Printf.sprintf
+          "kill_app (pid=%d,window=%s): process already dead" pid wid); *)
     ()
   end;
   while
@@ -789,9 +790,9 @@ let kill_app pid wid =
     with
       Unix.Unix_error(Unix.ECHILD, _, _) -> false
   do () done;
-  prerr_endline (Printf.sprintf "kill_app (pid=%d,window=%s)" pid wid);
+  (* prerr_endline (Printf.sprintf "kill_app (pid=%d, window=%s)" pid wid); *)
   (* if this is the forked process, do not close the window!!! *)
-  if Unix.getpid () = Misc.advi_process then GY.close_subwindow wid
+  if Unix.getpid () = Launch.advi_process then GY.close_subwindow wid
 ;;
 
 let kill_apps app_mode =
@@ -807,15 +808,15 @@ let kill_apps app_mode =
   List.iter (fun (pid,wid) -> kill_app pid wid) to_be_killed;;
 
 let signal_app sig_val pid wid =
-  prerr_endline
+  (* prerr_endline
     (Printf.sprintf
-      "signal_app (pid=%d,window=%s) signal=%i killing=%b kill is %i"
-      pid wid sig_val (sig_val = Sys.sigquit) Sys.sigquit);
+      "signal_app (pid=%d, window=%s) signal=%i killing=%b kill is %i"
+      pid wid sig_val (sig_val = Sys.sigquit) Sys.sigquit); *)
   if sig_val = Sys.sigquit then kill_app pid wid else
   try Unix.kill pid sig_val with _ ->
     (* prerr_endline
         (Printf.sprintf
-          "signal_app (pid=%d,window=%s) signal=%i: cannot signal process"
+          "signal_app (pid=%d, window=%s) signal=%i: cannot signal process"
           pid wid sig_val); *)
     ();;
 
@@ -1108,7 +1109,7 @@ let open_dev geom =
   xmin := 0; xmax := !size_x;
   ymin := 0; ymax := !size_y;
   Graphics.remember_mode true;
-  GY.display_mode !Misc.global_display_mode;
+  GY.display_mode !Options.global_display_mode;
   Graphics.set_window_title !title;
   color := !default_fgcolor;
   opened := true;;
@@ -1125,7 +1126,7 @@ let clear_dev () =
   if not !opened then failwith "Grdev.clear_dev: no window";
   kill_ephemeral_apps ();
   unmap_persistent_apps ();
-  GY.display_mode !Misc.global_display_mode;
+  GY.display_mode !Options.global_display_mode;
   Graphics.clear_graph ();
   H.clear ();
   bg_color := bkgd_data.bgcolor; (* modifiable via \setbgcolor . RDC *)

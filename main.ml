@@ -62,7 +62,7 @@ let set_dviname s =
 let standalone_main () =
   let sort = List.sort (fun (s1, _, _) (s2, _, _) -> compare s1 s2) in
   let options =
-    Misc.pretty_options (spec_list @ sort (Misc.all_options ())) in
+    Options.pretty (spec_list @ sort (Options.all ())) in
   Arg.parse options set_dviname usage_msg;
   let filename = match !dviname with
   | None -> 
@@ -73,7 +73,7 @@ let standalone_main () =
 	with Sys_error s ->
 	  eprintf "%s@.Try %s -help for more information@."
             usage_msg Sys.argv.(0);
-	  Misc.exit 1
+	  Launch.exit 1
       end;
       name
   | Some s -> s in
@@ -105,7 +105,7 @@ at_exit Gs.kill;;
 at_exit Grdev.kill_all_embedded_apps;;
 
 let quit = 3;;
-Sys.set_signal quit (Sys.Signal_handle (fun _ -> Misc.exit 0));;
+Sys.set_signal quit (Sys.Signal_handle (fun _ -> Launch.exit 0));;
 
 let main =
   if !Sys.interactive

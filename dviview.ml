@@ -17,40 +17,40 @@
 
 type select_mode = Interval | Rectangle;;
 
-let pauses = Misc.option_flag true "-nopauses" "Switch pauses off";;
-let fullwidth = Misc.option_flag false "-fullwidth" "Adjust size to width";;
-let bounding_box = Misc.option_flag false "-bbox" "Show the bounding box";;
+let pauses = Options.flag true "-nopauses" "Switch pauses off";;
+let fullwidth = Options.flag false "-fullwidth" "Adjust size to width";;
+let bounding_box = Options.flag false "-bbox" "Show the bounding box";;
 
 let start_page = ref 0;;
-Misc.set_option
+Options.set
   "-page"
   (Arg.Int (fun i -> start_page := i))
   "INT\tMake advi start at page INT";;
 
 let start_html = ref None;;
-Misc.set_option
+Options.set
   "-html"
   (Arg.String (fun s -> start_html := Some s))
   "STRING\tMake advi start at html reference of name STRING";;
 let debug_pages =
-  Misc.debug_option
+  Options.debug
     "--debug_pages"
     "Debug page motion";;
 
 let browser = ref "netscape-communicator";;
-Misc.set_option
+Options.set
   "-browser"
   (Arg.String (fun s -> browser := s))
   "STRING\tCommand to call the browser";;
 
 let pager = ref "xterm -e less";;
-Misc.set_option
+Options.set
   "-pager"
   (Arg.String (fun s -> pager := s))
   "STRING\tCommand to call the pager";;
 
 let click_turn_page =
-  Misc.option_flag false
+  Options.flag false
     "-click_turn"
     "Turn pages with mouse clicks (see the doc)";;
 
@@ -66,13 +66,13 @@ let set_scale x =
   else
     Misc.warning
       (Printf.sprintf "out of bounds scale_step %f ignored" x);;
-Misc.set_option
+Options.set
   "-scalestep"
   (Arg.Float set_scale)
   "REAL\tScale step for '<' and '>' (default sqrt(sqrt(2.0)))";;
 
 let autoresize = ref true;;
-Misc.set_option
+Options.set
   "-noautoresize"
   (Arg.Clear autoresize)
   "\tPrevents scaling from resizing the window (done if geometry is provided)"
@@ -282,7 +282,7 @@ let init filename =
     try (Unix.stat filename).Unix.st_mtime
     with _ -> 0.0 in
   let pages = Array.length dvi.Dvi.pages in
-  Misc.dops := !Misc.pson;
+  Options.dops := !Options.pson;
   let st =
     { filename = filename;
       dvi = dvi;
@@ -537,7 +537,7 @@ exception Link;;
 
 let exec_xref link =
   let call command =
-    let pid = Misc.fork_process command in
+    let pid = Launch.fork_process command in
     (* I don't understand this change -Didier: it was
     Grdev.wait_button_down() in *)
     (* only to launch embeded apps *)
@@ -622,10 +622,11 @@ let reload st =
     st.frozen <- true;
     st.aborted <- true;
     update_dvi_size false st;
-    Misc.dops := !Misc.pson;
+    Options.dops := !Options.pson;
     redraw ?trans:(Some Transitions.DirTop) st
   with x ->
-    assert (Misc.debug (Printexc.to_string x));
+    (* To be revisited (should assert Options.debug) *)
+    assert (Misc.debug_endline (Printexc.to_string x); true);
     st.cont <- None;;
 
 let changed st = reload_time st > st.last_modified;;
@@ -882,7 +883,7 @@ module B =
         | No_offset -> 0
         | Plus x -> x
         | Minus y -> - y in
-      let pid = Misc.fork_process
+      let pid = Launch.fork_process
           (Printf.sprintf "%s -g %dx%d %s"
       Sys.argv.(0)
              attr.geom.width
@@ -940,7 +941,7 @@ let main_loop filename =
   Grdev.set_title ("Advi: " ^ Filename.basename filename);
   Grdev.open_dev (" " ^ string_of_geometry attr.geom);
   set_bbox st;
-  if st.page_no > 0 && !Misc.dops then
+  if st.page_no > 0 && !Options.dops then
     Driver.scan_special_pages st.cdvi st.page_no
   else
     st.page_no <- page_start 0 st;

@@ -1,15 +1,15 @@
 let antialias =
-  Misc.option_flag false
+  Options.flag false
     "-A"
     "Set Postscript antialias";;
 
 let pstricks =
-  Misc.option_flag false
+  Options.flag false
     "-pstricks"
     "Show moveto";;
 
 let showps = ref false;;
-Misc.set_option
+Options.set
   "--showps" (Arg.Set showps)
   "\tPrint a copy of Postscript sent to gs to stdout";;
 let pspage = ref 0;;
@@ -120,7 +120,7 @@ class gs () =
     Unix.putenv "GHOSTVIEW"
       (Printf.sprintf "%s %s "
          (int32_string gr.window)
-         (if  !Misc.global_display_mode then "" else int32_string gr.pixmap)
+         (if !Options.global_display_mode then "" else int32_string gr.pixmap)
       ) in
 
   let iof = int_of_float and foi = float_of_int in
@@ -253,7 +253,7 @@ class gs () =
       with
         Killed s ->
           self # kill;
-          Misc.dops := false;
+          Options.dops := false;
           prerr_endline s;
           prerr_endline "Continuing without gs\n";
           flush stderr
@@ -280,7 +280,7 @@ let texc_special_pro gv =
       Misc.warning "Cannot find Postscript prologues: texc.pro or special.pro";
       Misc.warning "Continuing without Postscript specials";
       gv # kill;
-      Misc.dops := false;
+      Options.dops := false;
       []
 ;;
 
@@ -375,7 +375,7 @@ class gv =
     method process =
       match process with
       | None ->
-          if not !Misc.dops then raise Terminated;
+          if not !Options.dops then raise Terminated;
           let gs = new gs () in
           if headers = [] then headers <-  texc_special_pro self;
           (* should take matrix as a parameter ? *)
@@ -425,7 +425,7 @@ let gv = new gv;;
 
 let kill () = gv # kill;;
 let draw s x y =
-  if !Misc.dops then
+  if !Options.dops then
     try gv#ps (Misc.get_suffix  "ps: " s) x y  with Misc.Match ->
       try gv#special (Misc.get_suffix  "\" " s) x y with Misc.Match -> ()
 ;;
@@ -433,12 +433,12 @@ let draw s x y =
 let add_headers = gv#add_headers;;
 let newpage = gv#newpage;;
 let flush () =
-  if !Misc.dops then
+  if !Options.dops then
     try  gv#sync
     with Terminated ->
       Misc.warning "Continuing without Postscript";
       gv#kill;
-      Misc.dops := false;;
+      Options.dops := false;;
 
 let toggle_antialias () =
   antialias := not !antialias;
