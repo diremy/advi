@@ -135,8 +135,8 @@ void gr_origin(int* x, int* y)
   *x = 0; *y = 0;
   while (win != root) {
     XGetGeometry (grdisplay, win, &r, &dx, &dy, &w, &h, &b, &d);
-    *x = *x + dx;
-    *y = *y + dy;
+    *x = dx;
+    *y = dy;
     XQueryTree (grdisplay, win, &r, &parent, &children, &b);
     win = parent;
   }
@@ -427,7 +427,6 @@ value gr_reposition (value x, value y, value w, value h)
                     Int_val(x), Int_val(y), width, height);
   /* Not sufficient, should tell the manager not to decorate the window */
   XSetWindowBorderWidth(grdisplay, grwindow.win, width<0 ? 0 : BORDER_WIDTH);
-
     grwindow.w = width;
     grwindow.h = height;
     if (grwindow.w > grbstore.w || grwindow.h > grbstore.h) {

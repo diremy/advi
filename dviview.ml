@@ -128,7 +128,7 @@ type state = {
     mutable exchange_page : int;
     mutable last_modified : float;
     mutable button : (int * int) option;
-    mutable fullscreen : (int * int * int * int) option;
+    mutable fullscreen : (int * int * int * int * (int * int)) option;
 
     mutable pause_number : int;
     (* Attributes for Embedded postscript *)
@@ -260,7 +260,7 @@ let init filename =
 let set_bbox st =
   Grdev.set_bbox (Some (st.orig_x, st.orig_y, st.dvi_width, st.dvi_height));;
 
-let update_dvi_size init st =
+let update_dvi_size init ?dx ?dy st =
   let dvi_res = !dpi_resolution
   and mag = float st.dvi.Dvi.preamble.Dvi.pre_mag /. 1000.0
   and w_sp = st.dvi.Dvi.postamble.Dvi.post_width
@@ -304,8 +304,8 @@ let update_dvi_size init st =
       st.size_x <- size_x;
       st.size_y <- size_y;
       let orig_x, orig_y = (size_x - width) / 2,  (size_y - height) / 2 in
-      st.orig_x <- orig_x;
-      st.orig_y <- orig_y;
+      st.orig_x <- begin match dx with None -> orig_x | Some z -> z end;
+      st.orig_y <- begin match dy with None -> orig_y | Some z -> z end;
     end;
   st.dvi_width <- int_of_float (st.base_dpi *. w_in *. st.ratio);
   st.dvi_height <- int_of_float (st.base_dpi *. h_in *. st.ratio);
@@ -653,14 +653,14 @@ let goto_href link st = (* goto page of hyperref h *)
 let goto_next_page st =
   if st.page_number <> st.num_pages - 1 then goto_page (st.page_number + 1) st;;
 
-let resize st x y =
+let resize st ?dx ?dy x y =
   attr.geom <-
     { Ageometry.width = x;
       Ageometry.height = y;
       Ageometry.xoffset = Ageometry.No_offset;
       Ageometry.yoffset = Ageometry.No_offset;
     };
-  update_dvi_size true st;
+  update_dvi_size true ?dx ?dy st;
   redraw st;;
 
 let scale n st =
@@ -804,17 +804,18 @@ module B =
     let redisplay = redisplay
 
     let fullscreen st =
-      let x, y =
+      let (x, y), (dx, dy) =
         match st.fullscreen with
         | None ->
             let x = GraphicsY11.origin_x () in
             let y = GraphicsY11.origin_y () in
-            st.fullscreen <- Some (x, y, st.size_x, st.size_y);
-            Grdev.reposition ~x:0 ~y:0 ~w:(-1) ~h:(-1);
-        | Some (x, y, w, h) ->
+            st.fullscreen <-
+              Some (x, y, st.size_x, st.size_y, (st.orig_x, st.orig_y));
+            Grdev.reposition ~x:0 ~y:0 ~w:(-1) ~h:(-1), (0, 0);
+        | Some (x, y, w, h, dxy) ->
             st.fullscreen <- None;
-            Grdev.reposition ~x ~y ~w ~h in
-      resize st x y
+            Grdev.reposition ~x ~y ~w ~h, dxy in
+      resize st ~dx ~dy x y
 
     let exit st = raise Exit
     let switch_edit_mode st =
