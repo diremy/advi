@@ -86,21 +86,27 @@ let cannot_execute_command command_invocation =
           please rerun advi with option -ask or -exec."
          command_invocation);;
 
-let do_on_screen f x =
+(*let do_on_screen f x =
   Graphics.remember_mode false;
   GraphicsY11.display_mode true;
   let r = f x in
   Graphics.remember_mode true;
   GraphicsY11.display_mode false;
   r;;
+*)
+let forward_ask_redisplay =
+  ref (fun () -> failwith "Undefined forward ask_redisplay");;
 
 let ask_user command_invocation =
- GraphicsY11.iter_subwindows (fun wid _ -> GraphicsY11.unmap_subwindow wid);
+(* GraphicsY11.iter_subwindows (fun wid _ -> GraphicsY11.unmap_subwindow wid);
 prerr_endline "Subwindows unmapped!";
  let answer = do_on_screen Gterm.ask_to_launch command_invocation in
  GraphicsY11.iter_subwindows (fun wid _ -> GraphicsY11.map_subwindow wid);
 prerr_endline "Subwindows remapped!";
- answer;;
+ answer*)
+ let res = Gterm.ask_to_launch command_invocation in
+ !forward_ask_redisplay ();
+ res;;
  (* Misc.warning ("Do you want to launch " ^ command_invocation); 
  false;;*)
 
