@@ -252,10 +252,16 @@ val key_pressed : unit -> bool;;
         (* Return [true] if a keypress is available; that is, if [read_key]
            would not block. *)
 
-val global_display_mode : bool -> unit;;
-(** It enables/disables the command display_mode and synchronize according
- to the value [false]/[true]. When disable, [display_mode] and [synchronize]
- commands will be ignored. *)
+val get_global_display_mode : unit -> bool;;
+
+(** [get_global_display_mode] returns the value of flag
+    [global_display_mode]. This flags enables/disables the command
+    [display_mode]. By default the flag is [false], meaning that
+    [display_mode] and [synchronize] commands will not be ignored. *)
+
+val set_global_display_mode : bool -> unit;;
+(** [set_global_display_mode] sets the [global_display_mode] flags. *)
+
 val synchronize : unit -> unit;;
 (** Same as [Graphics.synchronize] but according to [global_display_mode] *)
 val display_mode : bool -> unit;;
