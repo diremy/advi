@@ -44,20 +44,57 @@ let add el set = set := el :: !set
 (* Says if the character code is probably the ascii code. *)
 let is_pure code =
   match Char.chr code with
-  | '!'..'~' -> true
+  | 'A'..'Z' | 'a'..'z' | '0'..'9' -> true
+  | '!'..'~' -> true (* "false" helps for debugging. *)
   | _ -> false
-  
+
 (* Symbols that are surrounded with big spaces. *)
 let big_space s = 
   match Char.chr s.code with
   | '!' | '.' | ':' | ',' -> true
   | _ -> false
 
+let default_encoding font code =
+  if is_pure code then String.make 1 (Char.chr code)
+  else Printf.sprintf "[[%s:%d]]]" font code
+
+(* Usual tex font. *)	
+let cmr_encoding font code =
+  match code with
+  | 12 -> "fi"
+  | 123 -> "--"
+  | _ -> default_encoding font code
+
+(* Math font. *)
+let cmex_encoding font code =
+  match code with
+  | 15 -> "o " (* bullet *)
+  | 112 -> "[sqrt]"
+  | 113 -> "[SQRT]"
+  | _ -> default_encoding font code
+
+(* List of recognized fonts (regexp) * handler *)
+let encodings = [
+  "cmr[0-9]*"       , cmr_encoding ;
+  "cmex[0-9]*"   , cmex_encoding ;
+  "cmsy[0-9]*"   , cmex_encoding ;
+] 
+
+(* Compiled regexps. *)
+let compiled_encodings =
+  List.map (fun (r,h) -> Str.regexp r, h) encodings
+
 (* Returns the name of the symbol. *)
 let symbol_name s =
-  match s.fontname,s.code with
-  | _, code when (is_pure code) -> String.make 1 (Char.chr code)
-  | font, code -> Printf.sprintf "[[%s:%d]]]" font code
+  let font = s.fontname in
+  (* Find a matching regexp. *)
+  let handler = 
+    try snd (List.find
+	       (fun (r,h) -> Str.string_match r font 0)
+	       compiled_encodings)
+    with Not_found -> default_encoding
+  in
+  handler font s.code
 
 let name_to_ascii n = n
 

@@ -518,10 +518,18 @@ module Make(Dev : DEVICE) = struct
 	| None -> ()
 	| Some g -> Dev.draw_glyph g s.Symbol.locx s.Symbol.locy
     in
+    let show_colored_glyph s =
+	match s.Symbol.glyph with
+	| None -> ()
+	| Some g ->
+	    Dev.set_color s.Symbol.color ;
+	    Dev.draw_glyph g s.Symbol.locx s.Symbol.locy
+    in
     Dev.set_color Graphics.cyan;
-    Dev.draw_path [| docx,docy ; docx2,docy ; docx2,docy2 ; docx,docy2 ; docx,docy |] 1;
     Symbol.iter show_glyph input ;
+ (* Dev.draw_path [| docx,docy ; docx2,docy ; docx2,docy2 ; docx,docy2 ; docx,docy |] 1; *)
     Dev.synchronize();
+    Symbol.iter show_colored_glyph input ;
 
     let output = Symbol.to_ascii input in
     print_string output;
@@ -1057,7 +1065,7 @@ module Make(Dev : DEVICE) = struct
           set_bbox st;
           redraw st
       | Dev.Region (x, y, w, h) ->
-          selection Interval st x y w (-h)
+          selection Rectangle st x y w (-h)
             
       | Dev.Click (Dev.Top_left, _) -> B.pop_page st
       | Dev.Click (_, Dev.Button1) -> B.pop_previous_page st
