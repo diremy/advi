@@ -70,7 +70,7 @@ CFLAGS=$(X11_INCLUDES) -O $(BYTECCCOMPOPTS)
 opt: $(EXEC).opt 
 byte: $(EXEC)
 allopt: opt
-all: byte opt
+all: byte opt documentation
 
 $(EXEC): $(COBJS) $(CMO_OBJS)
 	$(OCAMLC) -custom $(INCLUDES) $(BYTE_OBJS) $(LINK_OPTS) -o $(EXEC)
@@ -80,7 +80,7 @@ $(EXEC).opt: $(COBJS) $(CMX_OBJS)
 
 config.ml: config.ml.in
 	./configure
- 
+
 dvicolor.ml: Makefile.config dvicolor.mlp ifdef.cmo
 	camlp4o pa_ifdef.cmo ./ifdef.cmo -impl dvicolor.mlp > $@
 
@@ -116,6 +116,7 @@ count:
 clean:
 	rm -f *.cm[oix] *.o $(EXEC) $(EXEC).opt *~ .depend *.log *.aux
 	cd test; $(MAKE) clean
+	cd doc; $(MAKE) clean
 
 veryclean: clean
 	rm -f Makefile.config config.cache config.log \
@@ -125,10 +126,10 @@ veryveryclean: veryclean
 	rm -f configure
 
 installopt:install
-install:: advi.opt tex/splash.dvi
+install:: opt doc/splash.dvi
 	cp advi.opt ${bindir}/advi
 	- mkdir -p $(ADVI_LOC)
-	cp tex/splash.dvi tex/advilogo.eps tex/caml.eps tex/bar.jpg.eps tex/*.sty tex/advi.pro $(ADVI_LOC)
+	cp doc/splash.dvi tex/advilogo.eps tex/caml.eps tex/bar.jpg.eps tex/*.sty tex/advi.pro $(ADVI_LOC)
 	if [ -f conf/jpfonts.conf ]; then cp conf/jpfonts.conf $(ADVI_LOC); fi
 
 MLFILES = $(addsuffix .ml, $(MODULES))
@@ -143,13 +144,16 @@ WEBSITEDIR=/net/pauillac/infosystems/www/advi
 FTPSITEDIR=/net/pauillac/infosystems/ftp/cristal/advi
 
 # make splash builds splash.dvi
-tex/splash.dvi:
-	cd tex; latex splash.tex
+doc/splash.dvi:
+	(cd doc; $(MAKE) splash.dvi)
+
+documentation:
+	(cd doc; $(MAKE) all)
 
 distribute: tar_and_web rpm
 
 tar_and_web: tex/splash.dvi
-	(cd test; make all jpdemo.dvi)
+	(cd test; $(MAKE) all jpdemo.dvi)
 	rm -rf release
 	rm -rf $(WEBSITEDIR)/*
 	- mkdir $(WEBSITEDIR)
@@ -170,7 +174,7 @@ tar_and_web: tex/splash.dvi
 	gzip $(ADVI).tar; \
 	mv -f $(ADVI).tar.gz $(FTPSITEDIR)
 	rm -rf release
-	cd advi-development-kit; make distribute
+	cd advi-development-kit; $(MAKE) distribute
 
 rpm:
 	if test -d /usr/src/redhat; then rpmdir=/usr/src/redhat; \

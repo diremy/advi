@@ -12,7 +12,6 @@
 
 \newpage
 
-
 \subsection* {\ActiveDVI~has two components}
 
 \begin{itemize}
@@ -68,10 +67,12 @@ Support for \verb+\includegraphics+ with native image formats
 \verb+\includegraphics[width=0.2\textwidth]{caml.eps}+\\
 \verb+\includegraphics[width=0.1\textwidth]{world}+\\
 
-This last command looks for a file named {\tt world} with extensions out 
-of the ones provided by the directive \verb+\DeclareGraphicsExtensions+
-in the \verb|advi-images| package (in the present case, it finds \verb+world.jpg+, for which the
-bounding box must be available in \verb+world.bb+)\\
+This last command looks for a file named {\tt world} with extensions
+out of the ones provided by the directive
+\verb+\DeclareGraphicsExtensions+ in the \verb|advi-images| package
+(in the present case, it finds \verb+world.jpg+, for which a
+bounding box specification must be available in the file
+\verb+world.bb+)\\
 
 \includegraphics[width=0.1\textwidth]{../tex/caml.eps}
 \includegraphics[width=0.2\textwidth,height=0.09\textwidth]{../tex/caml.eps}
@@ -103,7 +104,6 @@ Embedded recordings are prohibited.
 Replay the DVI previously recorded as \docid{tag}.
 The optional argument changes the color to \docid{color} during replay. 
 \end{quote}
-
 
 \newpage 
 
@@ -166,7 +166,6 @@ Including some strange flashring effect!
 \textcolor{c5}{\adviplay{this}}\adviwait[\smallpause]%
 \textcolor{c6}{\adviplay{this}}\adviwait[\smallpause]%
 
-
 \newpage
 
 \subsection* {Embedded applications are easy to launch}
@@ -210,7 +209,6 @@ presentation using:\\
 % 
 % \adviembed[width=10.62cm,height=7.92cm]{xanim +W!p +Sx!w +Sy!h +Zpe -Zr dancemonkeyboy.avi}
 % \end{center}
-
 
 \newpage
 
@@ -259,8 +257,10 @@ the presentation.
   \verb|\adviembed[width=1mm,height=1mm]{mpg123 -q music.mp3}|
 \end{itemize}
 
-\advirecord{play}{\adviembed[name=mpg123,width=1mm,height=1mm]{mpg123 -q music.mp3}}
-\advirecord {stop}{\advikillembed {mpg123}}
+\advirecord{play}
+ {\adviembed[name=mpg123,width=1mm,height=1mm]{mpg123 -q music.mp3}}
+\advirecord {stop}
+ {\advikillembed {mpg123}}
 \advianchor[click]{play}{Play}
 \advianchor[click]{stop}{Stop}
 
@@ -350,15 +350,13 @@ The package \verb"advi" can be loaded with the \verb"batch" option:
 The effect is to switch off some \verb"advi" gadgets and to render some others 
 in Postscript, if possible. 
 
-
 \newpage
 
 \subsection* {Hyper links to other files}
 
 \begin {itemize}
 
-\item
-(recursive) link to \hyperref{demo.dvi}{}{overlays}{\tt demo.dvi}
+\item (recursive) link to \hyperref{demo.dvi}{}{overlays}{\tt demo.dvi}
 produced by
 
 \qquad\verb"\hyperref{demo.dvi}{}{overlays}{\tt demo.dvi}"
@@ -370,24 +368,29 @@ link \verb"overlays" in that file, as if the command
 
 had been typed in a shell.
 
-(Currently, the file name should end with \verb".dvi" extension, but in the
-future this should use Mine man Mailcap to find the type of the file and the
-previewer for that file.)
+\item the source file of this demo is \hyperref{demo.tex}{}{}{\tt
+demo.tex}. A link to it is produced by
 
-% \item
-% \hyperref{demo.tex}{}{foo}{\tt more demo.tex}
+\qquad\verb"\hyperref{demo.tex}{}{}{\tt more demo.tex}"
 
-\item
-Issue a warning if the extension is not recognized or if the 
-file is non-existent:
+A click on the link opens the file in a new window, as if 
+
+\qquad\verb"less demo.tex"
+
+had been typed in a shell.
+
+\item Currently, the file name should end with either \verb".dvi",
+\verb".txt", \verb".tex", \verb".htm", or \verb".html" extensions, but
+in the future this should use Mine man Mailcap to find the type of the
+file and the previewer for that file.
+
+\item Issue a warning if the extension is not recognized or the file
+is non-existent:
 \hyperref{nonexistent.dvi}{}{}{\tt nonexistent.dvi}
 or
 \hyperref{../tex/advi.sty}{}{}{\tt ../tex/advi.sty}
 
-
-
 \end {itemize}
-
 
 \newpage
 
@@ -429,7 +432,6 @@ Type space to change the background.
 \end{verbatim}
 
 \end {enumerate}
-
 
 \newpage
 
@@ -540,7 +542,6 @@ This very small package allows the superosing of boxes, making the
 surrounding box so that it fits all included boxes. This is convenient
 when displayin each included box at different pauses.
 
-
 Movie...
 \advirecord{0}{\colorbox{white}
 {\begin{superpose}
@@ -553,7 +554,6 @@ end
 \adviplay{1}
 \adviwait\adviplay{0}\adviplay{2}
 \adviwait\adviplay{0}\adviplay{3}
-
 
 \newpage
 
