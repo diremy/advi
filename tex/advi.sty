@@ -639,13 +639,13 @@ end
 
 %%% Thumbnails and Tocs
 
-\def\advi@html#1{\special {html:<a name="#1">}\special{html:</a>}}
-\def\advitoc 
-    {\advi@html {/toc.first}}
+\def\advi@html#1{\special{html:<a name="#1">}\special{html:</a>}}
+\def\advitoc {\advi@html {/toc.first}}
+\def\endadvitoc {\advi@html {/toc.last}}
 \def\endadvitoc
-    {\advi@html {/toc.last}%
-     %% So that next call is uneffective
-     \global \let \advitoc \relax \global \let \endadvitoc \relax}
+  {\advi@html {/toc.last}%
+  %% So that next call is uneffective
+  \global \let \advitoc \relax \global \let \endadvitoc \relax}
 \newcommand {\advithumbnail}[1][\thepage]{\advi@html {/page.#1}}
 %% Old version: delete if new is fine.
 %
