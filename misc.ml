@@ -54,20 +54,25 @@ let get_suffix pre str =
   else raise Match
     ;;
 
-let rec split_string s c start =
+let rec split_string s p start =
   let len = String.length s
   and i = ref start in
-  while !i < len && s.[!i] = c do incr i done ;
+  while !i < len && p s.[!i] do incr i done ;
   if !i >= len then [] else begin
     let i0 = !i in
-    while !i < len && s.[!i] <> c do incr i done ;
+    while !i < len && not (p s.[!i]) do incr i done ;
     let i1 = !i in
-    String.sub s i0 (i1 - i0) :: split_string s c i1
+    String.sub s i0 (i1 - i0) :: split_string s p i1
   end ;;
+
+let catenate_sep sep =
+  function 
+      [] -> ""
+    | x::l -> List.fold_left (fun s s' -> s^sep^s') x l
 
 (* unix command line parser *)
 let parse_shell_command str =
-  let arglist = split_string str ' ' 0 in
+  let arglist = split_string str (function ' ' -> true | _ -> false) 0 in
   Array.of_list arglist
 ;;
 
@@ -102,7 +107,7 @@ let fork_process command =
 exception Found of string * string 
 let pretty_options all_options = 
   let tab (o, s, m) =
-    let s = split_string m '\t' 0 in
+    let s = split_string m (function '\t' -> true | _ -> false) 0 in
     if String.length m > 0 && m.[0] = '\t' then "" :: s else s in
   let tab_options = List.map tab all_options in
   let width =

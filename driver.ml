@@ -22,7 +22,8 @@ let checkpoint_frequency = 10;;
 
 (*** Some utilities for specials ***)
 
-let split_string s start = Misc.split_string s ' ' start;;
+let split_string s start = 
+  Misc.split_string s (function ' ' -> true | _ -> false) start;;
 
 (* "hello world" is one world *)
 let rec split_string_quoted s start =

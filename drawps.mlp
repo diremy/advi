@@ -5,6 +5,8 @@ module M = struct
   open Color
   open GraphicsY11
   
+  let cache_prefix= "cache-";;
+
   let verbose_image_access = Misc.option_flag false
       "--verbose_image_access"
       "\tChange the cursor while image loadings";;
@@ -12,20 +14,19 @@ module M = struct
   let images_camlimage = Hashtbl.create 107
   let images_graphics = Hashtbl.create 107
   
-  let cache_dir = ".advi"
-  
   let f file whitetransp alpha blend (llx,lly,urx,ury) (w,h) x0 y0 =
     let file = Search.true_file_name [] file in
     let cache_name =
-      let file' = String.copy file in
+      let file' = Userfile.fullpath (Unix.getcwd ()) file in
       for i = 0 to String.length file' - 1 do
   	if file'.[i] = '/' then file'.[i] <- '-'
       done;
       let geom_string x = 
   	if x >= 0 then "+" ^ string_of_int x else string_of_int x
       in
-      Filename.concat cache_dir
-  	(Printf.sprintf "cache-%s-%dx%d%s%s%s%s%s"
+      Filename.concat Userfile.cache_dir
+  	(Printf.sprintf "%s%s-%dx%d%s%s%s%s%s"
+	   cache_prefix
   	   file'
   	   w h
   	   (geom_string llx) 
@@ -71,7 +72,7 @@ module M = struct
   	    output_value oc (Bitmap.dump image.Rgb24.data);
   	    close_out oc
   	  with _ -> () end
-      | _ -> () 
+      | _ -> assert false
     in
   
     let image = 
@@ -122,7 +123,7 @@ module M = struct
   	      end
   	  | _ -> assert false
   	  in
-  	  begin try Unix.mkdir cache_dir 0o775 with _ -> () end;
+	  Userfile.prepare_file cache_name; 
   	  (* we have no trivial image format for rgba32! *)
   	  save image;
   	  if !verbose_image_access then GraphicsY11.set_cursor Cursor_left_ptr;
@@ -191,9 +192,9 @@ module M = struct
   
   let clean_cache () =
     (* erase the files match with "cache-*" *)
-    let prefix = Filename.concat cache_dir "cache-" in
+    let prefix = cache_prefix in
     let suffix = "" in
-    let dh = Unix.opendir "." in
+    let dh = Unix.opendir Userfile.cache_dir in
     try while true do
       let file = Unix.readdir dh in
       if String.length file > 10 &&

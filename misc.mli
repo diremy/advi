@@ -7,7 +7,8 @@ val has_prefix : string -> string -> bool
 val has_suffix : string -> string -> bool
 exception Match
 val get_suffix : string -> string -> string
-val split_string : string -> char -> int -> string list
+val split_string : string -> (char -> bool) -> int -> string list
+val catenate_sep : string -> string list -> string
     
 val parse_shell_command : string -> string array
 val fork_process : string -> int
@@ -70,3 +71,4 @@ val exit : int -> unit
    registered by [at_exit] when the exiting process is forked one. 
    In the ADVI program, you MUST use this function instead of
    [Pervasives.exit] !!!! *)
+

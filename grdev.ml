@@ -303,6 +303,7 @@ let draw_bkgd_img (w, h) x0 y0 =
   match bkgd_data.bgimg with
   | None -> ()
   | Some fn ->
+     set_busy Busy;
      Draw_image.f
       fn bkgd_data.bgwhitetrans 1.0 None bkgd_data.bgratio (w, h) x0 y0;;
 
@@ -574,6 +575,7 @@ let draw_ps file bbox (w, h) x0 y0 =
   if not !opened then failwith "Grdev.fill_rect: no window";
   let x = x0
   and y = !size_y - y0 + h in
+  set_busy Busy;
   try Drawps.f file !epstransparent !alpha
       (if !blend = Normal then None else Some (blend_func !blend))
       bbox (w, h) x y

@@ -547,7 +547,8 @@ let exec_xref link =
     begin
       try
         let filename, arguments =
-          match Misc.split_string (Misc.get_suffix "file:" link) '#' 0 with
+          match Misc.split_string (Misc.get_suffix "file:" link) 
+	         (function '#' -> true | _ -> false) 0 with
           | [ filename ; tag ] -> filename, ["-html"; tag ]
           | [ filename ] -> filename, []
           | _ ->

@@ -5,14 +5,14 @@ open Image
 open Color
 open GraphicsY11
 
+let cache_prefix = "cache-";;
+
 let verbose_image_access = Misc.option_flag false
     "--verbose_image_access"
     "\tChange the cursor while image loadings";;
 
 let images_camlimage = Hashtbl.create 107;;
 let images_graphics = Hashtbl.create 107;;
-
-let cache_dir = ".advi";;
 
 type ratiopts =
    | ScaleX        (* scale x coords, but keep original Ratio *)
@@ -26,12 +26,13 @@ let white_rgb = {r = 255; g = 255; b = 255};;
 let f file whitetransp alpha blend ratiopts (w, h) x0 y0 =
   let file = Search.true_file_name [] file in
   let cache_name =   (* The computed cache name *)
-    let file' = String.copy file in
+    let file' = Userfile.fullpath (Unix.getcwd ()) file in
     for i = 0 to String.length file' - 1 do
       if file'.[i] = '/' then file'.[i] <- '-'
     done;
-    Filename.concat cache_dir
-      (Printf.sprintf "cache-%s-%dx%d%s"
+    Filename.concat Userfile.cache_dir
+      (Printf.sprintf "%s%s-%dx%d%s"
+	 cache_prefix
 	 file'
 	 w h
 	 (if whitetransp then "tr" else ""))
@@ -39,7 +40,6 @@ let f file whitetransp alpha blend ratiopts (w, h) x0 y0 =
 
   (* Load an image from the cache *)
   let load () =
-    prerr_endline "Loading from cache";
     (* we have no trivial image format for rgba32! *)
     if whitetransp then begin
       let ic = open_in_bin cache_name in
@@ -76,7 +76,7 @@ let f file whitetransp alpha blend ratiopts (w, h) x0 y0 =
 	  output_value oc (Bitmap.dump image.Rgb24.data);
 	  close_out oc
 	with _ -> () end
-    | _ -> ()
+    | _ -> assert false
   in
 
   let image = (* here one builds the image structure *)
@@ -147,11 +147,17 @@ let f file whitetransp alpha blend ratiopts (w, h) x0 y0 =
             end else Rgba32 (Index8.to_rgba32 i)
 	| _ -> assert false
 	in
-      	begin try Unix.mkdir cache_dir 0o775 with _ -> () end;
+	let image = 
+	  match image with
+	  | Rgb24 i -> Rgb24 (Rgb24.resize None i w h)
+	  | Rgba32 i -> Rgba32 (Rgba32.resize None i w h)
+	  | _ -> assert false
+	in
+	Userfile.prepare_file cache_name; 
 	(* we have no trivial image format for rgba32! *)
 	save image;
 	if !verbose_image_access then GraphicsY11.set_cursor Cursor_left_ptr;
-      	image
+	image
   in
   begin try ignore (Hashtbl.find images_camlimage cache_name) with Not_found ->
     Hashtbl.add images_camlimage cache_name image
@@ -228,11 +234,11 @@ let f file whitetransp alpha blend ratiopts (w, h) x0 y0 =
 
 let clean_cache () =
   (* erase the files whose name matches with "cache-*" *)
-  let prefix = Filename.concat cache_dir "cache-" in
+  let prefix = cache_prefix in
   let suffix = "" in
   let suff_len = String.length suffix in
   let pref_len = String.length prefix in
-  let dh = Unix.opendir "." in
+  let dh = Unix.opendir Userfile.cache_dir in
   try while true do
     let file = Unix.readdir dh in
     let file_len = String.length file in

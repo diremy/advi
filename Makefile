@@ -31,7 +31,7 @@ MLINCDIRS = $(CAMLIMAGESDIR)
 
 EXEC	  = advi
 
-MODULES	  = config graphicsY11 misc input symbol search \
+MODULES	  = config graphicsY11 misc userfile input symbol search \
 	    drawps draw_image dvicolor \
 	    table pkfont ttfont jfm font glyph devfont \
 	    units dimension \
@@ -115,7 +115,6 @@ count:
 
 clean:
 	rm -f *.cm[oix] *.o $(EXEC) $(EXEC).opt *~ .depend *.log *.aux
-	rm -rf .advi test/.advi test/*.log tex/.advi
 	cd test; $(MAKE) clean
 
 veryclean: clean
@@ -139,6 +138,7 @@ install:: advi.opt tex/splash.dvi
 	cp advi.opt ${bindir}/advi
 	- mkdir -p $(ADVI_LOC)
 	cp tex/splash.dvi tex/advilogo.eps tex/caml.eps tex/bar.jpg.eps tex/advi.sty tex/advi.pro $(ADVI_LOC)
+	cp conf/jpfonts.conf $(ADVI_LOC)
 
 MLFILES = $(addsuffix .ml, $(MODULES))
 .depend:: *.mli $(MLFILES) Makefile 

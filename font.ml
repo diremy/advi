@@ -81,13 +81,53 @@ module Japanese = struct
   *)
   
   type jfonttype = Mincho | Gothic
-  
-  let japanese_fontfiles = [
+
+  let default_japanese_fontfiles = [
     "min", Mincho, "msmincho.ttc";
     "goth", Gothic, "msgothic.ttc"
   ] 
   ;;
   
+  let japanese_fontfiles = 
+    let sys_conffile = Filename.concat Config.advi_loc "jpfonts.conf" in
+    let user_conffile = Filename.concat Userfile.user_dir "jpfonts.conf" in
+    try
+      let jffiles = ref [] in
+      let ic,conffile = 
+	try open_in user_conffile, user_conffile
+	with _ -> open_in sys_conffile, sys_conffile in
+      try while true do 
+	let line = input_line ic in
+	if not (try line.[0] = '#' with _ -> true) then begin
+	  let tks = 
+	    Misc.split_string line 
+	      (function ' ' | '\t' -> true | _ -> false) 0 
+	  in
+	  match tks with
+	  | [fname; ftype; ffile] ->
+	      begin try
+		let ftype = 
+		  match ftype with 
+		  | "Mincho" -> Mincho
+		  | "Gothic" -> Gothic
+		  | _ -> 
+		      Misc.warning (conffile ^ ": illegal font type: " ^ line);
+		      raise Exit
+		in
+		jffiles := (fname, ftype, ffile) :: !jffiles
+	      with
+	      |	_ -> () 
+	      end
+	  | _ -> Misc.warning (conffile ^ ": parse failure: " ^ line)
+	end;
+      done; raise Exit with End_of_file -> 
+	close_in ic;
+	List.rev !jffiles
+    with
+    | _ -> 
+	default_japanese_fontfiles
+  ;;
+    
   let make_font =
     let facetable = Hashtbl.create 17 in
   
@@ -105,18 +145,24 @@ module Japanese = struct
   		    int_of_string (String.sub fontname (String.length name)
   		      (String.length fontname - String.length name)) in
   		  if name = pref then file, typ, pt
-  		  else raise Exit
+  		  else begin 
+		    raise Exit
+		  end
   		with
   		| _ -> search xs
   	  in
-  	  let fontfile, typ, pt = 
-	      search japanese_fontfiles 
-	  in
+  	  let fontfile, typ, pt = search japanese_fontfiles in
  	  let face = 
-	    try
-	      Ttfont.load_face (Search.true_file_name [] fontfile) 
-	    with
-	    | e -> Misc.warning (Printf.sprintf "Japanese true type font %s not found" fontname); raise e
+	      let path = 
+		try
+		  Search.true_file_name [] fontfile 
+		with
+		| e -> Misc.warning (Printf.sprintf "Font file %s for %s is not found" fontfile fontname); raise e
+	      in
+	      try
+		Ttfont.load_face path
+	      with
+	      | e -> Misc.warning (Printf.sprintf "Failed to load font file %s for %s" path fontname); raise e
 	  in
   	  let jfmname = 
   	    let jfm = fontname ^ ".tfm" in
