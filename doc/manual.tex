@@ -48,14 +48,14 @@ Reference manual
 various special effects can easily be incorporated to the presentation,
 via a companion \doctt{advi} {\LaTeX} package. 
 
-{\ActiveDVI} is copyright from INRIA\footnote {\copyright\space 2002, INRIA}
-and distributed under the LGPL license ---see the LGPL file included in the
-distribution.
+{\ActiveDVI} is copyright \copyright\space 2000, 2001, 2002 INRIA
+and distributed under the Gnu Library General Public License ---see the LGPL
+file included in the distribution.
 \end{abstract}
 
 
 \vfill
-\section* {Contributors}
+ \section* {Contributors}
 
 The core of Active DVI is the plain DVI previewer, which was written by
 Alexandre~Miquel. The other main implementors are Jun~Furuse,
@@ -76,9 +76,9 @@ Roberto~Di~Cosmo, Xavier~Leroy, and Alan~Schmitt.
 
 {\ActiveDVI} may execute programs and commands embedded into the DVI file.
 To be safe, you should run \doctt{advi} with \doctt{-safer} option, 
-will inhibates the execution of embeded applications. 
+will inhibits the execution of embedded applications. 
 This applies in particular if you choose {\ActiveDVI} as your default 
-{\tt metamail} previewer for the {\tt application/x-dvi} mime-type . 
+{\tt meta-mail} previewer for the {\tt application/x-dvi} mime-type . 
 
 
 \subsection {Command line options}
@@ -99,8 +99,8 @@ Shift middle-click copies the current word.
 \item
 Shift right-click and drag copies the specified region. 
 \end {itemize}
-Moreove, Shift left-click dump an ascii representation of click 
-in the source file. This expects the dvi to be instrumented with line
+Moreover, Shift left-click dump an ASCII representation of click 
+in the source file. This expects the DVI to be instrumented with line
 numbers of the form
 \begin{quote}
 \doctt {line:} \docid {line} \docid {file}
@@ -108,14 +108,14 @@ numbers of the form
 where \docid {line} and \docid {file} are the current source line and
 current source file.
 
-The position is exported in ascii in the form
+The position is exported in ASCII in the form
 \begin{quote}
 \verb"#line "\docid{before}, \docid{after} 
 \doctt {<<}\docid{prefix}\doctt{>><<}\docid{suffix}\doctt{>>}
 \docid{file} 
 \end{quote}
 where \docid {before} and  \docid {after} are the enclosing line numbers, 
-\docid{prefix}\docid{suffix} are the word constituant surrounding the
+\docid{prefix}\docid{suffix} are the word constituent surrounding the
 position, and  file is the current file. 
 
 Line numbers default to $0$ when not found. Note that line numbers may be
@@ -123,7 +123,7 @@ inconsistent if they \docdef \special-line commands have not been inserted
 close enough to the position.
 
 
-\subsection {Hyperrefs}
+\subsection {Hyperref}
 
 {\ActiveDVI} supports {\LaTeX} {\tt hyperref} package 
 with both internal and cross-file references. For cross-file
@@ -137,11 +137,11 @@ See the key bindings in the appendix.
 \subsection {Using and making special effects}
 
 \ActiveDVI~can be used as is, but will shine when driven by a user
-with a bias towards programming: special effects can easily 
+with a bias toward programming: special effects can easily 
 be realized by using the \LaTeX package provided with the distribution. 
 
 Creative advanced users may program the presenter at various levels, either
-using or defining simple {\LaTeX} macros, writting new {\LaTeX} package
+using or defining simple {\LaTeX} macros, writing new {\LaTeX} package
 files, or by implementing extension to the previewer itself.
 
 Presentation examples can be found in the 
@@ -151,7 +151,7 @@ to read their source code and copy the effects they provide.
 % If you ever succeed at adding a nice special effect that could be of
 % a general interest, or if you can provide a nice and fancy presentation
 % of your own that can serve as an example to the \ActiveDVI's users
-% communauty, please don't hesitate to drop a mail to the implementors
+% community, please don't hesitate to drop a mail to the implementors
 % at \verb"advi@pauillac.inria.fr".
 
 
@@ -332,7 +332,7 @@ where \docid{key=value list} is a list of bindings of the following kind:
 \begin{quote}
 Set the transition mode to the corresponding key.
 One of this key is mandatory (several is should be illegal, but in fact
-overides the previous one). 
+overrides the previous one). 
 \end{quote}
 
 \dockey{from}{direction}
@@ -375,11 +375,11 @@ as well as the current page.
 
 By default, the transition affects only the current page.
 
-\subsection {Hyperrefs}
+\subsection {Hyperref}
 
-{\ActiveDVI} supports hyperrefs. 
+{\ActiveDVI} supports the \doctt{hyperref} {\LaTeX} package. 
 
-Explain \verb"<a name>aaa</a>"
+Explain \verb"<a name>XXX</a>"
 
 \subsection {Embed applications anchors}
 
@@ -394,7 +394,7 @@ where \docid{key=value list} is a list of bindings of the following kind:
 \dockey{name}{name}
 \begin{quote}
 Allows to refer to the embedded application as \docid{name}. 
-Annonymous applications have actually the default name \doctt{anonymous}.
+Anonymous applications have actually the default name \doctt{anonymous}.
 \end{quote}
 
 \dockey{ephemeral}{name}
@@ -446,7 +446,7 @@ The command is
 \docid {text}\docdef \end\doctt{\{advianchor\}}
 \begin{quote}
 The text is first display as usual and mark as active. 
-Mouving the mouse above the text will display the record \docid{tag}.
+Moving the mouse above the text will display the record \docid{tag}.
 
 In the environment form, \docid{text} may contain fragile commands. 
 \end{quote}
@@ -461,7 +461,7 @@ Postscripts is not always working.
 \item
 Since characters are rendered by {\ActiveDVI}, some PStricks are not allowed.
 \item
-Some change of repairs are also not yet correctly perfomed.  
+Some change of repairs are also not yet correctly performed.  
 \end {itemize}
 
 \subsubsection {Overlays}
@@ -605,7 +605,7 @@ be set globally using the command:
 \subsection{The annotations package}
 
 This package uses active anchors and the bubbles package to 
-allow annotations by raising a bulle when the cursor is over the anchor.
+allow annotations by raising a bubble when the cursor is over the anchor.
 
 The package provides a single command
 
@@ -629,17 +629,17 @@ Postscript fonts are not currently supported.
 
 \subsection*{Inlined Postscript and Ghostscript}
 
-PS relies on {\tt ghoscript} to display Postscript inlined specials.
+PS relies on {\tt ghostscript} to display Postscript inlined specials.
 However, some earlier releases of {\tt ghostscript} 
 implements Postscript {\tt flushpage} command as a {\tt XFlush} call
 which does not force the evaluation of commands, and thus makes the 
-synchronization between {\tt ghostscrip} and \ActiveDVI~drawings 
-uncontrolable. In this case, the interleaving of inlined postscript 
+synchronization between {\tt ghostscript} and \ActiveDVI~drawings 
+uncontrollable. In this case, the interleaving of inlined postscript 
 and other material may be inconsistent. 
 
 Fortunately, recent versions of ghostscript $(> 6.5)$ have
 fixed this problem by using {\tt XSync(false)} instead.
-If you use those versions of ghostscript, inline specials should be
+If you use those versions of ghostscript, inlined specials should be
 correctly rendered.
 
 Unfortunately, some releases of version 6.5x also carry a small but
@@ -652,6 +652,13 @@ releases. A workaround is available here
 So far, the implementation of inlined Postscript does not correctly handle
 complex change of coordinates.  (See PStricks section). 
 
+\section {Bug Reports}
+
+Please, send bug reports to 
+\url{mailto:advi@cristal.inria.fr}. 
+\\
+See \url{http://cristal.inria.fr/activedvi} for up to date information.
+
 
 \section {Key bindings}
 
@@ -660,3 +667,9 @@ complex change of coordinates.  (See PStricks section).
 \printindex
 
 \end{document}
+
+% LocalWords:  DVI Didier Weis advi INRIA LGPL Miquel Furuse Botlan XBuffer pst
+% LocalWords:  XSelection Hyperref hyperref dvips advirecording advianchoring
+% LocalWords:  CamlImages topleft topright bottomleft bottomright hbox PStricks
+% LocalWords:  advianchor eepic pstricks ps pos bg colspec bubbleset inlined
+% LocalWords:  flushpage XFlush XSync
