@@ -39,6 +39,8 @@
 \def\advi@record #1#2{\advi@@start{#1}#2\advi@@end{#1}}
 \def\advi@recplay #1#2{\advi@@startplay{#1}#2\advi@@end{#1}}
 
+%%% Embedded applications
+
 \newcommand{\advi@embed}[4][anonymous]{\mbox{\advi@special
   {advi: embed name="#1" type=ephemeral width=#2 height=#3 command="#4"}{\vbox to
 #3{\hbox to #2{}}}}}
@@ -53,13 +55,24 @@
   {advi: embed name="#1" type=persistent width=#2 height=#3 command="#4"}{\vbox to #3{\hbox to #2{}}}}}
 \def\advi@killembed#1{\advi@special
   {advi: kill name="#1"}}
+
+%%% Background colors and images
+
 \def\advi@setbgcolor#1{\advi@special{advi: setbg col=#1}}
 \def\advi@setbgimage#1{\advi@special{advi: setbg img=#1}}
-\def\advi@resetbg#1{\advi@special{advi: setbg reset}}
+\def\advi@resetbg{\advi@special{advi: setbg reset}}
+
+%%% Pausing and waiting
+
 \def\advi@pause{\advi@special{advi: pause}}
 \def\advi@wait#1{\advi@special{advi: wait sec=#1}}
+
+%%% Record and play
+
 \def\advi@play#1{\advi@special{advi: proc=#1 play}}
 \def\advi@hilight#1#2{{\color{#2}\advi@play{#1}}}
+
+%%% Transparency and alpha blending
 
 \def\advi@epstransparent
    {\advi@special{advi: epstransparent push true}\aftergroup\resetepstransparent}
@@ -70,6 +83,8 @@
 \def\advi@resetalpha{\advi@special{advi: alpha pop}}
 \def\advi@setblend#1{\advi@special{advi: blend push #1}\aftergroup\resetblend}
 \def\advi@resetblend{\advi@special{advi: blend pop}}
+
+%%% Animated transitions
 
 \def\advi@settransition#1{\advi@special{advi: trans push #1}}
 \def\advi@resettransition{\advi@special{advi: trans pop}}
@@ -123,7 +138,6 @@ end
   \def \advi@end {\advi@special {html:</a>}}
 \fi
 \def \advi@active #1#2{\advi@begin {#1}{#2}\advi@end}
-
 
 %%% Bulles
 
