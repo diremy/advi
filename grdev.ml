@@ -1018,7 +1018,7 @@ module H =
       GraphicsY11.display_mode true;
       begin match fill with
       | Fill -> old_fill_rect act.A.x act.A.y act.A.w act.A.h
-      | Draw -> old_draw_rect (act.A.x + 1) (act.A.y + 1)
+      | Draw -> Graphics.draw_rect (act.A.x + 1) (act.A.y + 1)
                   (act.A.w - 2) (act.A.h - 2)
       end;
       Graphics.set_color (get_color ());
