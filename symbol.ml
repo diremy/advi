@@ -52,7 +52,7 @@ let is_pure code =
   | '!'..'~' -> true (* "false" helps for debugging. *)
   | _ -> false
 
-(* Tells if s1 and s2, known to be on the same line, overlap seriously. *)
+(* Tells if s1 and s2, known to be on the same line, overlaps (1), goes beyond (2), or not (0). *)
 let overlap s1 s2 =
  (* Threshold in percent is used to tells when a space goes beyond a symbol, or just overlaps it. *)
  (* That is : if the space goes 50% further than the symbol, there is a space, otherwise there is not. *)
@@ -63,11 +63,13 @@ let overlap s1 s2 =
   let dx = right2 - right1 in
   if dx < 0
   then (* s2 is inside s1 *)
-    -100 * dx < threshold * s2.width
+    if -100 * dx < threshold * s2.width then 1 else 2
   else
     let common_width = s2.width - dx in
-    if common_width <= 0 then false
-    else common_width > dx (* More than the half of s2 overlaps s1. *)
+    if common_width <= 0 then 0
+    else if dx * 100 < common_width * threshold
+    then 1
+    else 2 
 
 (* Rules. *)
 let get_rule pre s = "_"
@@ -82,15 +84,17 @@ let get_rule pre s = "_"
 (* it appears that all spaces > 0 should be shown. *)
 (* The stupid method give definitely the best results. *)
 let get_space pre s =
-  if pre == dummy_symbol
-  then
-    begin
-      (* A line beginning with a tabulation. *)
-      "\t"
-    end
-  (* Same test as in get_rule. *)
-  else if overlap pre s then ""
-  else if s.width > 0 then " " else ""
+  if s.width <= 0 then ""
+  else
+    if pre == dummy_symbol
+    then
+      begin
+        (* A line beginning with a tabulation. *)
+	"\t"
+      end
+    (* Same test as in get_rule. *)
+    else if overlap pre s = 1 then ""
+    else " "
 
 (* Keep it for debug : dumps different spaces with size information. *)
 let get_space2 pre s =
@@ -109,7 +113,7 @@ let get_space2 pre s =
     | 4 | 5 -> ("(x"^(string_of_int s.width)^")") (* Interword? : C_x0 C_x *)
     | _ -> failwith "Symbol.get_space : unknown space code."
   in
-  if overlap pre s then ("{"^result^"}")
+  if overlap pre s = 1 then ("{"^result^"}")
   else result
 
 let default_encoding font code =
@@ -213,7 +217,7 @@ let symbol_name pre s =
 	  in
 	  handler font s.code
       in
-      if pre.fontname == spacename && overlap pre s then erase^name
+      if pre.fontname == spacename && overlap pre s <> 0 then erase^name
       else name
     end
   
@@ -305,7 +309,7 @@ let dump_line l =
 	  if ascii <> "" then
 	    begin
 	      line := !line^ascii ;
-	      old_sym := s ;
+	      if s.fontname <> spacename || s.width > 0 then old_sym := s ;
 	    end;
 	  if s.fontname != spacename then some := true ;
 	end
@@ -336,7 +340,6 @@ let rec split current lines = function
 let to_ascii set =
 
   (* Split lines. *)
-  let sorted = List.sort above !set in
   let lines = split {min = 0; max = 0; content = []} [] !set in
   let ascii = Misc.reverse_map dump_line lines in
   String.concat "" ascii
