@@ -995,12 +995,12 @@ let mouse_y = ref 0;;
 let button = ref false;;
 
 let reposition ~x ~y ~w ~h =
+  Gs.kill ();
   GraphicsY11.reposition x y w h;
   let x = Graphics.size_x ()
   and y = Graphics.size_y () in
   size_x := x;
   size_y := y;
-  Gs.kill ();
   x, y;;
 
 let resized () =
