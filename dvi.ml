@@ -15,6 +15,8 @@
  * details (enclosed in the file LGPL).
  *)
 
+(* $Id$ *)
+
 open Format ;;
 
 type preamble = {
