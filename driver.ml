@@ -1252,16 +1252,15 @@ let special st s =
   if has_prefix "PSfile=" s || has_prefix "psfile=" s then begin
     try
       let file, bbox, size = psfile_special st s in
+prerr_endline ("IMAGE " ^ file);
       let x = st.x_origin + int_of_float (st.conv *. float st.h)
       and y = st.y_origin + int_of_float (st.conv *. float st.v) in
       if !visible then
         let draw =
           if st.epsbygs then begin
-            let file = zap_to_char ' ' file in
             Misc.debug_endline (Printf.sprintf "Drawing by gs %s" file);
             Dev.draw_ps file bbox
           end else begin
-            let file = zap_to_char ' ' file in
             Misc.debug_endline (Printf.sprintf "Drawing by camlimages %s" file);
             Dev.draw_img file
               Drawimage.ScaleAuto false 1.0 st.blend (Some bbox)
@@ -1402,7 +1401,7 @@ let render_step cdvi num ?trans ?chst dpi xorig yorig =
       alpha = 1.0; alpha_stack = [];
       blend = Drawimage.Normal; blend_stack = [];
       epstransparent = true; epstransparent_stack = [];
-      epsbygs = true; epsbygs_stack = [];
+      epsbygs = false; epsbygs_stack = [];
       epswithantialiasing = true; epswithantialiasing_stack = [];
       direction = trans;
       transition = Transitions.TransNone;
