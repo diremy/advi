@@ -1296,7 +1296,7 @@ let html_special st html =
         open_html st link (fun x -> Dev.H.Name x)
     | ("href", link) :: _ ->
         open_html st link (fun x -> Dev.H.Href x)
-    | ("advi" | "hdvi", link) :: rest ->
+    | (("advi" | "hdvi" as kind), link) :: rest ->
         let mode =
           if kind = "advi" then Dev.H.Over else Dev.H.Click_down in
         let style =
