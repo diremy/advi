@@ -18,6 +18,7 @@
 %% Preliminary declarations
 
 \RequirePackage {keyval}
+\RequirePackage {color}
 
 %% Options
 
@@ -192,6 +193,13 @@ Maybe you mean \@currenvir ing}}
      \advi@global \edef \advi@bgcolor{ color="\advi@tmp"}%
      \advi@global \advi@bgactivetrue}}
 
+%% two abstract colors set by advi. Defaut to back and white
+\if
+\DefineNamedColor{named}{background}{rgb}{1,1,1} %white
+\definecolor{bgcolor}{named}{background}
+\DefineNamedColor{named}{foreground}{rgb}{0,0,0} %black
+\definecolor{fgcolor}{named}{foreground}
+
 \define@key {advi@bg}{color}[]{\advi@setbgcolor{#1}}
 \define@key {advi@bg}{image}[]{\advi@setbg{\advi@bgimage}{image}{#1}}
 \define@key {advi@bg}{alpha}[]{\advi@setbg{\advi@bgalpha}{alpha}{#1}}
@@ -208,7 +216,7 @@ Maybe you mean \@currenvir ing}}
 
 \def \advi@bgemit 
   {\advi@special 
-     {setbg \advi@bgcolor \advi@bgimage \advi@bgalpha \advi@bgblend
+     {setbg\advi@bgcolor \advi@bgimage \advi@bgalpha \advi@bgblend
       \advi@bgfit
       }}
 \newif \ifadvi@bglocal
