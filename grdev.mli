@@ -99,7 +99,7 @@ val set_blend : blend -> unit;;
 val draw_ps :
   string -> (int * int * int * int) -> (int * int) -> int -> int -> unit;;
 val clean_ps_cache : unit -> unit;;
-val sleep : float -> unit;;
+val sleep : float -> bool;; (* true= interrupted, false= fully performed *)
 
 (* Background information *)
 

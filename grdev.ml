@@ -17,35 +17,6 @@
 
 module GY = GraphicsY11;;
 
-(* for refreshed signal on usr1 *)
-exception Usr1;;
-let usr1_status = ref false;;
-let clear_usr1 () = usr1_status :=  false;;
-let waiting = ref false;;
-
-let usr1 = 10;;
-
-let set_usr1 () =
-  Sys.set_signal usr1
-    (Sys.Signal_handle
-       (fun _ -> usr1_status := true; if !waiting then raise Usr1));;
-
-set_usr1 ();;
-
-let sleep_watch b n =
-  let start = Unix.gettimeofday () in
-  let rec delay t =
-    try
-      if b && (!usr1_status || GY.key_pressed ()) then ()
-      else ignore (Unix.select [] [] [] t)
-    with Unix.Unix_error(Unix.EINTR, _, _) ->
-      let now = Unix.gettimeofday () in
-      let remaining = start +. n -. now in
-      if remaining > 0.0 then delay remaining in
-  delay n;;
-
-let sleep = sleep_watch true;;
-
 let ignore_background = Misc.option_flag false
     "--ignore_background"
     "\tIgnore background for antialiasing";;
@@ -54,12 +25,12 @@ let show_busy = Misc.option_flag true
     "-nowatch"
     "\tDon't display a watch when busy";;
 
-let busy_delay = ref 0.2;;
+let busy_delay = ref 0.5;;
 
 Misc.set_option
   "-watch"
   (Arg.Float (fun x -> busy_delay := x))
-  "FLOAT\tDelay before the watch cursor appears (default 0.2s)";;
+  "FLOAT\tDelay before the watch cursor appears (default 0.5s)";;
 
 type color = int;;
 let href_frame = 0x00ff00;;
@@ -116,52 +87,41 @@ let busy_set_cursor cursor =
 
 let reset_cursor () = GY.set_cursor !last_cursor;;
 
-let busy_check_timer () =
-  let t = !busy_timeout in
-  if t > 0. && Unix.gettimeofday () > t then
-      busy_set_cursor GY.Cursor_watch;;
-
-let busy_start () =
-  if !busy_timeout > 0. then busy_check_timer ()
-  else busy_timeout := Unix.gettimeofday () +. !busy_delay;;
-
 (* To be called before system calls that make take a long time *)
-let busy_now () =
-  if !busy_timeout > 0. then busy_set_cursor GY.Cursor_watch;;
+let busy_timeout = ref None
+let busy_start () =
+  try
+    busy_timeout := 
+      Some (Timeout.add !busy_delay 
+	      (fun () -> busy_set_cursor GY.Cursor_watch))
+  with
+  | _ -> ()
+;;
 
+let busy_end () =
+  match !busy_timeout with
+  | Some timeout -> 
+      begin try Timeout.remove timeout with Not_found -> () end
+  | None -> ()
+;;
+  
 let set_busy sw =
   if !show_busy then
     match sw with
     | Pause ->
+	busy_end ();
         busy_set_cursor GY.Cursor_right_side
+    | Free ->
+	busy_end ();
+        busy_set_cursor !free_cursor
     | Disk ->
         busy_set_cursor GY.Cursor_exchange
     | Busy ->
         busy_start ()
-    | Free ->
-        busy_set_cursor !free_cursor;;
+  ;;
 
 let title = ref "Advi";;
 let set_title s = title := s;;
-
-(* Transitions *)
-let sleep_watch b n =
-  let start = Unix.gettimeofday () in
-  let rec delay t =
-    try
-      if b && (!usr1_status || Graphics.key_pressed ()) then ()
-      else ignore (Unix.select [] [] [] t)
-    with Unix.Unix_error(Unix.EINTR, _, _) ->
-      let now = Unix.gettimeofday () in
-      let remaining = start +. n -. now in
-      if remaining > 0.0 then delay remaining in
-  delay n;;
-
-let sleep = sleep_watch true;;
-
-Transimpl.sleep := sleep;;
-
-let set_transition trans = Transimpl.current_transition := trans;;
 
 (* Applications function handlers. *)
 let embeds = ref [];;
@@ -171,11 +131,64 @@ let unmap_embeds = ref [];;
 let synchronize () =
   Gs.flush ();
   Transimpl.synchronize_transition ();
-  GraphicsY11.synchronize ();
+  GY.synchronize ();
   List.iter (fun f -> f ()) (List.rev !embeds);
   embeds := [];
   List.iter (fun f -> f ()) (List.rev !persists);
   persists := [];;
+
+(* for refreshed signal on usr1 *)
+exception Usr1;;
+let usr1_status = ref false;;
+let clear_usr1 () = usr1_status :=  false;;
+let waiting = ref false;;
+
+let usr1 = 10;;
+
+let set_usr1 () =
+  Sys.set_signal usr1
+    (Sys.Signal_handle
+       (fun _ -> usr1_status := true; if !waiting then raise Usr1));;
+
+set_usr1 ();;
+
+let sleep_broken = ref false
+let clear_sleep () = sleep_broken := false
+
+(* returns false if sleep is fully performed. returns true if interrupted *)
+let sleep_watch breakable sync n =
+  let start = Unix.gettimeofday () in
+  let interrupted () = 
+    if breakable && (!usr1_status || !sleep_broken || GY.key_pressed ()) then begin
+      if GY.key_pressed () then ignore (GY.read_key ());
+      sleep_broken := true;
+      true
+    end else false
+  in
+  let rec delay t =
+    if interrupted () then raise Exit (* if there is a sig or key press, exit*)
+    else begin
+      try ignore (Unix.select [] [] [] t) 
+      with Unix.Unix_error(Unix.EINTR, _, _) -> ()
+    end;
+    let now = Unix.gettimeofday () in
+    let remaining = start +. n -. now in
+    if remaining > 0.0 then delay remaining
+    else false
+  in
+  if interrupted () then true (* if it is interrupted, synchronization is not done *)
+  else begin
+    if sync then synchronize ();
+    try delay n with Exit -> true
+  end;;
+
+let sleep = sleep_watch true true;;
+
+(* trans *)
+
+Transimpl.sleep := sleep_watch true false;;
+
+let set_transition trans = Transimpl.current_transition := trans;;
 
 let transbox_save x y width height = 
   synchronize ();
@@ -349,7 +362,6 @@ let draw_bkgd_img (w, h) x0 y0 =
   match bkgd_data.bgimg with
   | None -> ()
   | Some file ->
-     set_busy Busy;
      Drawimage.f
       file
       bkgd_data.bgwhitetrans
@@ -401,8 +413,8 @@ let get_bg_color x y w h =
     begin
       sync dvi;
       if !psused || bkgd_data.bgimg <> None then
-        let c = GraphicsY11.point_color (x + 1) (y + 1) in
-	let c' = GraphicsY11.point_color (x + w - 1) (y + h - 1) in
+        let c = GY.point_color (x + 1) (y + 1) in
+	let c' = GY.point_color (x + w - 1) (y + h - 1) in
 	let rgb_of_color c =
 	  let b = (c land 0x0000ff) in 
 	  let g = (c land 0x00ff00) lsr 8 in
@@ -579,7 +591,6 @@ let draw_ps file bbox (w, h) x0 y0 =
   if not !opened then failwith "Grdev.fill_rect: no window";
   let x = x0
   and y = !size_y - y0 + h in
-  set_busy Busy;
   try Drawimage.f file !epstransparent !alpha
       (try Some (blend_func !blend) with _ -> None)
       (Some bbox) Drawimage.FreeScale (w, h) (x, y - h)
@@ -621,7 +632,7 @@ let raw_embed_app command app_mode app_name width height x y =
   (* Use graphics coordinates for subwindows *)
   let gry = !size_y - y in
 
-  let wid = GraphicsY11.open_subwindow ~x ~y:gry ~width ~height in
+  let wid = GY.open_subwindow ~x ~y:gry ~width ~height in
 
   (*** !x commands
     !p : embedding target window id (in digit)
@@ -687,17 +698,17 @@ let find_embedded_app app_name =
 
 let map_embed_app command app_mode app_name width height x y =
   let _, (app_mode, app_name, wid) = find_embedded_app app_name in
-  GraphicsY11.map_subwindow wid;;
+  GY.map_subwindow wid;;
 
 let unmap_embed_app command app_mode app_name width height x y =
  let _, (app_mode, app_name, wid) = find_embedded_app app_name in
- GraphicsY11.unmap_subwindow wid;;
+ GY.unmap_subwindow wid;;
 
 let move_or_resize_persistent_app command app_mode app_name width height x y =
   let _, (app_mode, app_name, wid) = find_embedded_app app_name in
-  GraphicsY11.resize_subwindow wid width height;
+  GY.resize_subwindow wid width height;
   let gry = !size_y - y + height - width in
-  GraphicsY11.move_subwindow wid x gry;
+  GY.move_subwindow wid x gry;
 ;;
 
 (* In hash table t, verifies that at least one element verifies p. *)
@@ -760,7 +771,7 @@ let kill_app pid wid =
       Unix.Unix_error(Unix.ECHILD, _, _) -> false
   do () done;
   (* if this is the forked process, do not close the window!!! *)
-  if Unix.getpid () = Misc.advi_process then GraphicsY11.close_subwindow wid
+  if Unix.getpid () = Misc.advi_process then GY.close_subwindow wid
 ;;
 
 let kill_apps app_mode =
@@ -946,35 +957,35 @@ module H =
     let deemphasize now emph =
         match emph with
         | Rect (ima, act, l) ->
-            GraphicsY11.display_mode now;
+            GY.display_mode now;
             List.iter
               (function ima, act -> Graphics.draw_image ima act.A.x act.A.y) l;
             Graphics.draw_image ima act.A.x act.A.y;
             GY.set_cursor !free_cursor;
-            GraphicsY11.display_mode false
+            GY.display_mode false
         | Screen (ima, act, all_anchors) ->
-            GraphicsY11.display_mode true;
+            GY.display_mode true;
             anchors := all_anchors;
             Gs.flush ();
             (* long delay to be safe *)
-            sleep_watch false 0.1;
+            sleep_watch false false 0.1;
             Graphics.draw_image ima 0 0;
             GY.set_cursor !free_cursor;
             GY.flush ();
-            GraphicsY11.display_mode false
+            GY.display_mode false
         | Nil -> ()
 
     let emphasize c act =
       let ima = Graphics.get_image act.A.x act.A.y act.A.w act.A.h in
       Graphics.set_color c;
-      GraphicsY11.display_mode true;
+      GY.display_mode true;
       Graphics.fill_rect act.A.x act.A.y act.A.w act.A.h;
       Graphics.set_color !color;
       push_bg_color c;
       List.iter (function x, y, g -> draw_glyph g x y) act.A.action.draw;
       pop_bg_color ();
       GY.set_cursor GY.Cursor_hand2;
-      GraphicsY11.display_mode false;
+      GY.display_mode false;
       Rect (ima, act, [])
 
     let save_screen_exec act a =
@@ -987,12 +998,12 @@ module H =
       Graphics.set_color (Graphics.point_color 0 0);
       (* it seems that the image is saved ``lazily'' and further instruction
          could be capture in the image *)
-      sleep_watch false 0.05;
+      sleep_watch false false 0.05;
 *)
       let all_anchors = !anchors in
       a ();
       flush_last ();
-      GraphicsY11.synchronize ();
+      GY.synchronize ();
       Screen (ima, act, all_anchors)
 
     let light t =
@@ -1031,17 +1042,27 @@ module Symbol = Symbol.Make (Glyph);;
 let cut s =
   (*  print_string s; print_newline (); *)
   (* cut does not work yet *)
-  GraphicsY11.cut s;;
+  GY.cut s;;
 
 let open_dev geom =
   if !opened then Graphics.close_graph ();
   Graphics.open_graph geom;
+
+  GY.init (); (* we disable Graphics's event retrieving *)
+  Timeout.init ();
+  (* Fill the event queue *)
+  let rec f () =
+    Timeout.add 0.5 (fun () -> 
+      GY.retrieve_events (); ignore (f ()))
+  in
+  ignore (f ());
+
   size_x := Graphics.size_x ();
   size_y := Graphics.size_y ();
   xmin := 0; xmax := !size_x;
   ymin := 0; ymax := !size_y;
   Graphics.remember_mode true;
-  GraphicsY11.display_mode !Misc.global_display_mode;
+  GY.display_mode !Misc.global_display_mode;
   Graphics.set_window_title !title;
   color := !default_fgcolor;
   opened := true;;
@@ -1058,7 +1079,7 @@ let clear_dev () =
   if not !opened then failwith "Grdev.clear_dev: no window";
   kill_ephemeral_apps ();
   unmap_persistent_apps ();
-  GraphicsY11.display_mode !Misc.global_display_mode;
+  GY.display_mode !Misc.global_display_mode;
   Graphics.clear_graph ();
   H.clear ();
   bg_color := bkgd_data.bgcolor; (* modifiable via \setbgcolor . RDC *)
@@ -1139,7 +1160,7 @@ let mouse_y = ref 0;;
 let button = ref false;;
 
 let reposition ~x ~y ~w ~h =
-  GraphicsY11.reposition x y w h;
+  GY.reposition x y w h;
   let x = Graphics.size_x () and y = Graphics.size_y() in
   size_x := x;
   size_y := y;
@@ -1240,10 +1261,10 @@ let wait_select_rectangle x y =
     | x -> x
   in
   set_color !default_fgcolor;
-  GraphicsY11.display_mode true;
+  GY.display_mode true;
   GY.set_cursor select_cursor;
   let restore () =
-    GraphicsY11.display_mode false;
+    GY.display_mode false;
     set_color !color;
     GY.set_cursor !free_cursor
   in
@@ -1276,12 +1297,12 @@ let wait_select_button_up m x y =
             Final (Selection (Symbol.region_to_ascii r'))
     | x -> x in
   let color = !color in
-  GraphicsY11.synchronize ();
-  GraphicsY11.display_mode true;
+  GY.synchronize ();
+  GY.display_mode true;
   Graphics.remember_mode false;
   GY.set_cursor select_cursor;
   let restore () =
-    GraphicsY11.display_mode false;
+    GY.display_mode false;
     Graphics.remember_mode true;
     set_color color;
     GY.set_cursor !free_cursor in
@@ -1324,9 +1345,9 @@ let wait_move_button_up x y =
   let color = !color in
   set_color !default_fgcolor;
   GY.set_cursor move_cursor;
-  GraphicsY11.display_mode true;
+  GY.display_mode true;
   let restore () =
-    GraphicsY11.display_mode false;
+    GY.display_mode false;
     set_color color;
     GY.set_cursor !free_cursor in
   try let e = move 0 0 in restore (); e
@@ -1366,6 +1387,8 @@ let wait_button_up m x y =
     end;;
 
 let wait_event () =
+  (* We reached to a pause. Now we can reset the sleep break *)
+  clear_sleep ();
   let temp_cursor = ref false in
   reset_cursor ();
   let rec event emph =
@@ -1374,9 +1397,9 @@ let wait_event () =
     match wait_signal_event all_events with
     | Raw ev ->
         begin
-          if ev.GY.keypressed then
+          if ev.GY.keypressed then begin
             send (Key ev.GY.key)
-          else
+          end else
             let ev' = 
               { mouse_x = ev.GY.mouse_x;
                 mouse_y = !size_y - ev.GY.mouse_y;
@@ -1411,7 +1434,7 @@ let wait_event () =
               end
             with
             | Not_found ->
-                if ev'.button then
+                if ev'.button then begin
                   let m = GY.get_modifiers () in
                   match wait_button_up m ev.mouse_x ev.mouse_y with
                   | Final (Region (x, y, dx, dy) as e) -> send e
@@ -1424,7 +1447,7 @@ let wait_event () =
                       push_back_event ev;
                       send e
                   | Raw _ -> rescan ()
-                else
+                end else begin
                   let m = GY.get_modifiers () in
                   if m land GY.shift <> 0 then
                      (if not !temp_cursor then
@@ -1432,6 +1455,7 @@ let wait_event () =
                   else if !temp_cursor then
                     (temp_cursor:= false; reset_cursor ());
                   rescan ()
+		end
             end
         end
     | Final e -> send e in
@@ -1444,7 +1468,6 @@ let resized () =
   Graphics.size_x () <> !size_x || Graphics.size_y () <> !size_y;;
 
 let continue () =
-  busy_check_timer();
   if resized() || GY.key_pressed() (*  || !usr1_status *) then
     begin
       Gs.flush ();
@@ -1470,4 +1493,4 @@ let add_headers l =
 let exec_ps s x0 y0 =
   sync ps;
   if not !opened then failwith "Grdev.exec_ps: no window";
-  Gs.draw s x0 y0;;
+  Gs.draw s x0 y0
