@@ -11,6 +11,15 @@ CAMLVERSION=`"$CAML"c -v | grep "compiler" | sed 's/.* version //' | sed 's/ .*$
 
 AC_MSG_RESULT(version $CAMLVERSION at $CAMLDIR)
 
+dnl Checking cdk_config
+AC_PATH_PROG(PATH_CDK, cdk_config, "nope")
+if test "X$PATH_CDK" != "Xnope"; then
+  HAVE_CDK="true"
+  echo "cdk_config has been found"
+else
+  HAVE_CDK="false"
+fi
+  
 dnl Checks for libraries.
 
 dnl CamlImages
@@ -24,10 +33,10 @@ AC_ARG_WITH(camlimages, [  --with-camlimages=dir      specify camlimages library
 	CAMLIMAGESDIR=nope
   fi)
 
-if test -f $CAMLIMAGESDIR/ps_img.cma; then
+if test -f $CAMLIMAGESDIR/ps_img.cma || $HAVE_CDK; then
 	echo "Camlimages: ok"
 	HAVE_CAMLIMAGES="true"
-	CAMLIMAGESLIBS="img ppm_img ps_img graphic_image freetype"
+	CAMLIMAGESLIBS="camlimages"
 else
 	echo "**************** Warning ******************"
 	echo "camlimages is not found or incomplete in the directory \"$CAMLIMAGESDIR\""
@@ -56,6 +65,8 @@ AC_SUBST(CAML)
 AC_SUBST(CAMLDIR)
 AC_SUBST(CAMLVERSION)
 
+AC_SUBST(HAVE_CDK)
+
 AC_SUBST(CAMLIMAGESDIR)
 AC_SUBST(HAVE_CAMLIMAGES)
 AC_SUBST(CAMLIMAGESLIBS)
@@ -78,6 +89,7 @@ AC_OUTPUT(Makefile.config config.ml)
 
 echo -------------------------------------------------- Configuration finished
 echo Language:            $CAML version $CAMLVERSION
+echo cdk_config:          $HAVE_CDK
 echo Camlimages:          $HAVE_CAMLIMAGES
 echo GS:		  $HAVE_GS
 echo Resources:           $ADVI_LOC/

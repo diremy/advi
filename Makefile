@@ -1,7 +1,8 @@
 # advi - A DVI previewer
 # Copyright (C) 2000 Alexandre Miquel
-# Copyright (C) 2001 Alexandre Miquel, Jun Furuse, Xavier Leroy, Didier Rémy
-#
+# Copyright (C) 2001 Alexandre Miquel, Jun Furuse, Xavier Leroy, Didier Rémy,
+#                    Alan Schmitt
+# 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
 # License as published by the Free Software Foundation; either
@@ -43,8 +44,14 @@ COBJS     = grY11.o
 
 CMO_OBJS  = $(addsuffix .cmo, $(MODULES))
 CMX_OBJS  = $(addsuffix .cmx, $(MODULES))
+
+ifeq ($(HAVE_CDK),true)
+CMA_OBJS  = `cdk_config $(LIBRARIES)` 
+CMXA_OBJS = `cdk_config -opt $(LIBRARIES)`
+else
 CMA_OBJS  = $(addsuffix .cma, $(LIBRARIES))
 CMXA_OBJS = $(addsuffix .cmxa, $(LIBRARIES))
+endif
 
 BYTE_OBJS = $(COBJS) $(CMA_OBJS) $(CMO_OBJS)
 OPT_OBJS  = $(COBJS) $(CMXA_OBJS) $(CMX_OBJS)
