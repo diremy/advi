@@ -28,7 +28,7 @@ this release introduces a lot of new features
 
    * Annotations of texts (visible when the mouse is on the annotated text)
 
-   * Hyper references from slide to slide or to other dvi files
+   * Hyper references within the same document or or to other dvi files
 
    * Animated transitions from slide to slide
 
@@ -41,10 +41,7 @@ this release introduces a lot of new features
    * A manual
 
    * A lot of examples, including talks using popular LaTeX packages seminar
-     and prosper.
-
-   * New package xprosper.sty, an extended version of the prosper package from
-     http://prosper.sourceforge.net/.
+     and prosper (cf. http://prosper.sourceforge.net/).
 
    * A new user's interface in the redesigned LaTeX package advi.sty.
 
