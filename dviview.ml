@@ -893,47 +893,72 @@ module B =
   end;;
 
 let bindings = Array.create 256 B.nop;;
-for i = 0 to 9 do
-  bindings.(Char.code '0' + i) <- B.digit i
-done;
-let bind (key, action) = bindings.(Char.code key) <- action  in
-List.iter bind [
-  (* For instance *)
-  (* Alan: I modified the bindings for hjkl to move the page around *)
-  'h', B.page_left;
-  'i', B.pop_page;
-  'j', B.page_down;
-  'k', B.page_up;
-  'l', B.page_right;
-  'm', B.push_page;
 
-  ' ', B.next_pause;
-  'n', B.next_page;
-  '\r', B.push_next_page;
-  '\t', B.push_page;
-  'p', B.previous_page;
-  'P', B.previous_pause;
-  'N', B.next_pause;
-  '\b', B.pop_previous_page;
-  '\027', B.pop_page;
-  ',', B.first_page;
-  '.', B.last_page;
-  'f', B.unfreeze_fonts;
-  'F', B.unfreeze_glyphs;
-  '', B.fullscreen;
-  'r', B.redraw;
-  '', B.redisplay;
-  'R', B.reload;
-  'c', B.center;
-  '<', B.scale_down;
-  '>', B.scale_up;
-  'g', B.goto;
-  'x', B.exchange_page;
-  '#', B.nomargin;
-  'q', B.exit;
-  'C', B.clear_image_cash;
-  '?', B.help;
-];;
+let bind (key, action) = bindings.(int_of_char key) <- action;;
+
+let bind_keys () =
+  for i = 0 to 9 do
+    bind (char_of_int (int_of_char '0' + i), B.digit i)
+  done;
+  List.iter bind [
+   (* Default key bindings. *)
+
+   (* General purpose keys. *)
+   'q', B.exit;
+   '?', B.help;
+
+   (* hjkl to move the page around *)
+   'h', B.page_left;
+   'j', B.page_down;
+   'k', B.page_up;
+   'l', B.page_right;
+   'c', B.center;
+
+   (* m, i, return, tab, backspace, escape, and x
+      for handling page marks stack. *)
+   'm', B.push_page;
+   'i', B.pop_page;
+
+   '\r' (* return *), B.push_next_page;
+   '\t' (* tab *), B.push_page;
+
+   '\b' (* backspace *), B.pop_previous_page;
+   '' (* Escape *), B.pop_page;
+
+   'x', B.exchange_page;
+
+   (* space, n, p, P, N to go on, or go back to next pause or page. *)
+   ' ', B.next_pause;
+   'n', B.next_page;
+   'p', B.previous_page;
+   'P', B.previous_pause;
+   'N', B.next_pause;
+
+   (* comma, ., g, to go to a page. *)
+   ',', B.first_page;
+   '.', B.last_page;
+   'g', B.goto;
+
+   (* r, Control-l, R, to redraw or reload. *)
+   'r', B.redraw;
+   'R', B.reload;
+   '' (* CONTROL-l *), B.redisplay;
+
+   (* Control-f, c, To handle the advi window. *)
+   '' (* CONTROL-f *) , B.fullscreen;
+
+   (* Scaling the page. *)
+   '<', B.scale_down;
+   '>', B.scale_up;
+   '#', B.nomargin;
+
+   (* Efficiency related keys. *)
+   'f', B.unfreeze_fonts;
+   'F', B.unfreeze_glyphs;
+   'C', B.clear_image_cash;
+  ];;
+
+bind_keys ();;
 
 let main_loop filename =
   let st = init filename in
