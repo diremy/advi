@@ -6,7 +6,7 @@
 
 \usepackage{pst-all}
 
-\usepackage[annot]{advi}
+\usepackage[annot]{../tex/advi}
 
 \usepackage{hyperref}
 
@@ -36,7 +36,7 @@ Press: \underline{n}ext page \underline{p}revious page
 
 \def\adviheader{\noindent
 {\bf\Large Active dvi}\\
-\includegraphics[width=\textwidth]{bar.jpg.eps}}
+\includegraphics[width=\textwidth]{../tex/bar.jpg.eps}}
 
 \let \Newpage \newpage
 \def \newpage {\Newpage \advifooter\adviheader}
@@ -90,8 +90,8 @@ Press: \underline{n}ext page \underline{p}revious page
   \item EPS graphics inclusion using Camlimages\\
     \verb+\includegraphics[width=0.1\textwidth]{caml.eps}+\\
     \verb+\includegraphics[width=0.2\textwidth]{caml.eps}+\\
-    \includegraphics[width=0.1\textwidth]{caml.eps}
-    \includegraphics[width=0.2\textwidth,height=0.09\textwidth]{caml.eps}
+    \includegraphics[width=0.1\textwidth]{../tex/caml.eps}
+    \includegraphics[width=0.2\textwidth,height=0.09\textwidth]{../tex/caml.eps}
   \item Other eye candies for presentation
     \begin{itemize}
     \item \verb+\pause+ \pause
@@ -511,7 +511,7 @@ See the \verb"gpic" command manual for more information about
 
 ~\vfill
 \begin{center}
-\includegraphics[width=0.5\textwidth]{advilogo.eps}\\
+\includegraphics[width=0.5\textwidth]{../tex/advilogo.eps}\\
 {\Large \bf That's all, folks!!}
 \end{center}
 \vfill

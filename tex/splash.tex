@@ -25,17 +25,34 @@
 
 \pagestyle{empty}
 
+\def\advifooter{\vbox to 0em{\vbox to \vsize {\vfill
+\center{Press: \key{n}ext page \key{p}revious page \key{q}uit \vss}}}}
+
+\def\adviheader{\noindent
+{\bf\Large Active dvi}\\
+\includegraphics[width=\textwidth]{bar.jpg.eps}}
+
+\let \Newpage \newpage
+\def \newpage {\Newpage \advifooter\adviheader}
+
+\def\adviemptyfooter{\vbox to 0em{\vbox to \vsize {\vfill
+~~} \vss}}
+
+\def\lastpage{\Newpage\adviemptyfooter\adviheader}
+
 \begin{document}
  
 \newpage
 
-\section*{Active dvi}
+%\section*{Active dvi}
+
+\medskip
 
 \begin{tabularx}{\linewidth}{Xl}
 The presentation tool of choice for discriminating hackers.
 See \texttt{http://pauillac.inria.fr/advi/}
 &
-\raisebox{-30pt}{\includegraphics{caml.eps}}
+\raisebox{-30pt}{\includegraphics[width=2cm]{advilogo.eps}}
 \end{tabularx}
 
 \subsection*{Usage}
@@ -44,18 +61,19 @@ Try \texttt{advi -help} for more information.
 
 \subsection*{Key Bindings}
 
-Advi recognizes the following keystrokes when typed in its window.
-Each may optionally be preceded by a number, called \arg below, whose
+Advi recognizes the keystrokes listed below when typed in its window.
+Some keystrokes may optionally be preceded by a number, called \arg below, whose
 interpretation is keystroke dependant. If \arg is unset, its value is
 1, unless specified otherwise.
 
 Advi maintains an history of previously visited pages organized as a stack. 
-Additionnally, the history contains marks pages which are stronger than
+Additionnally, the history contains marked pages which are stronger than
 unmarked pages. 
 
 \vspace{\stretch{1}}
 \noindent
 \begin{tabularx}{\linewidth}{clcX}
+\ikey{?}{info}{Quick info and key bindings help.}
 \ikey{q}{quit}{End of show.}
 \ikey{n}{next}
 {Move \arg physical pages forward, leaving the history unchanged.}
@@ -70,26 +88,26 @@ unmarked pages.
 
 \vspace{\stretch{1}}
 
-\begin{center}
-Press \key{n} for next page.
-\end{center}
+%\begin{center}
+%Press \key{n} for next page.
+%\end{center}
 
 \newpage
 
-\Large
-\begin{center}
-\textbf{Key bindings}
-\end{center}
-\normalsize
+%\Large
+%\begin{center}
+%\textbf{Key bindings}
+%\end{center}
+%\normalsize
 
 \vspace{\stretch{1}}
 
 \noindent
 \begin{tabularx}{\linewidth}{clcX}
 \ikey{return}{forward}
-{Push the current page on the history stack, and move forward n physical page}
+{Push the current page on the history stack, and move forward n physical pages.}
 \ikey{tab}{mark and next}
-{Push the current page on the history as marked, and move forward n physical page.}
+{Push the current page on the history as marked, and move forward n physical pages.}
 \ikey{space}{continue}
 {Move to the next pause if any, or do as \key{return} otherwise.}
 \ikey{backspace}{back}
@@ -101,7 +119,7 @@ Press \key{n} for next page.
 {If \arg is unset move to the last page.
  If \arg is the current page do nothing.
  Otherwise, push the current page on the history as marked, and move
- to the physical page \arg.}
+ to the physical pages \arg.}
 \ikey{f}{load fonts}{Load all the fonts used in the documents.  By default, fonts are loaded only when needed.}
 \ikey{r}{redraw}{Redraw the current page.}
 \ikey{R}{reload}{Reload the file and redraw the current page.}
@@ -113,7 +131,7 @@ This takes more time than loading the fonts, but the pages are drawn faster.}
 
 \vspace{\stretch{1}}
 
-\newpage
+\lastpage
 
 \subsection*{Acknowledgments}
 
@@ -124,6 +142,7 @@ Authors and contributors are :
 \item Jun Furuse \email{Jun.Furuse@inria.fr}
 \item Didier R\'emy \email{Didier.Remy@inria.fr}
 \item Xavier Leroy \email{Xavier.Leroy@inria.fr}
+\item Pierre Weis \email{Pierre.Weis@inria.fr}
 \end{itemize}
 
 \vspace{\stretch{1}}

@@ -4,7 +4,7 @@ Active dvi is a DVI previewer and presenter written in Objective Caml
 Active dvi is largely based on Mldvi written by Alexandre Miquel
 (http://pauillac.inria.fr/~miquel/).
 
-Version: 0.5 (second release)
+Version: 0.4 (second release)
 available at http://pauillac.inria.fr/advi/
 
 Contributions: 

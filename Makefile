@@ -112,7 +112,7 @@ splash.dvi: splash.tex
 install:: advi.opt splash.dvi
 	cp advi.opt ${bindir}/advi
 	- mkdir -p $(ADVI_LOC)
-	cp splash.dvi caml.eps advi.sty advi.pro $(ADVI_LOC)
+	cp tex/splash.dvi tex/caml.eps tex/bar.jpg.eps tex/advi.sty tex/advi-annot.sty tex/advi.pro $(ADVI_LOC)
 
 MLFILES = $(addsuffix .ml, $(MODULES))
 .depend:: *.mli $(MLFILES) Makefile 
@@ -120,13 +120,13 @@ MLFILES = $(addsuffix .ml, $(MODULES))
 	gcc -MM $(CFLAGS) $(COBJS:.o=.c) | sed -e 's|$(CAMLDIR)/caml/[^ ]*||' >> .depend
 
 # just for the authors
-VERSION=0.5.0
+VERSION=0.4.0
 ADVI=advi-$(VERSION)
 WEBSITEDIR=/net/pauillac/infosystems/www/advi
 
 # make splash builds splash.dvi
 splash:
-	latex splash.tex
+	cd tex; latex splash.tex
 
 distribute:
 	rm -rf release
