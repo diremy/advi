@@ -17,6 +17,8 @@
 
 # $Id$
 
+# See also file MakeHTML to recompile HTML files for the Web site.
+
 LATEX=TEXINPUTS=.:../tex:/usr/lib/hevea:/usr/local/lib/hevea: latex
 DVIPS=TEXPSHEADERS=.:../tex: dvips
 HEVEA=hevea -entities -I ../tex
@@ -24,8 +26,7 @@ IMAGEN=imagen
 PDFIMAGEN=pdfimagen
 DVIPDFM=dvipdfm
 
-all: web \
-manual.dvi manual.ps manual.pdf \
+all: manual.dvi manual.ps manual.pdf \
 splash.dvi splash.ps \
 scratch_write_splash.dvi scratch_write_splash.ps \
 scratch_draw_splash.dvi scratch_draw_splash.ps \
@@ -35,6 +36,8 @@ clean:
 	rm -f *.aux *.log manual.html *.dvi *.pdf *.pdfm *.ps *.ima *.out *.toc
 	rm -f *.haux *.htoc
 	$(MAKE) -f MakeHTML clean
+
+distribute: clean all web
 
 web:
 	$(MAKE) -f MakeHTML all

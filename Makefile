@@ -205,26 +205,7 @@ documentation:
 distribute: tar_and_web
 
 tar_and_web:
-	(cd test; $(MAKE) all jpdemo.dvi)
-	rm -rf release
-	rm -rf $(WEBSITEDIR)/*
-	- mkdir $(WEBSITEDIR)
-	mkdir release
-	cd release; cvs co bazar-ocaml/advi; \
-	cp -p ../test/*.dvi bazar-ocaml/advi/test/; \
-	cp -p ../doc/manual.dvi bazar-ocaml/advi/doc/; \
-	cp -p ../doc/manual.ps bazar-ocaml/advi/doc/; \
-	cp -p ../doc/manual.pdf bazar-ocaml/advi/doc/; \
-	cp -p ../doc/splash.dvi bazar-ocaml/advi/doc/; \
-	cp -p ../tex/advi.pro bazar-ocaml/advi/test/; \
-	find . -name '.cvsignore' -print | xargs rm; \
-	find . -name 'CVS' -print | xargs rm -rf; \
-	find . -name 'advi-development-kit' -print | xargs rm -rf; \
-	(cd bazar-ocaml/advi/doc/; \
-	ln -s index.html index-en.html; cd ../../..); \
-	cp -pr bazar-ocaml/advi/doc/* $(WEBSITEDIR)
-	- chgrp -R caml $(WEBSITEDIR)
-	- chmod -R g+w $(WEBSITEDIR)
+	$(MAKE) web_site;
 	cp -pr release/bazar-ocaml/advi/LGPL \
 		release/bazar-ocaml/advi/README \
 		release/bazar-ocaml/advi/INDEX $(FTPSITEDIR)
@@ -232,12 +213,17 @@ tar_and_web:
 	tar cvf $(ADVI).tar $(ADVI); \
 	gzip $(ADVI).tar; \
 	mv -f $(ADVI).tar.gz $(FTPSITEDIR)
-	rm -rf release
+	$(MAKE) clean_release
 	cd advi-development-kit; $(MAKE) distribute
 
 web:
+	$(MAKE) web_site
+	$(MAKE) clean_release
+
+web_site:
+	$(MAKE) clean_release
 	(cd test; $(MAKE) all jpdemo.dvi)
-	rm -rf release
+	(cd doc; $(MAKE) distribute)
 	rm -rf $(WEBSITEDIR)/*
 	- mkdir $(WEBSITEDIR)
 	mkdir release
@@ -246,10 +232,12 @@ web:
 	cp -p ../doc/manual.dvi bazar-ocaml/advi/doc/; \
 	cp -p ../doc/manual.ps bazar-ocaml/advi/doc/; \
 	cp -p ../doc/manual.pdf bazar-ocaml/advi/doc/; \
+	cp -p ../doc/manual.html bazar-ocaml/advi/doc/; \
+	cp -p ../doc/style.css bazar-ocaml/advi/doc/; \
 	cp -p ../doc/splash.dvi bazar-ocaml/advi/doc/; \
 	cp -p ../doc/scratch_write_splash.dvi bazar-ocaml/advi/doc/; \
 	cp -p ../doc/scratch_draw_splash.dvi bazar-ocaml/advi/doc/; \
-	cp -p ../tex/advi.pro bazar-ocaml/advi/test/; \
+	cp -p -r ../doc/pngs bazar-ocaml/advi/doc/; \
 	find . -name '.cvsignore' -print | xargs rm; \
 	find . -name 'CVS' -print | xargs rm -rf; \
 	find . -name 'advi-development-kit' -print | xargs rm -rf; \
@@ -258,6 +246,8 @@ web:
 	cp -pr bazar-ocaml/advi/doc/* $(WEBSITEDIR)
 	- chgrp -R caml $(WEBSITEDIR)
 	- chmod -R g+w $(WEBSITEDIR)
+
+clean_release:
 	rm -rf release
 
 rpm:
