@@ -209,17 +209,17 @@ reserve that area for your application.\\
 \verb+\adviembed[width=w,height=h]{command}+\\
 
 \noindent
-Moreover, {\ActiveDVI} provides two special \TeX macros \verb"!g" and
-\verb"!p" that specify the geometry and the (X) window identifier that
+Moreover, {\ActiveDVI} provides two special \TeX macros \verb"@g" and
+\verb"@p" that specify the geometry and the (X) window identifier that
 the application should use. Hence, if {\verb"command"} has option
 {\tt -geometry} to specify its X geometry specification, and option
 {\verb"-use"} to specify the X window it should use, then\\
 
-\verb+\adviembed[width=w,height=h]{command -geometry !g -use !p}+\\
+\verb+\adviembed[width=w,height=h]{command -geometry @g -use @p}+\\
 
 \noindent will launch \verb"command" with a geometry computed from the
 width and height specification \verb"w" and \verb"h"; \verb"command"
-will be display in the window \verb"!p" (normally a sub-window of
+will be display in the window \verb"@p" (normally a sub-window of
 {\ActiveDVI}'s window).
 
 \newpage
@@ -240,7 +240,7 @@ may be moved independantly).
 \subsubsection*{Embeddable applications}
 
 For each application to launch, {\ActiveDVI} allocates a new sub
-window of the specified size.  If provided, the identifier \verb"!p"
+window of the specified size.  If provided, the identifier \verb"@p"
 is replaced by the (X) identifier of that sub window, in order for the
 application to use that sub window as its root window. Options to
 specify the root window may vary depending of the application at hand
@@ -254,7 +254,7 @@ is not embeddable.
 
 \subsubsection*{Non embeddable applications}
 
-If the application cannot be rerooted (or if the \verb"!p" parameter
+If the application cannot be rerooted (or if the \verb"@p" parameter
 is not specified), {\ActiveDVI} cannot control the placement of the
 application: the window manager will handle it. However, {\ActiveDVI}
 helps by providing a complete X geometry specification: with width and
@@ -276,13 +276,13 @@ Examples:
 \item The \verb"display" command (from ImageMagick) can show any image into your
 presentation using:\\
 \verb|\adviembed[width=3cm,height=3.3cm]|\\
-\verb|          {display -geometry !g! -window !p logo.gif}|\\
-\adviembed[ephemeral=advilogo,width=3cm, height=3.3260869cm]{display -geometry !g! -window !p advilogo.gif}
+\verb|          {display -geometry @g! -window @p logo.gif}|\\
+\adviembed[ephemeral=advilogo,width=3cm, height=3.3260869cm]{display -geometry @g! -window @p advilogo.gif}
 
 \item Similarly, \verb|animate| can display animations with:\\
         \verb|\adviembed[width=2cm,height=2cm]|\\
-        \verb|          {animate -geometry !g! -window !p anim.gif}|\\
-        \adviembed[ephemeral=animate,width=2cm,height=2cm]{animate -geometry !g! -window !p mmm.anim.gif}
+        \verb|          {animate -geometry @g! -window @p anim.gif}|\\
+        \adviembed[ephemeral=animate,width=2cm,height=2cm]{animate -geometry @g! -window @p mmm.anim.gif}
 \end{itemize}
 
 \newpage
@@ -291,16 +291,16 @@ presentation using:\\
 
 \begin{itemize}
   \item Any application which supports embedding options can be launched, as\\
-   \verb+\adviembed[width=w,height=h]{prog -geometry !g -use !p}+\\
+   \verb+\adviembed[width=w,height=h]{prog -geometry @g -use @p}+\\
    For instance, using wish:\\
    \verb|\adviembed[persistent,width=5cm,height=1cm]|\\
-   \verb|          {wish ./watch -geometry !g -use !p}|\\
-   \adviembed[persistent=wish,width=5cm,height=0.71cm]{wish ./watch -geometry !g -use !p}
+   \verb|          {wish ./watch -geometry @g -use @p}|\\
+   \adviembed[persistent=wish,width=5cm,height=0.71cm]{wish ./watch -geometry @g -use @p}
 \adviwait
   \item Possibly interactive ! (We use CamlTk here)\\
    \verb|\adviembed[persistent=taquin,width=6.5cm,height=9.5cm]|\\
-   \verb|          {./taquin -geometry !g -use !p dojoji.gif}|\\
-  \adviembed[persistent=taquin,width=8.5cm,height=10cm]{./taquin.sh -geometry !g -use !p dojoji.gif}
+   \verb|          {./taquin -geometry @g -use @p dojoji.gif}|\\
+  \adviembed[persistent=taquin,width=8.5cm,height=10cm]{./taquin.sh -geometry @g -use @p dojoji.gif}
 
 \end{itemize}
 
@@ -323,15 +323,15 @@ will not follow (they may even desappear {\em below} the
 \begin{itemize}
  \item Xeyes using the macro command \verb|embed|:\\
    \verb|\adviembed[width=2cm,height=2cm]|\\
-   \verb|    {xeyes -bw 0 -shape -geometry !g}|\\
-   \adviembed[width=2cm,height=2cm]{xeyes -bw 0 -shape -geometry !g}
+   \verb|    {xeyes -bw 0 -shape -geometry @g}|\\
+   \adviembed[width=2cm,height=2cm]{xeyes -bw 0 -shape -geometry @g}
 
  \item An Xterm running an interesting application:\\
    \verb|\adviembed[width=10cm,height=4cm]|\\
-   \verb|    {xterm -geometry 50x7+!x+!y -e ocaml}|\\
+   \verb|    {xterm -geometry 50x7+@x+@y -e ocaml}|\\
 % Ne marche pas car la géometrie de xterm est en caractères non en points
-%   \adviembed[width=10cm,height=4cm]{xterm -geometry !g -e ocaml}
-   \adviembed[width=0.1\textwidth,height=0.02\textheight]{xterm -geometry !g -e ocaml}
+%   \adviembed[width=10cm,height=4cm]{xterm -geometry @g -e ocaml}
+   \adviembed[width=0.1\textwidth,height=0.02\textheight]{xterm -geometry @g -e ocaml}
 \end{itemize}
 
 \newpage
@@ -370,10 +370,10 @@ command during your presentations.
 \begin{center}
 {\large\bf I have four words for you!}\\[3mm]
 
-%\adviembed[width=10.62cm,height=7.92cm]{xanim +W!p +Sx!w +Sy!h +Zpe -Zr dancemonkeyboy.avi}
-%\adviembed[width=10.62cm,height=7.92cm]{plaympeg -s x!wx!h dancemonkeyboy.mpg}
-\adviembed[width=15.93cm,height=12.88cm]{mtvp -z -G=!wx!h -W!p dancemonkeyboy.mpg}
-%\adviembed[width=15.93cm,height=12.88cm]{mplayer -geometry !wx!h dancemonkeyboy.mpg}
+%\adviembed[width=10.62cm,height=7.92cm]{xanim +W@p +Sx@w +Sy@h +Zpe -Zr dancemonkeyboy.avi}
+%\adviembed[width=10.62cm,height=7.92cm]{plaympeg -s x@wx@h dancemonkeyboy.mpg}
+%\adviembed[width=15.93cm,height=12.88cm]{mtvp -z -G=@wx@h -W@p dancemonkeyboy.mpg}
+\adviembed[width=15.93cm,height=12.88cm]{mplayer -geometry @wx@h dancemonkeyboy.mpg}
 \end{center}
 
 \newpage
