@@ -55,14 +55,13 @@ type rectangle_gradient_mode =
   scale w w c c' = c'          (2)
   scale i w c c' = a * i + b   (3) for some real a and b.
 
-  We have b = c (due to (1))
-  and     c' = a * w + c (due to (2))
-  hence   a = (c' - c) / w
+  We have  b = c               (due to (1))
+  and      c'= a * w + c       (due to (2))
+  hence    a = (c' - c) / w
 
-  Finally:
+  Finally, we get:
 
   scale i w c c' = (c' * i + c * (w - i)) / w
-
 *)
 let scale i w c c' =
   if w = 0 then c else
@@ -113,8 +112,7 @@ let grad_arc gm x y rx ry a1 a2 =
       let rx = scale_rx i
       and ry = scale_ry i in
       draw_arc x y rx ry a1 a2;
-    done;
-;;
+    done;;
 
 (* Filling circles with gradients of colors. *)
 let grad_circle gm xc yc r = grad_arc gm xc yc r r 0 360;;
