@@ -21,8 +21,16 @@ include Makefile.config
 
 YEAR=2004
 OLDYEAR=2003
-VERSION=1.6
+PACKAGE=advi
+MAINVERSION=1
+SUBVERSION=6
+PATCHLEVEL=0
+VERSION=$(MAINVERSION).$(SUBVERSION)
 OLDVERSION=1.5
+
+CVSRELEASETAG=$(PACKAGE)-
+ANNOUNCEFILE=Announce-$(VERSION).$(PATCHLEVEL)
+
 PACKAGEVERSIONFILE=config.ml
 DOCVERSIONFILES=tex/advi.sty tex/advi.hva \
 doc_src/Includes/advi-version.html doc_src/Includes/env \
@@ -199,7 +207,7 @@ Makefile.config: Makefile.config.in
 		| sed -e 's|$(CAMLDIR)/[^ ]*||' >> .depend
 	chmod a+w .depend
 
-# just for the authors
+# Just for the authors
 ADVI=advi-$(VERSION)
 WEBSITEDIR=/net/pauillac/infosystems/www/advi
 FTPSITEDIR=/net/pauillac/infosystems/ftp/cristal/advi
@@ -264,6 +272,13 @@ web_site:
 
 clean_release:
 	rm -rf release
+
+release:
+	cvs rtag -R $(CVSRELEASETAG) bazar-ocaml/$(PACKAGE)
+
+announce:
+	mail -n -s "New release of $(PACKAGE)" \
+		caml-announce@inria.fr < $(ANNOUNCEFILE)
 
 rpm:
 	if test -d /usr/src/redhat; then rpmdir=/usr/src/redhat; \
