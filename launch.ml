@@ -44,7 +44,16 @@ type policy =
 
 let policy = ref Ask;;
 
+(* Normal policy assignment. *)
 let set_policy = function
+  | Safer -> policy := Safer
+  | Exec -> policy := Exec
+  | Ask -> policy := Ask
+;;
+
+(* Cautious policy assignment: -exec does not override -safer,
+   and ask can override -safer. *)
+let cautious_set_policy = function
   | Safer -> policy := Safer
   | Exec ->
      if !policy = Ask then policy := Exec
