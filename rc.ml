@@ -39,9 +39,8 @@ let current = Arg.current;;
 let usage = Arg.usage;;
 type spec = Arg.spec;;
 
-let parse_argv argv speclist anonfun errmsg =
+let parse_args progname argv speclist anonfun errmsg =
   let l = Array.length argv in
-  let progname = if !current < l then argv.(!current) else "(?)" in
   let stop error =
     begin match error with
       | Unknown "-help" -> ()
@@ -105,6 +104,11 @@ let parse_argv argv speclist anonfun errmsg =
     end;
   done;
 ;;
+
+let parse_argv argv =
+   let progname =
+    if !current < Array.length argv then argv.(!current) else "(?)" in
+   parse_args progname argv;;
 
 (* Implementation of rcfile input *)
 exception Lexical_error of string;;
@@ -182,26 +186,27 @@ let argv_of_string s =
   print_int (List.length l);
   print_newline ();
   List.iter (fun s -> print_string s; print_newline ()) l;
- Array.of_list (lex s);;
+  Array.of_list (lex s);;
 
-let argv_of_file fname =
-  argv_of_string (String.concat " " [fname; string_of_file fname]);;
+let argv_of_file fname = argv_of_string (string_of_file fname);;
 
-let parse_string s =
- current := 0;
- parse_argv (argv_of_string s);;
+let parse_argv_push_current progname argv speclist anonfun errmsg =
+ let curr = !current in
+ try
+   current := 0;
+   parse_args progname argv speclist anonfun errmsg;
+   current := curr
+ with x -> current := curr; raise x;;
 
-let parse_file fname =
- current := 0;
- parse_argv (argv_of_file fname);;
+let parse_string s = parse_argv_push_current s (argv_of_string s);;
+
+let parse_file fname = parse_argv_push_current fname (argv_of_file fname);;
 
 let cautious_parse_file fname speclist anonfun errmsg =
  try parse_file fname speclist anonfun errmsg with
  | Failure s
  | Lexical_error s
  | Sys_error s -> Misc.warning (Printf.sprintf "While loading %s" s);;
-
-let parse_args x = current := 0; Arg.parse x;;
 
 (*
 Example:
