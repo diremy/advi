@@ -220,8 +220,8 @@ let create_secteurs clock times =
         (
          let angle_sup_pre = (-. t /. !base_major) *. angle_base in
          let angle_sup = if !reverse then -. angle_sup_pre else angle_sup_pre in
-         Printf.printf "overtime inf=%f sup%f new_acc=%f"
-                       angle_inf angle_sup new_acc;  print_newline ();
+         (*Printf.printf "overtime inf=%f sup%f new_acc=%f"
+                       angle_inf angle_sup new_acc;  print_newline ();*)
          let arc =
            Canvas.create_arc clock.widget (Pixels 0) (Pixels 0)
              (Pixels d) (Pixels d)
