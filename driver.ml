@@ -413,7 +413,7 @@ let parse_blend s =
   | "difference" -> Dev.Difference
   | "exclusion" -> Dev.Exclusion
   | _ ->
-      Misc.warning "blend: invalid blend mode";
+      Misc.warning ("blend: invalid blend mode " ^ s);
       Dev.Normal;;
 
 let blend_special st s =
@@ -580,22 +580,26 @@ let parse_transition dir mode record =
     try
       List.assoc "genpath" record
     with _ ->
-      warning ("special: trans push: genpath function not found "); "spiral"
+      warning "special: trans push: genpath function not found";
+      "spiral"
   in
   let parse_pathelem s =
     try
-      (float_of_string (List.assoc (s^"x") record),
-       float_of_string (List.assoc (s^"y") record),1.0,0.0)
+      (parse_float (List.assoc (s ^ "x") record),
+       parse_float (List.assoc (s ^ "y") record),
+       1.0,
+       0.0)
     with _ ->
-      warning ("special: trans push: pathelem "^s^" not found "); (0.0,0.0,1.0,0.0)
+      warning ("special: trans push: pathelem " ^ s ^ " not found ");
+      (0.0, 0.0, 1.0, 0.0)
   in
   let parse_steps =
     try
       let stepsstr = List.assoc "steps" record in
       try Some (int_of_string stepsstr)
       with _ ->
-        warning ("special: trans push: steps parse failed: \"" ^ 
-                   stepsstr ^ "\"");
+        warning
+          ("special: trans push: steps parse failed: \"" ^ stepsstr ^ "\"");
         None
     with Not_found -> None
   in
@@ -617,15 +621,21 @@ let parse_transition dir mode record =
     with _ -> default (* Transitions.DirNone *)
   in
   match String.lowercase mode with
-  | "slide" -> Transitions.TransSlide (parse_steps,
-                           parse_direction "from" default_dir)
-  | "wipe" -> Transitions.TransWipe (parse_steps,
-                           parse_direction "from" default_dir)
-  | "block" -> Transitions.TransBlock (parse_steps,
-                           parse_direction "from" Transitions.DirNone)
-  | "path" -> Transitions.TransPath (parse_steps,
-	                   parse_genpath record, parse_pathelem "start", parse_pathelem "stop")
-  | "none" ->  Transitions.TransNone
+  | "slide" ->
+      Transitions.TransSlide (parse_steps, parse_direction "from" default_dir)
+  | "wipe" ->
+      Transitions.TransWipe (parse_steps, parse_direction "from" default_dir)
+  | "block" ->
+      Transitions.TransBlock
+        (parse_steps, parse_direction "from" Transitions.DirNone)
+  | "path" ->
+      Transitions.TransPath
+        (parse_steps,
+         parse_genpath record,
+         parse_pathelem "start",
+         parse_pathelem "stop")
+  | "none" ->
+      Transitions.TransNone
   | _ ->
      warning ("special: trans push: mode parse failed \"" ^ mode ^ "\"");
      Transitions.TransNone;;
@@ -712,8 +722,6 @@ let proc_special st s =
               } in
             current_recording_proc := recording :: !current_recording_proc;
           end;
-
-
     | "end" ->
         if !playing = 0 then
           begin match !current_recording_proc with
@@ -737,7 +745,6 @@ let proc_special st s =
                right above *) 
             (); 
         end;
-
     | _ -> ill_formed_special s
   with
   | Not_found ->
@@ -987,8 +994,8 @@ let tpic_specials st s =
        end
      else
        begin
-         st.h <- st.h + int_of_float (float (x) /. st.conv);
-         st.v <- st.v + int_of_float (float (y) /. st.conv);
+         st.h <- st.h + int_of_float (float x /. st.conv);
+         st.v <- st.v + int_of_float (float y /. st.conv);
        end;;
 
 let ps_special st s =
@@ -1240,8 +1247,8 @@ let render_step cdvi num ?trans dpi xorig yorig =
     } in
   if st.status.Dvi.hasps then
     newpage [] st  (mag *. dpi) xorig yorig;
-  setup_bkgd st.status; (* RDC apply the background preferences in Dev *)
-  Dev.clear_dev ();      (* and redraw the background                   *)
+  setup_bkgd st.status; (* apply the background preferences in Dev *)
+  Dev.clear_dev ();     (* and redraw the background               *)
   Dev.set_color st.color;
   Dev.set_transition st.transition;
   st.checkpoint <- 0;
