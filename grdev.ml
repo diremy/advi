@@ -800,7 +800,7 @@ type event =
   | Advi of string * (unit -> unit)
 ;;
 
-type option_event = Event of event | Mouse of status
+type option_event = Final of event | Raw of status
         
 let all_events = [
   Graphics.Button_down ;
@@ -816,6 +816,7 @@ let button_up_motion = [
 
 let event = ref [];;
 let push_back_event ev =
+  if List.length !event > 1 then Misc.warning "STACK";
   event :=  ev :: !event;;
 let event_waiting() =
   match !event with [] -> false | _ -> true;;
@@ -880,9 +881,9 @@ let rec draw_rectangle x y dx dy =
 
 let rec wait_signal_event events =
     match resized(), !usr1_status, event_waiting() with
-    | Some (x,y), _,_ -> Event (Resized (x,y))
-    | _, true, _ -> clear_usr1(); Event (Refreshed)
-    | _, _, true -> Mouse (pop_event())
+    | Some (x,y), _,_ -> Final (Resized (x,y))
+    | _, true, _ -> clear_usr1(); Final (Refreshed)
+    | _, _, true -> Raw (pop_event())
     | _, _, _ -> 
         try 
           waiting := true;
@@ -891,13 +892,13 @@ let rec wait_signal_event events =
           match resized () with
           | Some (x,y) ->
               push_back_event ev;
-              Event (Resized (x,y))
+              Final (Resized (x,y))
           | None ->
-              Mouse ev
+              Raw ev
         with
         | Usr1 ->
             waiting := false;
-            Event Refreshed
+            Final Refreshed
         | exn -> 
             waiting := false;
             raise exn
@@ -910,11 +911,11 @@ let wait_button_up x y =
     let ev = wait_signal_event button_up_motion in
     restore_rectangle buf x y dx dy;
     match ev with
-    | Mouse e ->
+    | Raw e ->
         let dx' = e.Graphics.mouse_x - x in 
         let dy' = e.Graphics.mouse_y - y in 
         if e.Graphics.button then select dx' dy'
-        else Event (Region (x, y, dx', 0 - dy'))
+        else Final (Region (x, y, dx', 0 - dy'))
     | x -> x
   in
   set_color Graphics.black;
@@ -927,13 +928,14 @@ let wait_button_up x y =
 let wait_event () =
   let rec event emph =
     
-    let send ev = H.deemphasize true emph; ev in
+    let send ev =
+      H.deemphasize true emph; ev in
     let rescan() = H.deemphasize true emph; event H.Nil in
-    
     match wait_signal_event all_events with
-    | Mouse ev ->
+    | Raw ev ->
         begin
-          if ev.Graphics.keypressed then Key ev.Graphics.key
+          if ev.Graphics.keypressed then
+            send (Key ev.Graphics.key)
           else
             let ev' = 
               { mouse_x = ev.Graphics.mouse_x ;
@@ -964,16 +966,16 @@ let wait_event () =
               end with Not_found ->
                 if ev'.button then
                   match wait_button_up ev.mouse_x ev.mouse_y with
-                  | Event (Region _ as e) -> send e
-                  | Event e ->
+                  | Final (Region _ as e) -> send e
+                  | Final e ->
                       push_back_event ev; 
                       send e
-                  | Mouse _ -> rescan()
+                  | Raw _ -> rescan()
                 else
                   rescan()
             end
         end
-    | Event e -> send e in
+    | Final e -> send e in
   event H.Nil
     ;;
 

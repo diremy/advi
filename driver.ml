@@ -845,7 +845,8 @@ module Make(Dev : DEVICE) = struct
                 end
           | PS false | Scanning true -> ()
           | Unknown | Scanning false -> 
-              if has_prefix "\" " s then st.status <- Scanning true
+              (* if has_prefix "\" " s then *)
+              st.status <- Scanning true
         end
 
     let header_special st s = 
@@ -966,15 +967,17 @@ module Make(Dev : DEVICE) = struct
           
   let eval_command st c =
     if scanning st then scan_command st c else
-    match !current_recording_proc_unit with
-    | None -> eval_command st c
-    | Some u ->	
-	begin match c with
-	(* The advi: proc specials are not recorded *)  
-	| Dvi.C_xxx s when has_prefix "advi: proc=" s -> ()
-        |  _ -> u.escaped_commands <- u.escaped_commands @ [c]
-	end;
-	eval_command st c
+      begin
+        begin match !current_recording_proc_unit with
+        | None -> ()
+        | Some u ->	
+	    match c with
+   	    (* The advi: proc specials are not recorded *)  
+	    | Dvi.C_xxx s when has_prefix "advi: proc=" s -> ()
+            |  _ -> u.escaped_commands <- u.escaped_commands @ [c]
+        end;
+        eval_command st c
+      end
 
   let _ = eval_command_ref := eval_command
 
@@ -1020,8 +1023,12 @@ module Make(Dev : DEVICE) = struct
         if not !Misc.dops then PS false
         else 
           begin match page.Dvi.status with
-          | Dvi.Unknown -> Unknown
-          | Dvi.PS b -> PS b
+          | Dvi.Unknown ->
+              prerr_endline "Unknown";
+              Unknown
+          | Dvi.PS b ->
+              prerr_endline ("PS "^(if b then "true" else "false"));
+              PS b
           end;
         headers = [];
         html = None;
@@ -1100,9 +1107,19 @@ module Make(Dev : DEVICE) = struct
         if not !Misc.dops then PS false
         else 
           begin match page.Dvi.status with
+          | Dvi.Unknown ->
+              prerr_endline "Unknown";
+              Scanning false
+          | Dvi.PS b ->
+              prerr_endline ("PS "^(if b then "true" else "false"));
+              PS b
+          end;
+(*
+          begin match page.Dvi.status with
           | Dvi.Unknown -> Scanning false
           | Dvi.PS b -> PS b
           end;
+*)
         headers = [];
         html = None;
         draw_html = [];

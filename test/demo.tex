@@ -280,11 +280,12 @@ also works.
 \subsubsection* {Unfortunately, some PS-tricks do not work, yet}
 \begin{itemize}
 \item[-]
-Labels over arrows.
+Labels over arrows \verb"\Aput", \verb"Bput", etc.
+(they change the Postscript coordinates...)
 
 \item[-]
 {\tt pspicture}
-(But drawings not embedded in pspictures works)
+(idem, but drawings that are not embedded in pspictures works)
 
 \item[-]
 Advi only recognizer binary overlays (display if 0, hide otherwise). 
@@ -292,10 +293,6 @@ This is sufficient for the proper documentclass
 (see \hyperlink {overlays}{below}).
 
 \end {itemize}
-Examples: 
-
-\Rnode {A}{A} \qquad \Rnode {B}{B}
-\ncline{->}{A}{B} \Aput{L}
 
 \newpage
 

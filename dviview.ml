@@ -568,9 +568,14 @@ module Make(Dev : DEVICE) = struct
             s
       | _ -> [] in
     clear stack
+
+  let reload_time st =
+      try let s = Unix.stat st.filename in s.Unix.st_mtime
+      with _ -> st.last_modified
       
   let reload st =
     try
+      st.last_modified <- reload_time st;
       let dvi = Dvi.load st.filename in
       let cdvi = Drv.cook_dvi dvi in
       let dvi_res = 72.27
@@ -597,14 +602,7 @@ module Make(Dev : DEVICE) = struct
       assert (Misc.debug (Printexc.to_string x));      
       None
         
-  let reload_if_changed st =
-    try
-      let s = Unix.stat st.filename in
-      if s.Unix.st_mtime > st.last_modified then begin
-        st.last_modified <- s.Unix.st_mtime ;
-        reload st
-      end else None
-    with _ -> None
+  let changed st = reload_time st > st.last_modified
         
   let goto_page st cont n = (* go to the begining of the page *) 
     let new_page_no = max 0 (min n (st.num_pages - 1)) in
@@ -708,16 +706,11 @@ module Make(Dev : DEVICE) = struct
     cont := redraw st ;
     let num = ref 0 in
     try while true do
-      let ev = Dev.wait_event () in
-      if ev = Dev.Refreshed then cont := reload st
-      else
-        begin match reload_if_changed st with
-        |	Some f -> cont := Some f
-        |	None -> () 
-        end;
+      let ev = if changed st then Dev.Refreshed else Dev.wait_event() in
       let num_val = !num in
-      begin match ev with
-        
+      match ev with
+      | Dev.Refreshed -> 
+          cont := reload st
       | Dev.Resized (x,y) -> 
           cont := resize st x y
       | Dev.Key ' ' -> 
@@ -787,8 +780,6 @@ module Make(Dev : DEVICE) = struct
           st.orig_x <- st.orig_x + w ;
           st.orig_y <- st.orig_y + h ; 
           cont := redraw st
-      | Dev.Refreshed -> ()
-      end
     done with Exit -> Dev.close_dev ()
         
 end ;;
