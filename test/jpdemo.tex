@@ -6,7 +6,8 @@
 
 \usepackage{pst-all}
 
-\usepackage[annot]{../tex/advi}
+\usepackage{advi}
+\usepackage{advi-annot}
 
 \usepackage{hyperref}
 
@@ -33,7 +34,7 @@
 \def\advifooter{\vbox to 0em{\vbox to \vsize {\vfill
 ²¡¤»: \underline{n}:¼¡ÊÇ \underline{p}:Á°ÊÇ
 \underline{\textvisiblespace} ¼¡Ää»ß%
-\hfill{\embedsticky{advianim}{1.56cm}{1.824cm}{animate -geometry !g! -window !p advilogo.anim.gif}}
+\hfill{\adviembed[mode=sticky,name=advianim]{1.56cm}{1.824cm}{animate -geometry !g! -window !p advilogo.anim.gif}}
 } \vss}}
 
 \def\adviheader{\noindent
