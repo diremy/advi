@@ -489,15 +489,6 @@ let redraw ?trans ?chst st =
   Misc.debug_stop "Page has been drawn\n";
 ;;
 
-let without_pauses f x =
-  let p = !pauses in
-  try
-    pauses := false;
-    let v = f x in
-    pauses := p;
-    v
-  with x -> pauses := p; raise x;;
-
 let thumbnail_limit = ref 5;;
 let _ =
   Options.add
@@ -559,7 +550,7 @@ let make_thumbnails st =
 	      Dvi.bkgd_prefs = 
               {s.Dvi.bkgd_prefs with
 	       Grdev.bgviewport = Some (dx,dy,0,size_y -dy)}} in
-           without_pauses (redraw ?chst:(Some chgvp)) 
+           redraw ?chst:(Some chgvp)
              { ist with page_number = p};
            begin try Grdev.continue() with
              Grdev.Stop -> 
