@@ -17,7 +17,7 @@
 
 (* $Id$ *)
 
-(* Embedding applications (in particular tcl/tk) *)
+(* Embedding applications (in particular tcl/tk) applications. *)
 
 type app_mode = | Fake | Raw | Sticky | Persistent | Ephemeral;;
 
@@ -93,7 +93,7 @@ let raw_embed_app command app_mode app_name width height x gry =
   Hashtbl.add app_table pid (app_mode, app_name, wid)
  end;;
 
-(* In hash table t, returns the first element that verifies p. *)
+(* In hash table t, returns the first element that verifies predicate p. *)
 let hashtbl_find t p =
   let res = ref None in
   try
@@ -104,6 +104,7 @@ let hashtbl_find t p =
    | None -> raise Not_found
    | Some k_x -> k_x;;
 
+(* In hash table t, returns all elements that verify predicate p. *)
 let hashtbl_find_all t p =
   let res = ref [] in
   try
@@ -160,7 +161,7 @@ let hashtbl_exists t f =
   try Hashtbl.iter (fun _ x -> if f x then raise Exit) app_table; false
   with Exit -> true;;
 
-(* embedded apps must be displayed when synced *)
+(* embedded apps must be displayed when synced. *)
 let embed_app command app_mode app_name width height x gry =
   let already_launched app_name =
     hashtbl_exists app_table (fun (ty, name, wid) -> name = app_name) in
@@ -269,8 +270,7 @@ let kill_embedded_app sig_val app_name =
      sig_val app_name); *)
   try
     let pid, (app_mode, app_name, wid) = find_embedded_app app_name in
-    signal_app app_mode sig_val pid wid
-  with
+    signal_app app_mode sig_val pid wid with
   | Not_found ->
       Misc.warning (Printf.sprintf "application %s is not running" app_name)
 ;;
