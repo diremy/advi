@@ -449,9 +449,10 @@ let input_dvi ch =
 	  { counters = counters ;
 	    commands = commands ;
             status = Unknown;
-            text =  Grdev.Symbol.commands_to_ascii font_map (parse_commands commands);
+            text =
+              Grdev.Symbol.commands_to_ascii font_map (parse_commands commands);
           } in
-prerr_endline page.text;
+        Misc.debug_endline page.text;
 	stack := page :: !stack ;
 	lim := !pos ;
 	pos := p
