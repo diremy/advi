@@ -1,6 +1,6 @@
 TEXINPUTS := ../lib:../../tex:../../lib:$(TEXINPUTS)
 ADVI=../../advi.opt
-LATEX=TEXINPITS=$(TEXINPUTS) latex 
+LATEX=TEXINPUTS=$(TEXINPUTS) latex 
 
 show: join.dvi
 	$(ADVI) join.dvi
