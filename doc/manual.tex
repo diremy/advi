@@ -67,7 +67,9 @@ Pierre~Weis with also contributions by  Roberto~Di~Cosmo, Didier~Le~Botlan,
 Xavier~Leroy, and Alan~Schmitt.
 
 \clearpage
+\advitoc
 \tableofcontents
+\endadvitoc
 \clearpage
 
 
@@ -199,6 +201,50 @@ with both internal and cross-file references. For cross-file
 references, it launches a new \verb"advi" process. 
 
 
+{\ActiveDVI} improves the treatment of hyperrefs over convential previewers,
+by emphasizing the hypertarget text of an hyperlink. Thus, an hypertarget
+definition \docdef\hypertarget \docarg{tag}\docarg{text}
+will allow the command an activation of the link \docid{tag}
+not only move to the page where \docid{text} occurs, but also emphasize
+\docid{text}. 
+
+(If you are viewing this document with \hypertarget{a}{\ActiveDVI}, you may
+move click \hyperlink{a}{here} to see.) 
+
+\subsection {Floating table of content and thumbnails}
+
+There are two ways to include a floating table of content while previewing. 
+\begin {itemize}
+
+\item
+{\ActiveDVI} recognizes the reserved hypertargets \doctt{/toc.first}
+and \doctt{/toc.last} as markers for the first and last page of the table
+of contents, which will become floating pages, {\em i.e.} accessible from
+anywhere in the document with the default keybinding \verb't'.
+The first stroke on \verb't' will show the first page of the table of
+content. Successive stokes will show the following pages. Prefix argument 
+may also be used to directly access second of third pages. 
+
+The package \softlink{advi}{{\tt advi}} below redefines
+{\docdef \tableofcontents} so that it automatically inserts the above
+markers around the table of content. It also provides two macros, {\docdef
+\advitoc} and \docdef \endadvitoc, that can be used to insert these markers
+explicitly when the table of context is hand-made.
+
+\item
+If no table of content markers are found, then {\ActiveDVI} will
+compute thumbnails, {\em i.e.} will present pack several pages at a smaller 
+scale on a single page. The default scale of 5 will fit 25 thumbnails on a
+single page. This can be changed with the option \doctt{-thumbnail\_scale}. 
+
+By default, thumbnails are made for all pages. However, thumbnail pages can
+be defined explicitly with an hypertarget whose anchor is of the form
+\doctt{/page.\docid{suffix}}. In this case, all thumbnail must be explicitly
+given.
+
+\end {itemize}
+
+
 \subsection {Moving around}
 
 See the key bindings in the appendix.
@@ -224,12 +270,13 @@ files, or by implementing extension to the previewer itself.
 % at \verb"advi@pauillac.inria.fr".
 
 
-\section {The {\tt advi.sty} \LaTeX~package}
+\section {The \softtarget{advi}{{\tt advi.sty}} \LaTeX~package}
+
 
 {\ActiveDVI} provides some {\LaTeX} packages to facilitate animations and
 interaction with the presenter from within your {\LaTeX} source text.
 
-The {\tt advi} package is the main package to include when writing
+The  advi package is the main package to include when writing
 a presentation for {\ActiveDVI}. It provides the main set of interactive
 commands for {\ActiveDVI} to animate the show. However, there is no
 need to load the package if no {\ActiveDVI} special effects are
@@ -467,12 +514,6 @@ the definition is global and will affect the following pages,
 as well as the current page.
 
 By default, the transition affects only the current page.
-
-\subsection {Hyperref}
-
-{\ActiveDVI} supports the \doctt{hyperref} {\LaTeX} package. 
-
-Explain \verb"<a name>XXX</a>"
 
 \subsection {Embedded applications}
 

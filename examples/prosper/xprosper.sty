@@ -58,6 +58,13 @@
 \def \ppp@error #1{\PackageError {xprosper}{#1}{Type <RETURN> to proceed.}}
 
 %% Redefinition of the slide environment
+\def \at@endslide
+  {\ifnum \value{overlaysCount}=0\at@endlastoverlay\else
+   \ifnum \value{overlaysCount}=\value{pause}\at@endlastoverlay\fi \fi}
+\def \AtEndSlide {\g@addto@macro {\at@endslide}}
+\def \at@endlastoverlay {}
+\def \AtEndLastOverlay {\g@addto@macro {\at@endlastoverlay}}
+
 \newcounter{trueSlideCounter}
 \def\thetrueslideCounter{\arabic{trueSlideCounter}}
 \let\slide@seminar=\slide
@@ -71,9 +78,11 @@
   \slide@seminar
         \@DefMyItem
         }{%
+      \at@endslide
       \endslide@seminar}
 % Slides in overlays
 \global\pslongbox{posit@Box}{\rput}%
+
 
 \newenvironment{SlideOverlay}[1][\@defaultTransition]{%
   \let\overlay@loop=\relax
@@ -89,6 +98,7 @@
   %\vskip -0em
   }{%
   \vss
+  \at@endslide
   \egroup \egroup
   \endslide@seminar
   \ifDVItoPS

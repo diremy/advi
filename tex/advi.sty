@@ -458,6 +458,21 @@ end
 \@ifundefined {overlay}{}
    {\AtBeginDocument {\advi@overlay@patch}}
 
+%%% Patch for hyperrefs
+
+\AtBeginDocument {\@ifundefined {ifHy@nesting}{}{\Hy@nestingtrue}}
+
+
+%%% Thumbnails and Tocs
+
+\def\advi@html#1{\special {html:<a name="#1">}\special{html:</a>}}
+\def\advitoc {\advi@html {/toc.first}}
+\def\endadvitoc {\advi@html {/toc.last}}
+\newcommand {\advithumbnail}[1][\thepage]{\advi@html {/page.#1}}
+\@ifundefined {tableofcontents}{}
+  {\let \latex@tableofcontents \tableofcontents
+   \def \tableofcontents {\advitoc \latex@tableofcontents \endadvitoc}}
+
 %%% Edit: special for edition with WhizzyTeX
 
 \newdimen \advi@edit@unit
@@ -544,6 +559,8 @@ end
 
 \newcommand{\adviedit}[2][]{\advi@edit{\adviedit}{#2}}
 %\advi@export \adviedit \advi@edit
+
+
 
 %%% End
 

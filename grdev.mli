@@ -200,6 +200,7 @@ module H :
         }
 
       val add : anchor -> unit
+      val area : tag -> int -> int -> int -> int -> unit
       val flashlight : tag -> unit
 
     end;;

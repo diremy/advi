@@ -25,6 +25,7 @@ let ignore_background =
 type color = Graphics.color;;
 let href_frame = 0x00ff00;;
 let advi_frame = 0xaaaaff;;
+let rect_emphasize = Graphics.blue;;
 let href_emphasize = 0xffff00;;
 let name_emphasize = 0xffaaaa;;
 let cut_emphasize = Graphics.cyan;;
@@ -681,6 +682,11 @@ module H =
 
     let add anchor = make_anchors anchor.tag anchor.draw
 
+    let area tag x y w h =
+      let anchor = { tag = tag; draw = [] } in
+      let a = { A.x = x; A.y = y; A.w = w; A.h = h; A.action = anchor} in
+      anchors := A.add a !anchors
+
     let find x y = A.find x y !anchors
 
     let find_tag t = A.find_action (fun x -> x.tag = t) !anchors
@@ -721,11 +727,12 @@ module H =
           GraphicsY11.display_mode false
       | Nil -> ()
 
-    let emphasize c act =
+    let emphasize fill c act =
       let ima = Graphics.get_image act.A.x act.A.y act.A.w act.A.h in
       Graphics.set_color c;
       GraphicsY11.display_mode true;
-      Graphics.fill_rect act.A.x act.A.y act.A.w act.A.h;
+      if fill then Graphics.fill_rect act.A.x act.A.y act.A.w act.A.h
+      else Graphics.draw_rect (act.A.x+1) (act.A.y+1) (act.A.w-2) (act.A.h-2);
       Graphics.set_color !color;
       push_bg_color c;
       List.iter (function x, y, g -> draw_glyph g x y) act.A.action.draw;
@@ -758,7 +765,7 @@ module H =
         match t with
         | Name n ->
             let t = Name (Misc.get_suffix "#" n) in
-            emphasize name_emphasize (find_tag t)
+            emphasize true name_emphasize (find_tag t)
         | _ -> Nil
       with
       | Not_found | Misc.Match -> Nil
@@ -767,7 +774,11 @@ module H =
       deemphasize false (light t)
 
     let emphasize_and_flash color act =
-      let emph = emphasize color act in
+      let fill, color = 
+        match act.A.action.tag with
+        | Href s when  has_prefix "#/page." s -> false, rect_emphasize
+        | _ -> true, color in
+      let emph = emphasize fill color act in
       let m =
         match act.A.action.tag with
         | Href n -> light (Name n)

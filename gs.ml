@@ -26,10 +26,12 @@ let pstricks =
     "-pstricks"
     "Show moveto";;
 
-let showps = ref false;;
+let showing_ps = ref false;;
+let showps s =
+  if !showing_ps then (print_string s; print_newline ());;
 
 Options.add
-  "--showps" (Arg.Set showps)
+  "--showps" (Arg.Set showing_ps)
   "\tPrint a copy of Postscript sent to gs to stdout";;
 
 let pspage = ref 0;;
@@ -262,7 +264,7 @@ class gs () =
       try
         output_string leftout l;
         output_char leftout '\n';
-        if !showps then print_endline l;
+        showps l;
       with x ->
         prerr_endline  (Printexc.to_string x);
         self # kill;
@@ -378,10 +380,9 @@ class gv =
       mag <- m;
       xorig <- x;
       yorig <- (gs # gr).height - y;
-      if !pspage > 0 then if !showps then print_endline "showpage";
+      if !pspage > 0 then showps "showpage";
       incr pspage;
-      if !showps then
-        print_endline (Printf.sprintf "%%%%Page: %d %d\n" !pspage !pspage);
+      showps (Printf.sprintf "%%%%Page: %d %d\n" !pspage !pspage);
       gs # line "\n%% Newpage\n";
       gs # line "grestore";
       if l' <> [] then gs # line "SI restore";
@@ -406,7 +407,7 @@ class gv =
           let gs = new gs () in
           if headers = [] then headers <-  texc_special_pro self;
           (* should take matrix as a parameter ? *)
-          if !showps then print_endline "%!PS-Adobe-2.0\n%%Creator: advi\n%!";
+          showps "%!PS-Adobe-2.0\n%%Creator: advi\n%!";
           gs # line "[1 0 0 -1 0 0] concat";
           List.iter (gs # load_header) headers;
           gs # line "/floatstring 20 string def";
@@ -439,7 +440,7 @@ class gv =
       sync <- false
 
     method kill =
-      if !showps then print_endline "showpage";
+      showps "showpage";
       match process with
       | None -> ()
       | Some gs ->

@@ -32,8 +32,8 @@ let starting_page npages =
 
 let start_html = ref None;;
 Options.add
-  "-html"
-  (Arg.String (fun s -> start_html := Some s))
+"-html"
+(Arg.String (fun s -> start_html := Some s))
   "STRING\tMake advi start at html reference of name STRING";;
 let debug_pages =
   Options.debug
@@ -106,6 +106,7 @@ type attr = {
 
 (*** The view state ***)
 type mode = Selection | Control;;
+type toc = Page of int | Thumbnails of (int * Graphics.image) array
 type state = {
     (* DVI attributes *)
     filename : string;
@@ -146,6 +147,8 @@ type state = {
     mutable mode : mode;
     (* Some of f when on a pause *)
     mutable cont : (unit -> bool) option;
+    mutable toc : toc array option;
+    synchronize : bool;
 };;
 
 let set_page_number st n =
@@ -226,6 +229,7 @@ let init_geometry all st =
     end;
   st.dvi_width <- width;
   st.dvi_height <- height;
+  st.toc <- None;
 ;;
 
 let init filename =
@@ -272,6 +276,8 @@ let init filename =
       mode = Control;
       num = 0;
       next_num = 0;
+      toc = None;
+      synchronize = true;
     } in
   init_geometry true st;
   attr.geom.Ageometry.width <- st.size_x;
@@ -288,6 +294,9 @@ let update_dvi_size all ?dx ?dy st =
   set_bbox st;;
 
 (* incremental drawing *)
+let synchronize st =
+  if st.synchronize then Grdev.synchronize()
+
 let goto_next_pause n st =
   let rec aux n st =
     if n > 0 then
@@ -313,7 +322,7 @@ let goto_next_pause n st =
       end
   in
   aux n st;
-  Grdev.synchronize();
+  synchronize st;
   Busy.set (if st.cont = None then Busy.Free else Busy.Pause);;
 
 let draw_bounding_box st =
@@ -421,7 +430,10 @@ let redraw ?trans st =
         try
           while
             try f () with
-            | Driver.Wait _ -> true
+            | Driver.Wait sec ->
+                if !current_pause = st.pause_number then
+                  ignore (Grdev.sleep sec);
+                true
             | Driver.Pause ->
                 if !current_pause = st.pause_number then raise Driver.Pause
                 else begin incr current_pause; true end
@@ -438,10 +450,124 @@ let redraw ?trans st =
     with
     | Grdev.Stop -> st.aborted <- true
   end;
-  Grdev.synchronize ();
+  synchronize st;
   Busy.set (if st.cont = None then Busy.Free else Busy.Pause);
-Misc.debug_stop "Page has been drawn\n";
+  Misc.debug_stop "Page has been drawn\n";
 ;;
+
+let without_pauses f x =
+  let p = !pauses in
+  try pauses := false; let v = f x in pauses := p; v
+  with x -> pauses := p; raise x
+
+let thumbnail_ratio = ref 5;;
+let _ =
+  Options.add
+    "-thumbnail_scale"
+    (Arg.Int (fun i -> thumbnail_ratio := i))
+    "INT\tSet the number of thumbname per line and column to INT";;
+
+let xrefs st =
+  if st.frozen then
+    begin
+      Driver.scan_special_pages st.cdvi max_int;
+      st.frozen <- false;
+    end;
+  st.dvi.Dvi.xrefs;;
+
+let make_thumbnails st  =
+  let xnails =
+    Hashtbl.fold
+      (fun x p all -> if Misc.has_prefix "/page." x then p :: all else all)
+      (xrefs st)
+      [] in
+  let page_nails =
+    if xnails = [] then Array.init st.num_pages (fun p -> p)
+    else
+      let ucons x l =
+        match l with
+          y :: _ when x = y -> l
+        | _ -> x :: l in
+      let rec unique = function
+          [] -> []
+        | x :: l -> ucons x (unique l) in 
+      Array.of_list (unique (List.sort compare xnails)) in
+  let r = !thumbnail_ratio in
+  let dx = st.size_x / r and dy = st.size_y / r in
+  let pages = st.num_pages -1 / r / r in
+  let ist =
+    { st with
+      (* size_x = dx; size_y = dy; *)
+      synchronize = false;
+      orig_x = st.orig_x / r; 
+      orig_y = st.orig_y / r; 
+      dvi_width = st.dvi_width / r;
+      base_dpi = st.base_dpi /. float r;
+      dvi_height = st.dvi_height / r;
+    } in
+  let all =
+    Array.map
+      (fun p ->
+        let p' = p mod (r * r) in
+        let x = st.size_x * (p' mod r) / r in
+        let y = st.size_y * (p' / r) / r in
+        without_pauses redraw
+          { ist with page_number = p;
+            orig_x = x + ist.orig_x;
+            orig_y = y + ist.orig_y;
+          };
+        p, Graphics.get_image x (st.size_y - y - dy) dx dy
+      )
+      page_nails in
+  let rolls = (Array.length all + r * r - 1) / r / r in
+  let split = 
+    Array.init rolls
+      (fun roll ->
+        let first = roll * r * r in
+        Thumbnails
+          (Array.sub all first (min (r * r) (Array.length all - first)))) in
+  st.toc <- Some split;
+;;
+
+let make_toc st =
+  try
+    let refs = xrefs st in
+    let first = Hashtbl.find refs "/toc.first" in
+    let last = Hashtbl.find refs "/toc.last" in
+    st.toc <- Some (Array.init (last - first + 1) (fun p -> Page (p+first)))
+  with
+    Not_found -> make_thumbnails st
+
+
+let show_toc st =
+  if st.toc = None then make_toc st;
+  Grdev.clear_dev();
+  Driver.clear_symbols();
+  match st.toc with
+    None -> ()
+  | Some rolls -> 
+      let r = !thumbnail_ratio in
+      let dx = st.size_x/r and dy = st.size_y/r in
+      let pages = st.page_number / r / r in
+      let n = Array.length rolls in
+      if st.num = n then redraw st
+      else
+        let roll = st.num mod n in
+        st.next_num <- succ st.num;
+        begin match rolls.(roll) with
+          Page p -> redraw { st with page_number = p }
+        | Thumbnails page -> 
+          Array.iteri (fun p' (p, img) -> 
+            let x = st.size_x * (p' mod r) / r in
+            let y = st.size_y * (p' / r) / r in
+            Graphics.draw_image img x (st.size_y - y -dy);
+            Grdev.H.area
+              (Grdev.H.Href ("#/page." ^ string_of_int (p+1))) x
+              (st.size_y - y - dy) dx dy) page;
+        end;
+      synchronize st;
+;;
+        
 
 let redisplay st =
   st.pause_number <- 0;
@@ -454,16 +580,12 @@ let goto_previous_pause n st =
   end;;
 
 let find_xref tag default st =
-  try Hashtbl.find st.dvi.Dvi.xrefs tag
-  with Not_found ->
-    if st.frozen then
-      begin
-        Driver.scan_special_pages st.cdvi max_int;
-        st.frozen <- false;
-        try Hashtbl.find st.dvi.Dvi.xrefs tag
-        with Not_found -> default
-      end
-    else default;;
+  try
+    let p = int_of_string (Misc.get_suffix "/page." tag) in
+    if p > 0 && p <= st.num_pages then p-1 else default
+  with Misc.Match -> 
+    try Hashtbl.find (xrefs st) tag
+    with Not_found -> default;;
 
 exception Link;;
 
@@ -543,6 +665,7 @@ let reload st =
     st.dvi <- dvi;
     st.cdvi <- cdvi;
     st.num_pages <- npages;
+    st.toc <- None;
     st.page_stack <- clear_page_stack npages st.page_stack;
     let npage = page_start (min st.page_number (st.num_pages - 1)) st in
     if npage <> st.page_number then
@@ -776,14 +899,14 @@ module B =
     let page_down st =
       let none () =
         if st.page_number < st.num_pages - 1 then begin
-            (* the following test is necessary because of some
-             * floating point rounding problem
-             *)
+          (* the following test is necessary because of some
+           * floating point rounding problem
+           *)
           if attr.geom.Ageometry.height <
             st.dvi_height + 2 * vmargin_size st then begin
-           st.orig_y <- top_of_page st;
-           set_bbox st;
-          end;
+              st.orig_y <- top_of_page st;
+              set_bbox st;
+            end;
           goto_page (st.page_number + 1) st
         end in
       match move_within_margins_y st (10 - attr.geom.Ageometry.height) with
@@ -800,10 +923,10 @@ module B =
       let none () =
         if st.page_number > 0 then begin
           if attr.geom.Ageometry.height <
-             st.dvi_height + 2 * vmargin_size st then begin
-            st.orig_y <- bottom_of_page st;
-            set_bbox st;
-          end;
+            st.dvi_height + 2 * vmargin_size st then begin
+              st.orig_y <- bottom_of_page st;
+              set_bbox st;
+            end;
           goto_page (st.page_number - 1) st
         end in
       match move_within_margins_y st (attr.geom.Ageometry.height - 10) with
@@ -849,15 +972,18 @@ module B =
              Config.splash_screen) in
       ()
 
-     let scratch st =
-       Scratch.draw ()
-     let scratch_write st =
-       Scratch.write ()
+    let scratch st =
+      Scratch.draw ()
+    let scratch_write st =
+      Scratch.write ()
 
-     let previous_slice  = previous_slice 
-     let next_slice = next_slice 
-     let mark_page  = mark_page
-     let goto_mark st = goto_mark st.num st
+    let previous_slice  = previous_slice 
+    let next_slice = next_slice 
+    let mark_page  = mark_page
+    let goto_mark st = goto_mark st.num st
+
+    let make_toc = make_toc
+    let show_toc = show_toc
   end;;
 
 let bindings = Array.create 256 B.nop;;
@@ -943,6 +1069,10 @@ let bind_keys () =
    (* Scratching. *)
    's', B.scratch_write;
    'S', B.scratch;
+
+   (* Thumbnails. *)
+   'T', B.make_toc;
+   't', B.show_toc;
   ];;
 
 bind_keys ();;
@@ -1017,3 +1147,4 @@ let main_loop filename =
         | _ -> ()
       done with Exit -> Grdev.close_dev ()
     end;;
+
