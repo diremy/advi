@@ -8,7 +8,7 @@
 (*  en Automatique.  All rights reserved.  This file is distributed    *)
 (*  under the terms of the GNU Lesser General Public License.          *)
 (*                                                                     *)
-(*  Jun Furuse, Didier Rémy and Pierre Weis.                           *)
+(*  Jun Furuse, Didier RñÎy and Pierre Weis.                           *)
 (*  Contributions by Roberto Di Cosmo, Didier Le Botlan,               *)
 (*  Xavier Leroy, and Alan Schmitt.                                    *)
 (*                                                                     *)
@@ -17,17 +17,41 @@
 
 (* $Id$ *)
 
-open Cdvi;;
+open Format ;;
+open Dvicommands;;
 
-exception Pause;;
-exception Wait of float
-type cooked_dvi;;
-val with_active : bool -> ('a -> 'b) -> 'a -> 'b;;
-val toggle_active : unit -> unit;;
-val cook_dvi : Cdvi.t -> cooked_dvi;;
-val render_step : cooked_dvi -> int -> ?trans:Transitions.direction -> 
-         ?chst:(known_status -> known_status) -> float -> int -> int -> (unit -> bool);;
-val unfreeze_fonts : cooked_dvi -> unit;;
-val unfreeze_glyphs : cooked_dvi -> float -> unit;;
-val scan_special_pages : cooked_dvi -> int -> unit;;
-val clear_symbols : unit -> unit;;
+type known_status = {
+   mutable hasps: bool;
+   mutable bkgd_local_prefs: Grdev.bgoption list;
+   mutable bkgd_prefs: Grdev.bkgd_prefs
+};;
+
+type status =
+   | Unknown
+   | Known of known_status
+
+type page = {
+    counters : int array;
+    commands : string;
+    mutable page_status : status;
+    mutable line : (int * string option) option;
+    text : string;
+  } ;;
+
+type t = {
+    preamble : preamble;
+    prelude : string;
+    pages : page array ;
+    postamble : postamble;
+    font_map : (int * font_def) list;
+    xrefs : (string, int) Hashtbl.t;
+  } ;;
+
+val cook_dvi : Dvi.t -> t;;
+
+val load : string -> t ;;
+val parse_string : string -> command list ;;
+val parse_page : page -> command list ;;
+val string_iter : (command -> unit) -> string -> unit ;;
+val page_iter : (command -> unit) -> page -> unit ;;
+val page_step : (command -> unit) -> page -> (unit -> bool);;

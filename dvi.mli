@@ -18,29 +18,15 @@
 open Format ;;
 open Dvicommands;;
 
-type known_status = {
-   mutable hasps: bool;
-   mutable bkgd_local_prefs: Grdev.bgoption list;
-   mutable bkgd_prefs: Grdev.bkgd_prefs
-};;
-
-type status =
-   | Unknown
-   | Known of known_status
-
 type page = {
     counters : int array ;
     commands : string;
-    mutable status : status;
-    mutable line : (int * string option) option;
-    text : string;
   } ;;
 
 type t = {
     preamble : preamble ;
     prelude : string ;
     pages : page array ;
-    xrefs : (string, int) Hashtbl.t;
     postamble : postamble ;
     font_map : (int * font_def) list
   } ;;
@@ -48,12 +34,22 @@ type t = {
 exception Error of string ;;
 
 val load : string -> t ;;
+  (** Load a dvi file and store all the command into the memory.
+      Parsing of dvi commands is not performed. Whole the command text
+      is splited into pages and stored as raw strings. *)
 val parse_string : string -> command list ;;
+  (** Parse a given dvi command string *)
 val parse_page : page -> command list ;;
+  (** Parse a dvi commands of a page *)
 val string_iter : (command -> unit) -> string -> unit ;;
+  (** Iteration over dvi commands obtained from a string by parsing *)
 val page_iter : (command -> unit) -> page -> unit ;;
+  (** Iteration over commands parsed from a dvi command string of a page *)
 val page_step : (command -> unit) -> page -> (unit -> bool);;
+  (** Make a stepping iterator over commands parsed from a dvi command 
+     string of a page, if the iterator returns false, the page ends. *)
 
+(* Printing dvi commands *)
 val fprint_preamble : formatter -> preamble -> unit ;;
 val fprint_postamble : formatter -> postamble -> unit ;;
 val fprint_font_def : formatter -> font_def -> unit ;;

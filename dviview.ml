@@ -8,7 +8,7 @@
 (*  en Automatique.  All rights reserved.  This file is distributed    *)
 (*  under the terms of the GNU Lesser General Public License.          *)
 (*                                                                     *)
-(*  Jun Furuse, Didier Rémy and Pierre Weis.                           *)
+(*  Jun Furuse, Didier R~y and Pierre Weis.                           *)
 (*  Contributions by Roberto Di Cosmo, Didier Le Botlan,               *)
 (*  Xavier Leroy, and Alan Schmitt.                                    *)
 (*                                                                     *)
@@ -16,6 +16,8 @@
 (***********************************************************************)
 
 (* $Id$ *)
+
+open Cdvi;;
 
 let pauses =
   Options.flag true "-nopauses"
@@ -172,7 +174,7 @@ and state = {
     (* DVI attributes *)
     filename : string;
     mutable duplex : duplex;
-    mutable dvi : Dvi.t;
+    mutable dvi : Cdvi.t;
     mutable cdvi : Driver.cooked_dvi;
     mutable num_pages : int;
     (* Page layout *)
@@ -285,9 +287,9 @@ let set_vmargin d = attr.vmargin <- normalize d;;
 let init_geometry all st =
   let dvi = st.dvi in
   let dvi_res = !dpi_resolution
-  and mag = float dvi.Dvi.preamble.Dvicommands.pre_mag /. 1000.0 in
-  let w_sp = dvi.Dvi.postamble.Dvicommands.post_width
-  and h_sp = dvi.Dvi.postamble.Dvicommands.post_height in
+  and mag = float dvi.preamble.Dvicommands.pre_mag /. 1000.0 in
+  let w_sp = dvi.postamble.Dvicommands.post_width
+  and h_sp = dvi.postamble.Dvicommands.post_height in
   let w_in = mag *. ldexp (float w_sp /. dvi_res) (-16)
   and h_in = mag *. ldexp (float h_sp /. dvi_res) (-16) in
 
@@ -338,7 +340,7 @@ let init_geometry all st =
 
 let init master filename =
   let dvi =
-    try Dvi.load filename
+    try Cdvi.load filename
     with
     | Sys_error _ -> raise (Error (Printf.sprintf "cannot open `%s'" filename))
     | Dvi.Error s -> raise (Error (Printf.sprintf "%s: (Dvi) %s" filename s))
@@ -353,9 +355,9 @@ let init master filename =
     try (Unix.stat filename).Unix.st_mtime
     with _ -> 0.0 in
   Gs.init_do_ps ();
-  let npages =  Array.length dvi.Dvi.pages in
+  let npages =  Array.length dvi.pages in
   let st =
-    let npages = Array.length dvi.Dvi.pages in
+    let npages = Array.length dvi.pages in
     { filename = filename;
       duplex = Alone;
       dvi = dvi;
@@ -631,7 +633,7 @@ let xrefs st =
       Driver.scan_special_pages st.cdvi max_int;
       st.frozen <- false;
     end;
-  st.dvi.Dvi.xrefs;;
+  st.dvi.xrefs;;
 
 let make_thumbnails st =
   let xnails =
@@ -674,9 +676,9 @@ let make_thumbnails st =
          (fun p ->
            let chgvp s =
              {s with
-              Dvi.bkgd_prefs =
-               {s.Dvi.bkgd_prefs with
-                Grdev.bgviewport =
+	      Cdvi.bkgd_prefs =
+               {s.bkgd_prefs with
+	        Grdev.bgviewport =
                   Some {
                    Grdev.vx = 0;
                    Grdev.vy = size_y - dy;
@@ -744,17 +746,17 @@ let rec reload foreground st =
   try
     Grdev.clear_usr1 ();
     st.last_modified <- reload_time st;
-    let dvi = Dvi.load st.filename in
+    let dvi = Cdvi.load st.filename in
     let cdvi = Driver.cook_dvi dvi in
     let dvi_res = !dpi_resolution
-    and mag = float dvi.Dvi.preamble.Dvicommands.pre_mag /. 1000.0 in
-    let w_sp = dvi.Dvi.postamble.Dvicommands.post_width
-    and h_sp = dvi.Dvi.postamble.Dvicommands.post_height in
+    and mag = float dvi.preamble.Dvicommands.pre_mag /. 1000.0 in
+    let w_sp = dvi.postamble.Dvicommands.post_width
+    and h_sp = dvi.postamble.Dvicommands.post_height in
     let w_in = mag *. ldexp (float w_sp /. dvi_res) (-16)
     and h_in = mag *. ldexp (float h_sp /. dvi_res) (-16) in
     let width = Misc.round (w_in *. st.base_dpi *. st.ratio)
     and height = Misc.round (h_in *. st.base_dpi *. st.ratio) in
-    let npages =  Array.length dvi.Dvi.pages in
+    let npages =  Array.length dvi.pages in
     st.dvi <- dvi;
     st.cdvi <- cdvi;
     st.num_pages <- npages;
@@ -952,14 +954,14 @@ let find_page_before_position (pos, file) st =
   let rec find p =
     if p < 0 then raise Not_found
     else
-      match st.dvi.Dvi.pages.(p).Dvi.line with
+      match st.dvi.pages.(p).line with
       | Some (pos', file') when pos' <= pos && file = file' -> p
       | _ -> find (pred p) in
   find (st.num_pages -1)
 
 let duplex_switch sync st =
   let find_sync_page master client =
-    match master.dvi.Dvi.pages.(master.page_number).Dvi.line with
+    match master.dvi.pages.(master.page_number).line with
     | None -> raise Not_found
     | Some (q, _ as pos) -> find_page_before_position pos client in
   match st.duplex with

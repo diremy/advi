@@ -41,7 +41,7 @@ COPTIONS = -warn-error A -g
 COPTOPTIONS = -warn-error A -unsafe -inline 9
 
 OCAMLC	  = $(CAML)c $(COPTIONS)
-OCAMLOPT  = $(CAML)opt $(COPTOPTIONS)
+OCAMLOPT  = $(CAML)opt.opt $(COPTOPTIONS)
 # OCAMLOPT  = $(CAML)opt.opt -unsafe -inline 9 -ccopt -I
 OCAMLDEP  = $(CAML)dep
 
@@ -53,18 +53,17 @@ EXEC	  = advi
 
 MISC	  = config misc timeout ageometry 
 OPTIONS	  = options rc userfile
-GRAPHICS  = graphicsY11 global_options busy gradient gterm launch laser_pointer
+GRAPHICS  = graphicsY11 global_options busy gradient gterm launch \
+	    laser_pointer
 SYMBOL	  = symbol
 DVI	  = input dvicolor table pkfont ttfont jfm search \
-	    font glyph devfont \
-	    units dimension
+	    font glyph devfont units dimension dvi
 EFFECTS	  = drawimage gs transimpl embed
-GUI	  = scratch driver thumbnails shot dviview
+GUI	  = scratch cdvi driver thumbnails shot dviview
 
 MODULES	  = $(MISC) $(OPTIONS) $(GRAPHICS) \
             $(SYMBOL) $(DVI) \
             $(EFFECTS) grdev addons \
-	    dvi \
 	    $(GUI) main
 
 LIBRARIES = graphics unix str $(CAMLIMAGESLIBS)

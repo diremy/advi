@@ -20,28 +20,15 @@
 open Format;;
 open Dvicommands;;
 
-(* Status for PS specials and background *)
-type known_status = {
-   mutable hasps: bool;
-   mutable bkgd_local_prefs: Grdev.bgoption list;
-   mutable bkgd_prefs: Grdev.bkgd_prefs
-};;
-
-type status = Unknown | Known of known_status;;
-
 type page = {
    counters : int array ;
    commands : string;
-   mutable status : status;
-   mutable line : (int * string option) option;
-   text : string;
   };;
 
 type t = {
     preamble : preamble ;
     prelude : string ;
     pages : page array ;
-    xrefs : (string, int) Hashtbl.t;
     postamble : postamble ;
     font_map : (int * font_def) list
   };;
@@ -508,10 +495,6 @@ let input_dvi ch =
 	let page =
 	  { counters = counters ;
 	    commands = commands ;
-            status = Unknown;
-            line = None;
-            text =
-              Grdev.Symbol.commands_to_ascii font_map (parse_page_of_commands commands);
           } in
         (*Misc.debug_endline page.text;*)
 	stack := page :: !stack ;
@@ -525,12 +508,10 @@ let input_dvi ch =
   seek_in ch prel_pos ;
   let prelude = input_string ch (!lim - prel_pos) in
   let pages = Array.of_list !stack in
-  let xrefs = Hashtbl.create 13 in
   { preamble = preamble; 
     prelude = prelude; 
     pages = pages; 
     postamble = postamble; 
-    xrefs =  xrefs;
     font_map = font_map }
 ;;
 
