@@ -99,8 +99,8 @@ count:
 	wc -l *.ml *.mli | sort -n
 
 clean:
-	rm -f *.cm[oix] *.o $(EXEC) $(EXEC).opt *~ .depend *.{log,aux}
-	rm -rf .advi test/.advi
+	rm -f *.cm[oix] *.o $(EXEC) $(EXEC).opt *~ .depend *.log *.aux
+	rm -rf .advi test/.advi tex/.advi tex/*.log tex/*.aux
 
 veryclean:
 	rm -f Makefile.config config.cache config.log *.dvi \
