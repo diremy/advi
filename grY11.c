@@ -483,7 +483,10 @@ value gr_resize_window (value wid, value w, value h)
   return Val_unit;
 }
 
-value gr_reposition (value x, value y, value w, value h)
+
+/* screen is the screen number */
+
+value gr_reposition (value x, value y, value w, value h, value screen)
 {
   Window r;
   int posx, posy, width, height;
@@ -508,9 +511,12 @@ value gr_reposition (value x, value y, value w, value h)
   {
   XineramaScreenInfo *screens;
   int num_screens;
+  int theScreen=0;
   screens = XineramaQueryScreens(grdisplay, &num_screens);
-  width=screens[0].width;
-  height=screens[0].height;
+  fprintf(stderr,"num_screens=%d\n",num_screens);
+  if (screen < num_screens) {theScreen=screen;}; 
+  width=screens[theScreen].width;
+  height=screens[theScreen].height;
   };
 #endif
     fullscreen = True;}
