@@ -1098,7 +1098,8 @@ let close_html st =
   | None -> warning ("Closing html tag that is not open");;
 
 let html_special st html =
-  if has_prefix "<A name=\"" html || has_prefix "<a name=\"" html then
+  if has_prefix "<A name=\"" html || has_prefix "<a name=\"" html
+   ||  has_prefix "<A name=" html then
     open_html st html (fun x -> Dev.H.Name x) "Name" else
   if  has_prefix "<A href=\"" html || has_prefix "<a href=\"" html then
     open_html st html (fun x -> Dev.H.Href x) "Href" else

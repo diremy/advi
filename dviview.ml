@@ -644,17 +644,22 @@ let pop_page b n st =
   goto_page (if npage > 0 then npage else -1 - npage) st;;
 
 let mark_page st =
+  Printf.printf "==> %d ==>" st.page_number; 
+  List.iter (fun x -> Printf.printf " %d " x) st.page_marks;
+  print_newline(); 
   let marks = 
     if List.length st.page_marks > 9
     then List.rev (List.tl (List.rev  st.page_marks))
     else st.page_marks in
   st.page_marks <- st.page_number :: marks
 
+
 let goto_mark n st =
-  try
-    goto_page (List.nth st.page_marks n) st
-  with
-    Failure _ -> ()
+  Printf.printf "<== %d ==>" n; 
+  List.iter (fun x -> Printf.printf " %d " x) st.page_marks;
+  print_newline();
+  try goto_page (List.nth st.page_marks n) st
+  with Failure _ | Invalid_argument _ -> ()
 
 let previous_slice st = 
   print_string "#line 0, 0 <<<<>><<>>Next-Slice>> "; 
@@ -875,9 +880,8 @@ module B =
 
      let previous_slice  = previous_slice 
      let next_slice = next_slice 
-     let mark_page  = mark_page 
-     let goto_mark st =
-       goto_mark (st.page_number - max 1 st.num) st
+     let mark_page  = mark_page
+     let goto_mark st = goto_mark st.num st
   end;;
 
 let bindings = Array.create 256 B.nop;;
@@ -916,6 +920,8 @@ let bind_keys () =
    '\r' (* return *), B.push_next_page;
 
    'x', B.exchange_page;
+   'M', B.mark_page;
+   'm', B.goto_mark;
 
    (* space, n, p, P, N to go on, or go back to next pause or page. *)
    ' ', B.next_pause;

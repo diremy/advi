@@ -318,8 +318,11 @@ let get_bg_color x y w h =
   if !ignore_background then Graphics.white else begin
     sync dvi;
     if !psused || bkgd_data.bgimg <> None then
-      let c = GraphicsY11.point_color (x + 1) (y + 1) in
-      let c' = GraphicsY11.point_color (x + w - 1) (y + h - 1) in
+      let point_color x y =
+        let x' = min (!size_x-1) x and y' = min (!size_y-1) y in
+        GraphicsY11.point_color x' y' in
+      let c = point_color (x + 1) (y + 1) in
+      let c' = point_color (x + w - 1) (y + h - 1) in
       if c = c' then c else
       if !get_playing () > 0 then find_bg_color x y w h else
       mean_color c c'
@@ -356,7 +359,7 @@ let get_color_table =
       Hashtbl.add htable col table;
       table;;
 
-let get_image g col =
+let get_glyph_image g col =
   match g.cache with
   | Cached (c, img) when c = col -> img
   | _ ->
@@ -411,7 +414,7 @@ let draw_glyph g x0 y0 =
   and y = !size_y - y0 + voffset g - h in
   if x + w > !xmin && x < !xmax && y + h > !ymin && y < !ymax then begin
     let bg = get_bg_color x y w h in
-    let img = get_image g (bg, !color) in
+    let img = get_glyph_image g (bg, !color) in
     Graphics.draw_image img x y;
   end;;
 
@@ -499,23 +502,38 @@ let clean_ps_cache () = Drawimage.clean_cache ();;
 
 (*** HTML interaction ***)
 
+(*
+let get_image x y dx dy =
+  let x' = x + dx and y' = y + dy in
+  if x > !size_x || y > !size_y || x' < 0 || y' < 0 then
+    ???
+  else
+    begin
+      let x1 = max x  0 and y1 = max y 0 in
+      let x1' = min x' !size_x and y1' = min y' !size_y in
+      let dx1 = x1' - x1 and dy1 = y1' - y1 in
+      Graphics.get_image x1 y1 dx1 dy1 
+    end
+*)
+let get_image = Graphics.get_image
+
 (* pour sauver une image_rectiligne *)
 type rectangular_image = {
-  north : Graphics.image;
-  south : Graphics.image;
-  east : Graphics.image;
-  west : Graphics.image;
-};;
+    north : Graphics.image;
+    south : Graphics.image;
+    east : Graphics.image;
+    west : Graphics.image;
+  };;
 
 let rec save_rectangle x y dx dy =
   let x = min x (x + dx) in
   let y = min y (y + dy) in
   let dx = max 1 (abs dx) in
   let dy = max 1 (abs dy) in
-  { south = Graphics.get_image x y dx 1;
-    west = Graphics.get_image x y 1 dy;
-    east = Graphics.get_image (x + dx) y 1 dy;
-    north = Graphics.get_image x (y + dy) (succ dx) 1;
+  { south = get_image x y dx 1;
+    west = get_image x y 1 dy;
+    east = get_image (x + dx) y 1 dy;
+    north = get_image x (y + dy) (succ dx) 1;
   };;
 
 let rec restore_rectangle r x y dx dy =
@@ -719,7 +737,7 @@ module H =
       | Nil -> ()
 
     let emphasize c act =
-      let ima = Graphics.get_image act.A.x act.A.y act.A.w act.A.h in
+      let ima = get_image act.A.x act.A.y act.A.w act.A.h in
       Graphics.set_color c;
       GraphicsY11.display_mode true;
       Graphics.fill_rect act.A.x act.A.y act.A.w act.A.h;
@@ -734,7 +752,7 @@ module H =
     let save_screen_exec act a =
       Gs.flush ();
       (* get image take the image from the backing store *)
-      let ima = Graphics.get_image 0 0 !size_x !size_y in
+      let ima = get_image 0 0 !size_x !size_y in
       GraphicsY11.sync ();
       (* wait until all events have been processed, flush should suffice *)
       (*
@@ -799,7 +817,7 @@ module E =
     let clear () = figures := []; screen := None
         (*
            let save_screen cont =
-           screen := Graphics.get_image 0 0 !size_x !size_y
+           screen := get_image 0 0 !size_x !size_y
            let restore_screen () = ()
          *)
         
@@ -915,6 +933,7 @@ let clear_dev () =
   then Graphics.fill_rect !xmin !ymin !xmax !ymax;
   (* Now try to handle background images. *)
   draw_bkgd_img (!xmax, !ymax) 0 0;;
+
 
 (*** Events ***)
 
@@ -1241,11 +1260,11 @@ let wait_button_up m x y =
         else Final Nil
       with
         Not_found ->
-        (*
+          if pressed m G.control then
             let event dx dy = Move (dx, dy) in
             wait_move_button_up !bbox Move_xy event x y 
-        *)
-        wait_position()
+          else
+            wait_position()
     end
   else if pressed m G.shift && released m G.button1 then
     wait_select_button_up m x y
