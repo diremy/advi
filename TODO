@@ -2,7 +2,7 @@ BEFORE RELEASE:
 ===============
 Of course, I know it.
 But string a la 
--scrathc-font -*-*-*-*-*-*-*-*-*-*-*-*-koi8-r
+-scratch-font -*-*-*-*-*-*-*-*-*-*-*-*-koi8-r
 is change font really, but advi not take any key-code with eighth bit (ie
 +symbols with code >127)
 
@@ -26,6 +26,8 @@ Of course, it is not difficult make symlinks ;) howether, I think it will be
 
 KNOWN BUGS:
 ===========
+ *PW security problem: should read .advirc in the directory where the
+   DVI file resides, NOT where advi is launched.
  *PW Spurious fatal error: (the psfile had a bounding box, but the dvi
    file contained vscale=100.0 hoffset=-228.0 voffset=-368.0
    hscale=100.0, instead of llx, lly, urx, ury).
@@ -188,6 +190,7 @@ General multimedia support
 possibly be launched from a dvi file.
  ==> Done with RDC
      -PW should document it!
+     ==> PW Done
 
 Bindings
 --------
