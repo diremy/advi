@@ -94,19 +94,10 @@ module type DEVICE = sig
   val embed_app : string -> app_type -> int -> int -> int -> int -> unit
   val kill_embedded_apps : unit -> unit 
 
-  type status = {
-      mouse_x : int ;
-      mouse_y : int ;
-      button : bool ;
-      keypressed : bool ;
-      key : char
-    }
-
   type event =
       Resized of int * int
     | Refreshed
     | Key of char
-    | Mouse of status
     | Region of int * int * int * int
     | Href of string
     | Advi of string * (unit -> unit)
@@ -796,30 +787,7 @@ module Make(Dev : DEVICE) = struct
           st.orig_x <- st.orig_x + w ;
           st.orig_y <- st.orig_y + h ; 
           cont := redraw st
-      | Dev.Mouse ev -> 
-          let mx = ev.Dev.mouse_x
-          and my = ev.Dev.mouse_y in
-          if ev.Dev.button then
-            begin
-              match st.button with
-              | None ->
-                  st.button <- Some(mx, my)
-              | Some(ox, oy) ->
-                  st.orig_x <- st.orig_x + (mx - ox) ;
-                  st.orig_y <- st.orig_y + (my - oy) ;
-                  st.button <- Some(mx, my)
-            end
-          else
-            begin
-              match st.button with
-              | None -> ()
-              | Some(ox, oy) ->
-                  st.orig_x <- st.orig_x + (mx - ox) ;
-                  st.orig_y <- st.orig_y + (my - oy) ;
-                  st.button <- None ;
-                  cont := redraw st
-            end
-      |  Dev.Refreshed -> ()
+      | Dev.Refreshed -> ()
       end
     done with Exit -> Dev.close_dev ()
         

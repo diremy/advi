@@ -53,19 +53,10 @@ module type DEVICE = sig
   val embed_app : string -> app_type -> int -> int -> int -> int -> unit
   val kill_embedded_apps : unit -> unit 
 
-  type status = {
-      mouse_x : int ;
-      mouse_y : int ;
-      button : bool ;
-      keypressed : bool ;
-      key : char
-    }
-
   type event =
       Resized of int * int
     | Refreshed
     | Key of char
-    | Mouse of status
     | Region of int * int * int * int
     | Href of string
     | Advi of string * (unit -> unit)

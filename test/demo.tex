@@ -260,7 +260,9 @@ Hence, images drawn using PS tricks will be displayed by \verb"advi".
 
 However, PS tricks make the assumptions that everything is displayed by
 Postscript, which is still \verb"advi" displaying most of the material
-itself. Thus, some PS tricks still not work.
+itself. 
+
+\subsubsection* {Most PS-tricks do work}
 \begin {itemize}
 
 \item[+]
@@ -273,16 +275,27 @@ Simple drawings work
 \item[+]
 Connections between nodes {\tt \string \ncarc}, {\tt \string \ncarc},
 also works.
+\end {itemize}
+
+\subsubsection* {Unfortunately, some PS-tricks do not work, yet}
+\begin{itemize}
+\item[-]
+Labels over arrows.
 
 \item[-]
-However, text arrow labels do not work, so far.
+{\tt pspicture}
+(But drawings not embedded in pspictures works)
 
 \item[-]
-PS tricks overlays do not work either
+Advi only recognizer binary overlays (display if 0, hide otherwise). 
+This is sufficient for the proper documentclass
 (see \hyperlink {overlays}{below}).
 
 \end {itemize}
+Examples: 
 
+\Rnode {A}{A} \qquad \Rnode {B}{B}
+\ncline{->}{A}{B} \Aput{L}
 
 \newpage
 

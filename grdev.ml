@@ -784,11 +784,12 @@ type event =
     Resized of int * int
   | Refreshed
   | Key of char
-  | Mouse of status
   | Region of int * int * int * int
   | Href of string
   | Advi of string * (unit -> unit)
 ;;
+
+type option_event = Event of event | Mouse of status
         
 let all_events = [
   Graphics.Button_down ;
@@ -868,8 +869,8 @@ let rec draw_rectangle x y dx dy =
 
 let rec wait_signal_event events =
     match resized(), !usr1_status, event_waiting() with
-    | Some (x,y), _,_ -> Resized (x,y)
-    | _, true, _ -> clear_usr1(); Refreshed
+    | Some (x,y), _,_ -> Event (Resized (x,y))
+    | _, true, _ -> clear_usr1(); Event (Refreshed)
     | _, _, true -> Mouse (pop_event())
     | _, _, _ -> 
         try 
@@ -879,13 +880,13 @@ let rec wait_signal_event events =
           match resized () with
           | Some (x,y) ->
               push_back_event ev;
-              Resized (x,y)
+              Event (Resized (x,y))
           | None ->
               Mouse ev
         with
         | Usr1 ->
             waiting := false;
-            Refreshed
+            Event Refreshed
         | exn -> 
             waiting := false;
             raise exn
@@ -902,7 +903,7 @@ let wait_button_up x y =
         let dx' = e.Graphics.mouse_x - x in 
         let dy' = e.Graphics.mouse_y - y in 
         if e.Graphics.button then select dx' dy'
-        else Region (x, y, dx', 0 - dy') 
+        else Event (Region (x, y, dx', 0 - dy'))
     | x -> x
   in
   set_color Graphics.black;
@@ -916,6 +917,7 @@ let wait_event () =
   let rec event emph =
     
     let send ev = H.deemphasize true emph; ev in
+    let rescan() = H.deemphasize true emph; event H.Nil in
     
     match wait_signal_event all_events with
     | Mouse ev ->
@@ -947,19 +949,20 @@ let wait_event () =
                       event (H.save_screen_exec act a)
                     end
 
-              | _ -> send (Mouse ev')
+              | _ -> rescan()
               end with Not_found ->
                 if ev'.button then
                   match wait_button_up ev.mouse_x ev.mouse_y with
-                  | Region _ as e -> send e
-                  | e ->
+                  | Event (Region _ as e) -> send e
+                  | Event e ->
                       push_back_event ev; 
                       send e
+                  | Mouse _ -> rescan()
                 else
-                  send (Mouse ev')
+                  rescan()
             end
         end
-    | e -> send e in
+    | Event e -> send e in
   event H.Nil
     ;;
 

@@ -75,7 +75,6 @@ type event =
     Resized of int * int
   | Refreshed
   | Key of char
-  | Mouse of status
   | Region of int * int * int * int
   | Href of string
   | Advi of string * (unit -> unit)
