@@ -20,12 +20,12 @@ let rec reverse_concat l1 = function
 
 exception False;;
 let has_prefix pre str =
-  let len = String.length pre in
-  let l =  String.length str in
-  l >= len &&
+  let lpre = String.length pre in
+  let lstr =  String.length str in
+  lstr >= lpre &&
   begin
     try
-      for i = 0 to len - 1 do if str.[i] <> pre.[i] then raise False done;
+      for i = 0 to lpre - 1 do if str.[i] <> pre.[i] then raise False done;
       true;
     with False -> false
   end;;
@@ -52,10 +52,10 @@ let get_suffix pre str =
 let rec split_string s p start =
   let len = String.length s
   and i = ref start in
-  while !i < len && p s.[!i] do incr i done ;
+  while !i < len && p s.[!i] do incr i done;
   if !i >= len then [] else begin
     let i0 = !i in
-    while !i < len && not (p s.[!i]) do incr i done ;
+    while !i < len && not (p s.[!i]) do incr i done;
     let i1 = !i in
     String.sub s i0 (i1 - i0) :: split_string s p i1
   end;;
@@ -63,7 +63,7 @@ let rec split_string s p start =
 let zap_to_char c s =
   let len = String.length s
   and i = ref 0 in
-  while !i < len && s.[!i] <> c do incr i done ;
+  while !i < len && s.[!i] <> c do incr i done;
   let i0 = !i+1 in
   if i0 >= len then "" else String.sub s i0 (len - i0);;
 
@@ -88,8 +88,8 @@ let advi_process = Unix.getpid ();;
 
 let exit code =
   (* at_exit code must be called only by the ADVI process.
-     if it is one of the forked processes, it must DIE IMMEDIATELY:
-     any cleaning must not be permitted. *) 
+     If it is one of the forked processes, it must DIE IMMEDIATELY:
+     no cleaning is allowed. *) 
   if Unix.getpid () = advi_process then Pervasives.exit code
   else (* SUICIDE *)
   Unix.kill (Unix.getpid ()) 9;;
@@ -124,7 +124,7 @@ let pretty_options all_options =
     List.fold_left2
       (fun w (o, _, _) -> function
         | [] | _ :: [] -> w
-        | m::_ -> max w (String.length o + String.length m))
+        | m :: _ -> max w (String.length o + String.length m))
       0 all_options tab_options in
   let margin = "\n" ^ String.make (width + 1) ' ' in
   let indent o = function
@@ -183,7 +183,7 @@ set_option "-fg"
 
 let warning mes =
   Printf.fprintf stderr "Warning: %s" mes;
-  prerr_newline();;
+  prerr_newline ();;
 
 exception Fatal_error of string;;
 let fatal_error x = raise (Fatal_error x);;
