@@ -383,7 +383,7 @@ let draw_img file whitetransp alpha blend
     psbbox ratiopt antialias (w, h) (x0, !size_y - y0)
 ;;
 
-let round_dim r t = int_of_float (0.5 +. r *. float t);;
+let round_dim r t = Misc.round (r *. float t);;
 let round_dim_x r = round_dim r !size_x;;
 let round_dim_y r = round_dim r !size_y;;
 
@@ -604,7 +604,7 @@ let get_glyph_image g col =
           for i = 0 to h - 1 do
             for j = 0 to w - 1 do
               let gamma_fix c =
-                int_of_float (((float c /. 255.0) ** !glyph_gamma) *. 255.0)
+                Misc.round (* int_of_float *) (((float c /. 255.0) ** !glyph_gamma) *. 255.0)
               in
               dst.(i).(j) <- table.(gamma_fix (Char.code gmap.[!p]));
               incr p
@@ -697,9 +697,9 @@ let shade_color shade =
   let r = 0xFF - (c lsr 16) land 0xFF
   and g = 0xFF - (c lsr 8) land 0xFF
   and b = 0xFF - c land 0xFF in
-  let r = 0xFF - int_of_float (shade *. float r)
-  and g = 0xFF - int_of_float (shade *. float g)
-  and b = 0xFF - int_of_float (shade *. float b) in
+  let r = 0xFF - Misc.round (* int_of_float *) (shade *. float r)
+  and g = 0xFF - Misc.round (* int_of_float *) (shade *. float g)
+  and b = 0xFF - Misc.round (* int_of_float *) (shade *. float b) in
   Graphics.rgb r g b;;
 
 let fill_path path ~shade =
@@ -720,6 +720,8 @@ let fill_arc ~x ~y ~rx ~ry ~start:a1 ~stop:a2 ~shade =
   Graphics.set_color (shade_color shade);
   Graphics.fill_arc x (!size_y - y) rx ry (- a1) (- a2);
   Graphics.set_color (get_color ());;
+
+let draw_ps_by_gs fname sz = Gs.draw_file fname;;
 
 let draw_ps file bbox (w, h) x0 y0 =
   if not !opened then failwith "Grdev.draw_ps: no window";
@@ -1591,6 +1593,7 @@ let add_headers l =
   Gs.add_headers l;;
 
 let exec_ps s x0 y0 =
+(*prerr_endline (Printf.sprintf "Calling exec_ps with %s" s);*)
   sync ps;
   if not !opened then failwith "Grdev.exec_ps: no window";
   Gs.draw s x0 y0;;
