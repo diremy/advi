@@ -383,7 +383,10 @@ let color_special st s =
       color_push st (Dvicolor.parse_color_args args)
   | "color" :: "pop" :: [] ->
       color_pop st
-  | _ -> ();;
+  | "color" :: args ->
+      let c = Dvicolor.parse_color_args args in
+      Misc.warning "global color special is not supported"
+  | _ -> ill_formed_special s;;
 
 let parse_float s =
  try float_of_string s
@@ -1327,18 +1330,21 @@ let newpage h st magdpi x y =
 let find_prologues l =
   let l = List.rev l in
   let h = List.map snd (List.filter (function b, _ -> not b) l)  in
-  let h' = Search.true_file_names [] h in
   try
+    let h' = Search.true_file_names [] h in
     let table = List.combine h h' in
-    List.map
-      (function b, s as p -> if b then p else b, List.assoc s table) l
+    try
+      List.map
+	(function b, s as p -> if b then p else b, List.assoc s table) l
+    with
+    | Not_found -> assert false
   with
-  | Invalid_argument _  ->
+  | Invalid_argument _ | Not_found ->
       Misc.warning
         "Cannot find postscript prologue. Continuing without Postscript";
       Options.dops := false;
       []
-  | Not_found -> assert false;;
+;;
 
 let render_step cdvi num ?trans ?chst dpi xorig yorig =
   proc_clean ();

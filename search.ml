@@ -76,6 +76,7 @@ let command_string com opt =
       (Printf.sprintf "Error %s while executing %s %s"
          (Unix.error_message c) com opt);
     raise Command
+  | End_of_file -> ""
 
 let addpath elem var kind =
   let oldv =
@@ -145,7 +146,10 @@ let database_font_path fontname dpi =
 
 let true_file_name options file =
   let args = String.concat " " (options @ [file]) in
-  try command_string Config.kpsewhich_path args
+  try 
+    let s = command_string Config.kpsewhich_path args in
+    if s = "" then raise Command;
+    s
   with
   | Command ->
       Misc.warning (Printf.sprintf "%s is not found" file);

@@ -263,9 +263,9 @@ class gs () =
 
     method line l =
       try
+        showps l;
         output_string leftout l;
         output_char leftout '\n';
-        showps l;
       with x ->
         prerr_endline  (Printexc.to_string x);
         self # kill;
@@ -455,6 +455,7 @@ let gv = new gv;;
 (* exported functions *)
 
 let kill () = gv # kill;;
+
 let draw s x y =
   if !Options.dops then
     try gv#ps (Misc.get_suffix  "ps: " s) x y  with Misc.Match ->
