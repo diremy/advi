@@ -257,12 +257,8 @@ Maybe you mean \@currenvir ing}}
 %% Hook \advi@setpagesetyle at \@begindvi that run at every page
 
 \def \advi@setpagestyle {\advi@bgpage \advi@transpage}
-
 \def \endpage@hook {}
 \def \AtEndPage {\g@addto@macro \endpage@hook}
-
-\def \g@addto@macro@end
-
 \AtEndPage {\advi@setpagestyle}
 
 % We musch pact \@begindvi to put out hook. 
@@ -279,8 +275,9 @@ Maybe you mean \@currenvir ing}}
 
 \def \advi@begindvi@patch
   {\g@addto@macro \@begindvi      
-      {\endpage@hook 
-       \g@addto@macro \@begindvi {\endpage@hook}}}
+      {\endpage@hook \g@addto@macro \@begindvi {\endpage@hook}}}
+
+\AtBeginDocument {\advi@begindvi@patch}
 
 %  {\let \advi@begindvi@save \@begindvi   %% value at begindocument
 %   \def \@begindvi                       %% our new value
@@ -291,6 +288,7 @@ Maybe you mean \@currenvir ing}}
 %         {\advi@begindvi@save \endpage@hook}%
 %      \endpage@hook                      %% our hook for the
 %     }}
+
 
 
 %% Transitions
