@@ -30,7 +30,7 @@ type set = {
 
 let draw_symbol s c =
   Graphics.set_color c;
-  Graphics.draw_rect s.locx s.locy s.width s.height;
+  Graphics.draw_rect (s.locx-s.hoffset) (s.locy-s.voffset) s.width s.height;
   Graphics.synchronize()
 
 (* Page is cut into small cells : *)
@@ -57,6 +57,12 @@ let is_pure code =
   | '!'..'~' -> true
   | _ -> false
   
+(* Symbols that are surrounded with big spaces. *)
+let big_space s = 
+  match Char.chr s.code with
+  | '!' | '.' | ':' -> true
+  | _ -> false
+
 (* Returns the name of the symbol. *)
 let symbol_name s =
   match s.fontname,s.code with
@@ -79,7 +85,7 @@ exception Break of int*int
 let empty_document = "[empty_document]"
 
 (* Says if symbol s1 is on a line above(-1) or below (1) s2. Should return 0 for ² and x in x². *)
-(* I think that hoffset and voffset _must_ be ignored. *)
+(* I think that voffset _must_ be ignored. *)
 let above s1 s2 =
   if s1.locy < s2.locy - s2.height then -1
   else if s2.locy < s1.locy - s1.height then 1
@@ -89,14 +95,15 @@ let above s1 s2 =
 let at_right s1 s2 =
   if s1.locx < s2.locx then -1 else 1
 
-(* Threshold to detect a blank, see below. *)
-let threshold = 40
+(* Thresholds to detect a blank, see below. *)
+let threshold1 = 25 (* For normal symbols. *)
+let threshold2 = 90 (* For certain punctuation signs. *)
 
-(* Says if there is a blank between s1 and s2. *)
+(* Says if there is a blank between s1 and s2. Here hoffset must be taken into account. *)
 let blank () =
 
   (* We make stats over the width of nb previous symbols. *)
-  let nb = 20 in
+  let nb = 5 in
 
   let total_width = ref 0  (* Total width of all elements in the array. *)
   and stat_nb = ref 0    (* Number of elements in the array. *)
@@ -115,19 +122,10 @@ let blank () =
       stat_syms.(!stat_index) <- s1 ;
       stat_index := (!stat_index + 1) mod nb ;
       total_width := tot;
+      let space = (s2.locx - s2.hoffset) - (s1.locx + s1.width - s1.hoffset) in
       
-
-      if s2.locx - s1.locx - s1.width > (threshold * !total_width) / (100 * !stat_nb)
-      then
-	begin
-	(* draw_symbol s1 Graphics.blue; *)
-	  true
-	end
-      else 
-	begin
-	(* draw_symbol s1 Graphics.red; *)
-	  false
-	end
+      let threshold = if (big_space s1) || (big_space s2) then threshold2 else threshold1 in
+      space > (threshold * !total_width) / (100 * !stat_nb)
     end
 
 (* Gives a string corresponding to line l. l is a list of symbols. *)
