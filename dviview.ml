@@ -1124,25 +1124,26 @@ module B =
 
     let ask_to_search =
       let prefill = ref "" in
-      (fun title ->
-       let minibuff =
-         let nlines = 1 in
-         let xc, yc = 2, 2 in
-         let sx, sy = Graphics.text_size "X" in
-         let wt, ht = Graphics.size_x () - 2 * xc, sy * nlines in
-         let ncol = wt / sx in
-         let bw = 0 in
-         Gterm.make_term_gen
-           Graphics.black (Graphics.rgb 180 220 220) (* Grounds colors *)
-           bw Graphics.black (* Border *)
-           (Graphics.rgb 220 150 120) (* Title color *)
-           (Graphics.black) (* Cursor color *)
-           xc yc (* Where on the screen *)
-           nlines ncol (* Size in lines and columns *) in
-       let re = Gterm.ask_prefill minibuff title !prefill in
-       !Misc.forward_push_back_key_event '' GraphicsY11.control;
-       prefill := re;
-       re)
+      (fun message ->
+         let minibuff =
+           let nlines = 1 in
+           let xc, yc = 2, 2 in
+           let sx, sy = Graphics.text_size "X" in
+           let wt, ht = Graphics.size_x () - 2 * xc, sy * nlines in
+           let ncol = wt / sx in
+           let bw = 0 in
+           Gterm.make_term_gen
+             Graphics.black (Graphics.rgb 180 220 220) (* Grounds colors *)
+             bw Graphics.black (* Border *)
+             (Graphics.rgb 220 150 120) (* Title color *)
+             (Graphics.black) (* Cursor color *)
+             xc yc (* Where on the screen *)
+             ncol nlines (* Size in columns and lines *) in
+         Gterm.draw_term minibuff;
+         let re = Gterm.ask_prefill minibuff message !prefill in
+         !Misc.forward_push_back_key_event '' GraphicsY11.control;
+         prefill := re;
+         re)
 
     let search_forward st =
       let re = ask_to_search "Search Forward (re): " in

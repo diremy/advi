@@ -143,7 +143,7 @@ let ask_to_launch command command_invocation =
      Graphics.green Graphics.black
      bw Graphics.red Graphics.black
      0x6FFFFF
-     xc yc nlines ncol in
+     xc yc ncol nlines in
  Gterm.set_title t (Printf.sprintf "Active-DVI alert for %s" command);
 
  unmapping_persistent_apps (fun () ->
