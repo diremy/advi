@@ -33,8 +33,6 @@ TEXSTYFILES= \
 
 STYFILES= $(addprefix tex/, $(STY))
 
-
-
 COPTIONS = -warn-error A -g
 COPTOPTIONS = -warn-error A -unsafe -inline 9
 
@@ -126,7 +124,6 @@ version:
 	mv $$i $$i~; \
 	sed -e '/ersion/s/$(OLDVERSION)/$(VERSION)/' $$i~ > $$i; \
 	done
-
 
 .c.o:
 	$(OCAMLC) -ccopt "$(CFLAGS)" -c $<
@@ -229,14 +226,14 @@ web_site:
 	mkdir release
 	cd release; cvs co bazar-ocaml/advi; \
 	cp -p ../test/*.dvi bazar-ocaml/advi/test/; \
-	cp -p ../doc/manual.dvi bazar-ocaml/advi/doc/; \
-	cp -p ../doc/manual.ps bazar-ocaml/advi/doc/; \
-	cp -p ../doc/manual.pdf bazar-ocaml/advi/doc/; \
-	cp -p ../doc/manual.html bazar-ocaml/advi/doc/; \
+	cp -p ../doc/*.dvi bazar-ocaml/advi/doc/; \
+	cp -p ../doc/*.ps bazar-ocaml/advi/doc/; \
+	cp -p ../doc/*.pdf bazar-ocaml/advi/doc/; \
+	cp -p ../doc/*.html bazar-ocaml/advi/doc/; \
+	cp -p ../doc/*.htm bazar-ocaml/advi/doc/; \
+	cp -p ../doc/*.gif bazar-ocaml/advi/doc/; \
+	cp -p ../doc/*.jpg bazar-ocaml/advi/doc/; \
 	cp -p ../doc/style.css bazar-ocaml/advi/doc/; \
-	cp -p ../doc/splash.dvi bazar-ocaml/advi/doc/; \
-	cp -p ../doc/scratch_write_splash.dvi bazar-ocaml/advi/doc/; \
-	cp -p ../doc/scratch_draw_splash.dvi bazar-ocaml/advi/doc/; \
 	cp -p -r ../doc/pngs bazar-ocaml/advi/doc/; \
 	find . -name '.cvsignore' -print | xargs rm; \
 	find . -name 'CVS' -print | xargs rm -rf; \
