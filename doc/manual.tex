@@ -12,6 +12,14 @@
 \usepackage {advi-annot}
 \usepackage {bubble}
 
+% For splash inclusion
+\usepackage{color}
+\usepackage{graphicx}
+\usepackage{tabularx}
+\usepackage{pst-all}
+\usepackage{hyperref}
+% End of splash specific stuf
+
 \newdimen \tmpdim
 \title {\setbox0 \hbox {\bf\ActiveDVI}\global \tmpdim \wd0
 \advance \tmpdim by 4em
@@ -160,7 +168,7 @@ original TeX source.
 \subsection {Cut and paste}
 
 Text can be copied from the {\ActiveDVI} previewer to an another application.
-However, this uses \doctt{XBuffer} and not the \doctt{XSelection}
+However, this uses the \doctt{XBuffer} and not the \doctt{XSelection}
 mechanism.
 \begin {itemize}
 \item
@@ -757,12 +765,29 @@ complex change of coordinates.  (See PStricks section).
 \section {Bug Reports}
 
 Please, send bug reports to 
-\url{mailto:advi@cristal.inria.fr}. 
+\url{mailto:advi@pauillac.inria.fr}. 
 \\
-See \url{http://cristal.inria.fr/activedvi} for up to date information.
+See \url{http://pauillac.inria.fr/advi} for up to date information.
 
 
 \section {Key bindings}
+
+% Macros specific to splash.tex
+\definecolor{red}{rgb}{1.0,0.0,0.0}
+\def\key#1{\textcolor{red}{#1}}
+\def\ikey#1#2#3{\key{#1} & #2 & -- & #3\\}
+\definecolor{blue}{rgb}{0.0,0.0,1.0}
+\def\arg{\textcolor{blue}{arg }}
+
+\let \Newpage \newpage
+\def \newpage {}
+
+%\let \Stretch \stretch
+%\def \stretch#1{0pt}
+
+\input{splash_contents.tex}
+\def \newpage{\Newpage}
+%\def \strech#1{\Strech{#1}}
 
 \section {Index}
 
