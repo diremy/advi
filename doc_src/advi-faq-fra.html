@@ -51,7 +51,10 @@ répertoires <CODE>LL</CODE> et <CODE>Join</CODE>) <CODE>seminar</CODE>
 <CODE>test</CODE> du répertoire principal de la distribution et jetter
 un coup d'oeil aux divers fichiers <CODE>*.tex</CODE> qui y sont.
 Dans chacun de ces sous-répertoires lancez la commande
-<CODE>make</CODE> pour construire les différentes présentations.</I>
+<CODE>make</CODE> pour construire les différentes présentations.
+Lancer <CODE>make</CODE> au niveau du répertoire <CODE>examples</CODE>
+construit et visualise tout-à-tour toutes les exemples de
+présentations.</I>
 
 <DT><STRONG>Comment assurer la sécurité des présentations si l'on peut
 lancer n'importe quel programme depuis un fichier DVI ?</STRONG>
@@ -76,14 +79,14 @@ source avec LaTeX: le style d'Active-DVI supprimera certains effets et
 en simulera d'autres à l'aide de postscript.</I>
  <DD>Réponse supplémentaire: <I>Impossible. Comment pouvez-vous croire
 que quelquechose ou quelqu'un puisse être capable de rendre sur une
-simple feuille de papier tous ces mouvements de dance de vos textes et
+simple feuille de papier tous ces mouvements de danse de vos textes et
 ces multiples effets, créatifs, fascinants, et pour tout dire si
 amusants, qui sont présents tout au long de votre présentation ? Il n'y
-a aucun espoir que vous puissiez utiliser des transparents pour votre
-colloque: vous avez réellement besoin d'Active-DVI pour jouer votre
-présentation!</I>
+a décidément aucun espoir que vous puissiez utiliser des transparents
+pour votre colloque: vous avez réellement besoin d'Active-DVI pour
+jouer votre présentation!</I>
  <DD>Réponse préventive supplémentaire<SUP>2</SUP>: <I>La réponse
-supplémentaire immédiatement précédent celle-ci est une blague; en
+supplémentaire précédant immédiatement celle-ci est une blague; en
 fait, nous avons travaillé de notre mieux pour que l'option
 <CODE>ignore</CODE> de <CODE>advi.sty</CODE> fasse un bon travail;
 il n'en demeure pas moins, que le style fait de son mieux pour remplir
@@ -118,12 +121,11 @@ problèmes pourvu que vous les entouriez des parenthèses spéciales
 
  <DD>Réponse: <I>Vous devez préprocesser votre fichier DVI avec la commande
 <A HREF="http://www.ctan.org/tex-archive/dviware/dvicopy/">dvicopy</A>
-qui expanse les fontes virtuelles:
+qui expanse les fontes virtuelles:</I>
 <PRE>
         dvicopy foo.dvi foo.advi && advi foo.advi
 </PRE>
-règle normalement le problème.
-</I>
+<I>règle normalement le problème.</I>
 
  <DD>Réponse additionnelle: <I> Active-DVI ne peut utiliser que
 les fontes basées sur des fichiers PK, dont les sources sont des
@@ -135,25 +137,25 @@ créer de fichiers <CODE>.pk</CODE> correspondants pour Active-DVI.</I>
 qui pose problème, parmi l'ensemble des fontes Computer-Modern qui a
 été créé par Donald Knuth pour servir de fontes par défaut à TeX.</I>
 
-<DT><STRONG>Comment se fait-il que Active-DVI ait des problèmes de
+<DT><STRONG>Comment se fait-il qu'Active-DVI ait des problèmes de
 marges (alors que <CODE>xdvi</CODE> n'en a pas) ?</STRONG>
  <DD>Réponse: <I><CODE>xdvi</CODE> et <CODE>advi</CODE> n'utilisent pas
 les mêmes marges. <CODE>Advi</CODE> utilise la spécification
 d'encombrement (bounding box) émise par TeX dans le fichier DVI et
 n'ajoute aucune marge supplémentaire. Malheureusement, beaucoup de
 styles et de librairies LaTeX ne donnent pas une valeur correcte à la
-bounding box.
- <DD>Le remède consiste à modifier les marges en déplaçant la boîte
-englobante (bounding box) à la souris (Control Bouton), ou sur la
+bounding box.</I>
+ <DD><I>Le remède consiste donc à modifier les marges en déplaçant la boîte
+englobante (bounding box) à la souris (Contrôle-Bouton Gauche), ou sur la
 ligne de commande au lancement de <CODE>advi</CODE> 
 (options <CODE>-vmargin</CODE> et <CODE>-hmargin</CODE>).</I>
 
 <DT><STRONG>Comment visualiser la page pointée par une ancre HTML dans
 un brouteur déjà lancé ?</STRONG>
- <DD>Réponse: <I>pour afficher les liens hyper texte qui pointe vers
+ <DD>Réponse: <I>pour afficher les liens hyper texte qui pointent vers
 des pages HTML, vous devez fixer correctement l'option
 <CODE>-browser</CODE> d'<CODE>advi</CODE>,
-ou alors appelé explicitement le brouteur de votre choix dans une commande
+ou alors appeler explicitement le brouteur de votre choix dans une commande
 <CODE>adviembed</CODE>. Vous pouvez par exemple utiliser:</I>
 <PRE>
 netscape -remote 'openURL(http://www.acm.org)'
@@ -214,7 +216,7 @@ dvips: Unknown keyword ("xmms") in \special will be ignored
 </PRE>
  </DD>
  <DD>Réponse: <I>Comme le disent les messages, ces erreurs ne
-proveinnent pas d'<CODE>advi</CODE> mais de la commande
+proviennent pas d'<CODE>advi</CODE> mais de la commande
 <CODE>dvips</CODE> qui ne comprend pas les instructions
 <CODE>\special</CODE> que le style LaTeX <CODE>advi.sty</CODE> insère
 and le fichier DVI.
