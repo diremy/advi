@@ -24,10 +24,14 @@ IMAGEN=imagen
 PDFIMAGEN=pdfimagen
 DVIPDFM=dvipdfm
 
-all: manual.ps manual.pdf splash.dvi splash.ps mathmode.dvi
+all: html manual.ps manual.pdf splash.dvi splash.ps mathmode.dvi
 
 clean: 
 	rm -f *.aux *.log manual.html *.dvi *.pdf *.pdfm *.ps *.ima *.out *.toc
+	$(MAKE) -f MakeHTML clean
+
+html:
+	$(MAKE) -f MakeHTML all
 
 splash.dvi manual.dvi: splash_contents.tex
 

@@ -1,0 +1,10 @@
+index.htm: ../doc_src/advi-index.htm
+	cp -p ../doc_src/advi-index.htm index.htm
+fra.htm: ../doc_src/advi-fra.htm
+	cp -p ../doc_src/advi-fra.htm fra.htm
+eng.htm: ../doc_src/advi-eng.htm
+	cp -p ../doc_src/advi-eng.htm eng.htm
+faq-fra.htm: ../doc_src/advi-faq-fra.htm
+	cp -p ../doc_src/advi-faq-fra.htm faq-fra.htm
+faq-eng.htm: ../doc_src/advi-faq-eng.htm
+	cp -p ../doc_src/advi-faq-eng.htm faq-eng.htm

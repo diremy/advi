@@ -1,0 +1,76 @@
+#*********************************************************************#
+#                                                                     #
+#                             Active-DVI                              #
+#                                                                     #
+#                   Projet Cristal, INRIA Rocquencourt                #
+#                                                                     #
+#  Copyright 2003 Institut National de Recherche en Informatique et   #
+#  en Automatique.  All rights reserved.  This file is distributed    #
+#  under the terms of the GNU Lesser General Public License.          #
+#                                                                     #
+#  Jun Furuse, Didier Rémy and Pierre Weis.                           #
+#  Contributions by Roberto Di Cosmo, Didier Le Botlan,               #
+#  Xavier Leroy, and Alan Schmitt.                                    #
+#                                                                     #
+#  Based on Mldvi by Alexandre Miquel.                                #
+#*********************************************************************#
+
+# $Id$
+
+# Makefile to generate the HTML files of a WEB site from their sources
+# in another directory.
+
+# Usage:
+#
+# Initialization:
+#  create an empty file named .Makefile.auto in the same directory,
+#  fill in the SRC and FILES variables below,
+#  type make auto to initialize the Makefile included rules.
+
+# Site maintenance (or creation):
+#  make (or make all) will rebuild the whole thing
+#  make clean will remove all the generated files
+
+# Sources files directory
+SRC=../doc_src
+
+# Prefix before regular names
+PACKAGE=advi
+
+# The list of files for this part of the Web site
+FILES=index.htm fra.htm eng.htm faq-fra.htm faq-eng.htm
+
+######## This part of the Makefile should automatically handle the
+######## generation of object files for the list $(FILES)
+
+# Automatic generation of rules to handle $(FILES)
+# Rules are written into auxiliary file $(AUTO) that is included at
+# the end of this Makefile.
+AUTO=.Makefile.auto
+
+all: $(AUTO) expand $(FILES)
+
+expand:
+	cd $(SRC); $(MAKE)
+
+clean: $(AUTO)
+	cd $(SRC); $(MAKE) clean
+	/bin/rm -f $(FILES)
+
+#  Note: make auto regenerates the rules into file .Makefile.auto.
+# (handled automatically). .Makefile.auto depends upon this Makefile,
+# since any addition to the Makefile may leads to the recompilation of
+# the rules. Hence,
+# make clean all
+# will recompute rules and the set of files again.
+.Makefile.auto : auto
+
+auto:
+	/bin/rm -f $(AUTO)
+	for i in $(FILES); do \
+	j=`basename $$i .htm`; \
+	echo $$i: $(SRC)/$(PACKAGE)-$$j.htm >> $(AUTO); \
+	echo "	cp -p $(SRC)/$(PACKAGE)-$$j.htm $$j.htm" >> $(AUTO); \
+	done
+
+include $(AUTO)
