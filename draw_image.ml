@@ -44,7 +44,6 @@ let f file whitetransp alpha blend ratiopts (w,h) x0 y0 =
       let height = input_value ic in
       let data = input_value ic in
       close_in ic;
-prerr_endline ("cw: "^(string_of_int width)^" ch: "^(string_of_int height));
       Rgba32 (Rgba32.create_with width height data) 
     end else begin
       let ic = open_in_bin cache_name in
