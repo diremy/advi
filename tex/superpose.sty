@@ -48,18 +48,18 @@
    \hbox \bgroup \@tempdima \super@dima  \@tempdimb \super@dimb
      \let \super@ignore@if  \ifsuper@ignore
      \vbox \bgroup
-       \@ifundefined {super@#1@}
-          {\PackageError {Superpose}{Unknown Preamble #1}{}}
+       \@ifundefined {super@#1@}%
+          {\PackageError {Superpose}{Unknown Preamble #1}{}}%
           {\@nameuse {super@#1@}}%
        \offinterlineskip \super@dima 0em \super@dimb \super@dima 
        \super@ignorefalse
-       \let \\ \super@cr \halign \bgroup
+       \let \\\super@cr \halign \bgroup
          \super@left 
            \setbox0\hbox{\super@math ##\super@math}\super@store
             \ifsuper@first
                  \ifsuper@ignore  \setbox0 \null \else
                  \global \super@ignoretrue \fi \fi
-           \ht0 0em\dp0 0em \mbox{\box0}%
+           \ht0 0em\dp0 0em\mbox{\box0}%
          \super@right\cr}
   {\crcr \egroup \super@dima \@tempdima \super@dima \@tempdimb 
      \let \ifsuper@ignore  \super@ignore@if \egroup

@@ -1,3 +1,23 @@
+BEFORE RELEASE:
+
+ * Fixé les  KNOWN BUGS
+
+ * compléter manual.tex (la plupart des morceaux manquants existent mais
+   sont dispersés)
+
+ * merger camlimages avec activedvi
+
+ * refaire la page WEB.
+
+    . transformer advi@pauillac en advi-bugs@pauillac
+    . mettre advi@pauillac comme liste d'abonnés avec Majordomo ?
+
+ * packagifier pour Linux?
+
+   . pour gagner de l'audience
+   . pour dimuner le nombre de problèmes d'installation.
+
+
 KNOWN BUGS:
 
 * Advi is unsafe!
