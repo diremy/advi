@@ -971,12 +971,6 @@ let close_dev () =
   end;
   opened := false;;
 
-let draw_scale (w,h) x0 y0 =
-  Graphics.set_color Graphics.black;
-  for i = 0 to h do
-      if (i mod 50) = 0 then (Graphics.moveto x0 i; Graphics.lineto (x0+200) i;Graphics.draw_string (string_of_int i));
-  done;;
-
 let clear_dev () =
   if not !opened then
     failwith "Grdev.clear_dev: no window" ;
@@ -997,8 +991,6 @@ let clear_dev () =
   Graphics.set_color !bg_color;
   Graphics.fill_rect !xmin !ymin !xmax !ymax;
   (* now try to handle background images *)
-prerr_endline ("w: "^(string_of_int !xmax)^" h: "^(string_of_int !ymax));
-  draw_scale (!xmax,!ymax) 0 0;
   draw_bkgd_img (!xmax,!ymax) 0 0
 ;;
 

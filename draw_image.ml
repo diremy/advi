@@ -22,8 +22,6 @@ type ratiopts =
 ;;
 
 let f file whitetransp alpha blend ratiopts (w,h) x0 y0 =
-prerr_endline ("w: "^(string_of_int w)^" h: "^(string_of_int h));
-prerr_endline ("gw: "^string_of_int (Graphics.size_x ())^" gh: "^string_of_int (Graphics.size_y ()));
   let file = Search.true_file_name [] file in
   let cache_name =   (* The computed cache name *)
     let file' = String.copy file in
@@ -120,9 +118,9 @@ prerr_endline ("cw: "^(string_of_int width)^" ch: "^(string_of_int height));
   		Rgba32.unsafe_set rgba x y { color=rgb; alpha=a }
   	      done
   	      done;
-  	      Rgba32 (Rgba32.resize None rgba (width) (height))
+  	      Rgba32 (Rgba32.resize None rgba w h)
 	    end else begin
-  	      Rgb24 (Rgb24.resize None i (width) (height))
+  	      Rgb24 (Rgb24.resize None i w h)
 	    end
 	| _ -> assert false
 	in
