@@ -1052,7 +1052,7 @@ let open_dev geom =
   Timeout.init ();
   (* Fill the event queue *)
   let rec f () =
-    Timeout.add 0.5 (fun () -> 
+    Timeout.add 0.25 (fun () -> 
       GY.retrieve_events (); ignore (f ()))
   in
   ignore (f ());
