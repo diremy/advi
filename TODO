@@ -1,0 +1,39 @@
+BUGS:
+
+* Chase all uncaught exceptions (using  Pessaux's tool?)
+For instance:
+
+  Fatal error: unknown special: advi: setbg col=Yellow
+
+This should not be fatal, but a warning.
+
+* It seems that advi does not find EPS files correctly.
+I haven't tried to localized the bug, but my example was: 
+
+    % kpsewhich Logo-INRIA-Rocq.eps       
+    /home/morgon/remy/lib/tex/Logo-INRIA-Rocq.eps
+
+while from the same path:
+
+     % advi cely.dvi
+     Warning: Logo-INRIA-Rocq.eps is not found. (Error while executing kpsewhich Logo-INRIA-Rocq.eps > /tmp/advi48)
+
+
+WISH LIST: 
+
+- adapter la résolution aux vrai dpy de l'écran
+
+- fullscreen mode (en graphics?)
+
+- fork? (i.e. lancer un dvi identique à celui qui tourne)
+
+- améliorer advi.sty
+ 
+  * pour les bulles-actives 
+      -> générer un slide supplémentaire
+      -> générer des footnotes (avec un cadre ou dans une mini-bulle)
+
+  * exporter \ifadvi et \Ifadvi
+
+  
+
