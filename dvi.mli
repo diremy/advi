@@ -69,7 +69,8 @@ type command =
   | C_post of postamble * int
   | C_post_post of int ;;
 
-type status = Unknown | PS of bool
+type known_status = {mutable hasps: bool; mutable bkgd_local_prefs: Grdev.bgoption list; mutable bkgd_prefs: Grdev.bkgd_prefs};;
+type status = Unknown | Known of known_status
 type page = {
     counters : int array ;
     commands : string;

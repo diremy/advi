@@ -600,7 +600,7 @@ if test -f $CAMLIMAGESDIR/ps_img.cma || $HAVE_CDK; then
         if $HAVE_CDK; then
 	        CAMLIMAGESLIBS="camlimages"
         else
-                CAMLIMAGESLIBS="img ppm_img ps_img graphic_image freetype"
+                CAMLIMAGESLIBS="img gif_img jpeg_img png_img tiff_img bmp_img xpm_img ppm_img ps_img graphic_image freetype"
         fi
 else
 	echo "**************** Warning ******************"

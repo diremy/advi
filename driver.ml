@@ -65,9 +65,6 @@ let rec split_record s =
       _ -> token, "") tokens
 ;;
 
-(* Status for PS specials *)
-type status = Unknown | Scanning of bool | PS of bool
-
 
 let named_colors = [
   "Black", 0x000000 ;
@@ -224,28 +221,28 @@ type state = {
     mutable tpic_path : (float * float) list;
     mutable tpic_shading : float;
       (* PS specials page state *)
-    mutable status : status; 
+    mutable status : Dvi.known_status; 
     mutable headers : string list;
     mutable html : (Dev.H.tag * int) option ;
     mutable draw_html : (int * int * Dev.glyph) list;
     mutable checkpoint : int; 
-  }
-      
-type proc_unit = {
-    escaped_register : reg_set;
-    escaped_cur_font : cooked_font ;
-    escaped_cur_mtable : (int * int) Table.t;
-    escaped_cur_gtable : Dev.glyph Table.t;
-    mutable escaped_commands : Dvi.command list
-  }	
-      
+    }
+        
+  type proc_unit = {
+      escaped_register : reg_set;
+      escaped_cur_font : cooked_font ;
+      escaped_cur_mtable : (int * int) Table.t;
+      escaped_cur_gtable : Dev.glyph Table.t;
+      mutable escaped_commands : Dvi.command list
+    }	
+	
 let procs = Hashtbl.create 107
 let current_recording_proc_name = ref None
 let current_recording_proc_unit = ref None
 let hidden = ref false	
 let is_hidden () = !hidden	
 let is_recording () = !current_recording_proc_name <> None
-    
+      
   (*** Rendering primitives ***)
     
 let last_height = ref 0 
@@ -760,6 +757,47 @@ let set_rule st a b =
       st.checkpoint <- 0
     ;;
 
+
+
+
+    (* Background object configuration. RDC *)
+    
+    let setup_bkgd status = (* propagate bkgd preferences to graphics device *)
+      Dev.copy_bkgd_data status.Dvi.bkgd_prefs Dev.bkgd_data;
+      Dev.set_bg_options status.Dvi.bkgd_local_prefs;
+      Dev.copy_bkgd_data Dev.bkgd_data status.Dvi.bkgd_prefs
+      ;;
+
+    let bkgd_alist = [
+      ("col",fun s -> fun st -> [Dev.BgColor (parse_color_args (split_string (unquote s) 0))]);
+      ("img",fun s -> fun st -> [Dev.BgImg s]);
+      ("reset",fun s -> fun st -> Dev.copy_bkgd_data (Dev.default_bkgd_data ()) st.Dvi.bkgd_prefs; []) 
+      (***RDC: is this code ---/\ doing the rest of data we want to see ? ***)
+    ] ;;
+
+
+    let filter_alist alist falist =
+      let aux k alist okalist = 
+        try
+          (k,List.assoc k alist)::okalist
+        with Not_found -> okalist
+      in
+      List.fold_left (fun l -> fun k -> aux k alist l) [] (List.map (fun (k,v) -> k) falist);;
+      
+
+    (* When scanning the page, we just fill the info structure for backgrounds *)
+    let scan_bkgd_special st s =
+      let records = List.map (fun (k,v) -> String.lowercase k, v) (split_record s)
+      in
+      st.Dvi.bkgd_local_prefs <- 
+          (List.flatten (List.map (fun (k,v) -> (List.assoc k bkgd_alist) v st) (filter_alist records bkgd_alist)))
+          @st.Dvi.bkgd_local_prefs
+    ;;
+
+    (* When not scanning, we ignore the background information *)
+    let bkgd_special st s = ()
+    ;;
+
     (* Support for TPIC specials.  XL. *)
 
     let milli_inch_to_sp = Units.from_to Units.IN Units.SP 1e-3
@@ -876,11 +914,6 @@ let set_rule st a b =
           ()
     (* End of TPIC hacks *)
 
-
-    (* For inlined Postscript *)
-    let scanning st =
-       match st.status with Scanning _ -> true | _ -> false;;
-
     let moveto_special st s =
       if !Misc.dops then
         begin
@@ -895,31 +928,17 @@ let set_rule st a b =
 
 
     let ps_special st s = 
-      if !Misc.dops then
-        begin 
-          match st.status with
-          | PS true -> 
-              let x = int_of_float (st.conv *. float st.h) in
-              let y = int_of_float (st.conv *. float st.v) in
-	      if not (is_hidden ()) then
-                begin try
-                  Dev.exec_ps s x y
-                with Dev.GS ->
-                  st.status <- PS false
-                end
-          | PS false | Scanning true -> ()
-          | Unknown | Scanning false -> 
-              (* if has_prefix "\" " s then *)
-              st.status <- Scanning true
-        end
+      if !Misc.dops && st.status.Dvi.hasps then
+          let x = int_of_float (st.conv *. float st.h) in
+          let y = int_of_float (st.conv *. float st.v) in
+          if not (is_hidden ()) then
+            begin try
+              Dev.exec_ps s x y
+            with Dev.GS ->
+              st.status.Dvi.hasps <- false
+            end
 
-    let header_special st s = 
-      if !Misc.dops then
-        begin
-          let h = get_suffix "header=" s in 
-          if List.mem h st.headers then ()
-          else st.headers <- h :: st.headers
-        end
+    let header_special st s = ()      (* header are not "rendered", only stored during scan *)
 
     (* For html specials *)
 
@@ -964,12 +983,37 @@ let set_rule st a b =
     else
       warning ("Unknown html suffix" ^ html)
 
+    let scan_special_html (headers,xrefs) page s =
+       let name = String.sub s 14 (String.length s - 16) in
+       Hashtbl.add  xrefs name page
+
+    let scan_special status (headers,xrefs) pagenum s =
+      (* Embedded Postscript, better be first for speed when scanning *)
+      if has_prefix "\" " s || has_prefix "ps: " s then 
+          (if !Misc.dops then status.Dvi.hasps <- true)
+      else if has_prefix "header=" s then 
+          (if !Misc.dops then
+              headers := (get_suffix "header=" s) :: !headers)
+      else if has_prefix "advi: setbg " s then scan_bkgd_special status s
+      else if has_prefix "html:<A name=\"" s || has_prefix "html:<a name=\"" s then 
+        scan_special_html (headers,xrefs) pagenum s
+
+    let scan_special_page cdvi globals pagenum =
+       let page = cdvi.base_dvi.Dvi.pages.(pagenum) in
+           match page.Dvi.status with
+            | Dvi.Unknown ->  
+               let status = {Dvi.hasps=false;Dvi.bkgd_local_prefs=[];Dvi.bkgd_prefs=Dev.bkgd_data} in
+               let eval = function
+                  Dvi.C_xxx s -> scan_special status globals pagenum s
+                  | _ -> () 
+               in
+               Dvi.page_iter eval cdvi.base_dvi.Dvi.pages.(pagenum);
+               page.Dvi.status <- Dvi.Known status; 
+               status
+            | Dvi.Known stored_status -> stored_status
 
     let special st s =
-      (* Embedded Postscript, better be first for speed when scanning *)
       if has_prefix "\" " s || has_prefix "ps: " s then ps_special st s
-      else if has_prefix "header=" s then header_special st s
-      else if scanning st then ()
       else if has_prefix "advi: moveto" s then moveto_special st s 
       else
 
@@ -997,6 +1041,7 @@ let set_rule st a b =
 	  else if has_prefix "advi: embed " s then embed_special st s
 	  else if has_prefix "advi: trans " s then transition_special st s
 	  else if has_prefix "advi: kill " s then kill_embed_special st s
+	  else if has_prefix "advi: setbg " s then bkgd_special st s
       	  else if has_prefix "advi:" s then 
 	    raise (Failure ("unknown special: "^ s))
         end
@@ -1036,26 +1081,23 @@ let set_rule st a b =
   let scan_command st = function
     | Dvi.C_xxx s -> special st s
     | _ -> ()
-          
+
   let eval_command st c =
-    if scanning st then scan_command st c else
-      begin
-        begin match !current_recording_proc_unit with
-        | None -> ()
-        | Some u ->	
-	    match c with
-   	    (* The advi: proc specials are not recorded *)  
-	    | Dvi.C_xxx s when has_prefix "advi: proc=" s -> ()
-            |  _ -> u.escaped_commands <- u.escaped_commands @ [c]
-        end;
-        eval_command st c
-      end
+     begin match !current_recording_proc_unit with
+     | None -> ()
+     | Some u ->	
+         match c with
+	    (* The advi: proc specials are not recorded *)  
+         | Dvi.C_xxx s when has_prefix "advi: proc=" s -> ()
+         |  _ -> u.escaped_commands <- u.escaped_commands @ [c]
+     end;
+     eval_command st c
 
   let _ = eval_command_ref := eval_command
 
   let newpage h st magdpi x y =
     try Dev.newpage h st.sdpi magdpi x y
-    with Dev.GS -> st.status <- PS false
+    with Dev.GS -> st.status.Dvi.hasps <- false
 
   let find_prologues l =
     let l' = Search.true_file_names [] l in
@@ -1065,89 +1107,10 @@ let set_rule st a b =
       []
     end else l'
 
+(* function to be removed in the future, or replaced by the proper iteration of render_step *)
   let render_page cdvi num dpi xorig yorig =
-    proc_clean ();
-    if num < 0 || num >= Array.length cdvi.base_dvi.Dvi.pages then
-      invalid_arg "Driver.render_page" ;
-    let mag = float cdvi.base_dvi.Dvi.preamble.Dvi.pre_mag /. 1000.0
-    and page = cdvi.base_dvi.Dvi.pages.(num) in
-    let st =
-      { cdvi = cdvi ;
-	sdpi = int_of_float (mag *. ldexp dpi 16) ;
-	conv = mag *. dpi /. cdvi.dvi_res /. 65536.0 ;
-	x_origin = xorig ; y_origin = yorig ;
-	cur_mtable = dummy_mtable ;
-	cur_gtable = dummy_gtable ;
-	cur_font = dummy_font ;
-	h = 0 ; v = 0 ; w = 0 ; x = 0 ; y = 0 ; z = 0 ;
-	stack = [] ; color = 0x000000 ; color_stack = [];
+    failwith "Render_page is deprecated.";;
 
-	alpha = 1.0; alpha_stack = [];
-	blend = Dev.Normal; blend_stack = [];
-	epstransparent = false; epstransparent_stack = [];
-	transition= Transitions.TransNone; transition_stack = [];
-        tpic_pensize = 0.0; tpic_path = []; tpic_shading = 0.0;
-        status =
-        if not !Misc.dops then PS false
-        else 
-          begin match page.Dvi.status with
-          | Dvi.Unknown -> Unknown
-          | Dvi.PS b -> PS b
-          end;
-        headers = [];
-        html = None;
-        draw_html = [];
-        checkpoint = 0;
-      } in
-    Dev.set_color st.color ;
-    Dev.set_transition st.transition ;
-    (* To check whether printing of the page should be cancelled *)
-    st.checkpoint <- 0;
-    let check() =
-      begin try Dev.continue() with
-      | Dev.Stop as exn -> 
-          if num > 0 then raise exn
-          else
-            match st.status with
-            | PS b -> raise exn
-            | Scanning _ -> ()
-            | Unknown -> st.status <- Scanning false
-      end; 
-      st.checkpoint <- checkpoint_frequency in
-
-    let eval st x =
-      st.checkpoint <- st.checkpoint -1 ;
-      eval_command st x; 
-      if st.checkpoint < 0 then check() in
-    if st.status = PS true then 
-      newpage [] st  (mag *. dpi) xorig yorig;
-    Dvi.page_iter (eval st) page;
-    (* If Postscript was encountered abruptly, the mode turned into scanning
-       mode, and the page must be reprinted in PS mode *)
-    begin
-      match st.status with
-      | PS _ -> ()
-      | Unknown ->
-          if st.headers <> [] then
-            Dev.add_headers (find_prologues (List.rev st.headers));
-          cdvi.base_dvi.Dvi.pages.(num).Dvi.status <- Dvi.PS false;
-      | Scanning false -> assert false
-      | Scanning true -> 
-          let headers = 
-            if st.headers = [] then []
-            else find_prologues (List.rev st.headers) in
-          let st' =
-            { st with
-              status = PS true;
-              h = 0 ; v = 0 ; w = 0 ; x = 0 ; y = 0 ; z = 0 ;
-              stack = [] ; color = 0x000000 ; color_stack = [] } in
-          Dev.clear_dev();
-          newpage headers st (mag *. dpi) xorig yorig;
-          cdvi.base_dvi.Dvi.pages.(num).Dvi.status <- Dvi.PS true;
-          check();
-          Dvi.page_iter (eval st') page
-    end;
-    check()
 
   let render_step cdvi num dpi xorig yorig =
     proc_clean ();
@@ -1155,6 +1118,15 @@ let set_rule st a b =
       invalid_arg "Driver.render_step" ;
     let mag = float cdvi.base_dvi.Dvi.preamble.Dvi.pre_mag /. 1000.0
     and page = cdvi.base_dvi.Dvi.pages.(num) in
+    let status =
+      let headers = ref [] 
+      and xrefs = cdvi.base_dvi.Dvi.xrefs in
+      let s = scan_special_page cdvi (headers,xrefs) num
+      in if !headers <> [] then
+        Dev.add_headers (find_prologues (List.rev !headers));
+        s
+    in
+    if not !Misc.dops then status.Dvi.hasps <-false;
     let st =
       { cdvi = cdvi ;
 	sdpi = int_of_float (mag *. ldexp dpi 16) ;
@@ -1170,44 +1142,17 @@ let set_rule st a b =
 	epstransparent = false; epstransparent_stack = [];
 	transition= Transitions.TransNone; transition_stack = [];
         tpic_pensize = 0.0; tpic_path = []; tpic_shading = 0.0;
-        status = 
-        if not !Misc.dops then PS false
-        else 
-          begin match page.Dvi.status with
-          | Dvi.Unknown -> Scanning false
-          | Dvi.PS b -> PS b
-          end;
+        status = status;
         headers = [];
         html = None;
         draw_html = [];
         checkpoint = 0;
       } in
+    setup_bkgd st.status; (* RDC apply the background preferences in Dev *)
+    Dev.clear_dev();      (* and redraw the background                   *)
     Dev.set_color st.color ;
     Dev.set_transition st.transition ;
-    (* if page status is unknow, we first scan the page without drawing.
-       since, unfortunately, Postscript headers seem to appear anywhere *)
-    if scanning st then
-        begin
-          Dvi.page_iter (scan_command st) page;
-          match st.status with 
-          | Scanning false ->
-              if st.headers <> [] then
-                Dev.add_headers
-                  (find_prologues (List.rev st.headers));
-              cdvi.base_dvi.Dvi.pages.(num).Dvi.status <- Dvi.PS false;
-              st.status <- PS false;
-          | Scanning true -> 
-              let headers = 
-                if st.headers = [] then []
-                else find_prologues (List.rev st.headers) in
-              st.status <- PS true;
-          (* other variables should not be affected here *) 
-              Dev.clear_dev();
-              newpage headers st  (mag *. dpi) xorig yorig;
-              cdvi.base_dvi.Dvi.pages.(num).Dvi.status <- Dvi.PS true;
-          | _ -> assert false
-        end
-    else if st.status = PS true then 
+    if st.status.Dvi.hasps then 
       newpage [] st  (mag *. dpi) xorig yorig;
     st.checkpoint <- 0;
     let check() =
@@ -1232,25 +1177,22 @@ let set_rule st a b =
     List.iter (fun (n, _) -> unfreeze_font cdvi n)
       cdvi.base_dvi.Dvi.font_map
 
-  let ps_true = Dvi.PS true 
-
-  let scan_special cdvi page headers s =
-    if has_prefix "header=" s then
-      let h = get_suffix "header=" s in
-      headers := h :: !headers
-    else if has_prefix "\" " s || has_prefix "ps: " s then
-      cdvi.base_dvi.Dvi.pages.(page).Dvi.status <- ps_true
-    else if
-      has_prefix "html:<A name=\"" s || has_prefix "html:<a name=\"" s then 
-      let name = String.sub s 14 (String.length s - 16) in
-      Hashtbl.add  cdvi.base_dvi.Dvi.xrefs name page
+    let scan_special_pages cdvi lastpage =
+      let headers = ref [] 
+      and xrefs = cdvi.base_dvi.Dvi.xrefs in
+      for n = 0 to min lastpage (Array.length cdvi.base_dvi.Dvi.pages) - 1 do
+        ignore (scan_special_page cdvi (headers,xrefs) n);
+      done ;
+      if !headers <> [] then
+        Dev.add_headers (find_prologues (List.rev !headers))
 
   let unfreeze_glyphs cdvi dpi =
     let mag = float cdvi.base_dvi.Dvi.preamble.Dvi.pre_mag /. 1000.0 in
     let sdpi = int_of_float (mag *. ldexp dpi 16)
     and mtable = ref dummy_mtable
     and gtable = ref dummy_gtable in
-    let headers = ref [] in
+    let headers = ref []
+    and xrefs = cdvi.base_dvi.Dvi.xrefs in
     let eval page = function
       |	Dvi.C_fnt n ->
 	  let (mt, gt) =
@@ -1263,8 +1205,10 @@ let set_rule st a b =
       |	Dvi.C_set code ->
 	  begin try ignore (Table.get !mtable code) with _ -> () end ;
 	  begin try ignore (Table.get !gtable code) with _ -> () end
-      | Dvi.C_xxx s ->
-          scan_special cdvi page headers s
+      | Dvi.C_xxx s -> 
+          prerr_endline "Scan_special is not yet properly implemented inside unfreeze_glyphs: should merge with scan_special_pages";
+          (* scan_special cdvi page headers s *)
+          ()
       |	_ -> () in
     for n = 0 to Array.length cdvi.base_dvi.Dvi.pages - 1 do
       mtable := dummy_mtable ;
@@ -1273,16 +1217,5 @@ let set_rule st a b =
     done ;
     if !headers <> [] then
       Dev.add_headers (Search.true_file_names [] (List.rev !headers))
-
-    let scan_specials cdvi lastpage =
-      let headers = ref [] in
-      let eval n = function
-          Dvi.C_xxx s -> scan_special cdvi n headers s;
-        | _ -> () in
-      for n = 0 to min lastpage (Array.length cdvi.base_dvi.Dvi.pages) - 1 do
-        Dvi.page_iter (eval n) cdvi.base_dvi.Dvi.pages.(n);
-      done ;
-      if !headers <> [] then
-        Dev.add_headers (Search.true_file_names [] (List.rev !headers))
 
 

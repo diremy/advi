@@ -15,6 +15,15 @@
  * details (enclosed in the file LGPL).
  *)
 
+
+(* Background information *)
+
+type bkgd_prefs = { mutable bgcolor: int; mutable bgimg: string option; mutable bgratio: Draw_image.ratiopts; mutable bgwhitetrans:bool}
+
+val copy_bkgd_data : bkgd_prefs -> bkgd_prefs -> unit
+val default_bkgd_data : unit -> bkgd_prefs
+val bkgd_data : bkgd_prefs
+
 (* Private glyphs *)
 
 type glyph ;;
@@ -65,9 +74,14 @@ val close_dev : unit -> unit ;;
 val clear_dev : unit -> unit ;;
 val set_bbox : (int * int * int * int) option -> unit ;;
 
+
 (* Drawing *)
 
 type color = int ;;
+
+type bgoption = BgColor of color | BgImg of string;;
+
+val set_bg_options : bgoption list -> unit;; (* Background  RDC *) 
 
 val set_color : int -> unit ;;
 val push_bg_color : int -> unit;;

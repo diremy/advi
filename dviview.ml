@@ -208,8 +208,9 @@ let parse_geometry str =
     let yoffset = parse_offset () in
     { width = width; height = height; xoffset = xoffset; yoffset = yoffset }
     with Failure _ -> invalid_arg "parse_geometry"
-        
+
 (*** Setting other parameters ***)        
+
 let attr =
   { geom = 
     { width = 0;
@@ -485,7 +486,7 @@ let redraw st =
   let () =
     try
       Dev.continue(); 
-      Dev.clear_dev () ;
+(*      Dev.clear_dev () ; (* RDC: moved inside render_step to properly handle backgorunds *) *)
 (*
    let blank_w = 20
    and blank_h = 20 in
@@ -533,7 +534,7 @@ let find_xref tag default st =
   with Not_found ->
     if st.frozen then
       begin
-        Drv.scan_specials st.cdvi max_int;
+        Drv.scan_special_pages st.cdvi max_int;
         st.frozen <- false;
         try Hashtbl.find st.dvi.Dvi.xrefs tag
         with Not_found ->
@@ -590,7 +591,7 @@ let exec_xref link =
 let page_start default st =   
   match !start_html with None -> default
   | Some html ->
-      Drv.scan_specials st.cdvi max_int;
+      Drv.scan_special_pages st.cdvi max_int;
       find_xref html default st
 
 let rec clear_page_stack max stack =
@@ -934,7 +935,7 @@ let main_loop filename =
   Dev.open_dev (Printf.sprintf " " ^ string_of_geometry attr.geom) ;
   set_bbox st;
   if st.page_no > 0 && !Misc.dops then
-    Drv.scan_specials st.cdvi st.page_no
+    Drv.scan_special_pages st.cdvi st.page_no
   else
     st.page_no <- page_start 0 st;
   redraw st;

@@ -1,7 +1,7 @@
 # advi - A DVI previewer
 # Copyright (C) 2000 Alexandre Miquel
 # Copyright (C) 2001 Alexandre Miquel, Jun Furuse, Xavier Leroy, Didier Rémy,
-#                    Alan Schmitt
+#		     Alan Schmitt
 # 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,7 @@ include Makefile.config
 COPTIONS = -g
 COPTOPTIONS = -unsafe -inline 9
 
-OCAMLC    = $(CAML)c $(COPTIONS)
+OCAMLC	  = $(CAML)c $(COPTIONS)
 OCAMLOPT  = $(CAML)opt $(COPTOPTIONS)
 # OCAMLOPT  = $(CAML)opt.opt -unsafe -inline 9 -ccopt -I
 OCAMLDEP  = $(CAML)dep
@@ -29,18 +29,17 @@ OCAMLDEP  = $(CAML)dep
 
 MLINCDIRS = $(CAMLIMAGESDIR)
 
-EXEC      = advi
+EXEC	  = advi
 
-MODULES   = config misc input symbol search \
-	    graphicsY11 drawps \
-            table pkfont ttfont jfm font glyph devfont dvi \
+MODULES	  = config misc input symbol search \
+	    graphicsY11 drawps draw_image \
+	    table pkfont ttfont jfm font glyph devfont \
 	    units dimension \
-	    gs transimpl grdev  driver dviview main
-
+	    gs transimpl grdev dvi driver dviview main
 LIBRARIES = graphics unix str $(CAMLIMAGESLIBS)
-CLIBS     = unix graphics
+CLIBS	  = unix graphics
 
-COBJS     = grY11.o
+COBJS	  = grY11.o
 
 CMO_OBJS  = $(addsuffix .cmo, $(MODULES))
 CMX_OBJS  = $(addsuffix .cmx, $(MODULES))
@@ -78,7 +77,7 @@ $(EXEC).opt: $(COBJS) $(CMX_OBJS)
 	$(OCAMLOPT) $(INCLUDES) $(OPT_OBJS) $(LINK_OPTS) -o $(EXEC).opt
 
 # config.ml:
-# 	configure
+#	configure
  
 drawps.ml: Makefile.config drawps_with_ps.ml drawps_without_ps.ml
 	rm -f drawps.ml
@@ -120,7 +119,7 @@ count:
 clean:
 	rm -f *.cm[oix] *.o $(EXEC) $(EXEC).opt *~ .depend *.log *.aux
 	rm -rf .advi test/.advi test/*.log test/*.aux test/*.dvi \
-        tex/.advi tex/*.log tex/*.aux tex/*.dvi
+	tex/.advi tex/*.log tex/*.aux tex/*.dvi
 
 veryclean:
 	rm -f Makefile.config config.cache config.log \

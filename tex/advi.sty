@@ -51,10 +51,11 @@
 
 \def\advi@embedpersistent#1#2#3#4{\mbox{\advi@special
   {advi: embed name="#1" type=persistent width=#2 height=#3 command="#4"}{\vbox to #3{\hbox to #2{}}}}}
-
 \def\advi@killembed#1{\advi@special
   {advi: kill name="#1"}}
-
+\def\advi@setbgcolor#1{\advi@special{advi: setbg col=#1}}
+\def\advi@setbgimage#1{\advi@special{advi: setbg img=#1}}
+\def\advi@resetbg#1{\advi@special{advi: setbg reset}}
 \def\advi@pause{\advi@special{advi: pause}}
 \def\advi@wait#1{\advi@special{advi: wait sec=#1}}
 \def\advi@play#1{\advi@special{advi: proc=#1 play}}
@@ -107,12 +108,10 @@ end
 \box\pst@hbox}%
 \pst@Verb{\tx@PutEnd}}}
 
-\ifadvi@ignore\else
 \@ifundefined {psput@special}{}
 {\let \psput@special \advi@psput@special
  \@ifundefined {ncput@iii}{}{\let \ncput@iii \advi@ncput@iii}%
  \advi@special {header=advi.pro}}
-\fi
 
 %%% Active DVI
 
@@ -186,9 +185,6 @@ end
 \advi@export \Advi \advi@begin \let \endAdvi \advi@end
 \advi@export \advi \advi@active
 
-\newenvironment{Record}[1]
-    {\def \advi@tag{#1}\advi@@start{\advi@tag}}
-    {\advi@@end{\advi@tag}}
 \advi@export \record \advi@record
 \advi@export \recplay \advi@recplay
 \advi@export \play \advi@play
@@ -200,6 +196,11 @@ end
 
 \advi@export \pause \advi@pause
 \advi@export \wait \advi@wait
+
+\advi@export \setbgcolor \advi@setbgcolor
+\advi@export \setbgimage \advi@setbgimage
+\advi@export \resetbg \advi@resetbg
+
 \advi@export \tag \advi@recplay
 \advi@export \hide \advi@record
 \advi@export \hilight \advi@hilight

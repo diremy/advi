@@ -191,17 +191,70 @@ let make_glyph g =
     
 let get_glyph g = g.glyph;;
 
+(* The Background preferences                                   *)
+(* to be extended, should contain the image, gradients etc. RDC *)
 
-let default_bg_color = Graphics.white;;
-let bg_color = ref  default_bg_color;;
+type bkgd_prefs = { mutable bgcolor: int; 
+		    mutable bgimg: string option; 
+		    mutable bgratio: Draw_image.ratiopts;
+		    mutable bgwhitetrans:bool}
+;;
+let default_bkgd_data () = {bgcolor=Graphics.white;
+			    bgimg=None;
+			    bgratio=Draw_image.ScaleY;
+			    bgwhitetrans=false}
+;;
+
+let copy_bkgd_data s d = d.bgcolor <- s.bgcolor;
+                         d.bgimg   <- s.bgimg;
+                         d.bgratio <- s.bgratio;
+                         d.bgwhitetrans <- s.bgwhitetrans
+;;
+
+let bkgd_data = default_bkgd_data ()
+;;
+
+(* TODO: handle ratio and whitetransparent preferences *)
+
+let draw_bkgd_img (w,h) x0 y0 = 
+  match bkgd_data.bgimg with 
+    None -> () 
+  | Some fn -> Draw_image.f 
+                fn 
+                bkgd_data.bgwhitetrans 
+                1.0 
+                None 
+                bkgd_data.bgratio
+                (w,h) x0 y0 
+;;
+
+let default_bg_color = ref bkgd_data.bgcolor
+;;
+
+type bgoption = BgColor of color | BgImg of string
+;;
+
+let set_bg_option = function
+    BgColor c ->bkgd_data.bgcolor <- c; prerr_endline ("Color: "^string_of_int c);
+                default_bg_color := c
+  | BgImg fn -> bkgd_data.bgimg <- Some fn; prerr_endline ("Image: "^fn);
+                    (* draw it! *)
+;;
+
+let set_bg_options l = List.iter set_bg_option l
+;;
+
+let bg_color = ref !default_bg_color;;
 let bg_colors = ref [];;
 let push_bg_color c =
   bg_colors := !bg_color :: !bg_colors;
   bg_color := c;;
 let pop_bg_color() =
   match !bg_colors with
-  | h :: t -> bg_color := h; bg_colors := t
-  | [] -> bg_color := default_bg_color;;
+  | h::t -> bg_color := h; bg_colors := t
+  | [] -> bg_color := !default_bg_color
+;;
+
 
 let background_colors = ref [];;
 let add_background_color x y w h c =
@@ -220,7 +273,7 @@ let get_bg_color x y w h =
   else
     begin
       sync dvi;
-      if !psused then
+      if !psused || (bkgd_data.bgimg <> None) then
         let c = Graphics.point_color (x+1) (y+1) in
         if Graphics.point_color (x+w-1) (y+h-1) = c then c
         else Graphics.white
@@ -929,7 +982,7 @@ let clear_dev () =
   Graphics.display_mode !display_mode ;
   Graphics.clear_graph ();
   H.clear(); 
-  bg_color := default_bg_color;
+  bg_color := !default_bg_color; (* reference modified via \setbgcolor . RDC *)
   bg_colors := [];
   background_colors := [];
   Symbol.clear();
@@ -937,6 +990,11 @@ let clear_dev () =
   size_y := Graphics.size_y () ;
   xmin := 0 ; xmax := !size_x ;
   ymin := 0 ; ymax := !size_y ;
+  (* here we add the background setting. RDC *)
+  Graphics.set_color !bg_color;
+  Graphics.fill_rect !xmin !ymin !xmax !ymax;
+  (* now try to handle background images *)
+  draw_bkgd_img (!xmax,!ymax) 0 0
 ;;
 
 (*** Events ***)
