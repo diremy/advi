@@ -197,9 +197,6 @@ let input_char_types ic len =
   for i = 0 to len - 1 do
     let kcode = input_int16 ic in
     let chartype = input_int16 ic in
-(*
-    prerr_endline (Printf.sprintf "%x=%d" kcode chartype);
-*)
     Hashtbl.add tbl kcode chartype
   done;
   tbl
@@ -280,9 +277,6 @@ let input_jfm ic =
 ;;
 
 let load_jfm_file filename =
-(*
-  prerr_endline ("loading " ^ filename);
-*)
   let ic = open_in_bin filename in
   let jfm = input_jfm ic in
   begin try
@@ -294,27 +288,21 @@ let load_jfm_file filename =
   close_in ic;
 (*
   prerr_endline "done";
-*)
-
-(*
   Hashtbl.iter (fun k v ->
     prerr_endline (Printf.sprintf "%c%c %x %f\n" 
 	     (char_of_int (k / 256 + 0x80)) (char_of_int (k mod 256 + 0x80))
 	     k 
-	     jfm.widths.(jfm.char_infos.(v).width_index))) jfm.char_types;
-*)
+	     jfm.widths.(jfm.char_infos.(v).width_index))) jfm.char_types; *)
   jfm
 ;;
 
 let find_width jfm kcode =
   let char_type = try Hashtbl.find jfm.char_types kcode with Not_found -> 0 in
   let char_info = jfm.char_infos.(char_type + jfm.preamble.bc) in
-(*
-  prerr_endline (Printf.sprintf "%c%c %d" 
+(* prerr_endline (Printf.sprintf "%c%c %d" 
 	     (char_of_int (kcode / 256 + 0x80)) 
 	     (char_of_int (kcode mod 256 + 0x80))
-	     jfm.widths.(char_info.width_index));
-*)
+	     jfm.widths.(char_info.width_index)); *)
   jfm.widths.(char_info.width_index)
 ;;
 

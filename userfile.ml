@@ -33,8 +33,8 @@ let normalize path =
     | x :: xs ->
         begin match x :: remove xs with
         | x :: [] -> [x]
-        | "." :: xs -> xs (* remove . *)
-        | x :: ".." :: xs when x <> ".." -> xs (* remove dir/.. *)
+        | "." :: xs -> xs (* remove "." *)
+        | x :: ".." :: xs when x <> ".." -> xs (* remove "dir/.." *)
         | l -> l
         end
     | [] -> [] in
@@ -230,7 +230,8 @@ let set_advi_cache_dir d =
 Options.add
   "-cache-dir"
   (Arg.String set_advi_cache_dir)
-  "STRING\tSet the cache directory (default /tmp)";;
+  "<dir>: set the cache directory to <dir>,\
+  \n\t (the default cache directory is \"/tmp\").";;
 
 (* Get the actual advi cache directory.
    If it has not yet been set (i.e. it was not specified on the command
@@ -260,7 +261,8 @@ Rc.at_init init_advi_cache_dir;;
 (* Writing page current number to the file advi_page_number_file. *)
 let write_page_number =
  Options.flag false "-page-number"
-  "Ask advi to write the current page number in a file (default is no)";;
+  ": ask Active-DVI to write the current page number in a file,\
+  \n\t (the default is to skip writing page number).";;
 
 let advi_page_number_file = ref None;;
 
@@ -277,10 +279,9 @@ let get_page_number_file () =
 
 Options.add "-page-number-file"
  (Arg.String set_page_number_file)
- "STRING\tSet the name of the file where \
-  advi could write the current page number\n\
-  \t(default is file \"advi_page_number\" in the cache directory\n\
-  \t(default \"~/.advi\"))";;
+ "<file>: set the name of the file where \
+  \n\t Active-DVI could write the current page number,\
+  \n\t (the default file is \"advi_page_number\" in the cache directory).";;
 
 let open_append fname =
   let oc =
@@ -322,7 +323,8 @@ Rc.at_init init_advi_page_number_file;;
   for instance the clock or a sound track. *)
 let write_page_timing =
  Options.flag false "-page-timing"
-  "Ask advi to write the current page timing in a file (default is no)";;
+  "Ask Active-DVI to write the current page timing in a file,\
+  \n\t (the default is not to write timings).";;
 
 let advi_page_timing_file = ref None;;
 
@@ -341,10 +343,9 @@ let get_page_timing_file () =
 
 Options.add "-page-timing-file"
  (Arg.String set_page_timing_file)
- "STRING\tSet the name of the file where \
-  advi could write the current page timing\n\
-  \t(default is file \"advi_page_timing\" in the cache directory\n\
-  \t(default \"~/.advi\"))";;
+ "<file>: set the name of the file where \
+  \n\t Active-DVI could write the page timings,\
+  \n\t (the default file is \"advi_page_timing\" in the cache directory).";;
 
 let save_page_timing n =
  if !write_page_timing then

@@ -22,12 +22,14 @@ let debugs = Misc.debug_endline;;
 let antialias =
   Options.flag false
     "-A"
-    "Set Postscript antialiasing (default is unset)";;
+    ": ask Active-DVI to use PostScript antialiasing,\
+    \n\t (the default is not to use PostScript antialiasing).";;
 
 let pstricks =
   Options.flag false
     "-pstricks"
-    "Show moveto";;
+    ": ask Active-DVI to show moveto,\
+    \n\t (the default is not to show moveto).";;
 
 let showing_ps = ref false;;
 let showps s =
@@ -35,7 +37,8 @@ let showps s =
 
 Options.add
   "--showps" (Arg.Set showing_ps)
-  "\tPrint a copy of Postscript sent to gs to stdout";;
+  ": ask advi to print to stdout a copy\
+  \n\t of the PostScript program sent to gs.";;
 
 let pspage = ref 0;;
 
@@ -419,7 +422,7 @@ class gv =
           let gs = new gs () in
           if headers = [] then headers <-  texc_special_pro self;
           (* should take matrix as a parameter ? *)
-          showps "%!PS-Adobe-2.0\n%%Creator: advi\n%!";
+          showps "%!PS-Adobe-2.0\n%%Creator: Active-DVI\n%!";
           gs # line "[1 0 0 -1 0 0] concat";
           List.iter (gs # load_header) headers;
           gs # line "/floatstring 20 string def";

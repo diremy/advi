@@ -30,7 +30,7 @@ let flag initial option_name message =
   let r = ref initial in
   add option_name
     (if initial then Arg.Clear r else Arg.Set r)
-    ("\t" ^ message);
+    message;
   r;;
 
 (* Another special case: debug options *)
@@ -40,7 +40,7 @@ let make_debug r s =
 
 let debug option_name message =
   let r = ref false in
-  add option_name (Arg.Set r) ("\t" ^ message);
+  add option_name (Arg.Set r) message;
   make_debug r;;
 
 (* To print debugging messages. *)
@@ -55,7 +55,9 @@ Misc.forward_debug_endline := debug_endline;;
 let pson = 
   if Config.have_gs then
     flag true
-      "-nogs" "Turn off display of inlined Postscript"
+      "-nogs"
+      ": turn off the display of inlined Postscript.\
+      \n\t (the default is to display inlined Postscript)."
   else ref false;;
 let dops = ref !pson;;
 
@@ -66,7 +68,8 @@ let set_global_display_mode b =
 
 add "-fg"
  (Arg.Unit (fun () -> set_global_display_mode true))
- "\tDraw in the foreground";;
+ ": set the drawing policy to ``screen only'',\
+ \n\t (the default is to draw both on the screen and in the memory).";;
 
 add "-w"
  (Arg.String
@@ -74,7 +77,8 @@ add "-w"
      | "a" -> Misc.set_warnings false
      | "A" -> Misc.set_warnings true
      | s -> raise (Arg.Bad (Printf.sprintf "-w %s is unknown" s))))
- "STRING\tA/a enable/disable all warnings";;
+ "<flags>: A/a enable/disable all warnings,\
+ \n\t (the default is \"A\", to enable all warnings).";;
 
 (* Command line options *)
 

@@ -87,7 +87,9 @@ Options.add
     (fun () ->
       if !policy <> Exec then Misc.warning "Setting policy to -exec";
       set_policy Exec))
-  "\tExec mode: allow all external applications to be executed";;
+  ": set the security policy to \"Exec\" mode, i.e.\
+  \n\t all embedded applications are automatically executed.\
+  \n\t Unless explicitely required, this mode does not apply.";;
 
 Options.add
   "-safer"
@@ -95,7 +97,9 @@ Options.add
     (fun () ->
       if !policy <> Safer then Misc.warning "Setting policy to -safer";
       set_policy Safer))
-  "\tSafer mode: external applications are never launched";;
+  ": set the security policy to \"Safer\" mode, i.e.\
+  \n\t external applications are simply ignored.\
+  \n\t Unless explicitely required, this mode does not apply.";;
 
 Options.add
   "-ask"
@@ -103,8 +107,9 @@ Options.add
     (fun () ->
       if !policy <> Ask then Misc.warning "Setting policy to -ask";
       set_policy Ask))
-  "\tAsk mode: launching an external application requires confirmation\n\
-   \t(this is the default)";;
+  ": set the security policy to \"Ask\" mode, i.e.\
+  \n\t launching an external application requires explicit confirmation\
+  \n\t (this is the default policy).";;
 
 let cannot_execute_command command_invocation =
     Misc.warning
@@ -114,7 +119,7 @@ let cannot_execute_command command_invocation =
           For security reasons, it was not executed.\n\
           Hence the presentation could be strange or incomplete.\n\
           To enable execution of embedded applications,\n\
-          please rerun advi with option -ask or -exec."
+          please rerun Active-DVI with option -ask or -exec."
          command_invocation);;
 
 (* Opening a terminal to ask something to the user. *)
@@ -235,4 +240,6 @@ let dump_whiterun_commands () =
 Options.add
   "-n"
   (Arg.Unit (fun () -> whiterun_flag := true))
-  "\tEchoes commands, but does not execute them.";;
+  ": ask Active-DVI to run in \"fake mode\", i.e.\
+  \n\t to just echo the name of embedded commands\
+  \n\t (there is no previewing nor embedded commands execution).";;

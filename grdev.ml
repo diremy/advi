@@ -22,7 +22,8 @@ open Misc;;
 let ignore_background =
     Options.flag false
     "--ignore_background"
-    "\tIgnore background for antialiasing";;
+    ": ignore background for antialiasing,\
+    \n\t (the default is to look at the background during antialiasing).";;
 
 let glyph_gamma = ref 1.0;;
 
@@ -32,7 +33,8 @@ Options.add
     if x <= 0.0 then Misc.warning "gamma value must be positive"
     else glyph_gamma := 1.0 /. x))
   (Printf.sprintf
-     "FLOAT (>0)\tGamma correction of glyphs (default %f)" !glyph_gamma)
+     "<float> (>0): set to <float> the gamma correction of glyphs,\
+     \n\t (the default correction is %f)." !glyph_gamma)
 ;;
 
 type color = Graphics.color;;
@@ -272,14 +274,16 @@ let set_bgcolor_string s =
 Options.add
   "-bgcolor"
   (Arg.String set_bgcolor_string)
-  "STRING\tSet default background color (Named or RGB)";;
+  "<string>: set the default background color (named, RGB, or X),\
+  \n\t (the default background is \"white\").";;
 
 let set_fgcolor_string = set_default_color_string default_fgcolor;;
 
 Options.add
   "-fgcolor"
   (Arg.String set_fgcolor_string)
-  "STRING\tSet default foreground color (Named or RGB)";;
+  "<string>: set the default foreground color (named, RGB, or X),\
+  \n\t (the default foreground is \"black\").";;
 
 let reverse_colors () =
   let c = fgcolor () in
@@ -289,8 +293,8 @@ let reverse_colors () =
 Options.add
   "-rv"
   (Arg.Unit reverse_colors)
-  "\tReverse video is simulated by swapping the \
-     foreground and background colors.";;
+  ": ask for reverse video\
+  \n\t (simulated by exchanging the foreground and background colors).";;
 
 let blit_bkgd_data s d =
   d.bgcolor <- s.bgcolor;
@@ -676,7 +680,9 @@ module A : ACTIVE =
 
 (* *)
 let editing =
-  Options.flag false "-edit" "Start in edit mode";;
+  Options.flag false "-edit"
+  ": start Active-DVI in edit mode,\
+  \n\t (the default is not to start in edit mode).";;
 
 module H =
   struct

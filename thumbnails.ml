@@ -31,7 +31,9 @@ let save_gr_image fname x y nw nh =
 
 let thumbnails =
  Options.flag false "-thumbnails"
- "Create thumbnails for your slides and write them into cachedir.";;
+ ": create thumbnails for your slides\
+ \n\t and write them into cachedir,\
+ \n\t (the default is to skip thumbnails construction).";;
 
 let thumbnails_size_w = ref 24;;
 let thumbnails_size_h = ref 32;;
@@ -43,7 +45,8 @@ let set_thumbnails_size s =
 Options.add
  "-thumbnails-size"
  (Arg.String set_thumbnails_size)
- "STRING\tFix thumbnails size (default 24x32).";;
+ "<geom>: set the thumbnails geometry size to <geom>,\
+ \n\t (the default geometry is \"24x32\").";;
 
 let save n =
   if !thumbnails then

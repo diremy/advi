@@ -17,17 +17,25 @@
 
 (* $Id$ *)
 
-let pauses = Options.flag true "-nopauses" "Switch pauses off";;
+let pauses =
+  Options.flag true "-nopauses"
+  ": switch pauses off,\
+  \n\t (the default is to wait for specified pauses).";;
 let fullwidth =
-  Options.flag false "-fullwidth" "Adjust size to width";;
+  Options.flag false "-fullwidth"
+  ": adjust size to full width,\
+   \n\t (the default is not to adjust to full width).";;
 let bounding_box =
-  Options.flag false "-bbox" "Show the bounding box";;
+  Options.flag false "-bbox"
+  ": show the bounding box,\
+  \n\t (the default is to hide the bounding box).";;
 
 let start_page = ref 0;;
 Options.add
   "-page"
   (Arg.Int (fun i -> start_page := i))
-  "INT\tMake advi start at page INT";;
+  "<num>: start preview to page number <num>,\
+  \n\t (the default starting page is page number 0).";;
 
 let starting_page npages =
  if !start_page > 0 then min !start_page npages - 1 else 0;;
@@ -36,52 +44,58 @@ let start_html = ref None;;
 Options.add
 "-html"
 (Arg.String (fun s -> start_html := Some s))
-  "STRING\tMake advi start at html reference of name STRING";;
+  "<anchor>: ask Active-DVI to start at HTML reference named <anchor>.";;
 let debug_pages =
   Options.debug
     "--debug_pages"
-    "Debug page motion";;
+    ": debug page motion.";;
 
 let browser = ref "netscape-communicator";;
 Options.add
   "-browser"
   (Arg.String (fun s -> browser := s))
-  "STRING\tCommand to call the browser (default netscape-communicator)";;
+  "<com>: set the HTML files viewer command to <com>,\
+  \n\t (the default is \"netscape-communicator\").";;
 
 let pager = ref "xterm -e less";;
 Options.add
   "-pager"
   (Arg.String (fun s -> pager := s))
-  "STRING\tCommand to call the pager (default xterm -e less)";;
+  "<com>: set the text files viewer command to <com>,\
+  \n\t (the default is \"xterm -e less\").";;
 
 let pdf_viewer = ref "xpdf";;
 Options.add
   "-pdf-viewer"
   (Arg.String (fun s -> pdf_viewer := s))
-  "STRING\tCommand to view PDF files (default xpdf)";;
+  "<com>: set the PDF files viewer command to <com>,\
+  \n\t (the default is \"xpdf\").";;
 
 let ps_viewer = ref "gv";;
 Options.add
   "-ps-viewer"
   (Arg.String (fun s -> ps_viewer := s))
-  "STRING\tCommand to view PS files (default gv)";;
+  "<com>: set the PostScript files viewer command to <com>,\
+  \n\t (the default is \"gv\").";;
 
 let image_viewer = ref "xv";;
 Options.add
   "-image-viewer"
   (Arg.String (fun s -> image_viewer := s))
-  "STRING\tCommand to display image files (default xv)";;
+  "<com>: set the image files viewer command to <com>,\
+  \n\t (the default is \"xv\").";;
 
 let film_viewer = ref "mplayer";;
 Options.add
   "-film-viewer"
   (Arg.String (fun s -> film_viewer := s))
-  "STRING\tCommand to display film files (default mplayer)";;
+  "<com>: set the movie files player command to <com>,\
+  \n\t (the default is \"mplayer\").";;
 
 let click_turn_page =
   Options.flag false
     "-click-turn"
-    "Turn pages with mouse clicks (see the doc)";;
+    ": turn pages with mouse clicks (see the doc).";;
 
 let page_stack_to_string page stack =
   let stack = String.concat " " (List.map string_of_int stack) in
@@ -97,20 +111,23 @@ let set_scale x =
 Options.add
   "-scalestep"
   (Arg.Float set_scale)
-  "REAL\tScale step for '<' and '>' (default sqrt (sqrt (sqrt 2.0)))";;
+  "<float>: set the step used by '<' and '>' for scaling the page,\
+  \n\t (the default is \"sqrt (sqrt (sqrt 2.0))\").";;
 
 let autoresize = ref true;;
 Options.add
   "-noautoresize"
   (Arg.Clear autoresize)
-  "\tPrevents scaling from resizing the window (done if geometry is provided)"
+  ": prevents scaling the page from resizing the window,\
+  \n\t (automatically set when the geometry is specified)."
 ;;
 
 let autoscale = ref true;;
 Options.add
   "-noautoscale"
   (Arg.Clear autoscale)
-  "\tPrevents resizing the window from scaling (done if geometry is provided)"
+  ": prevents resizing the window from scaling the page,\
+  \n\t (automatically set when the geometry is specified)."
 ;;
 
 let dpi_resolution = ref 72.27;;
@@ -119,7 +136,8 @@ let set_dpi_resolution r = dpi_resolution := max r 72.27;;
 Options.add
   "-resolution"
   (Arg.Float set_dpi_resolution)
-  "REAL\tDpi resolution of the screen (min 72.27)))";;
+  "<float>: set the dpi resolution of the screen,\
+  \n\t (the default (and minimum value) is 72.27))).";;
 
 module Symbol = Grdev.Symbol;;
 
@@ -533,7 +551,10 @@ let thumbnail_limit = ref 5;;
 Options.add
   "-thumbnail-scale"
   (Arg.Int (fun i -> thumbnail_limit := i))
-  "INT\tSet the number of thumbname per line and column to INT";;
+  (Printf.sprintf
+     "<int>: set the number of thumbnails per line\
+     \n\t and column to <int>,\
+     \n\t (the default number is %d)." !thumbnail_limit);;
 
 let xrefs st =
   if st.frozen then

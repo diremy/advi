@@ -20,7 +20,8 @@
 let show_busy =
     Options.flag true
     "-nowatch"
-    "\tDon't display a watch when busy";;
+    ": don't display a watch when busy,\
+    \n\t (the default is to display it).";;
 
 let busy_delay = ref 0.5;;
 
@@ -28,7 +29,8 @@ Options.add
   "-watch"
   (Arg.Float (fun x -> busy_delay := x))
   (Printf.sprintf
-     "FLOAT\tDelay before the watch cursor appears (default %fs)" !busy_delay);;
+     "<delay>: set the delay before the watch cursor appears to <delay>,\
+     \n\t (the default delay is %fs)." !busy_delay);;
 
 type busy =
    | Free | Busy | Pause | Disk | Question | Selection | Move

@@ -30,7 +30,9 @@ let scratch_line_color = ref G.red;;
 let set_scratch_line_color s = scratch_line_color := Dvicolor.parse_color s;;
 Options.add "-scratch-line-color"
  (Arg.String set_scratch_line_color)
- "INT\tSet the color of the pen used when scratching slides (default red)"
+ "<color>: set the color of the pen used\
+ \n\t when scratching slides,\
+ \n\t (the default scratch pen color is red)."
 ;;
 
 let color_incr = ref 10;;
@@ -50,7 +52,9 @@ let set_scratch_line_width i = if i > 0 then scratch_line_width := i;;
 Options.add "-scratch-line-width"
  (Arg.Int set_scratch_line_width)
  (Printf.sprintf
-   "INT\tSet the width of the pen used when scratching slides (default %i)"
+   "<int>: set the width of the pen used\
+   \n\t when scratching slides,\
+   \n\t (the default scratch pen width is %i)."
    default_scratch_line_width)
 ;;
 
@@ -63,7 +67,9 @@ let scratch_font_color = ref G.red;;
 let set_scratch_font_color s = scratch_font_color := Dvicolor.parse_color s;;
 Options.add "-scratch-font-color"
  (Arg.String set_scratch_font_color)
- "STRING\tSet the color of the font used when scratching slides (default red)"
+ "<color>: set the color of the font used\
+ \n\t when scratching slides,\
+ \n\t (the default scratch font color is \"red\")."
 ;;
 
 let scratch_font =
@@ -71,7 +77,9 @@ let scratch_font =
 let set_scratch_font s = scratch_font := s;;
 Options.add "-scratch-font"
  (Arg.String set_scratch_font)
- "STRING\tSet the font used when scratching slides (default times bold)"
+ "<font>: set the font used when scratching slides,\
+ \n\t (the default scratch font is the X font specification\
+ \n\t \"-*-times-bold-r-normal--18-180-75-75-p-99-iso8859-1\")."
 ;;
 
 let end_write () = raise Exit;;

@@ -20,7 +20,9 @@
 open Misc;;
 
 let active =
-  Options.flag true "-passive" "Cancel all advi-effects";;
+  Options.flag true "-passive"
+  ": cancel all Active-DVI effects,\
+  \n\t (the default is to play all effects).";;
 let toggle_active () = active := not !active;;
 
 let with_active b f x =
@@ -946,7 +948,9 @@ let wait_special st s =
 let inherit_background_info =
   Options.flag false
     "-inherit-background"
-    "\tBackground options are inherited from previous page";;
+    ": the background options are inherited\
+    \n\t from the previous page,\
+    \n\t (the default is not to inherit background settings).";;
 
 let setup_bkgd st =
   (* propagate bkgd preferences to graphics device *)

@@ -95,7 +95,7 @@ let reload_database () =
     if len > 0 && line.[0] <> '%' then begin
       if line.[len - 1] = ':'
       then curr_dir := String.sub line 0 (len - 1)
-      else Hashtbl.add database_table line (!curr_dir ^ "/" ^ line)
+      else Hashtbl.add database_table line (Filename.concat !curr_dir line)
     end
   done with
   | End_of_file -> close_in ch
@@ -117,7 +117,7 @@ let database_font_path fontname dpi =
   reload_if_changed_database ();
   let name = Printf.sprintf "%s.%dpk" fontname dpi in
   let path = Hashtbl.find database_table name in
-  Config.texdir_path ^ "/" ^ path
+  Filename.concat Config.texdir_path path
 ;;
 
 let true_file_name options file =
