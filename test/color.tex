@@ -1,0 +1,53 @@
+\documentclass[12pt]{article}
+
+% You need graphics package
+\usepackage{color}
+\usepackage{advi}
+
+\begin{document}
+
+
+\verb"\advibg{color=yellow}"
+\advibg{color=yellow}
+
+
+\newpage
+
+%\advibg{color=[named]yellow}
+
+\verb"\advibg{color=[named]yellow}" ne marche plus, il faut dire Yellow.
+
+
+\newpage
+
+\verb"\advibg{color=[named]Yellow}"
+\advibg{color=[named]Yellow}
+
+
+\newpage
+
+\advibg{color=[named]BlueViolet}
+\verb"\advibg{color=[named]BlueViolet}"
+
+
+\newpage
+
+\verb"\advibg{color=[cmyk]{1,0,1,0}}"
+
+\bigskip
+
+Ici \verb"\advibg{color=[cmyk]1,0,1,0}" n'est pas possible car la , est le
+séparateur de champ.
+
+\advibg{color=[cmyk]{1,0,1,0}}
+
+
+\newpage
+
+Même chose avec rgb:
+
+\verb"\advibg{color=[rgb]{1,0,1,0}}"
+
+\advibg{color=[rgb]{1,0,1}}
+
+\end{document}
