@@ -180,7 +180,16 @@ else
 fi
 
 AC_PATH_XTRA
-WITH_X="$X_LIBS $X_PRE_LIBS -lX11 $X_EXTRA_LIBS"
+
+dnl Check for xinerama support
+
+AC_CHECK_HEADERS(X11/extensions/Xinerama.h)
+if ! test "X$ac_cv_header_X11_extensions_Xinerama_h" = "X"; then
+HAVE_XINERAMA="-DHAVE_XINERAMA"
+XINE_LIBS="-lXinerama -lXext"
+fi
+
+WITH_X="$X_LIBS $X_PRE_LIBS $XINE_LIBS -lX11 $X_EXTRA_LIBS"
 
 dnl Resources location
 ADVI_LOC=`pwd`
@@ -204,6 +213,7 @@ AC_SUBST(HAVE_LABLTK)
 AC_SUBST(LABLTKDIR)
 AC_SUBST(LABLTKLIB)
 AC_SUBST(INSTALLTARGET)
+AC_SUBST(HAVE_XINERAMA)
 
 dnl BUILD OUR OWN LIBDIR
 myprefix=$prefix
