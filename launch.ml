@@ -16,7 +16,7 @@
 (***********************************************************************)
 
 (* Unix command line parser *)
-let pase_shell_command = Rc.argv_of_string;;
+let parse_shell_command = Rc.argv_of_string;;
 
 (* Handling forking problems: only father process can call the at_exit
    function, sons of the main process must leave without calling it.
@@ -103,7 +103,8 @@ let ask_to_launch command command_invocation =
  let xc, yc =
   (Graphics.size_x () - wt) / 2, (Graphics.size_y () - ht) / 2 in
 
- prerr_endline "Asking before launching";
+ (*prerr_endline "Asking before launching";*)
+
  let t =
    make_term_gen
      Graphics.green Graphics.black
@@ -127,12 +128,12 @@ let can_execute_table = Hashtbl.create 11;;
 
 let can_execute command_invocation command_tokens =
   let command = command_tokens.(0) in
-prerr_endline command;
+  (*prerr_endline command;*)
   try Hashtbl.find can_execute_table command
   with
   | Not_found ->
       let b = can_launch command command_invocation in
-prerr_endline (Printf.sprintf "can = %b" b);
+      (*prerr_endline (Printf.sprintf "can = %b" b);*)
       Hashtbl.add can_execute_table command b;
       b;;
 
