@@ -12,7 +12,7 @@ Active-DVI FAQ
 
 <DL>
 
-<DT><STRONG>Y-a-t-il une version Win32 ?</STRONG>
+<DT><STRONG>Existe-t-il une version Win32 ?</STRONG>
  <DD>Réponse: <I>Malheureusement, non.</I>
  Toutefois, vous pouvez utiliser le CD-ROM <I>DemoLinux</I> qui
 contient une version d'Active-DVI: si vous pouvez rebooter la machine
@@ -31,7 +31,7 @@ fenêtre d'Active-DVI!</I>
 <DT><STRONG>Comment centrer le transparent en mode plein écran ?</STRONG>
  <DD>Réponse: <I>Utilisez la souris pour déplacer la boîte (bounding
 box) qui contient le transparent: en appuyant sur la touche contrôle
-et le boutton gauche de la souris le contour de la boîte apparaît; il
+et le bouton gauche de la souris le contour de la boîte apparaît; il
 vous suffit de maintenir touche et souris pour déplacer la boîte où
 vous le voulez.</I>
 
@@ -48,12 +48,12 @@ s'inspirer, <CODE>prosper</CODE> (deux présentations dans les
 répertoires <CODE>LL</CODE> et <CODE>Join</CODE>) <CODE>seminar</CODE>
 (deux présentations dans les sous-répertoires <CODe>a14</CODE> et
 <CODE>clock</CODE>). Vous pouvez aussi explorer le sous-répertoire
-<CODE>test</CODE> du répertoire principal de la distribution et jetter
+<CODE>test</CODE> du répertoire principal de la distribution et jeter
 un coup d'oeil aux divers fichiers <CODE>*.tex</CODE> qui y sont.
 Dans chacun de ces sous-répertoires lancez la commande
 <CODE>make</CODE> pour construire les différentes présentations.
 Lancer <CODE>make</CODE> au niveau du répertoire <CODE>examples</CODE>
-construit et visualise tout-à-tour toutes les exemples de
+construit et visualise tour-à-tour tous les exemples de
 présentations.</I>
 
 <DT><STRONG>Comment assurer la sécurité des présentations si l'on peut
@@ -70,15 +70,15 @@ lancées par un fichier DVI ?</STRONG>
 se lance pas mais analyse le fichier pour trouver toutes les
 applications susceptibles d'être appelées durant la présentation.</I>
 
-<DT><STRONG>Comment imprimer mes transparents ``en vrai'', sur du
-papier ou des transparents pour retro-projecteur ?</STRONG>
+<DT><STRONG>Comment imprimer mes transparents «en vrai», sur du
+papier ou des transparents pour rétro-projecteur ?</STRONG>
  <DD>Réponse: <I>Facile. Utilisez l'option <CODE>ignore</CODE> du style
 <CODE>advi.sty</CODE> (écrivez
 <CODE>usepackage[ignore]{advi}</CODE>). Puis recompilez votre fichier
 source avec LaTeX: le style d'Active-DVI supprimera certains effets et
 en simulera d'autres à l'aide de postscript.</I>
  <DD>Réponse supplémentaire: <I>Impossible. Comment pouvez-vous croire
-que quelquechose ou quelqu'un puisse être capable de rendre sur une
+que quelque chose ou quelquun puisse être capable de rendre sur une
 simple feuille de papier tous ces mouvements de danse de vos textes et
 ces multiples effets, créatifs, fascinants, et pour tout dire si
 amusants, qui sont présents tout au long de votre présentation ? Il n'y
@@ -175,7 +175,7 @@ est interprété par LaTeX. Pour l'en empêcher, écrivez par exemple:</I>
 <CODE>mozilla -remote</CODE>. Comme pour la question précédente, cette
 option suppose que mozilla est déjà lancé. Si vous voulez une commande
 qui marche dans tous les cas, même si aucun programme mozilla ne
-tourne, utlisez une commande shell; par exemple:</I>
+tourne, utilisez une commande shell; par exemple:</I>
 <PRE>
 #!/bin/bash
 
@@ -223,7 +223,7 @@ and le fichier DVI.
 Ce comportement est normal et explicitement spécifié par le format DVI:
 les interprètes de fichiers DVI doivent ignorer les instructions
 <CODE>\special</CODE> qu'ils ne comprennent pas. Toutefois,
-rien n'empêche les intereprètes d'émettre une alerte quand ils
+rien n'empêche les interprètes d'émettre une alerte quand ils
 rencontrent une instruction qu'ils ne connaissent pas.
 </I>
 
