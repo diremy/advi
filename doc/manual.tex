@@ -630,6 +630,32 @@ Images can be encapsulated into the presentation using the Caml library
 CamlImages provided with the distribution of {\ActiveDVI} (see
 section~\ref {advi-grahicx}).
 
+Images can be lighten by specifying an alpha value (a
+floating point number between 0 and 1) that measures the mixing
+between the background and the image.
+
+Images can also be blended, meaning that you can choose the
+algorithm that sur-imposes the image to the background.
+Blending modes are reminiscent of Ghostscript blending options: blend
+mode should be one of the following: {\tt normal}, {\tt multiply},
+{\tt screen}, {\tt overlay}, {\tt dodge}, {\tt burn}, {\tt darken},
+{\tt lighten}, {\tt difference}, {\tt exclusion}, (\doctt{none} means
+unset).
+
+\begin{verbatim}
+{\setblend{burn}
+  {\setalpha{0.5}
+    {\includegraphics[width = 0.7\textwidth]{bar.jpg.eps}}}}
+\end{verbatim}
+
+{\setblend{difference}
+  {\setalpha{0.5}
+    {\includegraphics[width = 0.7\textwidth]{bar.jpg.eps}}}}
+
+{\setblend{normal}
+  {\setalpha{0.5}
+    {\includegraphics[width = 0.7\textwidth]{bar.jpg.eps}}}}
+
 \subsection{Colors}
 
 \subsubsection*{The \doctt{color} package}
@@ -638,6 +664,15 @@ In {\ActiveDVI}, colors can be specified with the conventions of the
 {\LaTeX} package \doctt{color.sty}, that is, it should either be a
 previously defined color or a specification of the form
 \docopt{model} \docarg{model color specification}.
+
+For example, the following specifications are all correct:
+\begin{quote}
+\begin{verbatim}
+\color{blue}
+\color[named]{Yellow}
+\color[rgb]{0.7,0.3,0.8}
+\end{verbatim}
+\end{quote}
 
 \subsubsection*{Named colors}
 
@@ -744,7 +779,7 @@ integers in the range 0.0 .. 1.0.
 For instance, {\tt {\char92}color[cmyk]\{0,1,0,0\}} is a valid specification
 for {\color[cmyk]{0,1,0,0}{magenta}}.
 
-\subsection*{The RGB specifications of colors}
+\subsubsection*{The RGB specifications of colors}
 
 RGB (Red, Green, Blue) specifications are similar to the CMYK
 specifications: following the \docid{rbg} keyword, the red, green, or
@@ -752,29 +787,39 @@ blue color values, are given as floating point numbers in the range
 0.0 .. 1.0.  Hence, {\tt{{\char92}color[rgb]\{1.0,0.0,0.0\}}} is a
 valid specification for {\color[rgb]{1.0,0.0,0.0}{red}}.
 
-\subsection*{X colors}
+\subsubsection*{The X colors}
 
 {\ActiveDVI} provides the package \doctt{xcolor}, an extension to the
 \doctt{color} package, that defines a large set of X colors names, as
 found in the file {\tt rgb.txt} of a typical X installation (this file
 is generally located on {\tt /usr/X11R6/lib/X11/rgb.txt}). To know
-which colors are available look at the source file of package
+which colors are available look at the source file of the package
 {\tt xcolor.sty} in the directory {\tt tex} of the distribution.
 
 \subsection{Background}
 
-Background of pages can be set in the {\LaTeX} source of the page,
-either as a plain color or as an image (or both!).
-You can specify a global option to the background setting, so that this
-background will be used for the remaining pages of the presentation
-(otherwise the presenter resets background options at each new page).
+You can modify the background of your presentation in the {\LaTeX}
+source of the pages. Background can be defined either as a plain
+color, as an image, or as a gradient (or as a combination of these!).
 
-Background images can be lighten by specifying an alpha value (a
-floating point number between 0 and 1) that measures the mixing
-between the color of the background and the image.
+You can specify a global option to the background settings, so that these
+settings are used for the remaining pages of the presentation
+(otherwise the presenter resets the background options at each new page).
 
-Background images can also be blended, meaning that you can choose the
-algorithm that sur-imposes the image to the background.
+To modify the background of your presentation, you can:
+
+\begin{itemize}
+  \item define the background color,
+  \item define a gradient function to be run on the background (or a
+   defined area of the background) using the predefined color gradients,
+  \item add a background image (which can be alpha-blended on top of
+   the background color).
+\end{itemize}
+
+If these options are used \emph{together}, they are applied in this
+order: first the solid background color is drawn, then the gradient
+function is applied, finally the image is drawn on the resulting
+background.
 
 \medskip\noindent
 \docdef \advibg \doctt {[global]}\docarg{decl}
@@ -785,16 +830,7 @@ where \docid{decl} is a list of settings of the following from:
 \begin{quote}
 Set the background color to \docid{color}.
 If \docid{color} is \doctt{none} this unsets the background color. 
-Otherwise, \docid{color} must follow the convention of the package 
-\doctt{color}, that is, it should either be a previously defined color or 
-of the form \docopt{model}\docarg{model color specification}. 
-
-For example, the following specifications are all correct:
-\begin{quote}\tt
-color=blue\\
-color=[named]\{Yellow\}\\
-color=[rgb]\{0.7,0.3,0.8\}\\
-\end{quote}
+Otherwise, \docid{color} must follow the notation above to designate colors.
 \end{quote}
 
 \dockey[none]{image}{file}
@@ -848,6 +884,85 @@ Ghostscript blending options. The blend mode should be one of the
 following: {\tt normal}, {\tt multiply}, {\tt screen}, {\tt overlay},
 {\tt dodge}, {\tt burn}, {\tt darken}, {\tt lighten}, {\tt
 difference}, {\tt exclusion}, (\doctt{none} means unset).
+\end{quote}
+
+\dockey[none]{gradient}{function}
+\begin{quote}
+Set the gradient function to \docid{function}, one of the
+predefined functions that convert the plain background color into a
+color gradient from the chosen color \verb"colorstart" to the color
+\verb"colorstop" (which is white by default). Available gradients are:
+\begin {itemize}
+
+\item \verb|hgradient| horizontal gradient (the gradient is a serie of
+vertical lines),
+\item \verb|vgradient| vertical gradient (the gradient is a serie of
+horizontal lines),
+\item \verb|d1gradient| first bissector gradient (the gradient is a serie of
+lines which are parallel to the first bissector),
+\item \verb|d2gradient| second bissector gradient (the gradient is a serie of
+lines which are parallel to the second bissector),
+\item \verb|cgradient| centered gradient (the gradient is a serie of
+concentric squares),
+\item \verb|circgradient| circular gradient (the gradient is a serie
+of concentric circles).
+\end {itemize}
+\end{quote}
+
+\dockey[white]{colorstart}{color}
+\begin{quote}
+Set the starting color of the gradient. When left unspecified defaults to
+white.
+\end{quote}
+
+\dockey[background]{colorstop}{color}
+\begin{quote}
+Set the end color of the gradient. When left unspecified defaults to
+the background color.
+\end{quote}
+
+\dockey[0]{xstart}{int}
+\begin{quote}
+Set the abscissa of the lower left point of the area where the
+gradient is drawn.
+\end{quote}
+
+\dockey[0]{ystart}{int}
+\begin{quote}
+Set the ordinate of the lower left point of the area where the
+gradient is drawn.
+\end{quote}
+
+\dockey[1.0]{width}{float}
+\begin{quote}
+Set the width of the area where the gradient is drawn.
+The width is a number in the range \verb|[0 .. 1]| that gives the
+ratio of the area width with respect to the page width (hence $0.0$
+means a null width and $1.0$ means the entire page width).
+\end{quote}
+
+\dockey[1.0]{height}{float}
+\begin{quote}
+Set the height of the area where the gradient is drawn.
+The width is a number in the range \verb|[0 .. 1]| that gives the
+ratio of the area height with respect to the page height (hence $0.0$
+means a null height and $1.0$ means the entire page height).
+\end{quote}
+
+\dockey[0.5]{xcenter}{float}
+\begin{quote}
+For a centered or circular gradient, set the abscissa of the center
+point of the gradient into the gradient area. {\tt xcenter} is a ratio
+of the gradient area's width. It defaults to $0.5$, meaning
+the middle of the gradient area width.
+\end{quote}
+
+\dockey[0.5]{ycenter}{float}
+\begin{quote}
+For a centered or circular gradient, set the ordinate of the center
+point of the gradient into the gradient area. {\tt ycenter} is a ratio
+of the gradient area's height. It defaults to $0.5$, meaning
+the middle of the gradient area height.
 \end{quote}
 
 \goodbreak
@@ -1144,6 +1259,11 @@ Labels over arrows \verb"\Aput", \verb"Bput", etc.
 \end {itemize}
 However, some other PStricks may not to work.
 
+
+\section{The \softtarget{advi-slides} {\doctt{advi-slides.sty}} {\LaTeX} package}
+
+{\ActiveDVI} provides a specialized {\LaTeX} package to facilitate
+writing presentation slides in the spirit of SliTeX.
 
 \section{Auxiliary {\LaTeX} packages}
 
