@@ -37,13 +37,25 @@ let set_dim r s = r := Dimension.dimen_of_string s;;
 let print_advi_version () =
   prerr_endline
    (Printf.sprintf
-      "The Active-DVI previewer and graphics presenter, version %.2f+%i (%s)"
-      Config.advi_version_number Config.advi_sub_version_number
-      Config.advi_version_date);
+      "The Active-DVI previewer and graphics presenter, version %.2f"
+      Config.advi_version_number);
   exit 0;;
 
-let version_spec nm =
-  nm, Arg.Unit print_advi_version, "\tPrint the current Active-DVI version";;
+let print_advi_full_version () =
+  prerr_endline
+   (Printf.sprintf
+      "The Active-DVI previewer and graphics presenter, version %s"
+      Config.advi_full_version);
+  exit 0;;
+
+let version_spec = function
+  | "-v" as opt ->
+       opt, Arg.Unit print_advi_version,
+       "\tPrint the current Active-DVI version"
+  | opt ->
+       opt, Arg.Unit print_advi_full_version,
+       "\tPrint the current Active-DVI version, sub-version and release date"
+;;
  
 let spec_list = [
   ("-geometry", Arg.String set_geom,
