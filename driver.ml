@@ -33,13 +33,13 @@ let rec split_string_quoted s start =
   while !i < len && s.[!i] = ' ' do incr i; done; 
   if !i >= len then [] else begin
     let i0 = !i in
-    while !i < len && s.[!i] <> ' ' do 
+    while !i < len && s.[!i] <> ' ' do
       if s.[!i] = '"' then begin
         incr i;
         while !i < len && s.[!i] <> '"' do incr i done;
         if s.[!i] <> '"' then failwith "parse error (split_string_quoted)";
         incr i
-      end else incr i 
+      end else incr i
     done;
     let i1 = !i in
     String.sub s i0 (i1 - i0) :: split_string_quoted s i1
@@ -49,9 +49,9 @@ let rec split_string_quoted s start =
 (* "\"hello world\"" -> "hello world" *)
 let unquote v =
   let s = if v.[0] = '"' then 1 else 0 in
-  let l = if v.[String.length v - 1] = '"' then 
-    String.length v - 1 - s else String.length v - s
-  in
+  let l =
+    if v.[String.length v - 1] = '"' then String.length v - 1 - s
+    else String.length v - s in
   String.sub v s l;;
 
 let split_record s =
@@ -60,7 +60,7 @@ let split_record s =
     try
       let i = String.index token '=' in
       String.sub token 0 i,
-      String.sub token (i+1) (String.length token - i - 1)
+      String.sub token (i + 1) (String.length token - i - 1)
     with
       _ -> token, "") tokens
 ;;
@@ -486,10 +486,10 @@ let app_mode_of_string = function
   | "sticky" -> Dev.Sticky
   | "persistent" -> Dev.Persistent
   | "ephemeral" -> Dev.Ephemeral
-  | s -> raise (Failure ("Unknown embedding type " ^ s));;
+  | s -> raise (Failure ("Unknown embedding mode " ^ s));;
 
 let embed_special st s =
-  (* advi: embed type=? width=? height=? command="command string" *)
+  (* advi: embed mode=? width=? height=? command="command string" *)
   let records = get_records s in
   let app_mode =
     try app_mode_of_string (List.assoc "mode" records)
@@ -519,7 +519,7 @@ let embed_special st s =
     let dpi = ldexp (float st.sdpi) (-16) in
     let width_pixel = truncate (w *. dpi) in
     let height_pixel = truncate (h *. dpi) in
- (* prerr_endline (Printf.sprintf "%d x %d pixel" width_pixel height_pixel);*)
+   (* prerr_endline (Printf.sprintf "%d x %d pixel" width_pixel height_pixel);*)
     width_pixel, height_pixel in
   let x = st.x_origin + int_of_float (st.conv *. float st.h)
   and y = st.y_origin + int_of_float (st.conv *. float st.v) in
@@ -625,24 +625,25 @@ let proc_special st s =
           try unquote (List.assoc "proc" records)
           with Not_found -> raise (Failure "proc: invalid special") in
         if !current_recording_proc_name <> None ||
-        !current_recording_proc_unit <> None then begin
+           !current_recording_proc_unit <> None
+        then
           prerr_endline
             (Printf.sprintf "proc=%s record=start: cannot be recorded"
                procname)
-        end else begin
+        else begin
           hidden :=
             (try ignore (List.assoc "play" records); false with _ -> true);
           current_recording_proc_name := Some procname;
           current_recording_proc_unit :=
-            Some { escaped_register= get_register_set st;
-                   escaped_cur_mtable= st.cur_mtable;
-                   escaped_cur_gtable= st.cur_gtable;
+            Some { escaped_register = get_register_set st;
+                   escaped_cur_mtable = st.cur_mtable;
+                   escaped_cur_gtable = st.cur_gtable;
                    escaped_cur_font = st.cur_font;
-                   escaped_commands= [] }
+                   escaped_commands = [] }
         end
     | "end" ->
         begin match !current_recording_proc_name with
-          None ->
+        | None ->
             prerr_endline
               (Printf.sprintf "'xxx %s' not recording" s)
         | Some procname -> 
@@ -839,7 +840,7 @@ let tpic_arc st x y rx ry s e cntr =
 
 let tpic_specials st s =
   match split_string s 0 with
-    "pn" :: size :: _ ->
+  | "pn" :: size :: _ ->
       st.tpic_pensize <- tpic_milli_inches size
   | "pa" :: x :: y :: _ ->
       st.tpic_path <-
@@ -1095,7 +1096,7 @@ let render_step cdvi num dpi xorig yorig =
       alpha = 1.0; alpha_stack = [];
       blend = Dev.Normal; blend_stack = [];
       epstransparent = true; epstransparent_stack = [];
-      transition= Transitions.TransNone; transition_stack = [];
+      transition = Transitions.TransNone; transition_stack = [];
       tpic_pensize = 0.0; tpic_path = []; tpic_shading = 0.0;
       status = status;
       headers = [];
@@ -1162,7 +1163,7 @@ let unfreeze_glyphs cdvi dpi =
         begin try ignore (Table.get !mtable code) with _ -> () end;
         begin try ignore (Table.get !gtable code) with _ -> () end
     | _ -> () in
-  
+
   let headers = ref []
   and xrefs = cdvi.base_dvi.Dvi.xrefs in
   let globals = headers, xrefs in
