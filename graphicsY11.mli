@@ -205,6 +205,7 @@ val mod2 : int;;
 val mod3 : int;;
 val mod4 : int;;
 val mod5 : int;;
+val nomod : int;;
         (* mask for modifiers *)
 
 external cut : string -> unit = "gr_cut";;

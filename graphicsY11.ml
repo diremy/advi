@@ -343,7 +343,8 @@ and mod1 = 0x400
 and mod2 = 0x800
 and mod3 = 0x1000
 and mod4 = 0x2000
-and mod5 = 0x4000;;
+and mod5 = 0x4000
+and nomod = 0x0;;
 
 external cut : string -> unit = "gr_cut";;
         (* store string in the cut buffer *)
