@@ -83,15 +83,25 @@
 \ProvidesPackage{advi-slides}
          [2003/02/05 v1.40 Active-DVI Slides Package for advi Previewer]
 
-% Packages to load
+%% Packages to load
 \usepackage[latin1]{inputenc}
 
+\RequirePackage {keyval}
 \RequirePackage {color}
 \RequirePackage {graphicx}
+\RequirePackage {advi-graphicx}
 \RequirePackage {advi}
+\RequirePackage {hyperref}
 \RequirePackage {alltt}
 \RequirePackage {xcolor}
+\RequirePackage {bubble}
 \RequirePackage {advi-annot}
+\RequirePackage {superpose}
+
+%% Options: same as regular advi style
+
+\DeclareOption {ignore}{\advi@ignoretrue}
+\ProcessOptions
 
 % To put a frame around an arbitrary amount of vertical material.
 % \begin{frame} ... \end{frame}
@@ -121,7 +131,7 @@
 
 % Headers of the slides
 \def\adviheader{\vbox to 0em{\vbox to \vsize {\noindent
-~\hfill\includegraphics[width=\textwidth,height=2em]{bar.eps}\hfill~%
+~\hfill\includegraphics[width=\textwidth,height=2em]{bar.jpg.eps}\hfill~%
 \vfill
 }
 \vss
@@ -143,3 +153,5 @@
 % The last page of the presentation: no footer.
 \def\lastslide{\Newpage\emptyfooter}
 
+% Defining a short name alias for advipause.
+\def\pause{\advipause}
