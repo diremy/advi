@@ -1261,7 +1261,7 @@ module B =
     let toggle_antialiasing st =
       Gs.toggle_antialiasing ()
 
-    let scratch st =
+    let scratch_draw st =
       Scratch.draw ()
     let scratch_write st =
       Scratch.write ()
@@ -1414,7 +1414,7 @@ let bind_keys () =
 
    (* Scratching. *)
    's', B.scratch_write;
-   'S', B.scratch;
+   'S', B.scratch_draw;
 
    (* Thumbnails. *)
    'T', B.make_thumbnails;

@@ -51,20 +51,20 @@ MLINCDIRS = $(CAMLIMAGESDIR)
 
 EXEC	  = advi
 
-MISC	  = config misc timeout ageometry 
-OPTIONS	  = options rc userfile search 
-GRAPHICS  = graphicsY11 busy gradient gterm launch
+MISC	  = config misc graphicsY11 timeout ageometry 
+OPTIONS	  = options global_options rc userfile
+GRAPHICS  = busy gradient gterm launch
+SYMBOL	  = symbol search
 DVI	  = input dvicolor table pkfont ttfont jfm font glyph devfont \
 	    units dimension
-SYMBOL	  = symbol
 EFFECTS	  = drawimage gs transimpl embed
 GUI	  = scratch driver thumbnails dviview
 UNUSED	  = shot
 
-MODULES	  = $(MISC) $(OPTIONS) $(GRAPHICS) global_options \
-            $(DVI) $(SYMBOL) \
-            $(EFFECTS) grdev \
-	    dvi addons \
+MODULES	  = $(MISC) $(OPTIONS) $(GRAPHICS) \
+            $(SYMBOL) $(DVI) \
+            $(EFFECTS) grdev addons \
+	    dvi \
 	    $(GUI) main \
 	    $(UNUSED)
 

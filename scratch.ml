@@ -340,12 +340,10 @@ let waiting_to_enter_scratch_write =
      (* Esc, q, or s means quit scratch write. *)
      | '' | 'q' | 's' ->
        (* Quit preserving invariant. *)
-       Misc.warning "Esc q or s in waiting_to_enter";
        scratch_write_settings_mode:= false;
        set_cursor cursor_write
      | '' | '' ->
        (* Quit scratch write settings mode. *)
-       Misc.warning "^q or ^z in waiting_to_enter";
        set_cursor cursor_write;
        (* Toggle scratch write settings mode. *)
        scratch_write_settings_mode := false
@@ -359,7 +357,6 @@ let waiting_to_enter_scratch_write =
        scratch_write_settings_mode:= false;
        end_write ()
      | '' | '' ->
-       Misc.warning "^q or ^z in waiting_to_enter";
        (* Enter scratch write settings mode. *)
        set_cursor cursor_settings;
        scratch_write_settings_mode := true

@@ -17,12 +17,28 @@
 
 (* $Id$ *)
 
-(* screen shot *)
+(* Saving screen shots. *)
 
-open Image
-let cntr = ref 0
+open Image;;
+
+type x = int and y = int and w = int and h = int;;
+
+let output_area fname x y w h =
+  let img = Graphic_image.get_image x y w h in
+  Image.save fname None [] (Rgb24 img);;
+
+let save_area fname x y w h =
+  let screen_w = Graphics.size_x () and screen_h = Graphics.size_y () in
+  if x >= 0 && x <= screen_w &&
+     y >= 0 && y <= screen_h &&
+     h >= 0 && y + h <= screen_h &&
+     w >= 0 && x + w <= screen_h then output_area fname x y w h;;
+
+let save_page fname =
+  let w = Graphics.size_x () and h = Graphics.size_y () in
+  output_area fname 0 0 w h;;
+
+let cntr = ref 0;;
 
 let save () =
-  let screen_w = Graphics.size_x () and screen_h = Graphics.size_y () in
-  let img = Graphic_image.get_image 0 0 screen_w screen_h in
-  Image.save (Printf.sprintf "shot%d.jpg" !cntr) None [] (Rgb24 img)
+  let fname = Printf.sprintf "shot%d.jpg" !cntr in save_page fname;;

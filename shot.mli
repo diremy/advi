@@ -17,4 +17,8 @@
 
 (* $Id$ *)
 
+type x = int and y = int and w = int and h = int;;
+
+val save_area : Misc.file_name -> x -> y -> w -> h -> unit;;
+val save_page : Misc.file_name -> unit;;
 val save : unit -> unit;;
