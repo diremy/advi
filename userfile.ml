@@ -28,7 +28,7 @@ let fullpath fromdir path =
 let rec next_slash s n =
   if  n >= String.length s or s.[n] = '/' 
   then n
-  else next_slash s (succ n)
+  else next_slash s (succ n);;
 
 let tilde_subst s =
  try

@@ -1,4 +1,3 @@
-
 (* Unix command line parser *)
 let parse_shell_command str =
   let p c = c = ' ' in
@@ -21,7 +20,7 @@ let exit code =
 
 let paranoid =
   Options.flag false "-safer"
-    "\tRun in safe mode: no external applications are launched";;
+    "\tSafer mode: external applications are not launched";;
 
 let exec_command command args =
   if !paranoid then
@@ -42,4 +41,3 @@ let fork_process command =
 	  exit 127
     end;
   pid;;
-

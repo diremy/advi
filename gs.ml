@@ -1,7 +1,7 @@
 let antialias =
   Options.flag false
     "-A"
-    "Set Postscript antialias";;
+    "Set Postscript antialiasing (default is unset)";;
 
 let pstricks =
   Options.flag false

@@ -86,3 +86,5 @@ WISH LIST:
   * exporter \ifadvi et \Ifadvi
   ==> done ?
 
+- We need a .advirc file to setup options at launch time, and store
+user's preferences for key bindings.

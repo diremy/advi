@@ -44,7 +44,7 @@ let spec_list = [
    "\tDisable cropping");
   ("-nomargins", Arg.Unit
      (fun () -> set_dim hmargin "0cm"; set_dim vmargin "0cm"),
-   "\tCancel horizontal and vertical margins");
+   "\tSuppress horizontal and vertical margins");
   ("-hmargin", Arg.String (set_dim hmargin),
    "DIMEN\tHorizontal margin  (default: 1cm)");
   ("-vmargin", Arg.String (set_dim vmargin),
