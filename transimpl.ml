@@ -214,11 +214,11 @@ let rescale_grimage img w h nw nh =
 (* Rendering function for sprites along a path *)
 let render newimg w h
     (nextx, nexty, nextscale, nextrot) =
-    let nw = Misc.round (* int_of_float *) (float w *. nextscale)
-    and nh = Misc.round (* int_of_float *) (float h *. nextscale) in
+    let nw = Misc.round (float w *. nextscale)
+    and nh = Misc.round (float h *. nextscale) in
     let newimg = rescale_grimage newimg w h nw nh in
     draw_sprite newimg
-      (Misc.round (* int_of_float *) nextx) (Misc.round (* int_of_float *) nexty)
+      (Misc.round nextx) (Misc.round nexty)
       nw nh
 ;;
 

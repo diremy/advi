@@ -91,7 +91,7 @@ let from_char_def cdef ratio =
 	      sum := !sum +. 1.0
 	done
       done ;
-      let gray = Misc.round (* int_of_float *) (!sum *. fact) in
+      let gray = Misc.round (!sum *. fact) in
       graymap.[!index] <- Char.chr (max 0 (min gray 255)) ;
       incr index
     done

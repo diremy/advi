@@ -147,7 +147,7 @@ class gs () =
        then Printf.sprintf "%lu " gr.window
        else Printf.sprintf "%lu %lu " gr.window gr.pixmap) in
 
-  let iof = Misc.round (* int_of_float *) and foi = float_of_int in
+  let iof = Misc.round and foi = float_of_int in
   let lx = iof ( (foi (gr.x * dpi)) /. gr.xdpi)
   and ly = iof ( (foi (gr.y * dpi)) /. gr.ydpi)
   and ux = iof ( (foi ((gr.x + gr.bwidth)  * dpi)) /. gr.xdpi )
