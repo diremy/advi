@@ -21,19 +21,21 @@ include ../Makefile.config
 
 # See also file MakeHTML to recompile HTML files for the Web site.
 
+SETTEXINPUTS=TEXINPUTS=.:../tex:/usr/lib/hevea/:/usr/local/lib/hevea/:/usr/local/share/texmf/tex//:$$TEXINPUTS
+
 LATEX=TEXINPUTS=.:../tex:/usr/lib/hevea/:/usr/local/lib/hevea/:/usr/local/share/texmf/tex//:$$TEXINPUTS latex
 DVIPS=TEXPSHEADERS=.:../tex: dvips
 HEVEA=$(PATH_HEVEA) -entities -I ../tex
-IMAGEN=imagen
+IMAGEN=$(SETTEXINPUTS) imagen
 PDFIMAGEN=pdfimagen
 DVIPDFM=dvipdfm
 
-all: manual.html manual.dvi manual.ps manual.pdf \
+all: manual.dvi manual.ps manual.pdf manual.html \
     splash.dvi splash.ps \
     scratch_write_splash.dvi scratch_write_splash.ps \
     scratch_draw_splash.dvi scratch_draw_splash.ps \
     mathmode.dvi \
-    advi_remote.html advi_remote.dvi
+    advi_remote.dvi advi_remote.html
 
 clean:
 	rm -f *~ *.aux *.log manual.html *.dvi *.pdf *.pdfm *.ps \
@@ -47,7 +49,6 @@ web:
 
 manual.dvi: manual.sty splash_contents.tex \
        scratch_write_splash_contents.tex scratch_draw_splash_contents.tex
-	$(LATEX) manual.tex && $(LATEX) manual.tex && $(LATEX) manual.tex
 splash.dvi: splash_contents.tex
 scratch_write_splash.dvi: scratch_write_splash_contents.tex
 scratch_draw_splash.dvi: scratch_draw_splash_contents.tex
@@ -66,7 +67,8 @@ endif
         # To avoid default hypertex.cfg if it exists.
         # Active-DVI really needs the hypertex driver...
 	$(LATEX) '\def\driver{hypertex}\input' $<
-#	$(LATEX) '\def\driver{hypertex}\input' $<
+	$(LATEX) '\def\driver{hypertex}\input' $<
+	$(LATEX) '\def\driver{hypertex}\input' $<
 
 .tex.ps:
 	$(LATEX) '\def\driver{dvips}\input' $<
