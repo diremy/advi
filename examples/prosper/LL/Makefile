@@ -41,7 +41,7 @@ ll.pdf: ll.tex
 	rm ll.dvi
 
 clean:
-	/bin/rm -f ll.aux ll.log ll.dvi ll.ps ll.pdf *~
+	/bin/rm -f ll.out ll.aux ll.log ll.dvi ll.ps ll.pdf *~
 
 .phony: show
 
