@@ -198,8 +198,7 @@ let print_chr t c =
  | _ -> print_str t (String.make 1 c);;
 
 let make_term_gen fg bg bw bwc tc cc x y h w =
- let font_size_x = 6
- and font_size_y = 13 in
+ let font_size_x, font_size_y = text_size "Ly" in
  let t = {
    lines = Array.init h (fun i -> String.make w ' ');
    height = h;
@@ -222,8 +221,8 @@ let make_term_gen fg bg bw bwc tc cc x y h w =
    title_color = tc;
 
    font = Printf.sprintf "%ix%i" font_size_x font_size_y;
-   font_size_x = 6;
-   font_size_y = 13;
+   font_size_x = (font_size_x + 1) / 2;
+   font_size_y = font_size_y;
   } in
  t;;
 
