@@ -15,6 +15,8 @@
 (*  Based on Mldvi by Alexandre Miquel.                                *)
 (***********************************************************************)
 
+(* $Id$ *)
+
 open Graphics;;
 
 type color = Graphics.color;;
@@ -30,74 +32,74 @@ let cmyk c m y k =
   rgb (f r) (f g) (f b);;
 
 let dvips_named_colors = [
-"GreenYellow", (cmyk 0.15 0. 0.69 0.);
-"Yellow", (cmyk 0. 0. 1.0 0.);
-"Goldenrod", (cmyk 0. 0.10 0.84 0.);
-"Dandelion", (cmyk 0. 0.29 0.84 0.);
-"Apricot", (cmyk 0. 0.32 0.52 0.);
-"Peach", (cmyk 0. 0.50 0.70 0.);
-"Melon", (cmyk 0.0 0.46 0.50 0.);
-"YellowOrange", (cmyk 0.0 0.42 1.0 0.);
-"Orange", (cmyk 0.0 0.61 0.87 0.);
-"BurntOrange", (cmyk 0.0 0.51 1.0 0.);
-"Bittersweet", (cmyk 0.0 0.75 1.0 0.24);
-"RedOrange", (cmyk 0.0 0.77 0.87 0.);
-"Mahogany", (cmyk 0.0 0.85 0.87 0.35);
-"Maroon", (cmyk 0.0 0.87 0.68 0.32);
-"BrickRed", (cmyk 0.0 0.89 0.94 0.28);
-"Red", (cmyk 0.0 1.0 1.0 0.);
-"OrangeRed", (cmyk 0.0 1.0 0.50 0.);
-"RubineRed", (cmyk 0.0 1.0 0.13 0.);
-"WildStrawberry", (cmyk 0.0 0.96 0.39 0.);
-"Salmon", (cmyk 0.0 0.53 0.38 0.);
-"CarnationPink", (cmyk 0.0 0.63 0.0 0.);
-"Magenta", (cmyk 0.0 1.0 0.0 0.);
-"VioletRed", (cmyk 0.0 0.81 0.0 0.);
-"Rhodamine", (cmyk 0.0 0.82 0.0 0.);
-"Mulberry", (cmyk 0.34 0.90 0.0 0.02);
-"RedViolet", (cmyk 0.07 0.90 0.0 0.34);
-"Fuchsia", (cmyk 0.47 0.91 0.0 0.08);
-"Lavender", (cmyk 0.0 0.48 0.0 0.);
-"Thistle", (cmyk 0.12 0.59 0.0 0.);
-"Orchid", (cmyk 0.32 0.64 0.0 0.);
-"DarkOrchid", (cmyk 0.40 0.80 0.20 0.);
-"Purple", (cmyk 0.45 0.86 0.0 0.);
-"Plum", (cmyk 0.50 1.0 0.0 0.);
-"Violet", (cmyk 0.79 0.88 0.0 0.);
-"RoyalPurple", (cmyk 0.75 0.90 0.0 0.);
-"BlueViolet", (cmyk 0.86 0.91 0.0 0.04);
-"Periwinkle", (cmyk 0.57 0.55 0.0 0.);
-"CadetBlue", (cmyk 0.62 0.57 0.23 0.);
-"CornflowerBlue", (cmyk 0.65 0.13 0.0 0.);
-"MidnightBlue", (cmyk 0.98 0.13 0.0 0.43);
-"NavyBlue", (cmyk 0.94 0.54 0.0 0.);
-"RoyalBlue", (cmyk 1.0 0.50 0.0 0.);
-"Blue", (cmyk 1.0 1.0 0.0 0.);
-"Cerulean", (cmyk 0.94 0.11 0.0 0.);
-"Cyan", (cmyk 1.0 0.0 0.0 0.);
-"ProcessBlue", (cmyk 0.96 0.0 0.0 0.);
-"SkyBlue", (cmyk 0.62 0.0 0.12 0.);
-"Turquoise", (cmyk 0.85 0.0 0.20 0.);
-"TealBlue", (cmyk 0.86 0.0 0.34 0.02);
-"Aquamarine", (cmyk 0.82 0.0 0.30 0.);
-"BlueGreen", (cmyk 0.85 0.0 0.33 0.);
-"Emerald", (cmyk 1.0 0.0 0.50 0.);
-"JungleGreen", (cmyk 0.99 0.0 0.52 0.);
-"SeaGreen", (cmyk 0.69 0.0 0.50 0.);
-"Green", (cmyk 1.0 0.0 1.0 0.);
-"ForestGreen", (cmyk 0.91 0.0 0.88 0.12);
-"PineGreen", (cmyk 0.92 0.0 0.59 0.25);
-"LimeGreen", (cmyk 0.50 0.0 1.0 0.);
-"YellowGreen", (cmyk 0.44 0.0 0.74 0.);
-"SpringGreen", (cmyk 0.26 0.0 0.76 0.);
-"OliveGreen", (cmyk 0.64 0.0 0.95 0.40);
-"RawSienna", (cmyk 0.0 0.72 1.0 0.45);
-"Sepia", (cmyk 0.0 0.83 1.0 0.70);
-"Brown", (cmyk 0.0 0.81 1.0 0.60);
-"Tan", (cmyk 0.14 0.42 0.56 0.);
-"Gray", (cmyk 0.0 0.0 0.0 0.50);
-"Black", (cmyk 0.0 0.0 0.0 1.0);
-"White", (cmyk 0.0 0.0 0.0 0.);
+  "GreenYellow", (cmyk 0.15 0. 0.69 0.);
+  "Yellow", (cmyk 0. 0. 1.0 0.);
+  "Goldenrod", (cmyk 0. 0.10 0.84 0.);
+  "Dandelion", (cmyk 0. 0.29 0.84 0.);
+  "Apricot", (cmyk 0. 0.32 0.52 0.);
+  "Peach", (cmyk 0. 0.50 0.70 0.);
+  "Melon", (cmyk 0.0 0.46 0.50 0.);
+  "YellowOrange", (cmyk 0.0 0.42 1.0 0.);
+  "Orange", (cmyk 0.0 0.61 0.87 0.);
+  "BurntOrange", (cmyk 0.0 0.51 1.0 0.);
+  "Bittersweet", (cmyk 0.0 0.75 1.0 0.24);
+  "RedOrange", (cmyk 0.0 0.77 0.87 0.);
+  "Mahogany", (cmyk 0.0 0.85 0.87 0.35);
+  "Maroon", (cmyk 0.0 0.87 0.68 0.32);
+  "BrickRed", (cmyk 0.0 0.89 0.94 0.28);
+  "Red", (cmyk 0.0 1.0 1.0 0.);
+  "OrangeRed", (cmyk 0.0 1.0 0.50 0.);
+  "RubineRed", (cmyk 0.0 1.0 0.13 0.);
+  "WildStrawberry", (cmyk 0.0 0.96 0.39 0.);
+  "Salmon", (cmyk 0.0 0.53 0.38 0.);
+  "CarnationPink", (cmyk 0.0 0.63 0.0 0.);
+  "Magenta", (cmyk 0.0 1.0 0.0 0.);
+  "VioletRed", (cmyk 0.0 0.81 0.0 0.);
+  "Rhodamine", (cmyk 0.0 0.82 0.0 0.);
+  "Mulberry", (cmyk 0.34 0.90 0.0 0.02);
+  "RedViolet", (cmyk 0.07 0.90 0.0 0.34);
+  "Fuchsia", (cmyk 0.47 0.91 0.0 0.08);
+  "Lavender", (cmyk 0.0 0.48 0.0 0.);
+  "Thistle", (cmyk 0.12 0.59 0.0 0.);
+  "Orchid", (cmyk 0.32 0.64 0.0 0.);
+  "DarkOrchid", (cmyk 0.40 0.80 0.20 0.);
+  "Purple", (cmyk 0.45 0.86 0.0 0.);
+  "Plum", (cmyk 0.50 1.0 0.0 0.);
+  "Violet", (cmyk 0.79 0.88 0.0 0.);
+  "RoyalPurple", (cmyk 0.75 0.90 0.0 0.);
+  "BlueViolet", (cmyk 0.86 0.91 0.0 0.04);
+  "Periwinkle", (cmyk 0.57 0.55 0.0 0.);
+  "CadetBlue", (cmyk 0.62 0.57 0.23 0.);
+  "CornflowerBlue", (cmyk 0.65 0.13 0.0 0.);
+  "MidnightBlue", (cmyk 0.98 0.13 0.0 0.43);
+  "NavyBlue", (cmyk 0.94 0.54 0.0 0.);
+  "RoyalBlue", (cmyk 1.0 0.50 0.0 0.);
+  "Blue", (cmyk 1.0 1.0 0.0 0.);
+  "Cerulean", (cmyk 0.94 0.11 0.0 0.);
+  "Cyan", (cmyk 1.0 0.0 0.0 0.);
+  "ProcessBlue", (cmyk 0.96 0.0 0.0 0.);
+  "SkyBlue", (cmyk 0.62 0.0 0.12 0.);
+  "Turquoise", (cmyk 0.85 0.0 0.20 0.);
+  "TealBlue", (cmyk 0.86 0.0 0.34 0.02);
+  "Aquamarine", (cmyk 0.82 0.0 0.30 0.);
+  "BlueGreen", (cmyk 0.85 0.0 0.33 0.);
+  "Emerald", (cmyk 1.0 0.0 0.50 0.);
+  "JungleGreen", (cmyk 0.99 0.0 0.52 0.);
+  "SeaGreen", (cmyk 0.69 0.0 0.50 0.);
+  "Green", (cmyk 1.0 0.0 1.0 0.);
+  "ForestGreen", (cmyk 0.91 0.0 0.88 0.12);
+  "PineGreen", (cmyk 0.92 0.0 0.59 0.25);
+  "LimeGreen", (cmyk 0.50 0.0 1.0 0.);
+  "YellowGreen", (cmyk 0.44 0.0 0.74 0.);
+  "SpringGreen", (cmyk 0.26 0.0 0.76 0.);
+  "OliveGreen", (cmyk 0.64 0.0 0.95 0.40);
+  "RawSienna", (cmyk 0.0 0.72 1.0 0.45);
+  "Sepia", (cmyk 0.0 0.83 1.0 0.70);
+  "Brown", (cmyk 0.0 0.81 1.0 0.60);
+  "Tan", (cmyk 0.14 0.42 0.56 0.);
+  "Gray", (cmyk 0.0 0.0 0.0 0.50);
+  "Black", (cmyk 0.0 0.0 0.0 1.0);
+  "White", (cmyk 0.0 0.0 0.0 0.);
 ];;
 
 let gr_named_color = [
@@ -136,10 +138,10 @@ let parse_color s =
     with _ ->
       (* Try an explicit 0xFFFFFF integer *)
       try int_of_string s
-        (* Otherwise emit a warning and give a default *)
+        (* Otherwise emit a warning and give a default gray *)
       with Failure _ ->
         Misc.warning (Printf.sprintf "unknown color %s." s);
-        0x000000;;
+        find_named_color "gray";;
 
 let parse_color_args = function
   | ["rgb"; rs; gs; bs] ->
@@ -153,7 +155,7 @@ let parse_color_args = function
       and y = float_of_string ys
       and k = float_of_string ks in
       cmyk c m y k
-  | ["gray"; gs] ->
+  | [("gray" | "grey"); gs] ->
       let g = int_of_float (255.0 *. float_of_string gs) in
       rgb g g g
   | [s] -> parse_color s
