@@ -25,7 +25,7 @@ Press: \underline{n}ext page \underline{p}revious page
 \includegraphics[width=\textwidth]{../tex/bar.jpg.eps}}
 
 \def\adviback#1{%
-\hspace{-\textwidth}
+\hspace{-\textwidth}%
 \rput(-0.7cm,-0.5cm){\psframe[framearc=.1,fillstyle=solid,linestyle=none,fillcolor=#1](1.1\textwidth,-0.85\textheight)}
 }
 
@@ -41,7 +41,7 @@ Press: \underline{n}ext page \underline{p}revious page
 %  \setlength\textheight{460\p@}
 
 \begin{document}
- 
+
 \newpage\adviback{red}
 
 \subsection*{Transitions}
@@ -106,9 +106,12 @@ New pages appears sliding into the screen.
 \item \verb+\settransition{slide from=left steps=30}+
 \end{itemize}
 
-\flushright{\includegraphics[width=0.25\textwidth]{../tex/advilogo.eps}}
+\begin{flushright}
+\includegraphics[width=0.25\textwidth]{../tex/advilogo.eps}
+\end{flushright}
 
 \newpage\adviback{yellow}
+
 \settransition{wipe from=right steps=30}
 
 \subsection*{Wipe transition}
@@ -163,13 +166,7 @@ New pages appears gradually into small pieces.
 \bigskip
 {\Huge \bf That's all, folks!!}
 \end{center}
-
-\wait{0.1}{\Huge \bf Allo }
-\wait{0.1}{\Huge \bf Hola }
-\wait{0.1}{\Huge \bf Salut }
-\wait{0.1}{\Huge \bf Au revoir}
-
-\vfill
+~\vfill
 
 
 \end{document}
