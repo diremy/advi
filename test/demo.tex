@@ -186,26 +186,24 @@ rectangle where the application will draw material.
 \item The \verb"display" command (from ImageMagick) can show any image into your
 presentation using:\\
 \verb|\embed{3cm}{3.3cm}|\verb|{display -geometry !g -window !p advilogo.gif}|\\
-
 \embed{3cm}{3.3260869cm}{display -geometry !g -window !p advilogo.gif}
 
 \item Similarly, \verb|animate| can display animations\\
     \verb+animate -geometry !g -window !p file.gif+:\\
     \verb|\embed{2cm}{2cm}{animate -geometry !g -window !p mmm.anim.gif}|\\
-
     \embed{2cm}{2cm}{animate -geometry !g -window !p mmm.anim.gif}
 \end{itemize}
 
-\newpage
-
+% \newpage
+% 
 % \begin{center}
-% {\large\bf I have four words for you!}\\
+% {\large\bf I have four words for you!}\\[3mm]
 % 
 % \embed{10.62cm}{7.92cm}{xanim +W!p +Sx!w +Sy!h +Zpe -Zr dancemonkeyboy.avi}
 % \end{center}
-% 
-% 
-% \newpage
+
+
+\newpage
 
 \subsection* {Embedded applications (cont.)}
 
@@ -214,12 +212,10 @@ presentation using:\\
    \verb+\embed{prog -geometry !g -use !p}+\\
    For instance \\
    \verb|\embed{3cm}{1cm}{./but -geometry !g -use !p}|\\
-   \\
    \embed{2.3cm}{0.71cm}{./but -geometry !g -use !p}
 
   \item Possibly interactive !\\
    \verb|\embed{6.5cm}{9.5cm}{./taquin -geometry !g -use !p dojoji.gif}|\\
-   \\
   \embed{6.5cm}{9.5cm}{./taquin -geometry !g -use !p dojoji.gif}
 
 \end{itemize}
@@ -229,17 +225,20 @@ presentation using:\\
 
 \subsection* {Embedded applications (cont.)}
 
-Arbitrary other X applications with a somewhat strange
-placement, if they do not obey the X geometry specifications.
+If we cannot specify the parent window of X applications,
+they will be handled by the window manager.
+Depending the WM, 
+their placements may not obey your geometry specifications.
+(Think about disabling ``remember window positions'' option of your WM.)
 
 \begin{itemize}
  \item Xeyes using the macro command \verb|embed|:\\
-   \verb|\embed{2cm}{2cm}{xeyes -bw 0 -shape -geometry 55x40+400+420}}|\\
-   \embed{2cm}{2cm}{xeyes -bw 0 -shape -geometry 55x40+400+420}
+   \verb|\embed{2cm}{2cm}{xeyes -bw 0 -shape -geometry !g}|\\
+   \embed{2cm}{2cm}{xeyes -bw 0 -shape -geometry !g}
 
  \item An Xterm running an interesting application:\\
-   \verb|\embed{5cm}{5cm}{xterm -geometry 50x10+500+420 -e ocaml}|\\
-   \embed{5cm}{5cm}{xterm -geometry 50x10+500+420 -e ocaml}
+   \verb|\embed{5cm}{5cm}{xterm -geometry 50x10+!x+!y -e ocaml}|\\
+   \embed{5cm}{5cm}{xterm -geometry 50x10+!x+!y -e ocaml}
 \end{itemize}
 
 The \verb|embed| macro can launch any executable system command during
@@ -293,6 +292,10 @@ This is sufficient for the proper documentclass
 (see \hyperlink {overlays}{below}).
 
 \end {itemize}
+Examples: 
+
+\Rnode {A}{A} \qquad \Rnode {B}{B}
+\ncline{->}{A}{B} \Aput{L}
 
 \newpage
 
@@ -317,7 +320,7 @@ seminar overlays might still be possible...
 The package \verb"advi" can be loaded with the \verb"batch" option:
 
 \smallskip
-{\verb"\usepackage [annot,batch]{advi}"}
+{\verb"\usepackage[annot,batch]{advi}"}
 \smallskip
 
 The effect is to switch off some \verb"advi" gadgets and to render some others 
