@@ -62,6 +62,7 @@ val f : string -> bool -> float -> blend ->
    in the size [(width, height)] pixels at [x0, y0] (top-left corner).
    If [whitetransp] is true, white pixels are treated as transparent.
    [alpha] specifies the alpha level of the image.
-   [blend] is the color blending function for rendering. *)
+   [blend] is the color blending function for rendering. 
+ *)
 
 val clean_cache : unit -> unit;;

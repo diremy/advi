@@ -117,6 +117,12 @@ let verbose_image_access = Options.flag false
     "--verbose-image-access"
     "\tChange the cursor while image loadings";;
 
+let image_aa = 
+  Options.flag true
+    "-disable-image-anti-aliasing"
+    "\tDisable eps inclusion anti-aliasing"
+;;
+
 let images_camlimages = Hashtbl.create 107;;
 let images_graphics = Hashtbl.create 107;;
 
@@ -156,13 +162,14 @@ let cache_path file whitetransp psbbox ratiopt (w, h) =
     | ScaleBottomRight -> "-br"
   in
   Filename.concat (Userfile.get_advi_cache_dir ())
-    (Printf.sprintf "%s%s-%dx%d%s%s%s"
+    (Printf.sprintf "%s%s-%dx%d%s%s%s%s"
        cache_prefix
        file'
        w h
        bbox_str
        ratiopt_str
-       (if whitetransp then "-tr" else ""))
+       (if whitetransp then "-tr" else "")
+       (if !image_aa then "-aa" else ""))
 ;;
 
 let cache_load file =
@@ -245,6 +252,7 @@ let clean_cache () =
 
 let image_load psbbox (w, h) file =
   debugs ("image load " ^ file);
+  let image_aa_level = if !image_aa then 2.0 else 1.0 in
   try
     match fst (Image.file_format file) with
     | Image.Ps ->
@@ -254,8 +262,8 @@ let image_load psbbox (w, h) file =
         | None -> (0, 0, w, h)
         in
         (* we need anti-aliasing *)
-        let resx = float w /. (float (urx - llx) /. 72.0) *. 2.0
-        and resy = float h /. (float (ury - lly) /. 72.0) *. 2.0
+        let resx = float w /. (float (urx - llx) /. 72.0) *. image_aa_level
+        and resy = float h /. (float (ury - lly) /. 72.0) *. image_aa_level
         in
 
         (* resolution fix *)
@@ -345,6 +353,7 @@ let resize_and_make_transparent image whitetransp ratiopt (ow, oh) =
     | _ -> raise (Failure "color model is not supported")
   in
   let white_rgb = {r = 255; g = 255; b = 255} in
+  let diff = 15 * 15 in
   let image'' =
     if not whitetransp then image' else
     match image' with
@@ -356,7 +365,8 @@ let resize_and_make_transparent image whitetransp ratiopt (ow, oh) =
           for x = 0 to width - 1 do
             let rgb = Rgb24.unsafe_get i x y in
             let a =
-              if whitetransp && rgb = white_rgb then 0 else 255 in
+              if whitetransp && Rgb.square_distance rgb white_rgb < diff 
+	      then 0 else 255 in
             Rgba32.unsafe_set rgba x y { color = rgb; alpha = a }
           done
         done;
