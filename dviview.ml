@@ -54,7 +54,7 @@ Options.add
 
 let click_turn_page =
   Options.flag false
-    "-click_turn"
+    "-click-turn"
     "Turn pages with mouse clicks (see the doc)";;
 
 let page_stack_to_string page stack =

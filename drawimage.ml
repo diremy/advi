@@ -114,7 +114,7 @@ let cache_prefix = "cache";;
 let cache_key = "advicache";;
 
 let verbose_image_access = Options.flag false
-    "--verbose_image_access"
+    "--verbose-image-access"
     "\tChange the cursor while image loadings";;
 
 let images_camlimages = Hashtbl.create 107;;
