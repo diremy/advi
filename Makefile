@@ -175,7 +175,7 @@ install:: $(INSTALLTARGET) $(HELPFILES)
 
 MLFILES = $(addsuffix .ml, $(MODULES))
 
-.depend:: *.mli $(MLFILES) Makefile
+.depend:: Makefile
 	$(OCAMLDEP) *.mli $(MLFILES) > .depend
 	gcc -MM -I$(CAMLDIR) $(CFLAGS) $(COBJS:.o=.c) \
 		| sed -e 's|$(CAMLDIR)/[^ ]*||' >> .depend

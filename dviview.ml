@@ -139,6 +139,15 @@ Options.add
   "<float>: set the dpi resolution of the screen,\
   \n\t (the default (and minimum value) is 72.27))).";;
 
+let duplex = ref None;;
+let set_duplex f = duplex := Some f;;
+let _ = 
+  Options.add
+    "-duplex"
+    (Arg.String set_duplex)
+    "<string>: make file <string> be a duplex view.
+    \n\t (it must have the same the same page setting).";;
+
 module Symbol = Grdev.Symbol;;
 
 open Dimension;;
@@ -162,9 +171,11 @@ type mode =
 type toc =
    | Page of int
    | Thumbnails of int * (int * Graphics.image) array;;
-type state = {
+type duplex = Alone | Master of state | Client of state
+and state = {
     (* DVI attributes *)
     filename : string;
+    mutable duplex : duplex;
     mutable dvi : Dvi.t;
     mutable cdvi : Driver.cooked_dvi;
     mutable num_pages : int;
@@ -205,6 +216,8 @@ type state = {
     mutable toc : toc array option;
     synchronize : bool;
 };;
+exception Duplex of state
+
 
 let set_page_number st n =
  Userfile.save_page_number n;
@@ -323,16 +336,16 @@ let init_geometry all st =
   st.toc <- None;
 ;;
 
-let init filename =
+let init master filename =
   let dvi =
     try Dvi.load filename
     with
     | Sys_error _ -> raise (Error (Printf.sprintf "cannot open `%s'" filename))
     | Dvi.Error s -> raise (Error (Printf.sprintf "%s: (Dvi) %s" filename s))
     | e ->
-       raise (Error
-                (Printf.sprintf "error while loading `%s': %s"
-                   filename (Printexc.to_string e))) in
+        raise (Error
+                 (Printf.sprintf "error while loading `%s': %s"
+                    filename (Printexc.to_string e))) in
   let cdvi = Driver.cook_dvi dvi in
   let int = 0 in
   let float = 0. in
@@ -344,6 +357,7 @@ let init filename =
   let st =
     let npages = Array.length dvi.Dvi.pages in
     { filename = filename;
+      duplex = Alone;
       dvi = dvi;
       cdvi = cdvi;
       num_pages =  npages;
@@ -374,9 +388,27 @@ let init filename =
       synchronize = true;
     } in
   init_geometry true st;
-  attr.geom.Ageometry.width <- st.size_x;
-  attr.geom.Ageometry.height <- st.size_y;
+  if master then begin 
+    attr.geom.Ageometry.width <- st.size_x;
+    attr.geom.Ageometry.height <- st.size_y;
+  end;
   st;;
+
+let compatible st st' =
+  (*
+  Printf.eprintf 
+    "x=%d/%d, y=%d/%d, width=%d/%d height=%d/%d dpi=%f/%f\n%!"
+    st.size_x  st'.size_x
+    st.size_y  st'.size_y
+    st.dvi_width  st'.dvi_width
+    st.dvi_height  st'.dvi_height
+    st.base_dpi  st'.base_dpi;
+  st.base_dpi = st'.base_dpi && 
+  st.dvi_width = st'.dvi_width && 
+  st.dvi_height = st'.dvi_height && *)
+  st.size_x = st'.size_x && 
+  st.size_y = st'.size_y
+;;
 
 let set_bbox st =
   Grdev.set_bbox (Some (st.orig_x, st.orig_y, st.dvi_width, st.dvi_height));;
@@ -385,7 +417,13 @@ let update_dvi_size all ?dx ?dy st =
   init_geometry all st;
   begin match dx with None -> () | Some z -> st.orig_x <- z end;
   begin match dy with None -> () | Some z -> st.orig_y <- z end;
-  set_bbox st;;
+  set_bbox st;
+  match st.duplex with
+    Master st' | Client st' ->
+      st'.orig_x <- st.orig_x;
+      st'.orig_y <- st.orig_y;
+      set_bbox st';
+  | Alone -> ()
 
 (* Incremental drawing *)
 let synchronize st =
@@ -708,7 +746,17 @@ let find_xref tag default st =
     if p > 0 && p <= st.num_pages then p - 1 else default
   with Misc.Match ->
     try Hashtbl.find (xrefs st) tag
-    with Not_found -> default;;
+    with Not_found ->
+      match st.duplex with
+      | Client _ | Alone -> default
+      | Master st' ->
+          try
+            st'.page_number <- Hashtbl.find (xrefs st') tag;
+            Printf.eprintf "Switching to %s!\n%!" st'.filename;
+            raise (Duplex st')
+          with
+            Not_found -> default
+;;
 
 exception Link;;
 
@@ -758,6 +806,7 @@ let exec_xref link =
   | _ ->
       Misc.warning (Printf.sprintf "Don't know what to do with link %s" link);;
 
+
 let page_start default st =
   match !start_html with
   | None -> default
@@ -785,7 +834,10 @@ let reload_time st =
   with _ -> st.last_modified;;
 
 let reload st =
-  Misc.warning "reloading DVI file";
+  let master, clientp = 
+    match st.duplex with
+      Client st -> st, true
+    | Master _ | Alone -> st, false in
   try
     Grdev.clear_usr1 ();
     st.last_modified <- reload_time st;
@@ -814,8 +866,18 @@ let reload st =
     set_page_number st npage;
     st.frozen <- true;
     st.aborted <- true;
+    if clientp && not (compatible st master) then
+      begin
+        Misc.warning
+          (Printf.sprintf
+             "Dropping master %s (incompatible with client %s)"
+             st.filename master.filename);
+        master.duplex <- Alone;
+        raise (Duplex master)
+      end;
     update_dvi_size false st;
     Gs.init_do_ps ();
+    Printf.eprintf "Reloaded %s!\n%!" st.filename;
     redraw ?trans:(Some Transitions.DirTop) st
   with x ->
     Misc.warning
@@ -1178,6 +1240,11 @@ module B =
       let re_string = ask_to_search "Search Backward (re): " in
       Misc.warning (Printf.sprintf "Search backward %s" re_string);
       ()
+        
+    let duplex st =
+      match st.duplex with
+        Master st' | Client st' -> raise (Duplex st')
+      | Alone -> ()
   end;;
 
 let bindings = Array.create 256 B.nop;;
@@ -1237,6 +1304,7 @@ let bind_keys () =
    ',', B.first_page;
    '.', B.last_page;
    'g', B.goto;
+   'G', B.goto_pageref;
 
    (* r, Control-l, R, to redraw or reload. *)
    'r', B.redraw;
@@ -1275,69 +1343,98 @@ let bind_keys () =
    (* Thumbnails. *)
    'T', B.make_thumbnails;
    't', B.show_toc;
+
+    (* Duplex *)
+   '', B.duplex;
   ];;
 
 bind_keys ();;
 
 let main_loop filename =
-  let st = init filename in
+  let st = init true filename in
+  begin match !duplex with
+    Some duplexname ->
+      let st' = init false duplexname in
+      if compatible st st' then
+        begin
+          st.duplex <- Master st';
+          st'.duplex <- Client st;
+        end
+      else
+        Misc.warning
+          (Printf.sprintf
+             "Ignoring client %s incompatible with master file %s"
+             duplexname st.filename
+          )
+  | None -> ()
+  end;
   (* Check if whiterun *)
   if Launch.whiterun () then begin
     Driver.scan_special_pages st.cdvi (st.num_pages - 1);
     Launch.dump_whiterun_commands ()
   end else begin
-    Grdev.set_title ("Advi: " ^ Filename.basename filename);
+    Grdev.set_title ("Advi: " ^ st.filename);
     let x, y = Grdev.open_dev (" " ^ Ageometry.to_string attr.geom) in
     attr.geom.Ageometry.width <- x;
     attr.geom.Ageometry.height <- y;
     update_dvi_size true st;
     set_bbox st;
-    if st.page_number > 0 && Gs.get_do_ps () then
-      Driver.scan_special_pages st.cdvi st.page_number
-    else set_page_number st (page_start 0 st);
-    redraw st;
-    (* num is the current number entered by keyboard *)
-    try while true do
-      let ev = if changed st then Grdev.Refreshed else Grdev.wait_event () in
-      st.num <- st.next_num;
-      st.next_num <- 0;
-      match ev with
-      | Grdev.Refreshed -> reload st
-      | Grdev.Resized (x, y) -> resize st x y
-      | Grdev.Key c -> bindings.(Char.code c) st
-      | Grdev.Href h -> goto_href h st
-      | Grdev.Advi (s, a) -> a ()
-      | Grdev.Move (w, h) ->
-          st.orig_x <- st.orig_x + w;
-          st.orig_y <- st.orig_y + h;
-          set_bbox st;
-          redraw st
-      | Grdev.Edit (p, a) ->
-          print_endline (Grdev.E.tostring p a);
-          flush stdout;
-          redraw st
-      | Grdev.Region (x, y, w, h) -> ()
-      | Grdev.Selection s -> selection s
-      | Grdev.Position (x, y) ->
-          position st x y
-      | Grdev.Click (pos, but, _, _) when Grdev.E.editing () ->
-          begin match pos, but with
-          | Grdev.Top_left, Grdev.Button1 -> B.previous_slice st
-          | Grdev.Top_left, Grdev.Button2 -> B.reload st
-          | Grdev.Top_left, Grdev.Button3 -> B.next_slice st
-          | Grdev.Top_right, Grdev.Button1 -> B.previous_page st
-          | Grdev.Top_right, Grdev.Button2 -> B.last_page st
-          | Grdev.Top_right, Grdev.Button3 -> B.next_page st
-          | _, _ -> ()
-          end
-      | Grdev.Click (Grdev.Top_left, _, _, _) ->
-          if !click_turn_page then B.pop_page st
-      | Grdev.Click (_, Grdev.Button1, _, _) ->
-          if !click_turn_page then B.previous_pause st
-      | Grdev.Click (_, Grdev.Button2, _, _) ->
-          if !click_turn_page then B.pop_previous_page st
-      | Grdev.Click (_, Grdev.Button3, _, _) ->
-          if !click_turn_page then B.next_pause st
-      | Grdev.Nil -> ()
-    done with Exit -> Grdev.close_dev ()
+    let rec duplex st =
+      Graphics.set_window_title  ("Advi: " ^ st.filename);
+      if st.page_number > 0 && Gs.get_do_ps () then
+        Driver.scan_special_pages st.cdvi st.page_number
+      else set_page_number st (page_start 0 st);
+      redraw st;
+      (* num is the current number entered by keyboard *)
+      try while true do
+        st.num <- st.next_num;
+        st.next_num <- 0;
+        if changed st then B.reload st else
+        match Grdev.wait_event () with
+        | Grdev.Refreshed ->
+            begin match st.duplex with
+            | Master _ | Alone -> B.reload st
+            | Client _ -> Grdev.clear_usr1();
+            end
+        | Grdev.Resized (x, y) -> resize st x y
+        | Grdev.Key c -> bindings.(Char.code c) st
+        | Grdev.Href h -> goto_href h st
+        | Grdev.Advi (s, a) -> a ()
+        | Grdev.Move (w, h) ->
+            st.orig_x <- st.orig_x + w;
+            st.orig_y <- st.orig_y + h;
+            set_bbox st;
+            redraw st
+        | Grdev.Edit (p, a) ->
+            print_endline (Grdev.E.tostring p a);
+            flush stdout;
+            redraw st
+        | Grdev.Region (x, y, w, h) -> ()
+        | Grdev.Selection s -> selection s
+        | Grdev.Position (x, y) ->
+            position st x y
+        | Grdev.Click (pos, but, _, _) when Grdev.E.editing () ->
+            begin match pos, but with
+            | Grdev.Top_left, Grdev.Button1 -> B.previous_slice st
+            | Grdev.Top_left, Grdev.Button2 -> B.reload st
+            | Grdev.Top_left, Grdev.Button3 -> B.next_slice st
+            | Grdev.Top_right, Grdev.Button1 -> B.previous_page st
+            | Grdev.Top_right, Grdev.Button2 -> B.last_page st
+            | Grdev.Top_right, Grdev.Button3 -> B.next_page st
+            | _, _ -> ()
+            end
+        | Grdev.Click (Grdev.Top_left, _, _, _) ->
+            if !click_turn_page then B.pop_page st
+        | Grdev.Click (_, Grdev.Button1, _, _) ->
+            if !click_turn_page then B.previous_pause st
+        | Grdev.Click (_, Grdev.Button2, _, _) ->
+            if !click_turn_page then B.pop_previous_page st
+        | Grdev.Click (_, Grdev.Button3, _, _) ->
+            if !click_turn_page then B.next_pause st
+        | Grdev.Nil -> ()
+      done
+      with
+      | Exit -> Grdev.close_dev ()
+      | Duplex st' -> duplex st'
+    in duplex st            
   end;;
