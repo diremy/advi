@@ -195,8 +195,8 @@ let save_excursion cursor color f =
 
   let current_color = Graphics.get_color () in
   let current_line_width = Graphics.get_line_width () in
-  let current_cursor = Graphics.get_cursor () in
   let current_font = Graphics.get_font () in
+  let current_cursor = Graphics.get_cursor () in
 
   let restore () =
     G.set_color current_color;
@@ -313,7 +313,7 @@ and scratch_write_settings () =
         (* Esc, ^Q, ^Z, or q means quit the scratch write settings mode
            and reenter scratch writing.
            Hence, two successive ^Z just do nothing (except changing
-           the cursor chape). *)
+           the cursor chape for a while). *)
            set_cursor cursor_write;
            enter_scratch_write ()
         | c ->
@@ -472,24 +472,28 @@ let draw_figure f =
   let (x1, y1 as p1) = G.mouse_pos () in
   f p0 p1;;
 
-let draw_hline (x0, y0) (x1, y1) =
-  G.moveto x0 y0;
-  G.lineto x1 y0;;
+(* Draws an horizontal line segment between origin point (x0, y0) to
+   end point (x1, y1). *)
+let draw_hline (x0, y0) (x1, y1) = G.moveto x0 y0; G.lineto x1 y0;;
 
-let draw_vline (x0, y0) (x1, y1) =
-  G.moveto x0 y0;
-  G.lineto x0 y1;;
+(* Draws a vertical line segment between origin point (x0, y0) to
+   end point (x1, y1). *)
+let draw_vline (x0, y0) (x1, y1) = G.moveto x0 y0; G.lineto x0 y1;;
 
-let draw_segment (x0, y0) (x1, y1) =
-  G.moveto x0 y0;
-  G.lineto x1 y1;;
+(* Draws a line segment between origin point (x0, y0) to
+   end point (x1, y1). *)
+let draw_segment (x0, y0) (x1, y1) = G.moveto x0 y0; G.lineto x1 y1;;
 
 let distance x0 y0 x1 y1 =
   let dx = x1 - x0 and dy = y1 - y0 in
   sqrt (float_of_int (dx * dx + dy * dy));;
 
+(* Draws a cercle with diameter (x0, y0) (x1, y1). *)
 let draw_circle (x0, y0) (x1, y1) =
-  G.draw_circle x0 y0 (Misc.round (distance x0 y0 x1 y1));;
+  let c_x = (x0 + x1 + 1) / 2
+  and c_y = (y0 + y1 + 1) / 2
+  and r = Misc.round (distance x0 y0 x1 y1) in
+  G.draw_circle c_x c_y r;;
 
 (* Enter drawing on slide *)
 let rec scratch_draw00 () =
