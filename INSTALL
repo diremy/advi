@@ -1,7 +1,7 @@
 PREREQUISITES
 =============
 
-You need Objective Caml 3.02 or higher to compile the sources.
+You need Objective Caml 3.04 or higher to compile the sources.
 
 However, you need a strictly higher version of Graphics (you can pick the
 one under CVS of a more recent release), especially if you are using Advi
@@ -35,3 +35,11 @@ COMPILATION AND INSTALLATION
    * Copy the file advi.pro to a place where is it a visible PS header.
    (kpewhich advi.pro should succeed from where advi is run)
 
+JAPANESE USERS
+==============
+
+There is a configuration file for mapping Japanese TeX font names
+to Japanese True Type fonts called "jpfonts.conf". It is placed in
+the advi library directory (usually /usr/local/lib/advi/). 
+If you want to use different TrueType fonts, you can edit this file,
+or put your own jpfonts.conf in ~/.advi/ .
