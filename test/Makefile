@@ -3,11 +3,11 @@ include ../Makefile.config
 
 RM=/bin/rm -f
 
-LATEX=TEXINPUTS=/usr/share/texmf//:$$TEXINPUTS; export TEXINPUTS; latex
+LATEX=TEXINPUTS=.:/usr/share/texmf//:$$TEXINPUTS; export TEXINPUTS; latex
 
 MLPROG=but taquin
 
-all: $(MLPROG) demo.dvi trigo_source.dvi trans.dvi trans2.dvi background.dvi
+all: $(MLPROG) demo.dvi trigo_source.dvi ./trans.dvi trans2.dvi background.dvi
 
 .tex.dvi:
 	$(LATEX) $<
