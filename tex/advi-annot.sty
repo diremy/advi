@@ -51,9 +51,16 @@
     {{#2}\@ifnextchar({\advi@skipparen{\advi@annot@footi}}%
       {\advi@annot@footi}}
 
+\newcommand {\advi@annot@nofoot}[2][]%
+    {{#2}\@ifnextchar({\advi@skipparen{}}%
+      {}}
+\newif \ifAdviFootnote
+\AdviFootnotetrue
+
 %% So...
 
-\def \advi@annot {\advi@ifadvi {\advi@annot@text}{\advi@annot@foot}}
+\def \advi@annot {\advi@ifadvi {\advi@annot@text}{\ifAdviFootnote
+\let \@do \advi@annot@foot  \else \let \@do \advi@annot@nofoot\fi \@do}}
 
 %% exports
 
