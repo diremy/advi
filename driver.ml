@@ -395,8 +395,10 @@ let color_special st s =
   | _ -> ill_formed_special s;;
 
 let parse_float s =
- try float_of_string s
- with _ -> failwith ("advi: cannot read a floating number in \"" ^ s ^ "\"");;
+ try float_of_string s with
+ | _ -> failwith
+         (Printf.sprintf "advi: cannot read a floating number in %S" s)
+;;
 
 let option_parse_float s r =
   try Some (parse_float (List.assoc s r)) with _ -> None;;
@@ -407,7 +409,7 @@ let alpha_special st s =
       alpha_push st (parse_float arg)
   | ["advi:"; "alpha"; "pop"] ->
       alpha_pop st
-  | _ -> ();;
+  | _ -> ill_formed_special s;;
 
 let parse_blend s =
   match String.lowercase s with
@@ -432,7 +434,7 @@ let blend_special st s =
       blend_push st (parse_blend arg)
   | "advi:" :: "blend" :: "pop" :: [] ->
       blend_pop st
-  | _ -> ();;
+  | _ -> ill_formed_special s;;
 
 let parse_bool s =
   match String.lowercase s with
@@ -446,7 +448,7 @@ let epstransparent_special st s =
       epstransparent_push st (parse_bool arg)
   | "advi:" :: "epstransparent" :: "pop" :: [] ->
       epstransparent_pop st
-  | _ -> ();;
+  | _ -> ill_formed_special s;;
 
 let epsbygs_special st s =
   match split_string s 0 with
@@ -454,7 +456,7 @@ let epsbygs_special st s =
       epstransparent_push st (parse_bool arg)
   | "advi:" :: "epsbygs" :: "pop" :: [] ->
       epstransparent_pop st
-  | _ -> ();;
+  | _ -> ill_formed_special s;;
 
 let epswithantialiasing_special st s =
   match split_string s 0 with
@@ -462,7 +464,7 @@ let epswithantialiasing_special st s =
       epstransparent_push st (parse_bool arg)
   | "advi:" :: "epswithantialiasing" :: "pop" :: [] ->
       epstransparent_pop st
-  | _ -> ();;
+  | _ -> ill_formed_special s;;
 
 let get_records s =
   List.map (fun (k, v) -> String.lowercase k, v) (split_record s);;
@@ -472,7 +474,7 @@ let psfile_special st s =
   let file =
     try unquote (List.assoc "psfile" records)
     with Not_found -> raise (Failure "psfile: invalid special") in
-  (* prerr_endline ("PSFILE=" ^ file); *)
+  Misc.debug_endline ("PSFILE=" ^ file);
   (* bbox *)
   let llx, lly, urx, ury =
     try
@@ -480,8 +482,8 @@ let psfile_special st s =
       and lly = int_or_float_of_string (List.assoc "lly" records)
       and urx = int_or_float_of_string (List.assoc "urx" records)
       and ury = int_or_float_of_string (List.assoc "ury" records) in
-      (* prerr_endline
-         ("BBOX=" ^ Printf.sprintf "%d %d %d %d" llx lly urx ury); *)
+      prerr_endline
+         (Printf.sprintf "BBOX=%d %d %d %d" llx lly urx ury);
       llx, lly, urx, ury
     with
     | _ -> raise (Failure "psfile: no bbox") in
@@ -586,14 +588,15 @@ let embed_special st s =
   (* advi: embed mode=? width=? height=? command="command string" *)
   let records = get_records s in
   let app_mode =
-    try app_mode_of_string (List.assoc "mode" records)
-    with Not_found ->
-      raise (Failure ("embed: no embedding mode in special " ^ s)) in
+    try app_mode_of_string (List.assoc "mode" records) with
+    | Not_found ->
+        raise (Failure ("embed: no embedding mode in special " ^ s)) in
   let app_name =
-    try unquote (List.assoc "name" records) with Not_found -> "" in
+    try unquote (List.assoc "name" records) with
+    | Not_found -> "" in
   let command =
-    try unquote (List.assoc "command" records)
-    with Not_found ->
+    try unquote (List.assoc "command" records) with
+    | Not_found ->
         if app_mode = Embed.Fake then "" else
         raise (Failure ("embed: no command to embed in special " ^ s)) in
   (* prerr_endline ("embed command=" ^ command); *)
@@ -619,17 +622,17 @@ let embed_special st s =
   let x = st.x_origin + int_of_float (st.conv *. float st.h)
   and y = st.y_origin + int_of_float (st.conv *. float st.v) in
   Misc.debug_endline
-    (Printf.sprintf "Embedding %s with command %S, in special %s."
-       app_name command s);
+    (Printf.sprintf
+       "Embedding %s with command %S, in special %s." app_name command s);
   if !visible then
-    Grdev.embed_app command app_mode app_name width_pixel height_pixel x y;;
+    Dev.embed_app command app_mode app_name width_pixel height_pixel x y;;
 
 (* When scanning the page, we gather information on the embedded commands *)
 let scan_embed_special st s =
   let records = get_records s in
   let command =
-    try unquote (List.assoc "command" records)
-    with Not_found ->
+    try unquote (List.assoc "command" records) with
+    | Not_found ->
         raise (Failure ("embed: no command to embed in special " ^ s)) in
   Launch.add_whiterun_command command;;
 
@@ -637,27 +640,24 @@ let parse_transition dir mode record =
   let default_dir =
     match dir with Some d -> d | None -> Transitions.DirNone in
   let parse_genpath record =
-    try
-      List.assoc "genpath" record
-    with _ ->
-      warning "special: trans push: genpath function not found";
-      "spiral"
-  in
+    try List.assoc "genpath" record with
+    | Not_found ->
+        warning "special: trans push: genpath function not found";
+        "spiral" in
   let parse_pathelem s =
       (option_parse_float (s ^ "x") record,
        option_parse_float (s ^ "y") record,
        None,
-       None) (* to complete with parsed scale and rotation *)
-  in
+       None) (* to complete with parsed scale and rotation *) in
   let parse_steps =
     try
       let stepsstr = List.assoc "steps" record in
-      try Some (int_of_string stepsstr)
-      with _ ->
-        warning
-          ("special: trans push: steps parse failed: \"" ^ stepsstr ^ "\"");
-        None
-    with Not_found -> None
+      try Some (int_of_string stepsstr) with
+      | _ ->
+         warning
+           ("special: trans push: steps parse failed: \"" ^ stepsstr ^ "\"");
+         None with
+    | Not_found -> None
   in
   let parse_direction key default =
     try
@@ -702,7 +702,7 @@ let transition_special st s =
       let record = split_record (String.concat " " args) in
       let trans = parse_transition st.direction mode record in
       transition_push st trans
-  | _ -> ();;
+  | _ -> ill_formed_special s;;
 
 let transbox_save_special st s =
   match split_string s 0 with
@@ -716,12 +716,10 @@ let transbox_save_special st s =
         match Dimension.normalize dim with
         | Dimension.Px x -> x
         | Dimension.In x -> truncate (x *. dpi)
-        | _ -> assert false
-      in
+        | _ -> assert false in
       let width_pixel = pixels_of_dimen width
       and height_pixel = pixels_of_dimen height
-      and depth_pixel = pixels_of_dimen depth
-      in
+      and depth_pixel = pixels_of_dimen depth in
       let x = st.x_origin + int_of_float (st.conv *. float st.h)
       and y = st.y_origin + int_of_float (st.conv *. float st.v) + depth_pixel
       in
@@ -792,18 +790,18 @@ let edit_special st s =
         } in
       Dev.E.add rect info
 
-  | _ ->
-      warning (Printf.sprintf "Incorrect advi Special `%s' ignored" s)
+  | _ -> ill_formed_special s
   with Ignore -> ()
 ;;
 
 
+(* Defining the forward function eval_command. *)
 let forward_eval_command = ref (fun _ _ -> ());;
 
 let playing = ref 0;;
 
-(* Setting the forward function Grdev.get_playing. *)
-let play = Grdev.get_playing in play := (fun () -> !playing);;
+(* Setting the forward function Dev.get_playing. *)
+let play = Dev.get_playing in play := (fun () -> !playing);;
 
 let visible_stack = ref [];;
 
@@ -888,8 +886,7 @@ let proc_special st s =
           st.cur_mtable <- escaped_cur_mtable;
           st.cur_gtable <- escaped_cur_gtable;
           st.cur_font <- escaped_cur_font;
-        end
-      with
+        end with
       | Not_found ->
           Misc.warning
             (Printf.sprintf "xxx '%s': %s not recorded" s procname);;
@@ -897,8 +894,7 @@ let proc_special st s =
 let wait_special st s =
   let records = get_records s in
   let second =
-    try parse_float (List.assoc "sec" records)
-    with
+    try parse_float (List.assoc "sec" records) with
     | Not_found | Failure _ ->
         raise (Failure (Printf.sprintf "wait: invalid special: [ %s ]" s)) in
   (* Wait is treated like Pause, as an exception *)
@@ -943,8 +939,7 @@ let bgfuns_alist = [
 ];;
 
 let find_bgfun s =
-   try Some (List.assoc (unquote s) bgfuns_alist)
-   with _ -> None;;
+   try Some (List.assoc (unquote s) bgfuns_alist) with _ -> None;;
 
 let bkgd_alist = [
   ("color", fun s st ->
@@ -974,8 +969,8 @@ let bkgd_alist = [
 
 let filter_alist alist falist =
   let aux k alist okalist =
-    try (k, List.assoc k alist) :: okalist
-    with Not_found -> okalist in
+    try (k, List.assoc k alist) :: okalist with
+    | Not_found -> okalist in
   List.fold_left (fun l -> fun k -> aux k alist l) []
                  (List.map (fun (k, v) -> k) falist);;
 
@@ -998,7 +993,8 @@ let milli_inch_to_sp = Units.from_to Units.IN Units.SP 1e-3;;
 let tpic_milli_inches s = parse_float s *. milli_inch_to_sp;;
 
 let tpic_pen st =
-  int_of_float (st.conv *. st.tpic_pensize +. 0.5)
+  int_of_float (st.conv *. st.tpic_pensize +. 0.5);;
+
 let tpic_x st x =
   st.x_origin + int_of_float (st.conv *. (float st.h +. x));;
 let tpic_y st y =
@@ -1260,14 +1256,17 @@ let special st s =
       and y = st.y_origin + int_of_float (st.conv *. float st.v) in
       if !visible then
         let draw =
-          if st.epsbygs then
+          if st.epsbygs then begin
+            let file = zap_to_char ' ' file in
+            Misc.debug_endline (Printf.sprintf "Drawing by gs %s" file);
             Dev.draw_ps file bbox
-          else begin
-            Dev.draw_img (zap_to_char ' ' file)
+          end else begin
+            let file = zap_to_char ' ' file in
+            Misc.debug_endline (Printf.sprintf "Drawing by camlimages %s" file);
+            Dev.draw_img file
               Drawimage.ScaleAuto false 1.0 st.blend (Some bbox)
-              st.epswithantialiasing
-          end
-        in
+               st.epswithantialiasing
+          end in
         draw size x y
     with
     | Failure s -> Misc.warning s
@@ -1348,6 +1347,7 @@ let eval_command st c =
   List.iter record !current_recording_proc;
   eval_dvi_command st c;;
 
+(* Setting the forward function eval_command. *)
 forward_eval_command := eval_command;;
 
 let newpage h st magdpi x y =
@@ -1398,7 +1398,7 @@ let render_step cdvi num ?trans ?chst dpi xorig yorig =
       cur_gtable = dummy_gtable;
       cur_font = dummy_font;
       h = 0; v = 0; w = 0; x = 0; y = 0; z = 0;
-      stack = []; color = Grdev.fgcolor (); color_stack = [];
+      stack = []; color = Dev.fgcolor (); color_stack = [];
       alpha = 1.0; alpha_stack = [];
       blend = Drawimage.Normal; blend_stack = [];
       epstransparent = true; epstransparent_stack = [];
