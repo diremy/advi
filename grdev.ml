@@ -576,7 +576,14 @@ let raw_embed_app command app_type app_name width height x y =
           Buffer.contents result in
     replace 0 in
 
-  let wid = GraphicsY11.open_subwindow ~x ~y ~width ~height in
+  (* Use graphics coordinates for subwindows *)
+  let gry = !size_y - y in
+  prerr_endline (Printf.sprintf "size_y %i, y %i" !size_y y);
+  prerr_endline
+    (Printf.sprintf "Launching %s (w=%i, h=%i) at x=%i gry=%i"
+       app_name width height x gry);
+
+  let wid = GraphicsY11.open_subwindow ~x ~y:gry ~width ~height in
 
   (*** !x commands
     !p : embedding target window id (in digit)
@@ -656,8 +663,10 @@ let move_or_resize_persistent_app command app_type app_name width height x y =
   let _, (app_type, app_name, wid) = find_embedded_app app_name in
   prerr_endline (Printf.sprintf "Resizing %s to %i, %i" app_name width height);
   GraphicsY11.resize_subwindow wid width height;
-  prerr_endline (Printf.sprintf "Moving %s to %i, %i" app_name x y);
-  GraphicsY11.move_subwindow wid x y;;
+  prerr_endline (Printf.sprintf "size_y %i, y %i" !size_y y);
+  let gry = !size_y - y + height - width in
+  prerr_endline (Printf.sprintf "Moving %s to x=%i, gry=%i" app_name x gry);
+  GraphicsY11.move_subwindow wid x gry;;
 
 (* In hash table t, verifies that at least one element verifies p. *)
 let hashtbl_exists t f =
@@ -679,8 +688,8 @@ let embed_app command app_type app_name width height x y =
      persists :=
       (fun () ->
          (* prerr_endline ("Moving " ^ app_name); *)
-         move_or_resize_persistent_app command
-         app_type app_name width height x y) ::
+         move_or_resize_persistent_app command app_type app_name
+           width height x y) ::
       !persists
   | Persistent ->
      if not (already_launched app_name) then
