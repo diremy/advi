@@ -895,6 +895,7 @@ module H =
 
     (* Draws a rectangle with border width bw if possible. *)
     let frame_rect bw x y w h =
+      let bw = bw - 1 in
       if bw > 0 && w > bw && h > bw then
         let draw_rect_with_line_width bw x y w h =
           Graphics.fill_rect x y bw h;
