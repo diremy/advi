@@ -5,6 +5,7 @@
 \usepackage{advi}
 \usepackage{advi-annot}
 \usepackage{demo}
+\usepackage{superpose}
 
 %
 % These declarations, properly conditioned to the real presence
@@ -471,7 +472,8 @@ For instance, the left game was typeset as
 \end{verbatim}}%
 
 \medskip
-Of course, the effect of active anchors can also be 
+\noindent
+The effect of active anchors can also be 
 \advianchor{C}{delocalized}.
 
 \SpecialCoor
@@ -480,6 +482,25 @@ Of course, the effect of active anchors can also be
          {<->}{A}{B}%\Aput{Fire!}
 }
 
+
+\noindent
+Another form of
+\begin{superpose}
+\advirecord[play]{a1}{\advianchor{a2}{simple}}\\
+\advirecord{a2}{\adviplay[white]{a1}\colorbox{yellow}{ cool }}
+\end{superpose}
+simple annotations is the overriding of
+\begin{superpose}
+\advianchor{7}{words}\\
+\advirecord{7}{\adviplay[white]{6}\colorbox{white}{{by text}}}\\
+\end{superpose}
+or by little 
+\begin{superpose}
+\advirecord[play]{1}{pieces \advianchor{2}{of} text}\\
+\advirecord{2}{\colorbox{white}{\begin{tabular}{@{}l@{}}
+inner tabular\\ should be between\\ parentheses\end{tabular}}}\\
+\advirecord{3}{The \qquad End}
+\end{superpose}
 
 \newpage
 
@@ -508,8 +529,6 @@ These annotations have been typeset respectively as:
 \end{verbatim}
 \end{small}
 
-\newpage
-
 \subsection*{Note}
 
 The command 
@@ -523,6 +542,29 @@ The command
 must appear after other packages that uses PS tricks, since it redefines
 some macros.  The package \verb"advi-annot" is necessary to get
 the annotation macros.
+
+\newpage
+
+\subsection*{Superpose Package}
+
+This very small package allows the superosing of boxes, making the
+surrounding box so that it fits all included boxes. This is convenient
+when displayin each included box at different pauses.
+
+
+Movie...
+\advirecord{0}{\colorbox{white}
+{\begin{superpose}
+\advirecord{1}{Begin}\\
+\advirecord{2}{{\begin{tabular}{@{}l@{}}
+inner tabular\\ should be between\\ parentheses\end{tabular}}}\\
+\advirecord{3}{The End}
+\end{superpose}}}
+end
+\adviplay{1}
+\adviwait\adviplay{0}\adviplay{2}
+\adviwait\adviplay{0}\adviplay{3}
+
 
 \newpage
 
