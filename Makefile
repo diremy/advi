@@ -26,12 +26,13 @@ MAINVERSION=1
 SUBVERSION=6
 PATCHLEVEL=0
 VERSION=$(MAINVERSION).$(SUBVERSION)
+FULLVERSION=$(VERSION).$(PATCHLEVEL)
 OLDVERSION=1.5
 
-CVSRELEASETAG=$(PACKAGE)-
-ANNOUNCEFILE=Announce-$(VERSION).$(PATCHLEVEL)
+CVSRELEASETAG=$(PACKAGE)-$(MAINVERSION)_$(SUBVERSION)_$(PATCHLEVEL)
+ANNOUNCEFILE=Announce-$(FULLVERSION)
 
-PACKAGEVERSIONFILE=config.ml
+PACKAGEVERSIONFILES=config.ml
 DOCVERSIONFILES=tex/advi.sty tex/advi.hva \
 doc_src/Includes/advi-version.html doc_src/Includes/env \
 doc_src/advi.man
@@ -56,7 +57,6 @@ COPTOPTIONS = -warn-error A -inline 9
 
 OCAMLC	  = $(CAML)c $(COPTIONS)
 OCAMLOPT  = $(CAML)opt.opt $(COPTOPTIONS)
-# OCAMLOPT  = $(CAML)opt.opt -unsafe -inline 9 -ccopt -I
 OCAMLDEP  = $(CAML)dep
 
 # CAMLIMAGESDIR & CAMLIMAGESLIBS is defined in Makefile.config
@@ -143,13 +143,13 @@ $(EXEC).opt: $(COBJS) $(CMX_OBJS)
 config.ml: config.ml.in configure
 	./configure
 
+# Automatic handling of versionning
 version:
-	for i in $(PACKAGEVERSIONFILE) $(DOCVERSIONFILES); do \
+	for i in $(PACKAGEVERSIONFILES) $(DOCVERSIONFILES); do \
 	echo $$i; \
-	mv $$i $$i~; \
-	sed -e '/ersion/s/$(OLDVERSION)/$(VERSION)/' $$i~ > $$i~~; \
-	sed -e '/year/s/$(OLDYEAR)/$(YEAR)/' $$i~~ > $$i; \
-	rm $$i~~; \
+	$(MV) $$i $$i~; \
+	sed -e '/ersion/s/$(OLDVERSION)/$(VERSION)/' $$i~ | \
+	sed -e '/year/s/$(OLDYEAR)/$(YEAR)/' > $$i; \
 	done
 
 .c.o:
@@ -169,8 +169,8 @@ version:
 count:
 	wc -l *.ml *.mli | sort -n
 
-clean:
-	rm -f *.cm[oix] *.o $(EXEC) $(EXEC).byt *~ .depend *.log *.aux
+clean::
+	rm -f *.cm[oix] *.o $(EXEC).opt $(EXEC).byt *~ .depend *.log *.aux
 	cd test && $(MAKE) clean
 	cd doc && $(MAKE) clean
 	cd examples && $(MAKE) clean
