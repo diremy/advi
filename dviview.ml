@@ -18,6 +18,7 @@
 
 let pauses = Misc.option_flag true "-nopauses" "Switch pauses off";;
 let fullwidth = Misc.option_flag false "-fullwidth" "Adjust size to width";;
+let bounding_box = Misc.option_flag false "-bbox" "Show the bounding box";;
 
 let start_page = ref 0
 let _ = Misc.set_option
@@ -413,8 +414,10 @@ module Make(Dev : DEVICE) = struct
         let orig_x, orig_y = (size_x - width)/2,  (size_y - height)/2 in
         st.orig_x <- orig_x; 
         st.orig_y <- orig_y; 
-      end
-        
+      end;
+      st.dvi_width <- int_of_float (st.base_dpi *. w_in *. st.ratio);
+      st.dvi_height <- int_of_float (st.base_dpi *. h_in *. st.ratio)
+      
   let goto_next_pause st f =
     try 
       let cont =
@@ -507,6 +510,7 @@ module Make(Dev : DEVICE) = struct
         st.aborted <- true;
         None
     in
+    if (!bounding_box) then draw_bounding_box st;
     Dev.set_busy (if cont = None then Dev.Free else Dev.Pause);
     Dev.synchronize();
     cont
