@@ -17,8 +17,8 @@
 
 include Makefile.config
 
-COPTIONS = -g
-COPTOPTIONS = -unsafe -inline 9
+COPTIONS = -warn-error A -g
+COPTOPTIONS = -warn-error A -unsafe -inline 9
 
 OCAMLC	  = $(CAML)c $(COPTIONS)
 OCAMLOPT  = $(CAML)opt $(COPTOPTIONS)
