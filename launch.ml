@@ -37,12 +37,24 @@ let exit code =
 
 let paranoid =
   Options.flag false "-safer"
-    "\tSafer mode: external applications are not launched";;
+    "\tSafer mode: external applications are never launched";;
+
+let unsafe =
+  Options.flag false "-unsafe"
+    "\tUnsafer mode: allow all external applications to be launched";;
+
+let safe_commands =
+  Sys.argv.(0) ::
+    [ "animate"; "display"; "xeyes"; "xterm"; "mpg123";
+      "advi"; "netscape"; ]
+;;
 
 let exec_command command args =
-  if !paranoid then
-     Misc.warning (Printf.sprintf "Attempt to launch %s" command) else
-  Unix.execvp command args;;
+  if !paranoid || not !unsafe && not (List.mem command safe_commands) then
+    Misc.warning (Printf.sprintf "Attempt to launch %s" command)
+  else
+    Unix.execvp command args
+;;
 
 let fork_process command = 
   let command_tokens = parse_shell_command command in

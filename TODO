@@ -139,3 +139,8 @@ vscale=100.0 hoffset=-228.0 voffset=-368.0 hscale=100.0
  - Engine for animated stuff from the W3C (SVG standard) ?
 
  - Engine for PDF rendering ?
+
+Bindings
+--------
+
+ - bind focus in to + and = and focus out to - and _

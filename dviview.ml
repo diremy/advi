@@ -959,7 +959,11 @@ let bind_keys () =
 
    (* Scaling the page. *)
    '<', B.scale_down;
+   '-', B.scale_down;
+   '_', B.scale_down;
    '>', B.scale_up;
+   '+', B.scale_up;
+   '=', B.scale_up;
    '#', B.nomargin;
 
    (* Efficiency related keys. *)
