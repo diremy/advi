@@ -148,6 +148,83 @@ englobante (bounding box) à la souris (Control Bouton), ou sur la
 ligne de commande au lancement de <CODE>advi</CODE> 
 (options <CODE>-vmargin</CODE> et <CODE>-hmargin</CODE>).</I>
 
+<DT><STRONG>Comment visualiser la page pointée par une ancre HTML dans
+un brouteur déjà lancé ?</STRONG>
+ <DD>Réponse: <I>pour afficher les liens hyper texte qui pointe vers
+des pages HTML, vous devez fixer correctement l'option
+<CODE>-browser</CODE> d'<CODE>advi</CODE>,
+ou alors appelé explicitement le brouteur de votre choix dans une commande
+<CODE>adviembed</CODE>. Vous pouvez par exemple utiliser:</I>
+<PRE>
+netscape -remote 'openURL(http://www.acm.org)'
+</PRE>
+
+<I>Pour insérer une telle commande dans une macro <CODE>adviembed</CODE>,
+un peu de magie est nécessaire parce que le caractère <CODE>'</CODE>
+est interprété par LaTeX. Pour l'en empêcher, écrivez par exemple:</I>
+<PRE>
+{\catcode `\' 12 \catcode `\: 12, \catcode `\' 12
+  \adviembed {netscape -remote 'openURL(http://www.acm.org)'}
+}
+</PRE>
+</DD>
+
+<DD><I>Pour <CODE>mozilla</CODE>, utilisez l'option
+<CODE>mozilla -remote</CODE>. Comme pour la question précédente, cette
+option suppose que mozilla est déjà lancé. Si vous voulez une commande
+qui marche dans tous les cas, même si aucun programme mozilla ne
+tourne, utlisez une commande shell; par exemple:</I>
+<PRE>
+#!/bin/bash
+
+# Écrivez ici l'adresse du binaire de mozilla, par exemple
+#MOZILLA=/usr/local/mozilla/mozilla
+MOZILLA=`which mozilla`
+
+case $# in
+ 1) 
+   if $MOZILLA -remote "ping()" 2>/dev/null
+   then 
+     $MOZILLA -remote "openURL($1,new-window)" || \
+     $MOZILLA "$@" 
+   else
+     $MOZILLA "$@" 
+   fi;;
+ *)
+   $MOZILLA "$@";;
+esac
+</PRE>
+<I>(À la place de la spécification de comportement
+<CODE>new-window</CODE>, vous pouvez choisir <CODE>new-tab</CODE> ou
+rien, comme vous le préférez.)</I>
+
+<DT><STRONG>Comment éviter ces messages superfétatoires d'<CODE>advi</CODE>
+au sujet de <CODE>dvips</CODE> ?</STRONG>
+
+<DD>J'obtiens par exemple
+<PRE>
+dvips: Unknown keyword (proc) in \special will be ignored
+dvips: Unknown keyword (koyaa) in \special will be ignored
+dvips: Unknown keyword (record) in \special will be ignored
+dvips: Unknown keyword (start) in \special will be ignored
+dvips: Couldn't find figure file advi:; continuing
+dvips: Unknown keyword (embed) in \special will be ignored
+dvips: Unknown keyword (name) in \special will be ignored
+dvips: Unknown keyword ("xmms") in \special will be ignored
+</PRE>
+ </DD>
+ <DD>Réponse: <I>Comme le disent les messages, ces erreurs ne
+proveinnent pas d'<CODE>advi</CODE> mais de la commande
+<CODE>dvips</CODE> qui ne comprend pas les instructions
+<CODE>\special</CODE> que le style LaTeX <CODE>advi.sty</CODE> insère
+and le fichier DVI.
+Ce comportement est normal et explicitement spécifié par le format DVI:
+les interprètes de fichiers DVI doivent ignorer les instructions
+<CODE>\special</CODE> qu'ils ne comprennent pas. Toutefois,
+rien n'empêche les intereprètes d'émettre une alerte quand ils
+rencontrent une instruction qu'ils ne connaissent pas.
+</I>
+
 </DL>
 
 <P ALIGN=LEFT><IMG SRC="bar.gif"></P>

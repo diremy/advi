@@ -153,14 +153,14 @@ relevant option on the command line when launching <CODE>advi</CODE>
 <DT><STRONG>How to display the target of an HTML anchor in an already
 running browser ?</STRONG>
  <DD>Answer: <I>to render hyper links that are HTML pages, you must
-properly set up the<CODE>-browser</CODE> option of <CODE>advi</CODE>,
+properly set up the <CODE>-browser</CODE> option of <CODE>advi</CODE>,
 or explicitely call the browser you want with the proper option in an
 <CODE>adviembed</CODE> command. You could use for instance:</I>
 <PRE>
 netscape -remote 'openURL(http://www.acm.org)'
 </PRE>
 
-<I>To insert such a command into an <CODE>adviembed </CODE> command, a
+<I>To insert such a command into an <CODE>adviembed</CODE> command, a
 little trickery is necessary, since <CODE>'</CODE> characters are
 interpreted by LaTeX. To prevent this behavior, you can write for
 instance:</I>
@@ -218,7 +218,7 @@ dvips: Unknown keyword ("xmms") in \special will be ignored
  <DD>Answer: <I>As written in the messages, those errors are not
 reported by <CODE>advi</CODE> by issued by <CODE>dvips</CODE> that
 cannot understand the <CODE>\special</CODE> instructions that
-the <CODE>advi</CODE> LaTeX style inserts into the DVI file.
+the <CODE>advi.sty</CODE> LaTeX style inserts into the DVI file.
 This behaviour is normal and properly specified by the DVI format:
 interpreters of DVI files are required to ignore the
 <CODE>\special</CODE> instructions they do not understand. However,
