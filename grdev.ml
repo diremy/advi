@@ -1044,6 +1044,7 @@ module H =
     let reemphasize emph act =
       deemphasize false emph;
       emphasize_and_flash href_emphasize_color act
+
   end;;
 
 module E =
@@ -1510,9 +1511,10 @@ let wait_button_up m x y =
 let wait_event () =
   (* We reached a pause. Now we can reset the sleep break *)
   clear_sleep ();
+  let deemphasize emph = H.deemphasize true emph in
   let rec event emph b =
-    let send ev = H.deemphasize false emph; ev in
-    let rescan () = H.deemphasize false emph; event H.Nil false in
+    let send ev = deemphasize emph; ev in
+    let rescan () = deemphasize emph; event H.Nil false in
     match wait_signal_event all_events with
     | Final e -> send e
     | Raw ev ->
@@ -1523,23 +1525,23 @@ let wait_event () =
               let ev' = GraphicsY11.wait_next_event button_up in
               send (Href h) else
             if H.up_to_date act emph then event emph b else begin
-              H.deemphasize false emph;
+              deemphasize emph;
               event (H.emphasize_and_flash href_emphasize_color act) b end
         | {A.action =
            {H.tag = H.Advi {H.link = s; H.action = a; H.mode = H.Over};
             H.draw = d}} as act ->
               if H.up_to_date act emph then event emph b else begin
-                H.deemphasize false emph;
+                deemphasize emph;
                 event (H.save_screen_exec act a) b end
         | {A.action =
            {H.tag = H.Advi {H.link = s; H.action = a; H.mode = H.Click_down};
             H.draw = d}} as act ->
               if ev.button && not b then begin
-                H.deemphasize false emph;
+                deemphasize emph;
                 event (H.save_screen_exec act a) true end else
               if ev.button then event emph b else
               if H.up_to_date act emph then event emph b else begin
-                H.deemphasize false emph;
+                deemphasize emph;
                 event (H.emphasize_and_flash href_emphasize_color act) b end
         | _ -> rescan ()
         with Not_found ->
