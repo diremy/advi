@@ -1,11 +1,11 @@
 The Active-DVI, DVI presenter
 
 README                    Requirements, overview of the distribution
-LGPL			  License for advi-1.0.0
-adk-1.0.0.tar.gz
+LGPL			  License for advi-1.2.0
+adk-1.2.0.tar.gz
   advi development kit source code (comprises all the source code to
   build a full fledged presenter, including companion Caml libraries
   camltk and camlimages consistent with the current advi version)
-advi-1.0.0.tar.gz	  The source code for advi presenter only
-advi-1.0.0-1.src.rpm      The RedHat package for advi source code
-advi-1.0.0-1.i386.rpm     The RedHat package for advi compiled binaries
+advi-1.2.0.tar.gz	  The source code for advi presenter only
+advi-1.2.0-1.src.rpm      The RedHat package for advi source code
+advi-1.2.0-1.i386.rpm     The RedHat package for advi compiled binaries
