@@ -17,3 +17,7 @@ val digdir : string -> int -> unit
 
 val prepare_file : string -> unit
 (* [prepare_file file] prepares the directory for [file] *)
+
+val save_page_no : int -> unit;;
+ (* [save_page_no no] saves the page number [no] to file
+    [cache_dir ^ "/advi_page_no". *)

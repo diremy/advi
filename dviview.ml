@@ -15,8 +15,6 @@
  * details (enclosed in the file LGPL).
  *)
 
-type select_mode = Interval | Rectangle;;
-
 let pauses = Options.flag true "-nopauses" "Switch pauses off";;
 let fullwidth = Options.flag false "-fullwidth" "Adjust size to width";;
 let bounding_box = Options.flag false "-bbox" "Show the bounding box";;
@@ -56,9 +54,7 @@ let click_turn_page =
 
 let page_stack_to_string page stack =
   let stack = String.concat " " (List.map string_of_int stack) in
-  Printf.sprintf "Page no: %d Page_stack: %s"
-    page
-    stack;;
+  Printf.sprintf "Page no: %d Page_stack: %s" page stack;;
 
 let scale_step = ref (sqrt (sqrt 2.));;
 let set_scale x =
@@ -88,28 +84,28 @@ exception Error of string;;
 (* things we can set before initialization *)
 
 type offset =
-  | No_offset
-  | Plus of int
-  | Minus of int
+   | No_offset
+   | Plus of int
+   | Minus of int;;
 
 let int_of_offset = function
   | No_offset -> 0
   | Plus n -> n
-  | Minus n -> -n
+  | Minus n -> -n;;
 
 type geometry = {
     mutable width : int;
     mutable height : int;
     mutable xoffset : offset;
     mutable yoffset : offset
-  }
+  };;
 
 type attr = {
     mutable geom : geometry;
     mutable crop : bool;
     mutable hmargin : dimen;
     mutable vmargin : dimen
-  }
+  };;
 
 let string_of_geometry geom =
   let w = geom.width
@@ -125,12 +121,12 @@ let string_of_geometry geom =
   | (Plus x, Plus y) -> Printf.sprintf "%dx%d+%d+%d" w h x y
   | (Plus x, Minus y) -> Printf.sprintf "%dx%d+%d-%d" w h x y
   | (Minus x, Plus y) -> Printf.sprintf "%dx%d-%d+%d" w h x y
-  | (Minus x, Minus y) -> Printf.sprintf "%dx%d-%d-%d" w h x y
+  | (Minus x, Minus y) -> Printf.sprintf "%dx%d-%d-%d" w h x y;;
 
 (*** The view state ***)
 type mode = Selection | Control;;
 type state = {
-      (* DVI attributes *)
+    (* DVI attributes *)
     filename : string;
     mutable dvi : Dvi.t;
     mutable cdvi : Driver.cooked_dvi;
@@ -169,6 +165,10 @@ type state = {
       (* Some of f when on a pause *)
     mutable cont : (unit -> bool) option;
   };;
+
+let set_page_no st n =
+ Userfile.save_page_no n;
+ st.page_no <- n;;
 
 (*** Setting the geometry ***)
 let is_digit c = c >= '0' && c <= '9';;
@@ -508,7 +508,7 @@ let redraw ?trans st =
     with
     | Grdev.Stop -> st.aborted <- true
   end;
-  Grdev.synchronize();
+  Grdev.synchronize ();
   Grdev.set_busy (if st.cont = None then Grdev.Free else Grdev.Pause);;
 
 let redisplay st =
@@ -618,7 +618,7 @@ let reload st =
     st.page_stack <- clear_page_stack pages st.page_stack;
     let page = page_start (min st.page_no (st.num_pages - 1)) st in
     if page <> st.page_no then st.pause_no <- 0;
-    st.page_no <- page;
+    set_page_no st page;
     st.frozen <- true;
     st.aborted <- true;
     update_dvi_size false st;
@@ -641,7 +641,7 @@ let goto_page n st = (* go to the begining of the page *)
         else if new_page_no = pred st.page_no then Some Transitions.DirLeft
         else if new_page_no = st.page_no then Some Transitions.DirTop
         else None in
-      st.page_no <- new_page_no;
+      set_page_no st new_page_no;
       st.pause_no <- 0;
       redraw ?trans:(t) st
     end;;
@@ -919,11 +919,11 @@ let bind_keys () =
    'm', B.push_page;
    'i', B.pop_page;
 
-   '\r' (* return *), B.push_next_page;
    '\t' (* tab *), B.push_page;
+   '' (* Escape *), B.pop_page;
 
    '\b' (* backspace *), B.pop_previous_page;
-   '' (* Escape *), B.pop_page;
+   '\r' (* return *), B.push_next_page;
 
    'x', B.exchange_page;
 
@@ -969,7 +969,7 @@ let main_loop filename =
   if st.page_no > 0 && !Options.dops then
     Driver.scan_special_pages st.cdvi st.page_no
   else
-    st.page_no <- page_start 0 st;
+    set_page_no st (page_start 0 st);
   redraw st;
   (* num is the current number entered by keyboard *)
   try while true do

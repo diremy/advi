@@ -97,3 +97,15 @@ let cache_dir =
     Filename.concat user_dir "cache"
 ;;
 
+let advi_page_no_file = Filename.concat cache_dir "advi_page_no";;
+
+let save_page_no n =
+ try
+   let oc = open_out advi_page_no_file in
+   output_string oc (string_of_int n);
+   output_char oc '\n';
+   close_out oc
+ with _ ->
+   Misc.warning 
+    (Printf.sprintf
+       "Cannot write file %s to record page number." advi_page_no_file);;
