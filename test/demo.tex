@@ -87,16 +87,20 @@ Replay the DVI previously recorded as \docid{tag}.
 The optional argument changes the color to \docid{color} during replay. 
 \end{quote}
 
-\medskip\noindent
-\verb+\advirecord+ \& \verb+\adviplay+ feature to change the colour
- of a text:
- \begin{itemize}
+
+\newpage 
+
+\subsection* {Eye candies (examples)}
+
+\begin{itemize}
    \item mark the text with a tag name:\\
-     $\tt{\backslash}record\{this\}\
-          \{\advirecord[play]{this}{Warning~to~the~casual~user}\}$
-   \item then change the current text color and replay the tagged text:
+     $\tt \backslash advirecord\{this\}
+      \{\advirecord[play]{this}{Warning~to~the~casual~user}\}$
+
+   \item then change the current text color and replay the tagged text:\\
   $\tt{\backslash}play\{this\}$.
- \end{itemize}
+\end{itemize}
+
 
 \noindent
 For instance, to display in red the text associated to the tag
