@@ -106,13 +106,13 @@ veryclean:
 	rm -f Makefile.config config.cache config.log *.dvi \
 	config.status drawps.ml config.ml
 
-splash.dvi: splash.tex
-	latex $*
+tex/splash.dvi: tex/splash.tex
+	latex tex/$*
 
-install:: advi.opt splash.dvi
+install:: advi.opt tex/splash.dvi
 	cp advi.opt ${bindir}/advi
 	- mkdir -p $(ADVI_LOC)
-	cp tex/splash.dvi tex/caml.eps tex/bar.jpg.eps tex/advi.sty tex/advi-annot.sty tex/advi.pro $(ADVI_LOC)
+	cp tex/splash.dvi tex/caml.eps tex/bar.jpg.eps tex/advi.sty tex/advi.pro $(ADVI_LOC)
 
 MLFILES = $(addsuffix .ml, $(MODULES))
 .depend:: *.mli $(MLFILES) Makefile 
