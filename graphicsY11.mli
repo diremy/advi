@@ -39,6 +39,8 @@ val resize_subwindow : window_id -> int -> int -> unit;;
          (* [resize_subwindow wid w h] resizes the sub-window having
             the given identifier to height [h] and width [w]. *)
 
+val iter_subwindows : (window_id -> int -> unit) -> unit;;
+
 external bstore_id : unit -> int32 = "gr_bstore";;
         (* return the X pixmap of the bstore window as an integer *)
 external window_id : unit -> int32 = "gr_window";;

@@ -38,6 +38,8 @@ external get_window_id : unit -> window_id = "gr_window_id";;
 
 let subwindows = Hashtbl.create 13;;
 
+let iter_subwindows f = Hashtbl.iter f subwindows;;
+
 external raw_open_subwindow : int -> int -> int -> int -> window_id 
     = "gr_open_sub_window";;
 external raw_close_subwindow : window_id -> unit

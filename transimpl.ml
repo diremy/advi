@@ -15,14 +15,19 @@
 (*  Based on Mldvi by Alexandre Miquel.                                *)
 (***********************************************************************)
 
-
-open Graphics;;
 open Transitions;;
 
 (* Drawing (moving and resizing and ...) sprites on the screen. *)
 let prev_geom = ref None;;
 
 let init_sprite () = prev_geom := None;;
+
+let do_on_screen f x =
+  Graphics.remember_mode false;
+  GraphicsY11.display_mode true;
+  f x;
+  Graphics.remember_mode true;
+  GraphicsY11.display_mode false;;
 
 let draw_sprite newimg x y width height =
   let orgimg = Graphics.get_image x y width height in
@@ -39,12 +44,7 @@ let draw_sprite newimg x y width height =
   Graphics.draw_image newimg x y;
   let workimg = Graphics.get_image wx wy wwidth wheight in
   Graphics.draw_image orgimg x y;
-
-  Graphics.remember_mode false;
-  GraphicsY11.display_mode true;
-  Graphics.draw_image workimg wx wy;
-  Graphics.remember_mode true;
-  GraphicsY11.display_mode false;
+  do_on_screen (Graphics.draw_image workimg wx) wy;
   prev_geom := Some (x, y, width, height)
 ;;
 
@@ -242,22 +242,18 @@ let get_steps default = function Some x -> x | None -> default;;
 let synchronize_transition () =
   if !current_transition <> TransNone then
   let w = Graphics.size_x () and h = Graphics.size_y () in
-  Graphics.remember_mode false;
-  GraphicsY11.display_mode true;
-  begin match !current_transition with
-  | TransSlide (steps, from) ->
-      slide 0.0 (get_steps 20 steps) from
-  | TransWipe (steps, from) ->
-      wipe 0.0 (get_steps 20 steps) from (w, h) (0, 0)
-  | TransBlock (steps, from) ->
-      block 0.0 (get_steps 5000 steps) from (w, h) (0, 0)
-  | TransPath (steps, genpath, start, stop) ->
-      path 0.0 (get_steps 20 steps) genpath start stop  
-  | TransNone -> assert false
-  end;
-  Graphics.remember_mode true;
-  GraphicsY11.display_mode false
-;;
+  do_on_screen (fun () ->
+    match !current_transition with
+    | TransSlide (steps, from) ->
+        slide 0.0 (get_steps 20 steps) from
+    | TransWipe (steps, from) ->
+        wipe 0.0 (get_steps 20 steps) from (w, h) (0, 0)
+    | TransBlock (steps, from) ->
+        block 0.0 (get_steps 5000 steps) from (w, h) (0, 0)
+    | TransPath (steps, genpath, start, stop) ->
+        path 0.0 (get_steps 20 steps) genpath start stop  
+    | TransNone -> assert false
+  ) ();;
 
 let string_of_transmode = function
   | TransNone -> "none"
@@ -315,25 +311,16 @@ let box_transition trans oldimg newimg x y width height =
       end
   | TransPath (steps, genpath, start, stop) ->
       let steps = get_steps 50 steps in
-      Graphics.remember_mode false;
-      GraphicsY11.display_mode true;
-      move_along_path newimg width height 0.01 steps genpath start stop;
-      Graphics.remember_mode true;
-      GraphicsY11.display_mode false
+      do_on_screen (fun stop ->
+        move_along_path newimg width height 0.01 steps genpath start stop) stop
   | TransBlock (step, from) ->
       let step = get_steps 50 step in
-      Graphics.remember_mode false;
-      GraphicsY11.display_mode true;
-      block 0.01 step from (width, height) (x, y);
-      Graphics.remember_mode true;
-      GraphicsY11.display_mode false
+      do_on_screen (fun () ->
+        block 0.01 step from (width, height) (x, y)) ()
   | TransWipe (step, from) ->
       let step = get_steps 50 step in
-      Graphics.remember_mode false;
-      GraphicsY11.display_mode true;
-      wipe 0.01 step from (width, height) (x, y);
-      Graphics.remember_mode true;
-      GraphicsY11.display_mode false
+      do_on_screen (fun () ->
+        wipe 0.01 step from (width, height) (x, y)) ()
   (*| _ ->
       (* JPF: Yes, I know this case is unused, but please keep it for future. *)
       Misc.warning (Printf.sprintf "transbox mode %s is not supported" 
@@ -360,4 +347,3 @@ let transbox_go trans =
   end;
   saved_transbox := None;
 ;;
-

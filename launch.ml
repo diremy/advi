@@ -51,17 +51,6 @@ let set_policy = function
   | Ask -> policy := Ask
 ;;
 
-(* Cautious policy assignment: -exec does not override -safer,
-   and ask can override -safer. *)
-let cautious_set_policy = function
-  | Safer -> policy := Safer
-  | Exec ->
-     if !policy = Ask then policy := Exec
-  | Ask ->
-     if !policy = Exec ||
-        !policy = Safer then policy := Ask
-;;
-
 Options.add
   "-exec"
   (Arg.Unit
@@ -97,29 +86,42 @@ let cannot_execute_command command_invocation =
           please rerun advi with option -ask or -exec."
          command_invocation);;
 
+let do_on_screen f x =
+  Graphics.remember_mode false;
+  GraphicsY11.display_mode true;
+  let r = f x in
+  Graphics.remember_mode true;
+  GraphicsY11.display_mode false;
+  r;;
+
 let ask_user command_invocation =
- Misc.warning ("Do you want to launch " ^ command_invocation); 
- false;;
+ GraphicsY11.iter_subwindows (fun wid _ -> GraphicsY11.unmap_subwindow wid);
+prerr_endline "Subwindows unmapped!";
+ let answer = do_on_screen Gterm.ask_to_launch command_invocation in
+ GraphicsY11.iter_subwindows (fun wid _ -> GraphicsY11.map_subwindow wid);
+prerr_endline "Subwindows remapped!";
+ answer;;
+ (* Misc.warning ("Do you want to launch " ^ command_invocation); 
+ false;;*)
 
-let execute_command command_invocation command_tokens =
-  let rec exec_command command_invocation command_tokens = function
-    | Exec -> Unix.execvp command_tokens.(0) command_tokens
-    | Ask ->
-        if ask_user command_invocation
-        then exec_command command_invocation command_tokens Exec
-        else exec_command command_invocation command_tokens Safer
-    | Safer ->
-        cannot_execute_command command_invocation in
+let can_launch command_invocation = function
+  | Exec -> true
+  | Safer -> false
+  | Ask -> ask_user command_invocation;;
 
-  exec_command command_invocation command_tokens !policy;;
+let execute_command can_exec command_invocation command_tokens =
+  if can_exec then Unix.execvp command_tokens.(0) command_tokens
+  else cannot_execute_command command_invocation;;
 
 let fork_process command_invocation = 
   let command_tokens = parse_shell_command command_invocation in
+  let can_exec = can_launch command_invocation !policy in
+prerr_endline (Printf.sprintf "Can_exec %b" can_exec);
   let pid = Unix.fork () in
   if pid = 0 then
     begin (* child *)
       try
-        execute_command command_invocation command_tokens;
+        execute_command can_exec command_invocation command_tokens;
 	exit 0
       with
       | Unix.Unix_error (e, _, arg) -> 

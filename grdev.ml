@@ -360,7 +360,7 @@ let copy_of_bkgd_data () =
   c;;
 
 let draw_img file ratio whitetrans alpha blend psbbox (w,h) x0 y0 =
-  if not !opened then failwith "Grdev.fill_rect: no window";
+  if not !opened then failwith "Grdev.draw_img: no window";
   let x = x0
   and y = !size_y - y0 in
   Drawimage.f
@@ -629,6 +629,7 @@ type app_mode = Sticky | Persistent | Ephemeral;;
 let app_table = Hashtbl.create 17;;
 
 let raw_embed_app command app_mode app_name width height x y =
+
   let string_replace pat templ str =
     let result = Buffer.create (String.length str * 2) in
     let patlen = String.length pat in
@@ -752,7 +753,7 @@ let embed_app command app_mode app_name width height x y =
       (fun () ->
           (* prerr_endline ("Moving " ^ app_name); *)
           move_or_resize_persistent_app command app_mode app_name
-          width height x y) :: 
+          width height x y) ::
       !persists
   | Persistent ->
      if not (already_launched app_name) then
@@ -767,7 +768,7 @@ let embed_app command app_mode app_name width height x y =
      unmap_embeds :=
       (fun () ->
         unmap_embed_app command app_mode app_name width height x y) ::
-      !unmap_embeds;
+      !unmap_embeds
   | Ephemeral ->
      embeds :=
       (fun () ->
@@ -806,9 +807,9 @@ let kill_apps app_mode =
   end; *)
   let to_be_killed =
     Hashtbl.fold (fun pid (apt, app_name, wid) acc ->
-      if apt = app_mode then (pid,wid) :: acc else acc) app_table []
+      if apt = app_mode then (pid, wid) :: acc else acc) app_table []
   in
-  List.iter (fun (pid,wid) -> kill_app pid wid) to_be_killed;;
+  List.iter (fun (pid, wid) -> kill_app pid wid) to_be_killed;;
 
 let signal_app sig_val pid wid =
   (* prerr_endline
@@ -1347,12 +1348,12 @@ let wait_select_button_up m x y =
     | x -> x in
   let color = !color in
   GraphicsY11.synchronize ();
-  GraphicsY11.display_mode true;
   Graphics.remember_mode false;
+  GraphicsY11.display_mode true;
   GraphicsY11.set_cursor select_cursor;
   let restore () =
-    GraphicsY11.display_mode false;
     Graphics.remember_mode true;
+    GraphicsY11.display_mode false;
     set_color color;
     GraphicsY11.set_cursor !free_cursor in
   try
