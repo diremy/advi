@@ -56,7 +56,8 @@ let page_stack_to_string page stack =
   let stack = String.concat " " (List.map string_of_int stack) in
   Printf.sprintf "Page no: %d Page_stack: %s" page stack;;
 
-let scale_step = ref (sqrt (sqrt 2.));;
+let scale_step = ref (sqrt (sqrt (sqrt 2.)));;
+
 let set_scale x =
   if x > 1.0 && x <= 2. then scale_step := x
   else
@@ -65,7 +66,7 @@ let set_scale x =
 Options.set
   "-scalestep"
   (Arg.Float set_scale)
-  "REAL\tScale step for '<' and '>' (default sqrt(sqrt(2.0)))";;
+  "REAL\tScale step for '<' and '>' (default sqrt (sqrt (sqrt 2.0)))";;
 
 let autoresize = ref true;;
 Options.set
@@ -73,6 +74,15 @@ Options.set
   (Arg.Clear autoresize)
   "\tPrevents scaling from resizing the window (done if geometry is provided)"
 ;;
+
+let dpi_resolution = ref 72.27;;
+let set_dpi_resolution r =
+ dpi_resolution := max r 72.27;;
+
+Options.set
+  "-resolution"
+  (Arg.Float set_dpi_resolution)
+  "REAL\tDpi resolution of the screen (min 72.27)))";;
 
 module Symbol = Grdev.Symbol;;
 
@@ -240,7 +250,7 @@ let init filename =
     | Dvi.Error s -> raise (Error (filename ^ ": " ^ s))
     | _ -> raise (Error ("error while loading `" ^ filename ^ "'")) in
   let cdvi = Driver.cook_dvi dvi
-  and dvi_res = 72.27
+  and dvi_res = !dpi_resolution
   and mag = float dvi.Dvi.preamble.Dvi.pre_mag /. 1000.0 in
   let w_sp = dvi.Dvi.postamble.Dvi.post_width
   and h_sp = dvi.Dvi.postamble.Dvi.post_height in
@@ -315,7 +325,7 @@ let set_bbox st =
   Grdev.set_bbox (Some (st.orig_x, st.orig_y, st.dvi_width, st.dvi_height));;
 
 let update_dvi_size init st =
-  let dvi_res = 72.27
+  let dvi_res = !dpi_resolution
   and mag = float st.dvi.Dvi.preamble.Dvi.pre_mag /. 1000.0
   and w_sp = st.dvi.Dvi.postamble.Dvi.post_width
   and h_sp = st.dvi.Dvi.postamble.Dvi.post_height in
@@ -601,7 +611,7 @@ let reload st =
     st.last_modified <- reload_time st;
     let dvi = Dvi.load st.filename in
     let cdvi = Driver.cook_dvi dvi in
-    let dvi_res = 72.27
+    let dvi_res = !dpi_resolution
     and mag = float dvi.Dvi.preamble.Dvi.pre_mag /. 1000.0 in
     let w_sp = dvi.Dvi.postamble.Dvi.post_width
     and h_sp = dvi.Dvi.postamble.Dvi.post_height in
