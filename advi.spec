@@ -1,5 +1,5 @@
 Release: 1
-Version: 1.2.0
+Version: 1.4.0
 Name: advi
 Summary: Active-DVI Presenter
 Source: ftp://ftp.inria.fr/INRIA/Projects/cristal/advi/advi-1.2.0.tar.gz
@@ -37,6 +37,7 @@ make clean
 /usr/lib/advi/advi.sty
 /usr/lib/advi/advi-annot.sty
 /usr/lib/advi/advi-graphicx.sty
+/usr/lib/advi/advi-slides.sty
 /usr/lib/advi/argv.sty
 /usr/lib/advi/bubble.sty
 /usr/lib/advi/superpose.sty
