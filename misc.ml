@@ -146,5 +146,5 @@ let debug_stop s =
    prerr_endline "Ok"
   end;;
 
-let forward_push_back_event_key = ref (fun c ->
+let forward_push_back_key_event = ref (fun c ->
   failwith "undefined forward push_back_event_key");;

@@ -157,10 +157,9 @@ let can_launch command command_invocation =
   | Ask ->
      let cursor = GraphicsY11.get_cursor () in
      GraphicsY11.set_cursor GraphicsY11.Cursor_question_arrow;
-     let res = 
-       (ask_to_launch command) command_invocation in
+     let res = ask_to_launch command command_invocation in
      GraphicsY11.set_cursor cursor;
-     !Misc.forward_push_back_event_key '' GraphicsY11.control;
+     !Misc.forward_push_back_key_event '' GraphicsY11.control;
      res;;
 
 let can_execute_table = Hashtbl.create 11;;
