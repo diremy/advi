@@ -1,3 +1,6 @@
+let debug = ref false
+let debugs s = if !debug then prerr_endline s
+
 type ratiopts =
    | ScaleX        (* scale x coords, but keep original Ratio *)
    | ScaleY        (* scale y coords, but keep original Ratio *)
@@ -61,7 +64,7 @@ module M = struct
   ;;
 
   let cache_load file =
-(*  prerr_endline ("cache_load " ^ file); *)
+    debugs ("cache_load " ^ file);
     let load ic =
       let s = String.create (String.length cache_key) in
       ignore (input ic s 0 (String.length cache_key));
@@ -82,7 +85,7 @@ module M = struct
   ;;
 
   let cache_save file img = 
-(*  prerr_endline ("cache_save " ^ file); *)
+    debugs ("cache_save " ^ file);
     let save oc =
       output oc cache_key 0 (String.length cache_key);
       match img with
@@ -90,9 +93,9 @@ module M = struct
   	  output_value oc true;
   	  output_value oc image.Rgba32.width;
   	  output_value oc image.Rgba32.height;
-(* prerr_endline (Printf.sprintf "(%dx%d) %d bytes written"
-		 image.Rgba32.width image.Rgba32.height
-		 (String.length (Bitmap.dump image.Rgba32.data))); *)
+	  debugs (Printf.sprintf "(%dx%d) %d bytes written"
+		    image.Rgba32.width image.Rgba32.height
+		    (String.length (Bitmap.dump image.Rgba32.data)));
   	  output_value oc (Bitmap.dump image.Rgba32.data);
       | Rgb24 image ->
   	  output_value oc false;
@@ -123,7 +126,7 @@ module M = struct
   ;;
 
   let image_load psbbox (w,h) file =
-(*  prerr_endline ("image load " ^ file); *)
+    debugs ("image load " ^ file);
     try 
       match fst (Image.file_format file) with
       | Image.Ps ->
@@ -312,7 +315,10 @@ module M = struct
 	load_and_resize file whitetransp psbbox ratiopt (w,h) in
       (* load_and_resize may not return exactly the same size 
 	 we specified as (w,h) *)
-      draw_image image cache_name alpha blend (w,h) (x0,y0)
+      debugs (Printf.sprintf "Draw (alpha=%f blend=%s)"
+		alpha (if blend = None then "NONE" else "SOME"));
+      draw_image image cache_name alpha blend (w,h) (x0,y0);
+      debugs "Success Draw!";
     with
     | Exit -> ()
     | Failure s -> Misc.warning s
