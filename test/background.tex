@@ -1,0 +1,127 @@
+\documentclass[12pt]{article}
+
+% You need graphics package
+\usepackage{color}
+\usepackage{graphicx}
+
+\usepackage{pst-all}
+
+\usepackage[annot]{../tex/advi}
+
+\usepackage{hyperref}
+
+%% \usepackage[annot]{advi} 
+%% must occur after packages using PStricks macros 
+%% (it redefines some of them) 
+
+\def\mathsym#1{\ifmmode{#1}\else$#1$\fi}
+
+\pagestyle{empty}
+
+\definecolor{red}{rgb}{1.0,0.0,0.0}
+\definecolor{green}{rgb}{0.0,1.0,0.0}
+\definecolor{blue}{rgb}{0.0,0.0,1.0}
+\definecolor{c1}{rgb}{1.0,0.0,0.0}
+\definecolor{c2}{rgb}{0.5,0.4,0.0}
+\definecolor{c3}{rgb}{0.0,0.8,0.0}
+\definecolor{c4}{rgb}{0.0,0.4,0.5}
+\definecolor{c5}{rgb}{0.0,0.0,1.0}
+\definecolor{c6}{rgb}{0.5,0.0,0.5}
+
+\def\smallpause{0.3}
+
+\def\keymenu#1{\textcolor{red}{\underline{#1}}}
+
+\def\advifooter{\vbox to 0em{\vbox to \vsize {\vfill
+Press: \keymenu{n}ext page \keymenu{p}revious page
+\keymenu{\textvisiblespace} next pause%
+\hfill{\embedsticky{advianim}{1cm}{1cm}{animate -geometry !g -window !p advi.anim.gif}}
+} \vss}}
+
+\def\adviheader{\noindent
+{\bf\Large Active dvi}\\
+\includegraphics[width=\textwidth]{../tex/bar.jpg.eps}}
+
+\let \Newpage \newpage
+\def \newpage {\Newpage \advifooter\adviheader}
+
+\def\adviemptyfooter{\vbox to 0em{\vbox to \vsize {\vfill
+~~\vss\killembed{advianim}}}}
+
+\def\lastpage{\Newpage\adviemptyfooter\adviheader}
+
+%  \setlength\textwidth{660\p@}
+%  \setlength\textheight{460\p@}
+
+\begin{document}
+
+\newpage
+
+\subsection* {Active dvi supports background effects}
+
+This file demonstrates a simple showcase for background effects.
+
+\newpage
+
+You can perform some simple background effects, that
+allow to fix a background color and/or image in your slides.
+
+For example, this page has a yellow background because we included
+in the LaTeX source of the page the command:
+  \begin{quote}
+    \begin{verbatim}
+	\setbgcolor{Yellow} 
+    \end{verbatim}
+  \end{quote}
+\setbgcolor{Yellow} 
+
+\newpage
+
+\setbgimage{world.jpg} 
+
+But we can also set a background image, like \verb|world.jpg| which
+is now in the test directory.
+
+We included in this page the command
+
+  \begin{quote}
+    \begin{verbatim}
+        \setbgimage{world.jpg} 
+    \end{verbatim}
+  \end{quote}
+
+\newpage
+
+\subsection* {Inheriting page backgrounds}
+
+By default, Advi will propagate to a page the background information
+of the previous page (Warning: previous page means the page
+\emph{previously displayed}, which is not necessarily the previous
+page in the dvi file, as happens when you use \emph{jump} commands).
+
+For example, this page has still the background image, even if no
+command is included, because it inherits the background of the
+previous page.
+
+If you do not like this behaviour, and prefer to have only the
+background explicitly declared in a page, run advi with the
+\verb|--reset_bkgd| option.
+
+%\setbgcolor{Red}
+
+\newpage
+
+Otherwise, you can locally issue a \verb|\resetbg| command, that 
+\resetbg
+resets the background eliminating everything which is inherited. This
+is how we got rid of the background image in this page, that only
+sports a nice Cyan background color.
+
+\setbgcolor{Cyan}
+
+Ah, of course, you can use the usual LaTeX colors (or define new ones
+the usual way) for backgrounds.
+
+Anybody willing to add support for color gradients?
+
+\end{document}

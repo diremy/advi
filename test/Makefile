@@ -7,13 +7,16 @@ LATEX=TEXINPUTS=/usr/share/texmf//:$$TEXINPUTS; export TEXINPUTS; latex
 
 MLPROG=but taquin
 
-all: $(MLPROG) demo.dvi trans.dvi
+all: $(MLPROG) demo.dvi trans.dvi background.dvi
 
 demo.dvi: demo.tex
 	$(LATEX) ./demo.tex
 
 trans.dvi: trans.tex
 	$(LATEX) ./trans.tex
+
+background.dvi: background.tex
+	$(LATEX) ./background.tex
 
 but: start_embed.ml
 ifeq ($(HAVE_CDK),true)  
