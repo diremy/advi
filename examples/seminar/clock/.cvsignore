@@ -1,4 +1,5 @@
-tools.log
-tools.aux
-tools.dvi
+*.eps
+*.log
+*.dvi
+*.aux
 .advi
