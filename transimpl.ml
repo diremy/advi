@@ -25,13 +25,14 @@ let prev_geom = ref None;;
 let init_sprite () = prev_geom := None;;
 
 let do_on_screen = GraphicsY11.only_on_screen;;
+
 let do_on_screen f x =
   Graphics.remember_mode false;
   GraphicsY11.display_mode true;
-  let res = f x in
-  Graphics.remember_mode true;
+  let r = f x in
   GraphicsY11.display_mode false;
-  res;;
+  Graphics.remember_mode true;
+  r;;
 
 let draw_sprite newimg x y width height =
   let orgimg = Graphics.get_image x y width height in
