@@ -628,6 +628,14 @@ type app_mode = Sticky | Persistent | Ephemeral;;
 
 let app_table = Hashtbl.create 17;;
 
+(* The function that launches all embedded applications.
+   When encountering an embedded application, a call to raw_embed_app
+   is stored in the list of application to launch at next pause
+   in the [embeds] list reference.
+
+   This function allocates a (sub)window for the application and tries
+   to launch the application into this window.
+*)
 let raw_embed_app command app_mode app_name width height x y =
 
   let string_replace pat templ str =
@@ -729,8 +737,7 @@ let move_or_resize_persistent_app command app_mode app_name width height x y =
   let _, (app_mode, app_name, wid) = find_embedded_app app_name in
   GraphicsY11.resize_subwindow wid width height;
   let gry = !size_y - y + height - width in
-  GraphicsY11.move_subwindow wid x gry;
-;;
+  GraphicsY11.move_subwindow wid x gry;;
 
 (* In hash table t, verifies that at least one element verifies p. *)
 let hashtbl_exists t f =
@@ -759,14 +766,17 @@ let embed_app command app_mode app_name width height x y =
      if not (already_launched app_name) then
      embeds :=
       (fun () ->
+        (* prerr_endline ("Launching " ^ app_name); *)
         raw_embed_app command app_mode app_name width height x y) ::
       !embeds;
      persists :=
       (fun () ->
+        (* prerr_endline ("Mapping " ^ app_name); *)
         map_embed_app command app_mode app_name width height x y) ::
       !persists;
      unmap_embeds :=
       (fun () ->
+        (* prerr_endline ("Unmapping " ^ app_name); *)
         unmap_embed_app command app_mode app_name width height x y) ::
       !unmap_embeds
   | Ephemeral ->
@@ -1091,7 +1101,7 @@ module H =
 module Symbol = Symbol.Make (Glyph);;
 
 let cut s =
-  (*  print_string s; print_newline (); *)
+  (* print_string s; print_newline (); *)
   (* cut does not work yet *)
   GraphicsY11.cut s;;
 
@@ -1099,7 +1109,8 @@ let open_dev geom =
   if !opened then Graphics.close_graph ();
   Graphics.open_graph geom;
 
-  GraphicsY11.init (); (* we disable Graphics's event retrieving *)
+  (* We disable Graphics's event retrieving *)
+  GraphicsY11.init ();
   Timeout.init ();
   (* Fill the event queue *)
   let rec f () =
@@ -1120,8 +1131,7 @@ let open_dev geom =
 
 let close_dev () =
   if !opened then begin
-    kill_ephemeral_apps ();
-    kill_persistent_apps ();
+    kill_all_embedded_apps ();
     Graphics.close_graph ();
   end;
   opened := false;;
@@ -1133,7 +1143,8 @@ let clear_dev () =
   GraphicsY11.display_mode !Options.global_display_mode;
   Graphics.clear_graph ();
   H.clear ();
-  bg_color := bkgd_data.bgcolor; (* modifiable via \setbgcolor . RDC *)
+  (* Modifiable via \setbgcolor . RDC *)
+  bg_color := bkgd_data.bgcolor;
   bg_colors := [];
   background_colors := [];
   Symbol.clear ();
@@ -1141,10 +1152,11 @@ let clear_dev () =
   size_y := Graphics.size_y ();
   xmin := 0; xmax := !size_x;
   ymin := 0; ymax := !size_y;
-  (* here we add the background setting. RDC *)
+  (* Here we add the background setting. RDC *)
   Graphics.set_color !bg_color;
-  if (!bg_color <> Graphics.white) then Graphics.fill_rect !xmin !ymin !xmax !ymax;
-  (* now try to handle background images *)
+  if !bg_color <> Graphics.white
+  then Graphics.fill_rect !xmin !ymin !xmax !ymax;
+  (* Now try to handle background images *)
   draw_bkgd_img (!xmax, !ymax) 0 0;;
 
 (*** Events ***)
@@ -1519,7 +1531,8 @@ let wait_event () =
                   let m = GraphicsY11.get_modifiers () in
                   if m land GraphicsY11.shift <> 0 then
                      (if not !temp_cursor then
-                       (temp_cursor:= true; GraphicsY11.set_cursor select_cursor))
+                       (temp_cursor:= true;
+                        GraphicsY11.set_cursor select_cursor))
                   else if !temp_cursor then
                     (temp_cursor:= false; reset_cursor ());
                   rescan ()
