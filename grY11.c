@@ -21,6 +21,11 @@
 #include "libgraph.h"
 #include "image.h"
 
+value gr_get_color(void)
+{
+  return Val_int(grcolor);
+}
+
 value gr_bsize_x(void)
 {
   gr_check_open();
@@ -96,8 +101,6 @@ value gr_window_color(value vx, value vy)
   XDestroyImage(im);
   return Val_int(rgb);
 }
-
-
 
 value gr_bsize_y(void)
 {
@@ -460,4 +463,3 @@ value gr_reposition (value x, value y, value w, value h)
   XFlush(grdisplay);
   return Val_unit;
 }
-

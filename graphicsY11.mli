@@ -14,6 +14,11 @@
 
 (* Module [GraphicsX11]: additional graphics primitives for the X Windows system *)
 
+type color = Graphics.color;;
+
+external get_color : unit -> color = "gr_get_color";;
+(** Get the current drawing color. *)
+
 type window_id = string;;
 
 val get_window_id : unit -> window_id;;
@@ -248,7 +253,7 @@ val synchronize : unit -> unit;;
 (** Same as [Graphics.display_mode] but according to [global_display_mode] *)
 val display_mode : bool -> unit;;
 (** As [point_color] but according to values of [global_display_mode] *)
-val point_color : int -> int -> int;;
+val point_color : int -> int -> color;;
 
 val init : unit -> unit;;
 (** We have to call this function to disable the original Graphics

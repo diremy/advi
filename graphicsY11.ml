@@ -17,6 +17,10 @@
 
 (* Module [GraphicsY11]: additional graphics primitives for the X Windows system *)
 
+type color = Graphics.color;;
+
+external get_color : unit -> color = "gr_get_color";;
+
 type window_id = string;;
 
 let null_window = "-1";;
