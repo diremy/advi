@@ -2,9 +2,9 @@ LATEX=latex
 
 #OSTYLES=~/lib/tex/STYLES
 
-.SUFFIXES: .tex
+.SUFFIXES: .dvi .tex
 
-all: talk
+all: talk.dvi
 	advi talk.dvi
 
 clean:
@@ -13,7 +13,7 @@ clean:
 scratch: clean
 	/bin/rm -f *.dvi; rm -f *.bbl
 
-talk: talk.tex
+talk.dvi: talk.tex
 
 .tex.dvi:
 	@ TEXINPUTS=$(OSTYLES):$$TEXINPUTS; export TEXINPUTS; latex $<
