@@ -19,6 +19,8 @@ ADVI=TEXPSHEADERS=$(ADVIDIR)/tex: $(ADVIDIR)/advi
 MLPROG=
 
 all: $(DVIFILES) $(MLPROG) 
+	advi simple.dvi && \
+	advi moderate.dvi
 
 $(DVIFILES): $(ADVIDIR)/tex/bar.jpg.eps $(ADVIDIR)/tex/advi.sty $(ADVIDIR)/tex/advi-annot.sty
 
