@@ -45,6 +45,7 @@ if test -f $CAMLIMAGESDIR/ci_ps.cma || $HAVE_CDK; then
 else
 	echo "**************** Warning ******************"
 	echo "camlimages is not found or incomplete in the directory \"$CAMLIMAGESDIR\""
+	echo "(make sure install the latest version 2.00)"
 	echo "*******************************************"
 	HAVE_CAMLIMAGES="false"
 	CAMLIMAGESLIBS=""

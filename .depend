@@ -12,6 +12,8 @@ symbol.cmo: misc.cmi symbol.cmi
 symbol.cmx: misc.cmx symbol.cmi 
 search.cmo: config.cmo misc.cmi search.cmi 
 search.cmx: config.cmx misc.cmx search.cmi 
+newgraph.cmo: newgraph.cmi 
+newgraph.cmx: newgraph.cmi 
 graphicsY11.cmo: graphicsY11.cmi 
 graphicsY11.cmx: graphicsY11.cmi 
 drawps.cmo: graphicsY11.cmi misc.cmi search.cmi drawps.cmi 
