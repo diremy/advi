@@ -100,14 +100,18 @@ count:
 
 clean:
 	rm -f *.cm[oix] *.o $(EXEC) $(EXEC).opt *~ .depend *.log *.aux
-	rm -rf .advi test/.advi tex/.advi tex/*.log tex/*.aux
+	rm -rf .advi test/.advi test/*.log test/*.aux test/*.dvi \
+        tex/.advi tex/*.log tex/*.aux tex/*.dvi
 
 veryclean:
-	rm -f Makefile.config config.cache config.log *.dvi \
+	rm -f Makefile.config config.cache config.log \
 	config.status drawps.ml config.ml
 
 tex/splash.dvi: tex/splash.tex
 	cd tex; latex splash.tex
+
+test/demo.dvi: test/demo.tex
+	cd test; $(MAKE)
 
 install:: advi.opt tex/splash.dvi
 	cp advi.opt ${bindir}/advi
@@ -128,12 +132,14 @@ WEBSITEDIR=/net/pauillac/infosystems/www/advi
 splash:
 	cd tex; latex splash.tex
 
-distribute:
+distribute: tex/splash.dvi test/demo.dvi	
 	rm -rf release
-#	rm -rf $(WEBSITEDIR)/*
+	rm -rf $(WEBSITEDIR)/*
 	- mkdir $(WEBSITEDIR)
 	mkdir release
 	cd release; cvs co bazar-ocaml/advi; \
+	cp -p ../test/demo.dvi bazar-ocaml/advi/test/; \
+	cp -p ../tex/splash.dvi bazar-ocaml/advi/tex/; \
 	find . -name '.cvsignore' -print | xargs rm; \
 	find . -name 'CVS' -print | xargs rm -rf; \
 	cp -pr bazar-ocaml/advi/doc/* $(WEBSITEDIR)
