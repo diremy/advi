@@ -36,9 +36,6 @@ type term = {
  (* Coordinates of the cursor in the char array. *)
  mutable cursor_x : int;
  mutable cursor_y : int;
- (* Coordinates of the cursor in the graphics window. *)
- (*mutable cursor_gx : int;
-   mutable cursor_gy : int;*)
  (* Colors *)
  mutable cursor_color : Graphics.color;
  mutable foreground_color : Graphics.color;
@@ -63,8 +60,7 @@ let cursor_gy t = get_gy t t.cursor_y;;
 let draw_cursor t cc cf =
  Graphics.set_color cc;
  let gx = cursor_gx t
- and gy = cursor_gy t
- in 
+ and gy = cursor_gy t in 
  Graphics.fill_rect gx gy t.font_size_x t.font_size_y;
  let c = t.lines.(t.cursor_y).[t.cursor_x] in
  Graphics.moveto gx gy;
