@@ -120,7 +120,7 @@ let clear_pointer ptr = draw_image ptr.bkg_img ptr.x ptr.y;;
 
 (* The X11 pointer shifts with respect to Advi's laser pointer center. *)
 let xptr_x = 1
-and xptr_y = 5;;
+and xptr_y = 1;;
 
 (* Show the pointer: first save the background, then draw the pointer. *)
 let show_pointer ptr x y =
@@ -128,8 +128,8 @@ let show_pointer ptr x y =
   let r = ptr.half_size in
   (* Compute the actual lower left corner of the pointer. *)
   let x = (x - r + xptr_x)
-  and y = y + xptr_y in
-  (* Save actual background. *)
+  and y = y - r + xptr_y in
+  (* Save the actual background. *)
   blit_image ptr.bkg_img x y;
   (* Move the pointer. *)
   ptr.x <- x; ptr.y <- y;
