@@ -27,6 +27,10 @@ type command = string;;
 
 let app_table = Hashtbl.create 17;;
 
+(* Register an application with its mode, name, (sub)window id,
+   and a fake process id (actually max_int).
+   This function does not actually launch the application, it just
+   allocates the ressources to launch it afterwards. *)
 let fake_embed_app command app_mode app_name width height x gry =
  let wid = GraphicsY11.open_subwindow ~x ~y:gry ~width ~height in
  Hashtbl.add app_table max_int (app_mode, app_name, wid)
