@@ -482,7 +482,7 @@ let kill_embed_special st s =
     with Not_found -> raise (Failure ("No command to kill in " ^ s)) in
   Dev.kill_embedded_app app_name;;
 
-let app_type_of_string = function
+let app_mode_of_string = function
   | "sticky" -> Dev.Sticky
   | "persistent" -> Dev.Persistent
   | "ephemeral" -> Dev.Ephemeral
@@ -491,10 +491,10 @@ let app_type_of_string = function
 let embed_special st s =
   (* advi: embed type=? width=? height=? command="command string" *)
   let records = get_records s in
-  let app_type =
-    try app_type_of_string (List.assoc "type" records)
+  let app_mode =
+    try app_mode_of_string (List.assoc "mode" records)
     with Not_found ->
-      raise (Failure ("embed: no embedding type in special " ^ s)) in
+      raise (Failure ("embed: no embedding mode in special " ^ s)) in
   let app_name =
     try unquote (List.assoc "name" records) with Not_found -> "" in
   let command =
@@ -524,7 +524,7 @@ let embed_special st s =
   let x = st.x_origin + int_of_float (st.conv *. float st.h)
   and y = st.y_origin + int_of_float (st.conv *. float st.v) in
   if not (is_hidden ()) then
-    Dev.embed_app command app_type app_name width_pixel height_pixel x y;;
+    Dev.embed_app command app_mode app_name width_pixel height_pixel x y;;
 
 let parse_transition mode record =
   let parse_steps default =

@@ -67,16 +67,16 @@
 \def \advi@embed@name{anonymous}
 \def \advi@embed@mode{ephemeral}
 \define@key {advi@embed}{name}{\def \advi@embed@name {#1}}
-\define@key {advi@embed}{type}{\def \advi@embed@type {#1}}
+\define@key {advi@embed}{mode}{\def \advi@embed@mode {#1}}
 \define@key {advi@embed}{ephemeral}
-  {\def \advi@embed@type {ephemeral}\def\advi@embed@name {#1}}
+  {\def \advi@embed@mode {ephemeral}\def\advi@embed@name {#1}}
 \define@key {advi@embed}{persistent}
-  {\def \advi@embed@type {persistent}\def\advi@embed@name {#1}}
+  {\def \advi@embed@mode {persistent}\def\advi@embed@name {#1}}
 \define@key {advi@embed}{sticky}
-  {\def \advi@embed@type {sticky}\def\advi@embed@name {#1}}
+  {\def \advi@embed@mode {sticky}\def\advi@embed@name {#1}}
 \def \advi@embed@ #1#2#3#4#5{%
   \mbox{\advi@special
-          {embed name="#1" type=#2 width=#3 height=#4 command="#5"}%
+          {embed name="#1" mode=#2 width=#3 height=#4 command="#5"}%
           {\vbox to #4{\hbox to #3{}}}}%
 }
 

@@ -126,7 +126,7 @@ type bgoption =
 val set_bg_options : bgoption list -> unit;;
 
 (* Embedded applications *)
-type app_type =
+type app_mode =
    | Sticky
       (* A [Sticky] application is launched once and only once.
          They are never killed when a new slide is visualized.
@@ -148,7 +148,7 @@ type app_type =
 ;;
 
 val embed_app :
-  string -> app_type -> string -> int -> int -> int -> int -> unit;;
+  string -> app_mode -> string -> int -> int -> int -> int -> unit;;
 val kill_embedded_app : string -> unit;;
 val kill_all_embedded_apps : unit -> unit;;
 

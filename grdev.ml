@@ -592,11 +592,11 @@ let clean_ps_cache () = Drawimage.clean_cache ();;
 
 (* Embedded (tcl/tk) applications *)
 
-type app_type = Sticky | Persistent | Ephemeral;;
+type app_mode = Sticky | Persistent | Ephemeral;;
 
 let app_table = Hashtbl.create 17;;
 
-let raw_embed_app command app_type app_name width height x y =
+let raw_embed_app command app_mode app_name width height x y =
   let string_replace pat templ str =
     let result = Buffer.create (String.length str * 2) in
     let patlen = String.length pat in
@@ -668,7 +668,7 @@ let raw_embed_app command app_type app_name width height x y =
   if Hashtbl.mem app_table pid then
     raise (Failure (Printf.sprintf
                       "pid %d is already in the app_table!" pid));
-  Hashtbl.add app_table pid (app_type, app_name, wid);
+  Hashtbl.add app_table pid (app_mode, app_name, wid);
   ;;
 
 (* In hash table t, returns the first element that verifies p. *)
@@ -685,16 +685,16 @@ let hashtbl_find t p =
 let find_embedded_app app_name =
   hashtbl_find app_table (fun (_, name, _) -> name = app_name);;
 
-let map_embed_app command app_type app_name width height x y =
-  let _, (app_type, app_name, wid) = find_embedded_app app_name in
+let map_embed_app command app_mode app_name width height x y =
+  let _, (app_mode, app_name, wid) = find_embedded_app app_name in
   GraphicsY11.map_subwindow wid;;
 
-let unmap_embed_app command app_type app_name width height x y =
- let _, (app_type, app_name, wid) = find_embedded_app app_name in
+let unmap_embed_app command app_mode app_name width height x y =
+ let _, (app_mode, app_name, wid) = find_embedded_app app_name in
  GraphicsY11.unmap_subwindow wid;;
 
-let move_or_resize_persistent_app command app_type app_name width height x y =
-  let _, (app_type, app_name, wid) = find_embedded_app app_name in
+let move_or_resize_persistent_app command app_mode app_name width height x y =
+  let _, (app_mode, app_name, wid) = find_embedded_app app_name in
   GraphicsY11.resize_subwindow wid width height;
   let gry = !size_y - y + height - width in
   GraphicsY11.move_subwindow wid x gry;
@@ -706,42 +706,42 @@ let hashtbl_exists t f =
   with Exit -> true;;
 
 (* embedded apps must be displayed when synced *)
-let embed_app command app_type app_name width height x y =
+let embed_app command app_mode app_name width height x y =
   let already_launched app_name =
     hashtbl_exists app_table (fun (ty, name, wid) -> name = app_name) in
-  match app_type with
+  match app_mode with
   | Sticky ->
      if not (already_launched app_name) then
      embeds :=
       (fun () ->
          (* prerr_endline ("Launching " ^ app_name); *)
-         raw_embed_app command app_type app_name width height x y) ::
+         raw_embed_app command app_mode app_name width height x y) ::
       !embeds else
      persists :=
       (fun () ->
          (* prerr_endline ("Moving " ^ app_name); *)
-	  move_or_resize_persistent_app command app_type app_name
+	  move_or_resize_persistent_app command app_mode app_name
           width height x y) :: 
       !persists
   | Persistent ->
      if not (already_launched app_name) then
      embeds :=
       (fun () ->
-        raw_embed_app command app_type app_name width height x y) ::
+        raw_embed_app command app_mode app_name width height x y) ::
       !embeds;
      persists :=
       (fun () ->
-        map_embed_app command app_type app_name width height x y) ::
+        map_embed_app command app_mode app_name width height x y) ::
       !persists;
      unmap_embeds :=
       (fun () ->
-        unmap_embed_app command app_type app_name width height x y) ::
+        unmap_embed_app command app_mode app_name width height x y) ::
       !unmap_embeds;
   | Ephemeral ->
      embeds :=
       (fun () ->
          (* prerr_endline ("Launching " ^ app_name); *)
-         raw_embed_app command app_type app_name width height x y) ::
+         raw_embed_app command app_mode app_name width height x y) ::
       !embeds;;
 
 let kill_app pid wid =
@@ -763,21 +763,21 @@ let kill_app pid wid =
   if Unix.getpid () = Misc.advi_process then GraphicsY11.close_subwindow wid
 ;;
 
-let kill_apps app_type =
-  (* begin match app_type with
+let kill_apps app_mode =
+  (* begin match app_mode with
   | Persistent -> prerr_endline "Killing persistent apps"
   | Sticky -> prerr_endline "Killing sticky apps"
   | Ephemeral -> prerr_endline "Killing ephemeral apps"
   end; *)
   let to_be_killed =
     Hashtbl.fold (fun pid (apt, app_name, wid) acc ->
-      if apt = app_type then (pid,wid) :: acc else acc) app_table []
+      if apt = app_mode then (pid,wid) :: acc else acc) app_table []
   in
   List.iter (fun (pid,wid) -> kill_app pid wid) to_be_killed;;
 
 let kill_embedded_app app_name =
   try
-    let pid, (app_type, app_name, wid) = find_embedded_app app_name in
+    let pid, (app_mode, app_name, wid) = find_embedded_app app_name in
     kill_app pid wid
   with
   | Not_found ->
