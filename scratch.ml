@@ -96,22 +96,26 @@ and scratch_write x y =
         if c <> '' then scratch_write_char c x y
 ;;
 
-let save_excursion c f () =
+let save_excursion c f =
+
+  let cautious_set_font fnt =
+    try Graphics.set_font fnt with
+    | G.Graphic_failure s -> Misc.warning s in
+
   let color = Graphics.get_color () in
   let line_width = Graphics.get_line_width () in
   let cursor = Graphics.get_cursor () in
   let font = Graphics.get_font () in
+
   let restore () =
     G.set_color color;
     Graphics.set_line_width line_width;
     Graphics.set_font font;
-    set_cursor cursor;
-  in
+    set_cursor cursor in
+
   G.set_color c;
   Graphics.set_line_width !scratch_line_width;
-  try
-    Graphics.set_font !scratch_write_font
-  with G.Graphic_failure s -> Misc.warning s;
+  cautious_set_font !scratch_write_font;
   set_cursor Cursor_pencil;
   try f (); restore ()
   with x -> restore (); raise x
@@ -123,7 +127,6 @@ let do_write () =
    match Graphics.wait_next_event [Button_down; Key_pressed] with
    | {mouse_x = x; mouse_y = y; button = btn; key = c} ->
        if btn then scratch_write x y else scratch_write_char c x y)
- ()
 ;;
 
 let write () = only_on_screen do_write ();;
@@ -147,7 +150,6 @@ let do_draw () =
    | {mouse_x = x; mouse_y = y} ->
        G.moveto x y;
        scratch_draw x y)
- ()
 ;;
 
 let draw () = only_on_screen do_draw ();;
