@@ -502,21 +502,6 @@ let clean_ps_cache () = Drawimage.clean_cache ();;
 
 (*** HTML interaction ***)
 
-(*
-let get_image x y dx dy =
-  let x' = x + dx and y' = y + dy in
-  if x > !size_x || y > !size_y || x' < 0 || y' < 0 then
-    ???
-  else
-    begin
-      let x1 = max x  0 and y1 = max y 0 in
-      let x1' = min x' !size_x and y1' = min y' !size_y in
-      let dx1 = x1' - x1 and dy1 = y1' - y1 in
-      Graphics.get_image x1 y1 dx1 dy1 
-    end
-*)
-let get_image = Graphics.get_image
-
 (* pour sauver une image_rectiligne *)
 type rectangular_image = {
     north : Graphics.image;
@@ -530,10 +515,10 @@ let rec save_rectangle x y dx dy =
   let y = min y (y + dy) in
   let dx = max 1 (abs dx) in
   let dy = max 1 (abs dy) in
-  { south = get_image x y dx 1;
-    west = get_image x y 1 dy;
-    east = get_image (x + dx) y 1 dy;
-    north = get_image x (y + dy) (succ dx) 1;
+  { south = Graphics.get_image x y dx 1;
+    west = Graphics.get_image x y 1 dy;
+    east = Graphics.get_image (x + dx) y 1 dy;
+    north = Graphics.get_image x (y + dy) (succ dx) 1;
   };;
 
 let rec restore_rectangle r x y dx dy =
@@ -737,7 +722,7 @@ module H =
       | Nil -> ()
 
     let emphasize c act =
-      let ima = get_image act.A.x act.A.y act.A.w act.A.h in
+      let ima = Graphics.get_image act.A.x act.A.y act.A.w act.A.h in
       Graphics.set_color c;
       GraphicsY11.display_mode true;
       Graphics.fill_rect act.A.x act.A.y act.A.w act.A.h;
@@ -752,7 +737,7 @@ module H =
     let save_screen_exec act a =
       Gs.flush ();
       (* get image take the image from the backing store *)
-      let ima = get_image 0 0 !size_x !size_y in
+      let ima = Graphics.get_image 0 0 !size_x !size_y in
       GraphicsY11.sync ();
       (* wait until all events have been processed, flush should suffice *)
       (*
@@ -817,7 +802,7 @@ module E =
     let clear () = figures := []; screen := None
         (*
            let save_screen cont =
-           screen := get_image 0 0 !size_x !size_y
+           screen := Graphics.get_image 0 0 !size_x !size_y
            let restore_screen () = ()
          *)
         

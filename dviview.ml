@@ -644,9 +644,6 @@ let pop_page b n st =
   goto_page (if npage > 0 then npage else -1 - npage) st;;
 
 let mark_page st =
-  Printf.printf "==> %d ==>" st.page_number; 
-  List.iter (fun x -> Printf.printf " %d " x) st.page_marks;
-  print_newline(); 
   let marks = 
     if List.length st.page_marks > 9
     then List.rev (List.tl (List.rev  st.page_marks))
@@ -655,9 +652,6 @@ let mark_page st =
 
 
 let goto_mark n st =
-  Printf.printf "<== %d ==>" n; 
-  List.iter (fun x -> Printf.printf " %d " x) st.page_marks;
-  print_newline();
   try goto_page (List.nth st.page_marks n) st
   with Failure _ | Invalid_argument _ -> ()
 
