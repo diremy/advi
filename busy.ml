@@ -33,7 +33,7 @@ type busy =
 
 let free_cursor = GraphicsY11.Cursor_left_ptr;;
 let busy_cursor = GraphicsY11.Cursor_watch;;
-let pause_cursor = Graphicsy11.Cursor_right_side;;
+let pause_cursor = GraphicsY11.Cursor_right_side;;
 let disk_cursor = GraphicsY11.Cursor_exchange;;
 let question_cursor = GraphicsY11.Cursor_question_arrow;;
 let selection_cursor = GraphicsY11.Cursor_xterm;;

@@ -24,8 +24,7 @@ type busy =
 
 val start_timer : unit -> unit;;
 (** Starts a timer which triggers the indication of a busy state. *)
-val stop : GraphicsY11.cursor -> unit;;
-(** Remove the busy timer and set the given cursor. *)
 val restore_cursor : unit -> unit;;
 (** Restore the last cursor saved by a busy timer. *)
 val set : busy -> unit;;
+(** Remove the busy timer and set the given cursor. *)
