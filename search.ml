@@ -160,7 +160,7 @@ let msdos_font_path fontname dpi =
 
 let font_path =
   match Sys.os_type with
-  | "Unix" -> unix_font_path
+  | "Unix" | "Cygwin" -> unix_font_path
   | "Win32" -> msdos_font_path
   | _ -> raise Not_found
 ;;

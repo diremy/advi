@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# In Cygwin, we have two versions of gs interpreter: with x11 driver
+# in /usr/X11R6/bin and without it. For advi, we must use /usr/X11R6/bin/gs.
+
+rm -f config.cache config.log
+PATH=/usr/X11R6/bin:$PATH ./configure 
