@@ -16,21 +16,28 @@ BEFORE RELEASE:
     ==> oui, il faut créer une adresse advi-bugs@pauillac pour les
         rapports de bugs, mais l'adresse advi@pauillac doit rester la
         liste des implementeurs.
+    ==> c'est fait.
     . mettre advi@pauillac comme liste d'abonnés avec Majordomo ?
     ==> oui, mais il faut la nommer advi-list@pauillac.inria.fr comme
     d'habitude avec les softs bat8.
+    ==> c'est fait.
 
  * packagifier pour Linux?
-
-   ==> c'est fait pour RedHat.
+ ==> c'est fait pour RedHat.
 
  * fixer partout dans la distribution le nom d'Active-DVI en utilisant
 la macro du manuel \def\ActiveDVI{Active-DVI}
 
 KNOWN BUGS:
 ===========
- * Bulles?
+ * Spurious fatal error: (the psfile had a bounding box, but the dvi
+   file contained vscale=100.0 hoffset=-228.0 voffset=-368.0
+   hscale=100.0, instead of llx, lly, urx, ury).
+ Fatal error: exception Failure("psfile: no bbox")
 
+
+ * Bulles?
+ ==> corrigé ?
 
 DELAYED AFTER RELEASE:
 ======================
@@ -88,3 +95,6 @@ WISH LIST:
 
 - We need a .advirc file to setup options at launch time, and store
 user's preferences for key bindings.
+
+- Traiter les fichiers postscript sans llx lly urx ury mais avec
+vscale=100.0 hoffset=-228.0 voffset=-368.0 hscale=100.0
