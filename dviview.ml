@@ -43,6 +43,12 @@ Misc.set_option
   (Arg.String (fun s -> browser := s))
   "STRING\tCommand to call the browser";;
 
+let pager = ref "xterm -e less";;
+Misc.set_option
+  "-pager"
+  (Arg.String (fun s -> pager := s))
+  "STRING\tCommand to call the pager";;
+
 let click_turn_page =
   Misc.option_flag false
     "-click_turn"
@@ -92,16 +98,16 @@ let int_of_offset = function
   | Minus n -> -n
 
 type geometry = {
-    mutable width : int ;
-    mutable height : int ;
-    mutable xoffset : offset ;
+    mutable width : int;
+    mutable height : int;
+    mutable xoffset : offset;
     mutable yoffset : offset
   }
 
 type attr = {
-    mutable geom : geometry ;
-    mutable crop : bool ;
-    mutable hmargin : dimen ;
+    mutable geom : geometry;
+    mutable crop : bool;
+    mutable hmargin : dimen;
     mutable vmargin : dimen
   }
 
@@ -125,26 +131,26 @@ let string_of_geometry geom =
 type mode = Selection | Control;;
 type state = {
       (* DVI attributes *)
-    filename : string ;
-    mutable dvi : Dvi.t ;
-    mutable cdvi : Driver.cooked_dvi ;
-    mutable num_pages : int ;
+    filename : string;
+    mutable dvi : Dvi.t;
+    mutable cdvi : Driver.cooked_dvi;
+    mutable num_pages : int;
       (* Page layout *)
-    mutable base_dpi : float ;
-    mutable dvi_width : int ;   (* in pixels *)
-    mutable dvi_height : int ;  (* in pixels *)
+    mutable base_dpi : float;
+    mutable dvi_width : int;   (* in pixels *)
+    mutable dvi_height : int;  (* in pixels *)
       (* Window size *)
-    mutable size_x : int ;
-    mutable size_y : int ;
+    mutable size_x : int;
+    mutable size_y : int;
       (* Current parameters *)
-    mutable orig_x : int ;
-    mutable orig_y : int ;
-    mutable ratio : float ;
+    mutable orig_x : int;
+    mutable orig_y : int;
+    mutable ratio : float;
     mutable page_no : int;
     mutable page_stack : int list;
     mutable exchange_page : int;
-    mutable last_modified : float ;
-    mutable button : (int * int) option ;
+    mutable last_modified : float;
+    mutable button : (int * int) option;
     mutable fullscreen : (int * int * int * int) option; 
 
     mutable pause_no : int;
@@ -173,10 +179,10 @@ let parse_geometry str =
     and i = ref 0 in
     let parse_int () =
       if !i = len || not (is_digit str.[!i] || str.[!i] == '-') then
-        invalid_arg "set_geometry" ;
+        invalid_arg "set_geometry";
       let start = !i in
       if str.[!i] = '-' && !i < len+1 then incr i;
-      while !i < len && is_digit str.[!i] do incr i done ;
+      while !i < len && is_digit str.[!i] do incr i done;
       let stop = !i in
       int_of_string (String.sub str start (stop - start)) in
     let parse_offset () =
@@ -184,7 +190,7 @@ let parse_geometry str =
         No_offset
       else begin
         let sgn = str.[!i] in
-        incr i ;
+        incr i;
         if !i = len || not (is_digit str.[!i] || str.[!i] == '-') then
           No_offset
         else
@@ -193,11 +199,11 @@ let parse_geometry str =
           | '-' -> Minus (parse_int ())
           | _ -> assert false
       end in
-    while !i < len && str.[!i] = ' ' do incr i done ;
+    while !i < len && str.[!i] = ' ' do incr i done;
     let width = parse_int () in
     if !i = len || (str.[!i] <> 'x' && str.[!i] <> 'X') then
-      invalid_arg "set_geometry" ;
-    incr i ;
+      invalid_arg "set_geometry";
+    incr i;
     let height = parse_int () in
     let xoffset = parse_offset () in
     let yoffset = parse_offset () in
@@ -213,8 +219,8 @@ let attr =
       xoffset = No_offset;
       yoffset = No_offset;
     };
-    crop = false ;
-    hmargin = Px 0 ;
+    crop = false;
+    hmargin = Px 0;
     vmargin = Px 0
   };;
 
@@ -268,8 +274,8 @@ let init filename =
       (min attr.geom.width sx, min attr.geom.height sy)
     end else
       (attr.geom.width, attr.geom.height) in
-  attr.geom.width <- size_x ;
-  attr.geom.height <- size_y ;
+  attr.geom.width <- size_x;
+  attr.geom.height <- size_y;
   let orig_x = (size_x - width)/2
   and orig_y = (size_y - height)/2 in
   let last_modified =
@@ -278,22 +284,22 @@ let init filename =
   let pages = Array.length dvi.Dvi.pages in
   Misc.dops := !Misc.pson;
   let st =
-    { filename = filename ;
-      dvi = dvi ;
-      cdvi = cdvi ;
-      num_pages = pages ;
-      base_dpi = base_dpi ;
-      dvi_width = width ;
-      dvi_height = height ;
-      size_x = size_x ;
-      size_y = size_y ;
-      orig_x = orig_x ;
-      orig_y = orig_y ;
-      ratio = 1.0 ;
+    { filename = filename;
+      dvi = dvi;
+      cdvi = cdvi;
+      num_pages = pages;
+      base_dpi = base_dpi;
+      dvi_width = width;
+      dvi_height = height;
+      size_x = size_x;
+      size_y = size_y;
+      orig_x = orig_x;
+      orig_y = orig_y;
+      ratio = 1.0;
       page_stack = [];
       exchange_page = 0;
       page_no = if !start_page > 0 then min !start_page pages - 1 else 0;
-      last_modified = last_modified ;
+      last_modified = last_modified;
       button = None;
       fullscreen = None;
 
@@ -347,8 +353,8 @@ let update_dvi_size init st =
         end else
           (attr.geom.width, attr.geom.height) in
 (*
-   attr.geom.width <- size_x ;
-   attr.geom.height <- size_y ;
+   attr.geom.width <- size_x;
+   attr.geom.height <- size_y;
 *)
       st.base_dpi <- base_dpi;
       st.size_x <- size_x;
@@ -382,10 +388,10 @@ let rec goto_next_pause n st =
   Grdev.set_busy (if st.cont = None then Grdev.Free else Grdev.Pause);;
 
 let draw_bounding_box st =
-  Grdev.set_color 0xcccccc ;
-  Grdev.fill_rect st.orig_x st.orig_y st.dvi_width 1 ;
-  Grdev.fill_rect st.orig_x st.orig_y 1 st.dvi_height ;
-  Grdev.fill_rect st.orig_x (st.orig_y + st.dvi_height) st.dvi_width 1 ;
+  Grdev.set_color 0xcccccc;
+  Grdev.fill_rect st.orig_x st.orig_y st.dvi_width 1;
+  Grdev.fill_rect st.orig_x st.orig_y 1 st.dvi_height;
+  Grdev.fill_rect st.orig_x (st.orig_y + st.dvi_height) st.dvi_width 1;
   Grdev.fill_rect (st.orig_x + st.dvi_width) st.orig_y 1 st.dvi_height;;
 
 (* Input : a point in window coordinates, relative to lower-left corner. *)
@@ -472,55 +478,44 @@ let move_within_margins_x st movex =
   else None;;
 
 let redraw ?trans st =
-    (* draws until the current pause_no or page end *)
+  (* draws until the current pause_no or page end *)
   Grdev.set_busy Grdev.Busy;
   st.cont <- None;
   st.aborted <- false;
-  let () =
+  begin
     try
-      Grdev.continue ();
-(*      Grdev.clear_dev () ;
-        (* RDC: moved inside render_step to properly handle backgrounds *) *)
-(*
-   let blank_w = 20
-   and blank_h = 20 in
-*)
-      Driver.clear_symbols ();
-      if !bounding_box then draw_bounding_box st;
-      if !pauses then
-        let f = Driver.render_step st.cdvi st.page_no ?trans
-            (st.base_dpi *. st.ratio) st.orig_x st.orig_y in
-        let current_pause = ref 0 in
-        begin
-          try
-            while
-              try f () with
-                | Driver.Pause ->
-                    if !current_pause = st.pause_no then raise Driver.Pause
-                    else begin incr current_pause; true end
-            do () done;
-            if !current_pause < st.pause_no then
-              st.pause_no <- !current_pause
-          with
-          | Driver.Pause ->
-              st.cont <- Some f;
-        end
-      else
-        begin
-          Driver.render_page  st.cdvi st.page_no 
-            (st.base_dpi *. st.ratio) st.orig_x st.orig_y;
-        end;
-    with Grdev.Stop ->
-      st.aborted <- true in
+     Grdev.continue ();
+     Driver.clear_symbols ();
+     if !bounding_box then draw_bounding_box st;
+     if !pauses then
+       let f =
+         Driver.render_step st.cdvi st.page_no ?trans
+           (st.base_dpi *. st.ratio) st.orig_x st.orig_y in
+       let current_pause = ref 0 in
+       try
+         while
+           try f () with
+             | Driver.Pause ->
+                 if !current_pause = st.pause_no then raise Driver.Pause
+                 else begin incr current_pause; true end
+         do () done;
+         if !current_pause < st.pause_no then st.pause_no <- !current_pause
+       with
+       | Driver.Pause -> st.cont <- Some f
+     else
+       Driver.render_page st.cdvi st.page_no 
+         (st.base_dpi *. st.ratio) st.orig_x st.orig_y
+    with
+    | Grdev.Stop -> st.aborted <- true
+  end;
   Grdev.synchronize();
   Grdev.set_busy (if st.cont = None then Grdev.Free else Grdev.Pause);;
 
 let goto_previous_pause n st =
-  if n > 0 then
-    begin
-      st.pause_no <- max 0 (st.pause_no -n);
-      redraw st
-    end;;
+  if n > 0 then begin
+    st.pause_no <- max 0 (st.pause_no - n);
+    redraw st
+  end;;
 
 let find_xref tag default st =
   try Hashtbl.find st.dvi.Dvi.xrefs tag
@@ -543,45 +538,35 @@ let exec_xref link =
     Grdev.wait_button_down() in *)
     (* only to launch embeded apps *)
     if Graphics.button_down () then
-      ignore (Graphics.wait_next_event [ Graphics.Button_up ]) in
+      ignore (Graphics.wait_next_event [Graphics.Button_up]) in
   if Misc.has_prefix "file:" link then
-    begin
-      try
-        let filename, arguments =
-          match Misc.split_string (Misc.get_suffix "file:" link) 
-	         (function '#' -> true | _ -> false) 0 with
-          | [ filename ; tag ] -> filename, ["-html"; tag ]
-          | [ filename ] -> filename, []
-          | _ ->
-              Misc.warning ("Invalid link "^link);
-              raise Link
-        in
-        if Sys.file_exists filename then
-          begin
-            if Misc.has_suffix ".dvi"  filename then
-              call (String.concat " " (Sys.argv.(0) :: arguments @ [ filename ]))
-            else if Misc.has_suffix ".txt" filename ||
-                    Misc.has_suffix ".tex" filename then
-              call ("xterm -e less " ^ filename)
-            else if Misc.has_suffix ".html"  filename ||
-                    Misc.has_suffix ".htm"  filename then
-              call (!browser ^ " " ^ link)
-            else
-              Misc.warning
-                (Printf.sprintf
-                   "Don't know what to do with file %s"
-                   filename);
-          end
-        else
-          Misc.warning
-            (Printf.sprintf "File %s non-existent or not readable"
-               filename)
-      with
-      | Misc.Match -> assert false
-      | Link -> ()
-    end
-  else if Misc.has_prefix "http:" link then
-    call (!browser ^ " " ^ link);;
+    try
+      let filename, arguments =
+        match Misc.split_string (Misc.get_suffix "file:" link) 
+               (function '#' -> true | _ -> false) 0 with
+        | [ filename; tag ] -> filename, ["-html"; tag ]
+        | [ filename ] -> filename, []
+        | _ -> Misc.warning ("Invalid link "^link); raise Link in
+      if not (Sys.file_exists filename) then
+        Misc.warning
+          (Printf.sprintf "File %s non-existent or not readable" filename) else
+      if Misc.has_suffix ".dvi"  filename then
+        let command =
+          String.concat " " (Sys.argv.(0) :: arguments @ [filename]) in
+        call command else
+      if Misc.has_suffix ".txt" filename ||
+         Misc.has_suffix ".tex" filename then
+        call (!pager ^ " " ^ filename) else
+      if Misc.has_suffix ".html"  filename ||
+         Misc.has_suffix ".htm"  filename then
+        call (!browser ^ " " ^ link) else
+      Misc.warning
+        (Printf.sprintf "Don't know what to do with file %s" filename)
+    with
+    | Misc.Match -> assert false
+    | Link -> () else
+  if Misc.has_prefix "http:" link then call (!browser ^ " " ^ link) else
+  Misc.warning (Printf.sprintf "Don't know what to do with link %s" link);;
 
 let page_start default st =
   match !start_html with
@@ -623,16 +608,16 @@ let reload st =
     let width = int_of_float (w_in *. st.base_dpi *. st.ratio)
     and height = int_of_float (h_in *. st.base_dpi *. st.ratio) in
     let pages =  Array.length dvi.Dvi.pages in
-    st.dvi <- dvi ;
-    st.cdvi <- cdvi ;
-    st.num_pages <- pages ;
+    st.dvi <- dvi;
+    st.cdvi <- cdvi;
+    st.num_pages <- pages;
     st.page_stack <- clear_page_stack pages st.page_stack;
     let page = page_start (min st.page_no (st.num_pages - 1)) st in
     if page <> st.page_no then st.pause_no <- 0;
     st.page_no <- page;
     st.frozen <- true;
     st.aborted <- true;
-    update_dvi_size false st ;
+    update_dvi_size false st;
     Misc.dops := !Misc.pson;
     redraw ?trans:(Some Transitions.DirTop) st
   with x ->
@@ -652,8 +637,8 @@ let goto_page n st = (* go to the begining of the page *)
         else if new_page_no = pred st.page_no then Some Transitions.DirLeft
         else if new_page_no = st.page_no then Some Transitions.DirTop
         else None in
-      st.page_no <- new_page_no ;
-      st.pause_no <- 0 ;
+      st.page_no <- new_page_no;
+      st.pause_no <- 0;
       redraw ?trans:(t) st
     end;;
 
@@ -735,10 +720,10 @@ let scale n st =
       let new_ratio = factor *. st.ratio in
       if new_ratio >= 0.02 && new_ratio < 50.0 then
         begin
-          st.ratio <- new_ratio ;
+          st.ratio <- new_ratio;
           let (cx, cy) = (st.size_x / 2, st.size_y / 2) in
-          st.orig_x <- int_of_float (float (st.orig_x - cx) *. factor) + cx ;
-          st.orig_y <- int_of_float (float (st.orig_y - cy) *. factor) + cy ;
+          st.orig_x <- int_of_float (float (st.orig_x - cx) *. factor) + cx;
+          st.orig_y <- int_of_float (float (st.orig_y - cy) *. factor) + cy;
         end;
     end;
   update_dvi_size true st;
@@ -782,10 +767,10 @@ let scale n st =
       let unfreeze_glyphs st =
         Driver.unfreeze_glyphs st.cdvi (st.base_dpi *. st.ratio)
       let center st =
-        st.ratio <- 1.0 ;
-        st.orig_x <- (st.size_x - st.dvi_width) / 2 ;
-        st.orig_y <- (st.size_y - st.dvi_height) / 2 ;
-        update_dvi_size false st ;
+        st.ratio <- 1.0;
+        st.orig_x <- (st.size_x - st.dvi_width) / 2;
+        st.orig_y <- (st.size_y - st.dvi_height) / 2;
+        update_dvi_size false st;
         redraw st
 
       let scale_up st = scale (max 1 st.num) st
@@ -947,7 +932,7 @@ let main_loop filename =
   let st = init filename in
   let cont = ref None in (* drawing continuation *)
   Grdev.set_title ("Advi: " ^ Filename.basename filename);
-  Grdev.open_dev (" " ^ string_of_geometry attr.geom) ;
+  Grdev.open_dev (" " ^ string_of_geometry attr.geom);
   set_bbox st;
   if st.page_no > 0 && !Misc.dops then
     Driver.scan_special_pages st.cdvi st.page_no
@@ -966,8 +951,8 @@ let main_loop filename =
     | Grdev.Href h -> goto_href h st
     | Grdev.Advi (s, a) -> a ()
     | Grdev.Move (w, h) ->
-        st.orig_x <- st.orig_x + w ;
-        st.orig_y <- st.orig_y + h ;
+        st.orig_x <- st.orig_x + w;
+        st.orig_y <- st.orig_y + h;
         set_bbox st;
         redraw st
     | Grdev.Region (x, y, w, h) -> ()
