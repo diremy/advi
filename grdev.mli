@@ -22,6 +22,11 @@ and y = GraphicsY11.y
 and w = GraphicsY11.w
 and h = GraphicsY11.h;;
 
+type ratio = float;;
+type xratio = ratio
+and yratio = ratio;;
+(** The types of ratios for abscissas and ordinates. *)
+
 (* Private glyphs *)
 
 type glyph;;
@@ -143,8 +148,8 @@ val draw_img :
 (* Background information *)
 
 type viewport = {vx : x; vy : y; vw : w; vh : h};;
+(** Viewports: x, y, size_x, size_y, in advi coordinates. *)
 
-(* The Background preferences *)
 type bkgd_prefs = {
   mutable bgcolor : color;
   mutable bgcolorstart : color option;
@@ -154,24 +159,23 @@ type bkgd_prefs = {
   mutable bgwhitetransp : bool;
   mutable bgalpha : Drawimage.alpha;
   mutable bgblend : Drawimage.blend;
-  mutable bgxstart : x;
-  mutable bgystart : y;
-  mutable bgwidth : x;
-  mutable bgheight : y;
-  mutable bgxcenter : x option;
-  mutable bgycenter : y option;
+  mutable bgxstart : xratio;
+  mutable bgystart : yratio;
+  mutable bgwidth : xratio;
+  mutable bgheight : yratio;
+  mutable bgxcenter : xratio option;
+  mutable bgycenter : yratio option;
   mutable bgviewport: viewport option;
   (* hook for sophisticated programmed graphics backgrounds *)
   mutable bgfunction: (bgfunarg -> unit) option;
 }
 
-(* The type of the argument of a background gradient function. *)
 and bgfunarg = {
  argcolor : color;
  argcolorstart : color option;
  argcolorstop : color option;
- argxcenter : x option;
- argycenter : y option;
+ argxcenter : x;
+ argycenter : y;
  argfunviewport : viewport;
  argviewport : viewport;
 };;
@@ -186,12 +190,12 @@ type bgoption =
    | BgBlend of Drawimage.blend
    | BgRatio of Drawimage.ratiopt
    | BgViewport of viewport option
-   | BgXStart of float
-   | BgYStart of float
-   | BgHeight of float
-   | BgWidth of float
-   | BgXCenter of float
-   | BgYCenter of float
+   | BgXStart of xratio
+   | BgYStart of yratio
+   | BgWidth of xratio
+   | BgHeight of yratio
+   | BgXCenter of xratio
+   | BgYCenter of yratio
    | BgFun of (bgfunarg -> unit) option;;
 
 val blit_bkgd_data : bkgd_prefs -> bkgd_prefs -> unit;;

@@ -224,8 +224,12 @@ and y = GraphicsY11.y
 and w = GraphicsY11.w
 and h = GraphicsY11.h;;
 
+type ratio = float;;
+type xratio = ratio
+and yratio = ratio;;
+
 type viewport = {vx : x; vy : y; vw : w; vh : h};;
-(** Viewports: off_x, off_y, size_x, size_y, in advi coordinates. *)
+(** Viewports: x, y, size_x, size_y, in advi coordinates. *)
 
 (* The Background preferences                    *)
 type bkgd_prefs = {
@@ -237,12 +241,12 @@ type bkgd_prefs = {
   mutable bgwhitetransp : bool;
   mutable bgalpha : Drawimage.alpha;
   mutable bgblend : Drawimage.blend;
-  mutable bgxstart : x;
-  mutable bgystart : y;
-  mutable bgwidth : x;
-  mutable bgheight : y;
-  mutable bgxcenter : x option;
-  mutable bgycenter : y option;
+  mutable bgxstart : xratio;
+  mutable bgystart : yratio;
+  mutable bgwidth : xratio;
+  mutable bgheight : yratio;
+  mutable bgxcenter : xratio option;
+  mutable bgycenter : yratio option;
   mutable bgviewport: viewport option;
   (* hook for sophisticated programmed graphics backgrounds *)
   mutable bgfunction: (bgfunarg -> unit) option;
@@ -252,8 +256,8 @@ and bgfunarg = {
  argcolor : color;
  argcolorstart : color option;
  argcolorstop : color option;
- argxcenter : x option;
- argycenter : y option;
+ argxcenter : x;
+ argycenter : y;
  argfunviewport : viewport;
  argviewport : viewport;
 };;
@@ -268,13 +272,16 @@ type bgoption =
    | BgBlend of Drawimage.blend
    | BgRatio of Drawimage.ratiopt
    | BgViewport of viewport option
-   | BgXStart of float
-   | BgYStart of float
-   | BgHeight of float
-   | BgWidth of float
-   | BgXCenter of float
-   | BgYCenter of float
+   | BgXStart of xratio
+   | BgYStart of yratio
+   | BgWidth of xratio
+   | BgHeight of yratio
+   | BgXCenter of xratio
+   | BgYCenter of yratio
    | BgFun of (bgfunarg -> unit) option;;
+
+let full_ratio = 1.0
+and null_ratio = 0.0;;
 
 let full_screen_view () = {vx = !xmin; vy = !ymin; vw = !size_x; vh = !size_y};;
 
@@ -285,13 +292,13 @@ let default_bkgd_prefs c = {
     bgimg = None;
     bgratiopt = Drawimage.ScaleAuto;
     bgwhitetransp = false;
-    bgalpha = 1.0;
+    bgalpha = full_ratio;
     bgblend = Drawimage.Normal;
     bgviewport = None;
-    bgxstart = 0;
-    bgystart = 0;
-    bgwidth = max_int;
-    bgheight = max_int;
+    bgxstart = null_ratio;
+    bgystart = null_ratio;
+    bgwidth = full_ratio;
+    bgheight = full_ratio;
     bgxcenter = None;
     bgycenter = None;
     bgfunction = None;
@@ -376,11 +383,15 @@ let draw_img file whitetransp alpha blend
     psbbox ratiopt antialias (w, h) (x0, !size_y - y0)
 ;;
 
+let round_dim r t = int_of_float (0.5 +. r *. float t);;
+let round_dim_x r = round_dim r !size_x;;
+let round_dim_y r = round_dim r !size_y;;
+
 let make_funviewport bkgd_data viewport =
-  let fx = bkgd_data.bgxstart
-  and fy = bkgd_data.bgystart
-  and fw = bkgd_data.bgwidth
-  and fh = bkgd_data.bgheight in
+  let fx = round_dim_x bkgd_data.bgxstart
+  and fy = round_dim_y bkgd_data.bgystart
+  and fw = round_dim_x bkgd_data.bgwidth
+  and fh = round_dim_y bkgd_data.bgheight in
   Misc.debug_endline (Printf.sprintf
     "The parsed function viewport is {vx = %d; vy = %d; vw = %d; vh = %d}."
     fx fy fw fh);
@@ -399,36 +410,70 @@ let make_funviewport bkgd_data viewport =
   {vx = fx; vy = fy; vw = fw; vh = fh}
 ;;
 
+(* Try to figure out what can be used as a center:
+   if the specified center in the funviewport is
+   within the background viewport we choose it;
+   otherwise, we choose the center of the background viewport. *)
+let make_center xcr ycr
+    ({vx = x; vy = y; vw = w; vh = h} as bgviewport)
+    ({vx = fx; vy = fy; vw = fw; vh = fh} as funviewport) =
+  let xc = match xcr with
+  | Some xcr ->
+      (* Get the center coordinates integer values in the funviewport. *)
+      let xc = round_dim xcr fw in
+      (* Check the center coordinates wrt the background viewport. *)
+      if xc < x then x else
+      if xc < x + w then xc else x + w - 1
+  | None -> x + (w + 1) / 2 in
+  let yc = match ycr with
+  | Some ycr ->
+      (* Get the center coordinates integer values in the funviewport. *)
+      let yc = round_dim ycr fh in
+      (* Check the center coordinates wrt the background viewport. *)
+      if yc < y then y else
+      if yc < y + h then yc else y + h - 1
+  | None -> y + (h + 1) / 2 in
+  xc, yc;;
+
+let make_funarg bkgd_data bgviewport funviewport =
+  (* Get the center coordinates ratios. *)
+  let xcr = bkgd_data.bgxcenter
+  and ycr = bkgd_data.bgycenter in
+  let xc, yc = make_center xcr ycr bgviewport funviewport in
+  {
+    argcolor = bkgd_data.bgcolor;
+    argcolorstart = bkgd_data.bgcolorstart;
+    argcolorstop = bkgd_data.bgcolorstop;
+    argxcenter = xc;
+    argycenter = yc;
+    argfunviewport = funviewport;
+    argviewport = bgviewport;
+  };;
+
 let draw_bkgd () =
   (* Find the viewport *)
-  let viewport =
+  let bgviewport =
     match bkgd_data.bgviewport with
     | None -> full_screen_view ()
     | Some v -> v in
-  (* Background: color. *)
+
+  (* Background: paint with the solid color. *)
   bg_color := bkgd_data.bgcolor;
   Graphics.set_color !bg_color;
-  let {vx = x; vy = y; vw = w; vh = h} = viewport in
+  let {vx = x; vy = y; vw = w; vh = h} = bgviewport in
   (* Background: solid color.
      Fix me: why this test ? could have a white bg, no ?
      -> Yes, but then it is useless to draw the rectangle.
      -> Mmm is it worth the burden to test ?
    *)
   if !bg_color <> Graphics.white then Graphics.fill_rect x y w h;
+
   (* Background: apply the gradient function if any. *)
   begin match bkgd_data.bgfunction with
   | None -> ()
   | Some bgfunction ->
-      let funviewport = make_funviewport bkgd_data viewport in
-      let bgfunarg = {
-        argcolor = bkgd_data.bgcolor;
-        argcolorstart = bkgd_data.bgcolorstart;
-        argcolorstop = bkgd_data.bgcolorstop;
-        argxcenter = bkgd_data.bgxcenter;
-        argycenter = bkgd_data.bgycenter;
-        argfunviewport = funviewport;
-        argviewport = viewport;
-       } in
+      let funviewport = make_funviewport bkgd_data bgviewport in
+      let bgfunarg = make_funarg bkgd_data bgviewport funviewport in
       let string_of_color_opt = function 
         | None -> "None"
         | Some c -> Printf.sprintf "Some %d" c in
@@ -436,9 +481,9 @@ let draw_bkgd () =
         "colors are {argcolor = %d; argcolorstart = %s; argcolorstop = %s}."
         bkgd_data.bgcolor (string_of_color_opt bkgd_data.bgcolorstart)
                           (string_of_color_opt bkgd_data.bgcolorstop));
-      bgfunction bgfunarg end;
-  
-  (* Background: image. *)
+      bgfunction bgfunarg end;  
+
+  (* Background: now draw the image. *)
   let draw_bg file =
     Drawimage.f file bkgd_data.bgwhitetransp bkgd_data.bgalpha
       bkgd_data.bgblend None
@@ -446,9 +491,6 @@ let draw_bkgd () =
       true (* antialias *)
       (w, h) (x, y) in
   lift draw_bg bkgd_data.bgimg;;
-
-let round_dim_x r = int_of_float (0.5 +. r *. float !size_x);;
-let round_dim_y r = int_of_float (0.5 +. r *. float !size_y);;
 
 let set_bg_option = function
   | BgColor c -> bkgd_data.bgcolor <- c
@@ -459,12 +501,12 @@ let set_bg_option = function
   | BgBlend b -> bkgd_data.bgblend <- b
   | BgRatio f -> bkgd_data.bgratiopt <- f
   | BgViewport v -> bkgd_data.bgviewport <- v
-  | BgXStart x -> bkgd_data.bgxstart <- round_dim_x x
-  | BgYStart y -> bkgd_data.bgystart <- round_dim_y y
-  | BgWidth w -> bkgd_data.bgwidth <- round_dim_x w
-  | BgHeight h -> bkgd_data.bgheight <- round_dim_y h
-  | BgXCenter x -> bkgd_data.bgxcenter <- Some (round_dim_x x)
-  | BgYCenter y -> bkgd_data.bgycenter <- Some (round_dim_y y)
+  | BgXStart x -> bkgd_data.bgxstart <- x
+  | BgYStart y -> bkgd_data.bgystart <- y
+  | BgWidth w -> bkgd_data.bgwidth <- w
+  | BgHeight h -> bkgd_data.bgheight <- h
+  | BgXCenter xc -> bkgd_data.bgxcenter <- Some xc
+  | BgYCenter yc -> bkgd_data.bgycenter <- Some yc
   | BgFun f -> bkgd_data.bgfunction <- f;;
 
 let set_bg_options l = List.iter set_bg_option l;;

@@ -84,22 +84,6 @@ let d2gradient {
    yet available to any distribution :) *)
 let dgradient = d1gradient;;
 
-(* Try to figure out what can be used as a center:
-   if xc or yc is within the viewport we choose it,
-   otherwise, we choose the center of the viewport. *)
-let center xc yc {vx = x; vy = y; vw = w; vh = h} =
-  let xc = match xc with
-  | Some xc ->
-      if xc < x then x else
-      if xc < x + w then xc else x + w - 1
-  | None -> x + (w + 1) / 2 in
-  let yc = match yc with
-  | Some yc ->
-      if yc < y then y else
-      if yc < y + h then yc else y + h - 1
-  | None -> y + (h + 1) / 2 in
-      xc, yc;;
-
 let cgradient {
     argcolor = c0; argcolorstart = c1; argcolorstop = c2;
     argfunviewport = {vx = x; vy = y; vw = w; vh = h} as viewport;
@@ -108,7 +92,6 @@ let cgradient {
    } =
   let c1 = start_color c0 c1
   and c2 = stop_color c0 c2 in
-  let xc, yc = center xc yc viewport in
   Gradient.grad_rect (Rect_Centered (c1, c2, xc, yc)) x y w h;;
 
 let circgradient {
@@ -119,5 +102,4 @@ let circgradient {
    } =
   let c1 = start_color c0 c1
   and c2 = stop_color c0 c2 in
-  let xc, yc = center xc yc viewport in
   Gradient.grad_rect (Rect_Circular (c1, c2, xc, yc)) x y w h;;
