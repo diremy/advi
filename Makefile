@@ -145,10 +145,8 @@ FTPSITEDIR=/net/pauillac/infosystems/ftp/cristal/advi
 tex/splash.dvi:
 	cd tex; latex splash.tex
 
-test/jpdemo.dvi:
-	cd test; $(MAKE) jpdemo.dvi
-
-distribute: tex/splash.dvi test/demo.dvi test/trans.dvi	test/jpdemo.dvi
+distribute: tex/splash.dvi
+	(cd test; make all jpdemo.dvi)
 	rm -rf release
 	rm -rf $(WEBSITEDIR)/*
 	- mkdir $(WEBSITEDIR)
