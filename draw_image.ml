@@ -1,9 +1,11 @@
-(* RDC: this file is an adaptation of draw_ps, having possibly a different logic   *)
-(* we might want to merge it back into a single source once the logic is finalised *)
+(* RDC: this file is an adaptation of draw_ps, having possibly a
+   different logic.
+   We might want to merge it back into a single source once the logic
+   is finalised. *)
 
-open Image
-open Color
-open GraphicsY11
+open Image;;
+open Color;;
+open GraphicsY11;;
 
 let cache_prefix = "cache-";;
 
@@ -26,7 +28,8 @@ let white_rgb = {r = 255; g = 255; b = 255};;
 let f file whitetransp alpha blend ratiopts (w, h) x0 y0 =
   
   let file = Search.true_file_name [] file in
-  let cache_name =   (* The computed cache name *)
+  let cache_name =
+    (* The computed cache name *)
     let file' = Userfile.fullpath (Unix.getcwd ()) file in
     let file' = if file == file' then String.copy file' else file' in
     for i = 0 to String.length file' - 1 do
@@ -98,7 +101,8 @@ let f file whitetransp alpha blend ratiopts (w, h) x0 y0 =
     | _ ->
 	if !verbose_image_access then GraphicsY11.set_cursor Cursor_exchange;
       	begin try Unix.unlink cache_name with _ -> () end;
-      	let image = (* image can be Rgb24, Rgba32, Index8 ... *)
+      	let image =
+          (* image can be Rgb24, Rgba32, Index8 ... *)
 	  (* we skip anti-aliasing for now ... *)
           try
             Image.load file []
@@ -112,28 +116,44 @@ let f file whitetransp alpha blend ratiopts (w, h) x0 y0 =
       	in
         (* convert the image to Rgba32 or Rgb24 *)
 	let image = match image with
-        | Rgba32 i -> image
+	| Rgba32 i ->
+  	    let width = i.Rgba32.width
+  	    and height = i.Rgba32.height
+  	    in
+	    if whitetransp then begin
+  	      let rgbaimg = Rgba32.create width height in
+  	      for y = 0 to height - 1 do
+               for x = 0 to width - 1 do
+                 let rgba = Rgba32.unsafe_get i x y in
+                 let a =
+                   if rgba.color = white_rgb then 0 else rgba.alpha in 
+                 Rgba32.unsafe_set rgbaimg x y
+                   { color = rgba.color; alpha = a }
+               done
+  	      done;
+  	      Rgba32 rgbaimg
+	    end else image
         | Rgb24 i ->
             if whitetransp then begin
   	      let width = i.Rgb24.width
   	      and height = i.Rgb24.height
   	      in
-  	      let rgba = Rgba32.create width height in
+  	      let rgbaimg = Rgba32.create width height in
   	      for y = 0 to height - 1 do
                 for x = 0 to width - 1 do
                   let rgb = Rgb24.unsafe_get i x y in
                   let a = if rgb = white_rgb then 0 else 255 in
-                  Rgba32.unsafe_set rgba x y { color = rgb; alpha = a }
+                  Rgba32.unsafe_set rgbaimg x y { color = rgb; alpha = a }
                 done
   	      done;
-              Rgba32 rgba
+              Rgba32 rgbaimg
             end else image
         | Index8 i ->
             if whitetransp then begin
   	      let width = i.Index8.width
   	      and height = i.Index8.height
   	      in
-  	      let rgba = Rgba32.create width height in
+  	      let rgbaimg = Rgba32.create width height in
   	      for y = 0 to height - 1 do
                 for x = 0 to width - 1 do
                   let index = Index8.unsafe_get i x y in
@@ -142,12 +162,15 @@ let f file whitetransp alpha blend ratiopts (w, h) x0 y0 =
                     if index = i.Index8.transparent || rgb = white_rgb then 0
                     else 255
                   in
-                  Rgba32.unsafe_set rgba x y { color = rgb; alpha = a }
+                  Rgba32.unsafe_set rgbaimg x y { color = rgb; alpha = a }
                 done
   	      done;
-              Rgba32 rgba
+              Rgba32 rgbaimg
             end else Rgba32 (Index8.to_rgba32 i)
-	| _ -> assert false
+        | Index16 i -> Rgb24 (Index16.to_rgb24 i)
+        | Cmyk32 i ->
+            Misc.warning "Fix me: draw_imge.ml, Cmyk image ignored";
+            raise Exit
 	in
 	let image = 
 	  match image with
@@ -179,14 +202,13 @@ let f file whitetransp alpha blend ratiopts (w, h) x0 y0 =
       in
       Graphics.draw_image image_graphics x0 y0
   | Rgb24 _ | Rgba32 _ ->
-(* RDC alpha blending INUTILE pour backgrounds? Let's say so for now...
       let alpha = truncate (alpha *. 255.0) in
       let get_src_alpha =
 	match image with
 	| Rgb24 image -> fun x y -> Rgb24.unsafe_get image x y, alpha
 	| Rgba32 image ->
 	    fun x y ->
-	      let {color= src; alpha= a} = Rgba32.unsafe_get image x y in
+	      let {color = src; alpha = a} = Rgba32.unsafe_get image x y in
 	      src, a * alpha / 255
 	| _ -> assert false
       in
@@ -203,15 +225,19 @@ let f file whitetransp alpha blend ratiopts (w, h) x0 y0 =
     	| 0 -> fun dst src -> dst
     	| 255 ->
 	    fun dst src ->
-	      {r= blend dst.r src.r;
-	       g= blend dst.g src.g;
-	       b= blend dst.b src.b }
+	      {r = blend dst.r src.r;
+	       g = blend dst.g src.g;
+	       b = blend dst.b src.b }
     	| _ ->
 	    let a' = 255 - a in
+            let combine dst src = (blend dst src * a + src * a') / 255 in
 	    fun dst src ->
-	      {r= (blend dst.r src.r * a + dst.r * a') / 255;
-	       g= (blend dst.g src.g * a + dst.g * a') / 255;
-	       b= (blend dst.b src.b * a + dst.b * a') / 255 }
+              let r = combine dst.r src.r in
+              let g = combine dst.g src.g in
+              let b = combine dst.b src.b in
+	      {r = r;
+	       g = g;
+	       b = b }
       in
       for y = 0 to h - 1 do
     	for x = 0 to w - 1 do
@@ -221,8 +247,6 @@ let f file whitetransp alpha blend ratiopts (w, h) x0 y0 =
     	done
       done;
       Graphic_image.draw_image (Rgb24 org) x0 y0
-*)
-      ()
   | _ -> assert false;;
 
 (* Wrapped version of [f], which catches the Exit 

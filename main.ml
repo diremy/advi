@@ -40,8 +40,6 @@ let spec_list = [
    "GEOM\tSame as -geometry GEOM");
   ("-crop", Arg.Set crop_flag,
    "\tCrop the window to the best size (default)");
-  ("-no-crop", Arg.Clear crop_flag,
-   "\tDisable cropping (* depreciated *)");
   ("-nocrop", Arg.Clear crop_flag,
    "\tDisable cropping");
   ("-nomargins", Arg.Unit

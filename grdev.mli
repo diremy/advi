@@ -16,22 +16,13 @@
  *)
 
 
-(* Background information *)
-
-type bkgd_prefs = { mutable bgcolor: int; mutable bgimg: string option; mutable bgratio: Draw_image.ratiopts; mutable bgwhitetrans:bool}
-
-val copy_bkgd_data : bkgd_prefs -> bkgd_prefs -> unit
-val copy_of_bkgd_data : unit -> bkgd_prefs
-val default_bkgd_data : unit -> bkgd_prefs
-val bkgd_data : bkgd_prefs
-
 (* Private glyphs *)
 
-type glyph ;;
+type glyph;;
 
-val make_glyph : Glyph.t -> glyph ;;
-val get_glyph  : glyph -> Glyph.t
-val draw_glyph : glyph -> int -> int -> unit ;;
+val make_glyph : Glyph.t -> glyph;;
+val get_glyph  : glyph -> Glyph.t;;
+val draw_glyph : glyph -> int -> int -> unit;;
 
 module Symbol :
     sig
@@ -48,10 +39,10 @@ module Symbol :
         | Rule of int * int
         | Line of int * string option
       type element =
-          { color   : int ; 
-            locx    : int ; 
-            locy    : int ;
-            code    : int ;
+          { color   : int; 
+            locx    : int; 
+            locy    : int;
+            code    : int;
             symbol : symbol }
       type set
       val voffset : element -> int
@@ -66,49 +57,75 @@ module Symbol :
       val intime : int -> int -> int -> int -> set
       val iter : (element -> unit) -> set -> unit
       val lines : int -> int -> (element * int * int * string * string) option
-    end
-    
-(* Device configuration *)
-    
-val open_dev : string -> unit ;;
-val close_dev : unit -> unit ;;
-val clear_dev : unit -> unit ;;
-val set_bbox : (int * int * int * int) option -> unit ;;
+    end;;
 
+(* Device configuration *)
+
+val open_dev : string -> unit;;
+val close_dev : unit -> unit;;
+val clear_dev : unit -> unit;;
+val set_bbox : (int * int * int * int) option -> unit;;
 
 (* Drawing *)
 
-type color = int ;;
+type color = int;;
 val fgcolor : unit -> color;;
 
-type bgoption = BgColor of color | BgImg of string;;
-
-val set_bg_options : bgoption list -> unit;; (* Background  RDC *) 
-
-val set_color : int -> unit ;;
+val set_color : int -> unit;;
 val push_bg_color : int -> unit;;
 val pop_bg_color : unit -> unit;;
-val fill_rect : int -> int -> int -> int -> unit ;;
+val fill_rect : int -> int -> int -> int -> unit;;
 
-val draw_path: (int * int) array -> pensize:int -> unit
-val fill_path: (int * int) array -> shade:float -> unit
-val draw_arc: x:int -> y:int -> rx:int -> ry:int -> 
-              start:int -> stop:int -> pensize:int -> unit
-val fill_arc: x:int -> y:int -> rx:int -> ry:int -> 
-              start:int -> stop:int -> shade:float -> unit
+val draw_path : (int * int) array -> pensize:int -> unit;;
+val fill_path : (int * int) array -> shade:float -> unit;;
+val draw_arc :
+  x:int -> y:int -> rx:int -> ry:int ->
+  start:int -> stop:int -> pensize:int -> unit;;
+val fill_arc :
+  x:int -> y:int -> rx:int -> ry:int -> 
+  start:int -> stop:int -> shade:float -> unit;;
 
-val set_alpha : float -> unit ;; 
-val set_epstransparent : bool -> unit ;; 
+(* Alpha blending *)
+val set_alpha : float -> unit;; 
+val set_epstransparent : bool -> unit;; 
+
 type blend =
   | Normal | Multiply | Screen | Overlay (* | SoftLight | HardLight *)
   | ColorDodge | ColorBurn | Darken | Lighten | Difference 
   | Exclusion (* | Luminosity | Color | Saturation | Hue *)
 ;;
-val set_blend : blend -> unit
-val draw_ps : string -> (int * int * int * int) -> (int * int) -> int -> int -> unit ;;
-val clean_ps_cache : unit -> unit
-val sleep : float -> unit
 
+val set_blend : blend -> unit;;
+val draw_ps :
+  string -> (int * int * int * int) -> (int * int) -> int -> int -> unit;;
+val clean_ps_cache : unit -> unit;;
+val sleep : float -> unit;;
+
+(* Background information *)
+
+type bkgd_prefs = {
+  mutable bgcolor : int;
+  mutable bgimg : string option;
+  mutable bgratio : Draw_image.ratiopts;
+  mutable bgwhitetrans : bool;
+  mutable bgalpha : float;
+  mutable bgblend : blend;
+};;
+
+val blit_bkgd_data : bkgd_prefs -> bkgd_prefs -> unit;;
+val copy_of_bkgd_data : unit -> bkgd_prefs;;
+val default_bkgd_data : unit -> bkgd_prefs;;
+val bkgd_data : bkgd_prefs;;
+
+type bgoption =
+   | BgColor of color
+   | BgImg of string
+   | BgAlpha of float
+   | BgBlend of blend;;
+
+val set_bg_options : bgoption list -> unit;;
+
+(* Embedded applications *)
 type app_type =
    | Sticky
       (* A [Sticky] application is launched once and only once.
@@ -128,24 +145,26 @@ type app_type =
          page it appears in is visualised. It is killed when going
          to another slide. If the page is visible again, the
          application will be launched again as well. *)
+;;
 
-val embed_app : string -> app_type -> string -> int -> int -> int -> int -> unit
-val kill_embedded_app : string -> unit 
-val kill_all_embedded_apps : unit -> unit 
+val embed_app :
+  string -> app_type -> string -> int -> int -> int -> int -> unit;;
+val kill_embedded_app : string -> unit;;
+val kill_all_embedded_apps : unit -> unit;;
 
 (* Events *)
 
 type status = {
-    mouse_x : int ;
-    mouse_y : int ;
-    button : bool ;
-    keypressed : bool ;
+    mouse_x : int;
+    mouse_y : int;
+    button : bool;
+    keypressed : bool;
     key : char;
     modifiers : int;
-  } ;;
+  };;
 
-type area = Bottom_right | Bottom_left | Top_right | Top_left | Middle
-type button = Button1 | Button2 | Button3
+type area = Bottom_right | Bottom_left | Top_right | Top_left | Middle;;
+type button = Button1 | Button2 | Button3;;
 type event =
     Resized of int * int
   | Refreshed
@@ -157,9 +176,9 @@ type event =
   | Href of string
   | Advi of string * (unit -> unit)
   | Click of area * button * int * int
-  | Nil
-        
-val wait_event : unit -> event ;;
+  | Nil;;
+
+val wait_event : unit -> event;;
 
 module H :
     sig
@@ -167,34 +186,35 @@ module H :
         | Name of string 
         | Href of string
         | Advi of string * (unit -> unit)
-              
+
       type anchor = {
           tag : tag;
           draw : (int * int * glyph) list
         } 
-            
+
       val add : anchor -> unit
       val flashlight : tag -> unit
-          
+
     end;;
 
-exception Stop
-exception GS
-val continue : unit -> unit ;;
-val reposition : x:int -> y:int -> w:int -> h:int -> int * int
-val exec_ps : string -> int -> int -> unit ;;
-val newpage : string list -> int -> float -> int -> int -> unit 
-val add_headers : string list -> unit
+exception Stop;;
+exception GS;;
+val continue : unit -> unit;;
+val reposition : x:int -> y:int -> w:int -> h:int -> int * int;;
+val exec_ps : string -> int -> int -> unit;;
+val newpage : string list -> int -> float -> int -> int -> unit;;
+val add_headers : string list -> unit;;
 val current_pos : unit -> int * int;;
-val synchronize : unit -> unit ;; 
+val synchronize : unit -> unit;; 
 
-type busy = Free | Busy | Pause | Disk
+type busy = Free | Busy | Pause | Disk;;
+
 val set_busy : busy -> unit;;
 
-val set_transition : Transitions.t -> unit
+val set_transition : Transitions.t -> unit;;
 
-val transbox_save : int -> int -> int -> int -> unit
-val transbox_go : Transitions.t -> unit 
+val transbox_save : int -> int -> int -> int -> unit;;
+val transbox_go : Transitions.t -> unit;;
 
 val set_title : string -> unit;;
 val cut : string -> unit;;

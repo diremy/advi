@@ -218,108 +218,161 @@ let make_glyph g =
 
 let get_glyph g = g.glyph;;
 
-(* The Background preferences                                   *)
-(* to be extended, should contain the image, gradients etc. RDC *)
+(* Blending *)
+type blend =
+   | Normal | Multiply | Screen | Overlay (* | SoftLight | HardLight *)
+   | ColorDodge | ColorBurn | Darken | Lighten | Difference
+   | Exclusion (* | Luminosity | Color | Saturation | Hue *);;
 
-let set_default_color r s =
-   r := 
-     match s with
-     | "black" | "Black" -> Graphics.black
-     | "white" | "White" -> Graphics.white
-     | "red" | "Red" -> Graphics.red
-     | "green" | "Green" -> Graphics.green
-     | "blue" | "Blue" -> Graphics.blue
-     | "yellow" | "Yellow" -> Graphics.yellow
-     | "cyan" | "Cyan" -> Graphics.cyan
-     | "magenta" | "Magenta" -> Graphics.magenta
-     | s -> int_of_string s
+let blend = ref Normal;;
+let set_blend b = blend := b;;
 
-let default_bgcolor = ref Graphics.white
-let default_fgcolor = ref Graphics.black
-let fgcolor() = !default_fgcolor;;
+(* look at gxblend.c of ghostscript *)
+let blend_func = function
+  | Normal -> fun dst src -> src
+  | Multiply ->
+      fun dst src ->
+        let t = dst * src + 0x80 in
+        let t = t + t lsr 8 in
+        t lsr 8
+  | Screen ->
+      fun dst src ->
+        let t = (0xff - dst) * (0xff - src) + 0x80 in
+        let t = t + t lsr 8 in
+        0xff - t lsr 8
+  | Overlay ->
+      fun dst src ->
+        let t =
+          if dst < 0x80 then 2 * dst * src
+          else 0xf301 - 2 * (0xff - dst) * (0xff - src) in
+        let t = t + 0x80 in
+        let t = t + t lsr 8 in
+        t lsr 8
+(*
+   | SoftLight ->
+   if s < 0x80 then begin
+   let t = (0xff - (src lsl 1)) * art_blend_sq_diff_8[dst] in
+   let t = t + 0x8000 in
+   dst - t lsr 16
+   end else begin
+   let t = ((src lsl 1) - 0xff) * art_blend_soft_light_8[dst] in
+   let t = t + 0x80 in
+   let t = t + t lsr 8 in
+   dst + t lsr 8
+   end
+*)
+  | ColorDodge ->
+      fun dst src ->
+        if dst = 0 then 0 else if dst >= src then 0xff
+        else (0x1fe * dst + src) / (src lsl 1)
+  | ColorBurn ->
+      fun dst src ->
+        let dst = 0xff - dst in
+        if dst = 0 then 0xff else if dst >= src then 0
+        else 0xff - (0x1fe * dst + src) / (src lsl 1)
+  | Darken ->
+      fun dst src -> if dst < src then dst else src
+  | Lighten ->
+      fun dst src -> if dst > src then dst else src
+  | Difference ->
+      fun dst src ->
+        let t = dst - src in
+        if t < 0 then -t else t
+  | Exclusion ->
+      fun dst src ->
+        let t = (0xff - dst) * src + dst * (0xff - src) in
+        let t = t + 0x80 in
+        let t = t + t lsr 8 in
+        t lsr 8;;
 
-
-let color = ref 0x000000;;
-
+(* Background implementation *)
 type bkgd_prefs = {
   mutable bgcolor : int;
   mutable bgimg : string option;
   mutable bgratio : Draw_image.ratiopts;
-  mutable bgwhitetrans : bool
+  mutable bgwhitetrans : bool;
+  mutable bgalpha : float;
+  mutable bgblend : blend;
 };;
+
+(* The Background preferences                        *)
+(* to be extended, should contain gradients etc. RDC *)
+
+let set_default_color r s =
+   r :=
+     match String.lowercase s with
+     | "black" -> Graphics.black
+     | "white" -> Graphics.white
+     | "red" -> Graphics.red
+     | "green" -> Graphics.green
+     | "blue" -> Graphics.blue
+     | "yellow" -> Graphics.yellow
+     | "cyan" -> Graphics.cyan
+     | "magenta" -> Graphics.magenta
+     | s -> int_of_string s;;
+
+let default_bgcolor = ref Graphics.white;;
+let default_fgcolor = ref Graphics.black;;
+let fgcolor () = !default_fgcolor;;
+
+let color = ref !default_fgcolor;;
+
+Misc.set_option
+  "-fgcolor"
+  (Arg.String (set_default_color default_fgcolor))
+  "STRING\tSet default foreground color (Named or RGB)";;
 
 let default_bkgd_data () =
   { bgcolor = !default_bgcolor;
     bgimg = None;
     bgratio = Draw_image.ScaleY;
-    bgwhitetrans = false }
-;;
+    bgwhitetrans = false;
+    bgalpha = 1.0;
+    bgblend = Normal };;
 
-(*
-(* ??? White is this code a duplicate of the above??? *)
-let copy_bkgd_data s d =
+let blit_bkgd_data s d =
   d.bgcolor <- s.bgcolor;
   d.bgimg   <- s.bgimg;
   d.bgratio <- s.bgratio;
-  d.bgwhitetrans <- s.bgwhitetrans;;
+  d.bgwhitetrans <- s.bgwhitetrans;
+  d.bgalpha <- s.bgalpha;
+  d.bgblend <- s.bgblend;;
 
 let bkgd_data = default_bkgd_data ();;
 
 let copy_of_bkgd_data () =
   let c = default_bkgd_data () in
-  copy_bkgd_data bkgd_data c;
+  blit_bkgd_data bkgd_data c;
   c;;
-*)
-
-let copy_bkgd_data s d =
-  d.bgcolor <- s.bgcolor;
-  d.bgimg   <- s.bgimg;
-  d.bgratio <- s.bgratio;
-  d.bgwhitetrans <- s.bgwhitetrans;;
-
-let bkgd_data = default_bkgd_data ();;
-
-let copy_of_bkgd_data () =
-  let c = default_bkgd_data () in
-  copy_bkgd_data bkgd_data c; c;;
-
-
-let _ = Misc.set_option
-     "-fgcolor"
-     (Arg.String (set_default_color default_fgcolor))
-     "STRING\tSet default foreground color (Named or RGB)"
-let _ = Misc.set_option
-     "-bgcolor"
-     (Arg.String
-        (fun s ->
-          set_default_color default_bgcolor s;
-          bkgd_data.bgcolor <- !default_bgcolor;
-        ))
-     "STRING\tSet default background color (Named or RGB)"
-
-(* TODO: handle ratio and whitetransparent preferences *)
 
 let draw_bkgd_img (w, h) x0 y0 =
   match bkgd_data.bgimg with
   | None -> ()
-  | Some fn ->
+  | Some file ->
      set_busy Busy;
      Draw_image.f
-      fn bkgd_data.bgwhitetrans 1.0 None bkgd_data.bgratio (w, h) x0 y0;;
+      file
+      bkgd_data.bgwhitetrans
+      bkgd_data.bgalpha
+      (Some (blend_func bkgd_data.bgblend))
+      bkgd_data.bgratio (w, h) x0 y0;;
 
 type bgoption =
    | BgColor of color
-   | BgImg of string;;
+   | BgImg of string
+   | BgAlpha of float
+   | BgBlend of blend;;
 
 let set_bg_option = function
-  | BgColor c ->bkgd_data.bgcolor <- c
-  | BgImg fn -> bkgd_data.bgimg <- Some fn;;
+  | BgColor c -> bkgd_data.bgcolor <- c
+  | BgImg file -> bkgd_data.bgimg <- Some file
+  | BgAlpha a -> bkgd_data.bgalpha <- a
+  | BgBlend b -> bkgd_data.bgblend <- b;;
 
 let set_bg_options l = List.iter set_bg_option l;;
 
 let bg_color = ref bkgd_data.bgcolor;;
 let bg_colors = ref [];;
-
 
 let push_bg_color c =
   bg_colors := !bg_color :: !bg_colors;
@@ -337,7 +390,8 @@ let add_background_color x y w h c =
 let find_bg_color x y w h =
   let rec find_color = function
     | (x0, y0, w0, h0, c) :: t ->
-        if x0 <= x && y0 <= y && x + w <= x0 + w0 && y + h <= y0 + h0 then c
+        if x0 <= x && y0 <= y && x + w <= x0 + w0 && y + h <= y0 + h0
+        then c
         else find_color t
     | [] -> !bg_color in
   find_color !background_colors;;
@@ -352,6 +406,14 @@ let get_bg_color x y w h =
         else Graphics.white
       else find_bg_color x y w h
     end;;
+
+Misc.set_option
+  "-bgcolor"
+  (Arg.String
+     (fun s ->
+        set_default_color default_bgcolor s;
+        bkgd_data.bgcolor <- !default_bgcolor))
+  "STRING\tSet default background color (Named or RGB)";;
 
 let get_color_table =
   let htable = Hashtbl.create 257 in
@@ -504,72 +566,6 @@ let set_epstransparent s = epstransparent := s;;
 
 let alpha = ref 1.0;;
 let set_alpha a = alpha := a;;
-
-type blend =
-   | Normal | Multiply | Screen | Overlay (* | SoftLight | HardLight *)
-   | ColorDodge | ColorBurn | Darken | Lighten | Difference
-   | Exclusion (* | Luminosity | Color | Saturation | Hue *);;
-
-let blend = ref Normal;;
-let set_blend b = blend := b;;
-
-(* look at gxblend.c of ghostscript *)
-let blend_func = function
-  | Normal -> fun dst src -> src
-  | Multiply ->
-      fun dst src ->
-        let t = dst * src + 0x80 in
-        let t = t + t lsr 8 in
-        t lsr 8
-  | Screen ->
-      fun dst src ->
-        let t = (0xff - dst) * (0xff - src) + 0x80 in
-        let t = t + t lsr 8 in
-        0xff - t lsr 8
-  | Overlay ->
-      fun dst src ->
-        let t =
-          if dst < 0x80 then 2 * dst * src
-          else 0xf301 - 2 * (0xff - dst) * (0xff - src) in
-        let t = t + 0x80 in
-        let t = t + t lsr 8 in
-        t lsr 8
-(*
-   | SoftLight ->
-   if s < 0x80 then begin
-   let t = (0xff - (src lsl 1)) * art_blend_sq_diff_8[dst] in
-   let t = t + 0x8000 in
-   dst - t lsr 16
-   end else begin
-   let t = ((src lsl 1) - 0xff) * art_blend_soft_light_8[dst] in
-   let t = t + 0x80 in
-   let t = t + t lsr 8 in
-   dst + t lsr 8
-   end
-*)
-  | ColorDodge ->
-      fun dst src ->
-        if dst = 0 then 0 else if dst >= src then 0xff
-        else (0x1fe * dst + src) / (src lsl 1)
-  | ColorBurn ->
-      fun dst src ->
-        let dst = 0xff - dst in
-        if dst = 0 then 0xff else if dst >= src then 0
-        else 0xff - (0x1fe * dst + src) / (src lsl 1)
-  | Darken ->
-      fun dst src -> if dst < src then dst else src
-  | Lighten ->
-      fun dst src -> if dst > src then dst else src
-  | Difference ->
-      fun dst src ->
-        let t = dst - src in
-        if t < 0 then -t else t
-  | Exclusion ->
-      fun dst src ->
-        let t = (0xff - dst) * src + dst * (0xff - src) in
-        let t = t + 0x80 in
-        let t = t + t lsr 8 in
-        t lsr 8;;
 
 let draw_ps file bbox (w, h) x0 y0 =
   if not !opened then failwith "Grdev.fill_rect: no window";

@@ -123,16 +123,17 @@ previous page.
 
 \subsection* {Resetting page backgrounds}
 
-If you do not like the implicit inheritance of the background configuration, and you
-want to see obeyed only the background directives explicitly declared in a page, you 
-have two options:
+If you do not like the implicit inheritance of the background
+configuration, and you want to see obeyed only the background
+directives explicitly declared in a page, you have two options:
 
   \begin{itemize}
-    \item run advi with the \verb|--reset_bkgd| option: this way, background inheritance
-          is disabled in all the file, or
-    \item you can locally issue a \verb|\resetbg| command, that resets the background 
-          eliminating everything which is inherited. This is how we got rid of
-          the background image in this page, that only sports a nice Cyan background color.
+    \item run advi with the \verb|--reset_bkgd| option: this way,
+     background inheritance is disabled in all the file, or
+    \item you can locally issue a \verb|\resetbg| command, that resets
+     the background eliminating everything which is inherited. This is how
+     we got rid of the background image in this page, that only sports a
+     nice Cyan background color.
   \end{itemize}
 
 \resetbg
@@ -191,22 +192,31 @@ biginning of next slide, if you also want to revert to normal background.)
 \subsection* {TODO:}
 
   \begin{itemize}
-    \item implement command options to \verb|\setbgimg| to allow various scaling preferences
+    \item implement command options to \verb|\setbgimg| to allow
+various scaling preferences,
     \item anybody willing to add support for color gradients?
-    \item implement command options to \verb|\setbgimg| to support partially transparent background
+    \item implement command options to \verb|\setbgimg| to support
+partially transparent background.
   \end{itemize}
 
 \lastpage
 
+\setbgalpha{0.25}
+\setbgimage{dojoji.gif}
+
 \subsection* {Design considerations:}
+
   \begin{itemize}
-    \item background preferences are ``asynchronous'', in the sense that they can imply rendering modifications
-          in a part of the page that has already been displayed; this is why we first scan a page, looking for
-          background specials (example, a red background), and only after we render it (setting the background to red
-          before everything else). By the way, this mechanism was already in place for
-          handling PostScript headers, that also appear asynchronously.
-    \item is it worthwhile to consider the possibility of making a ``synchronous'' variant? This would allow
-          for example to change the background color after a pause. But at what price?
+    \item background preferences are ``asynchronous'', in the sense
+that they can imply rendering modifications in a part of the page that
+has already been displayed; this is why we first scan a page, looking
+for background specials (example, a red background), and only after we
+render it (setting the background to red before everything else). By
+the way, this mechanism was already in place for handling PostScript
+headers, that also appear asynchronously.
+    \item is it worthwhile to consider the possibility of making a
+``synchronous'' variant? This would allow for example to change the
+background color after a pause. But at what price ?
   \end{itemize}
 
 \end{document}

@@ -382,12 +382,14 @@ let color_special st s =
       color_pop st
   | _ -> ();;
 
+let parse_float s =
+ try float_of_string s
+ with _ -> failwith ("advi: cannot read a float number in " ^ s);;
+
 let alpha_special st s =
   match split_string s 0 with
   | ["advi:"; "alpha"; "push"; arg] ->
-      alpha_push st
-        (try float_of_string arg
-         with _ -> raise (Failure "advi: invalid alpha"))
+      alpha_push st (parse_float arg)
   | ["advi:"; "alpha"; "pop"] ->
       alpha_pop st
   | _ -> ();;
@@ -404,7 +406,9 @@ let parse_blend s =
   | "lighten" -> Dev.Lighten
   | "difference" -> Dev.Difference
   | "exclusion" -> Dev.Exclusion
-  | _ -> raise (Failure "blend: invalid blend mode");;
+  | _ ->
+      Misc.warning "blend: invalid blend mode";
+      Dev.Normal;;
 
 let blend_special st s =
   match split_string s 0 with
@@ -602,7 +606,7 @@ let transbox_go_special st s =
       Dev.transbox_go trans
   | _ -> raise (Failure "advi: transbox go special failed");;
 
-let eval_command_ref = ref (fun _ _ -> ());;
+let forward_eval_command = ref (fun _ _ -> ());;
 
 let proc_clean () =
   current_recording_proc_name := None;
@@ -671,7 +675,7 @@ let proc_special st s =
           st.cur_gtable <- u.escaped_cur_gtable;
           st.cur_font <- u.escaped_cur_font;
           List.iter
-           (fun com -> !eval_command_ref st com) u.escaped_commands)
+           (fun com -> !forward_eval_command st com) u.escaped_commands)
            us;
         st.stack <- escaped_stack; pop st;
         st.cur_mtable <- escaped_cur_mtable;
@@ -685,21 +689,28 @@ let proc_special st s =
 let wait_special st s =
   let records = get_records s in
   let second =
-    try float_of_string (List.assoc "sec" records)
-    with Not_found -> raise (Failure "wait: invalid special") in
+    try parse_float (List.assoc "sec" records) 
+    with
+    | Not_found | Failure _ -> raise (Failure "wait: invalid special") in
   Dev.synchronize();
   if not (is_hidden()) then Dev.sleep second;
   st.checkpoint <- 0;;
 
 (* Background object configuration. RDC *)
 
+let inherit_background_info =
+  Misc.option_flag false
+    "-inherit_background"
+    "\tBackground options are inherited from previous page\n\
+     \t(default is to reset background options at each new page)";;
+
 let setup_bkgd status =
   (* propagate bkgd preferences to graphics device *)
-  Dev.copy_bkgd_data status.Dvi.bkgd_prefs Dev.bkgd_data;
+  Dev.blit_bkgd_data status.Dvi.bkgd_prefs Dev.bkgd_data;
   (* store the default/inherited prefs into Dev *)
   Dev.set_bg_options status.Dvi.bkgd_local_prefs;
   (* apply local modifications                  *)
-  Dev.copy_bkgd_data Dev.bkgd_data status.Dvi.bkgd_prefs
+  Dev.blit_bkgd_data Dev.bkgd_data status.Dvi.bkgd_prefs
   (* recover modified preferences               *);;
 
 let bkgd_alist = [
@@ -709,8 +720,17 @@ let bkgd_alist = [
   ("img", fun s -> fun st ->
      [Dev.BgImg s]);
   ("reset", fun s -> fun st ->
-     Dev.copy_bkgd_data (Dev.default_bkgd_data ()) st.Dvi.bkgd_prefs;
-     [])
+     Dev.blit_bkgd_data (Dev.default_bkgd_data ()) st.Dvi.bkgd_prefs;
+     []);
+  ("inherit", fun s -> fun st ->
+     inherit_background_info := true;
+     []);
+  ("alpha", fun s -> fun st ->
+     let a = parse_float (unquote s) in
+     [Dev.BgAlpha a]);
+  ("blend", fun s -> fun st ->
+     let b = parse_blend (unquote s) in
+     [Dev.BgBlend b]);
   (***RDC: is this code ---/\ doing the rest of data we want to see ? ***)
 ];;
 
@@ -737,7 +757,7 @@ let bkgd_special st s = ();;
 
 let milli_inch_to_sp = Units.from_to Units.IN Units.SP 1e-3;;
 
-let tpic_milli_inches s = float_of_string s *. milli_inch_to_sp;;
+let tpic_milli_inches s = parse_float s *. milli_inch_to_sp;;
 
 let tpic_pen st =
   int_of_float (st.conv *. st.tpic_pensize +. 0.5)
@@ -832,15 +852,15 @@ let tpic_specials st s =
   | "ar" :: x :: y :: rx :: ry :: s :: e :: _ ->
       tpic_arc st (tpic_milli_inches x) (tpic_milli_inches y)
                (tpic_milli_inches rx) (tpic_milli_inches ry)
-               (float_of_string s) (float_of_string e)
+               (parse_float s) (parse_float e)
                true
   | "ia" :: x :: y :: rx :: ry :: s :: e :: _ ->
       tpic_arc st (tpic_milli_inches x) (tpic_milli_inches y)
                (tpic_milli_inches rx) (tpic_milli_inches ry)
-               (float_of_string s) (float_of_string e)
+               (parse_float s) (parse_float e)
                true
   | "sh" :: s :: _ ->
-      st.tpic_shading <- float_of_string s
+      st.tpic_shading <- parse_float s
   | "wh" :: _ ->
       st.tpic_shading <- 0.0
   | "bk" :: _ ->
@@ -930,29 +950,24 @@ let scan_special status (headers,xrefs) pagenum s =
   if has_prefix "html:<A name=\"" s || has_prefix "html:<a name=\"" s then
     scan_special_html (headers, xrefs) pagenum s;;
 
-let reset_bkgd_info =
-  Misc.option_flag false
-    "--reset_bkgd"
-    "\tReset background options at each new page";;
-
-
 let scan_special_page otherwise cdvi globals pagenum =
    let page = cdvi.base_dvi.Dvi.pages.(pagenum) in
        match page.Dvi.status with
-        | Dvi.Unknown ->
-           let status = {Dvi.hasps=false;
-                         Dvi.bkgd_local_prefs=[];
-                         Dvi.bkgd_prefs=
-                          (if !reset_bkgd_info
-                           then Dev.default_bkgd_data ()
-                           else Dev.copy_of_bkgd_data ())} in
+       | Dvi.Unknown ->
+           let status =
+             {Dvi.hasps = false;
+              Dvi.bkgd_local_prefs = [];
+              Dvi.bkgd_prefs =
+                (if !inherit_background_info
+                 then Dev.copy_of_bkgd_data ()
+                 else Dev.default_bkgd_data ())} in
            let eval = function
              | Dvi.C_xxx s -> scan_special status globals pagenum s
              | x -> otherwise x in
            Dvi.page_iter eval cdvi.base_dvi.Dvi.pages.(pagenum);
            page.Dvi.status <- Dvi.Known status;
            status
-        | Dvi.Known stored_status -> stored_status;;
+       | Dvi.Known stored_status -> stored_status;;
 
 let special st s =
   if has_prefix "\" " s || has_prefix "ps: " s then ps_special st s else
@@ -992,7 +1007,7 @@ let special st s =
 
 (*** Page rendering ***)
 
-let eval_command st = function
+let eval_dvi_command st = function
   | Dvi.C_set code -> set st code
   | Dvi.C_put code -> put st code
   | Dvi.C_set_rule(a, b) -> set_rule st a b
@@ -1026,9 +1041,9 @@ let eval_command st c =
        | Dvi.C_xxx s when has_prefix "advi: proc=" s -> ()
        |  _ -> u.escaped_commands <- u.escaped_commands @ [c]
    end;
-   eval_command st c;;
+   eval_dvi_command st c;;
 
-eval_command_ref := eval_command;;
+forward_eval_command := eval_command;;
 
 let newpage h st magdpi x y =
   try Dev.newpage h st.sdpi magdpi x y

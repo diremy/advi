@@ -502,7 +502,8 @@ let load filename =
   let ch = open_in_bin filename in
   try
     let dvi = input_dvi ch in
-    close_in ch ; dvi
+    close_in ch;
+    dvi
   with e ->
     close_in ch ;
     match e with

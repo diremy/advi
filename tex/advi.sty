@@ -60,7 +60,10 @@
 
 \def\advi@setbgcolor#1{\advi@special{advi: setbg col=#1}}
 \def\advi@setbgimage#1{\advi@special{advi: setbg img=#1}}
+\def\advi@setbgalpha#1{\advi@special{advi: setbg alpha=#1}}
+\def\advi@setbgblend#1{\advi@special{advi: setbg blend=#1}}
 \def\advi@resetbg{\advi@special{advi: setbg reset}}
+\def\advi@inheritbg{\advi@special{advi: setbg inherit}}
 
 %%% Pausing and waiting
 
@@ -205,7 +208,10 @@
 
 \advi@export \setbgcolor \advi@setbgcolor
 \advi@export \setbgimage \advi@setbgimage
+\advi@export \setbgalpha \advi@setbgalpha
+\advi@export \setbgblend \advi@setbgblend
 \advi@export \resetbg \advi@resetbg
+\advi@export \inheritbg \advi@inheritbg
 
 \advi@export \tag \advi@recplay
 \advi@export \hide \advi@record

@@ -51,7 +51,7 @@ You can specify the transition by \verb|\settransition{|%
 $mode~arg_1~\ldots~arg_n$\verb|}| advi macro.
 Currently the following transition modes are available:
 \begin{itemize}
-\item {\tt none } --- no transition animation  
+\item {\tt none } --- no transition animation
 \item {\tt slide} --- new page slides on the screen
 \item {\tt wipe } --- new page wipes on the screen
 \item {\tt block} --- new page is split into small pieces and they
@@ -79,8 +79,9 @@ Each transition mode has additional parameters to control its details.
 Usually the followings are available:
 \begin{itemize}
 \item {\tt from=}{\em{arg}} --- new pages come from the direction of
-  {\em arg} (\verb+left+, \verb+top+, \verb+topleft+, etc) 
-\item {\tt steps=}{\em{arg}}  --- animation steps
+  {\em arg} (\verb+left+, \verb+right+, \verb+top+, \verb+bottom+,
+\verb+topleft+, etc)
+\item {\tt steps=}{\em{arg}}  --- number of animation steps
 \end{itemize}
 For example, if you want to slide-in a page from left in 30 steps,
 write \verb+\settransition{slide from=left steps=30}+.
@@ -133,6 +134,11 @@ New pages appears wiping out the old graphics.
 \item \verb+\settransition{wipe from=center steps=30}+
 \end{itemize}
 
+\begin{flushleft}
+\epstransparent
+\includegraphics[width=0.25\textwidth]{../tex/advilogo.eps}
+\end{flushleft}
+
 \newpage\adviback{magenta}
 \settransition{block from=topleft steps=20000}
 
@@ -153,6 +159,11 @@ New pages appears gradually into small pieces.
 \item \verb+\settransition{block}+
 \item \verb+\settransition{block from=topleft steps=10000}+
 \end{itemize}
+
+\begin{flushright}
+\epstransparent
+\includegraphics[width=0.25\textwidth]{../tex/advilogo.eps}
+\end{flushright}
 
 \lastpage
 
