@@ -109,8 +109,15 @@ module Japanese = struct
   		with
   		| _ -> search xs
   	  in
-  	  let fontfile, typ, pt = search japanese_fontfiles in
- 	  let face = Ttfont.load_face (Search.true_file_name [] fontfile) in
+  	  let fontfile, typ, pt = 
+	      search japanese_fontfiles 
+	  in
+ 	  let face = 
+	    try
+	      Ttfont.load_face (Search.true_file_name [] fontfile) 
+	    with
+	    | e -> Misc.warning (Printf.sprintf "Japanese true type font %s not found" fontname); raise e
+	  in
   	  let jfmname = 
   	    let jfm = fontname ^ ".tfm" in
   	    Search.true_file_name [] jfm
@@ -140,10 +147,10 @@ module Japanese = struct
              *)
   	    Pervasives.truncate (float pt *. 0.962216 *. 
 				   float dpi /. 72.0 *. fix /. 1000.0),
-	    (* baseline fix is quite ad-hoc. I took 5% without reason 
+	    (* baseline fix is quite ad-hoc. I took 10% without reason 
              *)
   	    Pervasives.truncate (float pt *. 
-				   float dpi /. 72.0 *. 0.05)
+				   float dpi /. 72.0 *. 0.10)
   	  in
 
 	  (* drawing using ttfont.build *)
