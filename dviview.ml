@@ -1024,6 +1024,9 @@ module B =
              Config.splash_screen) in
       ()
 
+    let toggle_antialiasing st = 
+      Gs.toggle_antialiasing ()
+
     let scratch st =
       Scratch.draw ()
     let scratch_write st =
@@ -1051,6 +1054,7 @@ let bind_keys () =
 
    (* General purpose keys. *)
    'a', B.toggle_active;
+   'A', B.toggle_antialiasing;
    'q', B.exit;
    '?', B.help;
 

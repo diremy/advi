@@ -471,6 +471,6 @@ let flush () =
       gv#kill;
       Options.dops := false;;
 
-let toggle_antialias () =
+let toggle_antialiasing () =
   antialias := not !antialias;
   kill ();;
