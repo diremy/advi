@@ -1,3 +1,6 @@
+(* filters and returns list. *)
+val reverse_filter : ('a -> bool) -> 'a list -> 'a list
+
 val has_prefix : string -> string -> bool
 val has_suffix : string -> string -> bool
 exception Match

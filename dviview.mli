@@ -19,6 +19,7 @@ module type DEVICE = sig
   type glyph
 
   val make_glyph : Glyph.t -> glyph
+  val get_glyph  : glyph -> Glyph.t
 
   val open_dev : string -> unit
   val close_dev : unit -> unit

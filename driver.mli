@@ -19,6 +19,7 @@ module type DEVICE = sig
   type color = int
   type glyph
   val make_glyph : Glyph.t -> glyph
+  val get_glyph  : glyph -> Glyph.t
   val set_color : int -> unit
   val draw_glyph : glyph -> int -> int -> unit
   val fill_rect : int -> int -> int -> int -> unit
@@ -84,6 +85,8 @@ module type DRIVER = sig
   val unfreeze_fonts : cooked_dvi -> unit
   val unfreeze_glyphs : cooked_dvi -> float -> unit
   val scan_specials : cooked_dvi -> int -> unit
+  val clear_symbols : unit -> unit
+  val give_symbols : unit -> Symbol.set
 end ;;
 
 module Make(Dev : DEVICE) : DRIVER ;;

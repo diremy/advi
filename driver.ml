@@ -28,6 +28,7 @@ module type DEVICE = sig
   type color = int
   type glyph
   val make_glyph : Glyph.t -> glyph
+  val get_glyph  : glyph -> Glyph.t
   val set_color : int -> unit
   val draw_glyph : glyph -> int -> int -> unit
   val fill_rect : int -> int -> int -> int -> unit
@@ -94,6 +95,8 @@ module type DRIVER = sig
   val unfreeze_fonts : cooked_dvi -> unit
   val unfreeze_glyphs : cooked_dvi -> float -> unit
   val scan_specials : cooked_dvi -> int -> unit 
+  val clear_symbols : unit -> unit
+  val give_symbols : unit -> Symbol.set
 end ;;
 
 (*** Some utilities for specials ***)
@@ -221,6 +224,8 @@ module Make(Dev : DEVICE) = struct
 
   let dummy_mtable = Table.make (fun _ -> raise Not_found)
   let dummy_gtable = Table.make (fun _ -> raise Not_found)
+  let dummy_font =
+    { name = "--nofont--" ; ratio = 1.0 ; mtable = dummy_mtable ; gtables = [] }
 
   let cook_font fdef dvi_res =
     let name = fdef.Dvi.name
@@ -281,6 +286,7 @@ module Make(Dev : DEVICE) = struct
       x_origin : int ;
       y_origin : int ;
       (* Current font attributes *)
+      mutable cur_font : cooked_font ;
       mutable cur_mtable : (int * int) Table.t ;
       mutable cur_gtable : Dev.glyph Table.t ;
       (* Registers *)
@@ -316,6 +322,7 @@ module Make(Dev : DEVICE) = struct
 
   type proc_unit = {
       escaped_register : reg_set;
+      escaped_cur_font : cooked_font ;
       escaped_cur_mtable : (int * int) Table.t;
       escaped_cur_gtable : Dev.glyph Table.t;
       mutable escaped_commands : Dvi.command list
@@ -329,6 +336,33 @@ module Make(Dev : DEVICE) = struct
   let is_recording () = !current_recording_proc_name <> None
       
   (*** Rendering primitives ***)
+
+  let drawn_symbols = ref Symbol.empty_set
+
+  let give_symbols () = !drawn_symbols
+  let clear_symbols () =
+    drawn_symbols := Symbol.empty_set ;
+    ()
+
+  let add_char st glyph code =
+
+    let x = int_of_float (st.conv *. float st.h)
+    and y = int_of_float (st.conv *. float st.v) in
+
+    let symbol =
+      { Symbol.color = st.color ;
+	Symbol.locx = x ;
+	Symbol.locy = y ;
+	Symbol.voffset = glyph.Glyph.voffset ;
+	Symbol.hoffset = glyph.Glyph.hoffset ;
+	Symbol.width = glyph.Glyph.width ;
+	Symbol.height = glyph.Glyph.height ;
+	Symbol.code = code ;
+	Symbol.fontname = st.cur_font.name ;
+	Symbol.fontratio = st.cur_font.ratio }
+    in
+    drawn_symbols := Symbol.add symbol !drawn_symbols ;
+    ()
 
   let get_register_set st =
       { reg_h = st.h ; reg_v = st.v ;
@@ -406,14 +440,15 @@ module Make(Dev : DEVICE) = struct
 	st.epstransparent_stack <- rest
 
   let fnt st n =
-    let (mtable, gtable) =
+    let (mtable, gtable, cfont) =
       try
 	let cfont = Table.get st.cdvi.font_table n in
-	(cfont.mtable, get_gtable cfont st.sdpi)
-      with Not_found -> (dummy_mtable, dummy_gtable) in
+	(cfont.mtable, get_gtable cfont st.sdpi, cfont)
+      with Not_found -> (dummy_mtable, dummy_gtable, dummy_font) in
     st.cur_mtable <- mtable ;
-    st.cur_gtable <- gtable
-
+    st.cur_gtable <- gtable ;
+    st.cur_font <- cfont ;
+    ()
  
   let put st code =
     try
@@ -427,7 +462,8 @@ module Make(Dev : DEVICE) = struct
               st.draw_html <- (x, y, glyph) :: st.draw_html
           | None -> ()
           end;
-          Dev.draw_glyph glyph x y
+          Dev.draw_glyph glyph x y;
+	  add_char st (Dev.get_glyph glyph) code ;
         end
     with _ -> ()
 
@@ -635,6 +671,7 @@ module Make(Dev : DEVICE) = struct
 		 Some { escaped_register= get_register_set st;
 			escaped_cur_mtable= st.cur_mtable;
 			escaped_cur_gtable= st.cur_gtable;
+			escaped_cur_font = st.cur_font;
 		      	escaped_commands= [] }
 	    end
 	| "end" ->
@@ -663,19 +700,22 @@ module Make(Dev : DEVICE) = struct
 	  try 
 	    ignore (List.assoc "play" records);
 	    let us = Hashtbl.find procs procname in
-	    let escaped_cur_mtable = st.cur_mtable in
-	    let escaped_cur_gtable = st.cur_gtable in
+	    let escaped_cur_font = st.cur_font
+	    and escaped_cur_mtable = st.cur_mtable
+	    and escaped_cur_gtable = st.cur_gtable in
 	    let escaped_stack = push st; st.stack in
 	    List.iter (fun u -> 
 	      set_register_set st u.escaped_register;
 	      st.cur_mtable <- u.escaped_cur_mtable;
 	      st.cur_gtable <- u.escaped_cur_gtable;
+	      st.cur_font <- u.escaped_cur_font;
 	      List.iter (fun com -> 
 		!eval_command_ref st com) u.escaped_commands
 	      ) us;
             st.stack <- escaped_stack; pop st;
 	    st.cur_mtable <- escaped_cur_mtable;
-	    st.cur_gtable <- escaped_cur_gtable
+	    st.cur_gtable <- escaped_cur_gtable;
+	    st.cur_font <- escaped_cur_font;
 	  with
 	  | Not_found -> 
 	      prerr_endline (Printf.sprintf "proc=%s play: not recorded" procname)
@@ -1012,6 +1052,7 @@ module Make(Dev : DEVICE) = struct
 	x_origin = xorig ; y_origin = yorig ;
 	cur_mtable = dummy_mtable ;
 	cur_gtable = dummy_gtable ;
+	cur_font = dummy_font ;
 	h = 0 ; v = 0 ; w = 0 ; x = 0 ; y = 0 ; z = 0 ;
 	stack = [] ; color = 0x000000 ; color_stack = [];
 
@@ -1097,6 +1138,7 @@ module Make(Dev : DEVICE) = struct
 	x_origin = xorig ; y_origin = yorig ;
 	cur_mtable = dummy_mtable ;
 	cur_gtable = dummy_gtable ;
+	cur_font = dummy_font ;
 	h = 0 ; v = 0 ; w = 0 ; x = 0 ; y = 0 ; z = 0 ;
 	stack = [] ; color = 0x000000 ; color_stack = [];
 	alpha = 1.0; alpha_stack = [];

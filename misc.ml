@@ -1,3 +1,11 @@
+(* Reverse and filters list l according to f. *)
+let reverse_filter f l =
+  let rec filter res = function
+    | [] -> res
+    | a::l -> if f a then filter (a::res) l else filter res l
+  in
+  filter [] l
+
 (* Strings *)
 
 exception False;;

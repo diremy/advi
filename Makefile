@@ -29,7 +29,7 @@ OCAMLDEP  = $(CAML)dep
 MLINCDIRS = $(CAMLIMAGESDIR)
 
 EXEC      = advi
-MODULES   = config misc search \
+MODULES   = config misc symbol search \
 	    graphicsY11 drawps \
             table pkfont font glyph devfont dvi \
 	    units dimension driver\
@@ -112,7 +112,7 @@ tex/splash.dvi: tex/splash.tex
 install:: advi.opt tex/splash.dvi
 	cp advi.opt ${bindir}/advi
 	- mkdir -p $(ADVI_LOC)
-	cp tex/splash.dvi tex/caml.eps tex/bar.jpg.eps tex/advi.sty tex/advi.pro $(ADVI_LOC)
+	cp tex/splash.dvi tex/advilogo.eps tex/caml.eps tex/bar.jpg.eps tex/advi.sty tex/advi.pro $(ADVI_LOC)
 
 MLFILES = $(addsuffix .ml, $(MODULES))
 .depend:: *.mli $(MLFILES) Makefile 

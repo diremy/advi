@@ -60,6 +60,7 @@ module type DEVICE = sig
   type glyph
 
   val make_glyph : Glyph.t -> glyph
+  val get_glyph  : glyph -> Glyph.t
 
   val open_dev : string -> unit
   val close_dev : unit -> unit
@@ -438,6 +439,32 @@ module Make(Dev : DEVICE) = struct
     Dev.fill_rect st.orig_x st.orig_y 1 st.dvi_height ;
     Dev.fill_rect st.orig_x (st.orig_y + st.dvi_height) st.dvi_width 1 ;
     Dev.fill_rect (st.orig_x + st.dvi_width) st.orig_y 1 st.dvi_height 
+
+  (* Input : a point in window coordinates, relative to lower-left corner. *)
+  (* Output : a point in document coordinates, relative to upper-right corner. *)
+  (* The output depends on the ratio st.ratio. *)
+  let document_xy st x y =
+    (* x and y are relative to lower-left corner, *)
+    (* but orig_x and orig_y are relative to upper-right corner !!! *)
+    (* So we change y to comply to orig_y coordinates. *)
+    let y = st.size_y - y in
+    let docx = int_of_float (float (x - st.orig_x))
+    and docy = int_of_float (float (y - st.orig_y))
+    in docx, docy
+
+  (* User has selected a region with the mouse. We dump characters. *)
+  let selection st x y dx dy =
+    let docx , docy  = document_xy st x y
+    and docx2, docy2 = document_xy st (x+dx) (y+dy) in
+    (* Printf.printf "Zone de %d, %d à %d, %d" docx docy docx2 docy2 ; *)
+    let symbols = Drv.give_symbols() in
+    let good_ones = Symbol.filters (Symbol.inzone docx docy docx2 docy2) symbols 
+    in
+    let symbol_names = Symbol.find_names good_ones in
+    print_string (Symbol.to_ascii symbol_names);
+    print_newline ();
+    flush stdout;
+    ()
       
   let redraw st =
     (* draws until the current pause_no or page end *)
@@ -446,6 +473,7 @@ module Make(Dev : DEVICE) = struct
       try
         Dev.continue(); 
         Dev.clear_dev () ;
+	Drv.clear_symbols() ;
         let cont = 
           if !pauses then
             let f = Drv.render_step st.cdvi st.page_no
@@ -704,7 +732,13 @@ module Make(Dev : DEVICE) = struct
     else
       st.page_no <- page_start st 0;
     cont := redraw st ;
+
+    (* num is the the current number entered by keyboard *)
     let num = ref 0 in
+
+    (* selection_mode says if a mouse click should move the window or select text. *)
+    let selection_mode = ref false in
+
     try while true do
       let ev = if changed st then Dev.Refreshed else Dev.wait_event() in
       let num_val = !num in
@@ -747,6 +781,7 @@ module Make(Dev : DEVICE) = struct
       | Dev.Key 'F' -> Drv.unfreeze_glyphs st.cdvi (st.base_dpi *. st.ratio)
       | Dev.Key 'r' -> cont := redraw st
       | Dev.Key 'R' -> cont := reload st
+      |	Dev.Key 's' -> selection_mode := not !selection_mode
       | Dev.Key 'c' -> cont := center st
       | Dev.Key '<' -> cont := scale_by st (1.0 /. !scale_step)
       | Dev.Key '>' -> cont := scale_by st !scale_step
@@ -777,9 +812,15 @@ module Make(Dev : DEVICE) = struct
           cont := goto_href st !cont h
       | Dev.Advi (s,a) -> a();
       | Dev.Region (x, y, w, h) ->
-          st.orig_x <- st.orig_x + w ;
-          st.orig_y <- st.orig_y + h ; 
-          cont := redraw st
+
+	  if !selection_mode then selection st x y w (-h)
+	  else
+	    begin
+              st.orig_x <- st.orig_x + w ;
+              st.orig_y <- st.orig_y + h ; 
+              cont := redraw st
+	    end
+	      
     done with Exit -> Dev.close_dev ()
         
 end ;;

@@ -111,6 +111,7 @@ type glyph = {
     hoffset : int ;
     voffset : int ;
     graymap : string ;
+    glyph : Glyph.t ;
     mutable cache : cache ;
     mutable img_list : ((color * color) * Graphics.image) list
   } ;;
@@ -209,10 +210,11 @@ let make_glyph g =
     hoffset = g.Glyph.hoffset ;
     voffset = g.Glyph.voffset ;
     graymap = g.Glyph.graymap ;
+    glyph = g ;
     cache = No_cache ;
     img_list = [] } ;;
 
-
+let get_glyph g = g.glyph
 
 (*** Device manipulation ***)
 
@@ -246,7 +248,7 @@ let draw_glyph g x0 y0 =
   then begin
     let bg = get_bg_color x y w h in
     let img = get_image g (bg, !color) in
-    Graphics.draw_image img x y
+    Graphics.draw_image img x y ;
   end ;; 
 
 let fill_rect x0 y0 w h =

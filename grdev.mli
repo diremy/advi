@@ -20,6 +20,7 @@
 type glyph ;;
 
 val make_glyph : Glyph.t -> glyph ;;
+  val get_glyph  : glyph -> Glyph.t
 
 (* Device configuration *)
 
