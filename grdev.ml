@@ -995,7 +995,8 @@ module H =
             (if !editing then Busy.Selection else Busy.Free);
           GraphicsY11.flush ();
           GraphicsY11.display_mode false
-      | Nil -> ()
+      | Nil -> 
+          ()
 
     let emphasize fill c act =
       let img = Graphics.get_image act.A.x act.A.y act.A.w act.A.h in

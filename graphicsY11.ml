@@ -319,8 +319,11 @@ let get_cursor, set_cursor =
  let cursor = ref Cursor_left_ptr in
  (fun () -> !cursor),
  (fun c ->
-   cursor := c;
-   set_cursor (glyph_of_cursor c));;
+   if !cursor <> c then
+     begin
+       cursor := c;
+       set_cursor (glyph_of_cursor c)
+     end);;
 
 external get_geometry : unit -> int * int * int * int = "gr_get_geometry";;
         (* returns width, height, x, y of the graphics window *)

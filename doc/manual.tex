@@ -68,7 +68,6 @@ Reference manual\\
 \makeindex
 
 \begin{document}
-
 \maketitle
 
 \ifhevea
@@ -1313,7 +1312,7 @@ Items of the list are separated by \verb"\\" as in tabular environments.
 Each item should be a horizontal material.
 \end{quote}
 
-\subsection{The bubble package}
+\subsection{The \texttt{bubble} package}
 
 This package draws bubbles over some text. 
 \begin{verbatim}
@@ -1385,9 +1384,9 @@ Parameters (color and tabular columns specifications) can also
 be set globally using the command:
 
 \medskip \noindent
-\docdef \setkeys\doctt{\{bubbleset\}}\docarg{key=value list}
+\docdef \bubbleset\docarg{key=value list}
 
-\subsection{The annotations package}
+\subsection{The \texttt{advi-annot} package}
 
 This package uses active anchors and the bubbles package to 
 provide annotations by raising a bubble when the cursor is over the anchor.
@@ -1398,7 +1397,7 @@ The package defines a single command
 \docdef \adviannot \docopt{key=value list}\docarg{anchor}%
     \docopt{ps options}\docpar {pos}\docarg{text}
 \begin{quote}
-whose options are identical to those of the \docdef \bubble macro; however
+whose options are identical to those of the {\docdef \bubble} macro; however
 the bubble appears within an active anchor.
 \end{quote}
 
