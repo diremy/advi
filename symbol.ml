@@ -175,7 +175,9 @@ let get_space2 pre s =
 
 let default_encoding font code =
   if is_pure code then String.make 1 (Char.chr code)
-  else Printf.sprintf "[[%s:%d]]" font code
+  else String.make 1 (Char.chr code)
+   (*  Printf.sprintf "[[%s:%d]]" font code *)
+   
 
 (* cmr is one of the usual tex fonts. *)
 let cmr_encoding font code =
@@ -257,6 +259,7 @@ let encodings = [
   "cm[rs][0-9]+" , cmr_encoding ;
   "cmt[ti][0-9]+", cmtt_encoding ; 
   "cms[lxs][0-9]+"   , cmr_encoding ;
+  "cmbx[0-9]+"   , cmr_encoding ;
   "cmmi[0-9]+"   , cmmi_encoding ;
   "cmex[0-9]+"   , cmex_encoding ;
   "cmsy[0-9]+"   , cmex_encoding ;

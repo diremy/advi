@@ -571,7 +571,7 @@ let make_toc st =
     let last = Hashtbl.find refs "/toc.last" in
     st.toc <- Some (Array.init (last - first + 1) (fun p -> Page (p+first)))
   with
-    Not_found -> make_thumbnails st
+    Not_found -> ()
 
 let show_thumbnails st r page =
   let size_x = Graphics.size_x() in
@@ -1028,7 +1028,7 @@ module B =
     let mark_page  = mark_page
     let goto_mark st = goto_mark st.num st
 
-    let make_toc = make_toc
+    let make_thumbnails = make_thumbnails
     let show_toc = show_toc
   end;;
 
@@ -1117,7 +1117,7 @@ let bind_keys () =
    'S', B.scratch;
 
    (* Thumbnails. *)
-   'T', B.make_toc;
+   'T', B.make_thumbnails;
    't', B.show_toc;
   ];;
 

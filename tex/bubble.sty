@@ -65,7 +65,7 @@
   {\ncarc [linestyle=solid,arcangleA=-0,arcangleB=-3]{#1}{bbb@to}%
    \ncarc [linestyle=solid,arcangleA=0,arcangleB=3]{#1}{bbb@to}}
 
-\newcommand {\bbb@}[2][]{
+\newcommand {\bbb@}[2][]{%
    \bgroup
    \setkeys {bubble}{#1}%
    \expandafter \newcolumntype \expandafter a\expandafter {\bbb@col}%
@@ -97,7 +97,7 @@
    \raise \@tempdimb \hb@xt@ \z@ 
        {\kern -0.5\@tempdima
         \rput (#1,#2){\ovalnode {bbb@to}{#3}}%
-        \BubblePsArc{bbb@from}{bbb@to}
+        \BubblePsArc{bbb@from}{bbb@to}%
         \hss}%
 }
 
@@ -111,7 +111,7 @@
 \def \bbb@ovalbox #1#2{%
     \bgroup
       \setbox0 \hbox {\fboxsep 0em\colorbox{#1}{#2}}%
-      \@tempdima \ht0 \advance \@tempdima by -\dp0 
+      \@tempdima \ht0 \advance \@tempdima by -\dp0
       \leavevmode
       \raise 0.5\@tempdima \hb@xt@ \z@
          {\kern 0.5\wd0
@@ -130,14 +130,14 @@
 \def \bbb@put (#1,#2)#3{%
      \setbox0 \hb@xt@ \z@ 
         {\setbox0 \hbox {\bbb@ovalbox{\bbb@bg}{#3}}%
-         \textcolor{\bbb@bg}
+         \textcolor{\bbb@bg}%
             {\Thicklines \let \@t \@tempcnta
              \@t \wd0 \divide \@t by \@gphlinewidth
              \divide \@t by \@wholewidth
              \ifnum \@t>5 \@tempcnta 5\fi
              \ifnum \@t=0 \@tempcnta 1\fi
              \multiply \@wholewidth by \@t
-             \multiply \@gphlinewidth by \@t 
+             \multiply \@gphlinewidth by \@t
              \bbb@dima \bbb@unit \bbb@dimb \bbb@dima
              \bbb@dima #1\bbb@dima \bbb@dimb #2\bbb@dimb
              \let \unitlength \relax
@@ -146,7 +146,7 @@
                         \advance \bbb@dima by \@wholewidth}%
              \@do \@do \@do \@do \@do
          }%
-         \@tempdimc \bbb@unit 
+         \@tempdimc \bbb@unit
          \raise #2\@tempdimc \hb@xt@ \z@
                     {\kern #1\bbb@unit \kern -0.5\wd0 \box0\hss}%
           \box0
