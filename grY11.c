@@ -28,18 +28,18 @@
 #include <X11/extensions/Xinerama.h>
 #endif
 
-value gr_get_color(void)
+value caml_gr_get_color(void)
 {
-  return Val_int(grcolor);
+  return Val_int(caml_gr_color);
 }
 
-value gr_bsize_x(void)
+value caml_gr_bsize_x(void)
 {
-  gr_check_open();
-  return Val_int(grbstore.w);
+  caml_gr_check_open();
+  return Val_int(caml_gr_bstore.w);
 }
 
-value gr_raw_draw_image_area(value im, value x, value y, value w, value h,
+value caml_gr_raw_draw_image_area(value im, value x, value y, value w, value h,
                          value vx, value vy)
 {
   int dest_x = Int_val(vx);
@@ -51,51 +51,51 @@ value gr_raw_draw_image_area(value im, value x, value y, value w, value h,
   int src_x = Int_val(x);
   int src_y = Int_val(y);
 
-  gr_check_open();
+  caml_gr_check_open();
   if (width > Width_im(im) - src_x) width = Width_im(im) - src_x;
   if (height > Height_im(im) - src_y) height = Width_im(im) - src_y;
   if (Mask_im(im) != None) {
-    if(grremember_mode) {
-      XSetClipOrigin(grdisplay, grbstore.gc, dest_x, bdest_y);
-      XSetClipMask(grdisplay, grbstore.gc, Mask_im(im));
+    if(caml_gr_remember_modeflag) {
+      XSetClipOrigin(caml_gr_display, caml_gr_bstore.gc, dest_x, bdest_y);
+      XSetClipMask(caml_gr_display, caml_gr_bstore.gc, Mask_im(im));
     }
-    if(grdisplay_mode) {
-      XSetClipOrigin(grdisplay, grwindow.gc, dest_x, wdest_y);
-      XSetClipMask(grdisplay, grwindow.gc, Mask_im(im));
+    if(caml_gr_display_modeflag) {
+      XSetClipOrigin(caml_gr_display, caml_gr_window.gc, dest_x, wdest_y);
+      XSetClipMask(caml_gr_display, caml_gr_window.gc, Mask_im(im));
     }
   }
-  if(grremember_mode)
-    XCopyArea(grdisplay, Data_im(im), grbstore.win, grbstore.gc,
+  if(caml_gr_remember_modeflag)
+    XCopyArea(caml_gr_display, Data_im(im), caml_gr_bstore.win, caml_gr_bstore.gc,
               src_x, src_y,
               width, height,
               dest_x, bdest_y);
-  if(grdisplay_mode)
-    XCopyArea(grdisplay, Data_im(im), grwindow.win, grwindow.gc,
+  if(caml_gr_display_modeflag)
+    XCopyArea(caml_gr_display, Data_im(im), caml_gr_window.win, caml_gr_window.gc,
               src_x, src_y,
               width, height,
               dest_x, wdest_y);
   if (Mask_im(im) != None) {
-    if(grremember_mode)
-      XSetClipMask(grdisplay, grbstore.gc, None);
-    if(grdisplay_mode)
-      XSetClipMask(grdisplay, grwindow.gc, None);
+    if(caml_gr_remember_modeflag)
+      XSetClipMask(caml_gr_display, caml_gr_bstore.gc, None);
+    if(caml_gr_display_modeflag)
+      XSetClipMask(caml_gr_display, caml_gr_window.gc, None);
   }
-  if(grdisplay_mode)
-    XFlush(grdisplay);
+  if(caml_gr_display_modeflag)
+    XFlush(caml_gr_display);
   return Val_unit;
 }
 
-value gr_draw_image_area(value im, value xywh, value vx, value vy)
+value caml_gr_draw_image_area(value im, value xywh, value vx, value vy)
 {
   value x = Field (xywh, 0);
   value y = Field (xywh, 1);
   value w = Field (xywh, 2);
   value h = Field (xywh, 3);
-  gr_raw_draw_image_area(im, x, y, w, h, vx, vy);
+  caml_gr_raw_draw_image_area(im, x, y, w, h, vx, vy);
   return Val_unit;
 }
 /****
-value gr_draw_image_area(value im, value xywh, value vx, value vy)
+value caml_gr_draw_image_area(value im, value xywh, value vx, value vy)
 {
   int dest_x = Int_val(vx);
   int dest_y = Int_val(vy);
@@ -106,160 +106,160 @@ value gr_draw_image_area(value im, value xywh, value vx, value vy)
   int src_x = Int_val(Field (xywh, 0));
   int src_y = Int_val(Field (xywh, 1));
 
-  gr_check_open();
+  caml_gr_check_open();
   if (width > Width_im(im) - src_x) width = Width_im(im) - src_x;
   if (height > Height_im(im) - src_y) height = Width_im(im) - src_y;
   if (Mask_im(im) != None) {
-    if(grremember_mode) {
-      XSetClipOrigin(grdisplay, grbstore.gc, dest_x, bdest_y);
-      XSetClipMask(grdisplay, grbstore.gc, Mask_im(im));
+    if(caml_gr_remember_modeflag) {
+      XSetClipOrigin(caml_gr_display, caml_gr_bstore.gc, dest_x, bdest_y);
+      XSetClipMask(caml_gr_display, caml_gr_bstore.gc, Mask_im(im));
     }
-    if(grdisplay_mode) {
-      XSetClipOrigin(grdisplay, grwindow.gc, dest_x, wdest_y);
-      XSetClipMask(grdisplay, grwindow.gc, Mask_im(im));
+    if(caml_gr_display_modeflag) {
+      XSetClipOrigin(caml_gr_display, caml_gr_window.gc, dest_x, wdest_y);
+      XSetClipMask(caml_gr_display, caml_gr_window.gc, Mask_im(im));
     }
   }
-  if(grremember_mode)
-    XCopyArea(grdisplay, Data_im(im), grbstore.win, grbstore.gc,
+  if(caml_gr_remember_modeflag)
+    XCopyArea(caml_gr_display, Data_im(im), caml_gr_bstore.win, caml_gr_bstore.gc,
               src_x, src_y,
               width, height,
               dest_x, bdest_y);
-  if(grdisplay_mode)
-    XCopyArea(grdisplay, Data_im(im), grwindow.win, grwindow.gc,
+  if(caml_gr_display_modeflag)
+    XCopyArea(caml_gr_display, Data_im(im), caml_gr_window.win, caml_gr_window.gc,
               src_x, src_y,
               width, height,
               dest_x, wdest_y);
   if (Mask_im(im) != None) {
-    if(grremember_mode)
-      XSetClipMask(grdisplay, grbstore.gc, None);
-    if(grdisplay_mode)
-      XSetClipMask(grdisplay, grwindow.gc, None);
+    if(caml_gr_remember_modeflag)
+      XSetClipMask(caml_gr_display, caml_gr_bstore.gc, None);
+    if(caml_gr_display_modeflag)
+      XSetClipMask(caml_gr_display, caml_gr_window.gc, None);
   }
-  if(grdisplay_mode)
-    XFlush(grdisplay);
+  if(caml_gr_display_modeflag)
+    XFlush(caml_gr_display);
   return Val_unit;
 }
 ***/
 
 /* Should be :
-value gr_draw_image(value im, value vx, value vy)
+value caml_gr_draw_image(value im, value vx, value vy)
 {
-  gr_raw_draw_image_area(im, 0, 0, (Width_im(im)), (Height_im(im)), vx, vy);
+  caml_gr_raw_draw_image_area(im, 0, 0, (Width_im(im)), (Height_im(im)), vx, vy);
   return Val_unit;
 } */
 
-value gr_anti_synchronize(void)
+value caml_gr_anti_synchronize(void)
 {
-  gr_check_open();
-  XCopyArea(grdisplay, grwindow.win, grbstore.win, grwindow.gc,
-            0, grbstore.h - grwindow.h,
-            grwindow.w, grwindow.h,
+  caml_gr_check_open();
+  XCopyArea(caml_gr_display, caml_gr_window.win, caml_gr_bstore.win, caml_gr_window.gc,
+            0, caml_gr_bstore.h - caml_gr_window.h,
+            caml_gr_window.w, caml_gr_window.h,
             0, 0);
-  XFlush(grdisplay);
+  XFlush(caml_gr_display);
   return Val_unit;
 }
 
-value gr_window_point_color(value vx, value vy)
+value caml_gr_window_point_color(value vx, value vy)
 {
   int x = Int_val(vx);
   int y = Int_val(vy);
   XImage * im;
   int rgb;
 
-  gr_check_open();
-  im = XGetImage(grdisplay, grwindow.win, x, Bcvt(y), 1, 1, (-1), ZPixmap);
-  rgb = gr_rgb_pixel(XGetPixel(im, 0, 0));
+  caml_gr_check_open();
+  im = XGetImage(caml_gr_display, caml_gr_window.win, x, Bcvt(y), 1, 1, (-1), ZPixmap);
+  rgb = caml_gr_rgb_pixel(XGetPixel(im, 0, 0));
   XDestroyImage(im);
   return Val_int(rgb);
 }
 
-value gr_bsize_y(void)
+value caml_gr_bsize_y(void)
 {
-  gr_check_open();
-  return Val_int(grbstore.h);
+  caml_gr_check_open();
+  return Val_int(caml_gr_bstore.h);
 }
 
-value gr_screen_x(void)
+value caml_gr_screen_x(void)
 {
   XWindowAttributes att;
-  gr_check_open();
-  XGetWindowAttributes (grdisplay, DefaultRootWindow(grdisplay), &att); 
+  caml_gr_check_open();
+  XGetWindowAttributes (caml_gr_display, DefaultRootWindow(caml_gr_display), &att); 
   return Val_int(att.width);
 }
 
-value gr_screen_y(void)
+value caml_gr_screen_y(void)
 {
   XWindowAttributes att;
-  gr_check_open();
-  XGetWindowAttributes (grdisplay, DefaultRootWindow(grdisplay), &att); 
+  caml_gr_check_open();
+  XGetWindowAttributes (caml_gr_display, DefaultRootWindow(caml_gr_display), &att); 
   return Val_int(att.height);
 }
 
-void gr_origin(int* x, int* y)
+void caml_gr_origin(int* x, int* y)
 {
   Window win, root, parent, r;
   Window* children;
   int dx, dy, h, w, b, d; 
-  gr_check_open();
-  win = grwindow.win;
-  root = DefaultRootWindow(grdisplay);
+  caml_gr_check_open();
+  win = caml_gr_window.win;
+  root = DefaultRootWindow(caml_gr_display);
   *x = 0; *y = 0;
   while (win != root) {
-    XGetGeometry (grdisplay, win, &r, &dx, &dy, &w, &h, &b, &d);
+    XGetGeometry (caml_gr_display, win, &r, &dx, &dy, &w, &h, &b, &d);
     *x += dx; *y += dy;
-    XQueryTree (grdisplay, win, &r, &parent, &children, &b);
+    XQueryTree (caml_gr_display, win, &r, &parent, &children, &b);
     if(children != NULL) XFree(children); 
     win = parent;
   }
   return;
 }
 
-value gr_origin_x(void)
+value caml_gr_origin_x(void)
 {
   int x, y;
-  gr_origin (&x, &y); 
+  caml_gr_origin (&x, &y); 
   return Val_int(x);
 }
-value gr_origin_y(void)
+value caml_gr_origin_y(void)
 {
   int x, y;
-  gr_origin (&x, &y); 
+  caml_gr_origin (&x, &y); 
   return Val_int(y);
 }
 
-/* Should be gr_window_id and gr_window_id should disapear. */
-value gr_window(void)
+/* Should be caml_gr_window_id and caml_gr_window_id should disapear. */
+value caml_gr_get_window(void)
 { unsigned int w; value res;
-  gr_check_open();
-  w = grwindow.win;
+  caml_gr_check_open();
+  w = caml_gr_window.win;
   return copy_int32 (w); 
 }
 
-value gr_bstore_id(void)
+value caml_gr_id_of_bstore(void)
 { unsigned int w; value res;
-  gr_check_open();
-  w = grbstore.win;
+  caml_gr_check_open();
+  w = caml_gr_bstore.win;
   return copy_int32 (w); 
 }
 
-value gr_flush(void)
+value caml_gr_flush(void)
 {
-  gr_check_open();
-  XFlush(grdisplay);
+  caml_gr_check_open();
+  XFlush(caml_gr_display);
   return Val_unit ;
 }
 
-value gr_sync(void)
+value caml_gr_sync(void)
 {
-  gr_check_open();
-  XSync(grdisplay, 0);
+  caml_gr_check_open();
+  XSync(caml_gr_display, 0);
   return Val_unit ;
 }
 
 /* The following is not the best, since it unsets the selection 
    It would be better to own the selection. However, the event loop should
    then be changed */
-value gr_cut (value string) {
+value caml_gr_cut (value string) {
   /* The following, suggested by Fabrice does not work */
   /* 
   Atom cut_buffers[] = 
@@ -272,12 +272,12 @@ value gr_cut (value string) {
        XA_CUT_BUFFER6, 
        XA_CUT_BUFFER7
      };
-  XRotateWindowProperties (grdisplay, grwindow.win,
+  XRotateWindowProperties (caml_gr_display, caml_gr_window.win,
                            cut_buffers, 8, 1);
   */
-  /* XRotateBuffers(grdisplay, 1); */
+  /* XRotateBuffers(caml_gr_display, 1); */
   /*
-  XChangeProperty (grdisplay, grwindow.win, 
+  XChangeProperty (caml_gr_display, caml_gr_window.win, 
                    XA_CUT_BUFFER0,	      
                    XA_STRING,                  
                    8,       			
@@ -286,18 +286,18 @@ value gr_cut (value string) {
                    String_length (string)
                    );
   */
-  XStoreBytes (grdisplay, String_val (string), string_length (string)); 
-  XSetSelectionOwner (grdisplay,
+  XStoreBytes (caml_gr_display, String_val (string), string_length (string)); 
+  XSetSelectionOwner (caml_gr_display,
                       XA_PRIMARY,
                       None,
                       CurrentTime);
-  XSync (grdisplay, False);
+  XSync (caml_gr_display, False);
   return Val_unit; 
 }
 
-value gr_set_named_atom_property (value name, value string) {
-  Atom a = XInternAtom (grdisplay, String_val(name), 0);
-  XChangeProperty (grdisplay, grwindow.win, 
+value caml_gr_set_named_atom_property (value name, value string) {
+  Atom a = XInternAtom (caml_gr_display, String_val(name), 0);
+  XChangeProperty (caml_gr_display, caml_gr_window.win, 
                    a,       			/* property */ 
                    XA_STRING,                   /* xa_string */ 
                    8,       			/* format */
@@ -305,27 +305,27 @@ value gr_set_named_atom_property (value name, value string) {
                    String_val(string), 		/* data */
                    string_length (string) 	/* nelements */
                    );
-  XSync(grdisplay, False);
+  XSync(caml_gr_display, False);
   return Val_unit;
 }
 
-value gr_set_cursor(value glyphid) {
+value caml_gr_set_cursor(value glyphid) {
   Cursor c;
   int gid;
   gid = Int_val(glyphid);
-  gr_check_open();
+  caml_gr_check_open();
   if (gid < 0 || gid >= XC_num_glyphs) {
     invalid_argument("set_cursor");
   }
-  c = XCreateFontCursor(grdisplay, gid);
-  XDefineCursor(grdisplay, grwindow.win, c);
-  XSync(grdisplay, False);
+  c = XCreateFontCursor(caml_gr_display, gid);
+  XDefineCursor(caml_gr_display, caml_gr_window.win, c);
+  XSync(caml_gr_display, False);
   return Val_unit;
 }
 
-value gr_unset_cursor(value unit) {
-  XUndefineCursor(grdisplay, grwindow.win);
-  XSync(grdisplay, False);
+value caml_gr_unset_cursor(value unit) {
+  XUndefineCursor(caml_gr_display, caml_gr_window.win);
+  XSync(caml_gr_display, False);
   return Val_unit;
 }
 
@@ -337,11 +337,11 @@ void get_position_against_root( Window w, int *pos )
   int nchildren;
   XWindowAttributes attr;
 
-  gr_check_open();
-  XGetWindowAttributes(grdisplay, w, &attr);
+  caml_gr_check_open();
+  XGetWindowAttributes(caml_gr_display, w, &attr);
   pos[0] += attr.x;
   pos[1] += attr.y;
-  XQueryTree(grdisplay, w, &root, &parent, &children, &nchildren);
+  XQueryTree(caml_gr_display, w, &root, &parent, &children, &nchildren);
   if(children != NULL){
     XFree(children);
   }
@@ -352,15 +352,15 @@ void get_position_against_root( Window w, int *pos )
   }
 }
 
-value gr_get_geometry(value unit){
+value caml_gr_get_geometry(value unit){
   CAMLparam1(unit);
   CAMLlocal1(res);
   XWindowAttributes attr;
   int pos[2] = {0,0};
 
-  gr_check_open();
-  XGetWindowAttributes(grdisplay, grwindow.win, &attr);
-  get_position_against_root( grwindow.win, pos );
+  caml_gr_check_open();
+  XGetWindowAttributes(caml_gr_display, caml_gr_window.win, &attr);
+  get_position_against_root( caml_gr_window.win, pos );
 
   res = alloc_tuple(4);
   Field(res,0) = Val_int(attr.width);
@@ -371,7 +371,7 @@ value gr_get_geometry(value unit){
 }
 
 /* get modifiers... */
-value gr_get_modifiers(void)
+value caml_gr_get_modifiers(void)
 {
   int mouse_x, mouse_y, button, key, keypressed;
   Window rootwin, childwin;
@@ -379,8 +379,8 @@ value gr_get_modifiers(void)
   unsigned int modifiers;
   unsigned int i;
 
-  gr_check_open();
-  if (XQueryPointer(grdisplay, grwindow.win,
+  caml_gr_check_open();
+  if (XQueryPointer(caml_gr_display, caml_gr_window.win,
                     &rootwin, &childwin,
                     &root_x, &root_y, &win_x, &win_y,
                     &modifiers)) {
@@ -403,7 +403,7 @@ value gr_get_modifiers(void)
 }
 
 /* Sub windows */
-value gr_open_sub_window(value vx, value vy, value width, value height)
+value caml_gr_open_sub_window(value vx, value vy, value width, value height)
 {
   Window win;
 
@@ -412,81 +412,81 @@ value gr_open_sub_window(value vx, value vy, value width, value height)
   int x = Int_val(vx);
   int y = Int_val(vy);
 
-  gr_check_open();
-  win = XCreateSimpleWindow(grdisplay, grwindow.win,
+  caml_gr_check_open();
+  win = XCreateSimpleWindow(caml_gr_display, caml_gr_window.win,
                             x, Wcvt(y + h), 
                             w, h,
-                            0, grblack, grbackground);
-  XMapWindow(grdisplay, win);
-  XFlush(grdisplay);
+                            0, caml_gr_black, caml_gr_background);
+  XMapWindow(caml_gr_display, win);
+  XFlush(caml_gr_display);
 
-  return (id_of_window(win));
+  return (caml_gr_id_of_window(win));
 }
 
-/* In graphics */
-value gr_close_subwindow2(value wid)
+/* In caml_gr_aphics */
+value caml_gr_close_subwindow2(value wid)
 {
   Window win;
 
-  gr_check_open();
+  caml_gr_check_open();
   sscanf( String_val(wid), "%lu", (unsigned long *)(&win) );
-  XDestroyWindow(grdisplay, win);
-  XFlush(grdisplay);
+  XDestroyWindow(caml_gr_display, win);
+  XFlush(caml_gr_display);
   return Val_unit;
 }
 
-value gr_map_window(value wid)
+value caml_gr_map_window(value wid)
 {
   Window win;
 
-  gr_check_open();
+  caml_gr_check_open();
   sscanf( String_val(wid), "%lu", (unsigned long *)(&win) );
-  XMapWindow(grdisplay, win);
-  XFlush(grdisplay);
+  XMapWindow(caml_gr_display, win);
+  XFlush(caml_gr_display);
   return Val_unit;
 }
 
-value gr_unmap_window(value wid)
+value caml_gr_unmap_window(value wid)
 {
   Window win;
 
-  gr_check_open();
+  caml_gr_check_open();
   sscanf( String_val(wid), "%lu", (unsigned long *)(&win) );
-  XUnmapWindow(grdisplay, win);
-  XFlush(grdisplay);
+  XUnmapWindow(caml_gr_display, win);
+  XFlush(caml_gr_display);
   return Val_unit;
 }
 
-value gr_move_window (value wid, value grx, value gry, value height)
+value caml_gr_move_window (value wid, value caml_gr_x, value caml_gr_y, value height)
 {
   Window win;
 
-  int x = Int_val(grx);
-  int y = Int_val(gry);
+  int x = Int_val(caml_gr_x);
+  int y = Int_val(caml_gr_y);
   int h = Int_val(height);
 
-  gr_check_open();
+  caml_gr_check_open();
   sscanf( String_val(wid), "%lu", (unsigned long *)(&win) );
-  XMoveWindow(grdisplay, win, x, Wcvt(y + h));
-  XFlush(grdisplay);
+  XMoveWindow(caml_gr_display, win, x, Wcvt(y + h));
+  XFlush(caml_gr_display);
   return Val_unit;
 }
 
-value gr_resize_window (value wid, value w, value h)
+value caml_gr_resize_window (value wid, value w, value h)
 {
   Window win;
 
-  gr_check_open();
+  caml_gr_check_open();
   sscanf( String_val(wid), "%lu", (unsigned long *)(&win) );
-  XResizeWindow(grdisplay, win, Int_val(w), Int_val(h));
-  XFlush(grdisplay);
+  XResizeWindow(caml_gr_display, win, Int_val(w), Int_val(h));
+  XFlush(caml_gr_display);
   return Val_unit;
 }
 
 
 /* screen is the screen number */
 
-value gr_reposition (value x, value y, value w, value h, value scr)
+value caml_gr_reposition (value x, value y, value w, value h, value scr)
 {
   Window r;
   int posx, posy, width, height, screen;
@@ -494,7 +494,7 @@ value gr_reposition (value x, value y, value w, value h, value scr)
   Bool fullscreen;
   XWindowAttributes att;
 
-  gr_check_open();
+  caml_gr_check_open();
 
   posx = Int_val(x);
   posy = Int_val(y);
@@ -503,19 +503,19 @@ value gr_reposition (value x, value y, value w, value h, value scr)
   screen = Int_val(scr);
 
   /* create the X atoms: should be done only once */
-  init_atoms(grdisplay);
+  init_atoms(caml_gr_display);
 
   if (width < 0) {    /* means fullscreen */
-    XGetWindowAttributes(grdisplay, DefaultRootWindow(grdisplay), &att);
+    XGetWindowAttributes(caml_gr_display, DefaultRootWindow(caml_gr_display), &att);
     width = att.width; height = att.height;
 #ifdef HAVE_XINERAMA
- if(XineramaIsActive(grdisplay))
+ if(XineramaIsActive(caml_gr_display))
   {
   XineramaScreenInfo *screens;
   int num_screens;
   int theScreen=0;
 
-  screens = XineramaQueryScreens(grdisplay, &num_screens);
+  screens = XineramaQueryScreens(caml_gr_display, &num_screens);
   fprintf(stderr,"num_screens=%d, screen=%d\n",num_screens,screen);
   if (screen < num_screens) {theScreen=screen;}; 
   width=screens[theScreen].width;
@@ -528,56 +528,56 @@ value gr_reposition (value x, value y, value w, value h, value scr)
   else fullscreen=False;
   
   /* add or remove the decorations */
-  x11_decoration(grdisplay,grwindow.win,!fullscreen);
+  x11_decoration(caml_gr_display,caml_gr_window.win,!fullscreen);
 
   /* update size hints, essential for KDE */
-  x11_sizehint(grdisplay, grwindow.win, posx, posy, width, height); 
+  x11_sizehint(caml_gr_display, caml_gr_window.win, posx, posy, width, height); 
 
-  x11_fullscreen(grdisplay,grwindow.win,posx,posy,width,height, fullscreen ? True:False);
+  x11_fullscreen(caml_gr_display,caml_gr_window.win,posx,posy,width,height, fullscreen ? True:False);
 
-  XMoveResizeWindow(grdisplay, grwindow.win, posx, posy, width, height);
+  XMoveResizeWindow(caml_gr_display, caml_gr_window.win, posx, posy, width, height);
 #ifdef HAVE_XINERAMA
- if(XineramaIsActive(grdisplay))
+ if(XineramaIsActive(caml_gr_display))
   {
-    if (fullscreen==True) {XMoveWindow(grdisplay,grwindow.win,xinerama_x,xinerama_y);};
+    if (fullscreen==True) {XMoveWindow(caml_gr_display,caml_gr_window.win,xinerama_x,xinerama_y);};
   }
 #endif
-  XMapRaised(grdisplay,grwindow.win );
-  XRaiseWindow(grdisplay,grwindow.win );
+  XMapRaised(caml_gr_display,caml_gr_window.win );
+  XRaiseWindow(caml_gr_display,caml_gr_window.win );
 
-  grwindow.w = width;
-  grwindow.h = height;
-  if (grwindow.w > grbstore.w || grwindow.h > grbstore.h) {
+  caml_gr_window.w = width;
+  caml_gr_window.h = height;
+  if (caml_gr_window.w > caml_gr_bstore.w || caml_gr_window.h > caml_gr_bstore.h) {
 
     /* Allocate a new backing store large enough to accomodate
          both the old backing store and the current window. */
     struct canvas newbstore;
-    newbstore.w = max(grwindow.w, grbstore.w);
-    newbstore.h = max(grwindow.h, grbstore.h);
+    newbstore.w = max(caml_gr_window.w, caml_gr_bstore.w);
+    newbstore.h = max(caml_gr_window.h, caml_gr_bstore.h);
     newbstore.win =
-      XCreatePixmap(grdisplay, grwindow.win, newbstore.w, newbstore.h,
-                    XDefaultDepth(grdisplay, grscreen));
-    newbstore.gc = XCreateGC(grdisplay, newbstore.win, 0, NULL);
-    XSetBackground(grdisplay, newbstore.gc, grwhite);
-    XSetForeground(grdisplay, newbstore.gc, grwhite);
-    XFillRectangle(grdisplay, newbstore.win, newbstore.gc,
+      XCreatePixmap(caml_gr_display, caml_gr_window.win, newbstore.w, newbstore.h,
+                    XDefaultDepth(caml_gr_display, caml_gr_screen));
+    newbstore.gc = XCreateGC(caml_gr_display, newbstore.win, 0, NULL);
+    XSetBackground(caml_gr_display, newbstore.gc, caml_gr_white);
+    XSetForeground(caml_gr_display, newbstore.gc, caml_gr_white);
+    XFillRectangle(caml_gr_display, newbstore.win, newbstore.gc,
                    0, 0, newbstore.w, newbstore.h);
-    XSetForeground(grdisplay, newbstore.gc, grcolor);
-    if (grfont != NULL)
-      XSetFont(grdisplay, newbstore.gc, grfont->fid);
+    XSetForeground(caml_gr_display, newbstore.gc, caml_gr_color);
+    if (caml_gr_font != NULL)
+      XSetFont(caml_gr_display, newbstore.gc, caml_gr_font->fid);
 
     /* Copy the old backing store into the new one */
-    XCopyArea(grdisplay, grbstore.win, newbstore.win, newbstore.gc,
-              0, 0, grbstore.w, grbstore.h, 0, newbstore.h - grbstore.h);
+    XCopyArea(caml_gr_display, caml_gr_bstore.win, newbstore.win, newbstore.gc,
+              0, 0, caml_gr_bstore.w, caml_gr_bstore.h, 0, newbstore.h - caml_gr_bstore.h);
 
     /* Free the old backing store */
-    XFreeGC(grdisplay, grbstore.gc);
-    XFreePixmap(grdisplay, grbstore.win);
+    XFreeGC(caml_gr_display, caml_gr_bstore.gc);
+    XFreePixmap(caml_gr_display, caml_gr_bstore.win);
 
     /* Use the new backing store */
-    grbstore = newbstore;
+    caml_gr_bstore = newbstore;
     }
 
-  XFlush(grdisplay);
+  XFlush(caml_gr_display);
   return Val_unit;
 }

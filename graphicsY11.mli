@@ -38,7 +38,7 @@ val set_line_width : int -> unit;;
 val get_line_width : unit -> int;;
 (** Get the current line width. *)
 
-external get_color : unit -> color = "gr_get_color";;
+external get_color : unit -> color = "caml_gr_get_color";;
 (** Get the current drawing color. *)
 
 type window_id = string;;
@@ -68,30 +68,30 @@ val resize_subwindow : window_id -> int -> int -> unit;;
 
 val iter_subwindows : (window_id -> int -> unit) -> unit;;
 
-external bstore_id : unit -> int32 = "gr_bstore_id";;
+external bstore_id : unit -> int32 = "caml_gr_id_of_bstore";;
         (* return the X pixmap of the bstore window as an integer *)
-external window_id : unit -> int32 = "gr_window";;
+external window_id : unit -> int32 = "caml_gr_window";;
         (* return the X pixmap of the bstore window as an integer *)
 
 
-external flush : unit -> unit = "gr_flush";;
+external flush : unit -> unit = "caml_gr_flush";;
         (* flush pending events *)
 
-external sync : unit -> unit = "gr_sync";;
+external sync : unit -> unit = "caml_gr_sync";;
         (* flush pending events and wait until all have been processed *)
 
-external bsize_x : unit -> int = "gr_bsize_x";;
-external bsize_y : unit -> int = "gr_bsize_y";;
+external bsize_x : unit -> int = "caml_gr_bsize_x";;
+external bsize_y : unit -> int = "caml_gr_bsize_y";;
  (** Similar as [size_x], [size_y] but return the size of the backing store. *)
-external screen_x : unit -> int = "gr_screen_x";;
-external screen_y : unit -> int = "gr_screen_y";;
-external origin_x : unit -> int = "gr_origin_x";;
-external origin_y : unit -> int = "gr_origin_y";;
+external screen_x : unit -> int = "caml_gr_screen_x";;
+external screen_y : unit -> int = "caml_gr_screen_y";;
+external origin_x : unit -> int = "caml_gr_origin_x";;
+external origin_y : unit -> int = "caml_gr_origin_y";;
         (* Return the size of the screen. *)
-external reposition : int -> int -> int -> int -> int -> unit = "gr_reposition";;
+external reposition : int -> int -> int -> int -> int -> unit = "caml_gr_reposition";;
 
 external set_named_atom_property : string -> string -> unit
-    = "gr_set_named_atom_property";;
+    = "caml_gr_set_named_atom_property";;
         (* make_atom_property ATOM STRING define an X atom ATOM with
            property STRING *)
 
@@ -187,10 +187,10 @@ val unset_cursor : unit -> unit;;
     Uses the parent's cursor instead.
     Also syncs the on-screen window. *)
 
-external get_geometry : unit -> int * int * int * int = "gr_get_geometry";;
+external get_geometry : unit -> int * int * int * int = "caml_gr_get_geometry";;
         (* returns width, height, x, y of the graphics window. *)
 
-external get_modifiers : unit -> modifiers = "gr_get_modifiers";;
+external get_modifiers : unit -> modifiers = "caml_gr_get_modifiers";;
         (* returns the list of modifiers as an integer. *)
 
 val button1 : int;;
@@ -208,7 +208,7 @@ val mod5 : int;;
 val nomod : int;;
         (* mask for modifiers *)
 
-external cut : string -> unit = "gr_cut";;
+external cut : string -> unit = "caml_gr_cut";;
         (* paste string to the cut and paste buffer *)
 
 (****
@@ -242,7 +242,7 @@ type event =
         (* To specify events to wait for. *)
 ;;
 
-external wait_next_event : event list -> status = "gry_wait_event";;
+external wait_next_event : event list -> status = "caml_gry_wait_event";;
         (* Wait until one of the events specified in the given event list
            occurs, and return the status of the mouse and keyboard at
            that time. If [Poll] is given in the event list, return immediately
@@ -329,7 +329,7 @@ val init : unit -> unit;;
 (** We have to call this function to disable the original Graphics
    event retrieving facility. *)
 
-external anti_synchronize : unit -> unit = "gr_anti_synchronize";;
+external anti_synchronize : unit -> unit = "caml_gr_anti_synchronize";;
 (** Synchronize the backing store drawings from the window display:
   performs the inverse operation as the regular [synchronize] function. *)
 

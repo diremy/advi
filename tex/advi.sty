@@ -509,6 +509,7 @@ Maybe you mean \@currenvir ing}}
 \def \advi@putend {\advi@special {putend}}
 \def \advi@CP{advi@CP }
 
+%% Original version
 % \def\psput@special#1{%
 % \hbox{%
 % \pst@Verb{{ \pst@coor } \tx@PutCoor \tx@PutBegin}%
@@ -520,6 +521,7 @@ Maybe you mean \@currenvir ing}}
 \hbox {\advi@putbegin \box#1\advi@putend}%
 \pst@Verb{\tx@PutEnd}}}
 
+%% Original version
 % \def\ncput@iii{%
 % \leavevmode
 % \hbox{%
@@ -548,7 +550,6 @@ end
   {\@ifundefined {psput@special}{}
     {\let \psput@special \advi@psput@special
      \@ifundefined {ncput@iii}{}{\let \ncput@iii \advi@ncput@iii}%
-     %\pstheader {advi.pro}
      }}
 \ifadvi@ignore \else
 \AtBeginDocument 

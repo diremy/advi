@@ -20,9 +20,10 @@
 let database_mtime = ref 0.0;;
 let database_table = Hashtbl.create 257;;
 
-let unwind_protect f x g y =
-  try let v = f x in g y; v with
-  | exc -> g y; raise exc;;
+let try_finalize f x finally y =
+  let res = try f x with exn -> finally y; raise exn in 
+  finally y; 
+  res
 
 let open_process_in cmd =
   let (in_read, in_write) = Unix.pipe () in
@@ -47,7 +48,7 @@ let command_string com opt =
   Misc.debug_endline (Printf.sprintf "command_string: launching %s" command);
   try
     let pid, chan as pidchan = open_process_in command in
-    unwind_protect input_line chan close_process_in pidchan with
+    try_finalize input_line chan close_process_in pidchan with
   | Unix.Unix_error (c, _, _) ->
       Misc.warning
         (Printf.sprintf "Error %s while executing %s %s"

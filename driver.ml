@@ -413,8 +413,10 @@ exception Ill_formed_special of string;;
 let line_of_special s k =
   match split_string s k with
   | line :: rest ->
+(*
       Printf.eprintf "%s @ %s\n%!" line
        (match rest with h :: _ -> h | _ -> ""); 
+*)
       begin try
         let l = int_of_string line in
         let f = match rest with | file :: _ -> Some file | _ -> None in
@@ -1542,8 +1544,9 @@ let eval_command st c =
 set_forward_eval_command eval_command;;
 
 let newpage h st magdpi x y =
-  try Dev.newpage h st.sdpi magdpi x y
-  with Dev.GS -> st.status.Cdvi.hasps <- false;;
+  if st.status.Cdvi.hasps then 
+    try Dev.newpage h st.sdpi magdpi x y
+    with Dev.GS -> st.status.Cdvi.hasps <- false;;
 
 let find_prologues l =
   let l = List.rev l in
@@ -1577,8 +1580,10 @@ let render_step cdvi num ?trans ?chst dpi xorig yorig =
     let s = scan_special_page otherwise cdvi (headers, xrefs) num in
     if !headers <> [] then Dev.add_headers (find_prologues !headers);
     s in
-  status.Cdvi.hasps <- Gs.get_do_ps ();
-  let orid = function Some f -> f | None -> fun x -> x in
+ (* Didier: why hell was it ``Gs.get_do_ps ()'' instead of false? 
+    and why has Dvi been chaned to Cdvi *)
+  status.Cdvi.hasps <- false;
+  let orid = function Some f -> f | None -> fun x->x in
   let st =
     { cdvi = cdvi;
       sdpi = Misc.round (mag *. ldexp dpi 16);
@@ -1604,7 +1609,8 @@ let render_step cdvi num ?trans ?chst dpi xorig yorig =
       draw_html = [];
       checkpoint = 0;
     } in
-  if st.status.Cdvi.hasps then newpage [] st (mag *. dpi) xorig yorig;
+  (* if st.status.Cdvi.hasps then *)
+  newpage [] st (mag *. dpi) xorig yorig;
   setup_bkgd st.status; (* apply the background preferences in Dev *)
   Dev.clear_dev ();     (* and redraw the background               *)
   Dev.set_color st.color;

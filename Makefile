@@ -38,7 +38,7 @@ STYFILES= $(addprefix tex/, $(TEXSTYFILES))
 EPSFILES= $(addprefix tex/, $(TEXEPSFILES))
 
 COPTIONS = -warn-error A -g
-COPTOPTIONS = -warn-error A -unsafe -inline 9
+COPTOPTIONS = -warn-error A -inline 9
 
 OCAMLC	  = $(CAML)c $(COPTIONS)
 OCAMLOPT  = $(CAML)opt.opt $(COPTOPTIONS)

@@ -44,36 +44,36 @@ let set_line_width, get_line_width =
  (fun () -> !current_line_width);;
 
 (* Returns the current painting color. *)
-external get_color : unit -> color = "gr_get_color";;
+external get_color : unit -> color = "caml_gr_get_color";;
 
 (* Sub-windows. *)
 type window_id = string;;
 
 let null_window = "-1";;
 
-external flush : unit -> unit = "gr_flush";;
+external flush : unit -> unit = "caml_gr_flush";;
         (* flush pending events *)
 
-external sync : unit -> unit = "gr_sync";;
+external sync : unit -> unit = "caml_gr_sync";;
         (* flush pending events and wait until all have been processed *)
 
 external raw_draw_image_area : Graphics.image -> (int * int * int * int) ->
-  int -> int -> unit = "gr_draw_image_area";;
+  int -> int -> unit = "caml_gr_draw_image_area";;
 
 let draw_image_area ~img ~src_x ~src_y ~w ~h ~dest_x ~dest_y =
   if src_x < 0 || src_y < 0 then raise (Invalid_argument "draw_image_area")
   else raw_draw_image_area img (src_x, src_y, w, h) dest_x dest_y;;
 
-external get_window_id : unit -> window_id = "gr_window_id";;
+external get_window_id : unit -> window_id = "caml_gr_window_id";;
 
 let subwindows = Hashtbl.create 13;;
 
 let iter_subwindows f = Hashtbl.iter f subwindows;;
 
 external raw_open_subwindow : int -> int -> int -> int -> window_id 
-    = "gr_open_sub_window";;
+    = "caml_gr_open_sub_window";;
 external raw_close_subwindow : window_id -> unit
-    = "gr_close_subwindow2";;
+    = "caml_gr_close_subwindow2";;
 
 let open_subwindow ~x ~y ~width ~height =
   if width = 0 && height = 0 then null_window else
@@ -91,8 +91,8 @@ let close_subwindow wid =
   raw_close_subwindow wid;
   Hashtbl.remove subwindows wid end;;
 
-external raw_map_window : window_id  -> unit = "gr_map_window";;
-external raw_unmap_window : window_id -> unit = "gr_unmap_window";;
+external raw_map_window : window_id  -> unit = "caml_gr_map_window";;
+external raw_unmap_window : window_id -> unit = "caml_gr_unmap_window";;
 
 let map_subwindow wid =
   (*prerr_endline (Printf.sprintf "mapping subwindow %s" wid);*)
@@ -106,10 +106,10 @@ let unmap_subwindow wid =
   raw_unmap_window wid end;;
 
 external raw_move_window : window_id -> int -> int -> int -> unit
-    = "gr_move_window";;
+    = "caml_gr_move_window";;
 
 external raw_resize_window : window_id -> int -> int -> unit
-    = "gr_resize_window";;
+    = "caml_gr_resize_window";;
 
 let resize_subwindow wid height width =
   if wid != null_window then begin 
@@ -123,28 +123,28 @@ let move_subwindow wid x y =
   let h = Hashtbl.find subwindows wid in
   raw_move_window wid x y h end;;
 
-external flush : unit -> unit = "gr_flush";;
+external flush : unit -> unit = "caml_gr_flush";;
         (* flush the content of the backing store *)
 
-external bsize_x : unit -> int = "gr_bsize_x"
-external bsize_y : unit -> int = "gr_bsize_y"
+external bsize_x : unit -> int = "caml_gr_bsize_x"
+external bsize_y : unit -> int = "caml_gr_bsize_y"
         (* Idem, but return the size of the backing store. *)
-external screen_x : unit -> int = "gr_screen_x"
-external screen_y : unit -> int = "gr_screen_y"
+external screen_x : unit -> int = "caml_gr_screen_x"
+external screen_y : unit -> int = "caml_gr_screen_y"
         (* Return the size of the screen. *)
-external origin_x : unit -> int = "gr_origin_x"
-external origin_y : unit -> int = "gr_origin_y"
+external origin_x : unit -> int = "caml_gr_origin_x"
+external origin_y : unit -> int = "caml_gr_origin_y"
         (* Return the size of the screen. *)
-external reposition : int -> int -> int -> int -> int -> unit = "gr_reposition"
+external reposition : int -> int -> int -> int -> int -> unit = "caml_gr_reposition"
 
 external set_named_atom_property : string -> string -> unit
-    = "gr_set_named_atom_property"
+    = "caml_gr_set_named_atom_property"
         (* make_atom_property ATOM STRING define an X atom ATOM with
            property STRING *)
 
-external bstore_id : unit -> int32 = "gr_bstore_id"
+external bstore_id : unit -> int32 = "caml_gr_id_of_bstore"
  (** return the X id of the bstore canvas pixmap as an integer *)
-external window_id : unit -> int32 = "gr_window"
+external window_id : unit -> int32 = "caml_gr_window"
  (** return the X id of the canvas of the on-screen window as an integer *)
 
 (* Setting the cursor *)
@@ -314,8 +314,8 @@ let glyph_of_cursor = function
 (* The Caml version of the raw C primitive has the same name as the
    high level Caml function that calls it, to document the fact that
    you should not call the C primitive directly. *)
-external set_cursor : int -> unit = "gr_set_cursor";;
-external unset_cursor : unit -> unit = "gr_unset_cursor";;
+external set_cursor : int -> unit = "caml_gr_set_cursor";;
+external unset_cursor : unit -> unit = "caml_gr_unset_cursor";;
 
 let get_cursor, set_cursor =
  let cursor = ref Cursor_left_ptr in
@@ -326,10 +326,10 @@ let get_cursor, set_cursor =
      set_cursor (glyph_of_cursor c);
    end);;
 
-external get_geometry : unit -> int * int * int * int = "gr_get_geometry";;
+external get_geometry : unit -> int * int * int * int = "caml_gr_get_geometry";;
         (* returns width, height, x, y of the graphics window *)
 
-external get_modifiers : unit -> int = "gr_get_modifiers";;
+external get_modifiers : unit -> int = "caml_gr_get_modifiers";;
         (* returns modifiers as an integer *)
 
 let button1 = 0x1
@@ -346,7 +346,7 @@ and mod4 = 0x2000
 and mod5 = 0x4000
 and nomod = 0x0;;
 
-external cut : string -> unit = "gr_cut";;
+external cut : string -> unit = "caml_gr_cut";;
         (* store string in the cut buffer *)
 
 (* Redefinition of the events loop *)
@@ -367,8 +367,8 @@ type event =
   | Mouse_motion
   | Poll;;
 
-external wait_next_event : event list -> status = "gry_wait_event";;
-external retrieve_events : unit -> unit = "gry_retrieve_events";;
+external wait_next_event : event list -> status = "caml_gry_wait_event";;
+external retrieve_events : unit -> unit = "caml_gry_retrieve_events";;
 
 let mouse_pos () =
   let e = wait_next_event [Poll] in (e.mouse_x, e.mouse_y);;
@@ -384,10 +384,10 @@ let key_pressed () =
 
 (* Additional primitives that operate on the screen only *)
 external window_point_color : int -> int -> Graphics.color
-  = "gr_window_point_color";;
+  = "caml_gr_window_point_color";;
 (** As [point_color] but read the information in the window display. *)
 
-external anti_synchronize : unit -> unit = "gr_anti_synchronize";;
+external anti_synchronize : unit -> unit = "caml_gr_anti_synchronize";;
 (** Synchronize the backing store drawings from the window display:
   performs the inverse operation as the regular [synchronize] function. *)
 
@@ -481,7 +481,7 @@ let only_on_backing_store f = only_on set_backing_store_only_mode f;;
 let drawing_on_both f = only_on set_both_mode f;;
 
 (* Graphics.sigio_signal is not exported. We declare it here again. *)
-external sigio_signal: unit -> int = "gr_sigio_signal";;
+external sigio_signal: unit -> int = "caml_gr_sigio_signal";;
 
 let init () =
   (* we disable the original Graphics event retrieveing system *)

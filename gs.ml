@@ -245,7 +245,7 @@ class gs () =
 
     method kill =
       try
-        Unix.kill pid Sys.sighup; 
+        Unix.kill pid Sys.sighup;  (* Sys.sigkill? *)
         let _, _ = Unix.waitpid [] pid in
         close_all ();
       with Unix.Unix_error (_, _, _) -> ()
