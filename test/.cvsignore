@@ -5,4 +5,6 @@ adviclock
 *.dvi
 *.aux
 *.toc
+demo*.ps
+gpic.ps
 .advi
