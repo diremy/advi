@@ -59,13 +59,13 @@ let debug_stop s =
 
 (* Pushing a key (a char), with a given list of modifiers,
    in the advi's events queue. *)
-let forward_push_back_key_event =
+let forward_push_key_event =
   ref (fun (c : char) (ms : modifiers) ->
-         failwith "undefined forward push_back_event_key");;
+         failwith "undefined forward push_key_event");;
 
-let push_back_key_event c ms = (!forward_push_back_key_event c ms: unit);;
+let push_key_event c ms = (!forward_push_key_event c ms: unit);;
 
-let set_forward_push_back_key_event f = forward_push_back_key_event := f;;
+let set_forward_push_key_event f = forward_push_key_event := f;;
 
 (* To round properly a float to an int (round it to the nearest integer). *)
 let round_pos x = int_of_float (x +. 0.5);;
@@ -126,32 +126,6 @@ let has_prefix pre s = contains_string_from s 0 pre;;
 let has_suffix suf s =
   contains_string_from s (String.length s - String.length suf) suf;;
 
-(*
-exception False;;
-
-let has_prefix pre str =
-  let lpre = String.length pre in
-  let lstr =  String.length str in
-  lstr >= lpre &&
-  begin
-    try
-      for i = 0 to lpre - 1 do if str.[i] <> pre.[i] then raise False done;
-      true;
-    with False -> false
-  end;;
-
-let has_suffix suf str =
-  let lsuf = String.length suf in
-  let lstr =  String.length str in
-  lstr >= lsuf &&
-  begin
-    try
-      let d = lstr - lsuf in
-      for i = 0 to lsuf - 1 do if str.[d + i] <> suf.[i] then raise False done;
-      true;
-    with False -> false
-  end;;
-*)
 exception Match;;
 
 let get_suffix pre str =

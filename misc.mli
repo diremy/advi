@@ -67,11 +67,11 @@ val debug_stop : string -> unit;;
 (* To print a message if debugging is on. *)
 val debug_endline : string -> unit;;
 
-val push_back_key_event : char -> modifiers -> unit;;
+val push_key_event : char -> modifiers -> unit;;
 (** [push_back_key_event c ms] pushes a key press [c]
   with a given modifier list [ms] into the Active-DVI's events queue. *)
 
 (* The necessary forwards: not to be called directly. *)
 val set_forward_debug_endline : (string -> unit) -> unit;;
-val set_forward_push_back_key_event : (char -> modifiers -> unit) -> unit;;
+val set_forward_push_key_event : (char -> modifiers -> unit) -> unit;;
 
