@@ -55,7 +55,7 @@ let parse_pos s =
     if bc = 'a' then true else if bc = 'r' then false
     else assert false in
   let left = String.sub s 4 (c-4) in
-  let right = String.sub s (c+1) (String.length s -c-1) in
+  let right = String.sub s (c + 1) (String.length s - c - 1) in
   let int_of_floatstring f = int_of_float (float_of_string f +. 0.5) in
   b, int_of_floatstring left, int_of_floatstring right;;
 
@@ -229,7 +229,7 @@ class gs () =
               | _, _, _ ->
                   input_line rightin  in
           if Misc.has_prefix s ack_string
-          then ack <- ack -1
+          then ack <- ack - 1
           else if Misc.has_prefix pos_string s then
             begin
               try
