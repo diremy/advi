@@ -19,7 +19,7 @@
 
 \documentclass[12pt]{article}
 
-\def\version{1.2}
+\def\version{1.4}
 
 \usepackage {manual}
 \usepackage {fullpage}
@@ -92,6 +92,53 @@ Xavier~Leroy, and Alan~Schmitt.
 \clearpage
 
 \section{Installation}
+
+\section{{\ActiveDVI} for the impatient}
+
+\begin{itemize}
+
+\item As a previewer, {\ActiveDVI} can preview any correct DVI file.
+
+\item As a presenter, {\ActiveDVI} provides some {\LaTeX} packages to
+facilitate animations and interaction with the presenter from within
+your {\LaTeX} source text. The {\tt advi-slides.sty} package is
+designed to be a simple way to build a presentation for {\ActiveDVI}.
+
+\end{itemize}
+
+Here is a simplistic talk example, to begin with. As a first simple
+interaction with the presenter, write {\tt \char92pause} into your
+{\LaTeX} code when you want the presenter to stop when it is
+displaying a slide.
+
+\begin{verbatim}
+\documentclass[landscape]{slides}
+
+% The mandatory definition of the \footer macro
+% Footer is empty, if you write \def\footer{}
+\def\footer{{\hfill \em {Me.Myself@institut.fr\hfill 24-01-2003}}}
+
+\usepackage{advi-slides}
+
+\begin{document}
+
+\firstslide{My talk}\centerline{{\large \bf \em Me Myself}}
+\newslide{Plan}
+ Nparts in this talk: Part 1, Part 2, and Partn.
+\newslide{Part 1}
+ This is my first talk
+\newslide{Part 2}
+ Bla bla.
+\newslide{Part n}
+ Blz blz.
+\lastslide{Conclusion}
+ This was my first talk.
+\end{document}
+\end{verbatim}
+
+More involved examples (including Makefiles to compile the whoe thing)
+can be found in the directory {\tt examples} of the distribution. (In
+particular {\tt examples/slitex}.)
 
 \section{Safety concerns when using the {\ActiveDVI} previewer}
 
@@ -188,10 +235,13 @@ advi [options] dvifile
 
 \noindent The \verb"advi" commands recognized the following options:
 
-\subsubsection*{Help for {\tt advi} options}
+\subsubsection*{Help and info options}
 
 \medskip\noindent\begin{tabular}{ll}
-\verb"-help"               & Short command line options help
+\verb"-v"         & Prints the {\tt advi} current version and exits \\
+\verb"--version"  & Prints the full {\tt advi} current version and
+exits \\
+\verb"-help"      & Short command line options help
 \end{tabular}
 
 \subsubsection*{Window and display specifications}
@@ -408,8 +458,8 @@ files, or by implementing extensions to the previewer itself.
 % community, please don't hesitate to drop a mail to the implementors
 % at \verb"advi@pauillac.inria.fr".
 
-\section{The \softtarget{advi}{{\tt advi.sty}} {\LaTeX} package}
 
+\section{The \softtarget{advi}{{\tt advi.sty}} {\LaTeX} package}
 
 {\ActiveDVI} provides some {\LaTeX} packages to facilitate animations and
 interaction with the presenter from within your {\LaTeX} source text.
