@@ -47,4 +47,4 @@ val debug_stop : string -> unit;;
 val debug_endline : string -> unit;;
 
 val forward_debug_endline : (string -> unit) ref;;
-val forward_push_back_event_key : (char -> int -> unit) ref;;
+val forward_push_back_key_event : (char -> int -> unit) ref;;
