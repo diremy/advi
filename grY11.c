@@ -463,12 +463,14 @@ value gr_reposition (value x, value y, value w, value h)
   /* End Manager Hints */
 
   XMoveResizeWindow(grdisplay, grwindow.win, posx, posy, width, height);
-  gr_origin (&ox, &oy);
-  /* in case it did not work, we move relative to the parent window */
-  if (ox != posx || oy != posy) {
-    XGetWindowAttributes(grdisplay, grwindow.win, &att);
-    XMoveWindow(grdisplay, grwindow.win, posx - att.x, posy - att.y);
-  }
+  // removed, as it fails on sawfish and twm
+  //  XFlush(grdisplay);
+  //gr_origin (&ox, &oy);
+  ///* in case it did not work, we move relative to the parent window */
+  //if (ox != posx || oy != posy) {
+  //  XGetWindowAttributes(grdisplay, grwindow.win, &att);
+  //  XMoveWindow(grdisplay, grwindow.win, posx - att.x, posy - att.y);
+  //}
 
   /* Begin Manager Hints:  should probably be clean or go away */
   /* Now make sure our window is in front of all the others */

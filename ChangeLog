@@ -9,7 +9,9 @@
 	   Sawfish: OK
 	   Fluxbox: OK
 	   MWM: NO (decorations are not removed)
-	   Fvwm95: Partial (control bar is still on front)
+	   Fvwm95: Partial (control bar is still on front) [can be removed by
+	   WithDrawing and replacing the window, but this causes problems with
+	   fvwm (no 95)]
 	   Fvwm: Partial (virtual screen window still on front)
 	   Twm: OK
 	
