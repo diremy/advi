@@ -1,5 +1,7 @@
 (* filters and returns list. *)
 val reverse_filter : ('a -> bool) -> 'a list -> 'a list
+val reverse_map : ('a -> 'b) -> 'a list -> 'b list
+val reverse_concat : 'a list -> 'a list -> 'a list
 
 val has_prefix : string -> string -> bool
 val has_suffix : string -> string -> bool

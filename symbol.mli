@@ -10,25 +10,20 @@ type symbol = { color   : int ;
 	       fontname : string ;
 	       fontratio : float }
 
-(* Sets of symbol and sets of symbol names. *)
+(* Sets of symbol. *)
 type set
-type named_set
 
 (* Empty set. *)
-val empty_set : set
+val empty_set : pagewidth:int -> pageheight:int -> set
+
 
 (* Add an element. *)
-val add : symbol -> set -> set
+val add : symbol -> set -> unit
 
-val symbol_name : symbol -> string  
-val find_names : set -> named_set
+(* to_ascii returns a string representing the symbols that are in zone 'zone'. *)
+(* Elements are filtered according to the first argument. *)
+val to_ascii   : (int*int*int*int) -> set -> string
+val to_escaped : (int*int*int*int) -> set -> string
 
-(* Filters a symbol_set *)
-val filters : (symbol -> bool) -> set -> set
-
-(* to_ascii takes a named_set and returns a string representing the named symbols. *)
-val to_ascii : named_set -> string
-val to_escaped : named_set -> string
-
-(* Says if the symbol is in zone x1-x2 y1-y2. *)
+(* Says if the symbol is in zone x1,y1 -> x2,y2. *)
 val inzone : int -> int -> int -> int -> symbol -> bool

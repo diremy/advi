@@ -1,10 +1,22 @@
-(* Reverse and filters list l according to f. *)
+(* Reverse and filters list l according to f. (Pour faire plaisir à Gérard) *)
 let reverse_filter f l =
   let rec filter res = function
     | [] -> res
     | a::l -> if f a then filter (a::res) l else filter res l
   in
   filter [] l
+
+let reverse_map f l =
+  let rec map res = function
+    | [] -> res
+    | a::l -> map (f a::res) l
+  in
+  map [] l
+
+(* Concat of List-1 and List-2 is  2-tsiL :: List-1 *)
+let rec reverse_concat l1 = function
+  | [] -> l1
+  | a::b -> reverse_concat (a::l1) b
 
 (* Strings *)
 

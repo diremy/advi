@@ -461,10 +461,9 @@ module Make(Dev : DEVICE) = struct
     and docx2, docy2 = document_xy st (x+dx) (y+dy) in
     (* Printf.printf "Zone de %d, %d à %d, %d" docx docy docx2 docy2 ; *)
     let symbols = Drv.give_symbols() in
-    let good_ones = Symbol.filters (Symbol.inzone docx docy docx2 docy2) symbols 
-    in
-    let symbol_names = Symbol.find_names good_ones in
-    print_string (Symbol.to_ascii symbol_names);
+    let zone = (docx, docy, docx2, docy2) in
+    let output = Symbol.to_ascii zone symbols in
+    print_string output;
     print_newline ();
     flush stdout;
     ()
@@ -476,7 +475,10 @@ module Make(Dev : DEVICE) = struct
       try
         Dev.continue(); 
         Dev.clear_dev () ;
-	Drv.clear_symbols() ;
+	(* Size of a blank ? *)
+	let blank_w = 20
+	and blank_h = 20 in
+	Drv.clear_symbols st.size_x st.size_y blank_w blank_h ;
         let cont = 
           if !pauses then
             let f = Drv.render_step st.cdvi st.page_no

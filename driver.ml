@@ -95,7 +95,7 @@ module type DRIVER = sig
   val unfreeze_fonts : cooked_dvi -> unit
   val unfreeze_glyphs : cooked_dvi -> float -> unit
   val scan_specials : cooked_dvi -> int -> unit 
-  val clear_symbols : unit -> unit
+  val clear_symbols : int -> int -> int -> int -> unit
   val give_symbols : unit -> Symbol.set
 end ;;
 
@@ -337,11 +337,11 @@ module Make(Dev : DEVICE) = struct
       
   (*** Rendering primitives ***)
 
-  let drawn_symbols = ref Symbol.empty_set
+  let drawn_symbols = ref (Symbol.empty_set 1 1)
 
   let give_symbols () = !drawn_symbols
-  let clear_symbols () =
-    drawn_symbols := Symbol.empty_set ;
+  let clear_symbols page_w page_h blank_w blank_h =
+    drawn_symbols := Symbol.empty_set page_w page_h;
     ()
 
   let add_char st glyph code =
@@ -361,7 +361,7 @@ module Make(Dev : DEVICE) = struct
 	Symbol.fontname = st.cur_font.name ;
 	Symbol.fontratio = st.cur_font.ratio }
     in
-    drawn_symbols := Symbol.add symbol !drawn_symbols ;
+    Symbol.add symbol !drawn_symbols ;
     ()
 
   let get_register_set st =
