@@ -417,7 +417,7 @@ let synchronize () =
     Misc.debug_stop "Graphics.synchronize";
     Graphics.synchronize ()
   ) else (
-    Misc.debug_stop "GraphicsY11.antisynchronize";
+    Misc.debug_stop "GraphicsY11.anti_synchronize";
     anti_synchronize ()
   );;
 

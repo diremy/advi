@@ -41,6 +41,10 @@ fi
 
 AC_PATH_PROG(PATH_KPSEWHICH, kpsewhich, "nope") 
 if test "$PATH_KPSEWHICH" = "nope"; then
+  echo "**************** Warning ******************"
+  echo "kpsewhich command not found." 
+  echo "We use a $PATH dependant kpsewhich command"
+  echo "*******************************************"
   PATH_KPSEWHICH="kpsewhich"
 fi
 
@@ -48,6 +52,10 @@ dnl Gzip
 
 AC_PATH_PROG(PATH_GZIP, gzip, "nope") 
 if test "$PATH_GZIP" = "nope"; then
+  echo "**************** Warning ******************"
+  echo "gzip command not found." 
+  echo "We use a $PATH dependant gzip command"
+  echo "*******************************************"
   PATH_GZIP=""
 fi
 
@@ -246,7 +254,7 @@ test "x$myexec_prefix" = xNONE && myexec_prefix=${myprefix}
 mylibdir=$libdir
 test "x$libdir" = 'x${exec_prefix}/lib' && mylibdir="$myexec_prefix/lib"
 
-if test -d $TEXMFMAIN/tex/latex; then
+if test -dw $TEXMFMAIN/tex/latex; then
   ADVI_LOC=$TEXMFMAIN/tex/latex/advi
 else 
   ADVI_LOC=$mylibdir/advi
@@ -258,6 +266,9 @@ AC_SUBST(HAVE_GS)
 AC_OUTPUT(Makefile.config config.ml)
 
 echo "------------------------------------------------- Configuration finished"
+echo
+echo "             Configuration summary"
+echo
 echo "Language:    $CAML version $CAMLVERSION"
 echo "Camlimages:  $HAVE_CAMLIMAGES"
 echo "LablTk:      $HAVE_LABLTK"
