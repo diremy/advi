@@ -14,6 +14,9 @@ open Tk
 (** Diameter of the circle. *)
 let diametre = ref 200
 
+(** Background color. *)
+let background_color = ref "White"
+
 (** Total major time for 360 degres (in miliseconds) *)
 let base_major = ref 3600000.0
 
@@ -60,12 +63,16 @@ let times = ref ([] : float list)
 let filename = ref (None : string option)
 
 let pi = 4.0 *. atan 1.0
+let base_x = 2
+let base_y = 2
 
 module Args = struct
 
   let options = [
     "-d", Arg.Int (fun d -> diametre := d),
       "<d>  Use <d> as the diameter of the clock";
+    "-bg", Arg.String (fun c -> background_color := c),
+      "<color>  Set the background color";
     "-wc", Arg.Int (fun n -> width_circle := n),
       "<n>  Use <n> as the width of the circle line";
     "-W", Arg.Int (fun n -> width_major := n),
@@ -99,7 +106,7 @@ module Args = struct
   ] 
 
   let parse () = Arg.parse 
-      options 
+      (keywords @ options)
       (fun s -> 
         try times := !times @ [ float_of_string s *. 1000.0] 
         with Invalid_argument err -> 
@@ -139,38 +146,44 @@ let draw_major c =
   Canvas.delete c.widget [c.major];
   let d = !diametre in
   let r = d / 2 in
-  let pr = Pixels r in
   let (x,y) = compute_coord r !base_major c.major_elapsed in
   c.major <-
     Canvas.create_line c.widget
-      [pr; pr; Pixels (r + x); Pixels(r + y)] (options_major ())
+      [ Pixels (base_x + r); Pixels (base_y + r); 
+	Pixels (base_x + r + x); Pixels(base_y + r + y)]
+      (options_major ())
 
 let draw_minor c = 
   Canvas.delete c.widget [c.minor];
   let d = !diametre in
   let r = d / 2 in
-  let pr = Pixels r in
   let (x,y) = compute_coord r !base_minor c.minor_elapsed in
   c.minor <-
     Canvas.create_line c.widget
-      [pr; pr; Pixels (r + x); Pixels(r + y)] (options_minor ())
+      [ Pixels (base_x + r); Pixels (base_y + r); 
+	Pixels (r + x); Pixels(r + y)]
+      (options_minor ())
 
 
 let create_clock () =
   let top = opencamltk () in
+  Toplevel.configure top [Background (NamedColor !background_color) ] ;
   let d = !diametre in
   let r = d / 2 in
-  let pr = Pixels r in 
-  let w = Canvas.create top [] in
-  pack [w] [Expand true; Fill Fill_Both];
+  let w = Canvas.create top [Background  (NamedColor !background_color)] in
+  pack [w] [Expand true; Fill Fill_Both ];
   let clock =
     {
       widget = w;
       circle =
-        Canvas.create_oval w
-          (Pixels 0) (Pixels 0) (Pixels d) (Pixels d) (options_circle ());
-      major = Canvas.create_line w [pr; pr; pr; Pixels 0] (options_major ());
-      minor = Canvas.create_line w [pr; pr; pr; Pixels 0] (options_minor ());
+      Canvas.create_oval w
+        (Pixels base_x) (Pixels base_y) 
+	(Pixels (base_x + d)) (Pixels (base_y + d))
+	(options_circle ());
+      major = Canvas.create_line w [ Pixels (base_x + r); Pixels (base_y + r); 
+				     Pixels (base_x + r); Pixels base_y] (options_major ());
+      minor = Canvas.create_line w [ Pixels (base_x + r); Pixels (base_y + r); 
+				     Pixels (base_x + r); Pixels base_y] (options_minor ());
       major_elapsed = (if !reverse then !total_time else 0.0);
       minor_elapsed = 0.0;
     }
@@ -195,10 +208,12 @@ let draw_overtime_arc c old_major =
   (* prerr_endline
       (Printf.sprintf "overtime inf=%f sup=%f" angle_inf angle_sup); *)
   let arc =
-    Canvas.create_arc c.widget (Pixels 0) (Pixels 0) (Pixels d) (Pixels d)
-     [Start angle_inf; Extent angle_sup;
-      FillColor (NamedColor !color_overtime);
-      ArcStyle PieSlice; Outline (NamedColor !color_overtime)]
+    Canvas.create_arc c.widget
+      (Pixels base_x) (Pixels base_y) 
+      (Pixels (base_x + d)) (Pixels (base_y + d))
+      [ Start angle_inf; Extent angle_sup;
+	FillColor (NamedColor !color_overtime);
+	ArcStyle PieSlice; Outline (NamedColor !color_overtime)]
   in
   ()
 
@@ -223,8 +238,8 @@ let create_secteurs clock times =
          (*Printf.printf "overtime inf=%f sup%f new_acc=%f"
                        angle_inf angle_sup new_acc;  print_newline ();*)
          let arc =
-           Canvas.create_arc clock.widget (Pixels 0) (Pixels 0)
-             (Pixels d) (Pixels d)
+           Canvas.create_arc clock.widget (Pixels base_x) (Pixels base_y)
+             (Pixels (base_x + d)) (Pixels (base_y + d))
              [Start angle_inf; Extent angle_sup;
               FillColor (NamedColor !color_ok);
               ArcStyle PieSlice; Outline (NamedColor "Black")]
