@@ -1410,7 +1410,7 @@ let bind_default_keys () =
    'n', B.next_page;
    '', B.next_page;
    'p', B.previous_page;
-   'ö', B.previous_page;
+   '\246' (* o" *), B.previous_page;
    'P', B.previous_pause;
    'N', B.next_pause;
 
