@@ -133,7 +133,7 @@ install:: advi.opt tex/splash.dvi
 MLFILES = $(addsuffix .ml, $(MODULES))
 .depend:: *.mli $(MLFILES) Makefile 
 	$(OCAMLDEP) *.mli $(MLFILES) > .depend
-	gcc -MM -I$(CAMLDIR)/caml $(CFLAGS) $(COBJS:.o=.c) | sed -e 's|$(CAMLDIR)/caml/[^ ]*||' >> .depend
+	gcc -MM -I$(CAMLDIR) $(CFLAGS) $(COBJS:.o=.c) | sed -e 's|$(CAMLDIR)/[^ ]*||' >> .depend
 
 # just for the authors
 VERSION=0.4.0
