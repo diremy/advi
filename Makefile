@@ -35,7 +35,7 @@ MLINCDIRS = $(CAMLIMAGESDIR)
 
 EXEC	  = advi
 
-MODULES	  = config timeout misc graphicsY11 options busy rc \
+MODULES	  = config misc graphicsY11 timeout options busy rc \
             gterm launch \
             userfile input symbol search \
             shot drawimage dvicolor \
@@ -47,7 +47,7 @@ MODULES	  = config timeout misc graphicsY11 options busy rc \
 LIBRARIES = graphics unix str $(CAMLIMAGESLIBS)
 CLIBS	  = graphics unix str
 
-COBJS     = events.o grY11.o
+COBJS     = events.o grwm.o grY11.o
 
 CMO_OBJS  = $(addsuffix .cmo, $(MODULES))
 CMX_OBJS  = $(addsuffix .cmx, $(MODULES))
@@ -103,10 +103,7 @@ $(EXEC).opt: $(COBJS) $(CMX_OBJS)
 config.ml: config.ml.in configure
 	./configure
 
-grY11.o : grY11.c
-	$(OCAMLC) -ccopt "$(CFLAGS)" -c $<
-
-events.o : events.c
+.c.o:
 	$(OCAMLC) -ccopt "$(CFLAGS)" -c $<
 
 .SUFFIXES: .ml .mli .cmo .cmi .cmx
