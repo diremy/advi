@@ -178,39 +178,10 @@ designed to be a simple way to build a presentation for {\ActiveDVI}.
 
 \end{itemize}
 
-Here is a simplistic talk example, to begin with. As a first simple
-interaction with the presenter, write {\tt \char92pause} into your
-{\LaTeX} code when you want the presenter to stop when it is
-displaying a slide.
-
-\begin{verbatim}
-\documentclass[landscape]{slides}
-
-% The mandatory definition of the \footer macro
-% Footer is empty, if you write \def\footer{}
-\def\footer{{\hfill \em {Me.Myself@institut.fr\hfill 24-01-2003}}}
-
-\usepackage{advi-slides}
-
-\begin{document}
-\firstslide{My talk}
- \vspace*{5cm}\centerline{{\large \bf \em Me Myself}}
-\newslide{Plan}
-        This talk is divided into $n$ parts: Part 1, Part 2, and Partn.
-\newslide{Part 1}
-        This is my first talk using {\ActiveDVI}!
-\newslide{Part 2}
-        Bla bla.
-\newslide{Part n}
-        Blz blz.
-\newslide{Conclusion}
-        This was my first talk.
-\end{document}
-\end{verbatim}
-
-More involved examples (including Makefiles to compile the whole thing)
-can be found in the directory {\tt examples} of the distribution. (In
-particular, this example is given in {\tt examples/slitex/simplistic}.)
+See {\tt examples/slitex/simplistic/} for a simplistic talk example.  There,
+the command {\tt \char92pause} is used to make the presenter stop while
+displaying the document.  More involved examples can be found in the
+directory {\tt examples} of the distribution.
 
 \section{Safety concerns when using the {\ActiveDVI} previewer}
 
@@ -542,6 +513,14 @@ a presentation for {\ActiveDVI}. It defines the main set of interactive
 commands for {\ActiveDVI} to animate the show. However, there is no
 need to load the package if no {\ActiveDVI} special effects are
 required for the presentation.
+
+\paragraph{Warning!} Most commands of \verb$advi.sty$ use 
+the {\TeX} \verb"\special" command to insert special commands into the DVI
+output file, which commands are then interpreted by {\ActiveDVI} when while
+previewing.  Note that \verb$\special{bla bla}$ is equivalent to
+\verb$\hbox{}$ for {\TeX}'s mounth, which may alters the document layout
+accordingly.  Hence, be aware that most commands of \verb$advi.sty$ will
+also be equivalent to \verb$\hbox{}$ regarding the document layout.
 
 \subsection{Printing the presentation}
 
