@@ -7,5 +7,3 @@ adk-1.4.0.tar.gz
   build a full fledged presenter, including companion Caml libraries
   camltk and camlimages consistent with the current advi version)
 advi-1.4.0.tar.gz	  The source code for advi presenter only
-advi-1.4.0-1.src.rpm      The RedHat package for advi source code
-advi-1.4.0-1.i386.rpm     The RedHat package for advi compiled binaries

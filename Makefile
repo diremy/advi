@@ -19,7 +19,7 @@
 
 include Makefile.config
 
-VERSION=1.4
+VERSION=1.4.0
 
 COPTIONS = -warn-error A -g
 COPTOPTIONS = -warn-error A -unsafe -inline 9
@@ -153,7 +153,7 @@ doc/splash.dvi:
 documentation:
 	(cd doc; $(MAKE) all)
 
-distribute: tar_and_web rpm
+distribute: tar_and_web
 
 tar_and_web: tex/splash.dvi
 	(cd test; $(MAKE) all jpdemo.dvi)
