@@ -7,12 +7,11 @@
 
 \usepackage{pst-all}
 
-% \usepackage[annot]{advi}
 \usepackage{hyperref}
 
-%% \usepackage[annot]{advi} 
 %% must occur after packages using PStricks macros 
 %% (it redefines some of them) 
+\usepackage{advi-annot} 
 
 \definecolor{red}{rgb}{1.0,0.0,0.0}
 \definecolor{blue}{rgb}{0.0,0.0,1.0}
@@ -29,7 +28,7 @@
 \center{Press: \key{n}ext page \key{p}revious page \key{q}uit \vss}}}}
 
 \def\adviheader{\noindent
-{\bf\Large Active dvi}\\
+{\bf{\Large {\adviname}} (version \adviversion)}\\
 \includegraphics[width=\textwidth]{bar.jpg.eps}}
 
 \let \Newpage \newpage
