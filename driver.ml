@@ -673,8 +673,7 @@ let proc_special st s =
           try unquote (List.assoc "proc" records)
           with Not_found -> raise (Failure "proc: invalid special") in
         visible_stack := !visible :: !visible_stack;
-        visible := 
-          (try ignore (List.assoc "play" records); true with _ -> false);
+        visible := List.mem_assoc "play" records;
         if !playing = 0 then
           begin
             let recording =
@@ -763,7 +762,7 @@ let wait_special st s =
 let inherit_background_info =
   Misc.option_flag false
     "-inherit_background"
-    "\tBackground options are inherited from previous page\n\
+    "\tBackground options are inherited from previous page\n\t\t\
      \t(default is to reset background options at each new page)";;
 
 let setup_bkgd status =
@@ -777,7 +776,7 @@ let setup_bkgd status =
 
 
 let ratios_alist = [
-  ("auto",   Drawimage.ScaleAuto);
+  ("auto", Drawimage.ScaleAuto);
   ("center", Drawimage.ScaleCenter);
   ("top", Drawimage.ScaleTop);
   ("bottom", Drawimage.ScaleBottom);
@@ -808,9 +807,9 @@ let bkgd_alist = [
      let b = parse_blend (unquote s) in
      [Dev.BgBlend b]);
   ("fit", fun s -> fun st ->
-     let f = try List.assoc (unquote s) ratios_alist with _ -> Drawimage.ScaleAuto in
+     let f =
+       try List.assoc (unquote s) ratios_alist with _ -> Drawimage.ScaleAuto in
      [Dev.BgRatio f]);
-  (***RDC: is this code ---/\ doing the rest of data we want to see ? ***)
 ];;
 
 let filter_alist alist falist =
@@ -832,7 +831,7 @@ let scan_bkgd_special st s =
 (* When not scanning, we ignore the background information *)
 let bkgd_special st s = ();;
 
-(* Support for TPIC specials.  XL. *)
+(* Support for TPIC specials. *)
 
 let milli_inch_to_sp = Units.from_to Units.IN Units.SP 1e-3;;
 
@@ -983,7 +982,7 @@ let header_special st s = ();;
 
 (* For html specials *)
 
-(* Should check that a pause is not in the middle of html code *)
+(* Should check that a pause is not in the middle of some html code *)
 let open_html st html tag tag_string =
   let name = String.sub html 9 (String.length html - 11) in
   let x = st.x_origin + int_of_float (st.conv *. float st.h)
@@ -1015,16 +1014,21 @@ let html_special st html =
     let advi x =
       let play () = proc_special st ("advi: proc=" ^ x ^ " play") in
       Dev.H.Advi
-        {Dev.H.link = x; Dev.H.action = play;
-         Dev.H.mode = Dev.H.Over; Dev.H.color = None; Dev.H.area = None} in 
+        {Dev.H.link = x;
+         Dev.H.action = play;
+         Dev.H.mode = Dev.H.Over;
+         Dev.H.color = None;
+         Dev.H.area = None} in 
       open_html st html advi "Advi" else
   if  has_prefix "<A hdvi=\"" html || has_prefix "<a hdvi=\"" html then
     let advi x =
       let play () = proc_special st ("advi: proc=" ^ x ^ " play") in
       Dev.H.Advi
-        {Dev.H.link = x; Dev.H.action = play;
+        {Dev.H.link = x;
+         Dev.H.action = play;
          Dev.H.mode = Dev.H.Click_down;
-         Dev.H.color = None; Dev.H.area = None} in 
+         Dev.H.color = None;
+         Dev.H.area = None} in 
       open_html st html advi "Advi" else
   if has_prefix "</A>" html || has_prefix "</a>" html then close_html st
   else warning ("Unknown html suffix" ^ html);;
@@ -1077,10 +1081,12 @@ let special st s =
       let x = st.x_origin + int_of_float (st.conv *. float st.h)
       and y = st.y_origin + int_of_float (st.conv *. float st.v) in
       if !visible then 
-        (if (has_prefix "`" file)
-        then Dev.draw_img (zap_to_char ' ' file) Drawimage.ScaleAuto false 1.0 None (Some bbox)
-        else Dev.draw_ps file bbox)
-          size x y
+        let draw = 
+          if has_prefix "`" file then
+           Dev.draw_img (zap_to_char ' ' file)
+             Drawimage.ScaleAuto false 1.0 None (Some bbox)
+          else Dev.draw_ps file bbox in
+        draw size x y
     end else
   if has_prefix "advi: " s then begin
     if has_prefix "advi: alpha" s then alpha_special st s else
@@ -1118,7 +1124,7 @@ let eval_dvi_command st = function
   | Dvi.C_w0 ->  add_blank 2 st st.w; st.h <- st.h + st.w
   | Dvi.C_w k -> st.w <- k; add_blank 3 st st.w; st.h <- st.h + st.w
   | Dvi.C_x0 ->  add_blank 4 st st.x; st.h <- st.h + st.x
-  | Dvi.C_x k -> st.x <- k;  add_blank 5 st st.x; st.h <- st.h + st.x
+  | Dvi.C_x k -> st.x <- k; add_blank 5 st st.x; st.h <- st.h + st.x
   | Dvi.C_down k -> st.v <- st.v + k
   | Dvi.C_y0 -> st.v <- st.v + st.y
   | Dvi.C_y k -> st.y <- k; st.v <- st.v + st.y
@@ -1140,8 +1146,8 @@ let eval_command st c =
 (*
     | Dvi.C_xxx s when has_prefix "advi: proc" s -> ()
 *)
-    |  _ -> u.escaped_commands <- c :: u.escaped_commands in
-  List.iter record   !current_recording_proc;
+    | _ -> u.escaped_commands <- c :: u.escaped_commands in
+  List.iter record !current_recording_proc;
   eval_dvi_command st c;;
 
 forward_eval_command := eval_command;;
@@ -1235,7 +1241,7 @@ let scan_special_pages cdvi lastpage =
   and xrefs = cdvi.base_dvi.Dvi.xrefs in
   let otherwise _ = () in
   for n = 0 to min lastpage (Array.length cdvi.base_dvi.Dvi.pages) - 1 do
-    ignore (scan_special_page otherwise cdvi (headers,xrefs) n);
+    ignore (scan_special_page otherwise cdvi (headers, xrefs) n);
   done;
   if !headers <> [] then
     Dev.add_headers (find_prologues (List.rev !headers));;
