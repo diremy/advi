@@ -204,7 +204,7 @@ class gs () =
         raise Terminated
       | exn ->
           Misc.warning (Printexc.to_string exn);
-          self # kill;
+          self # kill; 
           raise Terminated
 
     method ack =
@@ -253,7 +253,8 @@ class gs () =
 
     method kill =
       try
-        Unix.kill pid 3;
+        Unix.kill pid Sys.sighup; 
+        let _, _ = Unix.waitpid [] pid in
         close_all ();
       with Unix.Unix_error (_, _, _) -> ()
 
@@ -284,7 +285,6 @@ class gs () =
     method load_header (b, h) =
       self # line
         (if b then h else String.concat "" [ "("; h; ") run"; ])
-        
 
   end;;
 
