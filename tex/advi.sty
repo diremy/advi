@@ -164,7 +164,26 @@ Maybe you mean \@currenvir ing}}
   {\advi@global \expandafter \let \noexpand #1\advi@empty}
   {\advi@global \expandafter \def \noexpand #1{ #2=#3}%
    \advi@global \advi@bgactivetrue}}
-\define@key {advi@bg}{color}[]{\advi@setbg{\advi@bgcolor}{color}{#1}}
+
+\def \advi@setbgcolor #1{\advi@ifnone {#1}
+  {\advi@global \expandafter \let \noexpand #1\advi@empty}
+  {\advi@setbg@color #1\relax}}
+\def \advi@setbg@color{% 
+  \@ifnextchar[\advi@setbg@undeclared\advi@setbg@declared}
+\def \advi@setbg@declared #1\relax{%
+  \@ifundefined{\string\color @#1}%
+    {\c@lor@error{`#1'}}%
+    {\advi@global \edef \advi@bgcolor
+         { color="\csname \string \color@#1\endcsname"}%
+     \advi@global \advi@bgactivetrue}}
+\def \advi@setbg@undeclared[#1]#2\relax{%
+  \@ifundefined{color@#1}%
+    {\c@lor@error{model `#1'}}%
+    {\csname color@#1\endcsname\advi@tmp {#2}%
+     \advi@global \edef \advi@bgcolor{ color="\advi@tmp"}%
+     \advi@global \advi@bgactivetrue}}
+
+\define@key {advi@bg}{color}[]{\advi@setbgcolor{#1}}
 \define@key {advi@bg}{image}[]{\advi@setbg{\advi@bgimage}{image}{#1}}
 \define@key {advi@bg}{alpha}[]{\advi@setbg{\advi@bgalpha}{alpha}{#1}}
 \define@key {advi@bg}{blend}[]{\advi@setbg{\advi@bgblend}{blend}{#1}}
