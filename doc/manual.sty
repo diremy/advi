@@ -13,8 +13,13 @@
 \edef\hyper@sharp{\string#}
 
 \def \softlink #1#2{\special 
-  {html:<A href=\hyper@quote\hyper@sharp#1\hyper@quote>}#2\special
+  {html:<A HREF=\hyper@quote\hyper@sharp#1\hyper@quote>}#2\special
   {html:</A>}}
-\def \softtarget #1#2{\special
-  {html:<A name=\hyper@quote#1\hyper@quote>}#2\special{html:</A>}}
+\def \softtarget #1#2{{\special
+  {html:<A NAME=\hyper@quote#1\hyper@quote>}{#2}\special{html:</A>}}}
 
+\newenvironment{citemize}{\begin{list}{$\bullet$}%
+{\itemsep 0pt \topsep 5pt}}{\end{list}}
+
+\newenvironment{cenumerate}%
+{\begin{list}{-}{\itemsep 0pt \topsep 5pt}}{\end{list}}
