@@ -46,8 +46,8 @@ sub-directories to build the corresponding DVI presentations.</I>
 <DT><STRONG>How to ensure safety, since unknown applications can be launched
 from the DVI file that I am previewing ?</STRONG>
  <DD>Answer: <I>Active-DVI's  default behavior is not to automatically
-launch embedded applications: when a presentation attempt to launch an
-application, the presentation is stopped and a dialog box appear to
+launch embedded applications: when a presentation attempts to launch an
+application, the presentation is stopped and a dialog box appears to
 tell you the name of the application and ask you for confirmation
 before launching.</I>
 
@@ -141,6 +141,78 @@ relevant value to the bounding box.
 bounding-box around with the mouse (Control+button), or to use the
 relevant option on the command line when launching <CODE>advi</CODE>
 (the <CODE>-vmargin</CODE> and <CODE>-hmargin</CODE> options).</I>
+
+<DT><STRONG>How to display the target of an HTML anchor in an already
+running browser ?</STRONG>
+ <DD>Answer: <I>to render hyper links that are HTML pages, you must
+properly set up the<CODE>-browser</CODE> option of <CODE>advi</CODE>,
+or explicitely call the browser you want with the proper option in an
+<CODE>adviembed</CODE> command. You could use for instance:</I>
+<PRE>
+netscape -remote 'openURL(http://www.acm.org)'
+</PRE>
+
+<I>To insert such a command into an <CODE>adviembed </CODE> command, a
+little trickery is necessary, since <CODE>'</CODE> characters are
+interpreted by LaTeX. To prevent this behavior, you can write for
+instance:</I>
+<PRE>
+{\catcode `\' 12 \catcode `\: 12, \catcode `\' 12
+  \adviembed {netscape -remote 'openURL(http://www.acm.org)'}
+}
+</PRE>
+
+</DD>
+<DD><I>For <CODE>mozilla</CODE>, you must use the option 
+<CODE>mozilla -remote</CODE>. Unfortunately, this option supposes that
+a mozilla browser is already up and running. If you want to have a
+command that works in any case, even if no mozilla is launched, you could use a
+shell script like:</I>
+<PRE>
+#!/bin/bash
+
+MOZILLA=/usr/local/mozilla/mozilla
+case $# in
+ 1) 
+   if $MOZILLA -remote "ping()" 2>/dev/null
+   then 
+     $MOZILLA -remote "openurl($1,new-window)" || \
+     $MOZILLA "$@" 
+   else
+     $MOZILLA "$@" 
+   fi;;
+ *)
+   $MOZILLA "$@";;
+esac
+</PRE>
+<I>(Instead of the <CODE>new-window</CODE> behavior specification, you
+can use <CODE>new-tab</CODE> or nothing, as you wish.)</I>
+
+<DT><STRONG>How to avoid spurious messages from <CODE>advi</CODE>
+related to <CODE>dvips</CODE> ?</STRONG>
+
+<DD>I got for instance
+<PRE>
+dvips: Unknown keyword (proc) in \special will be ignored
+dvips: Unknown keyword (koyaa) in \special will be ignored
+dvips: Unknown keyword (record) in \special will be ignored
+dvips: Unknown keyword (start) in \special will be ignored
+dvips: Couldn't find figure file advi:; continuing
+dvips: Unknown keyword (embed) in \special will be ignored
+dvips: Unknown keyword (name) in \special will be ignored
+dvips: Unknown keyword ("xmms") in \special will be ignored
+</PRE>
+ </DD>
+ <DD>Answer: <I>As written in the messages, those errors are not
+reported by <CODE>advi</CODE> by issued by <CODE>dvips</CODE> that
+cannot understand the <CODE>\special</CODE> instructions that
+the <CODE>advi</CODE> LaTeX style inserts into the DVI file.
+This behaviour is normal and properly specified by the DVI format:
+interpreters of DVI files are required to ignore the
+<CODE>\special</CODE> instructions they do not understand. However,
+nothing prevents interpreters from emitting a warning when facing an
+unknown instruction.
+</I>
 
 </DL>
 
