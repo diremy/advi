@@ -720,10 +720,10 @@ let setup_bkgd status =
   (* recover modified preferences               *);;
 
 let bkgd_alist = [
-  ("col", fun s -> fun st ->
+  ("color", fun s -> fun st ->
      let c = Dvicolor.parse_color_args (split_string (unquote s) 0)
      in [Dev.BgColor c]);
-  ("img", fun s -> fun st ->
+  ("image", fun s -> fun st ->
      [Dev.BgImg s]);
   ("reset", fun s -> fun st ->
      Dev.blit_bkgd_data (Dev.default_bkgd_data ()) st.Dvi.bkgd_prefs;

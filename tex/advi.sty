@@ -30,6 +30,7 @@
 
 % Auxilliary macros
 
+\def \advi@empty{}
 \ifadvi@ignore 
 \def \advi@special@ #1{\hbox{}}
 \else
@@ -63,23 +64,22 @@
 
 %%% Embedded applications
 
-\def \advi@empty{}
 \def \advi@embed@name{anonymous}
 \def \advi@embed@mode{ephemeral}
 \define@key {advi@embed}{name}{\def \advi@embed@name {#1}}
-\define@key {advi@embed}{mode}{\def \advi@embed@mode {#1}}
-\define@key {advi@embed}{ephemeral}
-  {\def \advi@embed@mode {ephemeral}\def\advi@embed@name {#1}}
-\define@key {advi@embed}{persistent}
-  {\def \advi@embed@mode {persistent}\def\advi@embed@name {#1}}
-\define@key {advi@embed}{sticky}
-  {\def \advi@embed@mode {sticky}\def\advi@embed@name {#1}}
+\def \advi@definemode #1{%
+  \define@key {advi@embed}{#1}[anonymous]{%
+     \def \advi@embed@mode {#1}\def\advi@embed@name {##1}%
+  }}
+\advi@definemode{ephemeral}
+\advi@definemode{persistent}
+\advi@definemode{sticky}
+
 \def \advi@embed@ #1#2#3#4#5{%
   \mbox{\advi@special
           {embed name="#1" mode=#2 width=#3 height=#4 command="#5"}%
           {\vbox to #4{\hbox to #3{}}}}%
 }
-
 \newcommand{\advi@embed}[4][]{
   \mbox {\setkeys {advi@embed}{#1}%
          \advi@embed@ {\advi@embed@name}{\advi@embed@mode}{#2}{#3}{#4}}%
@@ -93,8 +93,8 @@
 
 \define@key {advi@bg}{color}{\advi@special{setbg col=#1}}
 \define@key {advi@bg}{image}{\advi@special{setbg ima=#1}}
-\define@key {advi@bg}{alpha}{\advi@special{setbg blend=#1}}
-\define@key {advi@bg}{blend}{\advi@special{setbg alpha=#1}}
+\define@key {advi@bg}{alpha}{\advi@special{setbg alpha=#1}}
+\define@key {advi@bg}{blend}{\advi@special{setbg blend=#1}}
 \define@key {advi@bg}{reset}[]{\advi@special{setbg reset}}
 \define@key {advi@bg}{inherit}[]{\advi@special{setbg inherit}}
 \newcommand{\advibg}{\setkeys{advi@bg}}

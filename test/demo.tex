@@ -41,7 +41,7 @@ Press: \keymenu{n}ext page \keymenu{p}revious page
 
 \def\adviheader{\noindent
 {\bf\Large Active dvi}\\
-\includegraphics[width=\textwidth]{../tex/bar.jpg.eps}}
+\includegraphics[width=\textwidth]{../tex/bar.jpg.eps}\par}
 
 \let \Newpage \newpage
 \def \newpage {\Newpage \advifooter\adviheader}
@@ -296,21 +296,20 @@ Annonymous applications have actually the default name \doctt{anonymous}.
 \dockey{ephemeral}{name}
 
 \begin{quote}
-This is the default case: the embedded applicattion is kills when the page
+This is the default case: the embedded application is killed when the page
 is turned.
 \end{quote}
 
-\dockey{sticky}{name}
+\dockey{persistent}{name}
 
 \begin{quote}
-The application keep running in the background, but will only be visible in
+The application keeps running in the background, but will only be visible in
 the current page.
 \end{quote}
 
-\dockey{persistent}{name}
+\dockey{sticky}{name}
 \begin{quote}
-The application keep running in the background, but will only be visible in
-the current page.
+The application keep running and remains visible when turning pages.
 \end{quote}
 
 \end{quote}
@@ -318,7 +317,7 @@ the current page.
 \medskip\noindent
 \docdef \advikillembed \docarg{name}
 \begin{quote}
-Kill all embeded applications named \docid{name}
+Kill all embedded applications named \docid{name}
 \end{quote}
 
 \newpage

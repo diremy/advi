@@ -18,34 +18,60 @@
 
 %% Options
 
-\newcommand {\AdviBulleBG}{\def \advibulle@bg}
-\newcommand {\AdviBulleArc}[2]
+\def \advi@annot@bg{yellow}
+\def \advi@annot@col{c}
+\define@key{adviannot}{bg}{\def \advi@annot@bg{#1}}
+\define@key{adviannot}{l}{\def \advi@annot@col{l}}
+\define@key{adviannot}{c}{\def \advi@annot@col{c}}
+\define@key{adviannot}{r}{\def \advi@annot@col{r}}
+\define@key{adviannot}{p}{\def \advi@annot@col{p{#1}}}
+\define@key{adviannot}{col}{\def \advi@annot@col{#1}}
+
+\newcommand {\AdviAnnotArc}[2]
   {\ncarc [linestyle=solid,arcangleA=-0,arcangleB=-3]{#1}{advi@to}%
    \ncarc [linestyle=solid,arcangleA=0,arcangleB=3]{#1}{advi@to}}
-
-\AdviBulleBG{yellow}
 
 \newcount \advi@c@annot
 \newcommand {\advi@annot}[2][]{\global \advance \advi@c@annot by 1%
    \bgroup
+   \NormalCoor
+   \setkeys {adviannot}{#1}%
    \Rnode {advi@from\the\advi@c@annot}%
           {\begin{advi*}{advi@annot\the\advi@c@annot}#2\end{advi*}}%
    \annot@i}
+
+\def \advi@annot@setdefault  {\psset{}}
+
 \newcommand {\annot@i}[1]
-  [linecolor=\advibulle@bg,linewidth=1pt,%
-   fillstyle=solid,fillcolor=\advibulle@bg]
-  {\psset {#1}\@ifnextchar({\annot@ii}{\annot@ii(1,1)}}
+  [linecolor=\advi@annot@bg,linewidth=1pt,%
+   fillstyle=solid,fillcolor=\advi@annot@bg]
+  {\psset{#1}\@ifnextchar({\annot@ii}{\annot@ii(1,1)}}
 
 \ifadvi@ignore
 \def \annot@ii(#1)#2{\egroup}
 \else
+\def \advi@annottab #1#2{\begin{tabular}{@{}#1@{}}#2\end{tabular}}%
 \def \annot@ii(#1)#2{%
   \begin{advi@record}{advi@annot\the\advi@c@annot}
-    \rput(#1){\ovalnode {advi@to}{#2}}%
-    \AdviBulleArc{advi@from\the\advi@c@annot}{advi@to}%
-  \end{advi@record}\egroup
-}
+    \rput(#1){\ovalnode {advi@to}%
+                 {\advi@annottab {\advi@annot@col}{#2}}}%
+     \AdviAnnotArc{advi@from\the\advi@c@annot}{advi@to}%
+  \end{advi@record}\egroup}
 \fi
+
+% \def \annot@ii(#1){\@ifnextchar [{\annot@iii(#1)}{\annot@iii(#1)[c]}}
+% \ifadvi@ignore
+% \def \annot@iii (#1)[#2]#3{\egroup}
+% \else
+% \def \annot@iii (#1)[#2]#3{%
+%   \begin{advi@record}{advi@annot\the\advi@c@annot}
+%     \rput(#1){\ovalnode {advi@to}
+%                {\begin{tabular}{@{}#2@{}}#3\end{tabular}}}%
+%     \AdviAnnotArc{advi@from\the\advi@c@annot}{advi@to}%
+%   \end{advi@record}\egroup
+% }
+% \fi
+
 
 %% exports
 
