@@ -3,22 +3,23 @@ BEFORE RELEASE:
 
  * compléter manual.tex (la plupart des morceaux manquants existent mais
    sont dispersés)
- ==> en cours ...
+ ==>PW toujours en cours ...
 
  * distribuer camltk avec advi (la seule GUI actuellement embeddable.)
- ==> fait dans la même mesure que camlimages (RPM livré avec advi).
+ ==>PW fait dans la même mesure que camlimages (RPM livré avec advi).
 
  * refaire la page WEB.
 
  * packagifier pour Linux?
- ==> c'est fait pour RedHat.
+ ==>PW c'est fait pour RedHat grâce à Jun.
 
  * fixer partout dans la distribution le nom d'Active-DVI en utilisant
 la macro du manuel \def\ActiveDVI{Active-DVI}
+ ==>PW ouf! c'est fait!
 
 KNOWN BUGS:
 ===========
- * Spurious fatal error: (the psfile had a bounding box, but the dvi
+ *PW Spurious fatal error: (the psfile had a bounding box, but the dvi
    file contained vscale=100.0 hoffset=-228.0 voffset=-368.0
    hscale=100.0, instead of llx, lly, urx, ury).
  Fatal error: exception Failure("psfile: no bbox")
@@ -29,6 +30,7 @@ DELAYED AFTER RELEASE:
 LIMITATIONS:
 
 * Grdev.cut does not work ?
+==>PW could you elaborate a bit ???
 
 * PStricks ne marche pas correctement avec \ncarc etc. (annotation sur les
   flèches). 
@@ -37,6 +39,7 @@ LIMITATIONS:
 config.ml.in instead of dynamically finding the search path for fonts). 
 This will not work if the user install news fonts and sets some environment
 variable accordingly. 
+==>PW has to be revisited
 
 CLEANING: 
 
@@ -45,6 +48,8 @@ CLEANING:
 
 * The hyperref links (green boxes) are a little to close to the text (take a
   link that ends with a '2' for instance) 
+  ==>PW added some extra blank space, but this needs to be rewritten
+  using the parameters of the font of the glyphs at hand.
 
 WISH LIST: 
 
@@ -55,21 +60,31 @@ WISH LIST:
     . embeded applets are not launched
       (then, they could be launch by a key stroke, this is actually an
        interesting mode for applets)
+    ==>PW implemented -safer option.
+        need to add launching by keystrokes as suggested here and below
 
     . reload would not kill/restart applets that are the same string command
       after reloading (this is also an interesting feature)
-    ==> could you explain ?
+    ==>PW could you explain ? May be you can try ^L (redisplay) and r
+    (redraw), as opposed to R (reload) ? In addition, I guess your
+    wish also has some relationship with the semantics of advi's persistent
+    and sticky embedded applications ? Is there still something to
+    implement for that wish ?
 
  - Adapter la résolution aux vrai dpy de l'écran
+   ==>PW code is prepared to do so. Still need to get characteristics
+   of the screen into X ressources.
 
  - transbox: replace steps by a timer
-   ==> to wish list
+   ==>PW to wish list
 
  - alpha, blend, etc. for images: keep track within text and emit the info
    at every image?
-   ==> to wish list
+   ==>PW could you explain (alpha and blending preferences already are
+   image specific, so what more ?)
 
- ==> tester fullscreen mode
+ - tester fullscreen mode
+ ==>PW I don't think it works properly.
 
  - fork? (i.e. lancer un dvi identique à celui qui tourne)
 
@@ -80,14 +95,14 @@ WISH LIST:
       -> générer des footnotes (avec un cadre ou dans une mini-bulle)
 
   * exporter \ifadvi et \Ifadvi
-  ==> done ?
+  ==>PW done ?
 
- - ajouter m et i comme j et k mais une ligne à la fois (scrolling).
+ -PW ajouter m et i comme j et k mais une ligne à la fois (scrolling).
 
- - We need a .advirc file to setup options at launch time, and store
+ -PW We need a .advirc file to setup options at launch time, and store
 user's preferences for key bindings.
 
- - Traiter les fichiers postscript sans llx lly urx ury mais avec
+ -PW Traiter les fichiers postscript sans llx lly urx ury mais avec
 vscale=100.0 hoffset=-228.0 voffset=-368.0 hscale=100.0
 
  - while 'g' jumps to aboslute (dvi) <page number>, 
@@ -96,33 +111,41 @@ vscale=100.0 hoffset=-228.0 voffset=-368.0 hscale=100.0
   (Do not make 'G' the default, since it is fragiles ---depends on how latex
   has generated page numbers. Experiment with book files slides, etc.)
 
- - Need to control advi from within tex
+ -PW Need to control advi from within tex
    \advikey{key} would generate a call to key as if key has been pressed
    \advicom{f arg} would generate a call to internal function f with
    argument arg.
 
- - Need to be able to generate graphics from the Graphics module, that
+ -PW Need to be able to generate graphics from the Graphics module, that
    are displayed directly inside the advi screen.
 
- - Need also to be able to pop a small window to request something to
+ -PW Need also to be able to pop a small window to request something to
  the user (for instance to launch applications on a on demand basis).
 
- - Should incorporate the clock into the core advi in order to be able
+ -PW Should incorporate the clock into the core advi in order to be able
  to interact smoothly with it (for instance to have a key to hide it)...
 
  DR: Not necessarily: the key bindings could be programmed from tex (neeed
  to be added). Then the user could also launch an application by hitting a
  key of his choice [ add an action on-key similar to on-clikc or on-mouse
  for active parts ]
+ PW: I already listed above:
+   ``\advikey{key} would generate a call to key as if key has been pressed
+     \advicom{f arg} would generate a call to internal function f with
+     argument arg.''
+   So we should add also the combinaison of both
+   \advikeybinding{key}{f arg}
+   that bind keystroke key to internal function call f (arg)
 
- - Need a key to hide and show windows
+ -PW Need a key to hide and show windows
 
 ==> Which ones?
+ ==> PW: the windows that advi launches, what else ?
 
  - Need a key binding similar to 'g' such that it goes to the page and pushes
    on the stack alll the pages from here to the target page
 
- - Need a ``compiling'' version of advi (name it advic) that creates
+ -PW Need a ``compiling'' version of advi (name it advic) that creates
    and caches all the images of a presentation to speed up the
    presentation afterwards. (Otherwise one is obliged to play the
    presentation in advance by viewing every slides!)
@@ -130,17 +153,29 @@ vscale=100.0 hoffset=-228.0 voffset=-368.0 hscale=100.0
  DR: I don't think so, since there is already several unfreeze flags to do
  that.  You should just use them, maybe add -unfreeze on the command line,
  that would do as if you press the unfree keep.
+ PW: Good news! You're right, I want to use those flags not to
+ reimplement them! So, please tell me what are the names of the
+ ``several unfreeze flags to do that'' ?
 
- - Add a new macro !current-page! for insertion in arguments of command
+ -PW Add a new macro !current-page! for insertion in arguments of command
    calls.
 
- - Animated backgrounds ?
+ -PW Animated backgrounds ?
 
- - Engine for animated stuff from the W3C (SVG standard) ?
+ -PW Engine for animated stuff from the W3C (SVG standard) ?
 
- - Engine for PDF rendering ?
+ -PW Engine for PDF rendering ?
+
+ -PW add a new -n flag to advi, that would list the commands that could
+possibly be launched from a dvi file.
 
 Bindings
 --------
 
  - bind focus in to + and = and focus out to - and _
+ PW Why all those doublons (triplons, say!)?
+ (There already exist > and < to do that)
+
+ PW We should choose one default key for each functionality and let the
+ user redefine those bindings as soon as we have an .advirc
+ implementation ?
