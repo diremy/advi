@@ -200,17 +200,16 @@ type bkgd_prefs = {
   mutable bgfunction: (viewport -> unit) option; 
 };;
 
-
-let set_default_color r s = r := Dvicolor.parse_color (String.lowercase s);;
 let default_bgcolor = ref Graphics.white;;
 let default_fgcolor = ref Graphics.black;;
 let fgcolor () = !default_fgcolor;;
 
-let color = ref !default_fgcolor;;
+let set_default_color r s = r := Dvicolor.parse_color (String.lowercase s);;
+let set_fgcolor_string = set_default_color default_fgcolor;;
 
 Options.add
   "-fgcolor"
-  (Arg.String (set_default_color default_fgcolor))
+  (Arg.String set_fgcolor_string)
   "STRING\tSet default foreground color (Named or RGB)";;
 
 let default_bkgd_data () =
@@ -223,6 +222,28 @@ let default_bkgd_data () =
     bgviewport = None;
     bgfunction = None};;
 
+let bkgd_data = default_bkgd_data ();;
+
+let set_bgcolor_string s =
+  set_default_color default_bgcolor s;
+  bkgd_data.bgcolor <- !default_bgcolor;;
+
+Options.add
+  "-bgcolor"
+  (Arg.String set_bgcolor_string)
+  "STRING\tSet default background color (Named or RGB)";;
+
+let reverse_colors () =
+  let c = fgcolor () in
+  default_fgcolor := !default_bgcolor;
+  default_bgcolor := c;;
+
+Options.add
+  "-rv"
+  (Arg.Unit reverse_colors)
+  "\tReverse video is simulated by swapping the \
+     foreground and background colors.";;
+
 let blit_bkgd_data s d =
   d.bgcolor <- s.bgcolor;
   d.bgimg   <- s.bgimg;
@@ -232,8 +253,6 @@ let blit_bkgd_data s d =
   d.bgblend <- s.bgblend;
   d.bgviewport <- s.bgviewport;
   d.bgfunction <- s.bgfunction;;
-
-let bkgd_data = default_bkgd_data ();;
 
 let copy_of_bkgd_data () =
   let c = default_bkgd_data () in
@@ -350,14 +369,6 @@ let get_bg_color x y w h =
     else find_bg_color x y w h
   end;;
 
-Options.add
-  "-bgcolor"
-  (Arg.String
-     (fun s ->
-        set_default_color default_bgcolor s;
-        bkgd_data.bgcolor <- !default_bgcolor))
-  "STRING\tSet default background color (Named or RGB)";;
-
 let get_color_table =
   let htable = Hashtbl.create 257 in
   function (bg, fg as col) ->
@@ -421,6 +432,8 @@ let set_bbox bb =
       bbox := { x = x0; y = !size_y - y0; w = w; h = -h};;
 
 (*** Drawing ***)
+let color = ref !default_fgcolor;;
+
 let set_color col =
   if not !opened then failwith "Grdev.set_color: no window";
   (*prerr_endline "set_color";*)

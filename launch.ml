@@ -103,8 +103,8 @@ Options.add
     (fun () ->
       if !policy <> Ask then Misc.warning "Setting policy to -ask";
       set_policy Ask))
-  "\tAsk mode: ask confirmation before launching an external application\n\
-   \t(the default policy mode)";;
+  "\tAsk mode: launching an external application requires confirmation\n\
+   \t(this is the default)";;
 
 let cannot_execute_command command_invocation =
     Misc.warning
