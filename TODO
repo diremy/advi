@@ -2,6 +2,7 @@ BEFORE RELEASE:
 ===============
 
  * Fixer les KNOWN BUGS
+ ==> fait
 
  * compléter manual.tex (la plupart des morceaux manquants existent mais
    sont dispersés)
@@ -34,9 +35,6 @@ KNOWN BUGS:
    file contained vscale=100.0 hoffset=-228.0 voffset=-368.0
    hscale=100.0, instead of llx, lly, urx, ury).
  Fatal error: exception Failure("psfile: no bbox")
-
- * Bulles?
- ==> corrigé ?
 
 DELAYED AFTER RELEASE:
 ======================
@@ -121,3 +119,17 @@ to interact smoothly with it (for instance to have a key to hide it)...
 
  - Need a key binding similar to 'g' such that it goes to the page and pushes
    on the stack alll the pages from here to the target page
+
+-- Need a ``compiling'' version of advi (name it advic) that creates
+   and caches all the images of a presentation to speed up the
+   presentation afterwards. (Otherwise one is obliged to play the
+   presentation in advance by viewing every slides!)
+
+ - Add a new macro !current-page! for insertion in arguments of command
+   calls.
+
+ - Animated backgrounds ?
+
+ - Engine for animated stuff from the W3C (SVG standard) ?
+
+ - Engine for PDF rendering ?
