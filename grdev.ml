@@ -63,7 +63,7 @@ let sync b =
   else begin flush_last(); last_is_dvi := b end;;
 
 let synchronize () =
-  Gs.flush(); 
+  Gs.flush();
   Graphics.synchronize();;
 
 type busy = Free | Busy | Pause | Disk
@@ -456,7 +456,16 @@ let embed_app command app_type width height x y =
   in
 
   let wid = GraphicsX11.open_subwindow ~x ~y:(y - height) ~width ~height in
+
+  (*** !x commands
+    !g : geometry like 100x100+20+30
+    !p : embedding target window id (in digit)
+    !w : width  of the target window in pixel
+    !h : height of the target window in pixel
   
+    Why "!"?  '\' is for TeX. "%" is for TeX. "$" is for TeX...
+  ***)
+
   let opt_geometry = 
     Printf.sprintf "%dx%d+%d+%d" width height 0 0
   in
@@ -659,21 +668,23 @@ module H =
             
             
     let deemphasize now emph =
-      Graphics.display_mode now;
-      begin match emph with
-      | Rect (ima, act, l) ->
-          List.iter
-            (function ima, act -> Graphics.draw_image ima act.A.x act.A.y) l;
-          Graphics.draw_image ima act.A.x act.A.y;
-      | Screen (ima, act, all_anchors) ->
-          anchors := all_anchors;
-          Gs.flush();
-          Graphics.draw_image ima 0 0;
-      | Nil -> ()
-      end;
-      GraphicsY11.set_cursor GraphicsY11.Cursor_left_ptr;
-      Graphics.display_mode false
-
+      if emph = Nil then ()
+      else begin
+	Graphics.display_mode now;
+	begin match emph with
+	| Rect (ima, act, l) ->
+            List.iter
+              (function ima, act -> Graphics.draw_image ima act.A.x act.A.y) l;
+            Graphics.draw_image ima act.A.x act.A.y;
+	| Screen (ima, act, all_anchors) ->
+            anchors := all_anchors;
+            Gs.flush();
+            Graphics.draw_image ima 0 0;
+	| Nil -> raise (Failure "this must not be called") 
+	end;
+	GraphicsY11.set_cursor GraphicsY11.Cursor_left_ptr;
+	Graphics.display_mode false
+      end
         
     let emphasize c act =
       let ima = Graphics.get_image act.A.x act.A.y act.A.w act.A.h in
