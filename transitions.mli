@@ -22,9 +22,13 @@ type direction =
    | DirCenter | DirNone
 ;;
 
+type pathelem = float * float * float * float
+;;
+
 type t =
    | TransNone
    | TransSlide of int option * direction
    | TransWipe of int option * direction
    | TransBlock of int option * direction
+   | TransPath of int option * string * pathelem * pathelem
 ;;

@@ -198,7 +198,28 @@ let string_of_transmode = function
   | TransSlide _ -> "slide"
   | TransBlock _ -> "block"
   | TransWipe _ -> "wipe"
+  | TransPath _ -> "path"
 ;;
+
+(* collection of path generators wired in *)
+
+let get_genpath = function 
+    "spiral" -> (fun steps (sx,sy,ss,sr) (tx,ty,ts,tr) i -> failwith "Spiral not yet implemented") 
+  | "line" -> (fun steps (sx,sy,ss,sr) (tx,ty,ts,tr) ->
+                 let stepx = (tx-.sx)/.(float steps) and stepy=(ty-.sy)/.(float steps) in
+		 fun i ->
+                   let x, y = sx+.(float i)*.stepx,sy+.(float i)*.stepy in
+                   (x, y, ss, sr))
+  | s    -> failwith ("Unknown path"^s)
+;;
+
+(* rendering function for sprites along a path *)
+
+let render newimg width height 
+    (prevx,prevy,prevscale,prevrot)
+    (nextx,nexty,nextscale,nextrot)
+    =
+    draw_sprite newimg (int_of_float nextx) (int_of_float nexty) width height
 
 let box_transition trans oldimg newimg x y width height =
   let screen_w = Graphics.size_x () and screen_h = Graphics.size_y () in
@@ -240,6 +261,21 @@ let box_transition trans oldimg newimg x y width height =
       with
       |	Exit -> ()
       end
+  | TransPath (steps,genpath,start,stop) ->
+      let steps = get_steps 50 steps in
+      let genpath = get_genpath genpath steps start stop in
+      let rec loop prev i =
+	if i >= steps then () else
+	  let next = genpath i in
+          render newimg width height prev next;
+	  loop next (i+1)
+      in
+      begin try 
+	loop start 0
+       with
+      |	Exit -> ()
+      end
+     
   | TransBlock (step, from) ->
       let step = get_steps 50 step in
       Graphics.remember_mode false;

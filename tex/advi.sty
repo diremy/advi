@@ -237,16 +237,27 @@ Maybe you mean \@currenvir ing}}
 
 \def \advi@transfrom{}
 \def \advi@transsteps{}
+\def \advi@transstartx{}
+\def \advi@transstarty{}
+\def \advi@transstopx{}
+\def \advi@transstopy{}
+\def \advi@transgenpath{}
 \def \advi@settrans {\advi@global \def}
 \define@key {advi@trans}{none} []{\advi@settrans \advi@transmode {none}}
 \define@key {advi@trans}{slide}[]{\advi@settrans \advi@transmode {slide}}
 \define@key {advi@trans}{block}[]{\advi@settrans \advi@transmode {block}}
 \define@key {advi@trans}{wipe} []{\advi@settrans \advi@transmode {wipe}}
+\define@key {advi@trans}{path} []{\advi@settrans \advi@transmode {path}}
 \define@key {advi@trans}{from} {\advi@settrans \advi@transfrom { from=#1}}
+\define@key {advi@trans}{startx} {\advi@settrans \advi@transstartx { startx=#1}}
+\define@key {advi@trans}{starty} {\advi@settrans \advi@transstarty { starty=#1}}
+\define@key {advi@trans}{stopx} {\advi@settrans \advi@transstopx { stopx=#1}}
+\define@key {advi@trans}{stopy} {\advi@settrans \advi@transstopy { stopy=#1}}
 \define@key {advi@trans}{steps}{\advi@settrans \advi@transsteps { steps=#1}}
+\define@key {advi@trans}{genpath}{\advi@settrans \advi@transgenpath { genpath=#1}}
 
 \def \advi@transemit
-   {\advi@special{trans \advi@transmode \advi@transfrom \advi@transsteps}}
+   {\advi@special{trans \advi@transmode \advi@transfrom \advi@transsteps \advi@transstartx \advi@transstarty \advi@transstopx \advi@transstopy \advi@transgenpath}}
 \newif \ifadvi@translocal 
 \newcommand {\advi@transition}[2][]{%
   \begingroup
@@ -312,7 +323,7 @@ Maybe you mean \@currenvir ing}}
       {\hbox {\advi@transbox@save{\the\wd0 }{\the\ht0 }{\the\dp0}%
               \unhbox0\setkeys {advi@trans}{#1}%
               \advi@transbox@go
-                  {\advi@transmode \advi@transfrom \advi@transsteps}}}%
+                  {\advi@transmode \advi@transfrom \advi@transsteps  \advi@transstartx \advi@transstarty \advi@transstopx \advi@transstopy \advi@transgenpath}}}%
    \def \advi@@afterbox {\aftergroup \advi@afterbox} 
    \afterassignment \advi@@afterbox \setbox0 \hbox } 
 

@@ -576,6 +576,19 @@ let scan_embed_special st s =
 let parse_transition dir mode record =
   let default_dir =
     match dir with Some d -> d | None -> Transitions.DirNone in
+  let parse_genpath record =
+    try
+      List.assoc "genpath" record
+    with _ ->
+      warning ("special: trans push: genpath function not found "); "spiral"
+  in
+  let parse_pathelem s =
+    try
+      (float_of_string (List.assoc (s^"x") record),
+       float_of_string (List.assoc (s^"y") record),1.0,0.0)
+    with _ ->
+      warning ("special: trans push: pathelem "^s^" not found "); (0.0,0.0,1.0,0.0)
+  in
   let parse_steps =
     try
       let stepsstr = List.assoc "steps" record in
@@ -610,6 +623,8 @@ let parse_transition dir mode record =
                            parse_direction "from" default_dir)
   | "block" -> Transitions.TransBlock (parse_steps,
                            parse_direction "from" Transitions.DirNone)
+  | "path" -> Transitions.TransPath (parse_steps,
+	                   parse_genpath record, parse_pathelem "start", parse_pathelem "stop")
   | "none" ->  Transitions.TransNone
   | _ ->
      warning ("special: trans push: mode parse failed \"" ^ mode ^ "\"");
