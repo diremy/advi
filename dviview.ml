@@ -146,7 +146,7 @@ open Dimension;;
 exception Error of string;;
 
 (*** View attributes ***)
-(* things we can set before initialization *)
+(* Things we can set before initialization *)
 
 type attr = {
     mutable geom : Ageometry.t;
@@ -156,8 +156,12 @@ type attr = {
   };;
 
 (*** The view state ***)
-type mode = Selection | Control;;
-type toc = Page of int | Thumbnails of int * (int * Graphics.image) array
+type mode =
+   | Selection
+   | Control;;
+type toc =
+   | Page of int
+   | Thumbnails of int * (int * Graphics.image) array;;
 type state = {
     (* DVI attributes *)
     filename : string;
@@ -186,15 +190,15 @@ type state = {
     mutable pause_number : int;
     (* Attributes for Embedded postscript *)
 
-    (* true when page was not completed: may need to redraw *)
+    (* True when page was not completed: may need to redraw *)
     mutable aborted : bool;
-    (* true when hrefs have not been processed *)
+    (* True when hrefs have not been processed *)
     mutable frozen : bool;
-    (* numeric value for keyboard interaction *)
+    (* Numeric value for keyboard interaction *)
     mutable num : int;
-    (* next numeric value *)
+    (* Next numeric value *)
     mutable next_num : int;
-    (* control the action of the mouse *)
+    (* Control the action of the mouse *)
     mutable mode : mode;
     (* Some of f when on a pause *)
     mutable cont : (unit -> bool) option;
@@ -285,10 +289,10 @@ let init_geometry all st =
     | In f -> float attr.geom.Ageometry.height /. (h_in +. 2.0 *. f)
     | _ -> assert false in
   let base_dpi = min wdpi hdpi in
-  let width = Misc.round (* int_of_float *) (base_dpi *. w_in)
-  and height = Misc.round (* int_of_float *) (base_dpi *. h_in)
-  and real_width = Misc.round (* int_of_float *) (base_dpi *. w_in *. st.ratio)
-  and real_height = Misc.round (* int_of_float *) (base_dpi *. h_in *. st.ratio) in
+  let width = Misc.round (base_dpi *. w_in)
+  and height = Misc.round (base_dpi *. h_in)
+  and real_width = Misc.round (base_dpi *. w_in *. st.ratio)
+  and real_height = Misc.round (base_dpi *. h_in *. st.ratio) in
   let fwidth = base_dpi *. w_in
   and fheight = base_dpi *. h_in in
   let (size_x, size_y) =
@@ -383,7 +387,7 @@ let update_dvi_size all ?dx ?dy st =
   begin match dy with None -> () | Some z -> st.orig_y <- z end;
   set_bbox st;;
 
-(* incremental drawing *)
+(* Incremental drawing *)
 let synchronize st =
   if st.synchronize then Grdev.synchronize()
 
@@ -423,11 +427,11 @@ let draw_bounding_box st =
   Grdev.fill_rect st.orig_x (st.orig_y + st.dvi_height) st.dvi_width 1;
   Grdev.fill_rect (st.orig_x + st.dvi_width) st.orig_y 1 st.dvi_height;;
 
-(* Input : a point in window coordinates, relative to lower-left corner.
-   Output : a point in document coordinates, relative to upper-right corner.
+(* Input : a point in window coordinates, relative to the lower-left corner.
+   Output : a point in document coordinates, relative to the upper-right corner.
    The output depends on the ratio st.ratio. *)
 let document_xy st x y =
-  (* x and y are relative to lower-left corner, *)
+  (* x and y are relative to the lower-left corner. *)
   let y = st.size_y - y in
   x, y;;
 
@@ -442,12 +446,13 @@ let position st x y =
       flush stdout
   | None -> ();;
 
-(* User has selected a region with the mouse. We dump characters. *)
+(* User has selected a region with the mouse.
+   We dump the corresponding characters. *)
 let selection s = Grdev.cut s;;
 
 let get_size_in_pix st = function
   | Px n -> n
-  | In f -> Misc.round (* int_of_float *) (st.base_dpi *. f)
+  | In f -> Misc.round (st.base_dpi *. f)
   | _ -> assert false;;
 
 let vmargin_size st = get_size_in_pix st attr.vmargin;;
@@ -479,10 +484,8 @@ let move_within_margins_y st movey =
       if tmp_orig_y - vmargin_size > 0
       then vmargin_size
       else tmp_orig_y
-    end
-  in
-  if st.orig_y <> new_orig_y then Some new_orig_y
-  else None;;
+    end in
+  if st.orig_y <> new_orig_y then Some new_orig_y else None;;
 
 let move_within_margins_x st movex =
   let tmp_orig_x = st.orig_x + movex in
@@ -496,14 +499,12 @@ let move_within_margins_x st movex =
       if tmp_orig_x - hmargin_size > 0
       then hmargin_size
       else tmp_orig_x
-    end
-  in
-  if st.orig_x <> new_orig_x then Some new_orig_x
-  else None;;
+    end in
+  if st.orig_x <> new_orig_x then Some new_orig_x else None;;
 
 let redraw ?trans ?chst st =
-  (* draws until the current pause_number or page end    *)
-  (* the pauses and waits that appear before are ignored *)
+  (* Draws until the current pause_number or page end. *)
+  (* The pauses and waits that appear before are ignored. *)
   Busy.set Busy.Busy;
   st.cont <- None;
   st.aborted <- false;
@@ -622,7 +623,7 @@ let make_thumbnails st =
 	     with x -> pauses := p; raise x in
 	   without_pauses(redraw ?chst:(Some chgvp))
              {ist with page_number = p};
-           (* interrupt thumbnail computation if user interacts *)
+           (* Interrupt thumbnail computation in case of user interaction. *)
            begin try Grdev.continue() with
            | Grdev.Stop ->
                let gray = Graphics.rgb 200 200 200 in
@@ -667,7 +668,7 @@ let show_thumbnails st r page =
          (Grdev.H.Href ("#/page." ^ string_of_int (p + 1))) x
          (size_y - y - dy) dx dy)
     page;
-  (* to force the page under thumbnails to be redrawn *)
+  (* To force the page under thumbnails to be redrawn *)
   st.aborted <- true
 ;;
 
@@ -734,18 +735,18 @@ let exec_xref link =
         | ".dvi" ->
             let command = String.concat " " (Sys.argv.(0) :: arguments) in
             call command fname
-        | ".html" | ".htm" ->
+        | ".html" | ".shtml" | ".htm" | ".shtm" ->
             call !browser link
-        (* In any other cases we call the pager program. *)
-        | ".txt" | ".tex" | ".ftex" | ".sty" | ".pic"
-        | ".ml" | ".scm" | ".c" | ".el" ->
-            call !pager fname
         | ".pdf" -> call !pdf_viewer fname
         | ".ps" | ".eps" -> call !ps_viewer fname
         | ".bmp" | ".gif" | ".png" | ".jpg" | ".jpeg"
         | ".pbm" | ".pgm" | ".pnm" | ".tiff" | ".xpm" ->
             call !image_viewer fname
         | ".mpg" -> call !film_viewer fname
+        (* In any other cases we call the pager program. *)
+        | ".txt" | ".tex" | ".ftex" | ".sty" | ".pic"
+        | ".ml" | ".scm" | ".c" | ".el" ->
+            call !pager fname
         | _ ->
             Misc.warning
               (Printf.sprintf "Don't know what to do with link %s" link)
@@ -784,6 +785,7 @@ let reload_time st =
   with _ -> st.last_modified;;
 
 let reload st =
+  Misc.warning "reloading DVI file";
   try
     Grdev.clear_usr1();
     st.last_modified <- reload_time st;
@@ -795,8 +797,8 @@ let reload st =
     and h_sp = dvi.Dvi.postamble.Dvicommands.post_height in
     let w_in = mag *. ldexp (float w_sp /. dvi_res) (-16)
     and h_in = mag *. ldexp (float h_sp /. dvi_res) (-16) in
-    let width = Misc.round (* int_of_float *) (w_in *. st.base_dpi *. st.ratio)
-    and height = Misc.round (* int_of_float *) (h_in *. st.base_dpi *. st.ratio) in
+    let width = Misc.round (w_in *. st.base_dpi *. st.ratio)
+    and height = Misc.round (h_in *. st.base_dpi *. st.ratio) in
     let npages =  Array.length dvi.Dvi.pages in
     st.dvi <- dvi;
     st.cdvi <- cdvi;
@@ -816,14 +818,15 @@ let reload st =
     Gs.init_do_ps ();
     redraw ?trans:(Some Transitions.DirTop) st
   with x ->
-    (* To be revisited (should assert Options.debug) *)
-    assert (Misc.debug_endline (Printexc.to_string x); true);
+    Misc.warning
+      (Printf.sprintf "exception while reloading %s" (Printexc.to_string x));
     st.cont <- None;;
 
 let changed st =
   reload_time st > st.last_modified;;
 
-let goto_page n st = (* go to the begining of the page *)
+(* Go to the begining of the page. *)
+let goto_page n st =
   let new_page_number = max 0 (min n (st.num_pages - 1)) in
   if st.page_number <> new_page_number || st.aborted then
     begin
@@ -939,7 +942,7 @@ let scale n st =
     else  (1. /. !scale_step) ** float (0 - n) in
     if !autoresize then
       begin
-        let scale x = Misc.round (* int_of_float *) (float x *. factor) in
+        let scale x = Misc.round (float x *. factor) in
         attr.geom.Ageometry.width <- scale st.size_x;
         attr.geom.Ageometry.height <- scale st.size_y;
         Grdev.close_dev ();
@@ -956,8 +959,8 @@ let scale n st =
           begin
             st.ratio <- new_ratio;
             let (cx, cy) = (st.size_x / 2, st.size_y / 2) in
-            st.orig_x <- Misc.round (* int_of_float *) (float (st.orig_x - cx) *. factor) + cx;
-            st.orig_y <- Misc.round (* int_of_float *) (float (st.orig_y - cy) *. factor) + cy;
+            st.orig_x <- Misc.round (float (st.orig_x - cx) *. factor) + cx;
+            st.orig_y <- Misc.round (float (st.orig_y - cy) *. factor) + cy;
           end;
       end;
   update_dvi_size true st;
@@ -1335,11 +1338,6 @@ let main_loop filename =
           if !click_turn_page then B.pop_previous_page st
       | Grdev.Click (_, Grdev.Button3, _, _) ->
           if !click_turn_page then B.next_pause st
-(*
- | Grdev.Click (Grdev.Bottom_right, _) -> B.next_pause st
- | Grdev.Click (Grdev.Bottom_left, _) -> B.pop_previous_page st
- | Grdev.Click (Grdev.Top_right, _) -> B.push_page st
-*)
       | Grdev.Nil -> ()
     done with Exit -> Grdev.close_dev ()
   end;;
