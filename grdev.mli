@@ -79,6 +79,7 @@ val set_bbox : (int * int * int * int) option -> unit ;;
 (* Drawing *)
 
 type color = int ;;
+val fgcolor : unit -> color;;
 
 type bgoption = BgColor of color | BgImg of string;;
 

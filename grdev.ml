@@ -74,7 +74,6 @@ let opened = ref false;;
 
 let size_x = ref 0;;
 let size_y = ref 0;;
-let color = ref 0x000000;;
 
 let xmin = ref 0;;
 let xmax = ref 0;;
@@ -222,6 +221,26 @@ let get_glyph g = g.glyph;;
 (* The Background preferences                                   *)
 (* to be extended, should contain the image, gradients etc. RDC *)
 
+let set_default_color r s =
+   r := 
+     match s with
+     | "black" | "Black" -> Graphics.black
+     | "white" | "White" -> Graphics.white
+     | "red" | "Red" -> Graphics.red
+     | "green" | "Green" -> Graphics.green
+     | "blue" | "Blue" -> Graphics.blue
+     | "yellow" | "Yellow" -> Graphics.yellow
+     | "cyan" | "Cyan" -> Graphics.cyan
+     | "magenta" | "Magenta" -> Graphics.magenta
+     | s -> int_of_string s
+
+let default_bgcolor = ref Graphics.white
+let default_fgcolor = ref Graphics.black
+let fgcolor() = !default_fgcolor;;
+
+
+let color = ref 0x000000;;
+
 type bkgd_prefs = {
   mutable bgcolor : int;
   mutable bgimg : string option;
@@ -230,11 +249,14 @@ type bkgd_prefs = {
 };;
 
 let default_bkgd_data () =
-  { bgcolor = Graphics.white;
+  { bgcolor = !default_bgcolor;
     bgimg = None;
     bgratio = Draw_image.ScaleY;
-    bgwhitetrans = false };;
+    bgwhitetrans = false }
+;;
 
+(*
+(* ??? White is this code a duplicate of the above??? *)
 let copy_bkgd_data s d =
   d.bgcolor <- s.bgcolor;
   d.bgimg   <- s.bgimg;
@@ -247,6 +269,7 @@ let copy_of_bkgd_data () =
   let c = default_bkgd_data () in
   copy_bkgd_data bkgd_data c;
   c;;
+*)
 
 let copy_bkgd_data s d =
   d.bgcolor <- s.bgcolor;
@@ -259,6 +282,20 @@ let bkgd_data = default_bkgd_data ();;
 let copy_of_bkgd_data () =
   let c = default_bkgd_data () in
   copy_bkgd_data bkgd_data c; c;;
+
+
+let _ = Misc.set_option
+     "-fgcolor"
+     (Arg.String (set_default_color default_fgcolor))
+     "STRING\tSet default foreground color (Named or RGB)"
+let _ = Misc.set_option
+     "-bgcolor"
+     (Arg.String
+        (fun s ->
+          set_default_color default_bgcolor s;
+          bkgd_data.bgcolor <- !default_bgcolor;
+        ))
+     "STRING\tSet default background color (Named or RGB)"
 
 (* TODO: handle ratio and whitetransparent preferences *)
 
@@ -281,6 +318,7 @@ let set_bg_options l = List.iter set_bg_option l;;
 
 let bg_color = ref bkgd_data.bgcolor;;
 let bg_colors = ref [];;
+
 
 let push_bg_color c =
   bg_colors := !bg_color :: !bg_colors;
@@ -989,6 +1027,7 @@ let open_dev geom =
   Graphics.remember_mode true;
   GraphicsY11.display_mode !Misc.global_display_mode;
   Graphics.set_window_title !title;
+  color := !default_fgcolor;
   opened := true;;
 
 let close_dev () =
@@ -1184,7 +1223,7 @@ let wait_select_rectangle x y =
         else Final (Region (x, y, dx', 0 - dy'))
     | x -> x
   in
-  set_color Graphics.black;
+  set_color !default_fgcolor;
   GraphicsY11.display_mode true;
   GY.set_cursor select_cursor;
   let restore () =
@@ -1266,12 +1305,13 @@ let wait_move_button_up x y =
         if e.GY.button then move dx' dy'
         else Final (Move (dx', 0 - dy'))
     | x -> x in
-  set_color Graphics.black;
+  let color = !color in
+  set_color !default_fgcolor;
   GY.set_cursor move_cursor;
   GraphicsY11.display_mode true;
   let restore () =
     GraphicsY11.display_mode false;
-    set_color !color;
+    set_color color;
     GY.set_cursor !free_cursor in
   try let e = move 0 0 in restore (); e
   with exn -> restore (); raise exn;;

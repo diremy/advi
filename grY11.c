@@ -123,7 +123,7 @@ value gr_screen_y(void)
 
 void gr_origin(int* x, int* y)
 {
-  Window win, root, r;
+  Window win, root, parent, r;
   Window* children;
   int dx, dy, h, w, b, d; 
   gr_check_open();
@@ -134,7 +134,8 @@ void gr_origin(int* x, int* y)
     XGetGeometry (grdisplay, win, &r, &dx, &dy, &w, &h, &b, &d);
     *x = *x + dx;
     *y = *y + dy;
-    XQueryTree (grdisplay, win, &r, &win, &children, &b);
+    XQueryTree (grdisplay, win, &r, &parent, &children, &b);
+    win = parent;
   }
   return;
 }
@@ -422,6 +423,40 @@ value gr_reposition (value x, value y, value w, value h)
                     Int_val(x), Int_val(y), width, height);
   /* Not sufficient, should tell the manager not to decorate the window */
   XSetWindowBorderWidth(grdisplay, grwindow.win, width<0 ? 0 : BORDER_WIDTH);
+
+    grwindow.w = width;
+    grwindow.h = height;
+    if (grwindow.w > grbstore.w || grwindow.h > grbstore.h) {
+
+      /* Allocate a new backing store large enough to accomodate
+         both the old backing store and the current window. */
+      struct canvas newbstore;
+      newbstore.w = max(grwindow.w, grbstore.w);
+      newbstore.h = max(grwindow.h, grbstore.h);
+      newbstore.win =
+        XCreatePixmap(grdisplay, grwindow.win, newbstore.w, newbstore.h,
+                      XDefaultDepth(grdisplay, grscreen));
+      newbstore.gc = XCreateGC(grdisplay, newbstore.win, 0, NULL);
+      XSetBackground(grdisplay, newbstore.gc, grwhite);
+      XSetForeground(grdisplay, newbstore.gc, grwhite);
+      XFillRectangle(grdisplay, newbstore.win, newbstore.gc,
+                     0, 0, newbstore.w, newbstore.h);
+      XSetForeground(grdisplay, newbstore.gc, grcolor);
+      if (grfont != NULL)
+        XSetFont(grdisplay, newbstore.gc, grfont->fid);
+
+      /* Copy the old backing store into the new one */
+      XCopyArea(grdisplay, grbstore.win, newbstore.win, newbstore.gc,
+                0, 0, grbstore.w, grbstore.h, 0, newbstore.h - grbstore.h);
+
+      /* Free the old backing store */
+      XFreeGC(grdisplay, grbstore.gc);
+      XFreePixmap(grdisplay, grbstore.win);
+
+      /* Use the new backing store */
+      grbstore = newbstore;
+    }
+
   XFlush(grdisplay);
   return Val_unit;
 }

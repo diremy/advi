@@ -517,7 +517,6 @@ let embed_special st s =
     width_pixel, height_pixel in
   let x = st.x_origin + int_of_float (st.conv *. float st.h)
   and y = st.y_origin + int_of_float (st.conv *. float st.v) in
-  prerr_endline (Printf.sprintf "x=%d y=%d" x y);
   if not (is_hidden ()) then
     Dev.embed_app command app_type app_name width_pixel height_pixel x y;;
 
@@ -1064,7 +1063,7 @@ let render_step cdvi num dpi xorig yorig =
       cur_gtable = dummy_gtable;
       cur_font = dummy_font;
       h = 0; v = 0; w = 0; x = 0; y = 0; z = 0;
-      stack = []; color = 0x000000; color_stack = [];
+      stack = []; color = Grdev.fgcolor(); color_stack = [];
       alpha = 1.0; alpha_stack = [];
       blend = Dev.Normal; blend_stack = [];
       epstransparent = true; epstransparent_stack = [];
