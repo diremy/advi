@@ -902,8 +902,8 @@ let bind_keys () =
    'C', B.clear_image_cache;
 
    (* Scratching. *)
-   's', B.scratch;
-   'S', B.scratch_write;
+   's', B.scratch_write;
+   'S', B.scratch;
   ];;
 
 bind_keys ();;
