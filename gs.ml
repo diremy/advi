@@ -56,7 +56,7 @@ let parse_pos s =
   let b =
     if bc = 'a' then true else if bc = 'r' then false
     else assert false in
-  let left = String.sub s 4 (c-4) in
+  let left = String.sub s 4 (c - 4) in
   let right = String.sub s (c + 1) (String.length s - c - 1) in
   let int_of_floatstring f = int_of_float (float_of_string f +. 0.5) in
   b, int_of_floatstring left, int_of_floatstring right;;
@@ -130,9 +130,8 @@ class gs () =
       "-";
     |] in
 
-  let _ =
-    debugs command;
-    Array.iter debugs command_args in
+  let _ = debugs command;
+  Array.iter debugs command_args in
 
   (* Set environment so that ghostscript writes in our window. *)
   let int32_string k x =
@@ -145,11 +144,12 @@ class gs () =
     s in
   let int32_string x = Int32.format "%u" x in
 
-  let  _ = Unix.putenv "GHOSTVIEW"
-    (Printf.sprintf "%s %s "
-       (int32_string gr.window)
-       (if !Options.global_display_mode then "" else int32_string gr.pixmap)
-    ) in
+  let _ =
+    Unix.putenv "GHOSTVIEW"
+      (Printf.sprintf "%s %s "
+         (int32_string gr.window)
+         (if !Options.global_display_mode then "" else int32_string gr.pixmap)
+      ) in
 
   let iof = int_of_float and foi = float_of_int in
   let lx = iof ( (foi (gr.x * dpi)) /. gr.xdpi)
@@ -169,12 +169,12 @@ class gs () =
 
   let _ =
     begin
-      try GraphicsY11.set_named_atom_property  "GHOSTVIEW"  content;
+      try GraphicsY11.set_named_atom_property  "GHOSTVIEW" content;
       with x -> Misc.fatal_error "Cannot set ``GHOSTVIEW'' property"
-    end in
+    end;
 
   (* Ignore signal SIGPIPE. *)
-  let _ = Unix.sigprocmask Unix.SIG_BLOCK [13] in
+  Unix.sigprocmask Unix.SIG_BLOCK [13] in
 
   let lpd_in, lpd_out = Unix.pipe () in
   let rpd_in, rpd_out = Unix.pipe () in
