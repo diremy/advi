@@ -56,30 +56,14 @@
    fillstyle=solid,fillcolor=\advi@annot@bg]
   {\psset{#1}\@ifnextchar({\annot@ii}{\annot@ii(1,1)}}
 
-\ifadvi@ignore
-\def \annot@ii(#1)#2{\egroup}
-\else
 \def \advi@annottab #1#2{\begin{tabular}{@{}a@{}}#2\end{tabular}}%
 \def \annot@ii(#1)#2{%
-  \advi@record{advi@annot\the\advi@c@annot}
-    {\rput(#1){\ovalnode {advi@to}%
+  \advi@ifadvi
+    {\advi@record{advi@annot\the\advi@c@annot}
+       {\rput(#1){\ovalnode {advi@to}%
                  {\begin{tabular}{a}#2\end{tabular}}}%
-     \AdviAnnotArc{advi@from\the\advi@c@annot}{advi@to}}\egroup}
-\fi
-
-% \def \annot@ii(#1){\@ifnextchar [{\annot@iii(#1)}{\annot@iii(#1)[c]}}
-% \ifadvi@ignore
-% \def \annot@iii (#1)[#2]#3{\egroup}
-% \else
-% \def \annot@iii (#1)[#2]#3{%
-%   \begin{advi@record}{advi@annot\the\advi@c@annot}
-%     \rput(#1){\ovalnode {advi@to}
-%                {\begin{tabular}{@{}#2@{}}#3\end{tabular}}}%
-%     \AdviAnnotArc{advi@from\the\advi@c@annot}{advi@to}%
-%   \end{advi@record}\egroup
-% }
-% \fi
-
+        \AdviAnnotArc{advi@from\the\advi@c@annot}{advi@to}}\egroup}
+    {\egroup}}
 
 %% exports
 

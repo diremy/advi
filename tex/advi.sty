@@ -69,14 +69,14 @@
         \advi@special {proc=#2 record=\advi@do}%
    \endgroup}
   {\advi@special {proc record=end}}
-\newenvironment{advi@record}[3][]{\advi@recording[#1]{#2}\endadvi@recording}
+\newenvironment{advi@record}[3][]{\advi@recording[#1]{#2}#3\endadvi@recording}
 
 \newcommand {\advi@play}[2][]%
    {\begingroup
       \advi@ifempty{#1}{}{\color {#1}}{\advi@special {proc=#2 play}}%
     \endgroup}
 
-\advi@exportenv {advirecording}{advi@record} 
+\advi@exportenv {advirecording}{advi@recording} 
 \advi@export \advirecord \advi@record
 \advi@export \adviplay \advi@play
 
