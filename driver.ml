@@ -161,10 +161,10 @@ type state = {
     mutable color : Dvicolor.color;
     mutable color_stack : Dvicolor.color list;
       (* Other attributes *)
-    mutable alpha : float;
-    mutable alpha_stack : float list;
-    mutable blend : Dev.blend;
-    mutable blend_stack : Dev.blend list;
+    mutable alpha : Drawimage.alpha;
+    mutable alpha_stack : Drawimage.alpha list;
+    mutable blend : Drawimage.blend;
+    mutable blend_stack : Drawimage.blend list;
     mutable epstransparent : bool;
     mutable epstransparent_stack : bool list;
     mutable direction : Transitions.direction option;
@@ -406,20 +406,20 @@ let alpha_special st s =
 
 let parse_blend s =
   match String.lowercase s with
-  | "none" -> Dev.Normal
-  | "normal" -> Dev.Normal
-  | "multiply" -> Dev.Multiply
-  | "screen" -> Dev.Screen
-  | "overlay" -> Dev.Overlay
-  | "dodge" -> Dev.ColorDodge
-  | "burn" -> Dev.ColorBurn
-  | "darken" -> Dev.Darken
-  | "lighten" -> Dev.Lighten
-  | "difference" -> Dev.Difference
-  | "exclusion" -> Dev.Exclusion
+  | "none" -> Drawimage.Normal
+  | "normal" -> Drawimage.Normal
+  | "multiply" -> Drawimage.Multiply
+  | "screen" -> Drawimage.Screen
+  | "overlay" -> Drawimage.Overlay
+  | "dodge" -> Drawimage.ColorDodge
+  | "burn" -> Drawimage.ColorBurn
+  | "darken" -> Drawimage.Darken
+  | "lighten" -> Drawimage.Lighten
+  | "difference" -> Drawimage.Difference
+  | "exclusion" -> Drawimage.Exclusion
   | _ ->
       Misc.warning ("blend: invalid blend mode " ^ s);
-      Dev.Normal;;
+      Drawimage.Normal;;
 
 let blend_special st s =
   match split_string s 0 with
@@ -1124,7 +1124,7 @@ let special st s =
   	  let draw = 
   	    if has_prefix "`" file then
   	     Dev.draw_img (zap_to_char ' ' file)
-  	       Drawimage.ScaleAuto false 1.0 None (Some bbox)
+  	       Drawimage.ScaleAuto false 1.0 st.blend (Some bbox)
   	    else Dev.draw_ps file bbox in
   	  draw size x y
       with
@@ -1237,7 +1237,7 @@ let render_step cdvi num ?trans dpi xorig yorig =
       h = 0; v = 0; w = 0; x = 0; y = 0; z = 0;
       stack = []; color = Grdev.fgcolor (); color_stack = [];
       alpha = 1.0; alpha_stack = [];
-      blend = Dev.Normal; blend_stack = [];
+      blend = Drawimage.Normal; blend_stack = [];
       epstransparent = true; epstransparent_stack = [];
       direction = trans;
       transition = Transitions.TransNone;
