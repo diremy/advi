@@ -93,7 +93,7 @@ let prepare_file file =
 
 let default_user_advi_dir = tilde_subst "~/.advi";;
 
-let user_advi_dir = 
+let user_advi_dir =
   let dir = try Sys.getenv "ADVIDIR" with _ -> default_user_advi_dir in
   try tilde_subst dir with
   | _ -> "./.advi"
@@ -103,22 +103,22 @@ let default_user_advi_cache_dir = Filename.concat (Unix.getcwd ()) ".advi";;
 let advi_cache_dir = ref default_user_advi_cache_dir;;
 let set_advi_cache_dir s = advi_cache_dir := s;;
 
-(* User preferences. *)
-let default_advi_option_files = 
-  [tilde_subst "~/.advirc";
-   tilde_subst (Filename.concat default_user_advi_dir "advirc")]
-let advi_options_files = ref default_advi_option_files;;
-
 Options.add
  "-cache-dir"
  (Arg.String set_advi_cache_dir)
  "STRING\tSet the cache directory (default ./.advi)";;
 
 (* User preferences. *)
+let default_init_file0 = "/etc/advirc";;
 let default_init_file1 = tilde_subst "~/.advirc";;
-let default_init_file2 = tilde_subst "~/.advi/advirc";;
+let default_init_file2 =
+  tilde_subst (Filename.concat default_user_advi_dir "advirc");;
 
-let init_files = [default_init_file1; default_init_file2];;
+let init_files = [
+  default_init_file0;
+  default_init_file1;
+  default_init_file2
+];;
 
 let load_options_file options set_dvi_filename usage_msg fname =
  Rc.cautious_parse_file fname options set_dvi_filename usage_msg;;

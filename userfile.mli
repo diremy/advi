@@ -36,7 +36,7 @@ val fullpath : Misc.dir_name -> Misc.file_name -> Misc.file_name;;
    [path] which is relative to the directory [dir]. *)
 
 val tilde_subst : Misc.file_name -> Misc.file_name;;
-(* Replaces the occurences of "~/" or "~username" to the corresponding
+(* Replaces the occurrences of "~/" or "~username" to the corresponding
    path names. *)
 
 val digdir : Misc.dir_name -> int -> unit;;
