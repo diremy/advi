@@ -378,7 +378,7 @@ let rec goto_next_pause n st =
           goto_next_pause (pred n) st
         with Dev.Stop -> st.aborted <- true;
     end;
-  Dev.synchronize();
+  Dev.synchronize(); 
   Dev.set_busy (if st.cont = None then Dev.Free else Dev.Pause);;
 
 let draw_bounding_box st =
@@ -538,6 +538,8 @@ exception Link;;
 let exec_xref link =
   let call command =
     let pid = Misc.fork_process command in
+    (* I don't understand this change -Didier: it was 
+    Dev.wait_button_down() in *)
     (* only to launch embeded apps *)
     if Graphics.button_down () then
       ignore (Graphics.wait_next_event [ Graphics.Button_up ]) in

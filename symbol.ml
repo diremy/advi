@@ -191,6 +191,11 @@ let cmr_encoding font code =
   | 126 -> "~"
   | _ -> default_encoding font code
 	
+
+let accents encoding font code =
+  if code > 128 then String.make 1 (Char.chr code)
+  else encoding font code
+
 (* Greek font. *)
 let cmmi_encoding font code =
   if code >= 11 && code <= 41 then
@@ -221,13 +226,17 @@ let cmex_encoding font code =
 (* List of recognized fonts (regexp) * handler *)
 (* Don't optimize the regexps, it is readable that way. *)
 let encodings = [
-  "cm[rs][0-9]+"  , cmr_encoding ;
-  "cmt[ti][0-9]+" , cmr_encoding ;
+  "cm[rs][0-9]+" , cmr_encoding ;
+  "cmt[ti][0-9]+", cmr_encoding ;
   "cmsl[0-9]+"   , cmr_encoding ;
   "cmbx[0-9]+"   , cmr_encoding ;
   "cmmi[0-9]+"   , cmmi_encoding ;
   "cmex[0-9]+"   , cmex_encoding ;
   "cmsy[0-9]+"   , cmex_encoding ;
+(* does not seem correct. eg. ff is \027 instead of \011? *)
+  "ecrm[0-9]+",    accents cmr_encoding ;
+  "ecti[0-9]+",    accents cmr_encoding ;
+  "ecbx[0-9]+",    accents cmr_encoding ;
 ] 
     
 let compile_regexp source =
@@ -400,7 +409,7 @@ type region =
 let region_to_ascii r =
   let pos = min r.first r.last in
   let length = 1 + abs (r.first - r.last) in
-  to_ascii (Array.to_list (Array.sub r.history pos length))
+  to_ascii (List.rev (Array.to_list (Array.sub r.history pos length)))
     
 let distance x y s =
   let dist z h dh =

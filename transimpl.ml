@@ -113,7 +113,7 @@ let synchronize_transition () =
   if !current_transition = TransNone then ()
   else begin
     Graphics.remember_mode false;
-    Graphics.display_mode true;
+    GraphicsY11.display_mode true;
     begin match !current_transition with
     | TransSlide (step,from) -> slide step from
     | TransWipe (step,from) -> wipe step from
@@ -121,7 +121,7 @@ let synchronize_transition () =
     | TransNone -> assert false
     end;
     Graphics.remember_mode true;
-    Graphics.display_mode false
+    GraphicsY11.display_mode false
   end
 ;;
 
@@ -146,10 +146,10 @@ let draw_sprite newimg x y width height =
   Graphics.draw_image orgimg x y;
 
   Graphics.remember_mode false;
-  Graphics.display_mode true;
+  GraphicsY11.display_mode true;
   Graphics.draw_image workimg wx wy;
   Graphics.remember_mode true;
-  Graphics.display_mode false;
+  GraphicsY11.display_mode false;
   prev_geom := Some (x,y,width,height)
 ;;
 

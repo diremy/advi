@@ -138,7 +138,8 @@ type status = {
     mouse_y : int ;
     button : bool ;
     keypressed : bool ;
-    key : char
+    key : char;
+    modifiers : int;
   } ;;
 
 type area = Bottom_right | Bottom_left | Top_right | Top_left | Middle
@@ -182,7 +183,6 @@ val exec_ps : string -> int -> int -> unit ;;
 val newpage : string list -> int -> float -> int -> int -> unit 
 val add_headers : string list -> unit
 val current_pos : unit -> int * int;;
-val set_mode : bool -> unit ;;
 val synchronize : unit -> unit ;; 
 
 type busy = Free | Busy | Pause | Disk
@@ -196,3 +196,4 @@ val transbox_go : Transitions.t -> unit
 val set_title : string -> unit;;
 val cut : string -> unit;;
 
+val wait_button_down : unit -> unit;;

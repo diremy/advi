@@ -106,7 +106,9 @@ external set_named_atom_property : string -> string -> unit
         (* make_atom_property ATOM STRING define an X atom ATOM with
            property STRING *)
 
-external bstore_id : unit -> window_id = "gr_bstore"
+external bstore_id : unit -> int32 = "gr_bstore"
+        (* return the X pixmap of the bstore window as an integer *)
+external window_id : unit -> int32 = "gr_window"
         (* return the X pixmap of the bstore window as an integer *)
 
 (* setting cursor *)
@@ -298,3 +300,56 @@ let mod5 = 0x4000
 
 external cut : string -> unit = "gr_cut"
         (* store string in the cut buffer *)
+
+(* Redefinition of the events loop *)
+
+type status =
+    { mouse_x : int;
+      mouse_y : int;
+      button : bool;
+      keypressed : bool;
+      key : char; 
+      modifiers : int;
+    } 
+
+type event =
+    Button_down
+  | Button_up
+  | Key_pressed
+  | Mouse_motion
+  | Poll
+
+external wait_next_event : event list -> status = "gry_wait_event"
+
+let mouse_pos () =
+  let e = wait_next_event [Poll] in (e.mouse_x, e.mouse_y)
+
+let button_down () =
+  let e = wait_next_event [Poll] in e.button
+
+let read_key () =
+  let e = wait_next_event [Key_pressed] in e.key
+
+let key_pressed () =
+  let e = wait_next_event [Poll] in e.keypressed
+
+(** As [point_color] but read in window *)
+external window_color : int -> int -> Graphics.color = "gr_window_color"
+
+(** Global_display mode allows to inhibit diplay_mode commands *)
+external anti_synchronize : unit -> unit = "gr_anti_synchronize"
+let global_display_mode_status = ref false
+let global_display_mode b = global_display_mode_status :=  b
+let synchronize ()=
+  if not !global_display_mode_status then
+    Graphics.synchronize()
+  else anti_synchronize();;
+let display_mode b =
+  if not !global_display_mode_status then 
+    Graphics.display_mode (b || !global_display_mode_status)
+
+let point_color x y =
+  if !global_display_mode_status then window_color x y
+  else Graphics.point_color x y 
+
+

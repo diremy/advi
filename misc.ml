@@ -133,7 +133,7 @@ let debug_option option message =
   let _ = set_option option (Arg.Set r) ("\t" ^ message) in
   make_debug r;;
 
-(* two global options *)
+(* some global options *)
 let debug = debug_option
     "--debug"
     "General debug";;
@@ -143,8 +143,17 @@ let pson =
     option_flag true
       "-nogs" "Turn off display of inlined Postscript"
   else ref false;;
-
 let dops = ref (!pson);;
+
+let global_display_mode = ref false;;
+let set_global_display_mode b =
+  GraphicsY11.global_display_mode b;
+  global_display_mode := b;;
+let _ =
+  set_option "-fg"
+    (Arg.Unit (fun () -> set_global_display_mode true))
+    "Draw in the foreground";;
+
 
 let warning mes =
   Printf.fprintf stderr "Warning: %s" mes;
@@ -157,3 +166,4 @@ let fatal_error x = raise (Fatal_error x);;
 let handle_fatal_error f () =
   try f () with Fatal_error s -> prerr_string s; prerr_newline()
 ;;
+

@@ -104,24 +104,12 @@ programs from inside your slides
     \begin{itemize}
     \item \verb+\pause+ \pause
       and \verb+\wait{+{\em sec}\verb+}+ 
-      f\wait{0.32}%
-      o\wait{0.32}%
-      r\wait{0.32}
-      s\wait{0.32}%
-      i\wait{0.32}%
-      m\wait{0.16}%
-      p\wait{0.16}%
-      l\wait{0.16}%
-      e\wait{0.16}
-      a\wait{0.1}%
-      n\wait{0.1}%
-      i\wait{0.1}%
-      m\wait{0.1}%
-      a\wait{0.1}%
-      t\wait{0.1}%
-      i\wait{0.1}%
-      o\wait{0.1}%
-      n
+     %Didier's falshy macro 
+     \def \flash #1{\let \do\leflash \do #1\relax}
+     \def \leflash #1{\ifx #1\relax \def \do{}\else \def \do
+     {#1\wait{0.05}\leflash}\fi \do}
+      \flash {for~simple~ animation}
+
     \item \verb+\record+ \& \verb+\play+ feature to change the colour
      of a text:
      \begin{itemize}

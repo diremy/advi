@@ -54,6 +54,9 @@ val pson : bool ref;;
 (* [nogs] when set means do not call gs for drawing inline Postscript. *)
 val dops : bool ref;;
 (* temporary value, reset to pson when reloading the file. *)
+
+(** tells whether display must always happen in foreground *)
+val global_display_mode : bool ref
     
 val handle_fatal_error : (unit -> unit) -> unit -> unit
 val fatal_error : string -> 'a

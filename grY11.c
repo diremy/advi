@@ -72,6 +72,31 @@ value gr_draw_area(value im, value xywh, value vx, value vy)
   return Val_unit;
 }
 
+value gr_anti_synchronize(void)
+{
+  gr_check_open();
+  XCopyArea(grdisplay, grwindow.win, grbstore.win, grwindow.gc,
+            0, grbstore.h - grwindow.h,
+            grwindow.w, grwindow.h,
+            0, 0);
+  XFlush(grdisplay);
+  return Val_unit ;
+}
+
+value gr_window_color(value vx, value vy)
+{
+  int x = Int_val(vx);
+  int y = Int_val(vy);
+  XImage * im;
+  int rgb;
+
+  gr_check_open();
+  im = XGetImage(grdisplay, grwindow.win, x, Bcvt(y), 1, 1, (-1), ZPixmap);
+  rgb = gr_rgb_pixel(XGetPixel(im, 0, 0));
+  XDestroyImage(im);
+  return Val_int(rgb);
+}
+
 
 
 value gr_bsize_y(void)
@@ -96,10 +121,18 @@ value gr_screen_y(void)
   return Val_int(att.height);
 }
 
-value gr_bstore(void)
-{
+value gr_window(void)
+{ unsigned int w; value res;
   gr_check_open();
-  return id_of_window(grbstore.win);
+  w = grwindow.win;
+  return copy_int32 (w); 
+}
+
+value gr_bstore(void)
+{ unsigned int w; value res;
+  gr_check_open();
+  w = grbstore.win;
+  return copy_int32 (w); 
 }
 
 value gr_flush(void)

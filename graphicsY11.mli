@@ -39,7 +39,9 @@ val resize_subwindow : window_id -> int -> int -> unit
          (* [resize_subwindow wid w h] resizes the sub-window having
             the given identifier to height [h] and width [w]. *)
 
-external bstore_id : unit -> window_id = "gr_bstore"
+external bstore_id : unit -> int32 = "gr_bstore"
+        (* return the X pixmap of the bstore window as an integer *)
+external window_id : unit -> int32 = "gr_window"
         (* return the X pixmap of the bstore window as an integer *)
 
 
@@ -175,3 +177,63 @@ external cut : string -> unit = "gr_cut"
 val draw_area : 
     ima:Graphics.image -> srcx:int -> srcy:int -> width:int -> height:int ->
       destx:int -> desty:int -> unit
+
+
+(* Redefinition of events *)
+
+(*** Mouse and keyboard events *)
+
+type status =
+  { mouse_x : int;              (* X coordinate of the mouse *)
+    mouse_y : int;              (* Y coordinate of the mouse *)
+    button : bool;              (* true if a mouse button is pressed *)
+    keypressed : bool;          (* true if a key has been pressed *)
+    key : char ;                (* the character for the key pressed *)
+    modifiers : int;
+  } 
+(* To report events. *)
+
+type event =
+    Button_down                 (* A mouse button is pressed *)
+  | Button_up                   (* A mouse button is released *)
+  | Key_pressed                 (* A key is pressed *)
+  | Mouse_motion                (* The mouse is moved *)
+  | Poll                        (* Don't wait; return immediately *)
+        (* To specify events to wait for. *)
+
+external wait_next_event : event list -> status = "gry_wait_event"
+        (* Wait until one of the events specified in the given event list
+           occurs, and return the status of the mouse and keyboard at
+           that time. If [Poll] is given in the event list, return immediately
+           with the current status. If the mouse cursor is outside of the
+           graphics window, the [mouse_x] and [mouse_y] fields of the event are
+           outside the range [0..size_x()-1, 0..size_y()-1]. Keypresses
+           are queued, and dequeued one by one when the [Key_pressed]
+           event is specified. *)
+
+(*** Mouse and keyboard polling *)
+
+val mouse_pos : unit -> int * int
+        (* Return the position of the mouse cursor, relative to the
+           graphics window. If the mouse cursor is outside of the graphics
+           window, [mouse_pos()] returns a point outside of the range
+           [0..size_x()-1, 0..size_y()-1]. *)
+val button_down : unit -> bool
+        (* Return [true] if the mouse button is pressed, [false] otherwise. *)
+val read_key : unit -> char
+        (* Wait for a key to be pressed, and return the corresponding
+           character. Keypresses are queued. *)
+val key_pressed : unit -> bool
+        (* Return [true] if a keypress is available; that is, if [read_key]
+           would not block. *)
+
+(** It enables/disables the command display_mode and synchronize according
+ to the value [false]/[true]. When disable, [display_mode] and [synchronize]
+ commands will be ignored. *)
+val global_display_mode : bool -> unit
+(** Same as [Graphics.synchronize] but according to [global_display_mode] *)
+val synchronize : unit -> unit 
+(** Same as [Graphics.display_mode] but according to [global_display_mode] *)
+val display_mode : bool -> unit
+(** As [point_color] but according to values of [global_display_mode] *)
+val point_color : int -> int -> int

@@ -7,7 +7,8 @@ LATEX=TEXINPUTS=.:/usr/share/texmf//:$$TEXINPUTS; export TEXINPUTS; latex
 
 MLPROG=but taquin
 
-all: $(MLPROG) demo.dvi trigo_source.dvi ./trans.dvi trans2.dvi background.dvi
+all: demo.dvi trigo_source.dvi ./trans.dvi trans2.dvi background.dvi \
+     $(MLPROG) 
 
 .tex.dvi:
 	$(LATEX) $<

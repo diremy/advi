@@ -31,15 +31,15 @@ MLINCDIRS = $(CAMLIMAGESDIR)
 
 EXEC	  = advi
 
-MODULES	  = config misc input symbol search \
-	    graphicsY11 drawps draw_image dvicolor \
+MODULES	  = config graphicsY11 misc input symbol search \
+	    drawps draw_image dvicolor \
 	    table pkfont ttfont jfm font glyph devfont \
 	    units dimension \
 	    gs transimpl grdev dvi driver dviview main
 LIBRARIES = graphics unix str $(CAMLIMAGESLIBS)
 CLIBS	  = graphics unix str
 
-COBJS	  = grY11.o
+COBJS     = events.o grY11.o
 
 CMO_OBJS  = $(addsuffix .cmo, $(MODULES))
 CMX_OBJS  = $(addsuffix .cmx, $(MODULES))
