@@ -140,26 +140,32 @@
 
 \def \advi@transfrom{}
 \def \advi@transsteps{}
-\define@key {advi@trans}{none} []{\def \advi@transmode {none}}
-\define@key {advi@trans}{slide}[]{\def \advi@transmode {slide}}
-\define@key {advi@trans}{block}[]{\def \advi@transmode {block}}
-\define@key {advi@trans}{wipe} []{\def \advi@transmode {wipe}}
-\define@key {advi@trans}{from} {\def \advi@transfrom { from=#1}}
-\define@key {advi@trans}{steps}{\def \advi@transsteps { steps=#1}}
+\let \advi@settrans \def
+\define@key {advi@trans}{none} []{\advi@settrans \advi@transmode {none}}
+\define@key {advi@trans}{slide}[]{\advi@settrans \advi@transmode {slide}}
+\define@key {advi@trans}{block}[]{\advi@settrans \advi@transmode {block}}
+\define@key {advi@trans}{wipe} []{\advi@settrans \advi@transmode {wipe}}
+\define@key {advi@trans}{from} {\advi@settrans \advi@transfrom { from=#1}}
+\define@key {advi@trans}{steps}{\advi@settrans \advi@transsteps { steps=#1}}
 
 \def \advi@transemit
    {\advi@special{trans \advi@transmode \advi@transfrom \advi@transsteps}}
 \def \advi@global {global}
+\newif \ifadvi@translocal 
 \newcommand {\advi@transition}[2][]{%
-  \def \@test {#1}\ifx \@test \advi@global \let \advi@endtransition \advi@empty
-  \else \begingroup \let \advi@endtransition \endgroup \fi
-  \setkeys {advi@trans}{#2}%
-  \advi@transemit
-  \advi@endtransition}
+  \def \@test {#1}\ifx \@test \advi@global
+     \let \advi@settrans \gdef \setkeys {advi@trans}{#2}%
+  \else
+     \global \advi@translocaltrue
+     \begingroup \setkeys {advi@trans}{#2}\advi@transemit \endgroup
+  \fi}
 
 %% should also print background info when its advi API will be fixed.
 \def \advi@setpagestyle
-  {\@ifundefined {advi@transmode}{}{\advi@transemit}}
+  {\@ifundefined {advi@transmode}{}
+        {\ifadvi@translocal\else \advi@transemit \fi}%
+   \global \advi@translocalfalse}
+
 \@ifundefined {@thehead}{}
 {\expandafter\def\expandafter\@thehead\expandafter{%
     \@thehead\advi@setpagestyle}}
