@@ -1130,10 +1130,10 @@ let render_step cdvi num dpi xorig yorig =
       draw_html = [];
       checkpoint = 0;
     } in
-  setup_bkgd st.status; (* RDC apply the background preferences in Dev *)
-  Dev.clear_dev ();      (* and redraw the background                   *)
   if st.status.Dvi.hasps then
     newpage [] st  (mag *. dpi) xorig yorig;
+  setup_bkgd st.status; (* RDC apply the background preferences in Dev *)
+  Dev.clear_dev ();      (* and redraw the background                   *)
   Dev.set_color st.color;
   Dev.set_transition st.transition;
   st.checkpoint <- 0;

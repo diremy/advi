@@ -1100,7 +1100,7 @@ let clear_dev () =
   ymin := 0; ymax := !size_y;
   (* here we add the background setting. RDC *)
   Graphics.set_color !bg_color;
-  Graphics.fill_rect !xmin !ymin !xmax !ymax;
+  if (!bg_color <> Graphics.white) then Graphics.fill_rect !xmin !ymin !xmax !ymax;
   (* now try to handle background images *)
   draw_bkgd_img (!xmax, !ymax) 0 0;;
 
