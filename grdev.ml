@@ -747,12 +747,16 @@ module H =
       Rect (ima, act, []) 
         
     let save_screen_exec act a =
-      Gs.flush();
+      synchronize();
+      (* get image take the image from the screen! *)
       let ima = Graphics.get_image 0 0 !size_x !size_y in
       G.flush();
+      let _ = Graphics.mouse_pos() in
       (* it seems that the image is saved ``lazily'' and further instruction
          could be capture in the image *) 
+(*
       sleep_watch false 0.05;
+*)
       let all_anchors = !anchors in
       a();
       synchronize();
