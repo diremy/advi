@@ -37,7 +37,7 @@ include Makefile
 # into the $(FTPDIR) directory.
 
 WEBSITEDIR=/net/pauillac/infosystems/www/$(PACKAGE)
-FTPSITEDIR=/net/pauillac/infosystems/ftp/cristal/caml-light/bazar-ocaml/$(PACKAGE)
+FTPSITEDIR=/net/pauillac/infosystems/ftp/cristal/$(PACKAGE)
 
 fake:
 	echo '\n\nThis Makefile is used to distribute the software,\n\
@@ -81,18 +81,24 @@ advi:
 	$(CP) bazar-ocaml/$(PACKAGE)/doc/* $(WEBSITEDIR)/;
 	# Build the Web site
 	ln -s $(WEBSITEDIR)/index.htm $(WEBSITEDIR)/index.html
+	$(MAKE) -f Makefile.distrib ftp
+
+ftp:
 	# Copy legalease to $(FTPSITEDIR)
+	mkdirhier $(FTPSITEDIR)
 	$(CP) release/bazar-ocaml/advi/LGPL \
 		release/bazar-ocaml/advi/README \
 		release/bazar-ocaml/advi/INDEX $(FTPSITEDIR)
-	# Give the release its versioning name
-	cd release; mv bazar-ocaml/$(PACKAGE) $(PACKAGEFULLNAME); \
+	cd release; \
 	(cd bazar-ocaml/$(PACKAGE)/doc/; \
-	ln -sf eng.html index.html; cd ..); \
+	ln -sf eng.html index.html); \
 	$(CP) bazar-ocaml/$(PACKAGE)/doc/* $(WEBSITEDIR)
 	- chgrp -R caml $(WEBSITEDIR)
 	- chmod -R g+w $(WEBSITEDIR)
+	# Give the release its versioning name
+	cd release; mv bazar-ocaml/$(PACKAGE) bazar-ocaml/$(PACKAGEFULLNAME); \
 	# Build the archive and move it in the proper ftp site
+	cd release/bazar-ocaml; \
 	tar zcvf $(PACKAGEFULLNAME).tgz $(PACKAGEFULLNAME); \
 	$(MV) $(PACKAGEFULLNAME).tgz $(FTPSITEDIR)
 	$(RM) release

@@ -27,11 +27,11 @@ FTPSITEDIR=/net/pauillac/infosystems/ftp/cristal
 distribute: clean
 	(cd adk; \
 	   tar zxvf $(FTPSITEDIR)/caml-light/bazar-ocaml/camlimages-$(CAMLIMAGESVERSION).tgz; \
-	   tar zxvf $(FTPSITEDIR)/advi/advi-$(ADKVERSION).tar.gz)
-	tar zcvf adk-$(ADKVERSION).tar.gz --exclude '*~' --exclude .cvsignore --exclude CVS adk
-	cp adk-$(ADKVERSION).tar.gz $(FTPSITEDIR)/advi
+	   tar zxvf $(FTPSITEDIR)/advi/advi-$(ADKVERSION).tgz)
+	tar zcvf adk-$(ADKVERSION).tgz --exclude '*~' --exclude .cvsignore --exclude CVS adk
+	cp adk-$(ADKVERSION).tgz $(FTPSITEDIR)/advi
 
 clean:
-	rm -f adk-$(ADKVERSION).tar.gz
+	rm -f adk-$(ADKVERSION).tgz
 	(cd adk; \
 	   /bin/rm -rf camlimages* advi*)
