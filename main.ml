@@ -21,16 +21,14 @@ open Format;;
 
 (*** Parsing command-line arguments ***)
 
-let dvi_filename = ref None;;
-let set_dvi_filename s = dvi_filename := Some s;;
-
 let crop_flag = ref true;;
 
 let hmargin = ref (Dimension.Cm 1.0);;
 let vmargin = ref (Dimension.Cm 1.0);;
 let geometry = ref "864x864";;
 
-let set_geom g = Dviview.set_autoresize false; Dviview.set_autoscale false; geometry := g;;
+let set_geom g =
+  Dviview.set_autoresize false; Dviview.set_autoscale false; geometry := g;;
 
 let set_dim r s = r := Dimension.dimen_of_string s;;
 
@@ -95,7 +93,7 @@ let get_advi_options () =
    (Arg.String
       (fun fname ->
         Userfile.load_options_file
-          !advi_options set_dvi_filename usage_msg fname))
+          !advi_options Userfile.set_dvi_filename usage_msg fname))
      "STRING\tLoad this file when parsing this option to set up options\n\
       \t(to override the options of the default ~/.advirc or ~/.advi/advirc\n\
       init file).";
@@ -105,8 +103,8 @@ let get_advi_options () =
 let advi_options = get_advi_options ();;
 
 let init_arguments () =
- Userfile.load_init_files advi_options set_dvi_filename usage_msg;
- Arg.parse advi_options set_dvi_filename usage_msg;
+ Userfile.load_init_files advi_options Userfile.set_dvi_filename usage_msg;
+ Arg.parse advi_options Userfile.set_dvi_filename usage_msg;
 ;;
 
 let set_dvi_geometry () =
@@ -115,42 +113,43 @@ let set_dvi_geometry () =
   Dviview.set_vmargin !vmargin;
   Dviview.set_geometry !geometry;;
 
+let treat_file filename =
+  Rc.init ();
+  set_dvi_geometry ();
+  try Dviview.main_loop filename
+  with Dviview.Error s | Failure s | Graphics.Graphic_failure s ->
+      eprintf "Fatal error: %s@." s
+;;
+
 let standalone_main () =
   init_arguments ();
-  Rc.init ();
-  let filename = match !dvi_filename with
-  | None -> 
-      (* Test if file can be found, otherwise print console stuff. *)
-      let name = Config.splash_screen in
-      begin
-	try let channel = open_in name in close_in channel
-	with Sys_error s ->
-	  eprintf "%s@.Try %s -help for more information@."
-            usage_msg Sys.argv.(0);
-	  Launch.exit 1
-      end;
-      name
-  | Some s -> s in
-  set_dvi_geometry ();
-  Dviview.main_loop filename;;
+  let filename = Userfile.get_dvi_filename () in
+  (* Test if file can be found, otherwise print console stuff. *)
+  begin try let channel = open_in filename in close_in channel
+  with Sys_error s ->
+    eprintf "%s@.Try %s -help for more information@." usage_msg Sys.argv.(0);
+    Launch.exit 1
+  end;
+  treat_file filename
+;;
 
-let rec interactive_main () =
+let interactive_main () =
   (* Load the .advirc file ... *)
-  Userfile.load_init_files advi_options set_dvi_filename usage_msg; 
-  Rc.init ();
-  printf "Dvi file name: @?";
-  let filename = input_line stdin in
-  if Sys.file_exists filename then begin
-    set_dvi_geometry ();
-    try
-      Dviview.main_loop filename
-    with Dviview.Error s | Failure s | Graphics.Graphic_failure s ->
-      eprintf "Fatal error: %s@." s
-  end else begin
-    printf "File `%s' does not exists.@." filename;
-    printf "Please make another choice.@.";
-    interactive_main ()
-  end;;
+  Userfile.load_init_files advi_options Userfile.set_dvi_filename usage_msg; 
+  let filename =
+    try Userfile.get_dvi_filename ()
+    with Not_found ->
+      let name = 
+        Format.printf "Dvi file name: @?";
+        input_line stdin in
+      try let channel = open_in name in close_in channel; name
+      with Sys_error s ->
+        eprintf "%s@.Try %s -help for more information@."
+          usage_msg Sys.argv.(0);
+        Config.splash_screen in
+  Userfile.set_dvi_filename filename;
+  treat_file filename
+;;
 
 (* To quit nicely, killing all embedded processes. *)
 at_exit Gs.kill;;
