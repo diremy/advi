@@ -281,8 +281,10 @@ class gs () =
     method ps b =
       List.iter self#line b;
 
-    method load_header h =
-      self # line (String.concat "" [ "("; h; ") run"; ]);
+    method load_header (b, h) =
+      self # line
+        (if b then h else String.concat "" [ "("; h; ") run"; ])
+        
 
   end;;
 
@@ -291,10 +293,11 @@ let texend = "flushpage end";;
 let moveto x y = Printf.sprintf "%d %d moveto" x y;;
 
 let texc_special_pro gv =
-  let l = ["texc.pro"; "special.pro" ] in
+  let l = [ "texc.pro"; "special.pro" ] in
   try
     let l' = Search.true_file_names [] l in
-    if List.length l = List.length l' then l' else raise Not_found
+    if List.length l = List.length l' then List.map (fun s -> false, s) l'
+    else raise Not_found
   with
     Not_found ->
       Misc.warning "Cannot find Postscript prologues: texc.pro or special.pro";
@@ -351,7 +354,11 @@ class gv =
 
     method add_headers l =
       if headers = [] then headers <- texc_special_pro self;
-      match List.filter (fun s -> not (List.mem s headers)) l with
+      match
+        List.filter
+          (function _, s -> List.for_all (function _, s' -> s <> s') headers)
+          l
+      with
       | [] -> ()
       | l ->
           headers <- headers @ l;

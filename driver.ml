@@ -176,7 +176,7 @@ type state = {
     mutable tpic_shading : float;
       (* PS specials page state *)
     mutable status : Dvi.known_status;
-    mutable headers : string list;
+    mutable headers : (bool * string) list;
     mutable html : (Dev.H.tag * int) option;
     mutable draw_html : (int * int * Dev.glyph) list;
     mutable checkpoint : int;
@@ -1125,7 +1125,7 @@ let html_special st html =
   if has_prefix "</A>" html || has_prefix "</a>" html then close_html st
   else warning ("Unknown html suffix" ^ html);;
 
-let scan_special_html (headers,xrefs) page s =
+let scan_special_html (headers, xrefs) page s =
   let name = String.sub s 14 (String.length s - 16) in
   Hashtbl.add xrefs name page;;
 
@@ -1135,14 +1135,19 @@ let scan_special_html (headers,xrefs) page s =
    commands, html references) *)
 let scan_special status (headers, xrefs) pagenum s =
   if Launch.whiterun () &&
-     has_prefix "advi: embed " s then scan_embed_special status s else
+     has_prefix "advi: embed " s then scan_embed_special status s
   (* Embedded Postscript, better be first for speed when scanning *)
-  if has_prefix "\" " s || has_prefix "ps: " s || has_prefix "! " s then
-    (if !Options.dops then status.Dvi.hasps <- true) else
-  if has_prefix "header=" s then
-    (if !Options.dops then headers := get_suffix "header=" s :: !headers) else
-  if has_prefix "advi: setbg " s then scan_bkgd_special status s else
-  if has_prefix "html:<A name=\"" s || has_prefix "html:<a name=\"" s then
+  else if has_prefix "\" " s || has_prefix "ps: " s then
+    (if !Options.dops then status.Dvi.hasps <- true)
+  else if has_prefix "!" s then
+    (if !Options.dops then
+      headers := (true, get_suffix "!" s) :: !headers)
+  (* Embedded Postscript, better be first for speed when scanning *)
+  else if has_prefix "header=" s then
+    (if !Options.dops then
+      headers := (false, get_suffix "header=" s) :: !headers)
+  else if has_prefix "advi: setbg " s then scan_bkgd_special status s
+  else if has_prefix "html:<A name=\"" s || has_prefix "html:<a name=\"" s then
     scan_special_html (headers, xrefs) pagenum s;;
 
 (* Scan a page calling function scan_special when seeing a special and
@@ -1218,7 +1223,6 @@ let special st s =
      has_prefix "sh " s || s = "wh" || s = "bk" then tpic_specials st s;;
 
 (*** Page rendering ***)
-
 let eval_dvi_command st = function
   | Dvi.C_set code -> set st code
   | Dvi.C_put code -> put st code
@@ -1262,13 +1266,21 @@ let newpage h st magdpi x y =
   with Dev.GS -> st.status.Dvi.hasps <- false;;
 
 let find_prologues l =
-  let l' = Search.true_file_names [] l in
-  if List.length l <> List.length l' then begin
-    Misc.warning
-      "Cannot find postscript prologue. Continuing without Postscript specials";
-    Options.dops := false;
-    []
-  end else l';;
+  let l = List.rev l in
+  let h = List.map snd (List.filter (function b, _ -> not b) l)  in
+  let h' = Search.true_file_names [] h in
+  try
+    let table = List.combine h h' in
+    List.map
+      (function b, s as p -> if b then p else b, List.assoc s table) l
+  with
+    Invalid_argument _  -> 
+      Misc.warning
+        "Cannot find postscript prologue. Continuing without Postscript"; 
+      Options.dops := false;
+      []
+  | Not_found -> assert false
+;;
 
 (* function to be removed in the future, or replaced by
    the proper iteration of render_step *)
@@ -1286,7 +1298,8 @@ let render_step cdvi num ?trans dpi xorig yorig =
     let headers = ref []
     and xrefs = cdvi.base_dvi.Dvi.xrefs in
     let s = scan_special_page otherwise cdvi (headers, xrefs) num in
-    if !headers <> [] then Dev.add_headers (find_prologues (List.rev !headers));
+    if !headers <> [] then
+      Dev.add_headers (find_prologues !headers);
     s in
   if not !Options.dops then status.Dvi.hasps <- false;
   let st =
@@ -1349,7 +1362,7 @@ let scan_special_pages cdvi lastpage =
     ignore (scan_special_page otherwise cdvi (headers, xrefs) n);
   done;
   if !headers <> [] then
-    Dev.add_headers (find_prologues (List.rev !headers));;
+    Dev.add_headers (find_prologues !headers);;
 
 let unfreeze_glyphs cdvi dpi =
   let mag = float cdvi.base_dvi.Dvi.preamble.Dvi.pre_mag /. 1000.0 in
@@ -1380,6 +1393,5 @@ let unfreeze_glyphs cdvi dpi =
     gtable := dummy_gtable;
     ignore (scan_special_page otherwise cdvi globals n);
   done;
-  if !headers <> [] then
-    Dev.add_headers (Search.true_file_names [] (List.rev !headers));;
+  Dev.add_headers (find_prologues !headers);;
 

@@ -225,8 +225,8 @@ exception GS;;
 val continue : unit -> unit;;
 val reposition : x:int -> y:int -> w:int -> h:int -> int * int;;
 val exec_ps : string -> int -> int -> unit;;
-val newpage : string list -> int -> float -> int -> int -> unit;;
-val add_headers : string list -> unit;;
+val newpage : (bool * string) list -> int -> float -> int -> int -> unit;;
+val add_headers : (bool * string) list -> unit;;
 val current_pos : unit -> int * int;;
 val synchronize : unit -> unit;;
 
