@@ -21,7 +21,7 @@ let debug_endline = Options.debug "--debug" " General debug";;
 
 Misc.forward_debug_endline := debug_endline;;
 
-(* Some global options *)
+(* Some global options for Active-DVI. *)
 
 let pson =
   if Config.have_gs then
