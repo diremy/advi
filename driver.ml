@@ -18,7 +18,6 @@
 (* $Id$ *)
 
 open Misc;;
-open Cdvi;;
 
 let active =
   Options.flag true "-passive"
@@ -197,7 +196,7 @@ type state = {
     mutable tpic_path : (float * float) list;
     mutable tpic_shading : float;
     (* PS specials page state *)
-    mutable status : known_status;
+    mutable status : Cdvi.known_status;
     mutable headers : (bool * string) list;
     mutable html : (Dev.H.tag * int) option;
     mutable draw_html : (int * int * Dev.glyph) list;
@@ -1006,11 +1005,11 @@ let inherit_background_info =
 let setup_bkgd st =
   (* propagate bkgd preferences to graphics device *)
   (* storing the default/inherited prefs into Dev  *)
-  Dev.blit_bkgd_data st.bkgd_prefs Dev.bkgd_data;
+  Dev.blit_bkgd_data st.Cdvi.bkgd_prefs Dev.bkgd_data;
   (* apply local modifications                  *)
-  Dev.set_bg_options st.bkgd_local_prefs;
+  Dev.set_bg_options st.Cdvi.bkgd_local_prefs;
   (* recover modified preferences               *)
-  Dev.blit_bkgd_data Dev.bkgd_data st.bkgd_prefs;;
+  Dev.blit_bkgd_data Dev.bkgd_data st.Cdvi.bkgd_prefs;;
 
 let ratios_alist = [
   ("auto", Drawimage.ScaleAuto);
@@ -1047,7 +1046,7 @@ let bkgd_alist = [
   ("image", fun s st ->
      [Dev.BgImg s]);
   ("reset", fun s st ->
-     Dev.blit_bkgd_data (Dev.default_bkgd_data ()) st.bkgd_prefs;
+     Dev.blit_bkgd_data (Dev.default_bkgd_data ()) st.Cdvi.bkgd_prefs;
      []);
   ("inherit", fun s st ->
      inherit_background_info := true;
@@ -1100,11 +1099,11 @@ let filter_alist alist falist =
 (* When scanning the page, we just fill the info structure for backgrounds *)
 let scan_bkgd_special st s =
   let records = get_records s in
-  st.bkgd_local_prefs <-
+  st.Cdvi.bkgd_local_prefs <-
     List.flatten
       (List.map (fun (k, v) -> (List.assoc k bkgd_alist) v st)
                 (filter_alist records bkgd_alist)) @
-    st.bkgd_local_prefs;;
+    st.Cdvi.bkgd_local_prefs;;
 
 (* When not scanning, we ignore the background information *)
 let bkgd_special st s = ();;
@@ -1246,7 +1245,7 @@ let rec put_coor x y = function
   | [] -> x, y
 
 let ps_special st s =
-  if Gs.get_do_ps () && st.status.hasps then
+  if Gs.get_do_ps () && st.status.Cdvi.hasps then
      let h', v' = put_coor st.h st.v st.put in
      let x = Misc.round (st.conv *. float h') in
      let y = Misc.round (st.conv *. float v') in
@@ -1254,7 +1253,7 @@ let ps_special st s =
        begin try
          Dev.exec_ps s x y
        with Dev.GS ->
-         st.status.hasps <- false
+         st.status.Cdvi.hasps <- false
        end;;
 
 (* header are not "rendered", only stored during scan *)
@@ -1342,7 +1341,7 @@ let scan_special status (headers, xrefs, lastline as args) pagenum s =
   (* Embedded Postscript, better be first for speed when scanning *)
   let do_ps = Gs.get_do_ps () in
   if has_prefix "\" " s || has_prefix "ps: " s then
-    (status.hasps <- do_ps) else
+    status.Cdvi.hasps <- do_ps else
   if has_prefix "!" s then
     (if do_ps then headers := (true, get_suffix "!" s) :: !headers) else
   (* Embedded Postscript, better be first for speed when scanning *)
@@ -1360,13 +1359,13 @@ let scan_special status (headers, xrefs, lastline as args) pagenum s =
    the function otherwise for other DVI stuff. *)
 let scan_special_page otherwise cdvi globals pagenum =
    Misc.debug_stop "Scanning specials";
-   let page = cdvi.base_dvi.pages.(pagenum) in
-   match page.page_status with
-   | Unknown ->
+   let page = cdvi.base_dvi.Cdvi.pages.(pagenum) in
+   match page.Cdvi.status with
+   | Cdvi.Unknown ->
        let status =
-         {hasps = false;
-          bkgd_local_prefs = [];
-          bkgd_prefs =
+         {Cdvi.hasps = false;
+          Cdvi.bkgd_local_prefs = [];
+          Cdvi.bkgd_prefs =
             (if !inherit_background_info
              then Dev.copy_of_bkgd_data ()
              else Dev.default_bkgd_data ())} in
@@ -1376,11 +1375,11 @@ let scan_special_page otherwise cdvi globals pagenum =
              let globals = (fst globals, snd globals, lastline) in
              scan_special status globals pagenum s
          | x -> otherwise x in
-       Cdvi.page_iter eval cdvi.base_dvi.pages.(pagenum);
-       page.line <- !lastline;
-       page.page_status <- Known status;
+       Cdvi.page_iter eval cdvi.base_dvi.Cdvi.pages.(pagenum);
+       page.Cdvi.line <- !lastline;
+       page.Cdvi.status <- Cdvi.Known status;
        status
-   | Known stored_status -> stored_status;;
+   | Cdvi.Known stored_status -> stored_status;;
 
 let special st s =
   if has_prefix "\" " s || has_prefix "ps: " s
@@ -1439,7 +1438,7 @@ let special st s =
   || has_prefix "da " s || has_prefix "dt " s || s = "sp"
   || has_prefix "sp " s || has_prefix "ar " s || has_prefix "ia " s
   || has_prefix "sh " s || s = "wh" || s = "bk"
- then tpic_specials st s;;
+  then tpic_specials st s;;
 
 (*** Page rendering ***)
 let eval_dvi_command st = function
@@ -1484,7 +1483,7 @@ forward_eval_command := eval_command;;
 
 let newpage h st magdpi x y =
   try Dev.newpage h st.sdpi magdpi x y
-  with Dev.GS -> st.status.hasps <- false;;
+  with Dev.GS -> st.status.Cdvi.hasps <- false;;
 
 let find_prologues l =
   let l = List.rev l in
@@ -1502,26 +1501,25 @@ let find_prologues l =
       Misc.warning
         "Cannot find postscript prologue. Continuing without Postscript";
       Gs.set_do_ps false;
-      []
-;;
+      [];;
 
 let render_step cdvi num ?trans ?chst dpi xorig yorig =
   proc_clean ();
-  if num < 0 || num >= Array.length cdvi.base_dvi.pages then
+  if num < 0 || num >= Array.length cdvi.base_dvi.Cdvi.pages then
     invalid_arg "Driver.render_step";
   let dvi = cdvi.base_dvi in
-  let mag = float dvi.preamble.Dvicommands.pre_mag /. 1000.0
-  and page = dvi.pages.(num) in
-  let otherwise _ = () in
+  let mag = float dvi.Cdvi.preamble.Dvicommands.pre_mag /. 1000.0
+  and page = dvi.Cdvi.pages.(num) in
+  let otherwise = ignore in
   let status =
     let headers = ref []
-    and xrefs = dvi.xrefs in
+    and xrefs = dvi.Cdvi.xrefs in
     let s = scan_special_page otherwise cdvi (headers, xrefs) num in
     if !headers <> [] then
       Dev.add_headers (find_prologues !headers);
     s in
-  status.hasps <- Gs.get_do_ps ();
-  let orid = function Some f -> f | None -> fun x->x in
+  status.Cdvi.hasps <- Gs.get_do_ps ();
+  let orid = function Some f -> f | None -> fun x -> x in
   let st =
     { cdvi = cdvi;
       sdpi = Misc.round (mag *. ldexp dpi 16);
@@ -1547,7 +1545,7 @@ let render_step cdvi num ?trans ?chst dpi xorig yorig =
       draw_html = [];
       checkpoint = 0;
     } in
-  if st.status.hasps then newpage [] st  (mag *. dpi) xorig yorig;
+  if st.status.Cdvi.hasps then newpage [] st (mag *. dpi) xorig yorig;
   setup_bkgd st.status; (* apply the background preferences in Dev *)
   Dev.clear_dev ();     (* and redraw the background               *)
   Dev.set_color st.color;
@@ -1573,24 +1571,24 @@ let unfreeze_font cdvi n =
 
 let unfreeze_fonts cdvi =
   List.iter (fun (n, _) -> unfreeze_font cdvi n)
-    cdvi.base_dvi.font_map;;
+    cdvi.base_dvi.Cdvi.font_map;;
 
 let scan_special_pages cdvi lastpage =
   let headers = ref []
-  and xrefs = cdvi.base_dvi.xrefs in
-  let otherwise _ = () in
-  for n = 0 to min lastpage (Array.length cdvi.base_dvi.pages) - 1 do
+  and xrefs = cdvi.base_dvi.Cdvi.xrefs in
+  let otherwise = ignore in
+  for n = 0 to min lastpage (Array.length cdvi.base_dvi.Cdvi.pages) - 1 do
     ignore (scan_special_page otherwise cdvi (headers, xrefs) n);
   done;
   if !headers <> [] then Dev.add_headers (find_prologues !headers);;
 
 let unfreeze_glyphs cdvi dpi =
-  let mag = float cdvi.base_dvi.preamble.Dvicommands.pre_mag /. 1000.0 in
+  let mag = float cdvi.base_dvi.Cdvi.preamble.Dvicommands.pre_mag /. 1000.0 in
   let sdpi = Misc.round (mag *. ldexp dpi 16)
   and mtable = ref dummy_mtable
   and gtable = ref dummy_gtable in
   let headers = ref []
-  and xrefs = cdvi.base_dvi.xrefs in
+  and xrefs = cdvi.base_dvi.Cdvi.xrefs in
   let otherwise = function
     | Dvicommands.C_fnt n ->
         let (mt, gt) =
@@ -1606,9 +1604,9 @@ let unfreeze_glyphs cdvi dpi =
     | _ -> () in
 
   let headers = ref []
-  and xrefs = cdvi.base_dvi.xrefs in
+  and xrefs = cdvi.base_dvi.Cdvi.xrefs in
   let globals = headers, xrefs in
-  for n = 0 to Array.length cdvi.base_dvi.pages - 1 do
+  for n = 0 to Array.length cdvi.base_dvi.Cdvi.pages - 1 do
     mtable := dummy_mtable;
     gtable := dummy_gtable;
     ignore (scan_special_page otherwise cdvi globals n);

@@ -20,13 +20,15 @@
 open Cdvi;;
 
 exception Pause;;
-exception Wait of float
+exception Wait of float;;
 type cooked_dvi;;
 val with_active : bool -> ('a -> 'b) -> 'a -> 'b;;
 val toggle_active : unit -> unit;;
 val cook_dvi : Cdvi.t -> cooked_dvi;;
-val render_step : cooked_dvi -> int -> ?trans:Transitions.direction -> 
-         ?chst:(known_status -> known_status) -> float -> int -> int -> (unit -> bool);;
+val render_step :
+      cooked_dvi -> int -> ?trans:Transitions.direction -> 
+      ?chst:(known_status -> known_status) -> float -> int -> int ->
+      (unit -> bool);;
 val unfreeze_fonts : cooked_dvi -> unit;;
 val unfreeze_glyphs : cooked_dvi -> float -> unit;;
 val scan_special_pages : cooked_dvi -> int -> unit;;
