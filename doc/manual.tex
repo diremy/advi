@@ -390,9 +390,9 @@ exchanging the backgound and foreground colors \\
 
 \subsubsection*{Safety options}
 \medskip\noindent\begin{tabular}{ll}
-\verb"-exec" & Set safety policy to ``automatic execution'' \\
-\verb"-ask" & Set safety policy to ``ask user before execution'' \\
-\verb"-safer" & Set safety policy to ``no execution of embedded aplications''
+\verb"-exec" & Set safety policy to ``always execute embedded applications'' \\
+\verb"-ask" & Set safety policy to ``ask user before execution of embedded applications'' \\
+\verb"-safer" & Set safety policy to ``never execute embedded applications''
 \end{tabular}
 
 \subsubsection*{Option files option}
@@ -532,8 +532,7 @@ files, or by implementing extensions to the previewer itself.
 % community, please don't hesitate to drop a mail to the implementors
 % at \verb"advi@pauillac.inria.fr".
 
-
-\section{The \softtarget{advi}{{\tt advi.sty}} {\LaTeX} package}
+\section{The \softtarget{advi} {{\tt advi.sty}} {\LaTeX} package}
 
 {\ActiveDVI} provides some {\LaTeX} packages to facilitate animations and
 interaction with the presenter from within your {\LaTeX} source text.
@@ -728,8 +727,6 @@ To give an idea, the names and colors available on a standard installation of
 
 {\color[named]{Gray}{Gray}} $\quad$
 {\color[named]{Black}{Black}} $\quad$
-\advirecord{thewhite}{\
-{\color[named]{Red}{White}}}
 
 \subsubsection*{The CMYK specifications of colors}
 
@@ -919,8 +916,8 @@ By default, the transition affects only the current page.
 
 \subsection{Embedded applications}
 
-{\ActiveDVI} can launch arbitrary applications you need to animate your
-show.
+To animate your show, {\ActiveDVI} can launch arbitrary applications
+you need.
 
 \subsubsection{Launching embedded applications}
 
@@ -963,11 +960,11 @@ the page size.
 \dockey{raw}{name}
 \begin{quote}
 The application is launched each time its embedding command is
-encountered. A \doctt{raw} application is not managed by {\ActiveDVI},
-except for the initial launching and the final clean-up that occurs
-when {\ActiveDVI} exits. You can monitor \doctt{raw} applications with
-\doctt{advikillembed} and the associated window mapping facilities
-for \doctt{raw} applications (see below).
+encountered. A \doctt{raw} application is not {\em automatically}
+managed by {\ActiveDVI}, except for the initial launching and the
+final clean-up that occurs when {\ActiveDVI} exits. You can monitor
+\doctt{raw} applications with \doctt{advikillembed} and the associated
+window mapping facilities for \doctt{raw} applications (see below).
 \end{quote}
 
 \dockey{width}{dim}\\
