@@ -17,6 +17,8 @@
 
 (* $Id$ *)
 
+type color = GraphicsY11.color;;
+
 type x = GraphicsY11.x
 and y = GraphicsY11.y
 and w = GraphicsY11.w
@@ -35,44 +37,50 @@ val make_glyph : Glyph.t -> glyph;;
 val get_glyph  : glyph -> Glyph.t;;
 val draw_glyph : glyph -> x -> y -> unit;;
 
-module Symbol :
-    sig
-      type fontname = string
-      type fontratio = float
-      type g =
-          { fontname : string;
-            fontratio : float;
-            glyph : glyph;
-          }
-      type symbol =
-          Glyph of g
-        | Space of int * int
-        | Rule of int * int
-        | Line of int * string option
-      type element =
-          { color   : Graphics.color;
-            locx    : x;
-            locy    : y;
-            code    : int;
-            symbol : symbol }
-      type set
-      val voffset : element -> y
-      val hoffset : element -> x
-      val height : element -> h
-      val width : element -> w
-      val clear : unit -> unit
-      val add : x -> y -> w -> h -> symbol -> unit
-      val to_ascii   : set -> string
-      val to_escaped : set -> string
-      val commands_to_ascii:
-        (int * Dvicommands.font_def) list -> Dvicommands.command list -> string
-      val inzone : int -> int -> int -> int -> set
-      val intime : int -> int -> int -> int -> set
-      val iter : (element -> unit) -> set -> unit
-      val lines : int -> int ->
-        (element * int * int *
-           string * string * string * string * string option) option
-    end;;
+module Symbol : sig
+  type fontname = string
+  type fontratio = float
+   type g = {
+     fontname : string;
+     fontratio : float;
+     glyph : glyph;
+   };;
+
+   type symbol =
+      | Glyph of g
+      | Space of int * int
+      | Rule of int * int
+      | Line of int * string option;;
+
+   type code = int;;
+
+   type display_symbol = {
+     color : color;
+     locx : x;
+     locy : y;
+     code : code;
+     symbol : symbol;
+   };;
+
+   type display_set = display_symbol list;;
+
+   val voffset : display_symbol -> y
+   val hoffset : display_symbol -> x
+   val height : display_symbol -> h
+   val width : display_symbol -> w
+   val clear_global_display_set : unit -> unit
+   val add_to_global_display_set : x -> y -> w -> h -> symbol -> unit
+   val to_ascii : display_set -> string
+   val to_ascii_escaped : display_set -> string
+   val commands_to_ascii:
+     (int * Dvicommands.font_def) list -> Dvicommands.command list -> string
+   val inzone : int -> int -> int -> int -> display_set
+   val intime : int -> int -> int -> int -> display_set
+   val iter : (display_symbol -> unit) -> display_set -> unit
+   val lines : int -> int ->
+     (display_symbol * int * int *
+      string * string * string * string * string option) option
+ end;;
 
 (* Device configuration *)
 
@@ -84,13 +92,13 @@ val set_bbox : (int * int * int * int) option -> unit;;
 
 (* Application embedding *)
 val embed_app :
-  string -> Embed.app_mode -> string -> int -> int -> int -> int -> unit;;
+  Embed.app_command -> Embed.app_mode -> Embed.app_name ->
+  w -> h -> x -> y -> unit;;
 
 (* Drawing *)
 
 type 'a rect = { rx : 'a; ry : 'a; rh : 'a; rw : 'a };;
 
-type color = int;;
 val get_fgcolor : unit -> color;;
 
 val with_color : color -> ('a -> 'b) -> 'a -> 'b

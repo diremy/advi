@@ -1164,7 +1164,7 @@ let clear_dev () =
   E.clear ();
   bg_colors := [];
   background_colors := [];
-  Symbol.clear ();
+  Symbol.clear_global_display_set ();
   (* update graphics size information *)
   update_device_geometry ();
   (* draw background *)
@@ -1598,9 +1598,9 @@ let exec_ps s x0 y0 =
   if not !opened then failwith "Grdev.exec_ps: no window";
   Gs.draw s x0 y0;;
 
-let embed_app command app_mode app_name width_pixel height_pixel x y =
+let embed_app app_command app_mode app_name width_pixel height_pixel x y =
   Embed.embed_app
-   command app_mode app_name width_pixel height_pixel x (!size_y - y);;
+   app_command app_mode app_name width_pixel height_pixel x (!size_y - y);;
 
 let wait_button_up () =
   if GraphicsY11.button_down ()
