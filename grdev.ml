@@ -55,6 +55,12 @@ let xmax = ref 0;;
 let ymin = ref 0;;
 let ymax = ref 0;;
 
+let update_device_geometry () =
+  size_x := Graphics.size_x ();
+  size_y := Graphics.size_y ();
+  xmin := 0; xmax := !size_x;
+  ymin := 0; ymax := !size_y;;
+
 (* Communication with GS *)
 exception Stop;;
 
@@ -224,7 +230,6 @@ let full_screen_view () =
    v_off_y = !ymin};;
 
 (* The Background preferences                    *)
-(* to be extended, should contain gradients etc. *)
 type bkgd_prefs = {
   mutable bgcolor : color;
   mutable bgimg : string option;
@@ -309,7 +314,7 @@ let draw_img file whitetransp alpha blend
       psbbox ratiopt antialias (w, h) x0 y0 =
   if not !opened then failwith "Grdev.draw_img: no window";
   Drawimage.f file whitetransp alpha blend
-    psbbox ratiopt antialias (w, h) (x0, y0)
+    psbbox ratiopt antialias (w, h) (x0, !size_y - y0)
 ;;
 
 let draw_bkgd () =
@@ -322,17 +327,16 @@ let draw_bkgd () =
   (* Background: color. *)
   bg_color := bkgd_data.bgcolor;
   Graphics.set_color !bg_color;
-(*  Graphics.set_color Graphics.blue;*)
   (* Fix me: why this test ? could have a white bg, no ? *)
-(*  if !bg_color <> Graphics.white then *)Graphics.fill_rect x y w h;
-Graphics.synchronize ();
+  (*  if !bg_color <> Graphics.white then *)
+  Graphics.fill_rect x y w h;
   (* Background: image. *)
   let draw_bg file =
-    draw_img file bkgd_data.bgwhitetransp bkgd_data.bgalpha
+    Drawimage.f file bkgd_data.bgwhitetransp bkgd_data.bgalpha
       bkgd_data.bgblend None
       bkgd_data.bgratiopt
       true (* antialias *)
-      (w, h) x y in
+      (w, h) (x, y) in
   lift draw_bg bkgd_data.bgimg;
   (* Background: function. *)
   lift (fun draw -> draw viewport) bkgd_data.bgfunction;;
@@ -972,10 +976,7 @@ let open_dev geom =
   in
   ignore (f ());
 
-  size_x := Graphics.size_x ();
-  size_y := Graphics.size_y ();
-  xmin := 0; xmax := !size_x;
-  ymin := 0; ymax := !size_y;
+  update_device_geometry ();
   Graphics.remember_mode true;
   GraphicsY11.display_mode !Options.global_display_mode;
   Graphics.set_window_title !title;
@@ -1004,10 +1005,7 @@ let clear_dev () =
   background_colors := [];
   Symbol.clear ();
   (* update graphics size information *)
-  size_x := Graphics.size_x ();
-  size_y := Graphics.size_y ();
-  xmin := 0; xmax := !size_x;
-  ymin := 0; ymax := !size_y;
+  update_device_geometry ();
   (* draw background *)
   draw_bkgd ();;
 
@@ -1088,11 +1086,8 @@ let reposition ~x ~y ~w ~h =
   Gs.flush ();
   Gs.kill ();
   GraphicsY11.reposition x y w h;
-  let x = Graphics.size_x ()
-  and y = Graphics.size_y () in
-  size_x := x;
-  size_y := y;
-  x, y;;
+  update_device_geometry ();
+  !size_x, !size_y;;
 
 let resized () =
   let x = Graphics.size_x () and y = Graphics.size_y () in
