@@ -65,16 +65,14 @@ let zap_to_char c s =
   and i = ref 0 in
   while !i < len && s.[!i] <> c do incr i done ;
   let i0 = !i+1 in
-  if i0 >= len then "" else String.sub s i0 (len - i0)
-;;
+  if i0 >= len then "" else String.sub s i0 (len - i0);;
 
 let catenate_sep sep = function 
   | [] -> ""
   | x :: l -> List.fold_left (fun s s' -> s ^ sep ^ s') x l;;
 
 let int_of_int_or_float_string s =
-    try int_of_string s
-    with _ -> truncate (float_of_string s);;
+  try int_of_string s with _ -> truncate (float_of_string s);;
 
 (* Unix command line parser *)
 let parse_shell_command str =
@@ -124,7 +122,7 @@ let pretty_options all_options =
   let width =
     2 + 
     List.fold_left2
-      (fun w (o,_,_) -> function
+      (fun w (o, _, _) -> function
         | [] | _ :: [] -> w
         | m::_ -> max w (String.length o + String.length m))
       0 all_options tab_options in
@@ -132,11 +130,11 @@ let pretty_options all_options =
   let indent o = function
     | [] -> assert false
     | [h] -> h
-    | h::m::t ->
+    | h :: m :: t ->
         let length = width - String.length o - String.length h in
-        let hm = h ^ (String.make length ' ') ^ m in
+        let hm = h ^ String.make length ' ' ^ m in
         if t = [] then  hm
-        else hm ^ (String.concat margin t) in
+        else hm ^ String.concat margin t in
   List.map2 (fun  (o, s, _ ) ml -> (o, s, indent o ml))
     all_options tab_options;;
 
@@ -181,7 +179,7 @@ let set_global_display_mode b =
 
 set_option "-fg"
  (Arg.Unit (fun () -> set_global_display_mode true))
- "Draw in the foreground";;
+ "\tDraw in the foreground";;
 
 let warning mes =
   Printf.fprintf stderr "Warning: %s" mes;
