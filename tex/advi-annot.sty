@@ -1,0 +1,51 @@
+%%
+%% This is the original source file advi.sty
+%%
+%% Package `advi' to use with LaTeX 2e
+%% Copyright Roberto Di Cosmo, Jun Furuse, Didier Remy, and Pierre Weis
+%% All rights reserved.
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{advi-annot}
+         [2001/29/08 v0.40 Advi Annot Package for advi Previewer]
+
+%%% Bulles
+%% Identification
+%% Preliminary declarations
+
+\RequirePackage {advi}
+
+%% Options
+
+\newcommand {\AdviBulleBG}{\def \advibulle@bg}
+\newcommand {\AdviBulleArc}[2]
+  {\ncarc [linestyle=solid,arcangleA=-0,arcangleB=-3]{#1}{advi@to}%
+   \ncarc [linestyle=solid,arcangleA=0,arcangleB=3]{#1}{advi@to}}
+
+\AdviBulleBG{yellow}
+
+\newcount \advi@c@annot
+\newcommand {\advi@annot}[2][]{\global \advance \advi@c@annot by 1%
+   \bgroup
+   \Rnode {advi@from\the\advi@c@annot}%
+          {\begin{advi*}{advi@annot\the\advi@c@annot}#2\end{advi*}}%
+   \annot@i}
+\newcommand {\annot@i}[1]
+  [linecolor=\advibulle@bg,linewidth=1pt,%
+   fillstyle=solid,fillcolor=\advibulle@bg]
+  {\psset {#1}\@ifnextchar({\annot@ii}{\annot@ii(1,1)}}
+
+\ifadvi@ignore
+\def \annot@ii(#1)#2{\egroup}
+\else
+\def \annot@ii(#1)#2{%
+  \begin{advi@record}{advi@annot\the\advi@c@annot}
+    \rput(#1){\ovalnode {advi@to}{#2}}%
+    \AdviBulleArc{advi@from\the\advi@c@annot}{advi@to}%
+  \end{advi@record}\egroup
+}
+\fi
+
+%% exports
+
+\advi@export \annot \advi@annot 
