@@ -100,14 +100,14 @@ bounding box specification must be available in the file
 \docdef \adviwait\docopt{seconds}
 \begin{quote}
 Wait for \docid{seconds} or wait for ever if no argument is
-provided. Wait means do nothing until until the user requests to
+provided. Wait means do nothing until the user requests to
 continue (or to move to another page).
 \end{quote}
 
 \medskip\noindent
 \docdef \advirecord \doctt{[play]}\docarg{tag}\docarg{latex code}
 \begin{quote}
-The computes \docid{latex code} and record its DVI output bound to the tag
+Computes \docid{latex code} and records its DVI output bound to the tag
 \docid{tag}. The DVI output is not displayed during recording, unless the
 option \doctt{play} is set.
 
@@ -184,7 +184,7 @@ Including some strange flashing effect!
 
 \newpage
 
-\subsection* {Embedded applications}
+\subsection* {Embedding applications}
 
 Any Unix command can be launch during the presentation.
 This is convenient to call an external program to draw material in the
@@ -211,9 +211,12 @@ the application should use. Hence\\
 
 \verb+\adviembed[width=w,height=h]{command -geometry !g -use !p}+\\
 
-\noindent
-will launch \verb"command" with a geometry computed from the width and
-height specification \verb"w" and \verb"h".
+\noindent will launch \verb"command" with a geometry computed from the
+width and height specification \verb"w" and \verb"h"; \verb"command"
+will be display in the window \verb"!p" (normally a sub-window of
+{\ActiveDVI}'s window).
+
+\newpage
 
 \subsubsection*{Embeddable applications}
 
@@ -228,9 +231,8 @@ rerooted, it is truely embeddable into {\ActiveDVI} (meaning it is
 really a part of the {\ActiveDVI} window). Otherwise the application
 is not embeddable.
 
-\newpage
 
-\subsubsection*{Not embeddable applications}
+\subsubsection*{Non embeddable applications}
 
 If the application cannot be rerooted (or if the \verb"!p" parameter
 is not specified), {\ActiveDVI} cannot control the placement of the
@@ -239,10 +241,14 @@ helps by providing a complete X geometry specification: with width and
 height, an extra \verb"+x+y" shift is indicated to precisely access
 the place where the embedding should occur in the {\ActiveDVI}
 window. Hence, the application appears at the right place even if it
-cannot be rerooted and is impossible to embed.
+cannot be rerooted and is indeed impossible to embed.
+
+\newpage
+
+\subsubsection*{Embedded applications}
 
 That way, applications that obeys to the X geometry specifications
-can be properly displayed in the {\ActiveDVI} window.
+can be properly displayed within the {\ActiveDVI} window.
 
 Examples:
 
@@ -261,7 +267,7 @@ presentation using:\\
 
 \newpage
 
-\subsection* {Embedded applications (cont.)}
+\subsection*{Embedded applications (cont.)}
 
 \begin{itemize}
   \item Any application which has embedding options can be launched, as\\
@@ -280,13 +286,19 @@ presentation using:\\
 
 \newpage
 
-\subsection* {Embedded applications (cont.)}
+\subsection*{Non Embeddable applications}
 
 If an X application does not support the specification of its parent
-window, it will be automatically handled by the window manager.  Then,
+window, it will be automatically handled by the window manager. Then,
 depending on the WM at hand, the placements may or may not obey your
 geometry specifications. (In some cases, disabling the ``remember window
 positions'' option of your WM may help.)
+
+Applications launched that way will not be properly embedded: they
+will appear {\em above} not {\em inside} the {\ActiveDVI}
+window. (Hence if you move the {\ActiveDVI} window the applications
+will not follow (they may even desappear {\em below} the
+{\ActiveDVI}'s window)).
 
 \begin{itemize}
  \item Xeyes using the macro command \verb|embed|:\\
@@ -330,7 +342,7 @@ music automatically launched when you are still speaking! :)
 
 \noindent
 In conclusion, the \verb|embed| macro can launch any executable
-command during the presentation.
+command during your presentations.
 
 \newpage
  
@@ -409,7 +421,9 @@ material, which works well with \verb"advi".
 Some reimplementation of \verb"\overlay" for \verb"advi" to work with 
 seminar overlays might still be possible...  
 
-\subsection* {Printing your slides: the ignore mode}
+\newpage
+
+\section* {Printing your slides: the ignore mode}
 
 The package \verb"advi" can be loaded with the \verb"ignore" option:
 
@@ -576,7 +590,7 @@ inner tabulars\\ should be between\\ parentheses\end{tabular}}}\\
 \adviannot[p=9em]{Active anchors}(1,1.5)
 {\centering Active anchors are even greater!}
 can also annotate text as \adviannot[C,bg=green]{here}{here=h+e+r+e},
-{\adviannot[c]{for instance}[linecolor=red](-1.5,1){for example ?}}.
+{\adviannot[c]{for instance}(-1.5,1){\textcolor{red}{for example ?}}}.
 
 \medskip
 
@@ -594,13 +608,19 @@ can also annotate text as \adviannot[C,bg=green]{here}{here=h+e+r+e},
 
 \adviannot[C,bg=green]{here}{here=h+e+r+e}
 
-\adviannot[c]{for instance}[linecolor=red](-1.5,1){for example ?}
+\adviannot[c]{for instance}(-1.5,1){\textcolor{red}{for example ?}}
 \end{verbatim}
 \end{small}
 
+Background of annotations defaults to yellow, centering annotation is
+reminiscent to the {\tt array} command: {\tt c} means centered,
+{\tt r} right ajusted, and {\tt l} left adjusted. Uppercase variants
+{\tt C}, {\tt L}, {\tt R}, have the same meaning, plus implicit math
+mode environment.
+
 \subsection*{Note}
 
-The {\setanchor{invisible}\adviannot{commands}[linecolor=red](-1.5,1){you found it!}}
+The {\setanchor{invisible}\adviannot[bg=red]{commands}(-1.5,1){you found it!}}
 \begin{quote}
 \hsize \linewidth\setbox0\vbox\bgroup
 
