@@ -32,6 +32,17 @@ let set_geom g = Dviview.set_autoresize false; geometry := g;;
 
 let set_dim r s = r := Dimension.dimen_of_string s;;
 
+let print_advi_version () =
+  prerr_endline
+   (Printf.sprintf
+      "The Active-DVI previewer and graphics presenter, version %.2f+%i (%s)"
+      Config.advi_version_number Config.advi_sub_version_number
+      Config.advi_version_date);
+  exit 0;;
+
+let version_spec nm =
+  nm, Arg.Unit print_advi_version, "\tPrint the current Active-DVI version";;
+ 
 let spec_list = [
   ("-geometry", Arg.String set_geom,
    "GEOM\tSets the (maximum) geometry GEOM");
@@ -48,6 +59,8 @@ let spec_list = [
    "DIMEN\tHorizontal margin (default: 1cm)");
   ("-vmargin", Arg.String (set_dim vmargin),
    "DIMEN\tVertical margin (default: 1cm)");
+  version_spec "-v";
+  version_spec "--version";
   ] in
 
 List.iter (fun (nm, act, man) -> Options.add nm act man) spec_list;;
