@@ -1,5 +1,9 @@
+Version 1.7
+2004/12/07
+        Getting rid of the new warnings of the Caml compiler.
 Version 1.6
 2004/03/04
+        Man page rewritten and completed.
         Introducing a laser pointer facility.
 Version 1.5+2
 2003/10/09
