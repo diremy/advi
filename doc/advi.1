@@ -2,7 +2,7 @@
 .\" First parameter, NAME, should be all caps
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
-.TH ADVI SECTION "September 01, 2004"
+.TH ADVI 1 "October 02, 2004"
 .\" Please adjust this date whenever revising the manpage.
 .\"
 .\" Some roff macros, for reference:
@@ -94,7 +94,9 @@ table of contents or as small images set up on a page)
 
 \- Integrated ``Laser pointer'' feature to point to the slide
 
-Notice that advi needs the `kpsewhich' tool in order to find and
+Notice that
+.B advi
+needs the `kpsewhich' tool in order to find and
 recompile PK fonts.  (This program is part of the `kpathsea' library
 provided by many TeX distributions.)
 
@@ -178,7 +180,9 @@ Sets the (maximum) geometry GEOM
 Horizontal margin (default: 1cm)
 .TP
 .B \-html STRING
-Make advi start at html reference of name STRING
+Make
+.B advi
+start at html reference of name STRING
 .TP
 .B \-image\-viewer STRING
 Command to display image files (default xv)
@@ -215,13 +219,19 @@ Load this file when parsing this option to set up options
 (to override the options of the default ~/.advirc or ~/.advi/advirc init file).
 .TP
 .B \-page INT
-Make advi start at page INT
+Make
+.B advi
+start at page INT
 .TP
 .B \-page\-number
-Ask advi to write the current page number in a file (default is no)
+Ask
+.B advi
+to write the current page number in a file (default is no)
 .TP
 .B \-page\-number\-file STRING
-Set the name of the file where advi could write the current page number
+Set the name of the file where
+.B advi
+could write the current page number
 (default is file 'advi\_page\_number' in the cache directory).
 .TP
 .B \-pager STRING
@@ -332,8 +342,16 @@ Quick info and key bindings help
 Quits the program
 
 .TP
+.B ^X\-^C (Control\-X Control\-C)
+Quits the program
+
+.TP
+.B ^X\-^F (Control\-X Control\-F)
+Turn to full screen mode
+
+.TP
 .B ^F (Control\-F)
-Toggle to full screen mode (press ^F again to revert to normal mode)
+Toggle to switch from full screen to normal mode and converse
 
 .TP
 .B ^<button> (Control + left mouse button)
@@ -422,12 +440,41 @@ Erase the image cache
 
 .TP
 .B T
-Process thumbnails
+Process thumbnails (graphical table of contents for the show)
 
 .TP
 .B t
 Display thumbnails if processed or floating table of contents, or do
 nothing
+
+.TP
+.B ^X\-l (Control\-X l)
+Toggle on or off the laser pointer
+
+.TP
+.B s
+Turn on the write scratching mode (to interactively write on the
+slide). When in scratching mode press
+.B ? 
+to get help
+
+.TP
+.B S
+Turn on the draw scratching mode (to interactively draw on the
+slide). When in scratching mode press
+.B ? 
+to get help
+
+.TP
+.B ^X\-^S (Control\-X Control\-S)
+Save an image of the current state of the slide. The default image file
+name is shot
+.B <n>
+where
+.B <n>
+is the next available integer number such that no previously saved
+slide image is overwritten. The default image format is PNG which
+is the extension of the image file.
 
 .RE
 
@@ -443,11 +490,14 @@ window.)
 .SH EYE CANDY MACROS
 
 Using the LaTeX style advi.sty provided with the package, you can
-embed some Active dvi specials into your TeX documents. Advi
+embed some Active dvi specials into your TeX documents.
+.B Advi
 interprets those specials to provide some eye candy features for your
 presentation. For the casual user, the advi\-slides.sty package gives
-a truely simple way to write a show for advi (see in the examples
-directory of in the advi\-slides.sty file for more information).
+a truely simple way to write a show for
+.B advi
+(see in the examples directory or the documentation inside the
+advi\-slides.sty file for more information).
 
 .TP
 .B \eadviwait

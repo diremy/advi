@@ -53,7 +53,7 @@ web:
 	$(MAKE) -f MakeHTML all
 	$(MAKE) -f MakeMan all
 
-advi.1:
+advi.1: ../doc_src/advi.man
 	$(MAKE) -f MakeMan all
 
 

@@ -143,15 +143,14 @@ opt: $(EXEC).opt
 $(EXEC).opt: $(COBJS) $(CMX_OBJS)
 	$(OCAMLOPT) $(INCLUDES) $(OPT_OBJS) $(LINK_OPTS) -o $(EXEC).opt
 
-documentation:
+documentation: $(MANFILES)
 	cd doc; $(MAKE) all
 
-doc:
+doc: $(HELPFILES)
 	if test $(HAVE_HEVEA) = "true"; then ($(MAKE) documentation); fi
 
 config.ml: config.ml.in configure
 	./configure
-
 
 veryclean: clean
 	rm -f Makefile.config config.cache config.log \
@@ -163,7 +162,7 @@ veryveryclean: veryclean
 install: installopt installman
 
 installbyt:
-	$(MAKE) install INSTALLTARGET=advi
+	$(MAKE) install INSTALLTARGET=advi.byt
 
 installopt:: $(INSTALLTARGET) $(HELPFILES)
 	- install -d ${bindir}
@@ -187,7 +186,7 @@ installman:
 MLFILES = $(addsuffix .ml, $(MODULES))
 
 Makefile.config: Makefile.config.in
-	./configure_FreeBSD
+	./configure
 
 clean::
 	$(RM) $(EXEC).opt $(EXEC).byt
@@ -230,6 +229,16 @@ package_distribution: release distribution announce
 
 count:
 	wc -l *.ml *.mli | sort -n
+
+doc/splash.dvi: doc/splash.tex
+	cd doc; $(MAKE) `basename $@`
+doc/scratch_write_splash.dvi: doc/scratch_write_splash.tex
+	cd doc; $(MAKE) `basename $@`
+doc/scratch_draw_splash.dvi: doc/scratch_draw_splash.tex
+	cd doc; $(MAKE) `basename $@`
+
+doc/advi.1: doc_src/advi.man
+	cd doc; $(MAKE) `basename $@`
 
 include Makefile.common
 include .depend

@@ -38,6 +38,6 @@ clean:
 
 manpages:
 	for i in $(SRC)/*.m; do \
-	    cp $$i ./`basename $$i .m`.$(MANEXT); \
+	    $(CP) $$i ./`basename $$i .m`.$(MANEXT); \
 	done
 
