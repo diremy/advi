@@ -1386,11 +1386,11 @@ let scan_special status (headers, xrefs, lastline as args) pagenum s =
      has_prefix "advi: embed " s then scan_embed_special status s else
   (* Embedded Postscript, better be first for speed when scanning *)
   let do_ps = Gs.get_do_ps () in
-  if has_prefix "\" " s || has_prefix "ps: " s then
+  if has_prefix "\" " s || has_prefix "ps: " s 
+  || has_prefix "psfile=" s || has_prefix "PSfile=" s then
     status.Cdvi.hasps <- do_ps else
   if has_prefix "!" s then
     (if do_ps then headers := (true, get_suffix "!" s) :: !headers) else
-  (* Embedded Postscript, better be first for speed when scanning *)
   if has_prefix "header=" s then
     (if do_ps then headers := (false, get_suffix "header=" s) :: !headers) else
   if has_prefix "advi: setbg " s then scan_bkgd_special status s else
