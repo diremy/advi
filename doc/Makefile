@@ -64,7 +64,10 @@ endif
 
 .tex.dvi:
 	echo $<
-	$(LATEX) $<
+# was: 
+#	$(LATEX) $<
+# pour contourner le fichier hypertex.cfg s'il existe...
+	$(LATEX) '\def\driver{hypertex}\input' $<
 
 .tex.ps:
 	$(LATEX) '\def\driver{dvips}\input' $<
