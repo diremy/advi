@@ -93,3 +93,12 @@ Press: %
 \newcommand \dockey[3][]{{\tt #2\def \@test {#3}\ifx \@test \doc@empty \else
   =\docid{#3}\fi} \def \@test {#1}\ifx \@test \doc@empty \else
   \quad (default value is {\tt #1})\fi}
+
+\newenvironment{citemize}{\begin{list}{$\bullet$}%
+{\itemsep 0pt \topsep 5pt}}{\end{list}}
+
+\newenvironment{cenumerate}%
+{\begin{list}{-}{\itemsep 0pt \topsep 5pt}}{\end{list}}
+
+\def\advitalktitle#1{\centerline{{\Huge{\bf #1}}}}
+
