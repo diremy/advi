@@ -415,68 +415,42 @@ value gr_resize_window (value wid, value w, value h)
 
 value gr_reposition (value x, value y, value w, value h)
 {
-  Window root, parent, r;
-  Window* children;
-  int ox, oy, naux; 
+  Window r;
+  int posx, posy, width, height;
+  Bool fullscreen;
   XWindowAttributes att;
-  int posx, posy, width, height, dx, dy;
-  Bool fullscreen = False;
-  int fs_style;
 
   gr_check_open();
+
   posx = Int_val(x);
   posy = Int_val(y);
   width = Int_val(w);
   height = Int_val(h);
-  root = DefaultRootWindow(grdisplay);
-  /* choose the appropriate wm style for full screen, as done in mplayer */
-
-  XGetWindowAttributes(grdisplay, root, &att);
-  if (width < 0) { 
-    /* means take width and height of screen */
-    width = att.width; height = att.height;
-    fullscreen = True;
-  };
-  /* We mean to move win to (x,y), but instead we move the parent if not root
-     to (x + dx, y + dy) */
-  /* to get the parent window */
-  XQueryTree (grdisplay, grwindow.win, &r, &parent, &children, &naux);
-  if(children != NULL) XFree(children);
-
-  /* Should tell the manager not to decorate the window */
-  /* Begin Manage hints:  should probably be clean or go away */
 
   /* create the X atoms: should be done only once */
   init_atoms(grdisplay);
 
-  /* try to figure out what kind of fs capabilities the wm offers */
-  fs_style=wm_detect(grdisplay, DefaultRootWindow(grdisplay));
+  if (width < 0) {    /* means fullscreen */
+    XGetWindowAttributes(grdisplay, DefaultRootWindow(grdisplay), &att);
+    width = att.width; height = att.height;
+    fullscreen = True;}
+  else fullscreen=False;
+  
+  /* add or remove the decorations */
+  x11_decoration(grdisplay,grwindow.win,!fullscreen);
 
-  /* decorate iff we are not fullscreen mode */
-  /* The following does not really work and does not seem necessary */
-  /* x11_decoration(grdisplay, grwindow.win, !fullscreen, fs_style); */
+  /* update size hints, essential for KDE */
+  x11_sizehint(grdisplay, grwindow.win, posx, posy, width, height); 
 
-  /* Giving size hints is _essential_ for the "fullscreen" effect,
-     at least in KDE */
-
-  x11_sizehint(grdisplay, grwindow.win, posx, posy, width, height, 0);
-  /* End Manager Hints */
+  if (fullscreen)
+    x11_fullscreen(grdisplay,grwindow.win,posx,posy,width,height);
 
   XMoveResizeWindow(grdisplay, grwindow.win, posx, posy, width, height);
-  // removed, as it fails on sawfish and twm
-  //  XFlush(grdisplay);
-  //gr_origin (&ox, &oy);
-  ///* in case it did not work, we move relative to the parent window */
-  //if (ox != posx || oy != posy) {
-  //  XGetWindowAttributes(grdisplay, grwindow.win, &att);
-  //  XMoveWindow(grdisplay, grwindow.win, posx - att.x, posy - att.y);
-  //}
-
-  /* Begin Manager Hints:  should probably be clean or go away */
-  /* Now make sure our window is in front of all the others */
-  /* ontop iff we are in fullscreen mode */
-  x11_ontop(grdisplay, grwindow.win, fs_style, fullscreen); 
-  /* End Manager Hints */
+  //#ifdef HAVE_XINERAMA
+  // x11_xinerama_move(dpy,w);
+  //#endif
+  XMapRaised(grdisplay,grwindow.win );
+  XRaiseWindow(grdisplay,grwindow.win );
 
   grwindow.w = width;
   grwindow.h = height;
