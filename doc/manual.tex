@@ -639,6 +639,9 @@ Processes \docid{latex code} and records the corresponding DVI output,
 bound to the tag \docid{tag}. When recording, the DVI output is
 not displayed unless the option \doctt{play} is set.
 
+The recorded code must all fit on the same DVI page, which is 
+left under the user's responsability.
+
 Records can be nested. If so, the inner record is always recorded
 with its own  tag; if the inner record is played when recording, it is
 also recorded as part of the outer tag.
@@ -651,6 +654,9 @@ fragile commands.
 \docdef \adviplay\docopt{color}\docarg{tag}
 \begin{quote}
 Replay the DVI previously recorded and bound to \docid{tag}.
+The DVI must have been recorded on the same DVI page and before the play
+action is performed.
+
 The optional argument changes the text color to \docid{color} during replay. 
 \end{quote}
 
