@@ -549,16 +549,16 @@ let make_thumbnails st =
              {s with 
 	      Dvi.bkgd_prefs = 
               {s.Dvi.bkgd_prefs with
-	       Grdev.bgviewport = Some (dx,dy,0,size_y -dy)}} in
+	       Grdev.bgviewport = Some (dx, dy, 0, size_y - dy)}} in
            redraw ?chst:(Some chgvp)
-             { ist with page_number = p};
+             {ist with page_number = p};
            begin try Grdev.continue() with
              Grdev.Stop -> 
                let gray = Graphics.rgb 200 200 200 in
                Grdev.with_color gray
-                 (Graphics.fill_rect 0 (size_y -dy) (dx-1)) (dy-1)
+                 (Graphics.fill_rect 0 (size_y - dy) (dx - 1)) (dy - 1)
            end;
-           p, Graphics.get_image 0 (size_y -dy) dx dy;
+           p, Graphics.get_image 0 (size_y - dy) dx dy;
          ))
          page_nails in
   let rolls = (Array.length all + r * r - 1) / r / r in
@@ -576,14 +576,14 @@ let make_toc st =
     let refs = xrefs st in
     let first = Hashtbl.find refs "/toc.first" in
     let last = Hashtbl.find refs "/toc.last" in
-    st.toc <- Some (Array.init (last - first + 1) (fun p -> Page (p+first)))
+    st.toc <- Some (Array.init (last - first + 1) (fun p -> Page (p + first)))
   with
   | Not_found -> ()
 ;;
 
 let show_thumbnails st r page =
-  let size_x = Graphics.size_x() in
-  let size_y = Graphics.size_y() in
+  let size_x = Graphics.size_x () in
+  let size_y = Graphics.size_y () in
   let dx = size_x / r
   and dy = size_y / r in
   let pages = Array.length page / r / r in
@@ -633,8 +633,8 @@ let goto_previous_pause n st =
 let find_xref tag default st =
   try
     let p = int_of_string (Misc.get_suffix "/page." tag) in
-    if p > 0 && p <= st.num_pages then p-1 else default
-  with Misc.Match -> 
+    if p > 0 && p <= st.num_pages then p - 1 else default
+  with Misc.Match ->
     try Hashtbl.find (xrefs st) tag
     with Not_found -> default;;
 
@@ -645,6 +645,8 @@ let exec_xref link =
     Grdev.wait_button_up ();
     ignore (Launch.fork_process command) in
   if Misc.has_prefix "file:" link then
+    if Misc.has_prefix "file://" link then
+      call (!browser ^ " " ^ link) else
     try
       let filename, arguments =
         match Misc.split_string (Misc.get_suffix "file:" link)
@@ -659,18 +661,22 @@ let exec_xref link =
         let command =
           String.concat " " (Sys.argv.(0) :: arguments @ [filename]) in
         call command else
-      if Misc.has_suffix ".txt" filename ||
-         Misc.has_suffix ".tex" filename then
-        call (!pager ^ " " ^ filename) else
       if Misc.has_suffix ".html" filename ||
          Misc.has_suffix ".htm" filename then
         call (!browser ^ " " ^ link) else
-      Misc.warning
-        (Printf.sprintf "Don't know what to do with file %s" filename)
+      (* In any other cases we call the pager program. *)
+      (*if Misc.has_suffix ".txt" filename ||
+         Misc.has_suffix ".tex" filename then
+        call (!pager ^ " " ^ filename) else *)
+      call (!pager ^ " " ^ filename)
     with
     | Misc.Match -> assert false
     | Link -> () else
-  if Misc.has_prefix "http:" link then call (!browser ^ " " ^ link) else
+  if Misc.has_prefix "http:" link
+  || Misc.has_prefix "https:" link
+  || Misc.has_prefix "ftp:" link
+  || Misc.has_prefix "telnet:" link then
+    call (!browser ^ " " ^ link) else
   Misc.warning (Printf.sprintf "Don't know what to do with link %s" link);;
 
 let page_start default st =
