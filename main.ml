@@ -45,31 +45,40 @@ let spec_list = [
      (fun () -> set_dim hmargin "0cm"; set_dim vmargin "0cm"),
    "\tSuppress horizontal and vertical margins");
   ("-hmargin", Arg.String (set_dim hmargin),
-   "DIMEN\tHorizontal margin  (default: 1cm)");
+   "DIMEN\tHorizontal margin (default: 1cm)");
   ("-vmargin", Arg.String (set_dim vmargin),
-   "DIMEN\tVertical margin    (default: 1cm)");
-];;
+   "DIMEN\tVertical margin (default: 1cm)");
+  ] in
 
-let advi_options () =
-  let sort = List.sort (fun (s1, _, _) (s2, _, _) -> compare s1 s2) in
-  Options.pretty (spec_list @ sort (Options.all ()));;
+List.iter (fun (nm, act, man) -> Options.add nm act man) spec_list;;
 
 let usage_msg =
   Printf.sprintf "usage: %s [OPTIONS] DVIFILE" Sys.argv.(0);;
 
-let init_arguments () =
- let options = advi_options () in
- let rec new_options =
-    ("-options_file",
-     Arg.String
+let sort_advi_options () =
+  let sort = List.sort (fun (s1, _, _) (s2, _, _) -> compare s1 s2) in
+  Options.pretty (sort (Options.all ()));;
+
+let get_advi_options () =
+ (* We must add an option that uses the list of options we are defining.
+    We use a reference to break the cycle. *)
+ let advi_options = ref [] in
+ Options.add
+   "-options-file"
+   (Arg.String
       (fun fname ->
         Userfile.load_options_file
-          new_options set_dvi_filename usage_msg fname),
+          !advi_options set_dvi_filename usage_msg fname))
      "STRING\tLoad this file when parsing this option to set up options\n\
-      (to override the options of the default ~/.advirc init file).") ::
-    options in
- Userfile.load_init_files new_options set_dvi_filename usage_msg;
- Arg.parse new_options set_dvi_filename usage_msg;
+      (to override the options of the default ~/.advirc init file).";
+ advi_options := sort_advi_options ();
+ !advi_options;;
+
+let advi_options = get_advi_options ();;
+
+let init_arguments () =
+ Userfile.load_init_files advi_options set_dvi_filename usage_msg;
+ Arg.parse advi_options set_dvi_filename usage_msg;
 ;;
 
 let set_dvi_geometry () =
@@ -98,7 +107,8 @@ let standalone_main () =
   Dviview.main_loop filename;;
 
 let rec interactive_main () =
-  (* To do : load the .advirc file ... *)
+  (* Load the .advirc file ... *)
+  Userfile.load_init_files advi_options set_dvi_filename usage_msg; 
   Rc.init ();
   printf "Dvi file name: @?";
   let filename = input_line stdin in
@@ -114,11 +124,11 @@ let rec interactive_main () =
     interactive_main ()
   end;;
 
+(* To quit nicely, killing all embedded processes. *)
 at_exit Gs.kill;;
 at_exit Embed.kill_all_embedded_apps;;
-
-let quit = Sys.sigquit;;
-Sys.set_signal quit (Sys.Signal_handle (fun _ -> Launch.exit 0));;
+(* Even in case of signal, we kill embedded processes. *)
+Sys.set_signal Sys.sigquit (Sys.Signal_handle (fun _ -> Launch.exit 0));;
 
 let main = if !Sys.interactive then interactive_main else standalone_main;;
 

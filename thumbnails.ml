@@ -39,7 +39,7 @@ let set_thumbnails_size s =
   thumbnails_size_h := g.Ageometry.height;;
 
 Options.add
- "-thumbnails_size"
+ "-thumbnails-size"
  (Arg.String set_thumbnails_size)
  "STRING\tFix thumbnails size (default 24x32).";;
 

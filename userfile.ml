@@ -110,7 +110,7 @@ let default_option_files =
 let options_files = ref default_option_files;;
 
 Options.add
- "-cache_dir"
+ "-cache-dir"
  (Arg.String set_cache_dir)
  "STRING\tSet the cache directory (default ./.advi)";;
 
@@ -140,7 +140,7 @@ let advi_page_number_file =
 
 let set_page_number_file s = advi_page_number_file := s;;
 
-Options.add "-page_number_file"
+Options.add "-page-number-file"
  (Arg.String set_page_number_file)
  "STRING\tSet the name of the file where \
   advi could write the current page number\n\
