@@ -97,7 +97,7 @@ to specify XWindow geometries (i.e: \verb"WIDTHxHEIGHT[+XOFFSET+YOFFSET]").
 \begin{quote}
 \verb"-hmargin" DIMEN        Horizontal margin  (default: 1cm)
 \verb"-vmargin" DIMEN        Vertical margin    (default: 1cm)
-\verb"-fullwidth             Adjust size to the width of the screen
+\verb"-fullwidth"             Adjust size to the width of the screen
 \end{quote}
 
 Dimensions (for options \verb"-hmargin" and \verb"-vmargin") are specified as
@@ -105,11 +105,11 @@ numbers optionally followed by two letters representing units.
 When no units are given, dimensions are treated as numbers of pixels.
 Currently supported units are the standard TeX units as specified in
 the TeXbook (D. Knuth, Addison-Wesley, (C) 1986):
-\begin{blockquote}
+\begin{quote}
  `pt' (point), `pc' (pica), `in' (inch), `bp' (big point),
  `cm' (centimeter), `mm' (millimeter), `dd' (didot point),
  `cc' (cicero) and `sp' (scaled point).
-\end{blockquote}
+\end{quote}
 Note that dimensions are specified w.r.t the original TeX document,
 and do not correspond to what is actually shown on the screen, which
 can be displayed at a different resolution than specified in the
