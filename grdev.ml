@@ -672,6 +672,7 @@ let draw_glyph g x0 y0 =
   if x + w > !xmin && x < !xmax && y + h > !ymin && y < !ymax then begin
     let bg = get_bg_color x y w h in
     let img = get_glyph_image g (bg, get_color ()) in
+    sync dvi;
     Graphics.draw_image img x y;
   end;;
 
@@ -689,6 +690,7 @@ let fill_rect x0 y0 w h =
   let w = x' - x
   and h = y' - y in
   if w > 0 && h > 0 then begin
+    sync dvi;
     Graphics.fill_rect x y w h;
     add_background_color x y w h (get_color ());
   end;;

@@ -717,46 +717,6 @@ let make_toc st =
   | Not_found -> ()
 ;;
 
-let show_thumbnails st r page =
-  let size_x = Graphics.size_x () in
-  let size_y = Graphics.size_y () in
-  let dx = size_x / r
-  and dy = size_y / r in
-  let pages = Array.length page / r / r in
-  Array.iteri
-    (fun p' (p, img) ->
-       let x = size_x * (p' mod r) / r in
-       let y = size_y * (p' / r) / r in
-       Graphics.draw_image img x (size_y - y -dy);
-       Grdev.H.area
-         (Grdev.H.Href ("#/page." ^ string_of_int (p + 1))) x
-         (size_y - y - dy) dx dy)
-    page;
-  (* To force the page under thumbnails to be redrawn *)
-  st.aborted <- true
-;;
-
-let show_toc st =
-  if st.toc = None then make_toc st;
-  Grdev.clear_dev();
-  Driver.clear_symbols();
-  match st.toc with
-  | None -> ()
-  | Some rolls ->
-      let n = Array.length rolls in
-      if st.num = n then redraw st
-      else
-        let roll = st.num mod n in
-        st.next_num <- succ st.num;
-        begin match rolls.(roll) with
-        | Page p -> redraw { st with page_number = p }
-        | Thumbnails (r, page) -> show_thumbnails st r page
-        end;
-        synchronize st;
-        st.aborted <- true
-;;
-
-
 let find_xref_here tag st =
   try
     let p = int_of_string (Misc.get_suffix "/page." tag) in
@@ -850,6 +810,64 @@ let goto_previous_pause n st =
     st.pause_number <- max 0 (st.pause_number - n);
     redraw st
   end;;
+
+
+let show_thumbnails st r page =
+  let size_x = Graphics.size_x () in
+  let size_y = Graphics.size_y () in
+  let dx = size_x / r
+  and dy = size_y / r in
+  let pages = Array.length page / r / r in
+  Array.iteri
+    (fun p' (p, img) ->
+       let x = size_x * (p' mod r) / r in
+       let y = size_y * (p' / r) / r in
+       Graphics.draw_image img x (size_y - y -dy);
+       Grdev.H.area
+         (Grdev.H.Href ("#/page." ^ string_of_int (p + 1))) x
+         (size_y - y - dy) dx dy)
+    page;
+  (* To force the page under thumbnails to be redrawn *)
+  st.aborted <- true
+;;
+
+let rec show_toc st =
+  if st.toc = None then make_toc st;
+  Grdev.clear_dev();
+  Driver.clear_symbols();
+  let show st rolls st' = 
+    (* we are in st, but the rolls are in st', useful in duplex mode *)
+    let n = Array.length rolls in
+    if st.num = n then redraw st
+    else
+      let roll = st.num mod n in
+      st.next_num <- succ st.num;
+      begin match rolls.(roll) with
+      | Page p -> redraw { st' with page_number = p }
+      | Thumbnails (r, page) -> show_thumbnails st' r page
+      end;
+      synchronize st;
+      st.aborted <- true in
+  match st.toc with
+  | None ->
+      begin match st.duplex with
+      | Master ({ duplex = Client _ (* to prevent loop *) } as st') ->
+          (* normally, there is only one master, but just in case something
+             is wrong, we certainly prefer not to do anything than to
+             go in an infinite loop *)
+          if changed st' then reload false st';
+          if st'.toc = None then make_toc st';
+          begin match st'.toc with
+          | None -> ()
+          | Some rolls -> show st rolls st'
+          end
+      | _ -> ()
+      end
+  | Some rolls ->
+      show st rolls st; 
+;;
+
+
 
 exception Link;;
 

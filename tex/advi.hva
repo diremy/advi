@@ -32,3 +32,15 @@
 \advi@export \adviname \advi@name
 \advi@export \ActiveDVI \advi@name
 
+%%
+\def \@ignore{}
+\def \@ignore@ #1{}
+\def \@ignore@@ #1#2{}
+\def \@ignore@@@ #1#2#3{}
+\newcommand {\@Ignore}[1][]{}
+\newcommand {\@Ignore@}[2][]{}
+\newcommand {\@Ignore@@}[3][]{}
+
+\newcommand {\adviannot}[3][]{#2\footnote{\let\\\relax#3}}
+\let \advipause \@Ignore
+\let \adviwait \@Ignore

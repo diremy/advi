@@ -302,6 +302,24 @@
 \fi
 }
 
+\def\exceptSlide{%
+  \@ifnextchar *\exceptSlide@E\exceptSlide@NE
+}
+\long \def\exceptSlide@NE#1#2{%
+\ifDVItoPS
+    \ifAccumulate #2\fi
+\else
+  \ifnum#1=\value{overlaysCount}{\overlay {1}#2}\else #2\fi
+\fi
+}
+\long \def\exceptSlide@E*#1#2{%
+\ifDVItoPS
+    \ifAccumulate #2\fi
+\else
+  \ifnum#1=\value{overlaysCount}\else #2\fi
+\fi
+}
+
 
 % FromSlide, OnlySlide, UntilSlide
 % Masks or not the following material. Avances the position pointer
@@ -492,6 +510,30 @@
 
 \newcounter{pause}
 \newcount \tmp@pause
+\newenvironment{layer}[1][=0]{%
+  \tmp@pause \c@overlaysCount \advance \tmp@pause by -\c@pause
+  \ifnum \tmp@pause #1\relax \overlay 1\fi} 
+  {}  
+\newenvironment{layer*}[1][=0]{%
+  \tmp@pause \c@overlaysCount \advance \tmp@pause by -\c@pause
+  \ifnum \tmp@pause #1\relax \let \@do \layer@open
+  \else \let \@do \layer@ignore\fi \@do} 
+  {}
+\expandafter \def \csname endlayer*\endcsname 
+   #1\ignorespaces\fi{\endgroup\layer@close}
+
+\long\def \layer@ignore #1{\endgroup}
+\def \layer@open {\afterassignment \layer@checkopen \let \@do}
+\def \layer@close {\afterassignment \layer@checkclose \let \@do}
+\let \layer@bgroup{
+\let \layer@egroup}
+\def \layer@checkopen {\ifx \@do \layer@bgroup\else
+    \PackageError{xprosper}
+      {{layer*} should be folowed by open brace}{}\fi}
+\def \layer@checkclose {\ifx \@do \layer@egroup\else
+    \PackageError{xprosper}
+      {{layer*} should be folowed by close brace}{}\fi}
+
 \newcommand{\ppp@ifpause}[1][=0]{%
   \tmp@pause \c@overlaysCount \advance \tmp@pause by -\c@pause
   \ifnum \tmp@pause #1\relax \expandafter \@firstoftwo
@@ -509,6 +551,7 @@
 %\def \skip@star #1*{#1}
 \newcommand {\@@pause}[2][0]{\tmp@pause #1\advance \tmp@pause by \c@pause
   \pause@do{\tmp@pause}{#2}}
+\newcommand {\exceptPause} {\@pause{\exceptSlide}}
 \newcommand {\onlyPause} {\@pause{\onlySlide}}
 \newcommand {\fromPause} {\@pause{\fromSlide}}
 \newcommand {\untilPause} {\@pause{\untilSlide}}
