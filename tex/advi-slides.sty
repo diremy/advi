@@ -161,3 +161,15 @@
 
 % Defining a short name alias for advipause.
 \def\pause{\advipause}
+
+% Defining softlink and softarget
+\edef\hyper@quote{\string"}
+\edef\hyper@sharp{\string#}
+
+\def \softlink #1#2{\special 
+  {html:<a href=\hyper@quote\hyper@sharp#1\hyper@quote>}#2\special
+  {html:</a>}}
+\def \softtarget #1#2{{\special
+  {html:<a name=\hyper@quote#1\hyper@quote>}{#2}\special
+  {html:</a>}}}
+
