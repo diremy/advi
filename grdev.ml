@@ -618,7 +618,7 @@ let get_glyph_image g col =
           for i = 0 to h - 1 do
             for j = 0 to w - 1 do
               let gamma_fix c =
-                Misc.round (* int_of_float *) (((float c /. 255.0) ** !glyph_gamma) *. 255.0)
+                Misc.round (((float c /. 255.0) ** !glyph_gamma) *. 255.0)
               in
               dst.(i).(j) <- table.(gamma_fix (Char.code gmap.[!p]));
               incr p
@@ -711,9 +711,9 @@ let shade_color shade =
   let r = 0xFF - (c lsr 16) land 0xFF
   and g = 0xFF - (c lsr 8) land 0xFF
   and b = 0xFF - c land 0xFF in
-  let r = 0xFF - Misc.round (* int_of_float *) (shade *. float r)
-  and g = 0xFF - Misc.round (* int_of_float *) (shade *. float g)
-  and b = 0xFF - Misc.round (* int_of_float *) (shade *. float b) in
+  let r = 0xFF - Misc.round (shade *. float r)
+  and g = 0xFF - Misc.round (shade *. float g)
+  and b = 0xFF - Misc.round (shade *. float b) in
   Graphics.rgb r g b;;
 
 let fill_path path ~shade =
