@@ -784,6 +784,7 @@ let reload_time st =
   with _ -> st.last_modified;;
 
 let reload st =
+  prerr_endline "reloading";
   try
     Grdev.clear_usr1();
     st.last_modified <- reload_time st;
@@ -1295,8 +1296,7 @@ let main_loop filename =
     redraw st;
     (* num is the current number entered by keyboard *)
     try while true do
-      let ev =
-        if changed st then Grdev.Refreshed else Grdev.wait_event () in
+      let ev = if changed st then Grdev.Refreshed else Grdev.wait_event () in
       st.num <- st.next_num;
       st.next_num <- 0;
       match ev with
@@ -1341,6 +1341,6 @@ let main_loop filename =
  | Grdev.Click (Grdev.Bottom_left, _) -> B.pop_previous_page st
  | Grdev.Click (Grdev.Top_right, _) -> B.push_page st
 *)
-      | _ -> ()
+      | Grdev.Nil -> ()
     done with Exit -> Grdev.close_dev ()
   end;;

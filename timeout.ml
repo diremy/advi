@@ -21,10 +21,10 @@
 
 module Timeout = struct
   type t = {
-    at : float;
-    callback : (unit -> unit);
-    stamp : int;
-  }
+      at : float;
+      callback : (unit -> unit);
+      stamp : int;
+    }
   let compare t t' = compare t.at t'.at
 end
 ;;
@@ -40,20 +40,21 @@ let stamp = ref 0;;
 
 let rec callback () =
   try while
-      let min = TimeoutSet.min_elt !set in
-      let now = Unix.gettimeofday () in
-      let wait = min.at -. now in
-      if wait <= 0.0 then begin
-         set := TimeoutSet.remove min !set;
-         min.callback ();
-         true
-      end else begin
-         ignore
-         (Unix.setitimer Unix.ITIMER_REAL
-            {Unix.it_interval = 0.0; Unix.it_value = wait});
-         false
-      end
-    do () done
+    let min = TimeoutSet.min_elt !set in
+    let now = Unix.gettimeofday () in
+    let wait = min.at -. now in
+    (* be careful that is wait < 1e-7, timer will never be raised... *)
+    if wait < 0.001 then begin
+      set := TimeoutSet.remove min !set;
+      min.callback ();
+      true
+    end else begin
+      ignore
+        (Unix.setitimer Unix.ITIMER_REAL
+           {Unix.it_interval = 0.0; Unix.it_value = wait});
+      false
+    end
+  do () done
   with
   | Not_found -> ()
 ;;
@@ -67,7 +68,7 @@ let init () =
 ;;
 
 let add sec cbk =
-  if sec < 0.0 then raise (Invalid_argument "Timeout.add");
+  if sec < 0.001 then raise (Invalid_argument "Timeout.add");
   let start = Unix.gettimeofday () in
   let at = start +. sec in
   let mystamp = !stamp in
@@ -78,8 +79,13 @@ let add sec cbk =
   timeout
 ;; 
 
+let rec repeat sec cbk =
+  ignore (add sec (fun () ->
+    try cbk(); repeat sec cbk with z -> repeat sec cbk; raise z ))
+
 let remove timeout =
   if not (TimeoutSet.mem timeout !set) then raise Not_found;
   set := TimeoutSet.remove timeout !set;
   callback ()
 ;;
+

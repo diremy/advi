@@ -103,6 +103,9 @@ exception Usr1;;
 let waiting = ref false;;
 let usr1 = Sys.sigusr1;;
 let usr1_status = ref false;;
+exception Watch_file
+let watch_file_interval = 1.0;;
+let watch_file_check() = if !waiting then raise Watch_file
 
 let clear_usr1 () = usr1_status := false;;
 let set_usr1 () =
@@ -1143,10 +1146,8 @@ let open_dev geom =
   GraphicsY11.init ();
   Timeout.init ();
   (* Fill the event queue *)
-  let rec f () =
-    Timeout.add 0.25 (fun () ->
-      GraphicsY11.retrieve_events (); ignore (f ())) in
-  ignore (f ());
+  Timeout.repeat 0.25 GraphicsY11.retrieve_events; 
+  Timeout.repeat watch_file_interval watch_file_check; 
 
   update_device_geometry ();
   Graphics.remember_mode true;
@@ -1294,6 +1295,9 @@ let rec wait_signal_event events =
        | Usr1 ->
            waiting := false;
            Final Refreshed
+       | Watch_file ->
+           waiting := false;
+           Final Nil
        | exn ->
            waiting := false;
            raise exn;;

@@ -23,5 +23,6 @@ type t;;
 
 val init : unit -> unit;;
 val add : float -> (unit -> unit) -> t;;
+val repeat : float -> (unit -> unit) -> unit;;
 val remove : t -> unit;;
 
