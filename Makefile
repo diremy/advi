@@ -136,6 +136,7 @@ clean:
 	rm -f *.cm[oix] *.o $(EXEC) $(EXEC).opt *~ .depend *.log *.aux
 	cd test && $(MAKE) clean
 	cd doc && $(MAKE) clean
+	cd examples && $(MAKE) clean
 
 veryclean: clean
 	rm -f Makefile.config config.cache config.log \
