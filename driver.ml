@@ -100,9 +100,9 @@ let dummy_font =
   { name = "--nofont--"; ratio = 1.0; mtable = dummy_mtable; gtables = [] };;
 
 let cook_font fdef dvi_res =
-  let name = fdef.Dvi.name
-  and sf = fdef.Dvi.scale_factor
-  and ds = fdef.Dvi.design_size in
+  let name = fdef.Dvicommands.name
+  and sf = fdef.Dvicommands.scale_factor
+  and ds = fdef.Dvicommands.design_size in
   let ratio = float sf /. float ds in
   let mtable =
     try DFont.find_metrics name (dvi_res *. ratio)
@@ -203,7 +203,7 @@ type proc_unit = {
     escaped_cur_font : cooked_font;
     escaped_cur_mtable : (int * int) Table.t;
     escaped_cur_gtable : Dev.glyph Table.t;
-    mutable escaped_commands : Dvi.command list
+    mutable escaped_commands : Dvicommands.command list
   };;
 
 let procs = Hashtbl.create 107;;
@@ -1239,7 +1239,7 @@ let scan_special_page otherwise cdvi globals pagenum =
              then Dev.copy_of_bkgd_data ()
              else Dev.default_bkgd_data ())} in
        let eval = function
-         | Dvi.C_xxx s -> scan_special status globals pagenum s
+         | Dvicommands.C_xxx s -> scan_special status globals pagenum s
          | x -> otherwise x in
        Dvi.page_iter eval cdvi.base_dvi.Dvi.pages.(pagenum);
        page.Dvi.status <- Dvi.Known status;
@@ -1319,24 +1319,24 @@ let special st s =
 
 (*** Page rendering ***)
 let eval_dvi_command st = function
-  | Dvi.C_set code -> set st code
-  | Dvi.C_put code -> put st code
-  | Dvi.C_set_rule(a, b) -> set_rule st a b
-  | Dvi.C_put_rule(a, b) -> put_rule st a b
-  | Dvi.C_push -> push st
-  | Dvi.C_pop -> pop st
-  | Dvi.C_right k -> add_blank 1 st k; st.h <- st.h + k
-  | Dvi.C_w0 ->  add_blank 2 st st.w; st.h <- st.h + st.w
-  | Dvi.C_w k -> st.w <- k; add_blank 3 st st.w; st.h <- st.h + st.w
-  | Dvi.C_x0 ->  add_blank 4 st st.x; st.h <- st.h + st.x
-  | Dvi.C_x k -> st.x <- k; add_blank 5 st st.x; st.h <- st.h + st.x
-  | Dvi.C_down k -> st.v <- st.v + k
-  | Dvi.C_y0 -> st.v <- st.v + st.y
-  | Dvi.C_y k -> st.y <- k; st.v <- st.v + st.y
-  | Dvi.C_z0 -> st.v <- st.v + st.z
-  | Dvi.C_z k -> st.z <- k; st.v <- st.v + st.z
-  | Dvi.C_fnt n -> fnt st n
-  | Dvi.C_xxx s -> special st s
+  | Dvicommands.C_set code -> set st code
+  | Dvicommands.C_put code -> put st code
+  | Dvicommands.C_set_rule(a, b) -> set_rule st a b
+  | Dvicommands.C_put_rule(a, b) -> put_rule st a b
+  | Dvicommands.C_push -> push st
+  | Dvicommands.C_pop -> pop st
+  | Dvicommands.C_right k -> add_blank 1 st k; st.h <- st.h + k
+  | Dvicommands.C_w0 ->  add_blank 2 st st.w; st.h <- st.h + st.w
+  | Dvicommands.C_w k -> st.w <- k; add_blank 3 st st.w; st.h <- st.h + st.w
+  | Dvicommands.C_x0 ->  add_blank 4 st st.x; st.h <- st.h + st.x
+  | Dvicommands.C_x k -> st.x <- k; add_blank 5 st st.x; st.h <- st.h + st.x
+  | Dvicommands.C_down k -> st.v <- st.v + k
+  | Dvicommands.C_y0 -> st.v <- st.v + st.y
+  | Dvicommands.C_y k -> st.y <- k; st.v <- st.v + st.y
+  | Dvicommands.C_z0 -> st.v <- st.v + st.z
+  | Dvicommands.C_z k -> st.z <- k; st.v <- st.v + st.z
+  | Dvicommands.C_fnt n -> fnt st n
+  | Dvicommands.C_xxx s -> special st s
   | _ -> ();;
 
 let eval_command st c =
@@ -1344,7 +1344,7 @@ let eval_command st c =
     let u = r.unit in
     match c with
     (* The advi: proc specials are not recorded *)
-    (* | Dvi.C_xxx s when has_prefix "advi: proc" s -> () *)
+    (* | Dvicommands.C_xxx s when has_prefix "advi: proc" s -> () *)
     | _ -> u.escaped_commands <- c :: u.escaped_commands in
   List.iter record !current_recording_proc;
   eval_dvi_command st c;;
@@ -1378,7 +1378,7 @@ let render_step cdvi num ?trans ?chst dpi xorig yorig =
   proc_clean ();
   if num < 0 || num >= Array.length cdvi.base_dvi.Dvi.pages then
     invalid_arg "Driver.render_step";
-  let mag = float cdvi.base_dvi.Dvi.preamble.Dvi.pre_mag /. 1000.0
+  let mag = float cdvi.base_dvi.Dvi.preamble.Dvicommands.pre_mag /. 1000.0
   and page = cdvi.base_dvi.Dvi.pages.(num) in
   let otherwise _ = () in
   let status =
@@ -1455,14 +1455,14 @@ let scan_special_pages cdvi lastpage =
     Dev.add_headers (find_prologues !headers);;
 
 let unfreeze_glyphs cdvi dpi =
-  let mag = float cdvi.base_dvi.Dvi.preamble.Dvi.pre_mag /. 1000.0 in
+  let mag = float cdvi.base_dvi.Dvi.preamble.Dvicommands.pre_mag /. 1000.0 in
   let sdpi = int_of_float (mag *. ldexp dpi 16)
   and mtable = ref dummy_mtable
   and gtable = ref dummy_gtable in
   let headers = ref []
   and xrefs = cdvi.base_dvi.Dvi.xrefs in
   let otherwise = function
-    | Dvi.C_fnt n ->
+    | Dvicommands.C_fnt n ->
         let (mt, gt) =
           try
             let cfont = Table.get cdvi.font_table n in
@@ -1470,7 +1470,7 @@ let unfreeze_glyphs cdvi dpi =
           with Not_found -> (dummy_mtable, dummy_gtable) in
         mtable := mt;
         gtable := gt
-    | Dvi.C_set code ->
+    | Dvicommands.C_set code ->
         begin try ignore (Table.get !mtable code) with _ -> () end;
         begin try ignore (Table.get !gtable code) with _ -> () end
     | _ -> () in

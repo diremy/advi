@@ -54,6 +54,7 @@ module Symbol :
       val add : int -> int -> int -> int -> symbol -> unit
       val to_ascii   : set -> string
       val to_escaped : set -> string
+      val commands_to_ascii: (int * Dvicommands.font_def) list -> Dvicommands.command list -> string
       val inzone : int -> int -> int -> int -> set
       val intime : int -> int -> int -> int -> set
       val iter : (element -> unit) -> set -> unit

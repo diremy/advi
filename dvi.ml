@@ -18,59 +18,7 @@
 (* $Id$ *)
 
 open Format ;;
-
-type preamble = {
-    pre_num : int ;
-    pre_den : int ;
-    pre_mag : int ;
-    pre_text : string
-  } ;;
-
-type postamble = {
-    post_num : int ;
-    post_den : int ;
-    post_mag : int ;
-    post_height : int ;
-    post_width : int ;
-    post_depth : int ;
-    post_pages : int
-  } ;;
-
-type font_def = {
-    checksum : string ;
-    scale_factor : int ;
-    design_size : int ;
-    area : string ;
-    name : string
-  } ;;
-
-type command =
-  | C_set of int
-  | C_set_rule of int * int
-  | C_put of int
-  | C_put_rule of int * int
-  | C_nop
-  | C_bop of int array * int
-  | C_eop
-  | C_push
-  | C_pop
-  | C_right of int
-  | C_w0
-  | C_w of int
-  | C_x0
-  | C_x of int
-  | C_down of int
-  | C_y0
-  | C_y of int
-  | C_z0
-  | C_z of int
-  | C_fnt of int
-  | C_xxx of string
-  | C_fnt_def of int * font_def
-  | C_pre of preamble
-  | C_post of postamble * int
-  | C_post_post of int ;;
-
+open Dvicommands;;
 
 (* Status for PS specials and background *)
 type known_status = {
@@ -85,6 +33,7 @@ type page = {
    counters : int array ;
    commands : string;
    mutable status : status;
+   text : string;
   } ;;
 
 type t = {
@@ -422,6 +371,19 @@ let input_string ch len =
   really_input ch str 0 len ;
   str ;;
 
+(*** parsing commands ***)
+
+let parse_commands commands =
+  let buf = make_buffer commands in
+  let rec parse_rec () =
+    let cmd = read_command buf in
+    if cmd = C_eop then [] else cmd :: parse_rec () in
+  try
+    match read_command buf with
+    | C_bop _ -> parse_rec ()
+    | _ -> raise (Error "ill-formed page")
+  with End_of_buffer ->
+    raise (Error "input exhausted") ;;
 (*** Reading a DVI file ***)
 
 let input_dvi ch =
@@ -487,7 +449,9 @@ let input_dvi ch =
 	  { counters = counters ;
 	    commands = commands ;
             status = Unknown;
+            text =  Grdev.Symbol.commands_to_ascii font_map (parse_commands commands);
           } in
+prerr_endline page.text;
 	stack := page :: !stack ;
 	lim := !pos ;
 	pos := p
@@ -636,7 +600,7 @@ let fprint_command fmt = function
   | C_z0 -> fprintf fmt "z0"
   | C_z n -> fprintf fmt "z %d" n
   | C_fnt n -> fprintf fmt "fnt %d" n
-  | C_xxx s -> fprintf fmt "xxx \"%s\"" (String.escaped s)
+  | C_xxx s -> fprintf fmt "xxx %S" (String.escaped s)
   | C_fnt_def(n, def) -> fprintf fmt "fnt_def %d %a" n fprint_font_def def
   | C_pre pre -> fprintf fmt "pre %a" fprint_preamble pre
   | C_post(post, p) ->

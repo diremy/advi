@@ -63,6 +63,8 @@ module Make
    val to_ascii   : set -> string
    val to_escaped : set -> string
 
+   val commands_to_ascii: (int * Dvicommands.font_def) list -> Dvicommands.command list -> string
+
    (* Gives a copy of set where only symbols in zone x1 y1 x2 y2 are kept. *)
    val inzone : int -> int -> int -> int -> set
 

@@ -430,6 +430,34 @@ let to_ascii set =
   let ascii = Misc.reverse_map dump_line lines in
   String.concat "" ascii
 
+let commands_to_ascii fnt_map commands =
+let curfontdecoder = ref cmr_encoding in
+let curfont = ref "cmr7" in
+let cset = Buffer.create 1024 in 
+List.iter
+(function
+  | Dvicommands.C_fnt n -> curfont:= (List.assoc n fnt_map).Dvicommands.name;
+                curfontdecoder:= 
+                begin 
+                   try snd (List.find
+                   (fun (r, h) -> Str.string_match r !curfont 0)
+               encodings_c)
+               with Not_found ->
+               fun f s -> "[" ^ f ^ "]" ^ default_encoding f s
+               end
+  | Dvicommands.C_set code | Dvicommands.C_put code 
+    -> Buffer.add_string cset (!curfontdecoder !curfont code) 
+  | Dvicommands.C_w0 | Dvicommands.C_w _ 
+  | Dvicommands.C_x0 | Dvicommands.C_x _ 
+  | Dvicommands.C_y0 | Dvicommands.C_y _ 
+  | Dvicommands.C_z0 | Dvicommands.C_z _ 
+     ->  Buffer.add_char cset ' '
+  | _ -> ()
+)
+commands;
+Buffer.contents cset;;
+
+
 (* to_escaped does the same, but the final string is 'escaped'. *)
 let to_escaped set =
   String.escaped (to_ascii set)
