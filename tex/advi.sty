@@ -8,22 +8,21 @@
 
 %% $Id$
 
-% Which name is ours
-\def \advi@name {Active-DVI}
-
-% Which year of development are we (for various copyrights message) ?
-% (used for various copyrights messages)
-\def \advi@year {2003}
-% Which version is it ?
-\def \advi@version {1.40}
+%% Administrative definitions for Active-DVI, that need updating.
 
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{advi}
-         [2003/04/23 v1.74 Active-DVI Package for advi Previewer]
+         [2003/09/02 v1.75 LaTeX Package for the advi Previewer]
 
-%%
+% Which name is ours
+\def \advi@name {Active-DVI}
+% Which year of development are we (used for various copyrights message) ?
+\def \advi@year {2003}
+% Which version is it ?
+\def \advi@version {1.50}
 
-%% Identification
+%% End of administrative definitions that need updating.
+
 %% Preliminary declarations
 
 \RequirePackage {keyval}
@@ -41,9 +40,8 @@
 
 % Auxilliary macros
 
-
 \def \advi@empty{}
-\def \advi@ifempty #1{\def \@test {#1}\ifx \@test \advi@empty 
+\def \advi@ifempty #1{\def \@test {#1}\ifx \@test \advi@empty
   \expandafter \@firstoftwo \else \expandafter \@secondoftwo \fi}
 \def \advi@error #1{\PackageError {Advi}{#1}{Type <RETURN> to proceed.}}
 \def \advi@warning #1{\PackageWarning {Advi}{#1}}
@@ -54,10 +52,10 @@ Maybe you mean \@currenvir ing}}
 \def \advi@export #1#2{\@ifdefinable #1{\let #1#2}}
 \def \advi@exportenv #1#2{%
   \@ifundefined {#1}{\expandafter \let \csname #1\expandafter \endcsname
-                     \csname end#1\endcsname }\relax  
+                     \csname end#1\endcsname }\relax
   \expandafter \@ifdefinable \csname #1\endcsname
   {\expandafter \let \csname #1\expandafter \endcsname \csname #2\endcsname
-   \expandafter \let \csname end#1\expandafter \endcsname 
+   \expandafter \let \csname end#1\expandafter \endcsname
         \csname end#2\endcsname}}
 
 \def \advi@ignore #1{}
@@ -75,7 +73,7 @@ Maybe you mean \@currenvir ing}}
 
 %%% Record and play
 
-\newif \ifadvi@recording 
+\newif \ifadvi@recording
 \def \advi@ifrecording {\ifadvi@recording
    \expandafter \@firstoftwo \else \expandafter \@secondoftwo \fi}
 \def \advi@ifrecordenv {\ifx \@currenvir \advi@recordenv
@@ -99,7 +97,7 @@ Maybe you mean \@currenvir ing}}
       \advi@ifempty{#1}{}{\color {#1}}{\advi@special {proc=#2 play}}%
     \endgroup}
 
-\advi@exportenv {advirecording}{advi@recording} 
+\advi@exportenv {advirecording}{advi@recording}
 \advi@export \advirecord \advi@record
 \let \endadvirecord \advi@undefinedenv
 \advi@export \adviplay \advi@play
@@ -156,12 +154,12 @@ Maybe you mean \@currenvir ing}}
 \newcommand{\advi@unmapallembed}[1][]{\advi@special {unmapallembed name="#1"}}
 
 \advi@export \adviembed \advi@embed
-\advi@export \advimapembed \advi@mapembed 
-\advi@export \adviunmapembed \advi@unmapembed 
-\advi@export \advikillembed \advi@killembed 
-\advi@export \advimapallembed \advi@mapallembed 
-\advi@export \adviunmapallembed \advi@unmapallembed 
-\advi@export \advikillallembed \advi@killallembed 
+\advi@export \advimapembed \advi@mapembed
+\advi@export \adviunmapembed \advi@unmapembed
+\advi@export \advikillembed \advi@killembed
+\advi@export \advimapallembed \advi@mapallembed
+\advi@export \adviunmapallembed \advi@unmapallembed
+\advi@export \advikillallembed \advi@killallembed
 
 %%% Background colors and images
 
@@ -205,7 +203,7 @@ Maybe you mean \@currenvir ing}}
 \def \advi@setbgcolor #1{\advi@ifnone {#1}
   {\advi@global \expandafter \let \noexpand #1\advi@empty}
   {\advi@setbg@color #1\relax}}
-\def \advi@setbg@color{% 
+\def \advi@setbg@color{%
   \@ifnextchar[\advi@setbg@undeclared\advi@setbg@declared}
 \def \advi@setbg@declared #1\relax{%
   \@ifundefined{\string\color @#1}%
@@ -244,15 +242,15 @@ Maybe you mean \@currenvir ing}}
 
 %\define@key {advi@bg}{inherit}[]{\advi@special{setbg inherit}}
 
-\def \advi@bgemit 
-  {\advi@special 
+\def \advi@bgemit
+  {\advi@special
      {setbg \advi@bgcolor \advi@bgimage \advi@bgalpha \advi@bgblend
       \advi@bgfit \advi@bgfun
       }}
 \newif \ifadvi@bglocal
 
 \newcommand{\advi@bg}[2][]{%
-  \begingroup 
+  \begingroup
   \def \@test {#1}\ifx \@test \advi@global@ \let \advi@global \global
   \advi@bgset {#2}\else
   \ifx \@test \advi@empty \else \advi@warning
@@ -279,32 +277,32 @@ Maybe you mean \@currenvir ing}}
 
 
 %%% Transparency and alpha blending
-%%% To be revisited. 
+%%% To be revisited.
 
 \def\advi@epstransparent
    {\advi@special{epstransparent push true}%
-    \aftergroup \advi@resetepstransparent} 
+    \aftergroup \advi@resetepstransparent}
 \def\advi@epswhite
    {\advi@special{epstransparent push false}%
-    \aftergroup \advi@resetepstransparent} 
+    \aftergroup \advi@resetepstransparent}
 \def\advi@setalpha#1%
    {\advi@special{alpha push #1}%
-    \aftergroup \advi@resetalpha} 
+    \aftergroup \advi@resetalpha}
 \def\advi@setblend#1%
    {\advi@special{blend push #1}%
     \aftergroup\advi@resetblend}
 \def\advi@epsbygs
    {\advi@special{epsbygs push true}%
-    \aftergroup \advi@resetepsbygs} 
+    \aftergroup \advi@resetepsbygs}
 \def\advi@epsbycamlimages
    {\advi@special{epsbygs push false}%
-    \aftergroup \advi@resetepsbygs} 
+    \aftergroup \advi@resetepsbygs}
 \def\advi@epswithantialiasing
    {\advi@special{epswithantialiasing push true}%
-    \aftergroup \advi@resetepsantialiasing} 
+    \aftergroup \advi@resetepsantialiasing}
 \def\advi@epswithoutantialiasing
    {\advi@special{epswithantialiasing push false}%
-    \aftergroup \advi@resetepswithantialiasing} 
+    \aftergroup \advi@resetepswithantialiasing}
 \def\advi@resetepstransparent {\advi@special{epstransparent pop}}
 \def\advi@resetalpha {\advi@special{alpha pop}}
 \def\advi@resetblend {\advi@special{blend pop}}
@@ -341,11 +339,14 @@ Maybe you mean \@currenvir ing}}
 \define@key {advi@trans}{stopx} {\advi@settrans \advi@transstopx { stopx=#1}}
 \define@key {advi@trans}{stopy} {\advi@settrans \advi@transstopy { stopy=#1}}
 \define@key {advi@trans}{steps}{\advi@settrans \advi@transsteps { steps=#1}}
-\define@key {advi@trans}{genpath}{\advi@settrans \advi@transgenpath { genpath=#1}}
+\define@key {advi@trans}{genpath}{\advi@settrans%
+                                  \advi@transgenpath { genpath=#1}}
 
 \def \advi@transemit
-   {\advi@special{trans \advi@transmode \advi@transfrom \advi@transsteps \advi@transstartx \advi@transstarty \advi@transstopx \advi@transstopy \advi@transgenpath}}
-\newif \ifadvi@translocal 
+   {\advi@special{trans \advi@transmode \advi@transfrom \advi@transsteps%
+    \advi@transstartx \advi@transstarty \advi@transstopx \advi@transstopy%
+    \advi@transgenpath}}
+\newif \ifadvi@translocal
 \newcommand {\advi@transition}[2][]{%
   \begingroup
      \def \@test {#1}\ifx \@test \advi@global@ \let \advi@global \global
@@ -368,20 +369,20 @@ Maybe you mean \@currenvir ing}}
 \def \AtEndPage {\g@addto@macro \endpage@hook}
 \AtEndPage {\advi@setpagestyle}
 
-% We must patch \@begindvi to put out hook. 
+% We must patch \@begindvi to put our hook.
 % However, hyperref may patch it as well. So we should do it at begin
-% document to have the control (no one after us). 
-% Howver, one must be careful, because \@begindvi redefines itself at the
-% first call to its prerecorded final value. 
+% document to have the control (no one after us).
+% However, one must be careful, because \@begindvi redefines itself at the
+% first call to its prerecorded final value.
 % So our first patch will be overridden with the value that it was
 % meant to have after the first page.
-% Hence, we patch it a second time to put our hook to this final value. 
+% Hence, we patch it a second time to put our hook to this final value.
 
-% we can use \g@addto@macro which redefines #1 to so that it procedes as 
-% before and then execute #2 at the end. 
+% we can use \g@addto@macro which redefines #1 to so that it procedes as
+% before and then execute #2 at the end.
 
 \def \advi@begindvi@patch
-  {\g@addto@macro \@begindvi      
+  {\g@addto@macro \@begindvi
       {\endpage@hook \g@addto@macro \@begindvi {\endpage@hook}}}
 
 \AtBeginDocument {\advi@begindvi@patch}
@@ -390,13 +391,11 @@ Maybe you mean \@currenvir ing}}
 %   \def \@begindvi                       %% our new value
 %     {\advi@begindvi@save                %% may redefine \@begindvi
 %      \global\let \advi@begindvi@save    %% so we this new value
-%         \@begindvi                      
+%         \@begindvi
 %      \gdef \@begindvi                   %% now and forever
 %         {\advi@begindvi@save \endpage@hook}%
 %      \endpage@hook                      %% our hook for the
 %     }}
-
-
 
 %% Transitions
 
@@ -406,13 +405,15 @@ Maybe you mean \@currenvir ing}}
 
 \def \advi@transslide {slide}
 \def \advi@transbox #1{%
-   \def \advi@afterbox 
+   \def \advi@afterbox
       {\hbox {\advi@transbox@save{\the\wd0 }{\the\ht0 }{\the\dp0}%
               \unhbox0\setkeys {advi@trans}{#1}%
               \advi@transbox@go
-                  {\advi@transmode \advi@transfrom \advi@transsteps \advi@transstartx \advi@transstarty \advi@transstopx \advi@transstopy \advi@transgenpath}}}%
+                  {\advi@transmode \advi@transfrom \advi@transsteps%
+                   \advi@transstartx \advi@transstarty%
+                   \advi@transstopx \advi@transstopy \advi@transgenpath}}}%
    \def \advi@@afterbox {\aftergroup \advi@afterbox}%
-   \afterassignment \advi@@afterbox \setbox0 \hbox } 
+   \afterassignment \advi@@afterbox \setbox0 \hbox }
 
 \advi@export \advitransition \advi@transition
 \advi@export \advitransbox \advi@transbox
@@ -422,9 +423,9 @@ Maybe you mean \@currenvir ing}}
 \def \advi@moveto {\advi@special {moveto}}
 \def\advi@psput@special#1{%
 \hbox{%
-\pst@Verb{{ \pst@coor }  
+\pst@Verb{{ \pst@coor }
 dup exec 2 copy moveto advi@Dict begin printpos end
-\tx@PutCoor 
+\tx@PutCoor
 \tx@PutBegin}
 \hbox {\advi@moveto \box#1}%
 \pst@Verb{\tx@PutEnd}}}
@@ -436,8 +437,8 @@ dup exec 2 copy moveto advi@Dict begin printpos end
 \pst@nodedict
 /t \psk@npos def
 tx@NodeDict /LPutPos known { LPutPos } { CP /Y ED /X ED /NAngle 0
-def } ifelse 
-LPutCoor 
+def } ifelse
+LPutCoor
 end
 \tx@PutBegin
 }%
@@ -451,14 +452,13 @@ end
      \pstheader {advi.pro}}}
 \AtBeginDocument {\advi@pstricks@patch}
 
-
 %%% Anchors
 
 \def \advi@style {box}
 \def \advi@mode {advi}
 \define@key {advi@anchor}{over}  []{\def \advi@mode {advi}}
 \define@key {advi@anchor}{click} []{\def \advi@mode {hdvi}}
-\define@key {advi@anchor}{box}   []{\def \advi@style{box}}
+\define@key {advi@anchor}{box}   []{\def \advi@style {box}}
 \define@key {advi@anchor}{invisible}[]{\def \advi@style {invisible}}
 \define@key {advi@anchor}{underline}[]{\def \advi@style {underline}}
 
@@ -493,14 +493,14 @@ end
 
 \def \advi@max {0}
 \def \advi@overlay #1{%
-  \advi@ifadvi 
+  \advi@ifadvi
     {%\advance \c@overlay by 1
      \ifnum \c@overlay>\advi@max \global \xdef \advi@max {\the \c@overlay}\fi
      \advi@recording {overlay@#1}\aftergroup \endadvi@recording}
     {\latex@overlay {#1}}}
 
 \def \advi@overlay@loop
- {\advi@ifadvi 
+ {\advi@ifadvi
   {\begingroup
     \c@overlay=0
     \@whilenum\c@overlay<\advi@max
@@ -509,7 +509,7 @@ end
   \endgroup}
  {\latex@overlay@loop}}
 
-\def \advi@end@slide 
+\def \advi@end@slide
   {\advi@ifadvi {\overlay@loop}{}\gdef\advi@max{0}\latex@end@slide}
 
 \def \advi@overlay@patch {%
@@ -528,7 +528,6 @@ end
 
 % \AtBeginDocument {\@ifundefined {ifHy@nesting}{}{\Hy@nestingtrue}}
 
-
 %%% Thumbnails and Tocs
 
 \def\advi@html#1{\special {html:<a name="#1">}\special{html:</a>}}
@@ -537,11 +536,11 @@ end
 \newcommand {\advithumbnail}[1][\thepage]{\advi@html {/page.#1}}
 \@ifundefined {@starttoc}{}
   {\let \latex@starttoc \@starttoc
-   \def \@starttoc 
+   \def \@starttoc
      {\advitoc \let \@starttoc \latex@starttoc \@starttoc}}
 \@ifundefined {tableofcontents}{}
   {\let \latex@tableofcontents \tableofcontents
-   \def \tableofcontents 
+   \def \tableofcontents
       {\@ifundefined{latex@starttoc}{\advitoc}{}%
        \latex@tableofcontents
        \endadvitoc}}
@@ -559,7 +558,7 @@ end
 
 \def \define@keydim #1#2{%
    \define@key {#1}{#2}%
-     {\@tempdima##1\relax \expandafter 
+     {\@tempdima##1\relax \expandafter
         \edef \csname #1@#2\endcsname {\the\@tempdima}}}
 \def \define@keyset #1#2{%
    \expandafter \define@key@set \csname #1@#2\endcsname {#1}{#2}}
@@ -583,7 +582,7 @@ end
 \define@key {advi@edit}{file}{\def \advi@edit@file {#1}}
 
 \newcommand{\advi@edit}[3]{%
-  \begingroup 
+  \begingroup
     \def \advi@edit@comm {\string#1}%
     \def \advi@edit@name {#2}%
     \setkeys {advi@edit}{#3}%
@@ -593,8 +592,8 @@ end
     #2%
     \setkeys {advi@edit}{#3}%
     \advi@mandatory{edit}{w}\advi@mandatory{edit}{h}%
-    \advi@special 
-      {edit 
+    \advi@special
+      {edit
        comm="\advi@edit@comm" name="\advi@edit@name"
        line=\advi@edit@line\space
        file=\advi@edit@file\space
@@ -621,9 +620,9 @@ end
 
 \def \advi@setdim #1#2{%
    \advi@dim #2
-   \ifnum \advi@dim <0\advi@dim-\advi@dim 
+   \ifnum \advi@dim <0\advi@dim-\advi@dim
         \def \advi@tmp{-}\else \def \advi@tmp{}\fi
-   \advi@E \edef \advi@tmp {\advi@tmp.}\advi@D \advi@D \advi@D \advi@D 
+   \advi@E \edef \advi@tmp {\advi@tmp.}\advi@D \advi@D \advi@D \advi@D
    \edef #1{\advi@tmp}}
 \def \advisetx {\advi@setdim {\advi@edit@x}}
 \def \advisety {\advi@setdim {\advi@edit@y}}
