@@ -32,7 +32,7 @@ Options.add
     if x <= 0.0 then Misc.warning "gamma value must be positive" 
     else glyph_gamma := 1.0 /. x))
   (Printf.sprintf
-     "FLOAT(>0)\tGamma correction of glyphs (default %f)" !glyph_gamma)
+     "FLOAT (>0)\tGamma correction of glyphs (default %f)" !glyph_gamma)
 ;;
 
 type color = Graphics.color;;

@@ -515,7 +515,7 @@ let redraw ?trans ?chst st =
 let thumbnail_limit = ref 5;;
 let _ =
   Options.add
-    "-thumbnail_scale"
+    "-thumbnail-scale"
     (Arg.Int (fun i -> thumbnail_limit := i))
     "INT\tSet the number of thumbname per line and column to INT";;
 
