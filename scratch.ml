@@ -251,10 +251,10 @@ let scratch_write_settings_handle_char c =
   | c ->
     Misc.warning (Printf.sprintf "Unknown scratch write setting key: %C" c);;
 
-let enter_scratch_settings settings_handle_char c =
+let enter_scratch_settings scratch_settings c =
   match c with
   | '' | 'q' -> end_write ()
-  | '' -> settings_handle_char c
+  | '' -> scratch_settings ()
   | c ->
     Misc.warning
       (Printf.sprintf "Unknown key %C. Click to start scratching" c);;
@@ -341,7 +341,7 @@ and scratch_write_settings () =
 (* The main routine to begin write scratching:
    - wait for a click then enter scratching. *)
 and start_scratch_write () =
-  wait_button_pressed (enter_scratch_settings scratch_write_settings_handle_char);
+  wait_button_pressed (enter_scratch_settings scratch_write_settings);
   enter_scratch_write ();;
 
 let do_write () =
@@ -552,7 +552,7 @@ prerr_endline (Printf.sprintf "Setting key %C" c);
 
 (* Handling key presses while waiting for a mouse click
    that designates the place where draw scratching should begin:
-   - ^G means quit draw,
+   - ^G or q means quit draw,
    - Esc means toggle the scratch draw settings mode,
    - any other character when scratch draw settings mode is on
      means a setting (to handle with scratch_draw_settings_handle_char),
@@ -618,9 +618,9 @@ let rec scratch_draw () =
     Misc.warning "Scratch_draw_down";
     scratch_draw_down ()
 
-and scratch_draw_up () = scratch_until scratch_draw_up re_enter_scratch_draw ()
+and scratch_draw_up () = scratch_until scratch_draw_up start_scratch_draw ()
 
-and scratch_draw_down () = scratch_until re_enter_scratch_draw scratch_draw_down ()
+and scratch_draw_down () = scratch_until start_scratch_draw scratch_draw_down ()
 
 and scratch_draw_char_event c =
   Misc.warning "Scratch_draw_char_event";
@@ -632,7 +632,7 @@ and scratch_draw_char_event c =
   | c ->
      let x,y = G.mouse_pos () in
      try scratch_write_char c x y with
-     | Exit -> re_enter_scratch_draw ()
+     | Exit -> start_scratch_draw ()
 
 (* Button has been clicked: we move to the current mouse position,
    set up color and line thickness, and start scratch drawing. *)
@@ -646,6 +646,7 @@ and enter_scratch_draw () =
 
 (* Main draw settings loop. *)
 and scratch_draw_settings () =
+   set_cursor cursor_settings;
    match Graphics.wait_next_event [Key_pressed] with
    | {keypressed = kp; key = c} ->
      if kp then begin
@@ -655,22 +656,23 @@ and scratch_draw_settings () =
             and reenter the scratch drawing mode.
             Hence, two successive Esc just do nothing (except changing
             the cursor chape for a while). *)
-         set_cursor cursor_draw;
-         enter_scratch_draw ()
+         start_scratch_draw ()
         | c ->
           (* In any other case, treat the setting according to the character,
              and go on draw settings. *)
           scratch_draw_settings_handle_char c;
           scratch_draw_settings ()
-     end
+     end else
+     (* Button is down. *)
+     (* Pushing the mouse button exits from settings and goes on
+        scratch writing where the mouse is. *)
+     enter_scratch_draw ()
 
 (* The main routine to begin draw scratching:
    - wait for a click then enter scratching. *)
 and start_scratch_draw () =
-  wait_button_pressed waiting_to_enter_scratch_draw;
-  enter_scratch_draw ()
-
-and re_enter_scratch_draw () = start_scratch_draw ();;
+  wait_button_pressed (enter_scratch_settings scratch_draw_settings);
+  enter_scratch_draw ();;
 
 forward_scratch_draw_char_event := scratch_draw_char_event;;
 
