@@ -21,7 +21,6 @@ val all : unit -> (string * Arg.spec * string) list;;
 (** Return the list of options defined by one of the option creation
    functions of this module. *)
 
-
 val add : string -> Arg.spec -> string -> unit;;
 (** [add opt spec man] add the option [opt] to the command line
    with specification [spec] and man info [man]. *)
