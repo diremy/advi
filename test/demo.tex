@@ -218,9 +218,10 @@ the application should use. Hence, if {\verb"command"} has option
 \verb+\adviembed[width=w,height=h]{command -geometry @g -use @p}+\\
 
 \noindent will launch \verb"command" with a geometry computed from the
-width and height specification \verb"w" and \verb"h"; \verb"command"
-will be display in the window \verb"@p" (normally a sub-window of
-{\ActiveDVI}'s window).
+width and height specifications of the \verb|adviembed| call (the
+specified \verb"w" and \verb"h" parameters); hence the système command
+\verb"command" will run in the (X) window \verb"@p" (normally a
+sub-window of {\ActiveDVI}'s window) with the proper geometry.
 
 \newpage
 
@@ -229,12 +230,15 @@ will be display in the window \verb"@p" (normally a sub-window of
 There are two kinds of applications you can launch during the
 presentation:
 \begin{itemize}
-\item {\em embeddable applications} run inside a
-subwindow of the main {\ActiveDVI}'s window (hence their window is
-stuck to the precise place computed by {\ActiveDVI}),
-\item {\em non-embeddable applications} run in a window of
-their own (hence their window is unrelated to the {\ActiveDVI}'s window and
+
+\item {\em embeddable applications} that run inside a subwindow of the
+main {\ActiveDVI}'s window (hence their window is stuck to the precise
+place computed for you by {\ActiveDVI}),
+
+\item {\em non-embeddable applications} that run in a window of their
+own (hence their window is unrelated to the {\ActiveDVI}'s window and
 may be moved independantly).
+
 \end{itemize}
 
 \subsubsection*{Embeddable applications}
@@ -243,14 +247,13 @@ For each application to launch, {\ActiveDVI} allocates a new sub
 window of the specified size.  If provided, the identifier \verb"@p"
 is replaced by the (X) identifier of that sub window, in order for the
 application to use that sub window as its root window. Options to
-specify the root window may vary depending of the application at hand
+specify the root window may vary according to the application at hand
 (however, \verb"-use" or \verb"-window" are common to specify this
 option). Unfortunately, not every X-application is capable of using a
 specified window as its (root) window.  If an application can be
 rerooted, it is truely embeddable into {\ActiveDVI} (meaning it is
 really a part of the {\ActiveDVI} window). Otherwise the application
 is not embeddable.
-
 
 \subsubsection*{Non embeddable applications}
 
@@ -267,8 +270,8 @@ cannot be rerooted and is indeed impossible to embed.
 
 \subsubsection*{Launching embeddable applications}
 
-Rerootable applications obeys to the X geometry specifications and can
-be properly displayed within the {\ActiveDVI} window (embedding).
+Rerootable applications obey to the X geometry specifications and thus
+can be properly displayed within the {\ActiveDVI} window (embedding).
 
 Examples:
 
