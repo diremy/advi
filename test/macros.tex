@@ -1,14 +1,17 @@
 \documentclass{article}
 
-\usepackage{advi}
+\usepackage{../tex/advi}
 \usepackage{alltt}
 \usepackage{color}
 \usepackage{graphicx}
 
-\title{Active dvi macros}
-
 \begin{document}
-\maketitle
+
+\noindent
+{\bf\Large Active dvi macros}\\
+
+\noindent
+\includegraphics[width=\textwidth]{../tex/bar.jpg.eps}
 
 \section{Pause}
 
@@ -120,9 +123,9 @@ Easy, no ? Hit space to continue!\pause
 \begin{alltt}
 \verb!\begin{tabular}[t]{cccc}!
 \verb!  One & !{\color{blue}\verb!\hide{tag2}{Two}!}\verb! & !{\color{blue}\verb!\hide{tag3}{Three}!}\verb! & Caml!{\color{blue}\verb!\hide{tag2}{s}!}\verb!\\!
-\verb!  \includegraphics[width=0.1\textwidth]{caml.eps}&!
-\verb!  !{\color{blue}\verb!\hide{tag2}{\includegraphics[width=0.1\textwidth]{caml.eps}!}\verb!}&!
-\verb!  !{\color{blue}\verb!\hide{tag3}{\includegraphics[width=0.1\textwidth]{caml.eps}!}\verb!}!
+\verb!  \includegraphics[width=0.1\textwidth]{../tex/caml.eps}&!
+\verb!  !{\color{blue}\verb!\hide{tag2}{\includegraphics[width=0.1\textwidth]{../tex/caml.eps}!}\verb!}&!
+\verb!  !{\color{blue}\verb!\hide{tag3}{\includegraphics[width=0.1\textwidth]{../tex/caml.eps}!}\verb!}!
 \verb!\end{tabular}!
 \color{blue}\verb!\pause!
 \verb!\play{tag2}!
@@ -131,9 +134,9 @@ Easy, no ? Hit space to continue!\pause
 \end{alltt}
 \begin{tabular}[t]{cccc}
   One & \hide{tag2}{Two} & \hide{tag3}{Three} & Caml\hide{tag2}{s}\\
-  \includegraphics[width=0.1\textwidth]{caml.eps}&
-  \hide{tag2}{\includegraphics[width=0.1\textwidth]{caml.eps}}&
-  \hide{tag3}{\includegraphics[width=0.1\textwidth]{caml.eps}}
+  \includegraphics[width=0.1\textwidth]{../tex/caml.eps}&
+  \hide{tag2}{\includegraphics[width=0.1\textwidth]{../tex/caml.eps}}&
+  \hide{tag3}{\includegraphics[width=0.1\textwidth]{../tex/caml.eps}}
 \end{tabular}
 \pause
 \play{tag2}
