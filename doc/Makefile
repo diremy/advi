@@ -52,7 +52,7 @@ web:
 	$(MAKE) -f MakeHTML all
 	$(MAKE) -f MakeMan all
 
-manual.dvi: manual.sty splash_contents.tex \
+manual.dvi: ../tex/advi.sty manual.sty splash_contents.tex \
        scratch_write_splash_contents.tex scratch_draw_splash_contents.tex
 splash.dvi: splash_contents.tex
 scratch_write_splash.dvi: scratch_write_splash_contents.tex
@@ -81,6 +81,7 @@ endif
 	fi
 	$(LATEX) '\def\driver{dvips}\input' $<
 	$(DVIPS) -o $@ $*.dvi
+	  $(MV) $*.dvi $*.bdvi
 	if [ -e $*.advi ]; then \
 	  $(MV) $*.advi $*.dvi; \
 	fi
