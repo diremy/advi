@@ -10,7 +10,7 @@ ll.dvi: ll.tex world.jpg advilogo.anim.gif
 
 
 clean:
-	rm -f ll.{aux,log,dvi}
+	/bin/rm -f ll.aux ll.log ll.dvi
 
 
 .phony: show
