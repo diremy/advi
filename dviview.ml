@@ -158,6 +158,38 @@ let set_page_number st n =
 
 (*** Setting the geometry ***)
 
+(*****************************************************************************
+
+  The `st' record contains the geometry for advi drawing, not the real 
+  geometry, which is stored in the attr record. 
+  Fields st.size_x st.size_y orig_x orig_y of the window are in 
+  advi coordinates, i.e. 
+
+       ----->
+      | 
+      |
+      \/
+
+  Fields st.orig_x et st.orig_y indicates the advi "margins". 
+  Fields st.size_x et st.size_y the advi dimensions according to the 
+  resolution:
+
+   - these are not the dimension of the window !Graphics.size_x() and
+  Graphics.size_y() unless the window is self-adjusted to the advi dimensions;
+
+   - they can be lower in one dimension when the window is forced a 
+  different shape;
+
+   - they can be both higher when the window size is fixed and when drawing at 
+  a  higher scale. 
+  
+  We always have st.orig_x + st.width + st.orig_x = st.size_x
+  and the same for y coordinates
+
+*****************************************************************************)
+
+
+
 (*** Setting other parameters ***)
 
 let attr =
@@ -474,13 +506,6 @@ let xrefs st =
       st.frozen <- false;
     end;
   st.dvi.Dvi.xrefs;;
-
-(*******************************
-  st reference = top left corner
-  orig_x, orig_y = margins from the top
-  size_x, size_y = size of the dvi + margins
-  thus, if paper is too large, white space is bottom or right, not shared.
-**********************************)
 
 let make_thumbnails st  =
   let xnails =
