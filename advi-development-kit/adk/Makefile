@@ -1,14 +1,7 @@
-CAMLTK=camltk418
-CAMLIMAGES=camlimages-2.00
-ADVI=advi-1.0.0
+CAMLIMAGES=camlimages-2.10
+ADVI=advi-1.2.0
 
 install:
-	(cd $(CAMLTK); \
-	 if test ! -f Makefile.config; then \
-	   ./configure --with-config=site.config; \
-	 fi)
-	(cd $(CAMLTK); make all opt install installopt)
-
 	(cd $(CAMLIMAGES); \
 	 if test ! -f Makefile.config; then \
 	   ./configure; \
