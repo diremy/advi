@@ -168,9 +168,9 @@ let get_space2 pre s =
     match s.code with
     | 1 ->
       (* Adjustment space ('C_right'), it depends on the previous symbol. *)
-	if pre == dummy_symbol then "(tab=r" ^ w ^")" else  "(r" ^ w ^ ")"
-    | 2 | 3 -> "(w" ^ w ^")" (* Interword : C_w0 C_w *)
-    | 4 | 5 -> "(x" ^ w ^")" (* Interword? : C_x0 C_x *)
+        if pre == dummy_symbol then "(tab=r" ^ w ^ ")" else  "(r" ^ w ^ ")"
+    | 2 | 3 -> "(w" ^ w ^ ")" (* Interword : C_w0 C_w *)
+    | 4 | 5 -> "(x" ^ w ^ ")" (* Interword? : C_x0 C_x *)
     | _ -> failwith "Symbol.get_space : unknown space code."
   in
   if overlap pre s = 1 then "{" ^ result ^ "}" else result
@@ -260,7 +260,7 @@ let cmtt_encoding font code =
 let encodings = [
   "cm[rs][0-9]+" , cmr_encoding ;
   "cmt[ti][0-9]+", cmtt_encoding ; 
-  "cms[lxs][0-9]+"   , cmr_encoding ;
+  "cms[lxs][0-9]+", cmr_encoding ;
   "cmbx[0-9]+"   , cmr_encoding ;
   "cmmi[0-9]+"   , cmmi_encoding ;
   "cmex[0-9]+"   , cmex_encoding ;
@@ -280,7 +280,7 @@ let encodings = [
 ]
 
 let compile_regexp source =
-  List.map (fun (pat,zz) -> Str.regexp pat, zz) source
+  List.map (fun (pat, zz) -> Str.regexp pat, zz) source
 
 (* Compiled regexps. *)
 let encodings_c = compile_regexp encodings
@@ -293,10 +293,10 @@ let true_symbol_name s =
   (* For normal symbols, find a matching regexp. *)
   let handler =
     try snd (List.find
-	       (fun (r,h) -> Str.string_match r font 0)
-	       encodings_c)
+               (fun (r, h) -> Str.string_match r font 0)
+               encodings_c)
     with Not_found ->
-      fun f s -> "["^f^"]"^(default_encoding f s)
+      fun f s -> "[" ^ f ^ "]" ^ default_encoding f s
   in
   handler font s.code
 
@@ -307,14 +307,14 @@ let symbol_name pre s =
   | Rule (w, h) -> get_line pre s
   | _ ->
       let name = true_symbol_name s in
-      if space pre && overlap pre s <> 0 then erase^name else name
+      if space pre && overlap pre s <> 0 then erase ^ name else name
 
 
 (* Says if the symbol is in zone x1-x2 y1-y2. *)
 (* Size of the symbol should be used...we'll see later. *)
 let symbol_inzone x1 y1 x2 y2 =
-  let (x1,x2) = if x1 <= x2 then x1,x2 else x2,x1
-  and (y1,y2) = if y1 <= y2 then y1,y2 else y2,y1 in
+  let (x1, x2) = if x1 <= x2 then x1, x2 else x2, x1
+  and (y1, y2) = if y1 <= y2 then y1, y2 else y2, y1 in
   function s ->
     (s.locx - hoffset s <= x2) && (s.locx - hoffset s + width s >= x1) &&
     (s.locy - voffset s <= y2) && (s.locy - voffset s + height s >= y1)
@@ -334,12 +334,12 @@ let intime x1 y1 x2 y2 =
 
 (** FORMATING **)
 
-exception Break of int*int
+exception Break of int * int
 
 (* Four (4 !) backslashes because of two-level escapes !!! *)
 
 let process_all =
-  ["."^erase, "" ; (* Remove backspaces. *)
+  ["." ^ erase, "" ; (* Remove backspaces. *)
     "c\\\\c", "\\cc" ] (* Sometimes cedil \c is after the 'c'. *)
 
 let process_totext =
@@ -392,19 +392,19 @@ let dump_line l =
   and old_sym = ref dummy_symbol in
   let action s =
     match s.symbol with
-    | Line (_,_) -> ()
+    | Line (_, _) -> ()
     | _ ->
-	let ascii = symbol_name !old_sym s in
-	if ascii <> "" then
-	  begin
-	    line := !line^ascii ;
-	    if not (space s) || width s > 0 then old_sym := s ;
-	  end;
-	if not (space s) then some := true  in
+        let ascii = symbol_name !old_sym s in
+        if ascii <> "" then
+          begin
+            line := !line ^ ascii ;
+            if not (space s) || width s > 0 then old_sym := s;
+          end;
+        if not (space s) then some := true  in
   List.iter action l2;
 
   let return = post_process !line in
-  if !some then return^"\n" else ""
+  if !some then return ^ "\n" else ""
 
 (* Split a list of symbols in lines. *)
 let rec split current lines = function
@@ -414,13 +414,13 @@ let rec split current lines = function
       let bot = top + height s in
       if above_lines bot top current.max current.min <> 0
       then split {min = top;
-		   max = bot;
-		   content = [s]}
-	  (current :: lines) sl
+                   max = bot;
+                   content = [s]}
+          (current :: lines) sl
       else split {min = min current.min top;
-		   max = max current.max bot;
-		   content = s :: current.content}
-	  lines sl
+                   max = max current.max bot;
+                   content = s :: current.content}
+          lines sl
 
 (* to_ascii returns a string representing the symbols in set. *)
 (* Elements are filtered according to the first argument. *)
@@ -526,8 +526,8 @@ let around b x y =
             let c = symbol_name pre h in
             if c = " " then return w
             else word move i w next
-        | Line (_,_) -> word move i w next
-        | Rule (_,_) -> return w
+        | Line (_, _) -> word move i w next
+        | Rule (_, _) -> return w
         | _ ->
             if pre <> dummy_symbol && above pre h <> 0 then return w
             else
@@ -564,7 +564,7 @@ let around b x y =
 
 let rec least l min =
   match l with
-    {symbol = Line (l,_)} :: rest -> least rest (if l < min then l else min)
+    {symbol = Line (l, _)} :: rest -> least rest (if l < min then l else min)
   | _ :: rest -> least rest min
   | [] -> min
 
@@ -576,7 +576,7 @@ let lines x y =
         if valid region i then
           let h = region.history.(i) in
           match h.symbol with
-          | Line(n,f) when n >= 0 -> n, f
+          | Line(n, f) when n >= 0 -> n, f
           | _ ->  find_line move (move i)
         else -1, None in
       let space_ref = region.history.(region.first) in
@@ -607,7 +607,7 @@ let word x y =
 
 let apply f = function
   | { symbol = Glyph g } as s -> f g.glyph s.color s.locx s.locy
-    | _ -> ()
+  | _ -> ()
 ;;
 
 let iter_region f r =
