@@ -339,6 +339,8 @@ let draw_bkgd () =
   (* Fix me: why this test ? could have a white bg, no ? *)
   (*  if !bg_color <> Graphics.white then *)
   Graphics.fill_rect x y w h;
+  (* Background: function. *)
+  lift (fun draw -> draw viewport) bkgd_data.bgfunction;
   (* Background: image. *)
   let draw_bg file =
     Drawimage.f file bkgd_data.bgwhitetransp bkgd_data.bgalpha
@@ -346,9 +348,7 @@ let draw_bkgd () =
       bkgd_data.bgratiopt
       true (* antialias *)
       (w, h) (x, y) in
-  lift draw_bg bkgd_data.bgimg;
-  (* Background: function. *)
-  lift (fun draw -> draw viewport) bkgd_data.bgfunction;;
+  lift draw_bg bkgd_data.bgimg;;
 
 type bgoption =
    | BgColor of color

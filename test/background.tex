@@ -69,12 +69,15 @@ Press: \keymenu{n}ext page \keymenu{p}revious page
 You can modify the background of your presentations:
   \begin{itemize}
     \item define the background color
-    \item add a background image (which can be alpha-blended on top of the background color)
-    \item define a function to be run on the background (this is limited to a few color gradients, but it can
-          be expanded to more sophisticated effects)
+    \item define a function to be run on the background (this is
+    limited to a few color gradients, but it can be expanded to more
+    sophisticated effects) 
+    \item add a background image (which can be alpha-blended on top of
+    the background color).
   \end{itemize}
-If these options are used \emph{together}, they are currently applied in the abovementioned order
-(i.e.\ color, then image, then function).\\
+If these options are used \emph{together}, they are currently applied
+in the abovementioned order
+(i.e.\ color, then function, then image).\\
 
 This file is a simple showcase for the current background effects.
 
@@ -97,10 +100,12 @@ in the LaTeX source of the page the following command:
 
 \section{Setting the background color: gradients}
 
-By choosing one of the \verb|hgradient|, \verb|vgradient| or \verb|dgradient| predefined functions,
-we can convert the background color into a color gradient from the chosen color to white.
+By choosing one of the \verb|hgradient|, \verb|vgradient| or
+\verb|dgradient| predefined functions, we can convert the background
+color into a color gradient from the chosen color to white.
 
-For example, here is the effect produced by insering in the LaTeX source of the page the following command:
+For example, here is the effect produced by insering in the LaTeX
+source of the page the following command:
 
 \begin{quote}
   \begin{verbatim}
@@ -159,8 +164,9 @@ in your Advi's Makefile.config .
 
 As documented in the manual, the LaTeX macro for backgrounds has a
 wealth of options.\\
-For example, there are several different ways to adapt an image to the size of the
-background to fill, and they are declared with the \dockey{fit}{} parameter to \verb|\advibg|:
+For example, there are several different ways to adapt an image to the
+size of the background to fill, and they are declared with the
+\dockey{fit}{} parameter to \verb|\advibg|:
 
 \dockey[auto]{fit}{fit style}
 \begin{quote}
@@ -403,13 +409,15 @@ Here is the command used to obtain it:
 {\Huge Blending with a color background}
 \vfill
 In this page, the background is first set to light blue, then blended
-in {\tt difference} mode with the image which is scaled to fit the available area.\\
+in {\tt difference} mode with the image which is scaled to fit the
+available area.\\
 
 Here is the command used to obtain this effect:
 
 \begin{center}
 {\tt \char`\\advibg\{color=lightblue, alpha=0.1, blend=difference, image="dojoji.gif"\}}
 \end{center}
+
 \advibg{color=lightblue, alpha=0.1, blend=difference, image="dojoji.gif"} 
 \vfill
 
@@ -419,8 +427,6 @@ Here is the command used to obtain this effect:
 
 {\color{white}
 \advifooter\adviheader
-
-
 
 \section{Reverse video effect}
 
@@ -476,6 +482,90 @@ headers, that also appear asynchronously.
 background color after a pause. But at what price ?
 
     \item anybody willing to add support for color gradients?\\Done.
+  \end{itemize}
+
+\newpage
+
+\advibg{color=cyan}
+
+\vfill
+{\large {Plain cyan color: {\verb|\advibg{color=cyan}|}}}
+\vfill
+
+\newpage
+
+\advibg{color=cyan,fun="vgradient"}
+
+\vfill
+{\large {Cyan with vertical gradient
+\verb|\advibg{color=cyan,fun="vgradient"}|}}
+\vfill
+
+\newpage
+
+\advibg{alpha="0.1",image="dojojismall.jpg",color=cyan,fun="vgradient"}
+
+\vfill
+{\large {Cyan with vertical gradient and alpha = 0.1 blended image
+\verb|\advibg{alpha="0.1",image="dojojismall.jpg",color=cyan,fun="vgradient"}|
+}}
+\vfill
+
+\newpage
+
+\advibg{alpha="0.2",color=cyan,image="dojojismall.jpg",fun="vgradient"}
+
+\vfill
+{\large {Cyan with vertical gradient and alpha = 0.2 blended image\\
+\verb|\advibg{alpha="0.2",color=cyan,image="dojojismall.jpg",fun="vgradient"}|
+}}
+\vfill
+
+\newpage
+
+\advibg{alpha="0.4",fun="vgradient",color=cyan,image="dojojismall.jpg"}
+
+\vfill
+{\large {Cyan with vertical gradient and alpha = 0.4 blended
+image\\
+\verb|\advibg{alpha="0.4",fun="vgradient",color=cyan,image="dojojismall.jpg"}|
+}}
+\vfill
+
+\newpage
+
+\advibg{alpha="0.8",fun="vgradient",color=cyan,image="dojojismall.jpg"}
+
+\vfill
+{\large {Cyan with vertical gradient and alpha = 0.8 blended
+image\\
+\verb|\advibg{alpha="0.8",fun="vgradient",color=cyan,image="dojojismall.jpg"}|
+}}
+\vfill
+
+\newpage
+
+\advibg{color=cyan,image="dojojismall.jpg",alpha=0.25}
+\verb|\advibg{color=cyan,image="dojojismall.jpg",alpha=0.25}|
+
+\section{Future work}
+
+  \begin{itemize}
+    \item background preferences are ``asynchronous'', in the sense
+that they can imply rendering modifications in a part of the page that
+has already been displayed; this is why we first scan a page, looking
+for background specials (example, a red background), and only after we
+render it (setting the background to red before everything else). By
+the way, this mechanism was already in place to handle PostScript
+headers, that also appear asynchronously.
+
+    \item is it worthwhile to consider the possibility of making a
+``synchronous'' variant? This would allow for example to change the
+background color after a pause. But at what price ?
+
+    \item anybody willing to add support for color gradients with
+function arguments and more fancy variants ?\\
+Done.
   \end{itemize}
 
 \lastpage
