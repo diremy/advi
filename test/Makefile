@@ -5,7 +5,7 @@ RM=/bin/rm -f
 
 LATEX=TEXINPUTS=.:/usr/share/texmf//:$$TEXINPUTS; export TEXINPUTS; latex
 
-MLPROG=but taquin
+MLPROG=taquin
 
 all: demo.dvi trigo_source.dvi ./trans.dvi trans2.dvi background.dvi \
      $(MLPROG) 
