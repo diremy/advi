@@ -162,7 +162,7 @@ let move_or_resize_persistent_app
 
 (* In hash table t, verifies that at least one element verifies p. *)
 let hashtbl_exists t f =
-  try Hashtbl.iter (fun _ x -> if f x then raise Exit) app_table; false
+  try Hashtbl.iter (fun _ x -> if f x then raise Exit) t; false
   with Exit -> true;;
 
 (* embedded apps must be displayed when synced. *)
@@ -212,14 +212,14 @@ let embed_app command app_mode app_name width height x gry =
         raw_embed_app command app_mode app_name width height x gry);;
 
 (* Kill the process and close the associated window. *)
-let unembed_app app_mode pid wid =
-  (* Fake apps cannot be killed! *)
-  if app_mode <> Fake then begin
+let unembed_app (pid, (app_mode, app_name, wid)) =
     (* prerr_endline (Printf.sprintf "kill_app (pid=%d, window=%s)" pid wid); *)
     begin try Hashtbl.remove app_table pid with _ ->
       Misc.warning
         (Printf.sprintf "kill_app failed to remove application %d..." pid)
     end;
+  (* Fake apps cannot be killed! *)
+  if app_mode <> Fake then begin
     begin try Unix.kill pid Sys.sigquit with _ -> 
       (* prerr_endline
          (Printf.sprintf
@@ -248,48 +248,44 @@ let unembed_apps_with_mode app_mode =
   | Ephemeral -> prerr_endline "Killing ephemeral apps"
   end; *)
   let to_be_removed =
-    Hashtbl.fold (fun pid (apt, app_name, wid) acc ->
-      if apt = app_mode then (pid, wid) :: acc else acc) app_table [] in
-  List.iter (fun (pid, wid) -> unembed_app app_mode pid wid) to_be_removed;;
+    Hashtbl.fold (fun pid (mode, app_name, wid as embed) acc ->
+      if mode = app_mode then (pid, embed) :: acc else acc) app_table [] in
+  List.iter unembed_app to_be_removed;;
 
-let signal_app app_mode sig_val pid wid =
+let signal_app signal (pid, (app_mode, app_name, wid) as app) =
   (* prerr_endline
     (Printf.sprintf
       "signal_app (pid=%d, window=%s) signal=%i killing=%b kill is %i"
       pid wid sig_val (sig_val = Sys.sigquit) Sys.sigquit); *)
-  if sig_val = Sys.sigquit then
-       unembed_app app_mode pid wid else
-  try Unix.kill pid sig_val with _ ->
+  if signal = Sys.sigquit then unembed_app app else
+  try Unix.kill pid signal with _ ->
     (* prerr_endline
         (Printf.sprintf
           "signal_app (pid=%d, window=%s) signal=%i: cannot signal process"
-          pid wid sig_val); *)
+          pid wid signal); *)
     ()
 ;;
 
-let kill_embedded_app sig_val app_name =
+let kill_embedded_app signal app_name =
   (* prerr_endline
    (Printf.sprintf
      "kill_embedded_app (signal=%i app_name=%s)"
-     sig_val app_name); *)
+     signal app_name); *)
   try
-    let pid, (app_mode, app_name, wid) = find_embedded_app app_name in
-    signal_app app_mode sig_val pid wid with
+    let pid, (app_mode, app_name, wid) as app = find_embedded_app app_name in
+    signal_app signal app with
   | Not_found ->
       Misc.warning (Printf.sprintf "application %s is not running" app_name)
 ;;
 
-let kill_all_embedded_app sig_val app_name =
+let kill_all_embedded_app signal app_name =
   (* prerr_endline
    (Printf.sprintf
      "kill_all_embedded_app (signal=%i app_name=%s)"
-     sig_val app_name); *)
+     signal app_name); *)
   try
     let apps = find_all_embedded_app app_name in
-    List.iter
-      (fun (pid, (app_mode, app_name, wid)) ->
-         signal_app app_mode sig_val pid wid)
-      apps
+    List.iter (signal_app signal) apps
   with
   | Not_found ->
       Misc.warning (Printf.sprintf "application %s is not running" app_name)

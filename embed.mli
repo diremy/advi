@@ -24,7 +24,7 @@ type app_mode =
       (* A [Fake] application is not launched. It is just used to
          reserve a given area on the screen for another application to
          display its material afterwards. *)
-     
+
    | Raw
 
       (* A [Raw] application is launched at each invocation. It is

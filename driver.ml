@@ -566,11 +566,10 @@ let kill_embed_special kill_fun st s =
   let app_name =
     try unquote (List.assoc "name" records)
     with Not_found -> raise (Failure ("No command to kill in " ^ s)) in
-  let sign = List.assoc "signal" records in
-  (* prerr_endline (Printf.sprintf "Signal is ``%s''" sign); *)
+  let signal = List.assoc "signal" records in
+  (* prerr_endline (Printf.sprintf "Signal is ``%s''" signal); *)
   let sig_val =
-    try int_of_signal (unquote (List.assoc "signal" records))
-    with
+    try int_of_signal (unquote signal) with
     | Not_found -> raise (Failure ("No signal to kill command in " ^ s))
     | Failure _ -> raise (Failure ("Cannot understand signal in " ^ s))  in
   Misc.debug_endline
