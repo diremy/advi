@@ -153,13 +153,16 @@ let ask_to_launch command command_invocation =
     command_invocation
     "Do you want to execute it ? <yes>[no] ") ();;
 
-let ask_before_launching command command_invocation =
+let ask_before f arg =
   let cursor = GraphicsY11.get_cursor () in
   GraphicsY11.set_cursor GraphicsY11.Cursor_question_arrow;
-  let res = ask_to_launch command command_invocation in
+  let res = f arg in
   GraphicsY11.set_cursor cursor;
   !Misc.forward_push_back_key_event '' GraphicsY11.control;
   res;;
+
+let ask_before_launching command command_invocation =
+  ask_before (ask_to_launch command) command_invocation;;
 
 let can_execute_table = Hashtbl.create 11;;
 

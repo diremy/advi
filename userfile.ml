@@ -105,6 +105,7 @@ let get_dvi_filename () =
   | None -> raise Not_found
   | Some fname -> fname;;
 
+(* Its directory name. *)
 let get_dvi_file_dirname () =
   match !dvi_filename with
   | None -> raise Not_found

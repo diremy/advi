@@ -41,10 +41,10 @@ type term = {
  mutable foreground_color : Graphics.color;
  mutable background_color : Graphics.color;
  mutable border_width_color : Graphics.color;
+ mutable title_color : Graphics.color;
  (* Decorations *)
  mutable border_width : int;
  mutable title : string;
- mutable title_color : Graphics.color;
  (* Font *)
  mutable font : string;
  mutable font_size_x : int;
@@ -307,7 +307,10 @@ let rec flush_keys () =
    let c = GraphicsY11.read_key () in
    flush_keys ();;
 
-let get_line =
+type prompt = string;;
+type prefill = string;;
+
+let get_line_prefill =
   let b = Buffer.create 11 in
   let get t =
     flush_keys ();
@@ -343,11 +346,19 @@ let get_line =
          Buffer.add_char b c;
          print_chr t c;
          read t in
-    read t in
-  get;;
+    read in
+  (fun t prefill ->
+     let read = get t in
+     Buffer.add_string b prefill;
+     print_str t prefill;
+     read t);;
 
-let ask t s =
-  print_str t s;
-  let answer = get_line t in
+let ask_prefill t prompt prefill =
+  print_str t prompt;
+  let answer = get_line_prefill t prefill in
   flush_keys ();
   answer;;
+
+let get_line t = get_line_prefill t "";;
+
+let ask t prompt = ask_prefill t prompt "";;

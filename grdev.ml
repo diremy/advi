@@ -104,12 +104,8 @@ set_usr1 ();;
 
 let sleep_broken = ref false;;
 let clear_sleep () =
-  if GraphicsY11.key_pressed() then sleep_broken := true
-  else sleep_broken := false;;
-(* let _ = *)
-(*   Sys.set_signal Sys.sigint*)
-(*     (Sys.Signal_handle (fun _ -> sleep_broken := true))*)
-
+  if GraphicsY11.key_pressed () then sleep_broken := true else
+  sleep_broken := false;;
 
 (* returns false if sleep is fully performed. returns true if interrupted *)
 let sleep_watch breakable sync n =

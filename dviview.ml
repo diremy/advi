@@ -66,6 +66,18 @@ Options.add
   (Arg.String (fun s -> ps_viewer := s))
   "STRING\tCommand to view PS files (default gv)";;
 
+let image_viewer = ref "xv";;
+Options.add
+  "-image-viewer"
+  (Arg.String (fun s -> image_viewer := s))
+  "STRING\tCommand to display image files (default xv)";;
+
+let film_viewer = ref "mplayer";;
+Options.add
+  "-film-viewer"
+  (Arg.String (fun s -> film_viewer := s))
+  "STRING\tCommand to display film files (default mplayer)";;
+
 let click_turn_page =
   Options.flag false
     "-click-turn"
@@ -708,6 +720,10 @@ let exec_xref link =
             call !pager fname
         | ".pdf" -> call !pdf_viewer fname
         | ".ps" | ".eps" -> call !ps_viewer fname
+        | ".bmp" | ".gif" | ".png" | ".jpg" | ".jpeg"
+        | ".pbm" | ".pgm" | ".pnm" | ".tiff" | ".xpm" ->
+            call !image_viewer fname
+        | ".mpg" -> call !film_viewer fname
         | _ ->
             Misc.warning
               (Printf.sprintf "Don't know what to do with link %s" link)
@@ -1089,9 +1105,9 @@ module B =
     let scratch_write st =
       Scratch.write ()
 
-    let previous_slice  = previous_slice
+    let previous_slice = previous_slice
     let next_slice = next_slice
-    let mark_page  = mark_page
+    let mark_page = mark_page
     let goto_mark st = goto_mark st.num st
 
     let make_thumbnails st =
@@ -1106,11 +1122,35 @@ module B =
     let show_toc st =
        Launch.without_launching show_toc st
 
+    let ask_to_search =
+      let prefill = ref "" in
+      (fun title ->
+       let minibuff =
+         let nlines = 1 in
+         let xc, yc = 2, 2 in
+         let sx, sy = Graphics.text_size "X" in
+         let wt, ht = Graphics.size_x () - 2 * xc, sy * nlines in
+         let ncol = wt / sx in
+         let bw = 0 in
+         Gterm.make_term_gen
+           Graphics.black (Graphics.rgb 180 220 220) (* Grounds colors *)
+           bw Graphics.black (* Border *)
+           (Graphics.rgb 220 150 120) (* Title color *)
+           (Graphics.black) (* Cursor color *)
+           xc yc (* Where on the screen *)
+           nlines ncol (* Size in lines and columns *) in
+       let re = Gterm.ask_prefill minibuff title !prefill in
+       !Misc.forward_push_back_key_event '' GraphicsY11.control;
+       prefill := re;
+       re)
+
     let search_forward st =
-       ()
+      let re = ask_to_search "Search Forward (re): " in
+      ()
 
     let search_backward st =
-       ()
+      let re = ask_to_search "Search Backward (re): " in
+      ()
   end;;
 
 let bindings = Array.create 256 B.nop;;
@@ -1135,7 +1175,6 @@ let bind_keys () =
    'j', B.page_down;
    'k', B.page_up;
    'l', B.page_right;
-   'c', B.center;
 
    (* m, i are reserved for scrolling
      'm', B.scroll_one_line_down;
@@ -1177,13 +1216,13 @@ let bind_keys () =
    'R', B.reload;
    '', B.redisplay;
 
-   (* Control-f, c, To handle the advi window. *)
+   (* Control-f, c, to handle the advi window. *)
    '', B.fullscreen;
+   'c', B.center;
 
-   (* Control-s to search forward. *)
+   (* Searching: Control-s search forward, Control-r search backward. *)
    '', B.search_forward;
-   (* Control-r to search backward. *)
-   'R', B.search_backward;
+   '', B.search_backward;
 
    (* Scaling the page. *)
    '<', B.scale_down;
@@ -1216,72 +1255,68 @@ bind_keys ();;
 let main_loop filename =
   let st = init filename in
   (* Check if whiterun *)
-  if Launch.whiterun () then
-    begin
-      Driver.scan_special_pages st.cdvi (st.num_pages - 1);
-      Launch.dump_whiterun_commands ()
-    end
-  else
-    begin
-      Grdev.set_title ("Advi: " ^ Filename.basename filename);
-      let x, y = Grdev.open_dev (" " ^ Ageometry.to_string attr.geom) in
-      attr.geom.Ageometry.width <- x;
-      attr.geom.Ageometry.height <- y;
-      update_dvi_size true st;
-      set_bbox st;
-      if st.page_number > 0 && !Options.dops then
-        Driver.scan_special_pages st.cdvi st.page_number
-      else set_page_number st (page_start 0 st);
-      redraw st;
-      (* num is the current number entered by keyboard *)
-      try while true do
-        let ev =
-          if changed st then Grdev.Refreshed else Grdev.wait_event () in
-        st.num <- st.next_num;
-        st.next_num <- 0;
-        match ev with
-        | Grdev.Refreshed -> reload st
-        | Grdev.Resized (x, y) -> resize st x y
-        | Grdev.Key c -> bindings.(Char.code c) st
-        | Grdev.Href h -> goto_href h st
-        | Grdev.Advi (s, a) -> a ()
-        | Grdev.Move (w, h) ->
-            st.orig_x <- st.orig_x + w;
-            st.orig_y <- st.orig_y + h;
-            set_bbox st;
-            redraw st
-        | Grdev.Edit (p, a) ->
-            print_endline (Grdev.E.tostring p a);
-            flush stdout;
-            redraw st
-        | Grdev.Region (x, y, w, h) -> ()
-        | Grdev.Selection s -> selection s
-        | Grdev.Position (x, y) ->
-            position st x y
-        | Grdev.Click (pos, but, _, _) when Grdev.E.editing () ->
-            begin match pos, but with
-            | Grdev.Top_left, Grdev.Button1 -> B.previous_slice st
-            | Grdev.Top_left, Grdev.Button2 -> B.reload st
-            | Grdev.Top_left, Grdev.Button3 -> B.next_slice st
-            | Grdev.Top_right, Grdev.Button1 -> B.previous_page st
-            | Grdev.Top_right, Grdev.Button2 -> B.last_page st
-            | Grdev.Top_right, Grdev.Button3 -> B.next_page st
-            | _, _ -> ()
-            end
-        | Grdev.Click (Grdev.Top_left, _, _, _) ->
-            if !click_turn_page then B.pop_page st
-        | Grdev.Click (_, Grdev.Button1, _, _) ->
-            if !click_turn_page then B.previous_pause st
-        | Grdev.Click (_, Grdev.Button2, _, _) ->
-            if !click_turn_page then B.pop_previous_page st
-        | Grdev.Click (_, Grdev.Button3, _, _) ->
-            if !click_turn_page then B.next_pause st
+  if Launch.whiterun () then begin
+    Driver.scan_special_pages st.cdvi (st.num_pages - 1);
+    Launch.dump_whiterun_commands ()
+  end else begin
+    Grdev.set_title ("Advi: " ^ Filename.basename filename);
+    let x, y = Grdev.open_dev (" " ^ Ageometry.to_string attr.geom) in
+    attr.geom.Ageometry.width <- x;
+    attr.geom.Ageometry.height <- y;
+    update_dvi_size true st;
+    set_bbox st;
+    if st.page_number > 0 && !Options.dops then
+      Driver.scan_special_pages st.cdvi st.page_number
+    else set_page_number st (page_start 0 st);
+    redraw st;
+    (* num is the current number entered by keyboard *)
+    try while true do
+      let ev =
+        if changed st then Grdev.Refreshed else Grdev.wait_event () in
+      st.num <- st.next_num;
+      st.next_num <- 0;
+      match ev with
+      | Grdev.Refreshed -> reload st
+      | Grdev.Resized (x, y) -> resize st x y
+      | Grdev.Key c -> bindings.(Char.code c) st
+      | Grdev.Href h -> goto_href h st
+      | Grdev.Advi (s, a) -> a ()
+      | Grdev.Move (w, h) ->
+          st.orig_x <- st.orig_x + w;
+          st.orig_y <- st.orig_y + h;
+          set_bbox st;
+          redraw st
+      | Grdev.Edit (p, a) ->
+          print_endline (Grdev.E.tostring p a);
+          flush stdout;
+          redraw st
+      | Grdev.Region (x, y, w, h) -> ()
+      | Grdev.Selection s -> selection s
+      | Grdev.Position (x, y) ->
+          position st x y
+      | Grdev.Click (pos, but, _, _) when Grdev.E.editing () ->
+          begin match pos, but with
+          | Grdev.Top_left, Grdev.Button1 -> B.previous_slice st
+          | Grdev.Top_left, Grdev.Button2 -> B.reload st
+          | Grdev.Top_left, Grdev.Button3 -> B.next_slice st
+          | Grdev.Top_right, Grdev.Button1 -> B.previous_page st
+          | Grdev.Top_right, Grdev.Button2 -> B.last_page st
+          | Grdev.Top_right, Grdev.Button3 -> B.next_page st
+          | _, _ -> ()
+          end
+      | Grdev.Click (Grdev.Top_left, _, _, _) ->
+          if !click_turn_page then B.pop_page st
+      | Grdev.Click (_, Grdev.Button1, _, _) ->
+          if !click_turn_page then B.previous_pause st
+      | Grdev.Click (_, Grdev.Button2, _, _) ->
+          if !click_turn_page then B.pop_previous_page st
+      | Grdev.Click (_, Grdev.Button3, _, _) ->
+          if !click_turn_page then B.next_pause st
 (*
-   | Grdev.Click (Grdev.Bottom_right, _) -> B.next_pause st
-   | Grdev.Click (Grdev.Bottom_left, _) -> B.pop_previous_page st
-   | Grdev.Click (Grdev.Top_right, _) -> B.push_page st
- *)
-        | _ -> ()
-      done with Exit -> Grdev.close_dev ()
-    end;;
-
+ | Grdev.Click (Grdev.Bottom_right, _) -> B.next_pause st
+ | Grdev.Click (Grdev.Bottom_left, _) -> B.pop_previous_page st
+ | Grdev.Click (Grdev.Top_right, _) -> B.push_page st
+*)
+      | _ -> ()
+    done with Exit -> Grdev.close_dev ()
+  end;;

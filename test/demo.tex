@@ -378,7 +378,7 @@ command during your presentations.
 
 \newpage
 
-\subsection* {Limitations of Postscript specials}
+\section* {Postscript specials}
 
 {\ActiveDVI} recognizes and renders Postscript Specials by calling and telling
 \verb"ghostview" to display Postscript on the \verb"advi" window. 
@@ -399,7 +399,9 @@ material itself.
 also works.
 \end {itemize}
 
-\subsubsection* {Unfortunately, some PS-tricks do not work, yet}
+\subsubsection*{Limitations of Postscript specials}
+
+Unfortunately, some PS-tricks do not work, yet
 
 \begin{itemize}
 \item[-] Labels over arrows \verb"\Aput", \verb"Bput", etc.
@@ -414,9 +416,7 @@ hide otherwise). This is sufficient for the prosper documentclass (see
 
 \end {itemize}
 
-
-
-\subsection*{Known bug with PS tricks}
+\subsubsection*{Known bug with PS tricks}
 
 With some versions of \verb"gv" and/or \verb"X11", the PS tricks are not
 correctly synchronized. Some drawings may hide text, or conversely.
@@ -428,7 +428,7 @@ correctly synchronized. Some drawings may hide text, or conversely.
 
 \newpage
 
-\subsection* {Overlays}
+\section* {Overlays}
 \hypertarget {overlays}{}
 
 Overlays of the \verb"seminar" mode uses PS tricks, but in a manner that
@@ -461,7 +461,7 @@ approximation of the show that {\ActiveDVI} plays.
 
 \newpage
 
-\subsection* {Hyper links to other files}
+\section* {Hyper links to other files}
 
 \begin {itemize}
 
@@ -478,7 +478,7 @@ jumps to the link \verb"overlays" in that file, as if the command
 had been typed in a shell.
 
 \item The source file of this demo is \hyperref{demo.tex}{}{}{\tt
-demo.tex}. A link to it is produced by
+demo.tex}. A link to the source file is produced by
 
 \qquad\verb"\hyperref{demo.tex}{}{}{\tt more demo.tex}"
 
@@ -488,37 +488,55 @@ A click on the link opens the file in a new window, as if
 
 had been typed in a shell.
 
-\item Currently, the file name should end with either \verb".dvi",
-\verb".txt", \verb".tex", \verb".htm", or \verb".html" extensions, but
-in the future this should use Mine man Mailcap to find the type of the
-file and the proper previewer for that file.
+\item Currently, the file is recognized from its file name extension
+that must be one of \verb".dvi", \verb".pdf", \verb".ps", \verb".eps",
+\verb".htm", or \verb".html". In addition various well-known text file
+extensions are recognized, namely \verb".txt", \verb".tex",
+\verb".ftex", \verb".sty", \verb".pic", and famous programming
+languages source file extensions such as \verb".scm", \verb".c",
+\verb".el", or \verb".ml". In the future, this feature should use Mine
+man Mailcap to find the type of the file and the proper previewer for
+that file.
 
-For the time being, the different viewer commands can be set using an
-option on the command line (or including the same option in a
-\verb".advirc" file).
+For the time being, the viewer commands can be set using an
+option on the command line (or including this option in the
+\verb".advirc" file). Options are \verb"-browser", \verb"-pager",
+\verb"-pdf-viewer", \verb"-ps-viewer".
+
+\end{itemize}
+
+\newpage
+
+\section* {Hyper links to other files (cont)}
 
 For instance, you can compare the rendering of \ActiveDVI's manual
 
 \begin{itemize}
 
 \item in PDF, viewing {\tt ../doc/manual.pdf} with the
-\hyperref{../doc/manual.pdf}{}{}{viewer for PDF files} (by default
+\hyperref{../doc/manual.pdf}{}{}{viewer for PDF} files (by default
 {\tt xpdf}),
 \item in PostScript, viewing {\tt ../doc/manual.ps} with the
-\hyperref{../doc/manual.ps}{}{}{\tt viewer for PostScript files} (by
+\hyperref{../doc/manual.ps}{}{}{viewer for PostScript} files (by
 default {\tt gv}),
-\item in DVI \hyperref{../doc/manual.dvi}{}{}{as rendered by
+\item in DVI, \hyperref{../doc/manual.dvi}{}{}{as rendered by
 \ActiveDVI}.
 
 \end{itemize}
 
+\subsection *{Wrong links}
 
-\item A warning is emitted on standard error (Unix {\tt stderr}), if
-the file extension is not recognized:
+In case of bad link, \ActiveDVI just ignore the link and emits an
+error a warning is emitted on standard error (Unix {\tt stderr}). For
+instance
+
+\begin{itemize}
+
+\item when the file extension is not recognized:
 
 \hyperref{bad-talk.ppt}{}{}{\tt bad-talk.ptt}
 
-or the file is non-existent:
+\item or the file is non-existent:
 
 \hyperref{nonexistent.dvi}{}{}{\tt nonexistent.dvi}
 
@@ -605,10 +623,6 @@ The effect of active anchors can also be
          {<->}{A}{B}\Aput{Fire!}
 }
 
-
-\noindent
-Another form of simple annotations is the overriding of words.
-
 \noindent
 Another form of%
 \begin{superpose}
@@ -624,7 +638,7 @@ annotations is the overriding of%
 \noindent
 You can also replace larger pieces of text by other%
 \begin{superpose}
-\advirecord[play]{1}{pieces \advianchor{2}{of} \advianchor{3}{text}}\\
+\advirecord[play]{1}{\advianchor{2}{pieces} of \advianchor{3}{text}}\\
 \advirecord{2}{\colorbox{white}{\begin{tabular}{@{}l@{}}
 inner tabulars\\ should be enclosed\\ by parentheses\end{tabular}}}\\
 \advirecord{3}{\colorbox{white}{The \qquad End.}}\\
