@@ -23,6 +23,20 @@
 
 %% More declarations
 
+\advi@ifadvi {
+
+\newcommand{\ign@rebubble}[1][]{%
+	\@ifnextchar({\bbb@gl@b[#1]}{\footbubble[#1]}%
+}
+
+\def\bbb@gl@b[#1](#2)#3{\footbubble[#1]{#3}}
+\newcommand{\footbubble}[2][]{{#1}\footnote{#2}}
+
+\newcommand {\advi@annot}[2][]{%
+   \ign@rebubble[#2]
+}
+}
+{
 \def \advi@@anchor {\advi@anchor{\the\advi@c@annot}}
 \def \advi@@bubble #1{%
    \advi@ifadvi {\advi@record{\the\advi@c@annot}{#1}}{}%
@@ -33,6 +47,7 @@
    \leavevmode
    \bubble [#1,anchor=\advi@@anchor,bubble=\advi@@bubble]%
         {\advi@anchor{advi@annot\the\advi@c@annot}{#2}}%
+}
 }
 
 %% exports
