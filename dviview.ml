@@ -446,8 +446,8 @@ let move_within_margins_x st movex =
   else None;;
 
 let redraw ?trans ?chst st =
-  (* draws until the current pause_number or page end *)
-  (* the pauses and waits appears before are ignored *)
+  (* draws until the current pause_number or page end    *)
+  (* the pauses and waits that appear before are ignored *)
   Busy.set Busy.Busy;
   st.cont <- None;
   st.aborted <- false;
@@ -477,6 +477,7 @@ let redraw ?trans ?chst st =
         with
         | Driver.Pause -> st.cont <- Some f
       end else begin
+        Misc.debug_endline("Pauses are disabled: overriding transitions!");
         Transimpl.sleep := (fun _ -> true); (* always breaks *)
         while try f () with Driver.Wait _ | Driver.Pause -> true
         do () done
@@ -550,14 +551,20 @@ let make_thumbnails st =
 	      Dvi.bkgd_prefs = 
               {s.Dvi.bkgd_prefs with
 	       Grdev.bgviewport = Some (dx, dy, 0, size_y - dy)}} in
-           redraw ?chst:(Some chgvp)
+	   let without_pauses f x =
+	      let p = !pauses in
+	      try pauses := false; let v = f x in pauses := p; v
+	      with x -> pauses := p; raise x
+	   in
+	   without_pauses(redraw ?chst:(Some chgvp))
              {ist with page_number = p};
+           (* interrupt thumbnail computation if user interacts *)
            begin try Grdev.continue() with
              Grdev.Stop -> 
                let gray = Graphics.rgb 200 200 200 in
                Grdev.with_color gray
-                 (Graphics.fill_rect 0 (size_y - dy) (dx - 1)) (dy - 1)
-           end;
+                 (Graphics.fill_rect 0 (size_y - dy) (dx - 1)) (dy - 1) 
+           end; 
            p, Graphics.get_image 0 (size_y - dy) dx dy;
          ))
          page_nails in

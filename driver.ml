@@ -24,8 +24,10 @@ let active =
 let toggle_active () = active := not !active
 
 let with_active b f x =
+  let restore_delays() = if !active then Transimpl.sleep := (fun _ -> false) in
   let a = !active in
-  try let v = f x in active := a; v with z -> active := a; raise z;;
+  try let v = (active:=b; f x) in active := a; restore_delays (); v 
+  with z -> active := a; restore_delays (); raise z;;
 
 (* number of steps before checking for user interruptions *)
 let checkpoint_frequency = 10;;
