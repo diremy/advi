@@ -803,7 +803,7 @@ module H =
     let deemphasize now emph =
       match emph with
       | Rect (ima, act, l) ->
-          GraphicsY11.display_mode (not now);
+          GraphicsY11.display_mode now;
           List.iter
             (function ima, act -> Graphics.draw_image ima act.A.x act.A.y) l;
           Graphics.draw_image ima act.A.x act.A.y;
