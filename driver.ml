@@ -532,7 +532,8 @@ let parse_transition mode record =
       let stepsstr = List.assoc "steps" record in
       try int_of_string stepsstr
       with _ ->
-        warning "special: trans push: steps parse failed";
+        warning ("special: trans push: steps parse failed: \"" ^ 
+                   stepsstr ^ "\"");
         default
     with Not_found -> default
   in
@@ -541,15 +542,15 @@ let parse_transition mode record =
       match String.lowercase (List.assoc key record) with
       | "left" -> Transitions.DirLeft
       | "right" -> Transitions.DirRight
-      | "top" -> Transitions.DirTop
-      | "bottom" -> Transitions.DirBottom
-      | "topleft" -> Transitions.DirTopLeft
-      | "topright" -> Transitions.DirTopRight
-      | "bottomleft" -> Transitions.DirBottomLeft
-      | "bottomright" -> Transitions.DirBottomRight
+      | "top" | "up" -> Transitions.DirTop
+      | "bottom" | "down" -> Transitions.DirBottom
+      | "topleft" | "upleft" -> Transitions.DirTopLeft
+      | "topright" | "upright" -> Transitions.DirTopRight
+      | "bottomleft" | "downleft" -> Transitions.DirBottomLeft
+      | "bottomright" | "downright" -> Transitions.DirBottomRight
       | "center" -> Transitions.DirCenter
-      | _ ->
-         warning "special: trans push: steps parse failed";
+      | s ->
+         warning ("special: trans push: direction parse failed: \""^ s ^"\"");
          raise Exit
     with _ -> Transitions.DirNone
   in
