@@ -24,10 +24,13 @@ let active =
 let toggle_active () = active := not !active;;
 
 let with_active b f x =
-  let restore_delays() = if !active then Transimpl.sleep := (fun _ -> false) in
+  let restore_delays () =
+    if !active then Transimpl.sleep := (fun _ -> false) in
   let a = !active in
-  try let v = (active:=b; f x) in active := a; restore_delays (); v
-  with exc -> active := a; restore_delays (); raise exc;;
+  try
+    let v = active := b; f x in
+    active := a; restore_delays (); v with
+  | exc -> active := a; restore_delays (); raise exc;;
 
 (* Number of steps before checking for user interruptions *)
 let checkpoint_frequency = 10;;
@@ -216,7 +219,7 @@ let is_recording () = !current_recording_proc <> [];;
 (*** Rendering primitives ***)
 
 let last_height = ref 0;;
-let clear_symbols() = last_height := 2;;
+let clear_symbols () = last_height := 2;;
 
 let add_char st x y code glyph =
   let g : Symbol.g =
@@ -404,7 +407,8 @@ let line_special st s =
   | key :: line :: rest ->
       begin try
         let l = int_of_string line in
-        let f = match rest with file :: _ -> Some file | _ -> None in
+        let f = match rest with
+                | file :: _ -> Some file | _ -> None in
         add_line st (l, f)
       with Failure _ -> ill_formed_special s
       end
@@ -535,6 +539,8 @@ let psfile_special st s =
   (* prerr_endline (Printf.sprintf "%dx%d pixel" width_pixel height_pixel);*)
   file, (llx, lly, urx, ury), (width_pixel, height_pixel);;
 
+(* Killing embedded applications:
+   (1) we parse Unix signals in specials. *)
 let int_of_signal = function
   | "SIGABRT" | "sigabrt" -> Sys.sigabrt (* -1 *)
   | "SIGALRM" | "sigalrm" -> Sys.sigalrm (* -2 *)
@@ -560,6 +566,8 @@ let int_of_signal = function
   | "" -> Sys.sigquit
   | s -> int_of_string s;;
 
+(* Killing embedded applications:
+   (2) finding the application and calling Embed.kill_* to kill it. *)
 let kill_embed_special kill_fun st s =
   (* advi: kill[all]embed name=? signal=? *)
   let records = get_records s in
@@ -576,6 +584,8 @@ let kill_embed_special kill_fun st s =
     (Printf.sprintf "Killing %s, in special %s." app_name s);
   kill_fun sig_val app_name;;
 
+(* Killing embedded applications:
+   (3) partial applications to define the required primitives. *)
 let kill_one_embed_special = kill_embed_special Embed.kill_embedded_app;;
 let kill_all_embed_special = kill_embed_special Embed.kill_all_embedded_app;;
 
@@ -591,6 +601,7 @@ let show_hide_embed_special show_fun st s =
     (Printf.sprintf "Showing or hiding %s, in special %s." app_name s);
   show_fun app_name;;
 
+(* Mapping or unmapping windows of embedded applications. *)
 let unmap_one_embed_special st s =
   show_hide_embed_special Embed.unmap_embedded_app st s;;
 
@@ -603,6 +614,7 @@ let map_one_embed_special st s =
 let map_all_embed_special st s =
   show_hide_embed_special Embed.map_all_embedded_app st s;;
 
+(* Parsing embedding modes in specials. *)
 let app_mode_of_string = function
   | "fake" -> Embed.Fake
   | "raw" -> Embed.Raw
@@ -611,6 +623,7 @@ let app_mode_of_string = function
   | "ephemeral" -> Embed.Ephemeral
   | s -> raise (Failure ("Unknown embedding mode " ^ s));;
 
+(* Parsing embedding applications commands and calling embed_app. *)
 let embed_special st s =
   (* advi: embed mode=? width=? height=? command="command string" *)
   let records = get_records s in
@@ -826,9 +839,10 @@ let edit_special st s =
 let forward_eval_command = ref (fun _ _ -> ());;
 
 let playing = ref 0;;
+let get_playing () = !playing;;
 
 (* Setting the forward function Dev.get_playing. *)
-let play = Dev.get_playing in play := (fun () -> !playing);;
+Dev.get_playing := get_playing;;
 
 let visible_stack = ref [];;
 
@@ -1180,10 +1194,10 @@ let close_html st =
 
 let html_special st html =
   if has_prefix "<A " html || has_prefix "<a " html then
-    let stripped = String.sub html 3 (String.length html-4) in
+    let stripped = String.sub html 3 (String.length html - 4) in
     let fields = split_record stripped in
     begin match fields with
-      ("name", link) :: _ ->
+    | ("name", link) :: _ ->
         open_html st link (fun x -> Dev.H.Name x) "Name"
     | ("href", link) :: _ ->
         open_html st link (fun x -> Dev.H.Href x) "Href"
@@ -1344,7 +1358,7 @@ let special st s =
          (if !visible then unmap_one_embed_special st s) else
       if has_prefix "advi: unmapallembed " s then
          (if !visible then unmap_all_embed_special st s) else
-      Misc.warning ("unknown special: "^ s) end
+      Misc.warning ("unknown special: " ^ s) end
     (* else we ignore it, whether well-formed or ill-formed *)
     end else
   if has_prefix "line: " s then line_special st s else
@@ -1461,7 +1475,6 @@ let render_step cdvi num ?trans ?chst dpi xorig yorig =
   st.checkpoint <- 0;
   let check () =
     begin try Dev.continue () with
-    (* try with exn -> raise exn ?? What does that mean ? *)
     | Dev.Stop as exn -> raise exn
     end;
     st.checkpoint <- checkpoint_frequency in

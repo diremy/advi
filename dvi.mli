@@ -18,8 +18,16 @@
 open Format ;;
 open Dvicommands;;
 
-type known_status = {mutable hasps: bool; mutable bkgd_local_prefs: Grdev.bgoption list; mutable bkgd_prefs: Grdev.bkgd_prefs};;
-type status = Unknown | Known of known_status
+type known_status = {
+   mutable hasps: bool;
+   mutable bkgd_local_prefs: Grdev.bgoption list;
+   mutable bkgd_prefs: Grdev.bkgd_prefs
+};;
+
+type status =
+   | Unknown
+   | Known of known_status
+
 type page = {
     counters : int array ;
     commands : string;
