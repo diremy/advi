@@ -1287,6 +1287,7 @@ module B =
     let search_forward st =
       let re_string = ask_to_search "Search Forward (re): " in
       Misc.warning (Printf.sprintf "Search forward %s" re_string);
+      let re = Str.regexp re_string in
       ()
 
     let search_backward st =
