@@ -258,10 +258,10 @@ let set_excursion t x y w h =
   (* Validity verifications. *)
   (* x, y should be a valid character on the terminal. *)
   (* Rectangle x y w h is clipped to the terminal. *)
-  if x < 0 || x >= t.width ||
-     y < 0 || y >= t.height ||
-     w < 0 || w >= t.width ||
-     h < 0 || h >= t.height
+  if x < 0 || x > t.width ||
+     y < 0 || y > t.height ||
+     w < 0 || w > t.width ||
+     h < 0 || h > t.height
   then failwith "set_excursion" else
   let w = min w (t.width - x)
   and h = min h (t.height - y) in
@@ -339,6 +339,7 @@ let scroll_one_window_down t =
 *)
 
 let rec get_next_key t =
+  GraphicsY11.synchronize ();
   let c = GraphicsY11.read_key () in
   match c with
   | '' -> beginning_of_line t; get_next_key t
@@ -373,7 +374,6 @@ let get_line_prefill =
     let limx = t.cursor_x
     and limy = t.cursor_y in
     let rec read t =
-      GraphicsY11.synchronize ();
       let c = get_next_key t in
       match c with
       | '\n' | '\r' | '' ->
