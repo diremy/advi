@@ -129,7 +129,7 @@ MLFILES = $(addsuffix .ml, $(MODULES))
 	gcc -MM -I$(CAMLDIR) $(CFLAGS) $(COBJS:.o=.c) | sed -e 's|$(CAMLDIR)/[^ ]*||' >> .depend
 
 # just for the authors
-VERSION=1.0.0
+VERSION=1.2.0
 ADVI=advi-$(VERSION)
 WEBSITEDIR=/net/pauillac/infosystems/www/advi
 FTPSITEDIR=/net/pauillac/infosystems/ftp/cristal/advi
