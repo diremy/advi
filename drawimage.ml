@@ -67,8 +67,6 @@ let string_of_blend = function
   *);;
 
 
-type alpha = float;;
-
 (* look at gxblend.c of ghostscript *)
 let blend_func = function
   | Normal -> raise Exit (* this case is optimized *)
@@ -293,7 +291,6 @@ let image_load psbbox (w, h) file =
         let resx = float w /. (float (urx - llx) /. 72.0) *. image_aa_level
         and resy = float h /. (float (ury - lly) /. 72.0) *. image_aa_level
         in
-
         (* resolution fix *)
         (* gs dies if resolutions are too small (around 1.6 - 1.65dpi) *)
         let gs_min_res = 2.0 in
@@ -372,7 +369,8 @@ let resize_and_make_transparent image whitetransp ratiopt (ow, oh) =
     | ScaleBottomRight ->
         Some(max 0 (w - ow), max 0 (h - oh), 0, 0, min w ow, min h oh)
   in
-  let image' =
+  (* Coerce all formats to Rgba 24 or Rgba32 *)
+  let image =
     match image with
     | Index8 i -> Rgba32 (Index8.to_rgba32 i)
     | Index16 i -> Rgba32 (Index16.to_rgba32 i)
@@ -380,11 +378,12 @@ let resize_and_make_transparent image whitetransp ratiopt (ow, oh) =
     | Rgba32 i -> image
     | _ -> raise (Failure "color model is not supported")
   in
+  (* Adding transparency if necessary *)
   let white_rgb = {r = 255; g = 255; b = 255} in
   let diff = 15 * 15 in
-  let image'' =
-    if not whitetransp then image' else
-    match image' with
+  let image =
+    if not whitetransp then image else
+    match image with
     | Rgb24 i ->
         let width = i.Rgb24.width
         and height = i.Rgb24.height in
@@ -412,7 +411,8 @@ let resize_and_make_transparent image whitetransp ratiopt (ow, oh) =
         image
     | _ -> assert false
   in
-  match image'' with
+  (* Resizing the image then bliting it at the proper place. *)
+  match image with
   | Rgb24 i ->
       let i = Rgb24.resize None i w h in
       let i =
@@ -429,7 +429,7 @@ let resize_and_make_transparent image whitetransp ratiopt (ow, oh) =
         match blitinfo with
         | None -> i
         | Some(sx, sy, dx, dy, w, h) ->
-            let i' = Rgba32.make ow oh {color = white_rgb; alpha = 1} in
+            let i' = Rgba32.make ow oh {color = white_rgb; alpha = 255} in
             Rgba32.blit i sx sy i' dx dy w h;
             i' in
       Rgba32 i
@@ -464,7 +464,7 @@ let load_and_resize file whitetransp psbbox ratiopt (w, h) =
         let image =
           resize_and_make_transparent image whitetransp ratiopt (w, h) in
         Userfile.prepare_file cache_name;
-        (* we have no trivial image format for rgba32! *)
+        (* We have no trivial image format for rgba32! *)
         cache_save cache_name image;
         if !verbose_image_access then GraphicsY11.set_cursor Cursor_left_ptr;
         image
@@ -474,17 +474,22 @@ let load_and_resize file whitetransp psbbox ratiopt (w, h) =
 ;;
 
 let draw_image image cache_name alpha blend (w, h) (x0, y0) =
+  debugs (Printf.sprintf "Alpha is %d" alpha);
   let blend =
-    try Some (blend_func blend) with _ -> None in
+    try Some (blend_func blend) with _ -> debugs "No blend"; None in
   (* load_and_resize may not return exactly the same size
      we specified as (w, h) *)
   let iw, ih = Image.size image in
   match image with
-  | Rgb24 _ when alpha = 1 && blend = None ->
+  | Rgb24 _ when alpha = 255 && blend = None ->
       (* optimized *)
       let image_graphics =
-        try Hashtbl.find images_graphics cache_name with
+        try
+          let img = Hashtbl.find images_graphics cache_name in
+          debugs ("cached graphics image found for " ^ cache_name);
+          img with
         | Not_found ->
+            debugs ("no cached graphics image for " ^ cache_name);
             let im = Graphic_image.of_image image in
             Hashtbl.add images_graphics cache_name im;
             im
@@ -493,8 +498,15 @@ let draw_image image cache_name alpha blend (w, h) (x0, y0) =
   | Rgb24 _ | Rgba32 _ ->
       let get_src_alpha =
         match image with
-        | Rgb24 image -> fun x y -> Rgb24.unsafe_get image x y, alpha
+        | Rgb24 image ->
+            debugs (
+             Printf.sprintf "Rgba 24 with blend or alpha (%d) %s"
+              alpha cache_name);
+            fun x y -> Rgb24.unsafe_get image x y, alpha
         | Rgba32 image ->
+            debugs (
+             Printf.sprintf "Rgba 32 with blend or alpha (%d) %s"
+              alpha cache_name);
             fun x y ->
               let {color = src; alpha = a} = Rgba32.unsafe_get image x y in
               src, a * alpha / 255
@@ -533,7 +545,9 @@ let draw_image image cache_name alpha blend (w, h) (x0, y0) =
 ;;
 
 
-let f file whitetransp alpha blend psbbox ratiopt (w, h) (x0, y0) =
+type alpha = float;;
+
+let f file whitetransp (alpha : alpha) blend psbbox ratiopt (w, h) (x0, y0) =
   try
     let cache_name, image =
       load_and_resize file whitetransp psbbox ratiopt (w, h) in
