@@ -959,19 +959,17 @@ let tpic_flush_path st cntr =
   let pixpath =
     Array.map (fun (x, y) -> (tpic_x st x, tpic_y st y)) path in
   (* If shading requested and path is closed, fill *)
-  if st.tpic_shading > 0.0 &&
+  if st.tpic_shading >= 0.0 &&
      Array.length path >= 2 &&
-     path.(0) = path.(Array.length path - 1)
-  then
-    if !visible then Dev.fill_path pixpath ~shade:st.tpic_shading;
+     path.(0) = path.(Array.length path - 1) &&
+     !visible then Dev.fill_path pixpath ~shade:st.tpic_shading;
   (* If requested, draw outline of path *)
-  if cntr then
-    if !visible then Dev.draw_path pixpath ~pensize:(tpic_pen st);
+  if cntr && !visible then Dev.draw_path pixpath ~pensize:(tpic_pen st);
   (* Reset path *)
   st.tpic_path <- [];
   st.tpic_shading <- 0.0;;
 
-let dist (x0,y0) (x1,y1) = abs(x0 - x1) + abs(y0 - y1);;
+let dist (x0, y0) (x1, y1) = abs (x0 - x1) + abs (y0 - y1);;
 
 let tpic_spline_path st =
   (* Code shamelessly stolen from xdvi *)
@@ -983,9 +981,9 @@ let tpic_spline_path st =
     Array.concat [[|path.(0)|]; path; [|path.(Array.length path - 1)|]] in
   let r = ref [] in
   for i = 0 to Array.length p - 3 do
-    let steps = (dist p.(i) p.(i+1) + dist p.(i+1) p.(i+2)) / 4 in
-    let (x2, y2) = p.(i+2)
-    and (x1, y1) = p.(i+1)
+    let steps = (dist p.(i) p.(i + 1) + dist p.(i + 1) p.(i + 2)) / 4 in
+    let (x2, y2) = p.(i + 2)
+    and (x1, y1) = p.(i + 1)
     and (x0, y0) = p.(i) in
     for j = 0 to steps - 1 do
       let w = (j * 1000 + 500) / steps in
@@ -1014,13 +1012,11 @@ let tpic_arc st x y rx ry s e cntr =
   and s = int_of_float (s *. rad_to_deg)
   and e = int_of_float (e *. rad_to_deg) in
   (* If shading requested, fill the arc *)
-  if st.tpic_shading > 0.0 then
-    if !visible then
-      Dev.fill_arc ~x ~y ~rx ~ry ~start:s ~stop:e ~shade:st.tpic_shading;
+  if st.tpic_shading >= 0.0 && !visible then
+    Dev.fill_arc ~x ~y ~rx ~ry ~start:s ~stop:e ~shade:st.tpic_shading;
   (* If requested, draw outline of arc *)
-  if cntr then
-    if !visible then
-      Dev.draw_arc ~x ~y ~rx ~ry ~start:s ~stop:e ~pensize:(tpic_pen st);
+  if cntr && !visible then
+    Dev.draw_arc ~x ~y ~rx ~ry ~start:s ~stop:e ~pensize:(tpic_pen st);
   (* Reset shading *)
   st.tpic_shading <- 0.0;;
 
@@ -1057,8 +1053,9 @@ let tpic_specials st s =
       st.tpic_shading <- 0.0
   | "bk" :: _ ->
       st.tpic_shading <- 1.0
-  | _ ->
-      ();;
+  | s :: _ ->
+      Misc.warning ("Unknown pic command: " ^ s)
+  | _ -> ();;
 (* End of TPIC hacks *)
 
 let moveto_special st b s =
