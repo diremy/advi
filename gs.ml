@@ -81,8 +81,8 @@ exception Error;;
 exception Terminated;;
 exception Retry;;
 
-let x11alpha = "x11alpha";;
-let x11 = "x11";;
+let x11alpha_device = [| "-dNOPLATFONTS"; "-sDEVICE=x11alpha" |];;
+let x11_device = [| "-sDEVICE=x11" |];;
 type graphical =
     { display : int;
       window  : int32 (* GraphicsY11.window_id *) ; (* Window identifier. *)
@@ -130,14 +130,17 @@ class gs () =
   let dpi = 72 (* unite utilise par dvi? *) in
   let command = Config.gs_path in
   let command_args =
+    Array.concat [
     [|
       command; 
       "-dNOPLATFONTS"; "-dNOPAUSE";
-      "-sDEVICE=" ^ (if !antialias then x11alpha else x11);
+    |];
+    (if !antialias then x11alpha_device else x11_device);
+    [|
       "-q";
       "-dSAFER";
       "-";
-    |] in
+    |]] in
 
   let _ = debugs command;
   Array.iter debugs command_args in
@@ -394,6 +397,7 @@ class gv =
       xorig <- x;
       yorig <- (gs # gr).height - y;
       if !pspage > 0 then showps "showpage";
+      if !pspage > 0 then gs # line "erasepage";
       incr pspage;
       showps (Printf.sprintf "%%%%Page: %d %d\n" !pspage !pspage);
       gs # line "\n%% Newpage\n";
