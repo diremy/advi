@@ -4,7 +4,7 @@ Active dvi is a DVI previewer and presenter written in Objective Caml
 Active dvi is largely based on Mldvi written by Alexandre Miquel
 (http://pauillac.inria.fr/~miquel/).
 
-Version: 0.5
+Version: 1.0
 available at http://pauillac.inria.fr/advi/
 
 CURRENTLY SUPPORTED FEATURES:
@@ -24,6 +24,8 @@ CURRENTLY SUPPORTED FEATURES:
 + The file is reloading on signal SIGUSR1
 + Hyperlinks
 + Active areas (execute an action when the mouse is over)
++ Background colors and images
++ Alpha blending for images
 
 INVOCATION
 ==========
@@ -190,6 +192,7 @@ Alexandre Miquel  <Alexandre.Miquel@inria.fr>
 Jun Furuse <Jun.Furuse@inria.fr>
 Xavier Leroy <Xavier.Leroy@inria.fr> gpic specials
 Didier Remy <Didier.Remy@inria.fr> inlined Postcript, hyperlinks
+Pierre Weis <Pierre.Weis@inria.fr>
+Roberto Di Cosmo <dicosmo@pauillac.inria.fr>
 Didier Le Botlan <Didier.Le_Botlan@inria.fr>
 Alan Schmitt <Alan.Schmitt@inria.fr>
-Roberto Di Cosmo <dicosmo@pauillac.inria.fr>

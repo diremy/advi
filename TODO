@@ -3,7 +3,7 @@ BEFORE RELEASE:
 
  * Fixer les KNOWN BUGS
 
- * complèter manual.tex (la plupart des morceaux manquants existent mais
+ * compléter manual.tex (la plupart des morceaux manquants existent mais
    sont dispersés)
  ==> en cours ...
 
@@ -54,7 +54,7 @@ variable accordingly.
 
 CLEANING: 
 
-* Parsing of specials should probably be shared (it is dupplicated). 
+* Parsing of specials should probably be shared (it is duplicated). 
   The abstract syntax tree should provided a data-type for specials
 
 WISH LIST: 
@@ -92,6 +92,8 @@ WISH LIST:
 
   * exporter \ifadvi et \Ifadvi
   ==> done ?
+
+- ajouter u et i comme j et k mais une ligne à la fois (scrolling).
 
 - We need a .advirc file to setup options at launch time, and store
 user's preferences for key bindings.
