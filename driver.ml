@@ -525,10 +525,10 @@ let psfile_special st s =
     (* bbox *)
     let llx, lly, urx, ury as bbox =
       try
-        let llx = int_or_float_of_string (List.assoc "llx" records)
-        and lly = int_or_float_of_string (List.assoc "lly" records)
-        and urx = int_or_float_of_string (List.assoc "urx" records)
-        and ury = int_or_float_of_string (List.assoc "ury" records) in
+        let llx = int_of_float_of_string (List.assoc "llx" records)
+        and lly = int_of_float_of_string (List.assoc "lly" records)
+        and urx = int_of_float_of_string (List.assoc "urx" records)
+        and ury = int_of_float_of_string (List.assoc "ury" records) in
         Misc.debug_endline
           (Printf.sprintf "BBOX=%d %d %d %d" llx lly urx ury);
         llx, lly, urx, ury

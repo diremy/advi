@@ -37,7 +37,7 @@ exception Match;;
 val get_suffix : string -> file_name -> string;;
 val split_string : string -> (char -> bool) -> int -> string list;;
 val zap_to_char : char -> string -> string;;
-val int_or_float_of_string : string -> int;;
+val int_of_float_of_string : string -> int;;
 val is_digit : char -> bool;;
 val string_substitute_var : (char -> string) -> string -> string;;
  (** [string_substitute_var env s] Substitute any [@] one character long

@@ -159,7 +159,7 @@ let zap_to_char c s =
   let i0 = !i + 1 in
   if i0 >= len then "" else String.sub s i0 (len - i0);;
 
-let int_or_float_of_string s =
+let int_of_float_of_string s =
   try int_of_string s with _ -> truncate (float_of_string s);;
 
 let is_digit c = c >= '0' && c <= '9';;
