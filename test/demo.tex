@@ -6,11 +6,11 @@
 
 \usepackage{pst-all}
 
-\usepackage {advi}
-\usepackage {advi-annot}
 
 \usepackage{hyperref}
 
+\usepackage {advi}
+\usepackage {advi-annot}
 %% \usepackage[annot]{advi} 
 %% must occur after packages using PStricks macros 
 %% (it redefines some of them) 
@@ -36,7 +36,7 @@
 \def\advifooter{\vbox to 0em{\vbox to \vsize {\vfill
 Press: \keymenu{n}ext page \keymenu{p}revious page
 \keymenu{\textvisiblespace} next pause%
-\hfill{\adviembed[name=advianim,mode=sticky]{1.56cm}{1.824cm}{animate -geometry !g! -window !p advilogo.anim.gif}}
+\hfill{\adviembed[sticky=advianim]{1.56cm}{1.824cm}{animate -geometry !g! -window !p advilogo.anim.gif}}
 } \vss}}
 
 \def\adviheader{\noindent
@@ -55,9 +55,19 @@ Press: \keymenu{n}ext page \keymenu{p}revious page
 %  \setlength\textheight{460\p@}
 
 \epswhite
+\def \docdef #1{{\tt \string #1}}
+\def \docid #1{$\langle \hbox {\rm\em #1}\rangle$}
+\def \doctt #1{{\tt #1}}
+\def \docarg #1{{\tt \{\docid {#1}\}}}
+\def \docopt #1{{\tt [\docid {#1}]}}
+\def \docpar #1{{\tt (\docid {#1})}}
+\def \empty {}
+\newcommand \dockey[3][]{{\tt #2\def \test {#3}\ifx \test \empty \else
+  =\docid{#3}\fi} \def \test {#1}\ifx \test \empty \else
+  \quad (default value is {\tt #1})\fi}
 
 \begin{document}
- 
+
 \newpage
 
 \subsection* {Active dvi has two components}
@@ -84,6 +94,7 @@ Press: \keymenu{n}ext page \keymenu{p}revious page
 \begin{itemize}
 \item A set of macros to animate your presentation 
 (by Jun Furuse and Didier R{\'{e}}my).
+ 
 \item A simple way to launch arbitrary demonstration and/or animation
 programs from inside your slides
 (by Jun Furuse and Pierre Weis).
@@ -127,13 +138,14 @@ programs from inside your slides
 
 \noindent
 For instance, to display in red the text associated to the tag
-{\tt this} above, insert the command
-\verb+\textcolor{red}{\play{this}}+\\
+{\tt this} above, you can either pass a color option to the play command:
+\verb+\play[color=red]{this}}+\\
 \record[play]{that}{\goon}\pause%
 \textcolor{c1}{\play{this}\play{that}}\pause{\play{this}\play{that}}\pause
 
 \noindent
-To display the same text in green, type\\
+or place the command in the appropriate color environment:
+to display the same text in green, type\\
 \verb+\textcolor{green}{\play{this}}+\\
 \record[play]{goon}{\goon}\pause\textcolor{green}{\play{this}\play{goon}\pause}
 
@@ -222,12 +234,12 @@ presentation using:\\
   \item Any CamlTk application using\\
    \verb+\adviembed{w}{h}{prog -geometry !g -use !p}+\\
    For instance (using wish)\\
-   \verb|\adviembed[mode=persistent]{5cm}{1cm}{wish ./watch -geometry !g -use !p}|\\
-   \adviembed[mode=persistent]{5cm}{0.71cm}{wish ./watch -geometry !g -use !p}
+   \verb|\adviembed[persistent]{5cm}{1cm}{wish ./watch -geometry !g -use !p}|\\
+   \adviembed[persistent]{5cm}{0.71cm}{wish ./watch -geometry !g -use !p}
 \pause
   \item Possibly interactive ! (using CamlTk)\\
-   \verb|\adviembed[mode=persistent]{6.5cm}{9.5cm}{./taquin -geometry !g -use !p dojoji.gif}|\\
-  \adviembed[mode=persistent]{7.5cm}{11cm}{./taquin -geometry !g -use !p dojoji.gif}
+   \verb|\adviembed[persistent-taui]{6.5cm}{9.5cm}{./taquin -geometry !g -use !p dojoji.gif}|\\
+  \adviembed[persistent=taquin]{7.5cm}{11cm}{./taquin -geometry !g -use !p dojoji.gif}
 
 \end{itemize}
 
@@ -261,6 +273,53 @@ the presentation.
 \end{itemize}
 
 \adviembed[name=mpg123]{1cm}{1cm}{mpg123 -q music.mp3}
+
+\newpage
+
+\subsection* {Embedded applications (list of commands)}
+
+The commands are 
+
+\medskip\noindent
+\docdef \adviembed\docopt{key=value 
+list}\docarg{width}\docarg{height}\docarg{command} 
+
+\begin{quote}
+where \docid{key=value list} is a list of bindings of the following kind:
+
+\dockey{name}{name}
+\begin{quote}
+Allows to refer to the embedded application as \docid{name}. 
+Annonymous applications have actually the default name \doctt{anonymous}.
+\end{quote}
+
+\dockey{ephemeral}{name}
+
+\begin{quote}
+This is the default case: the embedded applicattion is kills when the page
+is turned.
+\end{quote}
+
+\dockey{sticky}{name}
+
+\begin{quote}
+The application keep running in the background, but will only be visible in
+the current page.
+\end{quote}
+
+\dockey{persistent}{name}
+\begin{quote}
+The application keep running in the background, but will only be visible in
+the current page.
+\end{quote}
+
+\end{quote}
+
+\medskip\noindent
+\docdef \advikillembed \docarg{name}
+\begin{quote}
+Kill all embeded applications named \docid{name}
+\end{quote}
 
 \newpage
 
@@ -305,6 +364,15 @@ This is sufficient for the proper documentclass
 (see \hyperlink {overlays}{below}).
 
 \end {itemize}
+
+
+
+\subsection*{Known bug with PS tricks}
+
+With some versions of \verb"gv" and/or \verb"X11", the PS tricks are not
+correctly synchronized. Some drawings may hide text, or conversely.
+
+
 % Examples: 
 
 % \Rnode {A}{A} \qquad \Rnode {B}{B}
@@ -446,14 +514,8 @@ For instance, the left game was typeset as
 \end{verbatim}
 
 \bigskip
-
-\subsection*{\annot{Annotations}(2,1.5){Annotations  are great!}}
-
-\noindent
-\annot{Active anchors}(1,1.5){\begin{minipage}{9em}\centering
-Active anchors are even greater!\end{minipage}}
-can also be used to annotate \annot{text}{Or math formulas} as here, 
-\annot{for instance}(-1.5,1){for example}. 
+Of course, the effect of active anchors can also be 
+\advi{C}{delocalized}.
 
 \SpecialCoor
 \record {C}
@@ -461,17 +523,93 @@ can also be used to annotate \annot{text}{Or math formulas} as here,
          {<->}{A}{B}%\Aput{Fire!}
 }
 
-Of course, the effect of active anchors can also be 
-\advi{C}{delocalized}.
+\subsection*{Known bug}
+
+On plateforms for which PS tricks does not synchronizes correctly,
+calling PS tricks by active anchors may result in part of the action 
+to erroneously remain on screen when leaving the anchor. 
+
+
+\newpage
+
+\subsection*{\annot{Active Annotations}(2,1.5){Annotations \\are great!}}
+
+\noindent
+\annot[p=9em]{Active anchors}(1,1.5)
+{\centering Active anchors are even greater!}
+can also be used to annotate \annot[bg=green]{text}{Or math formulas} as
+here, \annot{for instance}[linecolor=red](-1.5,1){for example}. 
+
+\medskip
+
+\noindent
+These annotations have been typeset respectively as:
+\begin{small}
+\begin{verbatim}
+\annot{Active Annotations}(2,1.5){Annotations \\are great!}
+
+\annot[p=9em]{Active anchors}(1,1.5)
+   {\centering Active anchors are even greater!}
+
+\annot[bg=green]{text}{Or math formulas}
+
+\annot{for instance}[linecolor=red](-1.5,1){for example}
+\end{verbatim}
+\end{small}
+
+\newpage
+
+\subsection*{Active Annotations (manual)}
+
+To use annotations, you must load the additional package
+\begin{verbatim}
+\usepackage{advi-annot}
+\end{verbatim}
+This defines the following command:
+
+\medskip\noindent
+\docdef \adviannot \docopt{key=value list}\docarg{anchor}%
+    \docopt{ps options}\docpar {pos}\docarg{text}
+\begin{quote}
+The \docid{key=value list} is a list of bindings of the following kind:
+
+\dockey[yellow]{bg}{color}
+\begin{quote}
+The background color for annotations. 
+\end{quote}
+
+\dockey[c]{col}{colspec}
+\begin{quote}
+Where \docid{colspec} is a column specification for the tabular
+environment. Moreover, the following abbreviations are recognized:
+
+\smallskip
+\begin{tabular}{|l|l|}
+\hline
+{\em key} & expands to \\
+\hline
+\dockey{c}{} &  \doctt{col=c}\\
+\dockey{l}{} &  \doctt{col=l}\\
+\dockey{r}{} &  \doctt{col=r}\\
+\dockey{p}{dim} &  \doctt{col=p\docarg{dim}}\\
+\cline{1-2}
+\end{tabular}
+\end{quote}
+
+\docid{pos} is the optional relative position of the annotation 
+defaults to $1,1$ (it is passed to the command \docdef\rput).
+
+\docid{ps options} are pased to  the command \docdef\psset). 
+\end{quote}
+Parameters (color and tabular column specification) can also 
+be set globally using the command:
+
+\medskip \noindent
+\docdef \setkeys\doctt{\{adviannot\}}\docarg{key=value list}
+
 
 %Annotation location can also be invisible \advi{C}{\tt{ }}instead of visible.
 
-\subsection*{Known bug}
-
-Sometimes, annotations (or part of annotations) may erroneously remain on
-screen when leaving the active anchor.
-
-(The page may be redrawn with \verb'r').
 
 \newpage
 
