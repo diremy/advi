@@ -518,39 +518,6 @@
 %%% where x in {l, c, r} encodes justification
 %%% and l1, ..., ln are lines to be superposed.
 
-\newdimen \super@dim
-\newbox \super@box
-
-\def \super@left {\egroup \super@dim \wd0
-   \ifnum \super@dim>\wd\super@box \wd\super@box \super@dim\fi 
-   \setbox\super@box \hbox {\box0 \hskip -\super@dim \box\super@box}}
-\def \super@center {\egroup \super@dim 0.5\wd0
-   \ifnum \super@dim>\wd\super@box \wd\super@box \super@dim\fi 
-   \setbox\super@box \hbox
-       {\hskip -\super@dim \box0 \hskip -\super@dim \box\super@box}}
-\def \super@right {\egroup \super@dim -\wd0
-   \ifnum \super@dim<\wd\super@box \wd\super@box \super@dim\fi 
-   \setbox\super@box \hbox {\hskip \super@dim \box0 \box\super@box}}
-\def \super@start {\setbox0 \hbox \bgroup}
-\def \super@pose {\super@end \super@start}
-
-\newcommand {\superpose}[2][l]
-  {\bgroup
-   \ifx #1l\let \super@end \super@left\else 
-   \ifx #1r\let \super@end \super@right\else 
-      \let \super@end \super@center\fi\fi
-   \setbox \super@box \hbox{}\let \\\super@pose 
-   \super@start #2\super@end
-   \ifx #1l\relax\else
-   \ifx #1r
-      \super@dim -\wd\super@box
-      \setbox\super@box
-         \hbox {\hskip \super@dim \box \super@box \hskip \super@dim}\else
-       \super@dim \wd\super@box
-      \setbox\super@box
-         \hbox {\hskip \super@dim \box \super@box}\fi \fi
-    \box \super@box \egroup}
-
 % \long \def \Superpose #1{\superpose{#1}}
 % \long \def \Onlypause [#1]#2{\onlyPause[#1]{#2}}
 % \long \def \cbox #1{\vbox {$\vcenter {\vbox {#1}}$}}

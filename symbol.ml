@@ -521,13 +521,14 @@ let lines x y =
         if valid region i then
           let h = region.history.(i) in
           match h.symbol with
-          | Line(n,_) when n >= 0 -> n
+          | Line(n,f) when n >= 0 -> n, f
           | _ ->  find_line move (move i)
-        else -1 in
+        else -1, None in
       let space_ref = region.history.(region.first) in
-      let l1 = find_line succ (succ i1) in
-      let l2 = find_line pred (pred i2) in
-      Some (space_ref, l1, l2, w1, w2) 
+      let l1, f1 = find_line succ (succ i1) in
+      let l2, f2 = find_line pred (pred i2) in
+      let f = match f1 with Some _ -> f1 | _ -> f2 in
+      Some (space_ref, l1, l2, w1, w2, f) 
         ;;
 
 let word x y =

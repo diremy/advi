@@ -16,12 +16,14 @@ all:: $(DVIFILES)
 	$(LATEX) $*
 
 .tex.ps:
-	$(LATEX) '\PassOptionsToPackage{ignore}{advi}\input' $*
+	$(LATEX) '\def\argv{driver=dvips}\input' $*
 	dvips -o $@ $*.dvi
+	rm $*.dvi
 
 .tex.pdf:
-	$(LATEX) '\def\argv{advi=ignore,hyperref=dvipdfm,xprosper=dvipdfm}\input' $*
+	$(LATEX) '\def\argv{driver=dvipdfm}\input' $*
 	dvipdfm -o $@ $*.dvi
+	rm $*.dvi
 
 clean:
 	rm -f $(FILES:%.tex=%.{aux,log,dvi,ps,pdf})

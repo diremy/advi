@@ -52,7 +52,7 @@ Maybe you mean \@currenvir ing}}
 
 \def \advi@ifadvi {\ifadvi@ignore
   \expandafter \@secondoftwo \else \expandafter \@firstoftwo \fi}
-\advi@export \advignore \advi@ignoretrue
+\advi@export \adviignore \advi@ignoretrue
 \advi@export \ifadvi \advi@ifadvi
 
 %%% record and play
@@ -69,7 +69,7 @@ Maybe you mean \@currenvir ing}}
 \def \advi@recordenv {advirecord}
 
 \newenvironment{advi@recording}[2][]%
-  {\leavevmode\begingroup
+  {\begingroup
      \let \advi@do \advi@start \setkeys{advi@record}{#1}%
      \advi@special {proc=#2 record=\advi@do}%
    \endgroup}

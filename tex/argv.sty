@@ -26,22 +26,28 @@
 
 \def \defargv {\define@key{argv}}
 \def \runargv
-  {\@ifundefined{argv}{}{\setkeys{argv}{\argv}}}
+  {\@ifundefined{argv}{}{\def \do {\setkeys{argv}}\expandafter \do
+  \expandafter {\argv}}}
 
 %% Some predefine keys
 
 \defargv {use}{\AtEndOfPackage{\RequirePackage{#1}}}
 \defargv {driver}{\rundriver {#1}}
-\def \rundriver #1{\@nameuse {argv@#1@}}
+\def \rundriver #1{\@ifundefined {argv@#1@}
+   {\PackageWarning {Argv}{Undefined driver #1}{}}
+   {\@nameuse {argv@#1@}}}
 \def \do #1{
   \expandafter \def \csname argv@#1@\endcsname {%
+    \PassOptionsToPackage{ignore}{advi}%
     \PassOptionsToPackage{#1}{hyperref}%
     \PassOptionsToPackage{#1}{graphicx}%
   }}
 \do {dvipdfm}
 \do {dvips}
-\do {ps2pdf}
 \do {pdftex}
+\expandafter \def \csname argv@ps2pdf@\endcsname 
+  {\PassOptionsToPackage{ignore}{advi}%
+   \PassOptionsToPackage{ps2pdf}{hyperref}}
 
 \let \do \relax
 

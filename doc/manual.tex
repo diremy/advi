@@ -28,7 +28,22 @@ Put a Summary of Active DVI.
 
 \section {Installation}
 
-\section {Calling advi}
+\section {Using the {\ActiveDVI} previewer}
+
+\subsection {Command line options}
+
+See the command help
+\begin{verbatim}
+advi -help
+\end{verbatim}
+
+\subsection {Cut and paste}
+
+\subsection {Hyperrefs}
+
+\subsection {Moving around}
+
+See the key bindings in the appendix.
 
 \section {The {\tt advi} package}
 
@@ -349,6 +364,26 @@ Labels over arrows \verb"\Aput", \verb"Bput", etc.
 
 
 \section {Auxiliary packages}
+
+\subsection*{The superpose package}
+
+This package allows to easily supperpose horizontal material, creating 
+the smallest horizontal box to fix all of supperpositions.
+\begin{verbatim}
+\usepackage{superpose}
+\end{verbatim}
+The package  defines a single environment:
+
+\medskip\noindent
+\docdef\begin\doctt{\{superpose\}}\docopt{alignment}\docid {list}%
+\docdef\end\doctt{\{superpose\}}
+\begin{quote}
+The \docid{alignment} can one the letters \doctt c (default value), \doctt
+l, or \doctt r.
+
+Items of the list must are sepated by \verb"\\" as in tabular environments.
+Each item should be horizontal material.
+\end{quote}
 
 \subsection*{The bubble package}
 

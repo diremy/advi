@@ -657,17 +657,17 @@ let proc_special st s =
     | "end" ->
         if !playing = 0 then
           begin match !current_recording_proc with
-            | [] ->
-                prerr_endline
-                  (Printf.sprintf "'xxx %s' not recording" s)
-            | recording :: rest ->
-                let procname = recording.tag in
-                current_recording_proc := rest;
-                let u = recording.unit in
-                Hashtbl.add procs procname u;
-                match u.escaped_commands with
-                | h::rest -> u.escaped_commands <- List.rev rest
-                | [] -> assert false
+          | [] ->
+              prerr_endline
+                (Printf.sprintf "'xxx %s' not recording" s)
+          | recording :: rest ->
+              let procname = recording.tag in
+              current_recording_proc := rest;
+              let u = recording.unit in
+              Hashtbl.add procs procname u;
+              match u.escaped_commands with
+              | h::rest -> u.escaped_commands <- List.rev rest
+              | [] -> assert false
           end;
         begin match !hidden_stack with
           h :: rest ->
@@ -683,27 +683,30 @@ let proc_special st s =
         with Not_found -> raise (Failure "proc: invalid special") in
       try
         ignore (List.assoc "play" records);
-        let us = Hashtbl.find_all procs procname in
-        let escaped_cur_font = st.cur_font
-        and escaped_cur_mtable = st.cur_mtable
-        and escaped_cur_gtable = st.cur_gtable in
-        let escaped_stack = push st; st.stack in
-        incr playing;
-        List.iter
-          (fun u ->
-            set_register_set st u.escaped_register;
-            st.stack <- u.escaped_stack;
-            st.cur_mtable <- u.escaped_cur_mtable;
-            st.cur_gtable <- u.escaped_cur_gtable;
-            st.cur_font <- u.escaped_cur_font;
-            List.iter (fun com -> !forward_eval_command st com)
-              u.escaped_commands
-          ) us;
-        decr playing;
-        st.stack <- escaped_stack; pop st;
-        st.cur_mtable <- escaped_cur_mtable;
-        st.cur_gtable <- escaped_cur_gtable;
-        st.cur_font <- escaped_cur_font;
+        if not (is_recording()) then
+          begin
+            let us = Hashtbl.find_all procs procname in
+            let escaped_cur_font = st.cur_font
+            and escaped_cur_mtable = st.cur_mtable
+            and escaped_cur_gtable = st.cur_gtable in
+            let escaped_stack = push st; st.stack in
+            incr playing;
+            List.iter
+              (fun u ->
+                set_register_set st u.escaped_register;
+                st.stack <- u.escaped_stack;
+                st.cur_mtable <- u.escaped_cur_mtable;
+                st.cur_gtable <- u.escaped_cur_gtable;
+                st.cur_font <- u.escaped_cur_font;
+                List.iter (fun com -> !forward_eval_command st com)
+                  u.escaped_commands
+              ) us;
+            decr playing;
+            st.stack <- escaped_stack; pop st;
+            st.cur_mtable <- escaped_cur_mtable;
+            st.cur_gtable <- escaped_cur_gtable;
+            st.cur_font <- escaped_cur_font;
+          end
       with
       | Not_found ->
           prerr_endline

@@ -62,7 +62,8 @@ val iter_regions :
     (element -> unit) -> (element -> unit) -> region -> region -> unit 
 val apply : (glyph -> int -> int -> int -> unit) -> element -> unit
 
-val lines : int -> int -> (element * int * int * string * string) option
+val lines : int -> int -> 
+  (element * int * int * string * string * string option) option
 val word : int -> int -> (region * string) option
 val region_to_ascii : region -> string
 end

@@ -1,5 +1,6 @@
 \documentclass[12pt]{article}
 
+\usepackage{graphicx}
 \usepackage {pstcol,color,pst-node}
 \usepackage{advi}
 \usepackage{advi-annot}
@@ -19,7 +20,7 @@
 %
 \DeclareGraphicsExtensions{.jpg,.eps,.tif,.tiff}
 \DeclareGraphicsRule{.jpg}{eps}{.bb}{`jpeg2ps #1} % compact conversion!
-\DeclareGraphicsRule{.tif,.tiff}{eps}{.bb}{`tiffps #1} % from camlimages examples
+\DeclareGraphicsRule{.tif,.tiff}{eps}{.bb}{`tiff2ps #1} % from camlimages examples
 
 
 \begin{document}
