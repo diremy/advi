@@ -18,34 +18,24 @@
 (* $Id$ *)
 
 val all : unit -> (string * Arg.spec * string) list;;
+(** Return the list of options defined by one of the option creation
+   functions of this module. *)
+
+
 val add : string -> Arg.spec -> string -> unit;;
 (** [add opt spec man] add the option [opt] to the command line
    with specification [spec] and man info [man]. *)
 
-(*val pretty : ((string * Arg.spec * string) list as 'a) -> 'a;;*)
-(** To pretty print options, use '\t' in the info string, the part
-   of the info message starting after tabulation will be aligned. 
-   Typically, the option first part of the message is the name of
-   the argument to the option. If no '\t' is present, the message
-   will not be aligned. *)
-
-val debug : string -> string -> (string -> bool);;
-(** [make_debug option message] create an option flag that is false by
-   default and that can be set with [option] with info [message]; 
-   then it returns a function to that prints its argument on stderr, 
-   but only when the [option] is set. *) 
+val debug : string -> string -> string -> unit;;
+(** [debug opt man] add the option flag [opt] to the command line
+   with associated option [opt] and man info [man].
+   The flag is false by default and can be set with [opt].
+   [debug] returns a function that prints its argument on [stderr] 
+   when the flag is set. *) 
 
 val flag : bool -> string -> string -> bool ref;;
-(** [option_flag init opt mes] creates a boolean flag with [init] 
-   as initial value declares the optional argument [opt] with info
-   message [mes] that sets or unsets the flag, according to the value 
-   of [init]. *)
-
-val pson : bool ref;;
-(** [pson] when set means do call gs for drawing inline Postscript. *)
-
-val dops : bool ref;;
-(** Temporary value, reset to [pson] when reloading the file. *)
-
-val global_display_mode : bool ref;;
-(** Tells whether display must always happen in foreground. *)
+(** [flag init opt man] add the option flag [opt] to the command line
+   with associated option [opt] and man info [man].
+   The flag has initial value [init] and the option sets the flag
+   (resp. clears the flag) if the initial value is [false]
+   (resp. is [true]). *)
