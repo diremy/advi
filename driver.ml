@@ -26,7 +26,7 @@ let toggle_active () = active := not !active
 let with_active b f x =
   let restore_delays() = if !active then Transimpl.sleep := (fun _ -> false) in
   let a = !active in
-  try let v = (active:=b; f x) in active := a; restore_delays (); v 
+  try let v = (active:=b; f x) in active := a; restore_delays (); v
   with z -> active := a; restore_delays (); raise z;;
 
 (* number of steps before checking for user interruptions *)
@@ -148,7 +148,7 @@ type reg_set = {
     reg_y : int;
     reg_z : int
   };;
-     
+
 type state = {
     cdvi : cooked_dvi;
     sdpi : int;
@@ -399,8 +399,7 @@ let parse_float s =
  with _ -> failwith ("advi: cannot read a floating number in \"" ^ s ^ "\"");;
 
 let option_parse_float s r =
-  try Some(parse_float (List.assoc s r))
-  with _ -> None;;
+  try Some (parse_float (List.assoc s r)) with _ -> None;;
 
 let alpha_special st s =
   match split_string s 0 with
@@ -804,8 +803,7 @@ let forward_eval_command = ref (fun _ _ -> ());;
 let playing = ref 0;;
 
 (* Setting the forward function Grdev.get_playing. *)
-let play = Grdev.get_playing in
-play := (fun () -> !playing);;
+let play = Grdev.get_playing in play := (fun () -> !playing);;
 
 let visible_stack = ref [];;
 
@@ -1051,7 +1049,7 @@ let tpic_spline_path st =
     done
   done;
   if !visible then
-      Dev.draw_path (Array.of_list (List.rev !r)) ~pensize:(tpic_pen st);
+    Dev.draw_path (Array.of_list (List.rev !r)) ~pensize:(tpic_pen st);
   st.tpic_path <- [];
   st.tpic_shading <- 0.0;;
 
@@ -1262,13 +1260,14 @@ let special st s =
       and y = st.y_origin + int_of_float (st.conv *. float st.v) in
       if !visible then
         let draw =
-	  if st.epsbygs then
-            Dev.draw_ps file bbox 
-	  else begin
+          if st.epsbygs then
+            Dev.draw_ps file bbox
+          else begin
             Dev.draw_img (zap_to_char ' ' file)
-	      Drawimage.ScaleAuto false 1.0 st.blend (Some bbox) st.epswithantialiasing
-	  end
-	in
+              Drawimage.ScaleAuto false 1.0 st.blend (Some bbox)
+              st.epswithantialiasing
+          end
+        in
         draw size x y
     with
     | Failure s -> Misc.warning s
@@ -1280,7 +1279,7 @@ let special st s =
     if has_prefix "advi: epstransparent" s then
       epstransparent_special st s else
     if has_prefix "advi: epsbygs" s then epsbygs_special st s else
-    if has_prefix "advi: epswithantialiasing" s then 
+    if has_prefix "advi: epswithantialiasing" s then
       epswithantialiasing_special st s else
     if has_prefix "advi: pause" s then raise Pause else
     if has_prefix "advi: proc" s then proc_special st s else
@@ -1363,7 +1362,7 @@ let find_prologues l =
     let table = List.combine h h' in
     try
       List.map
-	(function b, s as p -> if b then p else b, List.assoc s table) l
+        (function b, s as p -> if b then p else b, List.assoc s table) l
     with
     | Not_found -> assert false
   with
@@ -1451,8 +1450,7 @@ let scan_special_pages cdvi lastpage =
   for n = 0 to min lastpage (Array.length cdvi.base_dvi.Dvi.pages) - 1 do
     ignore (scan_special_page otherwise cdvi (headers, xrefs) n);
   done;
-  if !headers <> [] then
-    Dev.add_headers (find_prologues !headers);;
+  if !headers <> [] then Dev.add_headers (find_prologues !headers);;
 
 let unfreeze_glyphs cdvi dpi =
   let mag = float cdvi.base_dvi.Dvi.preamble.Dvicommands.pre_mag /. 1000.0 in

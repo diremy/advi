@@ -28,57 +28,58 @@ module Make
        end) =
   struct
 
-type glyph = G.t
-type fontname = string
-type fontratio = float
+type glyph = G.t;;
+type fontname = string;;
+type fontratio = float;;
 type g =
     { fontname : string;
       fontratio : float;
       glyph : glyph;
-    }
+    };;
 type symbol =
     Glyph of g
   | Space of int * int
   | Rule of int * int
-  | Line of int * string option
+  | Line of int * string option;;
 type element =
     { color   : int ;
       locx    : int ;
       locy    : int ;
       code    : int ;
-      symbol : symbol }
-type set = element list
+      symbol : symbol };;
+type set = element list;;
 
 let fontname s =
   match s.symbol with
   | Glyph g -> g.fontname
   | Space (w,h) -> "space"
   | Rule (w,h) -> "rule"
-  | Line (w,h) -> "line"
-let space s = match s.symbol with Space _ -> true | _ -> false
+  | Line (w,h) -> "line";;
+
+let space s = match s.symbol with Space _ -> true | _ -> false;;
 
 let voffset s =
   match s.symbol with
   | Glyph g -> G.voffset g.glyph
   | Space (w,h) -> h
-  | _ -> 0
+  | _ -> 0;;
 
 let hoffset s =
   match s.symbol with
   | Glyph g -> G.hoffset g.glyph
-  | _ -> 0
+  | _ -> 0;;
 
 let height s =
   match s.symbol with
   | Glyph g -> G.height g.glyph
   | Space (w,h) | Rule (w,h) -> h
-  | _ -> 0
+  | _ -> 0;;
 
 let width s =
   match s.symbol with
   | Glyph g -> G.width g.glyph
   | Space (w,h) | Rule (w,h) -> w
-  | _ -> 0
+  | _ -> 0;;
 
 (* Symbols information. *)
 
@@ -87,22 +88,21 @@ let dummy_symbol =
     locx  =  0 ;
     locy  =  0 ;
     code   = 0 ;
-    symbol = Line(-1, None) }
+    symbol = Line(-1, None) };;
 
 let set : set ref = ref [];;
 let clear() = set := [];;
-let give() = !set
+let give() = !set;;
 
 type line =
     { min : int ;
       max : int ;
-      content : element list }
+      content : element list };;
 
 (* Iterates ff over the set. *)
-let iter ff set = List.iter ff set
+let iter ff set = List.iter ff set;;
 
 (* Add an element. *)
-
 let add color x y code s =
   let symbol =
     { color = color ;
@@ -111,21 +111,24 @@ let add color x y code s =
       code = code ;
       symbol = s;
     } in
-  set := symbol :: !set
+  set := symbol :: !set;;
 
 (* Says if the character code is probably the ascii code. *)
 let is_pure code =
   match Char.chr code with
   | 'A'..'Z' | 'a'..'z' | '0'..'9' -> true
   | '!'..'~' -> true (* "false" helps for debugging. *)
-  | _ -> false
+  | _ -> false;;
 
-(* Tells if s1 and s2, known to be on the same line, overlaps (1), goes beyond (2), or not (0). *)
+(* Tells if s1 and s2, known to be on the same line,
+   overlap (1), go beyond (2), or not (0). *)
 let overlap s1 s2 =
- (* Threshold in percent is used to tells when a space goes beyond a symbol, or just overlaps it. *)
- (* That is : if the space goes 50% further than the symbol, there is a space, otherwise there is not. *)
+ (* Threshold in percent is used to tell when a space goes beyond a symbol,
+    or just overlaps it. *)
+ (* That is : if the space goes 50% further than the symbol,
+    there is a space, otherwise there is not. *)
   let threshold = 50 in
-  let s1,s2 = if s1.locx <= s2.locx then s1,s2 else s2,s1 in
+  let s1, s2 = if s1.locx <= s2.locx then s1, s2 else s2, s1 in
   let right1 = s1.locx - hoffset s1 + width s1
   and right2 = s2.locx - hoffset s2 + width s2 in
   let dx = right2 - right1 in
@@ -134,14 +137,13 @@ let overlap s1 s2 =
     if -100 * dx < threshold * width s2 then 1 else 2
   else
     let common_width = width s2 - dx in
-    if common_width <= 0 then 0
-    else if dx * 100 < common_width * threshold
-    then 1
-    else 2
+    if common_width <= 0 then 0 else
+    if dx * 100 < common_width * threshold then 1 else 2;;
 
-let get_line pre s = ""
+let get_line pre s = "";;
+
 (* Rules. *)
-let get_rule pre s = "_"
+let get_rule pre s = "_";;
 
 (* Spaces are a pain: *)
 (* 3 kinds of spaces exist in dvi: 'r', 'w' and 'x' spaces. *)
@@ -153,13 +155,11 @@ let get_rule pre s = "_"
 (* it appears that all spaces > 0 should be shown. *)
 (* The stupid method give definitely the best results. *)
 let get_space pre s =
-  if width s <= 0 then ""
-  else if pre == dummy_symbol then
-    (* A line beginning with a tabulation. *)
-    "\t"
+  if width s <= 0 then "" else
+  (* A line beginning with a tabulation. *)
+  if pre == dummy_symbol then "\t" else
   (* Same test as in get_rule. *)
-  else if overlap pre s = 1 then  ""
-  else " "
+  if overlap pre s = 1 then  "" else " ";;
 
 (* Keep it for debug : dumps different spaces with size information. *)
 let get_space2 pre s =
@@ -173,13 +173,13 @@ let get_space2 pre s =
     | 4 | 5 -> "(x" ^ w ^ ")" (* Interword? : C_x0 C_x *)
     | _ -> failwith "Symbol.get_space : unknown space code."
   in
-  if overlap pre s = 1 then "{" ^ result ^ "}" else result
+  if overlap pre s = 1 then "{" ^ result ^ "}" else result;;
 
 let default_encoding font code =
-  if is_pure code then String.make 1 (Char.chr code)
-  else String.make 1 (Char.chr code)
+(*  if is_pure code
+  then String.make 1 (Char.chr code)
+  else *) String.make 1 (Char.chr code);;
    (*  Printf.sprintf "[[%s:%d]]" font code *)
-   
 
 (* cmr is one of the usual tex fonts. *)
 let cmr_encoding font code =
@@ -210,7 +210,8 @@ let cmr_encoding font code =
   | 123 -> "--"
   | 124 -> "---"
   | 126 -> "~"
-  | _ -> default_encoding font code
+  | _ -> default_encoding font code;;
+
 let ecmr_encoding font code =
   match code with
   | 027 -> "ff"
@@ -219,7 +220,7 @@ let ecmr_encoding font code =
 
 let accents encoding font code =
   if code > 128 then String.make 1 (Char.chr code)
-  else encoding font code
+  else encoding font code;;
 
 (* Greek font. *)
 let cmmi_encoding font code =
@@ -234,7 +235,7 @@ let cmmi_encoding font code =
         "\\varsigma"; "\\varphi" ]
     in
     List.nth alph (code - 11)
-  else default_encoding font code
+  else default_encoding font code;;
 
 (* Math font. *)
 let cmex_encoding font code =
@@ -248,7 +249,7 @@ let cmex_encoding font code =
   | 103 -> "\\}"
   | 112 -> "[sqrt]"
   | 113 -> "[SQRT]"
-  | _ -> default_encoding font code
+  | _ -> default_encoding font code;;
 
 (* tt font. *)
 let cmtt_encoding font code =
@@ -277,15 +278,15 @@ let encodings = [
   "ptmri[0-9]+r",  accents ecmr_encoding ;
   "phvb[0-9]+r",  accents ecmr_encoding ;
   "msam[0-9]+",  accents ecmr_encoding ;
-]
+];;
 
 let compile_regexp source =
-  List.map (fun (pat, zz) -> Str.regexp pat, zz) source
+  List.map (fun (pat, zz) -> Str.regexp pat, zz) source;;
 
 (* Compiled regexps. *)
-let encodings_c = compile_regexp encodings
+let encodings_c = compile_regexp encodings;;
 
-let erase="/back/"
+let erase = "/back/";;
 
 (* Returns the name of the symbol s, pre is the symbol before s. *)
 let true_symbol_name s =
@@ -298,7 +299,7 @@ let true_symbol_name s =
     with Not_found ->
       fun f s -> "[" ^ f ^ "]" ^ default_encoding f s
   in
-  handler font s.code
+  handler font s.code;;
 
 let symbol_name pre s =
   match s.symbol with
@@ -307,7 +308,7 @@ let symbol_name pre s =
   | Rule (w, h) -> get_line pre s
   | _ ->
       let name = true_symbol_name s in
-      if space pre && overlap pre s <> 0 then erase ^ name else name
+      if space pre && overlap pre s <> 0 then erase ^ name else name;;
 
 
 (* Says if the symbol is in zone x1-x2 y1-y2. *)
@@ -317,72 +318,72 @@ let symbol_inzone x1 y1 x2 y2 =
   and (y1, y2) = if y1 <= y2 then y1, y2 else y2, y1 in
   function s ->
     (s.locx - hoffset s <= x2) && (s.locx - hoffset s + width s >= x1) &&
-    (s.locy - voffset s <= y2) && (s.locy - voffset s + height s >= y1)
+    (s.locy - voffset s <= y2) && (s.locy - voffset s + height s >= y1);;
 
 let inzone x1 y1 x2 y2 =
-  Misc.reverse_filter (symbol_inzone x1 y1 x2 y2) !set
+  Misc.reverse_filter (symbol_inzone x1 y1 x2 y2) !set;;
 
 let intime x1 y1 x2 y2 =
   let inz = symbol_inzone x1 y1 x2 y2 in
   let rec discard sl =
     match sl with
     | [] -> []
-    | s :: l -> if inz s then sl else discard l
-  in
-  discard (List.rev (discard !set))
+    | s :: l -> if inz s then sl else discard l in
+  discard (List.rev (discard !set));;
 
 
 (** FORMATING **)
 
-exception Break of int * int
+exception Break of int * int;;
 
 (* Four (4 !) backslashes because of two-level escapes !!! *)
 
 let process_all =
   ["." ^ erase, "" ; (* Remove backspaces. *)
     "c\\\\c", "\\cc" ] (* Sometimes cedil \c is after the 'c'. *)
+;;
 
 let process_totext =
-  ["\\\\bullet", "o " ]
+  ["\\\\bullet", "o " ];;
 
 (* Compiled versions. *)
-let process_all_c = compile_regexp process_all
-let process_totext_c = compile_regexp process_totext
+let process_all_c = compile_regexp process_all;;
+let process_totext_c = compile_regexp process_totext;;
 
 (* Apply a process list to input. *)
 let apply_process pl input =
   List.fold_left
     (fun input (pat, temp) -> Str.global_replace pat temp input)
-    input pl
+    input pl;;
 
 let post_process input =
   let input2 = apply_process process_all_c input in
   let input3 = apply_process process_totext_c input2 in
-  input3
+  input3;;
 
 let above_lines bot1 top1 bot2 top2 =
-  (* How much two lines must share in common (percent) to be declared overlaping. *)
+  (* How much two lines must share in common (percent)
+     to be declared overlaping. *)
   let threshold = 30 in
-  if bot1 < top2 then -1
-  else if bot2 < top1 then 1
-  else
+  if bot1 < top2 then -1 else
+  if bot2 < top1 then 1 else
     let minsize = min (bot1 - top1) (bot2 - top2)
     and share = (min bot1 bot2) - (max top1 top2) in
-    if share * 100 > threshold * minsize then 0
-    else if top1 < top2 then -1 else 1
+    if share * 100 > threshold * minsize then 0 else
+    if top1 < top2 then -1 else 1;;
 
 let above s1 s2 =
   let top1 = s1.locy - voffset s1
   and top2 = s2.locy - voffset s2 in
   let bot1 = top1 + height s1
   and bot2 = top2 + height s2 in
-  above_lines bot1 top1 bot2 top2
+  above_lines bot1 top1 bot2 top2;;
 
 (* Provided symbols s1 and s2 are on the same line, -1 means that s1 is at the left of s2. *)
 (* It is important to compare right sides of symbols since spaces, for example, can stretch wide. *)
 let at_right s1 s2 =
   if s1.locx - hoffset s1 + width s1 < s2.locx - hoffset s2 + width s2
-  then -1 else 1
+  then -1 else 1;;
 
 (* Gives a string corresponding to line l .*)
 let dump_line l =
@@ -400,11 +401,11 @@ let dump_line l =
             line := !line ^ ascii ;
             if not (space s) || width s > 0 then old_sym := s;
           end;
-        if not (space s) then some := true  in
+        if not (space s) then some := true in
   List.iter action l2;
 
   let return = post_process !line in
-  if !some then return ^ "\n" else ""
+  if !some then return ^ "\n" else "";;
 
 (* Split a list of symbols in lines. *)
 let rec split current lines = function
@@ -414,13 +415,13 @@ let rec split current lines = function
       let bot = top + height s in
       if above_lines bot top current.max current.min <> 0
       then split {min = top;
-                   max = bot;
-                   content = [s]}
-          (current :: lines) sl
+                  max = bot;
+                  content = [s]}
+             (current :: lines) sl
       else split {min = min current.min top;
-                   max = max current.max bot;
-                   content = s :: current.content}
-          lines sl
+                  max = max current.max bot;
+                  content = s :: current.content}
+            lines sl;;
 
 (* to_ascii returns a string representing the symbols in set. *)
 (* Elements are filtered according to the first argument. *)
@@ -428,46 +429,40 @@ let to_ascii set =
   (* Split lines. *)
   let lines = split {min = 0; max = 0; content = []} [] set in
   let ascii = Misc.reverse_map dump_line lines in
-  String.concat "" ascii
+  String.concat "" ascii;;
 
 let commands_to_ascii fnt_map commands =
-let curfontdecoder = ref cmr_encoding in
-let curfont = ref "cmr7" in
-let cset = Buffer.create 1024 in 
-List.iter
-(function
-  | Dvicommands.C_fnt n -> curfont:= (List.assoc n fnt_map).Dvicommands.name;
-                curfontdecoder:= 
-                begin 
-                   try snd (List.find
-                   (fun (r, h) -> Str.string_match r !curfont 0)
-               encodings_c)
-               with Not_found ->
-               fun f s -> "[" ^ f ^ "]" ^ default_encoding f s
-               end
-  | Dvicommands.C_set code | Dvicommands.C_put code 
-    -> Buffer.add_string cset (!curfontdecoder !curfont code) 
-  | Dvicommands.C_w0 | Dvicommands.C_w _ 
-  | Dvicommands.C_x0 | Dvicommands.C_x _ 
-  | Dvicommands.C_y0 | Dvicommands.C_y _ 
-  | Dvicommands.C_z0 | Dvicommands.C_z _ 
-     ->  Buffer.add_char cset ' '
-  | _ -> ()
-)
-commands;
-Buffer.contents cset;;
-
+  let curfontdecoder = ref cmr_encoding in
+  let curfont = ref "cmr7" in
+  let cset = Buffer.create 1024 in 
+  List.iter
+    (function
+     | Dvicommands.C_fnt n ->
+         curfont:= (List.assoc n fnt_map).Dvicommands.name;
+         curfontdecoder:= (
+           try snd (List.find
+                     (fun (r, h) -> Str.string_match r !curfont 0)
+                     encodings_c) with
+           | Not_found -> (fun f s -> "[" ^ f ^ "]" ^ default_encoding f s))
+     | Dvicommands.C_set code | Dvicommands.C_put code ->
+         Buffer.add_string cset (!curfontdecoder !curfont code) 
+     | Dvicommands.C_w0 | Dvicommands.C_w _ 
+     | Dvicommands.C_x0 | Dvicommands.C_x _ 
+     | Dvicommands.C_y0 | Dvicommands.C_y _ 
+     | Dvicommands.C_z0 | Dvicommands.C_z _ ->  Buffer.add_char cset ' '
+     | _ -> ())
+    commands;
+  Buffer.contents cset;;
 
 (* to_escaped does the same, but the final string is 'escaped'. *)
-let to_escaped set =
-  String.escaped (to_ascii set)
+let to_escaped set = String.escaped (to_ascii set);;
 
 (* get the closest lines to a given position on the screen *)
 type rect =
     { mutable top : int;
       mutable bot : int;
       mutable left : int;
-      mutable right : int }
+      mutable right : int };;
 
 type region =
     { history : element array;
@@ -477,14 +472,14 @@ type region =
 let region_to_ascii r =
   let pos = min r.first r.last in
   let length = 1 + abs (r.first - r.last) in
-  to_ascii (List.rev (Array.to_list (Array.sub r.history pos length)))
+  to_ascii (List.rev (Array.to_list (Array.sub r.history pos length)));;
 
 let distance x y s =
   let dist z h dh =
     if z < h then h - z else if h + dh < z then z - h - dh else 0 in
   let dx = dist x (s.locx - hoffset s) (width s) in
   let dy = dist y (s.locy - voffset s) (height s) in
-  dx + dy
+  dx + dy;;
 
 let closest history x y =
   let distance = distance x y in
@@ -499,37 +494,33 @@ let closest history x y =
     let i = ref 0 in
     Array.iteri (fun j _ -> if compare !i j > 0 then i := j) history;
     !i
-  with Invalid_argument _ ->
-    assert false
+  with Invalid_argument _ -> assert false;;
 
 let nearest r x y =
   let distance = distance x y in
   let h = r.history in
   let last = r.last in
   assert (Array.length h > last);
-  if distance h.(last) = 0 then last
-  else
-    try
-      let i = ref last in
-      let compare j = if distance h.(!i) > distance h.(j) then i := j in
-      let attempt d e =
-        for j = max 0 (last - d) to min (Array.length h - 1) (last + d) do
-          compare j done;
-        if distance h.(!i) <= e then !i else raise Not_found in
-      try attempt 10 4 with Not_found ->
-        try attempt 100 5 with Not_found ->
-          try attempt 400 7 with Not_found ->
-            closest h x y
-    with Invalid_argument _ ->
-      assert false
-
+  if distance h.(last) = 0 then last else
+  try
+    let i = ref last in
+    let compare j = if distance h.(!i) > distance h.(j) then i := j in
+    let attempt d e =
+      for j = max 0 (last - d) to min (Array.length h - 1) (last + d) do
+        compare j done;
+      if distance h.(!i) <= e then !i else raise Not_found in
+    try attempt 10 4 with Not_found ->
+      try attempt 100 5 with Not_found ->
+        try attempt 400 7 with Not_found ->
+          closest h x y
+  with Invalid_argument _ -> assert false;;
 
 let position x y =
   let history = Array.of_list !set in
   if Array.length history > 0 then
     let time = closest history x y in
-    { history = history; first = time; last = time;  }
-  else raise Not_found
+    { history = history; first = time; last = time; }
+  else raise Not_found;;
 
 let valid position i = i >= 0 && i < Array.length position.history;;
 
@@ -552,17 +543,15 @@ let around b x y =
         match h.symbol with
         | Space (_,_) ->
             let c = symbol_name pre h in
-            if c = " " then return w
-            else word move i w next
+            if c = " " then return w else word move i w next
         | Line (_, _) -> word move i w next
         | Rule (_, _) -> return w
         | _ ->
-            if pre <> dummy_symbol && above pre h <> 0 then return w
-            else
-              let c = symbol_name pre h in
-              let add x y = if move 0 > 0 then x ^ y else y ^ x in
-              word move i (add (true_symbol_name h) w) next
-      else -1,  w in
+            if pre <> dummy_symbol && above pre h <> 0 then return w else
+            let c = symbol_name pre h in
+            let add x y = if move 0 > 0 then x ^ y else y ^ x in
+            word move i (add (true_symbol_name h) w) next
+      else -1, w in
     let rec prefix move i =
       if valid i then
         let h = position.history.(i) in
@@ -594,7 +583,7 @@ let rec least l min =
   match l with
     {symbol = Line (l, _)} :: rest -> least rest (if l < min then l else min)
   | _ :: rest -> least rest min
-  | [] -> min
+  | [] -> min;;
 
 let lines x y =
   match around true x y with
@@ -612,8 +601,7 @@ let lines x y =
       let l2, f2 = find_line pred (pred i2) in
       let l1 = if l1 > l2 && l2 > 0 then least !set l2 else l1 in
       let f = match f1 with Some _ -> f1 | _ -> f2 in
-      Some (space_ref, l1, l2, left, w1, w2, right, f)
-;;
+      Some (space_ref, l1, l2, left, w1, w2, right, f);;
 
 let word x y =
   match around false x y with
@@ -623,51 +611,39 @@ let word x y =
         let l = String.length w in
         l > 0 && w.[0] <> ' ' && w.[l - 1] <> ' ' in
       let b1 = take w1 and b2 = take w2 in
-      if b1 && b2 then
-        Some ({region with first = i1; last = i2}, w1 ^ w2)
-      else if b1 then
-        Some ({region with first = i1}, w1)
-      else if b2 then
-        Some ({region with first = i2}, w2)
-      else
-        None
-;;
+      if b1 && b2 then Some ({region with first = i1; last = i2}, w1 ^ w2) else
+      if b1 then Some ({region with first = i1}, w1) else
+      if b2 then Some ({region with first = i2}, w2) else
+      None;;
 
 let apply f = function
   | { symbol = Glyph g } as s -> f g.glyph s.color s.locx s.locy
-  | _ -> ()
-;;
+  | _ -> ();;
 
 let iter_region f r =
   let iter first last f =
     for i = min first last to max first last do f r.history.(i) done in
-  iter r.first r.last f
-;;
+  iter r.first r.last f;;
 
 let iter_regions delete add r r' =
   assert (r.history == r'.history && r.first = r'.first);
-  if r.last = r'.last then ()
-  else
-    let iter first last f =
-      for i = min first last to max first last do f r.history.(i) done in
-    let l = r.last and l' = r'.last and f = r.first in
-    if l > f && l' > f then
-      if l' > l then iter l l' add else iter l l' delete
-  else if l < f && l' < f then
-    if l' > l then iter l l' delete else iter l l' add
-  else
-    (iter f l  delete; iter f l' add)
-;;
+  if r.last <> r'.last then
+  let iter first last f =
+    for i = min first last to max first last do f r.history.(i) done in
+  let l = r.last and l' = r'.last and f = r.first in
+  if l > f && l' > f then
+    if l' > l then iter l l' add else iter l l' delete else
+  if l < f && l' < f then
+    if l' > l then iter l l' delete else iter l l' add else
+  (iter f l  delete; iter f l' add);;
 
-let rect r = r.left, r.bot, r.right - r.left, r.top - r.bot
+let rect r = r.left, r.bot, r.right - r.left, r.top - r.bot;;
 
 let new_region r x y =
   let l = r.history.(r.last) in
-  if distance x y l = 0 then r else  { r with last = nearest r x y }
-;;
+  if distance x y l = 0 then r else  { r with last = nearest r x y };;
 
-end
-;;
+end;;
 
 
 

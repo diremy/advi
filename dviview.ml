@@ -209,8 +209,6 @@ let set_page_number st n =
 
 *****************************************************************************)
 
-
-
 (*** Setting other parameters ***)
 
 let attr =
@@ -382,7 +380,7 @@ let goto_next_pause n st =
   Busy.set (if st.cont = None then Busy.Free else Busy.Pause);;
 
 let draw_bounding_box st =
-Misc.warning "Draw_bounding box";
+  Misc.warning "Draw_bounding box";
   Grdev.set_color 0xcccccc;
   Grdev.fill_rect st.orig_x st.orig_y st.dvi_width 1;
   Grdev.fill_rect st.orig_x st.orig_y 1 st.dvi_height;
@@ -513,11 +511,11 @@ let redraw ?trans ?chst st =
 ;;
 
 let thumbnail_limit = ref 5;;
-let _ =
-  Options.add
-    "-thumbnail-scale"
-    (Arg.Int (fun i -> thumbnail_limit := i))
-    "INT\tSet the number of thumbname per line and column to INT";;
+
+Options.add
+  "-thumbnail-scale"
+  (Arg.Int (fun i -> thumbnail_limit := i))
+  "INT\tSet the number of thumbname per line and column to INT";;
 
 let xrefs st =
   if st.frozen then
@@ -852,7 +850,8 @@ let next_slice st =
   print_string "#line 0, 0 <<Previous-Slice<<>><<>>>> "; 
   print_newline ()
 
-let goto_href link st = (* goto page of hyperref h *)
+(* goto page of hyperref h *)
+let goto_href link st =
   let p =
     if Misc.has_prefix "#" link then
       let tag = Misc.get_suffix "#" link in
@@ -865,7 +864,8 @@ let goto_href link st = (* goto page of hyperref h *)
   push_page true p st;
   Grdev.H.flashlight (Grdev.H.Name link);;
 
-let goto_pageref n st =(* Go to hyperpage n if possible or page n otherwise *)
+(* Go to hyperpage n if possible or page n otherwise *)
+let goto_pageref n st =
   let tag = Printf.sprintf "#page.%d" n in
   let alt = if st.num > 0 then st.num - 1 else st.num_pages in
   let p = find_xref tag alt st in
@@ -1093,6 +1093,12 @@ module B =
         
     let show_toc st =
        Launch.without_launching show_toc st
+
+    let search_forward st =
+      ()
+
+    let search_backward st =
+      ()
   end;;
 
 let bindings = Array.create 256 B.nop;;
@@ -1161,6 +1167,11 @@ let bind_keys () =
 
    (* Control-f, c, To handle the advi window. *)
    '', B.fullscreen;
+
+   (* Control-s to search forward. *)
+   '', B.search_forward;
+   (* Control-r to search backward. *)
+   'R', B.search_backward;
 
    (* Scaling the page. *)
    '<', B.scale_down;

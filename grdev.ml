@@ -28,8 +28,8 @@ let glyph_gamma = ref 1.0;;
 
 Options.add
   "-gamma"
-  (Arg.Float (fun x -> 
-    if x <= 0.0 then Misc.warning "gamma value must be positive" 
+  (Arg.Float (fun x ->
+    if x <= 0.0 then Misc.warning "gamma value must be positive"
     else glyph_gamma := 1.0 /. x))
   (Printf.sprintf
      "FLOAT (>0)\tGamma correction of glyphs (default %f)" !glyph_gamma)
@@ -121,8 +121,7 @@ let sleep_watch breakable sync n =
     end;
     let now = Unix.gettimeofday () in
     let remaining = start +. n -. now in
-    if remaining > 0.0 then delay remaining
-    else false
+    if remaining > 0.0 then delay remaining else false
   in
   interrupted () || (* if it is interrupted, synchronization is not done *)
   begin
@@ -138,7 +137,7 @@ let sleep = sleep_watch true true;;
    (fun _ -> true) (look at dviview.ml) *)
 Transimpl.sleep := sleep_watch true false;;
 
-let set_transition trans = 
+let set_transition trans =
   Misc.debug_endline
     (Printf.sprintf "Setting transition mode to : %s"
        (Transimpl.string_of_transmode trans));
@@ -195,14 +194,12 @@ let blend = ref Drawimage.Normal;;
 let set_blend b = blend := b;;
 
 (* Viewport type definition *)
-
-type viewport = int * int * int * int;; 
+type viewport = int * int * int * int;;
 
 (* Background implementation *)
 
 (* The Background preferences                    *)
 (* to be extended, should contain gradients etc. *)
-
 type bkgd_prefs = {
   mutable bgcolor : color;
   mutable bgimg : string option;
@@ -210,9 +207,9 @@ type bkgd_prefs = {
   mutable bgwhitetrans : bool;
   mutable bgalpha : Drawimage.alpha;
   mutable bgblend : Drawimage.blend;
-  mutable bgviewport: viewport option; 
+  mutable bgviewport: viewport option;
   (* hook for sophisticated programmed graphics backgrounds *)
-  mutable bgfunction: (viewport -> unit) option; 
+  mutable bgfunction: (viewport -> unit) option;
 };;
 
 let default_bgcolor = ref Graphics.white;;
@@ -288,13 +285,12 @@ let draw_img file ratio whitetrans alpha blend psbbox antialias (w, h) x0 y0 =
     blend
     psbbox ratio antialias (w, h) (x, y);;
 
-let draw_bkgd () = 
+let draw_bkgd () =
   (* find the viewport *)
   let (w, h, xoff, yoff) as viewport =
     match bkgd_data.bgviewport with
     | None -> (!size_x, !size_y, !xmin, !ymin)
-    | Some v -> v
-  in 	  
+    | Some v -> v in
   (* Background: color. *)
   bg_color := bkgd_data.bgcolor;
   Graphics.set_color !bg_color;
@@ -308,7 +304,7 @@ let draw_bkgd () =
       bkgd_data.bgwhitetrans
       bkgd_data.bgalpha
       bkgd_data.bgblend
-      None 
+      None
       true (* antialias *)
       (w, h) xoff (!size_y - yoff)
   ) bkgd_data.bgimg;
@@ -425,9 +421,9 @@ let get_glyph_image g col =
           and p = ref 0 in
           for i = 0 to h - 1 do
             for j = 0 to w - 1 do
-	      let gamma_fix c =
-		int_of_float (((float c /. 255.0) ** !glyph_gamma) *. 255.0)
-	      in
+              let gamma_fix c =
+                int_of_float (((float c /. 255.0) ** !glyph_gamma) *. 255.0)
+              in
               dst.(i).(j) <- table.(gamma_fix (Char.code gmap.[!p]));
               incr p
             done
@@ -606,7 +602,6 @@ let draw_line x y dx dy =
 
 let draw_point x y =
   Graphics.draw_circle x y 3;;
-  
 
 (* Should be improve later using quad-tree or similar 2d structure *)
 module type ACTIVE =
@@ -686,13 +681,13 @@ module H =
 
     let frame_rect e x y w h =
       if e > 0 && w > e && h > e then
-	let draw_rect_with_line_width e x y w h =
+        let draw_rect_with_line_width e x y w h =
           Graphics.fill_rect x y e h;
           Graphics.fill_rect x y w e;
           Graphics.fill_rect (x + w - e) y e h;
           Graphics.fill_rect x (y + h - e) w e
-	in
-	draw_rect_with_line_width e x y w h
+        in
+        draw_rect_with_line_width e x y w h
       else Graphics.draw_rect x y w h
 
     let draw_anchor style c e a =
@@ -845,7 +840,7 @@ module H =
       deemphasize false (light t)
 
     let emphasize_and_flash color act =
-      let fill, color = 
+      let fill, color =
         match act.A.action.tag with
         | Href s when  has_prefix "#/page." s -> false, rect_emphasize
         | _ -> true, color in
@@ -868,7 +863,7 @@ module E =
   struct
     type direction = X | Y | XY | Z
     type info = { comm : string; name : string;
-                  line : string; file : string; 
+                  line : string; file : string;
                   origin : float rect; unit : float;
                   move : direction; resize : direction; }
     type figure = { rect : int rect; info : info; }
@@ -1239,7 +1234,7 @@ let wait_move_button_up rect trans_type event x y =
   let trans = trans trans_type in
   let w = rect.w and h = rect.h in
   let rec move dx dy =
-    let r = trans rect dx dy in 
+    let r = trans rect dx dy in
     let buf = save_rectangle r.x r.y r.w r.h in
     draw_rectangle r.x r.y r.w r.h;
     let ev = wait_signal_event button_up_motion in
@@ -1314,13 +1309,13 @@ let wait_button_up m x y =
         let action =
           match info.E.resize with
           | E.X -> Resize_x | E.Y -> Resize_y | _ -> Resize_xy in
-        wait_move_button_up rect action event x y 
+        wait_move_button_up rect action event x y
       else Final Nil
     with
     | Not_found ->
         if pressed m G.control then
           let event dx dy = Move (dx, dy) in
-          wait_move_button_up !bbox Move_xy event x y 
+          wait_move_button_up !bbox Move_xy event x y
         else wait_position ()
   end else
   if pressed m G.shift && released m G.button1 then wait_select_button_up m x y
@@ -1424,5 +1419,3 @@ let embed_app command app_mode app_name width_pixel height_pixel x y =
 let wait_button_up () =
   if GraphicsY11.button_down ()
   then ignore (GraphicsY11.wait_next_event [GraphicsY11.Button_up]);;
-
-

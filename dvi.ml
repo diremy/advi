@@ -17,7 +17,7 @@
 
 (* $Id$ *)
 
-open Format ;;
+open Format;;
 open Dvicommands;;
 
 (* Status for PS specials and background *)
@@ -34,7 +34,7 @@ type page = {
    commands : string;
    mutable status : status;
    text : string;
-  } ;;
+  };;
 
 type t = {
     preamble : preamble ;
@@ -43,11 +43,11 @@ type t = {
     xrefs : (string, int) Hashtbl.t;
     postamble : postamble ;
     font_map : (int * font_def) list
-  } ;;
+  };;
 
-exception Error of string ;;
+exception Error of string;;
 
-let ident_byte = 2 ;;
+let ident_byte = 2;;
 
 (*** Buffer management (we keep the type [buffer] private) ***)
 
@@ -55,12 +55,12 @@ type buffer = {
     str : string ;
     len : int ;
     mutable pos : int
-  } ;;
+  };;
 
-exception End_of_buffer ;; (* private *)
+exception End_of_buffer;; (* private *)
 
 let make_buffer str =
-  { str = str ; len = String.length str ; pos = 0 } ;;
+  { str = str ; len = String.length str ; pos = 0 };;
 
 let read_byte buf =
   let pos = buf.pos
@@ -69,9 +69,9 @@ let read_byte buf =
     raise End_of_buffer ;
   let n = Char.code str.[pos] in
   buf.pos <- pos + 1 ;
-  n ;;
+  n;;
 
-let read_uint8 = read_byte ;;
+let read_uint8 = read_byte;;
 
 let read_int8 buf =
   let pos = buf.pos
@@ -80,7 +80,7 @@ let read_int8 buf =
     raise End_of_buffer ;
   let n = Char.code str.[pos] in
   buf.pos <- pos + 1 ;
-  if n < 0x80 then n else n - 0x100 ;;
+  if n < 0x80 then n else n - 0x100;;
 
 let read_uint16 buf =
   let pos = buf.pos
@@ -90,7 +90,7 @@ let read_uint16 buf =
   let n0 = Char.code str.[pos] in
   let n1 = Char.code str.[pos + 1] in
   buf.pos <- pos + 2 ;
-  (n0 lsl 8) + n1 ;;
+  (n0 lsl 8) + n1;;
 
 let read_int16 buf =
   let pos = buf.pos
@@ -101,7 +101,7 @@ let read_int16 buf =
   let n1 = Char.code str.[pos + 1] in
   buf.pos <- pos + 2 ;
   let n = (n0 lsl 8) + n1 in
-  if n < 0x8000 then n else n - 0x10000 ;;
+  if n < 0x8000 then n else n - 0x10000;;
 
 let read_uint24 buf =
   let pos = buf.pos
@@ -112,7 +112,7 @@ let read_uint24 buf =
   let n1 = Char.code str.[pos + 1] in
   let n2 = Char.code str.[pos + 2] in
   buf.pos <- pos + 3 ;
-  (n0 lsl 16) + (n1 lsl 8) + n2 ;;
+  (n0 lsl 16) + (n1 lsl 8) + n2;;
 
 let read_int24 buf =
   let pos = buf.pos
@@ -124,7 +124,7 @@ let read_int24 buf =
   let n2 = Char.code str.[pos + 2] in
   buf.pos <- pos + 3 ;
   let n = (n0 lsl 16) + (n1 lsl 8) + n2 in
-  if n < 0x800000 then n else n - 0x1000000 ;;
+  if n < 0x800000 then n else n - 0x1000000;;
 
 let arch32_read_int32 buf =
   let pos = buf.pos
@@ -143,7 +143,7 @@ let arch32_read_int32 buf =
       if n0 = 0x80 && n123 = 0 then min_int
       else if n0 = 0x7f && n123 = 0xffffff then max_int
       else raise (Error "too large 32-bit integer") 
-  | _ -> assert false ;;
+  | _ -> assert false;;
 
 let arch64_read_int32 buf =
   let pos = buf.pos
@@ -156,13 +156,13 @@ let arch64_read_int32 buf =
   let n3 = Char.code str.[pos + 3] in
   buf.pos <- pos + 4 ;
   let n = (n0 lsl 24) + (n1 lsl 16) + (n2 lsl 8) + n3 in
-  if n < 0x80000000 then n else n - 0x100000000 ;;
+  if n < 0x80000000 then n else n - 0x100000000;;
 
 let read_int32 =
   match Sys.word_size with
   | 32 -> arch32_read_int32
   | 64 -> arch64_read_int32
-  | _ -> assert false ;;
+  | _ -> assert false;;
 
 let read_string buf len =
   let pos = buf.pos in
@@ -170,7 +170,7 @@ let read_string buf len =
     raise End_of_buffer ;
   let result = String.sub buf.str pos len in
   buf.pos <- pos + len ;
-  result ;;
+  result;;
 
 (*** Reading the preamble ***)
 
@@ -181,7 +181,7 @@ let read_preamble buf =
   let len = read_uint8 buf in
   let text = read_string buf len in
   { pre_num = num ; pre_den = den ;
-    pre_mag = mag ; pre_text = text } ;;
+    pre_mag = mag ; pre_text = text };;
 
 (*** Reading the postamble ***)
 
@@ -195,7 +195,7 @@ let read_postamble buf =
   let pages = read_uint16 buf in
   { post_num = num ; post_den = den ; post_mag = mag ;
     post_height = height ; post_width = width ;
-    post_depth = depth ; post_pages = pages } ;;
+    post_depth = depth ; post_pages = pages };;
 
 let finish_post_postamble buf =
   try while true do
@@ -205,7 +205,7 @@ let finish_post_postamble buf =
         Printf.sprintf "bad post postamble byte (%d <> 223)" byte in
       raise (Error msg)
     end
-  done with End_of_buffer -> () ;;
+  done with End_of_buffer -> ();;
 
 (*** Reading a font definition ***)
 
@@ -219,7 +219,7 @@ let read_font_def buf =
   let nstr = read_string buf nlen in
   { checksum = chk ;
     scale_factor = sfact ; design_size = dsize ;
-    area = astr ; name = nstr } ;;
+    area = astr ; name = nstr };;
     
 (*** Reading commands ***)
 
@@ -334,11 +334,11 @@ let read_command buf =
       end ;
       finish_post_postamble buf ;          
       C_post_post q
-  | 250|251|252|253|254|255 as byte ->
+  | 250 | 251 | 252 | 253 | 254 | 255 as byte ->
       let msg =
         Printf.sprintf "bad command opcode (%d)" byte in
       raise (Error msg)
-  | _ -> assert false ;;
+  | _ -> assert false;;
 
 (*** Reading an integer on an input channel ***)
 
@@ -350,7 +350,7 @@ let arch32_input_int32 ch =
   match n0 lsr 6 with
   | 0|3 -> (n0 lsl 24) + (n1 lsl 16) + (n2 lsl 8) + n3
   | 1|2 -> raise (Error "too large 32-bit integer")
-  | _ -> assert false ;;
+  | _ -> assert false;;
 
 let arch64_input_int32 ch =
   let n0 = input_byte ch in
@@ -358,18 +358,18 @@ let arch64_input_int32 ch =
   let n2 = input_byte ch in
   let n3 = input_byte ch in
   let n = (n0 lsl 24) + (n1 lsl 16) + (n2 lsl 8) + n3 in
-  if n < 0x80000000 then n else n - 0x10000000 ;;
+  if n < 0x80000000 then n else n - 0x10000000;;
 
 let input_int32 =
   match Sys.word_size with
   | 32 -> arch32_input_int32
   | 64 -> arch64_input_int32
-  | _ -> assert false ;;
+  | _ -> assert false;;
 
 let input_string ch len =
   let str = String.create len in
   really_input ch str 0 len ;
-  str ;;
+  str;;
 
 (*** parsing commands ***)
 
@@ -383,7 +383,7 @@ let parse_commands commands =
     | C_bop _ -> parse_rec ()
     | _ -> raise (Error "ill-formed page")
   with End_of_buffer ->
-    raise (Error "input exhausted") ;;
+    raise (Error "input exhausted");;
 (*** Reading a DVI file ***)
 
 let input_dvi ch =
@@ -468,7 +468,7 @@ let input_dvi ch =
     pages = Array.of_list !stack ;
     postamble = postamble ;
     xrefs =  Hashtbl.create 13;
-    font_map = font_map } ;;
+    font_map = font_map };;
 
 (*** Loading a DVI file ***)
 
@@ -482,7 +482,7 @@ let load filename =
     close_in ch ;
     match e with
     | End_of_file -> raise (Error "not a DVI file")
-    | _ -> raise e ;;
+    | _ -> raise e;;
 
 (*** Parsing commands ***)
 
@@ -494,7 +494,7 @@ let parse_string str =
     else [] in
   try parse_rec ()
   with End_of_buffer ->
-    raise (Error "input exhausted") ;;
+    raise (Error "input exhausted");;
 
 let parse_page page =
   let buf = make_buffer page.commands in
@@ -506,7 +506,7 @@ let parse_page page =
     | C_bop _ -> parse_rec ()
     | _ -> raise (Error "ill-formed page")
   with End_of_buffer ->
-    raise (Error "input exhausted") ;;
+    raise (Error "input exhausted");;
 
 let string_iter f str =
   let buf = make_buffer str in
@@ -515,7 +515,7 @@ let string_iter f str =
       f (read_command buf)
     done
   with End_of_buffer ->
-    raise (Error "input exhausted") ;;
+    raise (Error "input exhausted");;
 
 let page_iter f page =
   let buf = make_buffer page.commands in
@@ -530,7 +530,7 @@ let page_iter f page =
     | C_bop _ -> iter_rec ()
     | _ -> raise (Error "ill-formed page")
   with End_of_buffer ->
-    raise (Error "input exhausted") ;;
+    raise (Error "input exhausted");;
 
 let page_step f page =
   let buf = make_buffer page.commands in
@@ -551,7 +551,7 @@ let fprint_preamble fmt pre =
   fprintf fmt "@[<hov2>{ num = %d" pre.pre_num ;
   fprintf fmt "@ den = %d;" pre.pre_den ;
   fprintf fmt "@ mag = %d;" pre.pre_mag ;
-  fprintf fmt "@ text = \"%s\" }@]" pre.pre_text ;;
+  fprintf fmt "@ text = \"%s\" }@]" pre.pre_text;;
 
 let fprint_postamble fmt post =
   fprintf fmt "@[<hov2>{ num = %d" post.post_num ;
@@ -560,25 +560,25 @@ let fprint_postamble fmt post =
   fprintf fmt "@ height = %d;" post.post_height ;
   fprintf fmt "@ width = %d;" post.post_width ;
   fprintf fmt "@ depth = %d;" post.post_depth ;
-  fprintf fmt "@ pages = %d }@]" post.post_pages ;;
+  fprintf fmt "@ pages = %d }@]" post.post_pages;;
 
 let fprint_font_def fmt def =
-  fprintf fmt "@[<hov2>{ checksum = \"%s\";" (String.escaped def.checksum) ;
+  fprintf fmt "@[<hov2>{ checksum = %S;" def.checksum ;
   fprintf fmt "@ scale_factor = %d;" def.scale_factor ;
   fprintf fmt "@ design_size = %d;" def.design_size ;
-  fprintf fmt "@ area = \"%s\";" (String.escaped def.area) ;
-  fprintf fmt "@ name = \"%s\" }@]" (String.escaped def.name) ;;
+  fprintf fmt "@ area = %S;" def.area ;
+  fprintf fmt "@ name = %S }@]" def.name;;
 
 let fprint_command fmt = function
   | C_set code ->
       if code >= 0 && code < 256 then
-        fprintf fmt "set '%s'" (Char.escaped (Char.chr code))
+        fprintf fmt "set %C" (Char.chr code)
       else
         fprintf fmt "set %d" code
   | C_set_rule(a, b) -> fprintf fmt "set_rule %d %d" a b
   | C_put code ->
       if code >= 0 && code < 256 then
-        fprintf fmt "put '%s'" (Char.escaped (Char.chr code))
+        fprintf fmt "put %C" (Char.chr code)
       else
         fprintf fmt "put %d" code
   | C_put_rule(a, b) -> fprintf fmt "put_rule %d %d" a b
@@ -601,10 +601,10 @@ let fprint_command fmt = function
   | C_z0 -> fprintf fmt "z0"
   | C_z n -> fprintf fmt "z %d" n
   | C_fnt n -> fprintf fmt "fnt %d" n
-  | C_xxx s -> fprintf fmt "xxx %S" (String.escaped s)
+  | C_xxx s -> fprintf fmt "xxx %S" s
   | C_fnt_def(n, def) -> fprintf fmt "fnt_def %d %a" n fprint_font_def def
   | C_pre pre -> fprintf fmt "pre %a" fprint_preamble pre
   | C_post(post, p) ->
       fprintf fmt "post %a [prev=0x%x]"
         fprint_postamble post p
-  | C_post_post q -> fprintf fmt "post_post [post=0x%x]" q ;;
+  | C_post_post q -> fprintf fmt "post_post [post=0x%x]" q;;
