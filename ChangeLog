@@ -1,4 +1,7 @@
 Version 1.5+2
+2003/10/09
+        Added an HTML version of the manual with the help ofHeVeA and
+        Luc Maranget.
 2003/10/08
         Change the background command execution order:
         1) Solid background,
