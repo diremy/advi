@@ -1,7 +1,7 @@
 # advi - A DVI previewer
 # Copyright (C) 2000 Alexandre Miquel
 # Copyright (C) 2001 Alexandre Miquel, Jun Furuse, Xavier Leroy, Didier Rémy,
-#		     Alan Schmitt
+#		     Alan Schmitt, Pierre Weis
 # 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
