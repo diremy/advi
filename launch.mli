@@ -34,9 +34,9 @@ val fork_process : app_command -> int;;
 val fork_me : geometry -> argument -> int;;
 val advi_process : int;;
 
-val whiterun : unit -> bool;;
-val add_whiterun_command : app_name -> unit;;
-val dump_whiterun_commands : unit -> unit;;
+val white_run : unit -> bool;;
+val add_white_run_command : app_name -> unit;;
+val dump_white_run_commands : unit -> unit;;
 
 val without_launching : ('a -> 'b) -> 'a -> 'b;;
 (** [without_launching f x] evaluates [f x] without launching any

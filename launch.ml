@@ -31,7 +31,7 @@ let add_embed f = embeds := f :: !embeds
 and add_persist f = persists := f :: !persists
 and add_unmap_embed f = unmap_embeds := f :: !unmap_embeds;;
 
-(* Execute thunks of the list in reverse order. *)
+(* Execute thunks of a list of thunks in reverse order. *)
 let execute fs = List.iter (fun f -> f ()) (List.rev fs);;
 
 (* Evaluate f arg, while temporary unmapping persistent apps. *)
@@ -39,14 +39,12 @@ let unmapping_persistent_apps f arg =
   execute !unmap_embeds;
   let res = f arg in
   execute !persists;
-  res
-;;
+  res;;
 
 (* Unmap persistent apps windows (apps are still running). *)
 let unmap_persistent_apps () =
   execute !unmap_embeds;
-  unmap_embeds := []
-;;
+  unmap_embeds := [];;
 
 (* Really launch embedded apps. *)
 let launch_embedded_apps () = 
@@ -77,20 +75,20 @@ type policy =
                            application has to be launched. *)
 ;;
 
-let policy = ref Ask;;
-
 (* Policy assignment. *)
-let set_policy = function
+let get_policy, set_policy =
+ let policy = ref Ask in
+ (fun () -> !policy),
+ (function
   | Safer -> policy := Safer
   | Exec -> policy := Exec
-  | Ask -> policy := Ask
-;;
+  | Ask -> policy := Ask);;
 
 Options.add
   "-exec"
   (Arg.Unit
     (fun () ->
-      if !policy <> Exec then Misc.warning "Setting policy to -exec";
+      if get_policy () <> Exec then Misc.warning "Setting policy to -exec";
       set_policy Exec))
   "  set the security policy to \"Exec\" mode, i.e.\
   \n\t all embedded applications are automatically executed.\
@@ -100,7 +98,7 @@ Options.add
   "-safer"
   (Arg.Unit
     (fun () ->
-      if !policy <> Safer then Misc.warning "Setting policy to -safer";
+      if get_policy () <> Safer then Misc.warning "Setting policy to -safer";
       set_policy Safer))
   "  set the security policy to \"Safer\" mode, i.e.\
   \n\t external applications are simply ignored.\
@@ -110,7 +108,7 @@ Options.add
   "-ask"
   (Arg.Unit
     (fun () ->
-      if !policy <> Ask then Misc.warning "Setting policy to -ask";
+      if get_policy () <> Ask then Misc.warning "Setting policy to -ask";
       set_policy Ask))
   "  set the security policy to \"Ask\" mode, i.e.\
   \n\t launching an external application requires explicit confirmation\
@@ -177,7 +175,7 @@ let ask_before_launching command command_invocation =
 let can_execute_table = Hashtbl.create 11;;
 
 let can_execute command_invocation command_tokens =
-  match !policy with
+  match get_policy () with
   | Exec -> true
   | Safer -> false
   | Ask ->
@@ -217,45 +215,47 @@ let fork_process command_invocation =
 
 (* Support for no launching at all during an arbitrary function call. *)
 let without_launching f x =
-  let p = !policy in
+  let p = get_policy () in
   let restore () = set_policy p in
   try set_policy Safer; let r = f x in restore (); r
   with x -> restore (); raise x;;
 
-(* Support for no launching at all during an arbitrary function call. *)
+(* Support for automatic launching during an arbitrary function call. *)
 let with_launching f x =
-  let p = !policy in
+  let p = get_policy () in
   let restore () = set_policy p in
   try set_policy Exec; let r = f x in restore (); r
   with x -> restore (); raise x;;
 
+(* Fork the process that executes this function (cloning :). *)
 let fork_me geom arg =
   with_launching
   fork_process (Printf.sprintf "%s %s %s" Sys.argv.(0) geom arg);;
 
 (* Support for white run via -n option *)
 
-let whiterun_commands = ref []
-and whiterun_flag = ref false;;
+let white_run, set_white_run =
+  let white_run_flag = ref false in
+  (fun () -> !white_run_flag),
+  (fun () -> white_run_flag := true);;
 
-let whiterun () = !whiterun_flag;;
-
-let add_whiterun_command command =
-  whiterun_commands := command :: !whiterun_commands;;
-
-let dump_whiterun_commands () =
-  let unique l =
-    List.fold_right
-      (fun c acc ->
-	match acc with [] -> [c]
-	| c' :: r as cl -> if c = c' then cl else c :: cl)
-      (List.sort compare l) [] in
-  let comms = unique !whiterun_commands in
-  List.iter (fun c -> prerr_endline c) comms;;
+let add_white_run_command, dump_white_run_commands =
+  let white_run_commands = ref [] in
+  (fun command -> white_run_commands := command :: !white_run_commands),
+  (fun () ->
+    let unique l =
+      List.fold_right
+        (fun c acc ->
+	  match acc with
+          | [] -> [c]
+	  | c' :: r as cl -> if c = c' then cl else c :: cl)
+        (List.sort compare l) [] in
+    let comms = unique !white_run_commands in
+    List.iter (fun c -> prerr_endline c) comms);;
 
 Options.add
   "-n"
-  (Arg.Unit (fun () -> whiterun_flag := true))
+  (Arg.Unit (fun () -> set_white_run ()))
   "  ask Active-DVI to run in \"fake mode\", i.e.\
   \n\t to just echo the name of embedded commands\
   \n\t (there is no previewing nor embedded commands execution).";;
