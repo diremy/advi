@@ -87,6 +87,8 @@ image drawing.\\
 
 This file is a simple showcase for the current background effects.
 
+\newpage
+
 \tableofcontents
 
 \newpage
@@ -529,14 +531,13 @@ Resize the display window to see how this positioning option works.%
 
 \newpage
 
-\section{Alpha and blending}
+\section{Alpha factor and blending}
 \dockey[none]{alpha}{float}
 \begin{quote}
 Set the alpha factor for the background image to \docid{float}
 (\doctt{none} means unset).
 \end{quote}
 
-\section{Blending}
 \dockey[none]{blend}{blend mode}
 \begin{quote}
 Set the blend mode to \docid{blend mode}, which should be one of the
@@ -697,47 +698,7 @@ want to revert to normal background.
 
 \advibg{none}
 
-\section{Future work}
-
-\subsection {Design considerations}
-
-  \begin{itemize}
-    \item background preferences are ``asynchronous'', in the sense
-that they can imply rendering modifications in a part of the page that
-has already been displayed; this is why we first scan a page, looking
-for background specials (example, a red background), and only after we
-render it (setting the background to red before everything else). By
-the way, this mechanism was already in place to handle PostScript
-headers, that also appear asynchronously.
-
-    \item is it worthwhile to consider the possibility of making a
-``synchronous'' variant? This would allow for example to change the
-background color after a pause. But at what price ?
-
-    \item anybody willing to add support for color gradients?\\Done.
-
-    \item anybody willing to improve gradients so that we can have
-images above a color gradient ?\\Done.
-
-    \item anybody willing to improve gradients so that we can define a
-sub window where the color gradient takes place ?\\Done.
-
-    \item anybody willing to improve gradients to a more general
-scheme that could be programmable ?
-  \end{itemize}
-\vfill
-
-\advibg{none}
-The command to obtain this background is:
-
-\begin{center}
-\begin{verbatim}
-  \advibg{none}
-\end{verbatim}
-\end{center}
-\vfill
-
-\newpage
+\section{Backgrounds Gallery}
 
 \vfill
 {\Huge Solid color background}
@@ -991,9 +952,17 @@ headers, that also appear asynchronously.
 ``synchronous'' variant? This would allow for example to change the
 background color after a pause. But at what price ?
 
-    \item anybody willing to add support for color gradients with
-function arguments and more fancy variants ?\\
-Done.
+    \item anybody willing to add support for color gradients?\\Done.
+
+    \item anybody willing to improve gradients so that we can have
+images above a color gradient ?\\Done.
+
+    \item anybody willing to improve gradients so that we can define a
+sub window where the color gradient takes place ?\\Done.
+
+    \item anybody willing to improve gradients to a more general
+scheme that could be programmable ?
+
   \end{itemize}
 \vfill
 
