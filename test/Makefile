@@ -3,8 +3,8 @@ include ../Makefile.config
 
 RM=/bin/rm -f
 
-LATEX=TEXINPUTS=.:../tex:$$TEXINPUTS latex
-PLATEX=TEXINPUTS=.:../tex:$$TEXINPUTS platex
+LATEX=TEXINPUTS=.:../tex: latex
+PLATEX=TEXINPUTS=.:../tex: platex
 
 ifeq ($(HAVE_CAMLTK),true)
 MLPROG=taquin

@@ -10,9 +10,9 @@
 \usepackage {advi-annot}
 
 
-\title {Active DVI manual}
-\author {???}
-
+\title {{\ActiveDVI} manual}
+\author {Didier R{\'{e}}my and ???}
+\def \ActiveDVI {\textbf {Active-DVI}}
 
 
 \begin{document}
@@ -27,8 +27,24 @@ Put a Summary of Active DVI.
 
 \section {Installation}
 
+\section {Calling advi}
 
-\section {Documentation}
+\section {The {\tt advi} package}
+
+This package provides commands interactive with {\ActiveDVI}. 
+This package does not have to be loaded if one does not need special
+effects. The package recognizes the option \verb"ignore", which 
+makes all not produce any {\tt advi} specials, 
+so that it can be previewed by other previewers or turned into Postscript 
+with {\tt dvips}. Of course, this will disable most effects, although some
+of them will be approximated.
+
+If the global option is not {\tt ignore} is not set, it is possible to set
+it locally with the commands {\docdef \adviignore}.
+The package also defines the conditional
+{\docdef \ifadvi} which
+evaluate its first  argument if advi is not ignore and its second argument
+otherwise. 
 
 \subsection {Pause, Record and Play}
 
@@ -42,17 +58,19 @@ user requests to continue (or to change page).
 \medskip\noindent
 \docdef \advirecord \doctt{[play]}\docarg{tag}\docarg{latex code}
 \\
-\docdef \begin\doctt{\{advirecord\}}%
+\docdef \begin\doctt{\{advirecording\}}%
 \doctt{[play]}\docarg{tag}\docarg{latex code}%
-\docid {text}\docdef \end\doctt{\{advirecord\}}
+\docid {text}\docdef \end\doctt{\{advirecording\}}
 \begin{quote}
 The computes \docid{latex code} and record its DVI ouput under tag
 \docid{tag}. The DVI output is not displayed during recording, unless the
 option \doctt{play} is set.
 
-Embedded recordings are prohibited. 
+Records can be embedded. The inner record is always recorded
+its own  tag. It is also recorded under the outer tag if the inner record is
+played when recording.
 
-In the environment form \docid{latex code} may contain fragile commands. 
+In the environment form, \docid{latex code} may contain fragile commands. 
 \end{quote}
 
 \medskip\noindent
@@ -65,8 +83,8 @@ The optional argument changes the color to \docid{color} during replay.
 \medskip\noindent
 \docdef \advianchor\docopt{activation}\docarg{tag}\docarg{text}
 \\
-\docdef \begin\doctt{\{advianchor\}}\docopt{activation}\docarg{tag}%
-\docid {text}\docdef \end\doctt{\{advianchor\}}
+\docdef \begin\doctt{\{advianchoring\}}\docopt{activation}\docarg{tag}%
+\docid {text}\docdef \end\doctt{\{advianchoring\}}
 \begin{quote}
 Play record when anchor is activated. The argument \docid{activation} may
 either be \doctt{over} or \doctt{click}. The page is reset to its original
@@ -206,7 +224,7 @@ parsed incrementally.
 
 \subsection {Hyperrefs}
 
-Active dvi supports hyperrefs. 
+{\ActiveDVI} supports hyperrefs. 
 
 Explain \verb"<a name>aaa</a>"
 
@@ -273,28 +291,35 @@ In the environment form, \docid{text} may contain fragile commands.
 
 \subsection {Postscript specials}
 
+{\ActiveDVI} can deal with most of PStricks calling {\tt ghostscript} on
+included Postscripts. However, the interactive between {\ActiveDVI} and
+Postscripts is not always working.
+\begin {itemize}
+
+\item
+Since caracters are rendered by{\ActiveDVI}, some PStricks are not allowed.
+\item
+Some change of repairs are also not yet correctly perfomed.  
+\end {itemize}
+
+\subsubsection {Overlays}
+
+\index{overlays}
+
+The {\tt overlay} class implements overlays with PStricks.  Instead,
+{\ActiveDVI} implements overlays directly, using records and plays.
+This is more efficient, and of course more natural.
+(In fact, {\ActiveDVI} chooses the cumulative semantics of overlays
+display if all layers below the current overlay.)
+
+The {\tt xprosper} style derived from the {\tt prosper} class uses 
+the {\tt overlay} class and also work with {\ActiveDVI} in exactly the same
+way (relaxing the \overlay@loop macro inhibits all layers, but the first
+page). 
+
 \subsubsection {PStricks}
 
-For instance, some features of {\tt
-PStricks} such as annotations above arrows do not work, yet.
-
-\subsubsection {PStricks that are know to work}
-\begin{itemize}
-\item[-]
-Labels over arrows \verb"\Aput", \verb"Bput", etc.
-(they change the Postscript coordinates...)
-
-\item[-]
-{\tt pspicture}
-(idem, but drawings that are not embedded in pspictures works)
-
-\item[-]
-
-Advi only recognizes binary overlays (display if 0, hide otherwise). 
-This is sufficient for the proper documentclass
-(see \hyperlink {overlays}{below}).
-\end {itemize}
-PS-tricks that are known to work:
+{\ActiveDVI} can deal with most of PStricks. 
 \begin {itemize}
 
 \item[+]
@@ -307,6 +332,17 @@ Simple drawings work
 \item[+]
 Connections between nodes {\tt \string \ncarc}, {\tt \string \ncarc},
 also works.
+\end {itemize}
+However, some PStricks are known not to work.
+\begin{itemize}
+\item[--]
+Labels over arrows \verb"\Aput", \verb"Bput", etc.
+(they change the Postscript coordinates...)
+
+\item[--]
+{\tt pspicture}
+(idem, but drawings that are not embedded in pspictures works)
+
 \end {itemize}
 
 

@@ -181,6 +181,7 @@ type state = {
 
 type proc_unit = {
     escaped_register : reg_set;
+    escaped_stack : reg_set list;
     escaped_cur_font : cooked_font;
     escaped_cur_mtable : (int * int) Table.t;
     escaped_cur_gtable : Dev.glyph Table.t;
@@ -188,11 +189,12 @@ type proc_unit = {
   };;
 
 let procs = Hashtbl.create 107;;
-let current_recording_proc_name = ref None;;
-let current_recording_proc_unit = ref None;;
+type recording = { tag : string; unit : proc_unit}
+let current_recording_proc = ref [];;
+
 let hidden = ref false;;
 let is_hidden () = !hidden;;
-let is_recording () = !current_recording_proc_name <> None;;
+let is_recording () = !current_recording_proc <> [];;
 
 (*** Rendering primitives ***)
 
@@ -612,9 +614,13 @@ let transbox_go_special st s =
 
 let forward_eval_command = ref (fun _ _ -> ());;
 
+let playing = ref 0;;
+let hidden_stack = ref []
+
 let proc_clean () =
-  current_recording_proc_name := None;
-  current_recording_proc_unit := None;
+  current_recording_proc := [];
+  playing := 0;
+  hidden_stack := [];
   Hashtbl.clear procs;;
 
 let proc_special st s =
@@ -626,45 +632,47 @@ let proc_special st s =
         let procname =
           try unquote (List.assoc "proc" records)
           with Not_found -> raise (Failure "proc: invalid special") in
-        if !current_recording_proc_name <> None ||
-           !current_recording_proc_unit <> None
-        then
-          prerr_endline
-            (Printf.sprintf "proc=%s record=start: cannot be recorded"
-               procname)
-        else begin
-          hidden :=
-            (try ignore (List.assoc "play" records); false with _ -> true);
-          current_recording_proc_name := Some procname;
-          current_recording_proc_unit :=
-            Some { escaped_register = get_register_set st;
-                   escaped_cur_mtable = st.cur_mtable;
-                   escaped_cur_gtable = st.cur_gtable;
-                   escaped_cur_font = st.cur_font;
-                   escaped_commands = [] }
-        end
+        hidden_stack := !hidden :: !hidden_stack;
+        hidden := 
+          (try ignore (List.assoc "play" records); false with _ -> true);
+        if !playing = 0 then
+          begin
+            let recording =
+              { tag =  procname;
+                unit = 
+                { escaped_register = get_register_set st;
+                  escaped_stack = st.stack;
+                  escaped_cur_mtable = st.cur_mtable;
+                  escaped_cur_gtable = st.cur_gtable;
+                  escaped_cur_font = st.cur_font;
+                  escaped_commands = [] }
+              } in
+            current_recording_proc := recording :: !current_recording_proc;
+          end;
+
+
     | "end" ->
-        begin match !current_recording_proc_name with
-        | None ->
-            prerr_endline
-              (Printf.sprintf "'xxx %s' not recording" s)
-        | Some procname -> 
-            let v =
-              try
-                let v = Hashtbl.find procs procname in
-                Hashtbl.remove procs procname;
-                v
-              with Not_found -> []
-            in
-            match !current_recording_proc_unit with
-            | Some u ->
-                Hashtbl.add procs procname (v @ [u]);
-                current_recording_proc_name := None;
-                current_recording_proc_unit := None;
-                hidden := false
-            | None -> assert false
-        end
-    | _ -> ()
+        if !playing = 0 then
+          begin match !current_recording_proc with
+            | [] ->
+                prerr_endline
+                  (Printf.sprintf "'xxx %s' not recording" s)
+            | recording :: rest ->
+                let procname = recording.tag in
+                current_recording_proc := rest;
+                let u = recording.unit in
+                Hashtbl.add procs procname u;
+                match u.escaped_commands with
+                | h::rest -> u.escaped_commands <- List.rev rest
+                | [] -> assert false
+          end;
+        begin match !hidden_stack with
+          h :: rest ->
+            hidden := h; hidden_stack := rest;
+        | [] -> assert false; 
+        end;
+
+    | _ -> ill_formed_special s
   with
   | Not_found ->
       let procname =
@@ -672,19 +680,23 @@ let proc_special st s =
         with Not_found -> raise (Failure "proc: invalid special") in
       try
         ignore (List.assoc "play" records);
-        let us = Hashtbl.find procs procname in
+        let us = Hashtbl.find_all procs procname in
         let escaped_cur_font = st.cur_font
         and escaped_cur_mtable = st.cur_mtable
         and escaped_cur_gtable = st.cur_gtable in
         let escaped_stack = push st; st.stack in
-        List.iter (fun u ->
-          set_register_set st u.escaped_register;
-          st.cur_mtable <- u.escaped_cur_mtable;
-          st.cur_gtable <- u.escaped_cur_gtable;
-          st.cur_font <- u.escaped_cur_font;
-          List.iter
-            (fun com -> !forward_eval_command st com) u.escaped_commands)
-          us;
+        incr playing;
+        List.iter
+          (fun u ->
+            set_register_set st u.escaped_register;
+            st.stack <- u.escaped_stack;
+            st.cur_mtable <- u.escaped_cur_mtable;
+            st.cur_gtable <- u.escaped_cur_gtable;
+            st.cur_font <- u.escaped_cur_font;
+            List.iter (fun com -> !forward_eval_command st com)
+              u.escaped_commands
+          ) us;
+        decr playing;
         st.stack <- escaped_stack; pop st;
         st.cur_mtable <- escaped_cur_mtable;
         st.cur_gtable <- escaped_cur_gtable;
@@ -1052,15 +1064,16 @@ let scan_command st = function
   | _ -> ();;
 
 let eval_command st c =
-   begin match !current_recording_proc_unit with
-   | None -> ()
-   | Some u ->
-       match c with
-          (* The advi: proc specials are not recorded *)
-       | Dvi.C_xxx s when has_prefix "advi: proc" s -> ()
-       |  _ -> u.escaped_commands <- u.escaped_commands @ [c]
-   end;
-   eval_dvi_command st c;;
+  let record r =
+    let u = r.unit in
+    match c with
+      (* The advi: proc specials are not recorded *)
+(*
+    | Dvi.C_xxx s when has_prefix "advi: proc" s -> ()
+*)
+    |  _ -> u.escaped_commands <- c :: u.escaped_commands in
+  List.iter record   !current_recording_proc;
+  eval_dvi_command st c;;
 
 forward_eval_command := eval_command;;
 

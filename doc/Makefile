@@ -1,5 +1,4 @@
-TEXINPUTS := ../tex/:$(TEXINPUTS)
-LATEX=TEXINPUTS=$(TEXINPUTS) latex
+LATEX=TEXINPUTS=.:../tex: latex
 all: manual.ps manual.pdf 
 
 manual.dvi: manual.tex

@@ -27,16 +27,13 @@
 
 % Auxilliary macros
 
+
 \def \advi@empty{}
 \def \advi@ifempty #1{\def \@test {#1}\ifx \@test \advi@empty 
   \expandafter \@firstoftwo \else \expandafter \@secondoftwo \fi}
 \def \advi@error #1{\PackageError {Advi}{#1}{Type <RETURN> to proceed.}}
 \def \advi@warning #1{\PackageWarning {Advi}{#1}}
-\ifadvi@ignore 
-\def \advi@special@ #1{\hbox{}}
-\else
-\let \advi@special@ \special
-\fi
+\def \advi@special@ {\advi@ifadvi{\special}{\hbox{}\advi@ignore}}
 \def \advi@special #1{\advi@special@ {advi: #1}}
 \def \advi@export #1#2{\@ifdefinable #1{\let #1#2}}
 \def \advi@exportenv #1#2{%
@@ -47,29 +44,40 @@
    \expandafter \let \csname end#1\expandafter \endcsname 
         \csname end#2\endcsname}}
 
+\def \advi@ignore #1{}
+\def \advi@ifadvi {\ifadvi@ignore
+  \expandafter \@secondoftwo \else \expandafter \@firstoftwo \fi}
+\advi@export \advignore \advi@ignoretrue
+\advi@export \ifadvi \advi@ifadvi
+
 %%% record and play
 
-\newif \ifadvi@record 
+\newif \ifadvi@recording 
+\def \advi@ifrecording {\ifadvi@recording
+   \expandafter \@firstoftwo \else \expandafter \@secondoftwo \fi}
+\def \advi@ifrecordenv {\ifx \@currenvir \advi@recordenv
+   \expandafter \@firstoftwo \else \expandafter \@secondoftwo \fi}
+
 \def \advi@start {start}
 \def \advi@startplay {start play}
 \define@key{advi@record}{play}[]{\let \advi@do \advi@startplay}
 \def \advi@recordenv {advirecord}
-\newenvironment {advi@record}[2][]%
-  {\ifadvi@record \advi@error {Embedded record are not allowed}\fi
-   \ifx \@currenvir \advi@recordenv \else \begingroup \fi
-   \advi@recordtrue
-   \let \advi@do \advi@start 
-   \setkeys{advi@record}{#1}\advi@special {proc=#2 record=\advi@do}%
-   \ifx \@currenvir \advi@recordenv \let \@do \relax \else
-     \let \@do \advi@endrecord \fi \@do}
+
+\newenvironment{advi@recording}[2][]%
+  {\begingroup
+        \let \advi@do \advi@start \setkeys{advi@record}{#1}%
+        \advi@special {proc=#2 record=\advi@do}%
+   \endgroup}
   {\advi@special {proc record=end}}
-\def \advi@endrecord #1{#1\endadvi@record \endgroup}
+\newenvironment{advi@record}[3][]{\advi@recording[#1]{#2}\endadvi@recording}
+
 \newcommand {\advi@play}[2][]%
    {\begingroup
       \advi@ifempty{#1}{}{\color {#1}}{\advi@special {proc=#2 play}}%
     \endgroup}
 
-\advi@exportenv {advirecord}{advi@record} 
+\advi@exportenv {advirecording}{advi@record} 
+\advi@export \advirecord \advi@record
 \advi@export \adviplay \advi@play
 
 
@@ -145,10 +153,9 @@
 \define@key {advi@bg}{alpha}[]{\advi@setbg{\advi@bgalpha}{alpha}{#1}}
 \define@key {advi@bg}{blend}[]{\advi@setbg{\advi@bgblend}{blend}{#1}}
 \define@key {advi@bg}{fit}[auto]{\def \advi@bgfit {#1}%
-     \message {[\advi@bgfit]}
      \ifx \advi@bgfit \advi@auto@ \else
      \advi@ifnine {\advi@bgfit}
-       {\message {#1}\advi@global \def \advi@bgfit{ fit=#1}\message{END}}
+       {\advi@global \def \advi@bgfit{ fit=#1}}
        {\advi@error {Ill formed background fit=#1}}%
    \fi}
 \def \advi@bgset #1{\advi@ifnone {#1}{\advi@bgreset}{\setkeys {advi@bg}{#1}}}
@@ -246,8 +253,11 @@
 \def \advi@setpagestyle {\advi@bgpage \advi@transpage}
 
 \let \latex@begindvi \@begindvi
+\def \endpage@hook {}
+\def \AtEndPage {\g@addto@macro \endpage@hook}
+\AtEndPage {\advi@setpagestyle}
 \def \@begindvi
-  {\latex@begindvi \global \let \@begindvi \advi@setpagestyle \@begindvi}
+  {\latex@begindvi \global \let \@begindvi \endpage@hook \@begindvi}
 
 % not used anymore
 % \def\advi@resettransition{\advi@special{trans pop}}
@@ -307,40 +317,55 @@ end
 \def \advi@click@ {click}
 \def \advi@anchorenv {advianchor}
 
-\newenvironment {advi@anchor}[2][over]{%
-   \ifx \@currenvir \advi@anchorenv \else \begingroup \fi 
+\newenvironment {advi@anchoring}[2][over]{%
+   \begingroup
    \def \@test {#1}\ifx \@test \advi@over@ 
        \advi@special@ {html:<a advi="#2">}\else
    \ifx \@test \advi@click@ 
        \advi@special@ {html:<a hdvi="#2">}\else
-   \advi@error {Incorect anchor mode #1}\fi \fi
-   \ifx \@currenvir \advi@anchorenv \let \@do \relax \else
-        \let \@do \advi@endanchor \fi \@do}
+   \advi@error {Incorect anchor mode #1}\fi \fi\endgroup}
   {\advi@special@ {html:</a>}}
+\newcommand {\advi@anchor}[3][over]%
+   {\advi@anchoring[#1]{#2}#3\endadvi@anchoring}
 \def \advi@endanchor #1{#1\endadvi@anchor \endgroup}
 \advi@exportenv {advianchor}{advi@anchor}
 
 %%% Partial patch for overlays -- 0 will be shown > 0 will not be shown
 
-\newif \ifadvi@hidden \advi@hiddenfalse
-\def \advi@overlay 
-  {\ifadvi@hidden \else
-     \advi@hide \aftergroup \advi@endhide \advi@hiddentrue 
-   \fi}
+\let \latex@overlay \overlay
+\let \latex@end@slide \end@slide
+\let \latex@overlay@loop
 
-\def \advi@hide {\advi@special {proc=@hide record=\advi@start}}
-\def \advi@endhide {\advi@special {proc=@hide record=end}}
-\def \make@advioverlay 
-  {\let \advi@old@overlay \overlay
-   \renewcommand {\overlay}{\advi@overlay \advi@ignore}}
-\def \advi@ignore #1{}
+\def \advi@max {0}
+\newcommand {\advi@overlay}[1]%
+  {\advi@ifadvi 
+   {\advance \c@overlay by 1
+    \ifnum \c@overlay>\advi@max \global \xdef \advi@max {\the \c@overlay}\fi
+    \advi@recording {overlay@#1}
+    \aftergroup \endadvi@recording}
+   {\latex@overlay}}
+
+\def \advi@overlay@loop
+ {\advi@ifadvi 
+  {\begingroup
+    \c@overlay=0
+    \@whilenum\c@overlay<\advi@max
+    \do {\advance \c@overlay  by 1%
+         \adviwait \adviplay{overlay@\the\c@overlay}}%
+  \endgroup
+  \gdef \advi@max {0}}
+ {\latex@overlay@loop}}
+
+\def \advi@end@slide 
+  {\advi@ifadvi {\overlay@loop}{}\latex@end@slide}
+
+\def \advi@overlay@hook
+  {\let \overlay \advi@overlay
+   \let \overlay@loop \advi@overlay@loop
+   \let \end@slide \advi@end@slide
+  }
 \@ifundefined {overlay}{}
-  {\ifadvi@ignore
-     \def \advi@hide {\bgroup \overlay 9}
-     \def \advi@endhide {\egroup}
-   \else
-     \AtBeginDocument {\make@advioverlay}
-   \fi}
+   {\AtBeginDocument {\advi@overlay@hook}}
 
 
 \endinput

@@ -2,7 +2,11 @@
 %; dview  dview -mlslides $*.dvi &
 %; whizzy  slide -dvi "dview -mlslides."
 
-\documentclass [landscape,semlayer,semcolor,semlcmss]{seminar}
+\documentclass [landscape,semlayer,semcolor,semlcmss,a4]{seminar}
+
+\slidewidth 235mm
+\slideheight 174mm
+\centerslidesfalse
 
 \def \prsl {\green}
 \usepackage {xprosper}
@@ -41,20 +45,13 @@
 \def \jc {\@\triangleright\@}
 \def \jcand {\@\&\@}
 
-%\twoup
-%\slidesmag{1}
 
-
-%\slideframe {plain}\slideframewidth 0.1mm\slideframesep  4mm 
 \slideframe {none}
-%\renewcommand{\slideleftmargin}{-1cm}
 \renewcommand{\slidetopmargin}{20pt}
 \renewcommand{\slidebottommargin}{1cm}
 
-\iftrue
 \newpagestyle {mystyle}{}{}%{\hfil {\tiny \thepage}}
 \pagestyle {mystyle}
-\fi
 
 \def \tf {\blue \bf}
 
@@ -65,23 +62,6 @@
 \def \verbatim@font {\tt\red}
 \makeatother
 
-
-\iffalse
- \let \progfont  \rm
- \let \sltt \sl
-
- \let \progfont \tt
-  \font \progfont  cmss10 scaled 2000
-  \font \sltt  cmssi10 scaled 2000
-
- \def \progsize {\normalsize \progfont\baselineskip 0.0pt}
- \def \progstyle {\progsize \progfont }
-
- \def \progstyle {\progsize \progfont  \progcolor}
- \let \progcolor \black
- \def \reset {\progfont \progcolor}
- \def \reply {\sltt \red}
-\fi
 
 \let  ~ \hfill
 
