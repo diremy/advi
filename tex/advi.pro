@@ -1,6 +1,5 @@
 %!
 % PostScript prologue for advi.
-% see pst-advi.sty.
 %
 /advi@Dict 20 dict def 
 advi@Dict begin

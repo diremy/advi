@@ -31,7 +31,7 @@ MLINCDIRS = $(CAMLIMAGESDIR)
 EXEC      = advi
 MODULES   = config misc input symbol search \
 	    graphicsY11 drawps \
-            table input pkfont \
+            table pkfont \
 	    ttfont jfm \
 	    font glyph devfont dvi \
 	    units dimension driver\
@@ -155,6 +155,7 @@ distribute: tex/splash.dvi test/demo.dvi test/trans.dvi
 	cd release; cvs co bazar-ocaml/advi; \
 	cp -p ../test/demo.dvi bazar-ocaml/advi/test/; \
 	cp -p ../tex/splash.dvi bazar-ocaml/advi/tex/; \
+	cp -p ../tex/advi.pro bazar-ocaml/advi/test/; \
 	find . -name '.cvsignore' -print | xargs rm; \
 	find . -name 'CVS' -print | xargs rm -rf; \
 	cp -pr bazar-ocaml/advi/doc/* $(WEBSITEDIR)

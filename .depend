@@ -9,16 +9,14 @@ input.cmo: input.cmi
 input.cmx: input.cmi 
 symbol.cmo: misc.cmi symbol.cmi 
 symbol.cmx: misc.cmx symbol.cmi 
-search.cmo: config.cmo search.cmi 
-search.cmx: config.cmx search.cmi 
+search.cmo: config.cmo misc.cmi search.cmi 
+search.cmx: config.cmx misc.cmx search.cmi 
 graphicsY11.cmo: graphicsY11.cmi 
 graphicsY11.cmx: graphicsY11.cmi 
 drawps.cmo: graphicsY11.cmi misc.cmi search.cmi drawps.cmi 
 drawps.cmx: graphicsY11.cmx misc.cmx search.cmx drawps.cmi 
 table.cmo: table.cmi 
 table.cmx: table.cmi 
-input.cmo: input.cmi 
-input.cmx: input.cmi 
 pkfont.cmo: input.cmi pkfont.cmi 
 pkfont.cmx: input.cmx pkfont.cmi 
 ttfont.cmo: ttfont.cmi 

@@ -1139,18 +1139,12 @@ module Make(Dev : DEVICE) = struct
     with Dev.GS -> st.status <- PS false
 
   let find_prologues l =
-    try
-      let l' =  Search.true_file_names [] l in
-      if List.length l' <> List.length l then raise Not_found
-      else l'
-    with 
-      Not_found ->
-        Misc.warning
-          (Printf.sprintf "Cannot find Postscript prologues: %s"
-             (String.concat " " l));
-        Misc.warning "Continuing without Postscript specials";
-        dops := false;
-        []
+    let l' = Search.true_file_names [] l in
+    if List.length l <> List.length l' then begin
+      Misc.warning "Cannot find postscript prologue. Continuing without Postscript specials";
+      dops := false;
+      []
+    end else l'
 
   let render_page cdvi num dpi xorig yorig =
     proc_clean ();

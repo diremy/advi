@@ -83,8 +83,8 @@ module Japanese = struct
   type jfonttype = Mincho | Gothic
   
   let japanese_fontfiles = [
-    "min", Mincho, "/usr/share/fonts/TrueType/msmincho.ttc";
-    "goth", Gothic, "/usr/share/fonts/TrueType/msgothic.ttc"
+    "min", Mincho, "msmincho.ttc";
+    "goth", Gothic, "msgothic.ttc"
   ] 
   ;;
   
@@ -110,14 +110,10 @@ module Japanese = struct
   		| _ -> search xs
   	  in
   	  let fontfile, typ, pt = search japanese_fontfiles in
- 	  let face = Ttfont.load_face fontfile in
+ 	  let face = Ttfont.load_face (Search.true_file_name [] fontfile) in
   	  let jfmname = 
   	    let jfm = fontname ^ ".tfm" in
-  	    match Search.true_file_names [] [jfm] with
-  	    | [n] -> n
-  	    | _ -> 
-  		prerr_endline (jfm ^ " not found");
-  		raise Not_found 
+  	    Search.true_file_name [] jfm
   	  in
   	  let jfm = Jfm.load_jfm_file jfmname in
   	  Hashtbl.add facetable fontname (face,typ,pt,jfm);

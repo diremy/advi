@@ -24,6 +24,10 @@
    for the given font at the given resolution. *)
 val font_path : string -> int -> string ;;
 
+(* [true_file_name OPTIONS FILE] return the true FILE name
+   for a file (call kpsewitch)  under OPTIONS *)
+val true_file_name : string list -> string -> string
+
 (* [true_file_names OPTIONS FILES] return the list of true FILES names
    for files (call kpsewitch)  under OPTIONS *)
 val true_file_names : string list -> string list -> string list

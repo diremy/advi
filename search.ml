@@ -79,27 +79,31 @@ let database_font_path fontname dpi =
   let path = Hashtbl.find database_table name in
   texdir_path ^ "/" ^ path ;;
 
-let true_file_names options files =
-  let args = String.concat " " (options @ files) in
+let true_file_name options file =
+  let args = String.concat " " (options @ [file]) in
   let command = Printf.sprintf "%s %s > %s" kpsewhich_path args temp_filename
   in
   let exit_status =
     Sys.command command in
   if exit_status <> 0 then begin
-    Format.eprintf "Error while executing %s@." command ;
+    Misc.warning (Printf.sprintf "%s is not found. (Error while executing %s)" file command);
     raise Not_found
   end ;
-  let ch =
-    try open_in temp_filename
-    with _ -> raise Not_found in
-  let filenames = ref [] in
-  begin try
-    while true do 
-      filenames := (input_line ch) :: !filenames
-    done
-  with _ -> close_in ch ;
-  end;
-  List.rev !filenames;;
+  try
+    let ch = open_in temp_filename in
+    let filename = input_line ch in
+    close_in ch;
+    filename
+  with
+  | _ -> 
+      Misc.warning (Printf.sprintf "%s is not found" file);
+      raise Not_found
+;;
+
+let true_file_names options files =
+  List.fold_right (fun file st ->
+    try true_file_name options file :: st with Not_found -> st) files []
+;;
 
 let kpsewhich_font_path fontname dpi =
   match

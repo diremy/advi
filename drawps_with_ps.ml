@@ -12,9 +12,7 @@ let images_graphics = Hashtbl.create 107
 let cache_dir = ".advi"
 
 let f file whitetransp alpha blend (llx,lly,urx,ury) (w,h) x0 y0 =
-  let file = 
-    try List.hd (Search.true_file_names [] [file]) with _ -> raise Not_found
-  in
+  let file = Search.true_file_name [] file in
   let cache_name =
     let file' = String.copy file in
     for i = 0 to String.length file' - 1 do
