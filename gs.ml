@@ -284,6 +284,8 @@ let advi_pro =
 CM [1 0 0 -1 0 0] setmatrix
     CP (dvi) print advi@printfloat  (,) print advi@printfloat (\n) print 
 setmatrix } def";;
+let advi_noshowpage = " /showpage { } /def"
+let advi_resetmatrix = "[1 0 0 -1 0 0] concat"
 
 let texbegin = "TeXDict begin";;
 let texend = "flushpage end";;
@@ -429,9 +431,6 @@ class gv =
       (* does not draw---no flushpage *)
       self # send [ b ]
 
-    method file b x y =
-      self # send [ "grestore"; self#moveto x y; b; "gsave" ]
-
     method ps b (x : int) (y : int) =
 (*prerr_endline (Printf.sprintf "Calling gv#PS with\n\t\t %s" b);*)
       (* insert non protected postscript, typically with ``ps:''
@@ -452,11 +451,23 @@ class gv =
                   ] ;
       sync <- false
 
-    method file b (x : int) (y : int) =
+    method file name (llx, lly, urx, ury) (rwi, rhi : int * int) x y =
       (* insert into postscript into user dictionnary, typically with '!'
          should not change graphic parameters *)
       (* does not draw---no flushpage *)
-      self # send [ self # moveto x y; b ]
+      let ri z s = if z <> 0 then Printf.sprintf "%d %s" z s else "" in
+      self # send [ texbegin;
+                    self # moveto x y;
+                    "@beginspecial";
+                    Printf.sprintf "%d @llx %d @lly %d @urx %d @ury"
+                      llx lly urx ury;
+                    ri rwi "@rwi"; ri rhi "@rhi";
+                    "@setspecial";
+                    Printf.sprintf"(%s) run" name;
+                    "@endspecial";
+                    texend;
+                  ] ;
+      sync <- false
 
     method kill =
       showps "showpage";
@@ -483,15 +494,16 @@ let draw s x y =
         try gv#special (Misc.get_suffix  "\" " s) x y with
         | Misc.Match ->
             try gv#def (Misc.get_suffix  "! " s) with
+(*
             | Misc.Match ->
-              try gv#file (Misc.get_suffix  "psfile: " s) x y with
+              try gv#file (Misc.get_suffix  "psfile: " s) bbox size x y with
+*)
               | Misc.Match ->
                   Misc.warning
                     (Printf.sprintf "Unknown PostScript commands\n\t\t %s" s)
 ;;
-
-let draw_file fname x y =
-  draw (Printf.sprintf "psfile: (%s) run" fname) x y;;
+let draw_file fname bbox ri x y =
+  if get_do_ps () then gv#file fname bbox ri x y;;
 
 let current_point() =
     gv#current_point;;

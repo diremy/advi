@@ -739,7 +739,7 @@ let fill_arc ~x ~y ~rx ~ry ~start:a1 ~stop:a2 ~shade =
   Graphics.fill_arc x (!size_y - y) rx ry (- a1) (- a2);
   Graphics.set_color (get_color ());;
 
-let draw_ps_by_gs fname sz = Gs.draw_file fname;;
+let draw_ps_by_gs fname = Gs.draw_file fname;;
 
 let draw_ps file bbox (w, h) x0 y0 =
   if not !opened then failwith "Grdev.draw_ps: no window";
