@@ -295,7 +295,7 @@ let get_line =
     let limx = t.cursor_x
     and limy = t.cursor_y in
     let rec read t =
-redraw t;
+Graphics.synchronize ();
       let evt = Graphics.wait_next_event [Graphics.Key_pressed] in
       if evt.Graphics.keypressed then
       match evt.Graphics.key with
@@ -324,13 +324,13 @@ redraw t;
 
 (* Try it ! *)
 let ask_user t s1 s2 s3 =
-prerr_endline "Clearing terminal ";
-(*GraphicsY11.init ();*)
+(*prerr_endline "Clearing terminal ";
+GraphicsY11.init ();*)
 (* clear t;
-redraw t;*)
-prerr_endline "Terminal Cleared ";
+redraw t;
+prerr_endline "Terminal Cleared "; *)
  vtab t 16; htab t 15; print_str t s1;
- vtab t 12; htab t 15; print_str t s2;
+ vtab t 12; htab t 10; print_str t s2;
  vtab t 8; htab t 15; print_str t s3;
 prerr_endline "Setting prompt ";
  let answer = get_line t in
