@@ -24,7 +24,12 @@ IMAGEN=imagen
 PDFIMAGEN=pdfimagen
 DVIPDFM=dvipdfm
 
-all: web manual.ps manual.pdf splash.dvi splash.ps mathmode.dvi manual.html
+all: web \
+manual.ps manual.pdf \
+splash.dvi splash.ps \
+scratch_write_splash.dvi scratch_write_splash.ps \
+scratch_draw_splash.dvi scratch_draw_splash.ps \
+mathmode.dvi manual.html
 
 clean: 
 	rm -f *.aux *.log manual.html *.dvi *.pdf *.pdfm *.ps *.ima *.out *.toc
