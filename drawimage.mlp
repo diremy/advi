@@ -188,21 +188,50 @@ module M = struct
         raise Exit
   ;;
 
-  let resize_and_make_transparent image whitetransp ratiopt (w,h) = 
+  let resize_and_make_transparent image whitetransp ratiopt (ow,oh) = 
     let iw,ih = Image.size image in
-    let w,h =
+    let dominantx = (iw/ow) > (ih/oh) in    (* is X the coordinate that needs more stretching? *)
+    let w,h = (* compute the size of the scaled image according to the options *)
       match ratiopt with
-      |	ScaleAuto        -> w, h
-      |	ScaleCenter      -> w,h
-      |	ScaleTop         -> w, Pervasives.truncate (float ih *. float w /. float iw)        
-      |	ScaleBottom      -> Pervasives.truncate (float iw *. float h /. float ih), h
-      |	ScaleLeft        -> w,h
-      |	ScaleRight       -> w,h
-      |	ScaleTopLeft     -> w,h
-      |	ScaleBottomLeft  -> w,h
-      |	ScaleTopRight    -> w,h
-      |	ScaleBottomRight -> w,h
-      |	ScaleOriginal -> iw, ih
+      |	ScaleOriginal    -> iw, ih
+      |	ScaleAuto        -> ow, oh
+      |	ScaleTop         
+      |	ScaleBottom      -> ow, Pervasives.truncate (float ih *. float ow /. float iw)        
+      |	ScaleLeft        
+      |	ScaleRight       -> Pervasives.truncate (float iw *. float oh /. float ih), oh
+      |	ScaleCenter      
+      |	ScaleTopLeft     
+      |	ScaleBottomLeft  
+      |	ScaleTopRight    
+      |	ScaleBottomRight -> if dominantx 
+                            then ow, Pervasives.truncate (float ih *. float ow /. float iw)        
+                            else Pervasives.truncate (float iw *. float oh /. float ih), oh
+    in
+    let blitinfo = (* compute the blitting information for the image *)
+      match ratiopt with
+      |	ScaleOriginal    -> None
+      |	ScaleAuto        -> None
+      |	ScaleTop         -> if oh = h & ow = w then None 
+                            else Some(0,0,0,0,min w ow,min h oh)
+      |	ScaleBottom      -> if oh = h & ow = w then None
+                            else Some(0,max 0 (h-oh),0,max 0 (oh-h),min w ow,min h oh)
+      |	ScaleLeft        -> if ow=w then None
+                            else Some(0,0,0,0,min w ow,h)
+(*
+      |	ScaleRight       -> if ow=w then None
+                            else Some(max 0 (w-ow),0,max 0 (ow-w),0,min w ow,h)
+      |	ScaleCenter      -> if oh = h & ow = w then None
+                            else Some((ow-w)/2,(oh-h)/2,0,0,min w ow,min h oh)
+      |	ScaleTopLeft     -> if oh = h & ow = w then None
+                            else Some(0,0,0,0,min w ow,min h oh)
+      |	ScaleBottomLeft  -> if oh = h & ow = w then None
+                            else Some(0,max 0 (oh-h),0,0,min w ow,min h oh)
+      |	ScaleTopRight    -> if oh = h & ow = w then None
+                            else Some(max 0 (ow-w),0,0,0,min w ow,min h oh)
+      |	ScaleBottomRight -> if oh = h & ow = w then None
+                            else Some(max 0 (ow-w),max 0 (oh-h),0,0,min w ow,min h oh)
+*)
+      |	_  -> (Misc.warning "Unfinished case in drawimage.ml(blitinfo)";None)
     in
     let image' =
       match image with
@@ -247,8 +276,18 @@ module M = struct
       end else image'
     in
     match image'' with
-    | Rgb24 i -> Rgb24 (Rgb24.resize None i w h)
-    | Rgba32 i -> Rgba32 (Rgba32.resize None i w h)
+    | Rgb24 i -> let i=Rgb24.resize None i w h in 
+                 Rgb24(match blitinfo with
+		         None -> i
+		       | Some(sx,sy,dx,dy,w,h) -> let i'=Rgb24.create ow oh
+                                      in  Rgb24.blit i sx sy i' dx dy w h;i'
+		       )
+    | Rgba32 i -> let i=Rgba32.resize None i w h in
+                 Rgba32(match blitinfo with
+		          None -> i
+		        | Some(sx,sy,dx,dy,w,h) -> let i'=Rgba32.create ow oh
+                                       in Rgba32.blit i sx sy i' dx dy w h;i'
+		        )
     | _ -> assert false
   ;;
 
@@ -256,7 +295,6 @@ module M = struct
     let file =
       Search.true_file_name [ "-format=" ^ Config.texpicts_kind ] file in
     let cache_name = cache_path file whitetransp psbbox ratiopt (w,h) in
-
     let image = 
       try
 	try
