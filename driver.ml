@@ -21,15 +21,15 @@ open Misc;;
 
 let active =
   Options.flag true "-passive" "Cancel all advi-effects";;
-let toggle_active () = active := not !active
+let toggle_active () = active := not !active;;
 
 let with_active b f x =
   let restore_delays() = if !active then Transimpl.sleep := (fun _ -> false) in
   let a = !active in
   try let v = (active:=b; f x) in active := a; restore_delays (); v
-  with z -> active := a; restore_delays (); raise z;;
+  with exc -> active := a; restore_delays (); raise exc;;
 
-(* number of steps before checking for user interruptions *)
+(* Number of steps before checking for user interruptions *)
 let checkpoint_frequency = 10;;
 
 (*** Some utilities for specials ***)
@@ -73,7 +73,7 @@ let split_record s =
       String.sub token 0 i,
       String.sub token (i + 1) (String.length token - i - 1)
     with
-    | _ -> token, "") tokens
+    | Not_found -> token, "") tokens
 ;;
 
 module Dev = Grdev;;
@@ -317,6 +317,33 @@ let epstransparent_pop st =
       if !visible then Dev.set_epstransparent v;
       st.epstransparent_stack <- rest;;
 
+let epsbygs_push st v =
+  st.epsbygs_stack <- st.epsbygs :: st.epsbygs_stack;
+  st.epsbygs <- v;
+  if !visible then Dev.set_epsbygs v;;
+
+let epsbygs_pop st =
+  match st.epsbygs_stack with
+  | [] -> ()
+  | v :: rest ->
+      st.epsbygs <- v;
+      if !visible then Dev.set_epsbygs v;
+      st.epsbygs_stack <- rest;;
+
+let epswithantialiasing_push st v =
+  st.epswithantialiasing_stack <-
+    st.epswithantialiasing :: st.epswithantialiasing_stack;
+  st.epswithantialiasing <- v;
+  if !visible then Dev.set_epswithantialiasing v;;
+
+let epswithantialiasing_pop st =
+  match st.epswithantialiasing_stack with
+  | [] -> ()
+  | v :: rest ->
+      st.epswithantialiasing <- v;
+      if !visible then Dev.set_epswithantialiasing v;
+      st.epswithantialiasing_stack <- rest;;
+
 let transition_push st v =
   st.transition <- v;
   if !visible then Dev.set_transition v;;
@@ -360,7 +387,7 @@ let put_rule st a b =
   and y = st.y_origin + int_of_float (st.conv *. float st.v)
   and w = int_of_float (ceil (st.conv *. float b))
   and h = int_of_float (ceil (st.conv *. float a)) in
-  add_rule st x (y-h) w h;
+  add_rule st x (y - h) w h;
   if !visible then Dev.fill_rect x (y - h) w h;;
 
 let set_rule st a b =
@@ -453,23 +480,24 @@ let epstransparent_special st s =
 let epsbygs_special st s =
   match split_string s 0 with
   | ["advi:"; "epsbygs"; "push"; arg] ->
-      epstransparent_push st (parse_bool arg)
+      epsbygs_push st (parse_bool arg)
   | "advi:" :: "epsbygs" :: "pop" :: [] ->
-      epstransparent_pop st
+      epsbygs_pop st
   | _ -> ill_formed_special s;;
 
 let epswithantialiasing_special st s =
   match split_string s 0 with
   | ["advi:"; "epswithantialiasing"; "push"; arg] ->
-      epstransparent_push st (parse_bool arg)
+      epswithantialiasing_push st (parse_bool arg)
   | "advi:" :: "epswithantialiasing" :: "pop" :: [] ->
-      epstransparent_pop st
+      epswithantialiasing_pop st
   | _ -> ill_formed_special s;;
 
 let get_records s =
   List.map (fun (k, v) -> String.lowercase k, v) (split_record s);;
 
 let psfile_special st s =
+  Misc.debug_endline (Printf.sprintf "psfile_special %S" s);
   let records = get_records s in
   let file =
     try unquote (List.assoc "psfile" records)
@@ -907,14 +935,14 @@ let inherit_background_info =
     "-inherit-background"
     "\tBackground options are inherited from previous page";;
 
-let setup_bkgd status =
+let setup_bkgd st =
   (* propagate bkgd preferences to graphics device *)
   (* storing the default/inherited prefs into Dev  *)
-  Dev.blit_bkgd_data status.Dvi.bkgd_prefs Dev.bkgd_data;
+  Dev.blit_bkgd_data st.Dvi.bkgd_prefs Dev.bkgd_data;
   (* apply local modifications                  *)
-  Dev.set_bg_options status.Dvi.bkgd_local_prefs;
+  Dev.set_bg_options st.Dvi.bkgd_local_prefs;
   (* recover modified preferences               *)
-  Dev.blit_bkgd_data Dev.bkgd_data status.Dvi.bkgd_prefs;;
+  Dev.blit_bkgd_data Dev.bkgd_data st.Dvi.bkgd_prefs;;
 
 let ratios_alist = [
   ("auto", Drawimage.ScaleAuto);
@@ -929,9 +957,8 @@ let ratios_alist = [
   ("bottomleft", Drawimage.ScaleBottomLeft);
 ];;
 
-(* The find_bgfuns should eventually handle dynamically
+(* The find_bgfuns function should eventually handle dynamically
    loaded plugins *)
-
 let bgfuns_alist = [
   ("hgradient", Addons.hgradient);
   ("vgradient", Addons.vgradient);
@@ -1241,8 +1268,8 @@ let scan_special_page otherwise cdvi globals pagenum =
    | Dvi.Known stored_status -> stored_status;;
 
 let special st s =
-  if has_prefix "\" " s || has_prefix "ps: " s || has_prefix "! " s then
-    ps_special st s else
+  if has_prefix "\" " s ||
+     has_prefix "ps: " s || has_prefix "! " s then ps_special st s else
   if has_prefix "advi: moveto" s then moveto_special st true s else
   if has_prefix "advi: rmoveto" s then moveto_special st false s else
 
@@ -1270,18 +1297,19 @@ let special st s =
       if !visible then
         let draw =
           if drawbygs then begin
-            Misc.debug_endline (Printf.sprintf "Drawing by gs %s" file);
+            Misc.debug_endline (Printf.sprintf "Gs draws gs file %S" file);
             Dev.draw_ps file bbox
           end else begin
-            Misc.debug_endline (Printf.sprintf "Drawing by camlimages %s" file);
-            Dev.draw_img file
-              Drawimage.ScaleAuto false 1.0 st.blend (Some bbox)
-               st.epswithantialiasing
+            Misc.debug_endline (Printf.sprintf "Camlimages draws file %S" file);
+            Dev.draw_img file st.epstransparent st.alpha st.blend (Some bbox)
+              Drawimage.ScaleAuto st.epswithantialiasing
           end in
         draw size x y
     with
-    | Failure s -> Misc.warning s
-    | e -> Misc.warning (Printexc.to_string e) end else
+    | exc ->
+        Misc.warning
+         (Printf.sprintf "Failed to load psfile: %s" (Printexc.to_string exc))
+  end else
   if has_prefix "advi: " s then begin
     if has_prefix "advi: edit" s then edit_special st s else
     if has_prefix "advi: alpha" s then alpha_special st s else
@@ -1388,12 +1416,13 @@ let render_step cdvi num ?trans ?chst dpi xorig yorig =
   proc_clean ();
   if num < 0 || num >= Array.length cdvi.base_dvi.Dvi.pages then
     invalid_arg "Driver.render_step";
-  let mag = float cdvi.base_dvi.Dvi.preamble.Dvicommands.pre_mag /. 1000.0
-  and page = cdvi.base_dvi.Dvi.pages.(num) in
+  let dvi = cdvi.base_dvi in
+  let mag = float dvi.Dvi.preamble.Dvicommands.pre_mag /. 1000.0
+  and page = dvi.Dvi.pages.(num) in
   let otherwise _ = () in
   let status =
     let headers = ref []
-    and xrefs = cdvi.base_dvi.Dvi.xrefs in
+    and xrefs = dvi.Dvi.xrefs in
     let s = scan_special_page otherwise cdvi (headers, xrefs) num in
     if !headers <> [] then
       Dev.add_headers (find_prologues !headers);
