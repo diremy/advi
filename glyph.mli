@@ -26,3 +26,4 @@ type t = {
   } ;;
 
 val from_char_def : Font.char_def -> float -> t ;;
+(** rasterize char_def to a glyph with bitmap *)
