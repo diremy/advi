@@ -56,6 +56,9 @@ CLEANING:
 * Parsing of specials should probably be shared (it is duplicated). 
   The abstract syntax tree should provided a data-type for specials
 
+* The hyperref links (green boxes) are a little to close to the text (take a
+  link that ends with a '2' for instance) 
+
 WISH LIST: 
 
  - Some option to stop effects would also be nice
