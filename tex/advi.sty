@@ -140,8 +140,12 @@
 
 %%% Animated transitions
 
+\def \advi@transfrom{}
 \def \advi@transsteps{}
+\define@key {advi@trans}{none}[]{\def \advi@transmode {none}}
 \define@key {advi@trans}{slide}[]{\def \advi@transmode {slide}}
+\define@key {advi@trans}{block}[]{\def \advi@transmode {block}}
+\define@key {advi@trans}{wipe}[]{\def \advi@transmode {wipe}}
 \define@key {advi@trans}{from}{\def \advi@transfrom { from=#1}}
 \define@key {advi@trans}{steps}{\def \advi@transsteps { step=#1}}
 \def\advi@transition #1{%
