@@ -247,46 +247,18 @@ let scratch_write_settings_handle_char c =
   | '-' -> set_negative_color_increment ()
   | '?' -> Grdev.help_screen Config.scratch_write_splash_screen
     (* ^G always means quit scratch write. *)
-  | '' -> end_write ()
+  | '' | 'q' -> end_write ()
   | c ->
     Misc.warning (Printf.sprintf "Unknown scratch write setting key: %C" c);;
 
-(***
-(* Handling key presses while waiting for a mouse click
-   that designates the place where write scratching should begin:
-   - ^G means quit write,
-   - Esc means toggle the scratch write settings mode,
-   - any other character when scratch write settings mode is on
-     means a setting (to handle with scratch_write_settings_handle_char),
-   - any other character when not in scratch write settings mode,
-     means warning the user that he has to click somewhere on the
-     slide to start scratching. *)
-let waiting_to_enter_scratch_write =
-  let scratch_write_settings_mode = ref false in
-  (function c ->
-     match c with
-     (* ^G always means quit scratch write. *)
-     | '' ->
-       (* Quit preserving invariant. *)
-       scratch_write_settings_mode := false;
-       end_write ()
-     | '' ->
-       (* If scratch write settings mode is already on,
-          Esc means quit scratch write settings mode. *)
-       if !scratch_write_settings_mode then begin
-         (* Quit preserving invariant. *)
-         scratch_write_settings_mode := false;
-         set_cursor cursor_write
-       end else begin
-         (* Esc now means enter scratch write settings mode. *)
-         set_cursor cursor_settings;
-         scratch_write_settings_mode := true
-       end
-     | c when !scratch_write_settings_mode ->
-       scratch_write_settings_handle_char c
-     | '?' -> Grdev.help_screen Config.scratch_write_splash_screen
-     | c -> Misc.warning "Click to start scratch writing");;
-*)
+let enter_scratch_settings settings_handle_char c =
+  match c with
+  | '' | 'q' -> end_write ()
+  | '' -> settings_handle_char c
+  | c ->
+    Misc.warning
+      (Printf.sprintf "Unknown key %C. Click to start scratching" c);;
+
 (* The writing function:
    write char c at position x y then computes next scratching position
    and calls the main write scratching loop. *)
@@ -341,14 +313,6 @@ and enter_scratch_write () =
   G.set_color (get_scratch_font_color ());
   scratch_write x y
 
-and enter_scratch_settings c =
-  match c with
-  | '' -> end_write ()
-  | '' -> scratch_write_settings ()
-  | c ->
-    Misc.warning
-      (Printf.sprintf "Unknown key %C. Click to start scratch writing" c)
-
 (* Main write settings loop.
    We enter this loop when Esc has been pressed. *)
 and scratch_write_settings () =
@@ -377,7 +341,7 @@ and scratch_write_settings () =
 (* The main routine to begin write scratching:
    - wait for a click then enter scratching. *)
 and start_scratch_write () =
-  wait_button_pressed enter_scratch_settings;
+  wait_button_pressed (enter_scratch_settings scratch_write_settings_handle_char);
   enter_scratch_write ();;
 
 let do_write () =
@@ -580,7 +544,7 @@ prerr_endline (Printf.sprintf "Setting key %C" c);
    | '+' -> set_positive_color_increment ()
    | '-' -> set_negative_color_increment ()
    | '?' -> Grdev.help_screen Config.scratch_draw_splash_screen
-   | '' -> end_draw ()
+   | '' | 'q' -> end_draw ()
    | c ->
      Misc.warning (Printf.sprintf "Unknown scratch draw settings key: %C" c));
   Graphics.set_line_width (get_scratch_line_width ());
@@ -600,7 +564,7 @@ let waiting_to_enter_scratch_draw =
   (function c ->
      match c with
      (* ^G always means quit scratch draw. *)
-     | '' ->
+     | '' | 'q' ->
        (* Quit preserving invariant. *)
        scratch_draw_settings_mode := false;
        end_draw ()
@@ -661,7 +625,7 @@ and scratch_draw_down () = scratch_until re_enter_scratch_draw scratch_draw_down
 and scratch_draw_char_event c =
   Misc.warning "Scratch_draw_char_event";
   match c with
-  | '' -> end_draw ()
+  | '' | 'q' -> end_draw ()
   | '' ->
      set_cursor cursor_settings;
      scratch_draw_settings ()
