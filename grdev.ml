@@ -137,8 +137,9 @@ let synchronize () =
 
 (* for refreshed signal on usr1 *)
 exception Usr1;;
+
 let waiting = ref false;;
-let usr1 = 10;;
+let usr1 = Sys.sigusr1;;
 let usr1_status = ref false;;
 
 let clear_usr1 () = usr1_status := false;;
