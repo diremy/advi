@@ -3,8 +3,8 @@ include ../Makefile.config
 
 RM=/bin/rm -f
 
-LATEX=TEXINPUTS=.:../tex: latex
-PLATEX=TEXINPUTS=.:../tex: platex
+LATEX=TEXINPUTS=.:../tex:$(TEXINPUTS): latex
+PLATEX=TEXINPUTS=.:../tex:$(TEXINPUTS): platex
 
 TEXFILES= demo.tex trigo_source.tex trans.tex trans2.tex background.tex
 DVIFILES= $(TEXFILES:%.tex=%.dvi)
