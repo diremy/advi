@@ -20,6 +20,12 @@
 type file_name = string;;
 type dir_name = string;;
 
+(* To round properly a float to an int. *)
+let round_pos x = int_of_float (x +. 0.5);;
+let round_neg x = int_of_float (x -. 0.5);;
+
+let round x = if x >= 0. then round_pos x else round_neg x;;
+
 (* Reverse and filters list l according to f. (Pour faire plaisir à Gérard) *)
 let reverse_filter f l =
   let rec filter res = function
