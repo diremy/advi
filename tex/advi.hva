@@ -1,0 +1,34 @@
+%%% Active-DVI
+%%
+%% This is the original source file advi.sty
+%%
+%% Package `advi' to use with LaTeX 2e
+%% Copyright Roberto Di Cosmo, Jun Furuse, Didier Remy, and Pierre Weis
+%% All rights reserved.
+
+%% $Id$
+
+%% Administrative definitions for Active-DVI, that need updating.
+
+% Which name is ours
+\def \advi@name {Active-DVI}
+% Which year of development are we (used for various copyrights message) ?
+\def \advi@year {2003}
+% Which version is it ?
+\def \advi@version {1.50}
+
+%% End of administrative definitions that need updating.
+
+%% Preliminary declarations
+
+\RequirePackage {keyval}
+\RequirePackage {color}
+
+%% Options
+
+\def \advi@export #1#2{\let #1#2}
+\advi@export \adviversion \advi@version
+\advi@export \adviyear \advi@year
+\advi@export \adviname \advi@name
+\advi@export \ActiveDVI \advi@name
+

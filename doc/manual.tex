@@ -40,6 +40,16 @@
 %\expandafter \ifx \csname driver\endcsname\relax \def \driver{}\fi 
 %\usepackage [\driver]{hyperref}
 
+% We use hevea to create hte HTML version
+\usepackage{hevea}
+
+\ifhevea\title{
+{\bf\ActiveDVI}\\
+\imgsrc{bar.gif}\\
+Reference manual\\
+{\small Version {\adviversion}}
+}
+\else
 \newdimen \tmpdim
 \title {\setbox0 \hbox {\bf\ActiveDVI}\global \tmpdim \wd0
 \advance \tmpdim by 4em
@@ -50,9 +60,12 @@ Reference manual\\
 {\small Version {\adviversion}}
 \end{tabular}
 }
+\fi
 \author {Didier R{\'{e}}my and Pierre Weis}
 
 \thispagestyle{empty}
+
+\makeindex
 
 \begin{document}
 
@@ -778,8 +791,7 @@ Use the image found in \docid{file} as background (\doctt{none} means unset).
 Fit the background image according to \docid{style}, which may be 
 one of the following keywords:
 \begin{center}
-\tt
-auto \hfill {\rm or} \hfill
+\tt auto \hfill {\rm or} \hfill
 \begin{tabular}{l@{\qquad}c@{\qquad}r}
 topleft    & top     & topright\\
 left       & center  & right \\
@@ -1090,7 +1102,7 @@ displaying all layers below the current overlay.)
 
 The {\tt xprosper} style, derived from the {\tt prosper} class, uses 
 the {\tt overlay} class and works with {\ActiveDVI} in exactly the same
-way (relaxing the \overlay@loop macro inhibits all layers, but the first
+way (relaxing the \verb|\overlay@loop| macro inhibits all layers, but the first
 page).
 
 \subsubsection{PStricks}
@@ -1190,7 +1202,8 @@ c &  col=c\\
 l &  col=l\\
 r &  col=r\\
 p=\docid{w} & col=p\docarg{w}\\
-\cline{1-2}
+%\cline{1-2}
+\hline
 \end{tabular}
 \begin{tabular}{|l|l|}
 \hline
@@ -1200,7 +1213,8 @@ C &  col=\{>\{\$\}c<\{\$\}\}\\
 L &  col=\{>\{\$\}l<\{\$\}\}\\
 R &  col=\{>\{\$\}r<\{\$\}\}\\
 P\docid{w} &  \doctt{col=\{>\{\$\}p\docarg{w}<\{\$\}\}}\\
-\cline{1-2}
+%\cline{1-2}
+\hline
 \end{tabular}
 \end{quote}
 

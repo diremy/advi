@@ -1,1 +1,9 @@
 \renewcommand{\@bodyargs}{TEXT=black BGCOLOR=white}
+\let\RequirePackage\usepackage
+\def\space{~}
+\def\vfill{}
+\def\hfill{\hspace*{4ex}}
+\def\goodbreak{}
+\newcommand{\sqrt}[2][2]{(#2)^{1/#1}}
+\renewenvironment{abstract}{\begin{quote}}{\end{quote}}
+

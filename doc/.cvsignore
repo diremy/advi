@@ -8,3 +8,8 @@ manual.html
 *.ps
 *.out
 .advi
+*.haux
+*.htoc
+*.hind
+*.idx
+*.image.tex

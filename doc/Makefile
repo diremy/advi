@@ -17,17 +17,18 @@
 
 # $Id$
 
-LATEX=TEXINPUTS=.:../tex: latex
+LATEX=TEXINPUTS=.:../tex:/usr/local/lib/hevea: latex
 DVIPS=TEXPSHEADERS=.:../tex: dvips
-HEVEA=hevea
+HEVEA=hevea -entities -I ../tex
 IMAGEN=imagen
 PDFIMAGEN=pdfimagen
 DVIPDFM=dvipdfm
 
-all: web manual.ps manual.html manual.pdf splash.dvi splash.ps mathmode.dvi
+all: web manual.ps manual.pdf splash.dvi splash.ps mathmode.dvi manual.html
 
 clean: 
 	rm -f *.aux *.log manual.html *.dvi *.pdf *.pdfm *.ps *.ima *.out *.toc
+	rm -f *.haux *.htoc
 	$(MAKE) -f MakeHTML clean
 
 web:
@@ -36,6 +37,7 @@ web:
 splash.dvi manual.dvi: splash_contents.tex
 
 manual.dvi: manual.sty
+manual.html: manual.hva macros.hva
 
 .SUFFIXES: .tex .dvi .advi .ps .pdf .pdfm .html .ima
 
@@ -59,7 +61,6 @@ manual.dvi: manual.sty
 	touch $*.ima
 
 .tex.html:
-	$(HEVEA) -fix macros.hva manual -o $*.html $*.tex
-	if [ -f $<.image.tex ]; then mv $<.image.tex $*.image.tex; fi
-	if [ -f $*.image.tex ]; then $(IMAGEN) $*; fi
-
+	$(HEVEA) -fix macros.hva -o $*.html $*.tex
+#	if [ -f $<.image.tex ]; then mv $<.image.tex $*.image.tex; fi
+#	if [ -f $*.image.tex ]; then $(IMAGEN) $*; fi

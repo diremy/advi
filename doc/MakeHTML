@@ -59,6 +59,7 @@ expand:
 
 clean: $(AUTO)
 	cd $(SRC); $(MAKE) clean
+	cd pngs; $(MAKE) clean
 	/bin/rm -f $(FILES)
 
 #  Note: make auto regenerates the rules into file .Makefile.auto.
@@ -73,13 +74,12 @@ $(AUTO): MakeHTML
 $(AUTO):
 	/bin/rm -f $(AUTO)
 	for i in $(FILES); do \
-	/bin/rm -f $(FILES); \
-	j=`basename $$i .htm`; \
-	echo $$i: $(SRC)/$(PACKAGE)-$$j.htm >> $(AUTO); \
-	echo >> $(AUTO); \
-	echo $(SRC)/$(PACKAGE)-$$j.htm: >> $(AUTO); \
-	echo -n "	chmod +w $$j.htm; " >> $(AUTO); \
-	echo "cp -p $(SRC)/$(PACKAGE)-$$j.htm $$j.htm" >> $(AUTO); \
+	  j=`basename $$i .htm`; \
+	  echo $$i: $(SRC)/$(PACKAGE)-$$j.htm >> $(AUTO); \
+	  echo "	chmod +w $$j.htm; " >> $(AUTO); \
+	  echo "	cp -p $(SRC)/$(PACKAGE)-$$j.htm $$j.htm" >> $(AUTO); \
+	  echo $(SRC)/$(PACKAGE)-$$j.htm: >> $(AUTO); \
+	  echo >> $(AUTO); \
 	done
 
 include $(AUTO)

@@ -2,6 +2,8 @@ TOPDIR=../../..
 FILES=join.tex 
 include ../../lib/Makefile
 
+all: show
+
 show: join.dvi
 	$(ADVI) join.dvi
 

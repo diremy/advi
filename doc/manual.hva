@@ -1,0 +1,14 @@
+\def \docdef #1{{\tt \string #1}}
+\def \docid #1{$\langle \mbox {\rm\em #1}\rangle$}
+\def \doctt #1{{\tt #1}}
+\def \docarg #1{{\tt \{\docid {#1}\}}}
+\def \docopt #1{{\tt [\docid {#1}]}}
+\def \docpar #1{{\tt (\docid {#1})}}
+\def \doc@empty {}
+\newcommand \dockey[3][]{{\tt #2\def \@test {#3}\ifx \@test \doc@empty \else
+  =\docid{#3}\fi} \def \@test {#1}\ifx \@test \doc@empty \else
+  \quad (default value is {\tt #1})\fi}
+
+\def \softlink #1#2{\ahrefloc{#1}{#2}}
+\def \softtarget #1#2{\aname{#1}{#2}}
+
