@@ -134,14 +134,14 @@ let parse_color_args = function
       begin
 	try 
 	  let {Color.r = r; Color.g = g; Color.b = b} = Color.color_parse s in
-prerr_endline (s ^ " X color");	  
+          (*prerr_endline (s ^ " X color");*)
 	  rgb r g b
 	with _ ->
             (* Try known colors *)
             try 
-let c = List.assoc (String.lowercase s) named_colors in
-prerr_endline (s ^ " named color");	  
-c
+            let c = List.assoc (String.lowercase s) named_colors in
+            (*prerr_endline (s ^ " named color");*)
+            c
             with Not_found ->
             (* Try an explicit 0xFFFFFF integer *)
             try int_of_string s
