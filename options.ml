@@ -78,5 +78,5 @@ add "-w"
      | "A" -> Misc.set_warnings true
      | s -> raise (Arg.Bad (Printf.sprintf "-w %s is unknown" s))))
  "<flags>  Enable/disable warnings according to <flags>,\
- \n\t A/a enable/disable all warnings";;
+ \n\t A/a enable/disable all warnings\
  \n\t (the default is \"A\", to enable all warnings).";;
