@@ -32,6 +32,7 @@ else
 	ocamlc -custom -o taquin -I +camltk camltk.cma taquin_embed.ml
 endif
 
+# We do not remove jpdemo.dvi, because only Furuse can make it at Cristal.
 clean:
-	$(RM) a.out *.aux *.log *.dvi *~
+	$(RM) a.out *.aux *.log demo.dvi trans.dvi background.dvi *~
 	$(RM) $(MLPROG) *.cmi *.cmo
