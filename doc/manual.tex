@@ -47,19 +47,23 @@ various special effects can easily be incorporated to the presentation,
 via a companion \doctt{advi} {\LaTeX} package. 
 
 \bigskip
-{\ActiveDVI} is copyright \copyright\space 2000, 2001, 2002 INRIA
+{\ActiveDVI} is copyright \copyright\space 2001, 2002 INRIA
 and distributed under the Gnu Library General Public License ---see the LGPL
 file included in the distribution.
 \end{abstract}
 
 
 \vfill
- \section* {Contributors}
+ \section* {Acknowledgements and contributors}
 
-The core of {\ActiveDVI} is the plain DVI previewer, written by
-Alexandre~Miquel. The other main implementors are Jun~Furuse,
-Didier~R{\'{e}}my, and Pierre~Weis. Other contributors are Didier~Le~Botlan,  
-Roberto~Di~Cosmo, Xavier~Leroy, and Alan~Schmitt. 
+{\ActiveDVI} is based on Mldvi, written by Alexandre~Miquel, which
+constitutes its core. Mldvi alone is distributed 
+under LGPL license and is available at 
+\url{http://pauillac.inria.fr/~miquel/}. 
+
+{\ActiveDVI} has been developed by Jun~Furuse, Didier~R{\'{e}}my and
+Pierre~Weis with also contributions by Didier~Le~Botlan, Roberto~Di~Cosmo,
+Xavier~Leroy, and Alan~Schmitt.
 
 \clearpage
 \tableofcontents
@@ -307,11 +311,12 @@ If the environment form is used, \docid{text} may contain fragile commands.
 \subsection {Images}
 
 Images can be encapsulated into the presentation using the package
-CamlImages provided with the distribution.
+CamlImages provided with the distribution
+(see section~\ref {advi-grahicx})
 
-\subsection {Backgrounds}
+\subsection {Background}
 
-Background of pages can be set in the \LaTeX source of the page,
+Background of pages can be set in the {\LaTeX} source of the page,
 either as a plain color or as an image (or both!).
 You can specify a global option to the background setting, so that this
 background will be used for the remaining pages of the presentation
@@ -494,8 +499,8 @@ the current page.
 The application takes \docid{dim} width (respectively height) space in 
 latex. Both values default to 0pt.
 
-These dimensions are also substituted for all occurrences of \verb"!g" in
-the command string.
+These dimensions are also substituted for all occurrences of \verb"!g!" in
+the command string. 
 \end{quote}
 
 \dockey{sticky}{name}
@@ -695,6 +700,13 @@ appears withing an active anchor.
 \end{quote}
 
 %Annotation location can also be invisible \advi{C}{\tt{ }}instead of visible.
+
+\subsection{\label {advi-grahicx}The advi-graphicx package}
+
+This 3-line package provides loads the graphicx prackage and provides
+declarations so that JPEG, EPS, TIF, TIFF source images can be embedded:
+{\ActiveDVI} will preview these directly while other drivers will translate
+them on demand. 
 
 \appendix
 
