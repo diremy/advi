@@ -40,6 +40,18 @@ let rec reverse_concat l1 = function
 
 (* Strings *)
 
+let string_prefix char s =
+ let l = String.length s in
+ let i = String.index s char in
+ String.sub s 0 (i + 1);;
+
+let string_suffix char s =
+ let l = String.length s in
+ let i = String.rindex s char in
+ String.sub s i (l - i);;
+
+let filename_extension = string_suffix '.';;
+
 exception False;;
 
 let has_prefix pre str =
@@ -88,12 +100,8 @@ let zap_to_char c s =
   let len = String.length s
   and i = ref 0 in
   while !i < len && s.[!i] <> c do incr i done;
-  let i0 = !i+1 in
+  let i0 = !i + 1 in
   if i0 >= len then "" else String.sub s i0 (len - i0);;
-
-let catenate_sep sep = function 
-  | [] -> ""
-  | x :: l -> List.fold_left (fun s s' -> s ^ sep ^ s') x l;;
 
 let int_or_float_of_string s =
   try int_of_string s with _ -> truncate (float_of_string s);;
@@ -143,7 +151,8 @@ let set_warnings b = warnings := b;;
 
 let warning s = if !warnings then emit_warning s;;
 
-let forward_debug_endline = ref (function (s : string) -> ());;
+let forward_debug_endline = ref (function (s : string) ->
+  failwith "undefined forward debug_endline");;
 
 let debug_endline s = !forward_debug_endline s;;
 
