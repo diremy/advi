@@ -1412,8 +1412,9 @@ let push_keys_special st s =
 
 (* This function is iterated on the current DVI page BEFORE
    rendering it, to gather the information contained in some
-   "asynchronous" specials (typically, PS headers, background
+   "asynchronous" specials (typically, PS headers, background 
    commands, html references) *)
+
 let scan_special status (headers, xrefs, lastline as args) pagenum s =
   if Launch.white_run () &&
      has_prefix "advi: embed " s then scan_embed_special status s else
@@ -1439,30 +1440,64 @@ let scan_special status (headers, xrefs, lastline as args) pagenum s =
   then scan_special_html args pagenum s;;
 
 (* Scan a page calling function scan_special when seeing a special and
-   the function otherwise for other DVI stuff. *)
+  the function otherwise for other DVI stuff. *)
+
 let scan_special_page otherwise cdvi globals pagenum =
-   Misc.debug_stop "Scanning specials";
-   let page = cdvi.base_dvi.Cdvi.pages.(pagenum) in
-   match page.Cdvi.page_status with
-   | Cdvi.Unknown ->
-       let status =
-         {Cdvi.hasps = false;
-          Cdvi.bkgd_local_prefs = [];
-          Cdvi.bkgd_prefs =
-            (if !inherit_background_info
-             then Dev.copy_of_bkgd_data ()
-             else Dev.default_bkgd_data ())} in
-       let lastline = ref None in
-       let eval = function
-         | Dvicommands.C_xxx s ->
-             let globals = (fst globals, snd globals, lastline) in
-             scan_special status globals pagenum s
-         | x -> otherwise x in
-       Cdvi.page_iter eval cdvi.base_dvi.Cdvi.pages.(pagenum);
-       page.Cdvi.line <- !lastline;
-       page.Cdvi.page_status <- Cdvi.Known status;
-       status
-   | Cdvi.Known stored_status -> stored_status;;
+  Misc.debug_stop "Scanning specials";
+  let page = cdvi.base_dvi.Cdvi.pages.(pagenum) in
+  match page.Cdvi.page_status with
+  | Cdvi.Unknown ->
+      let status =
+        {Cdvi.hasps = false;
+         Cdvi.bkgd_local_prefs = [];
+         Cdvi.bkgd_prefs =
+         (if !inherit_background_info
+         then Dev.copy_of_bkgd_data ()
+         else Dev.default_bkgd_data ())} in
+      let lastline = ref None in
+      let eval = function
+        | Dvicommands.C_xxx s ->
+            let globals = (fst globals, snd globals, lastline) in
+            scan_special status globals pagenum s
+        | x -> otherwise x in
+      Cdvi.page_iter eval cdvi.base_dvi.Cdvi.pages.(pagenum);
+      page.Cdvi.line <- !lastline;
+      page.Cdvi.page_status <- Cdvi.Known status;
+      status
+  | Cdvi.Known stored_status -> stored_status;;
+
+let scan_find_location cdvi page (line, filename) =
+  let intervals = ref [] in
+  let last = ref 0 in
+  let eval = function
+    | Dvicommands.C_xxx s when has_prefix "line: " s ->
+        let (l, f as location) = line_of_special s 6 in
+        if f = filename then
+          begin
+            if !last <= line && line < l then
+              intervals := !last :: !intervals;
+            last := l
+          end;
+    | _ -> () in
+  Cdvi.page_iter eval cdvi.base_dvi.Cdvi.pages.(page);
+  match List.sort (fun l1 l2 -> compare (line - l1) (line - l2)) !intervals
+  with
+  | l :: _ -> l
+  | [] -> 0
+
+exception Found of (int * string option) option
+let scan_find_anchor_location cdvi page anchor =
+   let last = ref None in
+   let eval = function
+   | Dvicommands.C_xxx s when has_prefix "line: " s ->
+   last := Some (line_of_special s 6)
+   | Dvicommands.C_xxx s when 
+        has_prefix "html:<A name=\"" s 
+          && String.sub s 14 (String.length s - 16) = anchor -> 
+            raise (Found !last)
+    | _ -> () in
+  try Cdvi.page_iter eval cdvi.base_dvi.Cdvi.pages.(page); raise Not_found
+  with Found l -> l
 
 let special st s =
   if has_prefix "\" " s || has_prefix "ps:" s

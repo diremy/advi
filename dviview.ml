@@ -959,19 +959,42 @@ let set_page_pause_num n pause_num st =
 let goto_page n st = set_page_pause_num n 0 st;;
 
 (* Find the coocked DVI page that corresponds to a position in a source file. *)
-let find_page_before_position (pos, fname) st =
-  let rec find p =
-    if p < 0 then raise Not_found else
+let find_page_before_position (pos, filename as location) st =
+  (* To find all matching pages *)
+  let rec find last all p =
+    if p < 0 then all else
     match st.dvi.Cdvi.pages.(p).Cdvi.line with
-    | Some (pos', fname') when pos' <= pos && fname = fname' -> p
-    | _ -> find (pred p) in
-  find (st.num_pages - 1);;
+    | Some (pos', f) -> 
+        if (pos' <= pos) && (pos < last || last < pos') &&  filename = f 
+        then find pos' (min (p+1) max_int :: all) (pred p)
+        else find pos' all (pred p)
+    | _ -> find last all (pred p) in
+  let matches = find max_int [] (st.num_pages - 1) in
+  (* We should then desambiguate, but we do not. Return the first
+     page that match always would never jump to appendices.  *)
+  let refined =
+    List.map
+      (fun p -> p, Driver.scan_find_location st.cdvi p location)
+      matches in
+  match
+    List.sort (fun (p1,l1) (p2, l2) -> compare (pos - l1) (pos - l2)) refined
+  with
+  | [] -> raise Not_found
+  | (p, _)::_ -> p
 
 let duplex_switch sync st =
   let find_sync_page master client =
-    match master.dvi.Cdvi.pages.(master.page_number).Cdvi.line with
+   let anchor = "Start-Document" in
+   match
+   (* master.dvi.Cdvi.pages.(master.page_number).Cdvi.line *)
+     Driver.scan_find_anchor_location master.cdvi 
+        (Hashtbl.find (xrefs master) anchor) anchor 
+   with
     | None -> raise Not_found
-    | Some (q, _ as pos) -> find_page_before_position pos client in
+    | Some pos -> 
+   find_page_before_position pos client 
+  in
+
   match st.duplex with
   | Alone -> ()
   | (Client st' | Master st') when not sync -> raise (Duplex (redraw, st'))

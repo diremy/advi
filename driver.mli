@@ -32,4 +32,8 @@ val render_step :
 val unfreeze_fonts : cooked_dvi -> unit;;
 val unfreeze_glyphs : cooked_dvi -> float -> unit;;
 val scan_special_pages : cooked_dvi -> int -> unit;;
+val scan_find_location : 
+    cooked_dvi -> int -> (int * string option) -> int;;
+val scan_find_anchor_location : 
+    cooked_dvi -> int -> string -> (int * string option) option;;
 val clear_symbols : unit -> unit;;
