@@ -61,7 +61,7 @@ module M = struct
   ;;
 
   let cache_load file =
-(*  prerr_endline ("cache_load " ^ file); *)
+  prerr_endline ("cache_load " ^ file);
     let load ic =
       let s = String.create (String.length cache_key) in
       ignore (input ic s 0 (String.length cache_key));
@@ -82,7 +82,7 @@ module M = struct
   ;;
 
   let cache_save file img = 
-(*  prerr_endline ("cache_save " ^ file); *)
+  prerr_endline ("cache_save " ^ file);
     let save oc =
       output oc cache_key 0 (String.length cache_key);
       match img with
@@ -90,6 +90,9 @@ module M = struct
   	  output_value oc true;
   	  output_value oc image.Rgba32.width;
   	  output_value oc image.Rgba32.height;
+prerr_endline (Printf.sprintf "(%dx%d) %d bytes written" 
+		 image.Rgba32.width image.Rgba32.height
+		 (String.length (Bitmap.dump image.Rgba32.data)));
   	  output_value oc (Bitmap.dump image.Rgba32.data);
       | Rgb24 image ->
   	  output_value oc false;
@@ -153,8 +156,8 @@ module M = struct
     let iw,ih = Image.size image in
     let w,h =
       match ratiopt with
-      |	ScaleX -> w, Pervasives.truncate (float ih *. float iw /. float w)
-      |	ScaleY -> Pervasives.truncate (float iw *. float ih /. float h), h
+      |	ScaleX -> w, Pervasives.truncate (float ih *. float w /. float iw)
+      |	ScaleY -> Pervasives.truncate (float iw *. float h /. float ih), h
       |	Original -> iw, ih
       |	FreeScale -> w, h
     in
@@ -243,6 +246,9 @@ module M = struct
   ;;
 
   let draw_image image cache_name alpha blend (w,h) (x0, y0) =
+    (* load_and_resize may not return exactly the same size 
+       we specified as (w,h) *)
+    let iw, ih = Image.size image in
     match image with
     | Rgb24 _ when alpha = 1.0 && blend = None -> 
         (* optimized *) 
@@ -288,8 +294,8 @@ module M = struct
   		 g= (blend dst.g src.g * a + dst.g * a') / 255;
   		 b= (blend dst.b src.b * a + dst.b * a') / 255 }
   	in
-  	for y = 0 to h - 1 do
-  	  for x = 0 to w - 1 do
+  	for y = 0 to (min ih h) - 1 do
+  	  for x = 0 to (min iw w) - 1 do
   	    let dst = Rgb24.unsafe_get org x y in
   	    let src, a = get_src_alpha x y in
   	    Rgb24.unsafe_set org x y (coloropt a dst src)
@@ -304,6 +310,8 @@ module M = struct
     try
       let cache_name, image = 
 	load_and_resize file whitetransp psbbox ratiopt (w,h) in
+      (* load_and_resize may not return exactly the same size 
+	 we specified as (w,h) *)
       draw_image image cache_name alpha blend (w,h) (x0,y0)
     with
     | Exit -> ()
