@@ -1,11 +1,12 @@
 TEXINPUTS := .:../lib:../../tex:
-ADVI=../../advi.opt
+ADVI=TEXPSHEADERS=../../tex: ../../advi.opt
 LATEX=TEXINPUTS=$(TEXINPUTS) latex 
+DEP=$(addprefix ../../tex/, advi.sty advi-annot.sty)
 
-show: join.dvi
+show: join.dvi  
 	$(ADVI) join.dvi
 
-join.dvi: join.tex
+join.dvi: join.tex $(DEP)
 	$(LATEX) join.tex
 
 

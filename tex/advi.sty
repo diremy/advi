@@ -306,10 +306,13 @@ end
 \hbox {\box\pst@hbox}%
 \pst@Verb{\tx@PutEnd}}}
 
-\@ifundefined {psput@special}{}
-{\let \psput@special \advi@psput@special
- %\@ifundefined {ncput@iii}{}{\let \ncput@iii \advi@ncput@iii}%
- \advi@special@ {header=advi.pro}}
+\def \advi@pstricks@patch
+  {\@ifundefined {psput@special}{}
+    {\let \psput@special \advi@psput@special
+     %\@ifundefined {ncput@iii}{}{\let \ncput@iii \advi@ncput@iii}%
+     \pstheader {advi.pro}}}
+\AtBeginDocument {\advi@pstricks@patch}
+
 
 %%% Active DVI
 
