@@ -1308,7 +1308,7 @@ module B =
              ncol nlines (* Size in columns and lines *) in
          Gterm.draw_term minibuff;
          let re = Gterm.ask_prefill minibuff message !prefill in
-         !Misc.forward_push_back_key_event '' GraphicsY11.control;
+         Misc.push_back_key_event '' GraphicsY11.control;
          prefill := re;
          re)
 

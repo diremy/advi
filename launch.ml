@@ -166,7 +166,7 @@ let ask_before f arg =
   GraphicsY11.set_cursor GraphicsY11.Cursor_question_arrow;
   let res = f arg in
   GraphicsY11.set_cursor cursor;
-  !Misc.forward_push_back_key_event '' GraphicsY11.control;
+  Misc.push_back_key_event '' GraphicsY11.control;
   res;;
 
 let ask_before_launching command command_invocation =
