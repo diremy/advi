@@ -62,6 +62,13 @@ value gr_flush(void)
   return Val_unit ;
 }
 
+value gr_sync(void)
+{
+  gr_check_open();
+  XSync(grdisplay, 0);
+  return Val_unit ;
+}
+
 value gr_set_named_atom_property (value name, value string) {
   Atom a = XInternAtom (grdisplay, String_val(name), 0);
   XChangeProperty (grdisplay, grwindow.win, 

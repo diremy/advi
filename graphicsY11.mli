@@ -23,9 +23,11 @@ external bstore_id : unit -> window_id = "gr_bstore"
         (* return the X pixmap of the bstore window as an integer *)
 
 
-
 external flush : unit -> unit = "gr_flush"
-        (* flush the content of the backing store *)
+        (* flush pending events *)
+
+external sync : unit -> unit = "gr_sync"
+        (* flush pending events and wait until all have been processed *)
 
 external bsize_x : unit -> int = "gr_bsize_x"
 external bsize_y : unit -> int = "gr_bsize_y"

@@ -445,11 +445,15 @@ module Make(Dev : DEVICE) = struct
 	    | Px n -> height + 2 * n
 	    | In f -> height + int_of_float (base_dpi *. 2.0 *. f)
 	    | _ -> assert false in
-	    (min attr.geom.width sx, min attr.geom.height sy)
+            assert (attr.geom.width >= sx);
+            assert (attr.geom.height >= sy);
+	    (sx, sy)
           end else
 	    (attr.geom.width, attr.geom.height) in
+(*
         attr.geom.width <- size_x ;
         attr.geom.height <- size_y ;
+*)
         st.base_dpi <- base_dpi;
         st.size_x <- size_x;
         st.size_y <- size_y;
@@ -812,11 +816,10 @@ module Make(Dev : DEVICE) = struct
     if !autoresize then
       begin
         let scale x = int_of_float (float x *. factor) in
-        attr.geom.width <- scale attr.geom.width;
-        attr.geom.height <- scale attr.geom.height;
+        attr.geom.width <- scale st.size_x;
+        attr.geom.height <- scale st.size_y;
         Dev.close_dev();
         Dev.open_dev (Printf.sprintf " " ^ string_of_geometry attr.geom);
-        set_bbox st;
       end
     else
       begin

@@ -19,6 +19,12 @@
 
 type window_id = GraphicsX11.window_id
 
+external flush : unit -> unit = "gr_flush"
+        (* flush pending events *)
+
+external sync : unit -> unit = "gr_sync"
+        (* flush pending events and wait until all have been processed *)
+
 external window_id : unit -> window_id = "gr_window_id";;
 
 let subwindows = Hashtbl.create 13;;

@@ -25,6 +25,12 @@ let show_busy = Misc.option_flag true
     "-nowatch"
     "\tDon't display a watch when busy";;
 
+let busy_delay = ref 0.2
+let _ = Misc.set_option
+    "-watch"
+    (Arg.Float (fun x -> busy_delay := x))
+    "FLOAT\time delay before showing the watch when busy (default 0.2s)";;
+
 
 
 type color = int ;;
@@ -81,14 +87,33 @@ let set_selection_mode m =
     end
 
 type busy = Free | Busy | Pause | Disk
+let busy_timeout = ref 0.
+let busy_set_cursor cursor =
+  busy_timeout := 0.;
+  G.set_cursor cursor;;
+let busy_check_timer() =
+  let t = !busy_timeout in
+  if t > 0. && Unix.gettimeofday() > t then
+      busy_set_cursor G.Cursor_watch;;
+let busy_start() =
+  if !busy_timeout > 0. then busy_check_timer()
+  else busy_timeout := Unix.gettimeofday() +. !busy_delay
 
-let set_busy sw = 
+(* To be called before system calls that make take a long time *)
+let busy_now() =
+  if !busy_timeout > 0. then busy_set_cursor G.Cursor_watch;;
+
+let set_busy sw =
   if !show_busy then
     match sw with
-    | Pause -> G.set_cursor G.Cursor_right_side
-    | Disk -> G.set_cursor G.Cursor_exchange
-    | Busy -> G.set_cursor G.Cursor_watch
-    | Free -> G.set_cursor !free_cursor
+    | Pause ->
+        busy_set_cursor G.Cursor_right_side
+    | Disk ->
+        busy_set_cursor G.Cursor_exchange
+    | Busy ->
+        busy_start()
+    | Free ->
+        busy_set_cursor !free_cursor
   else ();;
 
 let set_title s = Graphics.set_window_title s ;;
@@ -258,17 +283,17 @@ let make_glyph g =
 let get_glyph g = g.glyph
 
 (*** Device manipulation ***)
+type rect = { x : int; y : int; h : int; w : int };;
+let nobbox =  { x = 0; y = 0; w = 10; h = 10 };;
+let bbox = ref nobbox;;
 
-let set_bbox bbox =
-  if not !opened then
-    failwith "Grdev.set_bbox: no window" ;
-  match bbox with
+let set_bbox bb =
+  if not !opened then failwith "Grdev.set_bbox: no window" ;
+  match bb with
   | None ->
-      xmin := 0 ; xmax := !size_x ;
-      ymin := 0 ; ymax := !size_y
+      bbox := nobbox; 
   | Some(x0, y0, w, h) ->
-      xmin := x0 ; xmax := x0 + w ;
-      ymin := !size_y - (y0 + h) ; ymax := !size_y - y0
+      bbox := { x = x0; y = y0; w = w; h = h}
  ;;
 
 (*** Drawing ***)
@@ -734,23 +759,25 @@ module H =
             
             
     let deemphasize now emph =
-      if emph = Nil then ()
-      else begin
-	Graphics.display_mode now;
-	begin match emph with
+        match emph with
 	| Rect (ima, act, l) ->
+            Graphics.display_mode now;
             List.iter
               (function ima, act -> Graphics.draw_image ima act.A.x act.A.y) l;
             Graphics.draw_image ima act.A.x act.A.y;
+	    G.set_cursor !free_cursor;
+	    Graphics.display_mode false
 	| Screen (ima, act, all_anchors) ->
+            Graphics.display_mode true;
             anchors := all_anchors;
             Gs.flush();
+            (* long delay to be safe *)
+            sleep_watch false 0.1;
             Graphics.draw_image ima 0 0;
-	| Nil -> raise (Failure "this must not be called") 
-	end;
-	G.set_cursor !free_cursor;
-	Graphics.display_mode false
-      end
+	    G.set_cursor !free_cursor;
+	    G.flush();
+	    Graphics.display_mode false
+	| Nil -> ()
         
     let emphasize c act =
       let ima = Graphics.get_image act.A.x act.A.y act.A.w act.A.h in
@@ -766,19 +793,21 @@ module H =
       Rect (ima, act, []) 
         
     let save_screen_exec act a =
-      synchronize();
-      (* get image take the image from the screen! *)
+      Gs.flush();
+      (* get image take the image from the backing store *)
       let ima = Graphics.get_image 0 0 !size_x !size_y in
-      G.flush();
-      let _ = Graphics.mouse_pos() in
+      G.sync();
+      (* wait until all events have been processed, flush should suffice *)
+(*
+      let _ = Graphics.set_color (Graphics.point_color 0 0) in
       (* it seems that the image is saved ``lazily'' and further instruction
          could be capture in the image *) 
-(*
       sleep_watch false 0.05;
 *)
       let all_anchors = !anchors in
       a();
-      synchronize();
+      Gs.flush();
+      Graphics.synchronize();
       Screen (ima, act, all_anchors)
         
     let light t =
@@ -820,10 +849,8 @@ let open_dev geom =
   Graphics.open_graph geom ;
   size_x := Graphics.size_x () ;
   size_y := Graphics.size_y () ;
-(*  
   xmin := 0 ; xmax := !size_x ;
   ymin := 0 ; ymax := !size_y ;
-*)
   Graphics.remember_mode true ;
   Graphics.display_mode !display_mode ;
   opened := true ;;
@@ -848,10 +875,8 @@ let clear_dev () =
   background_colors := [];
   size_x := Graphics.size_x () ;
   size_y := Graphics.size_y () ;
-(*
   xmin := 0 ; xmax := !size_x ;
   ymin := 0 ; ymax := !size_y ;
-*)
 ;;
 
 (*** Events ***)
@@ -1014,9 +1039,10 @@ let wait_select_button_up x y =
         ;;  
 
 let wait_move_button_up x y =
-  let w = !xmax - !xmin and h = !ymax - !ymin in
+  let bbox = !bbox in
+  let w = bbox.w and h = bbox.h in
   let rec move dx dy =
-    let x' = !xmin + dx and y' = !ymin + dy in
+    let x' = bbox.x + dx and y' = bbox.y + dy in
     let buf = save_rectangle x' y' w h in
     draw_rectangle x' y' w h;
     let ev = wait_signal_event button_up_motion in
@@ -1101,7 +1127,11 @@ let wait_event () =
             begin try
               begin match H.find ev.mouse_x ev.mouse_y with
               | {A.action = {H.tag = H.Href h; H.draw = d }} as act ->
-                  if ev.button then send (Href h)
+                  if ev.button then
+                    begin
+                      let ev' = Graphics.wait_next_event button_up in
+                      send (Href h)
+                    end
                   else if H.up_to_date act emph then
                     event emph
                   else
@@ -1145,6 +1175,7 @@ let resized() =
   Graphics.size_x() <> !size_x || Graphics.size_y() <> !size_y
 
 let continue () =
+  busy_check_timer();
   if resized() || !usr1_status || Graphics.key_pressed() then
     begin
       Gs.flush();
