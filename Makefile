@@ -17,6 +17,8 @@
 
 include Makefile.config
 
+VERSION=1.2
+
 COPTIONS = -warn-error A -g
 COPTOPTIONS = -warn-error A -unsafe -inline 9
 
@@ -129,7 +131,6 @@ MLFILES = $(addsuffix .ml, $(MODULES))
 	gcc -MM -I$(CAMLDIR) $(CFLAGS) $(COBJS:.o=.c) | sed -e 's|$(CAMLDIR)/[^ ]*||' >> .depend
 
 # just for the authors
-VERSION=1.2.0
 ADVI=advi-$(VERSION)
 WEBSITEDIR=/net/pauillac/infosystems/www/advi
 FTPSITEDIR=/net/pauillac/infosystems/ftp/cristal/advi
