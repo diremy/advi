@@ -37,13 +37,21 @@
 \typeout{CVSId: $Id$}
 \typeout{ }
 
+%% Options 
+
 \newif \ifDVItoPS \DVItoPSfalse
 \newif \ifAccumulate \Accumulatefalse
 
+\DeclareOption {psbubble}{\PassOptionsToPackage{ps}{bubble}}
+
+\ProcessOptions
 
 \RequirePackage{color}
 \RequirePackage{graphicx}
 \RequirePackage{ifthen}
+\RequirePackage{bubble}
+
+%% More declarations
 
 %% Redefinition of the slide environment
 \newcounter{trueSlideCounter}
@@ -407,8 +415,14 @@
 
 \newcounter{pause}
 \newcount \tmp@pause
-\newcommand{\ifpause}[3][=0]{\tmp@pause \c@overlaysCount \advance \tmp@pause by
--\c@pause \ifnum \tmp@pause #1#2\else #3\fi}
+\newcommand{\ppp@ifpause}[1][=0]{%
+  \tmp@pause \c@overlaysCount \advance \tmp@pause by -\c@pause
+  \ifnum \tmp@pause #1\relax \expandafter \@firstoftwo
+  \else \expandafter \@secondoftwo \fi} 
+\let \ifpause \ppp@ifpause
+% \newcommand{\ifpause}[3][=0]{%
+%   \tmp@pause \c@overlaysCount \advance \tmp@pause by -\c@pause
+%   \ifnum \tmp@pause #1#2\else #3\fi} 
 \newcommand{\ifbeforePause}{\ifpause[<0]}
 \newcommand{\ifafterPause}{\ifpause[>0]}
 \newcommand{\ifbetweenPauses}[4]
@@ -486,31 +500,13 @@
 %%% Bulles
 
 \def \SetBulleBG{\def \bulle@bg}
-\newcommand{\BulleArc}[2]
-  {\ncarc [linestyle=solid,arcangleA=-0,arcangleB=-3]
-          {from@bulle}{to@bulle}\ncarc
-  [linestyle=solid,arcangleA=0,arcangleB=3]{from@bulle}{to@bulle}}
-%%% Attempt to make nicer arcs
-\def \thinkingarc #1#2{\ncline[linestyle=none]{#1}{#2}%
-\aput[0]{0}(0.1){\psellipse[fillstyle=solid](0.05,0.05)}%
-\aput[0]{0}(0.3){\psellipse[fillstyle=solid](0.1,0.08)}%
-\aput[0]{0}(0.6){\psellipse[fillstyle=solid](0.15,0.1)}%
-\aput[0]{0}(0.9){\psellipse[fillstyle=solid](0.2,0.15)}}
-%\let \BulleArc \thinkingarc
-
 \SetBulleBG{yellow}
-\newcommand {\bulle}[2][=0]
-  {\bgroup \ifpause[#1]
-      {\Rnode{from@bulle}{#2}}
-      {#2\let \bulle@ii \bulle@ignore}\bulle@i}
-
-\newcommand {\bulle@i}[1]
-  [linecolor=\bulle@bg,fillcolor=\bulle@bg,linewidth=1pt]
-  {\psset {#1}\@ifnextchar({\bulle@ii}{\bulle@ii(1,1)}}
-
-\def \bulle@ii(#1)#2{\rput(#1){\ovalnode
-  [fillstyle=solid]{to@bulle}{#2}}\BulleArc{from@bulle}{to@bulle}\egroup}
-\def \bulle@ignore(#1)#2{\egroup}
+\def \ppp@bubble #1{#1}
+\def \ppp@ignore #1{}
+\newcommand {\bulle}[2][=0]%
+  {\ppp@ifpause[#1]%
+      {\bubble [bg=\bulle@bg]{#2}}
+      {\bubble [bubble=\ppp@ignore]{#2}}}
 
 %%% Superposition of boxes \superpose[x]{l1\\...\ln}
 %%% where x in {l, c, r} encodes justification

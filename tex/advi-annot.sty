@@ -9,62 +9,31 @@
 \ProvidesPackage{advi-annot}
          [2001/29/08 v0.40 Advi Annot Package for advi Previewer]
 
-%%% Bulles
+%%% Advi Annotations
 %% Identification
 %% Preliminary declarations
 
-% \def \advi@test {hdvipdfm}\ifx \Hy@driver \advi@test 
-% \message {*Ignoring package pst-node.sty with dvipdfm driver*}\else 
-\RequirePackage {pst-node}
-%\fi
-
-\RequirePackage {advi}
-\RequirePackage {array}
-
-
 %% Options
 
-\def \advi@annot@bg{yellow}
-\def \advi@annot@col{c}
-\define@key {adviannot} {bg} {\def \advi@annot@bg  {#1}}
-\define@key {adviannot} {l}[]{\def \advi@annot@col {@{}l@{}}}
-\define@key {adviannot} {c}[]{\def \advi@annot@col {@{}c@{}}}
-\define@key {adviannot} {r}[]{\def \advi@annot@col {@{}r@{}}}
-\define@key {adviannot} {L}[]{\def \advi@annot@col {@{}>{$}l<{$}@{}}}
-\define@key {adviannot} {C}[]{\def \advi@annot@col {@{}>{$}c<{$}@{}}}
-\define@key {adviannot} {R}[]{\def \advi@annot@col {@{}>{$}r<{$}@{}}}
-\define@key {adviannot} {p}  {\def \advi@annot@col {@{}p{#1}@{}}}
-\define@key {adviannot} {P}  {\def \advi@annot@col {@{}>{$}p{#1}<{$}@{}}}
-\define@key {adviannot} {col}{\def \advi@annot@col {#1}}
+\DeclareOption {ps}{\PassOptionsToPackage{ps}{bubble}}
+\ProcessOptions
 
-\newcommand {\AdviAnnotArc}[2]
-  {\ncarc [linestyle=solid,arcangleA=-0,arcangleB=-3]{#1}{advi@to}%
-   \ncarc [linestyle=solid,arcangleA=0,arcangleB=3]{#1}{advi@to}}
+\RequirePackage {bubble}
+\RequirePackage {advi}
 
+%% More declarations
+
+\def \advi@@anchor {\advi@anchor{\the\advi@c@annot}}
+\def \advi@@bubble #1{%
+   \advi@ifadvi {\advi@record{\the\advi@c@annot}{#1}}{}%
+}
 \newcount \advi@c@annot
-\newcommand {\advi@annot}[2][]{\global \advance \advi@c@annot by 1%
-   \bgroup
-   \NormalCoor
-   \setkeys {adviannot}{#1}%
-   \expandafter \newcolumntype \expandafter a\expandafter {\advi@annot@col}%
-   \Rnode {advi@from\the\advi@c@annot}%
-      {\advi@anchor{advi@annot\the\advi@c@annot}{#2}}\annot@i}
-
-\def \advi@annot@setdefault  {\psset{}}
-
-\newcommand {\annot@i}[1]
-  [linecolor=\advi@annot@bg,linewidth=1pt,%
-   fillstyle=solid,fillcolor=\advi@annot@bg]
-  {\psset{#1}\@ifnextchar({\annot@ii}{\annot@ii(1,1)}}
-
-\def \advi@annottab #1#2{\begin{tabular}{@{}a@{}}#2\end{tabular}}%
-\def \annot@ii(#1)#2{%
-  \advi@ifadvi
-    {\advi@record{advi@annot\the\advi@c@annot}
-       {\rput(#1){\ovalnode {advi@to}%
-                 {\begin{tabular}{a}#2\end{tabular}}}%
-        \AdviAnnotArc{advi@from\the\advi@c@annot}{advi@to}}\egroup}
-    {\egroup}}
+\newcommand {\advi@annot}[2][]{%
+   \global \advance \advi@c@annot by 1%
+   \leavevmode
+   \bubble [#1,anchor=\advi@@anchor,bubble=\advi@@bubble]%
+        {\advi@anchor{advi@annot\the\advi@c@annot}{#2}}%
+}
 
 %% exports
 

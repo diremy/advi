@@ -1,7 +1,7 @@
 TEXINPUTS := .:../lib:../../tex:
 ADVI=TEXPSHEADERS=../../tex: ../../advi.opt
 LATEX=TEXINPUTS=$(TEXINPUTS) latex 
-DEP=$(addprefix ../../tex/, advi.sty advi-annot.sty)
+DEP=$(addprefix ../../tex/, advi.sty advi-annot.sty bubble.sty)
 
 show: join.dvi  
 	$(ADVI) join.dvi

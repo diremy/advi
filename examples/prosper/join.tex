@@ -1,4 +1,4 @@
-%; tx     tx $*.tex
+%; tx     TEXINPUTS=.:../../tex:../lib: tx join.tex
 %; dview  dview -mlslides $*.dvi &
 %; whizzy  slide -dvi "dview -mlslides."
 
@@ -7,23 +7,18 @@
 \slidewidth 235mm
 \slideheight 174mm
 \centerslidesfalse
-
-\def \prsl {\green}
-\usepackage {xprosper}
-\def \jumpto #1{\special{html:<A href="jumpto:#1">}\special{html:</A>}}
-\def \here #1{\hypertarget{#1}{}}
-
-% \RequirePackage{semhelv}
-% \ptsize{14}
-
-%\input semlcmss.sty
-%\usefont{T1}{phv}{m}{n}\fontsize{14.4pt}{12pt}\selectfont
-%\usefont{T1}{phv}{m}{n}\fontsize{14.4pt}{14pt}\selectfont
+\slideframe {none}
+\renewcommand{\slidetopmargin}{20pt}
+\renewcommand{\slidebottommargin}{1cm}
 
 
-\usepackage {amssymb}
+%\usepackage[psbubble]{xprosper}
+\usepackage{xprosper}
 \usepackage {pst-node}
 \usepackage {hyperref}
+
+%%% advi must follow hyperref
+\usepackage{advi}
 
 %%% colors
 \usepackage {color}
@@ -34,64 +29,22 @@
 
 %%% both prosper and advi define the same macro pause, to be fixed
 
-\let \Pause \pause
-\let \pause \relax
-\usepackage {advi}
-\let \pause \Pause
-
-\def \subpar #1{\par\medskip {\blue\bf #1}}
-\let \partitle \subpar
-\def \programcolor {\red\rm}
-\def \jc {\@\triangleright\@}
-\def \jcand {\@\&\@}
-
-
-\slideframe {none}
-\renewcommand{\slidetopmargin}{20pt}
-\renewcommand{\slidebottommargin}{1cm}
+\def \jc {\;\triangleright\;}
+\def \jcand {\;\&\;}
 
 \newpagestyle {mystyle}{}{}%{\hfil {\tiny \thepage}}
 \pagestyle {mystyle}
 
-\def \tf {\blue \bf}
+\def \titlestyle {\color{blue}}
+\newcommand{\slidetitle}[1]
+   {\vskip 2ex \subsection* {\centerline {\titlestyle \Large #1}}}
 
-
-%\pagestyle {plain}
-
-\makeatletter 
-\def \verbatim@font {\tt\red}
-\makeatother
-
-
-\let  ~ \hfill
-
-\def \slidetitle #1{\begingroup 
-   \sl \bf \purple {#1}\hfill {\tiny \thepage}\hbox{}\par
-   \smallskip\hrule\medskip \endgroup} 
-\def \titlestyle {\color{cyan}}
-
-\renewcommand{\slidetitle}[1]{\vskip 2ex \subsection* 
-{\centerline {\titlestyle \Large #1}}
-}
-\let \sameslide \newslide
-
-\let \l \ell
-\let \r \rho
-\def \ebox #1{\colorbox{yellow}
-   {\mbox {\large \strut #1}}}
-\def \ie.{{\em i.e.}}
-\let \@\;
+\def \ebox #1{\colorbox{yellow}{\mbox {\large \strut #1}}}
 \def \mathprefix #1{\mathopen{}\mathrel{\tt {#1}}}
 
 \begin{document}
 
-\pagestyle {empty}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\pagestyle {mystyle}
-\def \title #1{\paragraph* {\tf #1}}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \overlays*{\begin{slide}
 \slidetitle{Effects with advi}
@@ -157,7 +110,6 @@ A concurrent, object-oriented calculus with:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \overlays*{\begin{slide}
 \slidetitle {Definition of behaviors in the $\pi$-calculus}
-%\jumpto {after-pi}
 
 \large
 $$
@@ -167,20 +119,20 @@ $$
 && 
 \bulle %[=1]
     {\ovalnode* [fillstyle=solid,fillcolor=lightred]{u1}
-        {\u?(x)\,P}}(0.2,-1.5){\mbox{Reception on $u$}} & 
+        {\u?(x)\,P}}(1.5,-1.5){\mbox{Reception on $u$}} & 
 \\
 \hfil
 \bulle %[=1]
   {\ovalnode* [fillstyle=solid,fillcolor=lightred]{u2}
-        {\mathprefix {rec}{\u?(x) \, Q}}}
-  (-1,-2)
+        {rec\; \u?(x) \, Q}}
+  (0.2,-2)
   {\begin{minipage}{7em}Replicated \\reception on $u$\end{minipage}}&  
 \\
 & 
 \bulle %[=1]
   {\ovalnode* [fillstyle=solid,fillcolor=lightgreen]{u3}
         {\hbox{$\u!(v)$}}}
-   (2,-2)
+   (3,-2)
    {\mbox{Emission on $u$}}
 %\pause
 & 
@@ -251,24 +203,20 @@ This makes reasoning {\em and} distributed computing difficult.}
 
 \end{slide}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\here {after-pi}
 \overlays*{\begin{slide}
-%\jumpto {after-join}
 \slidetitle {Definitions of behavior in the join-calculus}
 
 \large
 $$
 \def \u{{\mbox {\large \bf u\hskip 0.3ex}}}
 \def \w{{\mbox {\large \bf w\hskip 0.3ex}}}
-\def \jc {{}\@\triangleright\@{}}
-\def \jcand {\@\&\@}
 \hfill
 \begin{array}{ccccc}
 \bulle%[=1]
 {\rnode {u0}{\psframebox* [fillstyle=solid,fillcolor=lightred]
 {\begin{array}{r@{}l} \u(x) \jc& P\\ \u(x) \jcand \w(y) \jc &Q\\
 \end{array}}}}
-(-0.5,-3)
+(1.5,-3)
 {\mbox{\begin{minipage}{9em}
  Defines synchronizing names $\u$ and $\w$ 
  and their behaviors altogether
@@ -278,7 +226,7 @@ $$
 \begin{array}{cc}
 \bulle%[=1]
 {\ovalnode* [fillstyle=solid,fillcolor=lightgreen]{u1}{\u!(v)}}
-(1,-2)
+(1.5,-2)
 {\mbox{\begin{minipage}{6em}Asynchronous emission on $\u$\end{minipage}}}
 \pause
 \\
@@ -349,7 +297,6 @@ Easier for reasoning and  distributed computation}
 \centerline {\ebox {\LARGE {But it's too rigid!}}}
 
 \end{slide}}
-\here {after-join}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

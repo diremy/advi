@@ -814,9 +814,11 @@ let tpic_flush_path st cntr =
   if st.tpic_shading > 0.0 &&
      Array.length path >= 2 &&
      path.(0) = path.(Array.length path - 1)
-  then Dev.fill_path pixpath ~shade:st.tpic_shading;
+  then
+    if not !hidden then Dev.fill_path pixpath ~shade:st.tpic_shading;
   (* If requested, draw outline of path *)
-  if cntr then Dev.draw_path pixpath ~pensize:(tpic_pen st);
+  if cntr then
+    if not !hidden then Dev.draw_path pixpath ~pensize:(tpic_pen st);
   (* Reset path *)
   st.tpic_path <- [];
   st.tpic_shading <- 0.0;;
@@ -849,7 +851,8 @@ let tpic_spline_path st =
       r := (xp, yp) :: !r
     done
   done;
-  Dev.draw_path (Array.of_list (List.rev !r)) ~pensize:(tpic_pen st);
+  if not !hidden then
+      Dev.draw_path (Array.of_list (List.rev !r)) ~pensize:(tpic_pen st);
   st.tpic_path <- [];
   st.tpic_shading <- 0.0;;
 
@@ -864,10 +867,12 @@ let tpic_arc st x y rx ry s e cntr =
   and e = int_of_float (e *. rad_to_deg) in
   (* If shading requested, fill the arc *)
   if st.tpic_shading > 0.0 then
-    Dev.fill_arc ~x ~y ~rx ~ry ~start:s ~stop:e ~shade:st.tpic_shading;
+    if not !hidden then
+      Dev.fill_arc ~x ~y ~rx ~ry ~start:s ~stop:e ~shade:st.tpic_shading;
   (* If requested, draw outline of arc *)
   if cntr then
-    Dev.draw_arc ~x ~y ~rx ~ry ~start:s ~stop:e ~pensize:(tpic_pen st);
+    if not !hidden then
+      Dev.draw_arc ~x ~y ~rx ~ry ~start:s ~stop:e ~pensize:(tpic_pen st);
   (* Reset shading *)
   st.tpic_shading <- 0.0;;
 

@@ -348,17 +348,23 @@ Labels over arrows \verb"\Aput", \verb"Bput", etc.
 
 \section {Auxiliary packages}
 
-\subsection {Annotations}
-\subsection*{Active Annotations (manual)}
+\subsection*{The bubble package}
 
-To use annotations, you must load the additional package
+This package allows to easily draw bubbles over some text. 
 \begin{verbatim}
-\usepackage{advi-annot}
+\usepackage{bubble}
+\usepackage[ps]{bubble}
 \end{verbatim}
-This defines the following command:
+By default bubbles are produced using the \doctt{epic} and \doctt{eepic}
+packages, for portability. However, for better rendering and easier 
+parameterization, bubble can also be drawn using the \doctt{ pst-node}
+package of the pstricks collection.  This is was the \doctt{ps} option
+does. 
+
+The package  defines a single command:
 
 \medskip\noindent
-\docdef \adviannot \docopt{key=value list}\docarg{anchor}%
+\docdef \bubble \docopt{key=value list}\docarg{anchor}%
     \docopt{ps options}\docpar {pos}\docarg{text}
 \begin{quote}
 The \docid{key=value list} is a list of bindings of the following kind:
@@ -366,6 +372,11 @@ The \docid{key=value list} is a list of bindings of the following kind:
 \dockey[yellow]{bg}{color}
 \begin{quote}
 The background color for annotations. 
+\end{quote}
+
+\dockey[yellow]{unit}{dim}
+\begin{quote}
+Set the package unit to \docid{dim}.
 \end{quote}
 
 \dockey[c]{col}{colspec}
@@ -398,16 +409,31 @@ P\docid{w} &  \doctt{col=\{>\{\$\}p\docarg{w}<\{\$\}\}}\\
 \end{quote}
 
 \docid{pos} is the optional relative position of the annotation 
-defaults to $1,1$ (it is passed to the command \docdef\rput).
+defaults to $1,1$ and is counted in the package unit. 
 
-\docid{ps options} are pased to  the command \docdef\psset). 
+\docid{ps options} are passed to  the command \docdef\psset) 
+in \doctt{ps} mode and ignored otherwise. 
 \end{quote}
 Parameters (color and tabular column specification) can also 
 be set globally using the command:
 
 \medskip \noindent
-\docdef \setkeys\doctt{\{adviannot\}}\docarg{key=value list}
+\docdef \setkeys\doctt{\{bubbleset\}}\docarg{key=value list}
 
+\subsection*{Annotations package}
+
+This package uses active anchors and the package bubbles to 
+allow annotations by raising a bulle when the cursor is over the anchor.
+
+The package provides a single command
+
+\medskip\noindent
+\docdef \adviannot \docopt{key=value list}\docarg{anchor}%
+    \docopt{ps options}\docpar {pos}\docarg{text}
+\begin{quote}
+whose options are identical to those of \docdef \bubble, but the bubble
+appear withing an active anchor. 
+\end{quote}
 
 %Annotation location can also be invisible \advi{C}{\tt{ }}instead of visible.
 

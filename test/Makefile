@@ -18,7 +18,7 @@ endif
 
 all: $(DVIFILES) $(MLPROG) 
 
-$(DVIFILES): ../tex/bar.jpg.eps demo.sty
+$(DVIFILES): ../tex/bar.jpg.eps demo.sty ../tex/advi.sty ../tex/advi-annot.sty
 
 
 .dvi.advi:
