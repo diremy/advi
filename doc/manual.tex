@@ -229,7 +229,7 @@ to read their source code and copy the effects they provide.
 interaction with the presenter from within your {\LaTeX} source text.
 
 The {\tt advi} package is the main package to include when writing
-a presentation for \ActiveDVI. It provides the main set of interactive
+a presentation for {\ActiveDVI}. It provides the main set of interactive
 commands for {\ActiveDVI} to animate the show. However, there is no
 need to load the package if no {\ActiveDVI} special effects are
 required for the presentation.
@@ -473,9 +473,12 @@ By default, the transition affects only the current page.
 
 Explain \verb"<a name>XXX</a>"
 
-\subsection {Embed applications anchors}
+\subsection {Embedded applications}
 
-The commands are 
+{\ActiveDVI} can launch arbitrary applications you need to animate the
+show.
+
+The {\LaTeX} command is 
 
 \medskip\noindent
 \docdef \adviembed\docopt{key=value list}\docarg{command} 
@@ -500,7 +503,12 @@ is turned.
 
 \begin{quote}
 The application keeps running in the background, but will only be visible in
-the current page.
+the page where it has been launched.
+\end{quote}
+
+\dockey{sticky}{name}
+\begin{quote}
+The application keeps running and remains visible when turning pages.
 \end{quote}
 
 \dockey{width}{dim}\\
@@ -511,11 +519,6 @@ latex. Both values default to 0pt.
 
 These dimensions are also substituted for all occurrences of \verb"!g!" in
 the command string. 
-\end{quote}
-
-\dockey{sticky}{name}
-\begin{quote}
-The application keep running and remains visible when turning pages.
 \end{quote}
 
 \end{quote}
