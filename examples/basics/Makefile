@@ -1,4 +1,7 @@
-# To view the demo, use ../advi demo.dvi
+# To view the demo, use ../advi file.dvi
+
+TEXFILES= simple.tex moderate.tex
+
 ADVIDIR=../..
 
 include ../../Makefile.config
@@ -8,7 +11,6 @@ RM=/bin/rm -f
 LATEX=TEXINPUTS=.:$(ADVIDIR)/tex:$(TEXINPUTS): latex
 PLATEX=TEXINPUTS=.:$(ADVIDIR)/tex:$(TEXINPUTS): platex
 
-TEXFILES= simple.tex
 DVIFILES= $(TEXFILES:.tex=.dvi)
 ADVI=TEXPSHEADERS=$(ADVIDIR)/tex: $(ADVIDIR)/advi
 

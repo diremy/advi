@@ -3,6 +3,7 @@
 \usepackage{color}
 \usepackage{graphicx}
 \usepackage{advi}
+\usepackage{alltt}
 
 \pagestyle{empty}
 
@@ -56,6 +57,12 @@ the space bar to go on!
 Using the macro \verb"textcolor" you can write text in the color you
 want. For instance, \verb"\textcolor{red}{important}" is rendered as
 \textcolor{red}{important}!
+
+\begin{alltt}
+{\it{(* Remark that double semi-colon is mandatory *)}}
+let x = 1\textcolor{red}{;;}
+\{foo = 1; bar = "toto"\};;
+\end{alltt}
 
 \adviwait
 
