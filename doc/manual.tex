@@ -58,9 +58,9 @@ file included in the distribution.
 \vfill
  \section*{Acknowledgements and contributors}
 
-{\ActiveDVI} is based on Mldvi, written by Alexandre~Miquel, which
-constitutes its core. Mldvi alone is distributed 
-under LGPL license and is available at \url{http://pauillac.inria.fr/~miquel/}. 
+{\ActiveDVI} is based on Mldvi which constitutes its core rendering
+engine. Alexandre~Miquel wrote Mldvi and distributes it under the LGPL
+license at URL \url{http://pauillac.inria.fr/~miquel/}.
 
 {\ActiveDVI} has been developed by Jun~Furuse, Didier~R{\'{e}}my and
 Pierre~Weis with also contributions by Roberto~Di~Cosmo, Didier~Le~Botlan,
@@ -76,29 +76,81 @@ Xavier~Leroy, and Alan~Schmitt.
 
 \section{Safety concerns when using the {\ActiveDVI} previewer}
 
-\paragraph {\bf Warning!}
+\paragraph{\bf Warning!}
 
-{\ActiveDVI} may execute programs and commands embedded into the DVI file.
-Hence, when playing a DVI file from an untrusted source,
-you should run \doctt{advi} with the \doctt{-safer} option, 
-that inhibits the execution of embedded applications. 
-This warning applies in particular if you choose {\ActiveDVI} as your default 
-{\tt meta-mail} previewer for the {\tt application/x-dvi} mime-type.
+{\ActiveDVI} may execute programs and commands embedded into the DVI
+file.  Hence, when playing a DVI file from an untrusted source, you
+should run \doctt{advi} with the \doctt{-safer} option that inhibits
+the execution of embedded applications. This warning applies in
+particular if you choose {\ActiveDVI} as your default {\tt meta-mail}
+previewer for the {\tt application/x-dvi} mime-type.
 
-Conversely, you may run \doctt{advi} with the \doctt{-exec} option to
-automatically launch embedded applications.
-
-The last safety option is the default one: the \doctt{-ask} option
-tells {\ActiveDVI} to ask the user each time it has to launch an
+The default safety option is the \doctt{-ask} option: it
+tells {\ActiveDVI} to ask the user each time it must launch an
 application. (Note that in such a case {\ActiveDVI} asks only once to
 launch a given application: it remembers your previous decisions
-concerning a command and acts accordingly for the rest of the
-presentation.) 
-The safe \doctt{-ask} option is set by default. It can also be set for
-all the users by the machine administrator or on a local scale by
-individual users, and even via a per directory setting ! (Convenient
-to gracefully run your talks, while still be cautious when running
-talks from others.)
+concerning the command and acts accordingly for the rest of the
+presentation.)
+
+The last safety option is \doctt{-exec}: if you call \doctt{advi}
+\doctt{-exec}, \doctt{advi} automatically and silently launches all
+embedded applications (this is useful to play your own presentations without
+the burden of answering yes to {\ActiveDVI}'s questions).
+
+As mentioned, the safe \doctt{-ask} option is the default, if nothing
+is explicitly specified by the user. If desired, the default safety
+option can be set via {\em initialisation files} on a system large
+scale by the machine administrator (in file \doctt{/etc/advirc}), or
+on a local scale by individual users (setting the default policy for
+that user), or even on a per directory basis (setting the default
+policy to show DVI files in this directory)! (This last option is
+convenient to gracefully run your own talks, while still being
+cautious when running talks from others.)
+
+\section{Initialisation files for {\ActiveDVI}}
+
+\subsection{Syntax of an initialisation file}
+
+An initialisation file for {\ActiveDVI} is simply a text file that
+contains options exactly similar to those you can give on the command
+line (with the exception of comments, made of a sharp sign
+(\doctt{\char35}) followed by some text that is ignored until the end
+of line). For instance:
+%
+\begin{verbatim}
+-exec # I know what I mean!
+-bgcolor grey16
+-fgcolor grey95
+\end{verbatim}
+is a valid initialisation file that sets the policy to \doctt{-exec},
+then sets background and foreground colors to obtain a nice inverse
+video effect.
+
+\subsection{Loading initialisation files}
+
+Before parsing options on the command line, {\ActiveDVI} loads, in the
+order listed below, the following initialisation files (nothing
+happens if any of them does not exist):
+
+\begin{itemize}
+
+\item system wide initialisation file: \doctt{/etc/advirc},
+
+\item user specific initialisation files: \doctt{\char126/.advirc} then
+\doctt{\char126/.advi/advirc},
+
+\item directory specific initialisation file: \doctt{./.advirc}.
+
+\end{itemize}
+
+\subsection{Automatic setting of options}
+
+In addition, the user may load an arbitrary file containing options by
+specifying the file path via the command line argument
+\doctt{-options-file}.  Hence, \doctt{-options-file} {\tt filename}
+loads {\tt filename} when parsing this option to set up the options
+contained in {\tt filename} (thus overriding the options set before by
+the default \doctt{~/.advirc} or \doctt{~/.advi/advirc} init files).
 
 \section{Using the {\ActiveDVI} previewer}
 
@@ -110,6 +162,8 @@ advi [options] dvifile
 \end{verbatim}
 
 \noindent The \verb"advi" commands recognized the following options:
+
+\subsubsection*{Help for {\tt advi} options}
 
 \medskip\noindent\begin{tabular}{ll}
 \verb"-help"               & Short command line options help
@@ -174,7 +228,7 @@ original TeX source.
 \medskip\noindent\begin{tabular}{ll}
 \verb"-A" & Toggle Postscript antialiasing \\
 \verb"-passive" & Inhibit effects that are visible when redrawing the page
-\\ & (Transitions, delays, embeded apps) \\
+\\ & (Transitions, delays, embedded applications) \\
 \end{tabular}
 
 \subsubsection*{Safety options}
@@ -189,7 +243,6 @@ original TeX source.
 \verb"-option-file <filename>" & Load {\tt filename} as a file containing a list of options \\
 & as given on the command line to \doctt{advi}. \\
 \end{tabular}
-
 
 \subsection{Cut and paste}
 
@@ -227,17 +280,18 @@ close enough to the position.
 
 \subsection{Hyperref}
 
-{\ActiveDVI} supports {\LaTeX} {\tt hyperref} package 
-with both internal and cross-file references. For cross-file
-references, it launches a new \verb"advi" process. 
-
+{\ActiveDVI} supports the {\LaTeX} {\tt hyperref} package with both
+internal and cross-file references. For cross-file references, it
+launches a new \verb"advi" process to view the target.
 
 {\ActiveDVI} improves the treatment of hyperrefs over convential previewers,
 by emphasizing the hypertarget text of an hyperlink. Thus, an hypertarget
-definition \docdef\hypertarget \docarg{tag}\-\docarg{text}
-should make the activation of the link \docid{tag}
-not only move to the page where \docid{text} occurs, but also emphasize
-\docid{text}. 
+definition
+
+\docdef\hypertarget \docarg{tag}\docarg{text}
+
+should make the activation of the link \docid{tag} not only move to
+the page where \docid{text} occurs, but also emphasize the target \docid{text}.
 %
 However, since {\docdef\hypertarget} does include its second argument
 withing the target, we use the following command instead:
@@ -245,51 +299,57 @@ withing the target, we use the following command instead:
 \newcommand{\softtarget}[2]%
   {\special{html:<A name=\hyper@quote #1\hyperquote>}#2\special{html:</A>}}
 \end{verbatim}
-(If you are viewing this document with \softtarget{a}{\ActiveDVI}, you may
-move over or click on \hyperlink{a}{this area} to see the effect.) 
+
+(If you are viewing this document with \softtarget{activedvi}{{\ActiveDVI}},
+you may move over or click on \softlink{activedvi}{this area} to see
+the effect.)
 
 \subsection{Floating table of contents and thumbnails}
 
 There are two ways to include a floating table of contents while previewing. 
+
 \begin {itemize}
 
-\item
-{\ActiveDVI} recognizes the reserved hypertargets \doctt{/toc.first}
-and \doctt{/toc.last} as markers for the first and last page of the table
-of contents, which will become floating pages, {\em i.e.} accessible from
-anywhere in the document with the default keybinding \verb't'.
-The first stroke on \verb't' will show the first page of the table of
-contents. Successive stokes will show the following pages. Prefix argument 
-may also be used to directly access second of third pages. 
+\item {\ActiveDVI} recognizes the reserved hypertargets
+\doctt{/toc.first} and \doctt{/toc.last} as markers for the first and
+last pages of the table of contents. These pages then become floating,
+{\em i.e.} accessible from anywhere in the document with the default
+keybinding \verb't'. The first stroke on \verb't' shows the first page
+of the table of contents. Successive stokes will show the following
+pages. (As usual, prefix integer argument may be used to directly
+access a specific page of the table of contents.)
 
-The package \softlink{advi}{{\tt advi}} below redefines
-{\docdef \tableofcontents} so that it automatically inserts the above
-markers around the table of contents. It also provides two macros, {\docdef
-\advitoc} and \docdef \endadvitoc, that can be used to insert these markers
-explicitly when the table of context is hand-made.
+The package \softlink{advi}{{\tt advi}} below redefines the macro
+{\docdef \tableofcontents} so that it automatically inserts the
+reserved hypertargets markers around the table of contents. It also
+provides two new macros, {\docdef \advitoc} and \docdef \endadvitoc,
+that serve to insert these markers when the table of contents is
+hand-made.
 
-\item
-If no table of contents markers are found, then {\ActiveDVI} will
-compute thumbnails, {\em i.e.} will present pack several pages at a smaller 
-scale on a single page. {\ActiveDVI} will calculate the scale needed to 
-fit all thumbnails on a single page, and will use it if it is 
-less or equal to a maximal value, or take the maximal value otherwise
-and use several pages. The default maximal scale value is 5, so that
-25 thumbnails can fit on the same page. This value can be changed with the
-option \doctt{-thumbnail\_scale}.  
+\item If no table of contents markers are found, then {\ActiveDVI}
+will compute thumbnails, {\em i.e.} will show the whole set of pages
+of the presentation, each page drawn at a smaller scale and packed
+with the others on a single page. {\ActiveDVI} computes the scale so
+that all the thumbnails fit on one page only, provided that the scale
+is less or equal to a maximal value; otherwise, the maximal value
+scale is selected and the thumbnail pages spread on several pages. The
+default maximal scale value is 5, so that 25 thumbnails can fit on the
+same page. This value can be changed using the option
+\doctt{-thumbnail\_scale}.
 
-By default, thumbnails are made for all pages. However, thumbnail pages can
-be defined explicitly with an hypertarget whose anchor is of the form
-\doctt{/page.\docid{suffix}}. In this case, all thumbnail must be explicitly
-given.
+Normally, thumbnails are drawn for all the pages. However, thumbnail
+pages can also be defined manually, with an hypertarget whose anchor
+is of the form \doctt{/page.\docid{suffix}}. In this case, all the
+desired thumbnails must be explicitly marked.
 
-\end {itemize}
+\end{itemize}
+
 By default, the binding \doctt{T} processes thumbnails and the binding
-\doctt{t}  displays thumbnails if already processed or show the table of
-contents if available, otherwise does nothing. Thumbnails must be made
-explicitlty, to prevent accidental hit of the key, which may then 
-take some time.
-
+\doctt{t} displays thumbnails if already processed, or shows the table
+of contents if available. Otherwise pressing \doctt{t} has no
+action. Thumbnails computation is explicit, so that incidentally
+hitting the \doctt{t} key does not lead to an unexpected computation,
+hence an unexpected delay.
 
 \subsection{Moving around}
 
@@ -297,13 +357,13 @@ See the key bindings in the appendix.
 
 \subsection{Using and making special effects}
 
-Presentation examples can be found in the 
-\verb"examples" directory. Don't miss to play them! Then, feel free
-to read their source code and copy the effects they provide.
+Presentation examples can be found in the \verb"examples"
+directory. Don't miss to play them! Then, feel free to read their
+source code and copy the effects they provide.
 
 {\ActiveDVI} can be used as is, but will shine when driven by a user
-with a bias toward programming: special effects can easily 
-be realized by using the {\LaTeX} package provided with the distribution. 
+with a bias toward programming: special effects can easily be realized
+by using the {\LaTeX} packages provided with the distribution.
 
 Creative advanced users may program the presenter at various levels, either
 using or defining simple {\LaTeX} macros, writing new {\LaTeX} package
@@ -315,7 +375,7 @@ files, or by implementing extensions to the previewer itself.
 % community, please don't hesitate to drop a mail to the implementors
 % at \verb"advi@pauillac.inria.fr".
 
-\section{The \softtarget{advi}{{\tt advi.sty}} \LaTeX~package}
+\section{The \softtarget{advi}{{\tt advi.sty}} {\LaTeX} package}
 
 
 {\ActiveDVI} provides some {\LaTeX} packages to facilitate animations and
@@ -742,7 +802,7 @@ The application keeps running and remains visible when turning pages.
 \dockey{height}{dim}
 \begin{quote}
 The application takes \docid{dim} width (respectively height) space in 
-latex. Both values default to 0pt.
+{\LaTeX}. Both values default to 0pt.
 
 These dimensions are also substituted for all occurrences of \verb"!g" in
 the command string.
@@ -859,7 +919,7 @@ Labels over arrows \verb"\Aput", \verb"Bput", etc.
 \end {itemize}
 
 
-\section{Auxilliary \LaTeX~packages}
+\section{Auxilliary {\LaTeX} packages}
 
 \subsection{The superpose package}
 
@@ -1032,9 +1092,11 @@ See \url{http://pauillac.inria.fr/advi} for up to date information.
 \def\arg{\textcolor{blue}{arg }}
 
 \let \Newpage \newpage
+
 \def \newpage {}
 
 \input{splash_contents.tex}
+
 \def \newpage{\Newpage}
 
 \section{Index}
