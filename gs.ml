@@ -130,7 +130,9 @@ class gs () =
       "-";
     |] in
 
-  let _ = debugs command; Array.iter debugs command_args in
+  let _ =
+    debugs command;
+    Array.iter debugs command_args in
 
   (* Set environment so that ghostscript writes in our window. *)
   let int32_string k x =
@@ -143,20 +145,17 @@ class gs () =
     s in
   let int32_string x = Int32.format "%u" x in
 
-  let _ =
-    Unix.putenv "GHOSTVIEW"
-      (Printf.sprintf "%s %s "
-         (int32_string gr.window)
-         (if !Options.global_display_mode then "" else int32_string gr.pixmap)
-      ) in
+  let  _ = Unix.putenv "GHOSTVIEW"
+    (Printf.sprintf "%s %s "
+       (int32_string gr.window)
+       (if !Options.global_display_mode then "" else int32_string gr.pixmap)
+    ) in
 
   let iof = int_of_float and foi = float_of_int in
   let lx = iof ( (foi (gr.x * dpi)) /. gr.xdpi)
   and ly = iof ( (foi (gr.y * dpi)) /. gr.ydpi)
   and ux = iof ( (foi ((gr.x + gr.bwidth)  * dpi)) /. gr.xdpi )
-  and uy = iof ( (foi ((gr.y + gr.bheight) * dpi)) /. gr.ydpi)
-
-  in
+  and uy = iof ( (foi ((gr.y + gr.bheight) * dpi)) /. gr.ydpi) in
 
   (* Set ghostscript property. *)
   let content = Printf.sprintf "%s %d %d %d %d %d %f %f %d %d %d %d"
@@ -166,18 +165,16 @@ class gs () =
       (* lower-left x y , upper-right x y :
          Bounding box in default user coordinates. *)
       gr.xdpi gr.ydpi (* Resolution x y. *)
-      0 0 0 0 (* Margins left, bottom, top, right. *)
-  in
+      0 0 0 0 (* Margins left, bottom, top, right. *) in
 
   let _ =
     begin
       try GraphicsY11.set_named_atom_property  "GHOSTVIEW"  content;
       with x -> Misc.fatal_error "Cannot set ``GHOSTVIEW'' property"
-    end;
-  in
+    end in
 
   (* Ignore signal SIGPIPE. *)
-  let _ =  Unix.sigprocmask Unix.SIG_BLOCK [13] in
+  let _ = Unix.sigprocmask Unix.SIG_BLOCK [13] in
 
   let lpd_in, lpd_out = Unix.pipe () in
   let rpd_in, rpd_out = Unix.pipe () in
@@ -188,8 +185,7 @@ class gs () =
     tryc close_out leftout;
     tryc close_in rightin;
     tryc Unix.close lpd_in;
-    tryc Unix.close rpd_in
-  in
+    tryc Unix.close rpd_in in
   let pid =
     Unix.create_process command command_args lpd_in rpd_out
       (* Unix.stdout *) Unix.stderr
@@ -311,8 +307,7 @@ let texc_special_pro gv =
       Misc.warning "Continuing without Postscript specials";
       gv # kill;
       Options.dops := false;
-      []
-;;
+      [];;
 
 class gv =
   object (self)
@@ -342,7 +337,7 @@ class gv =
     method check_size =
       begin
         match process with
-          None -> ()
+        | None -> ()
         | Some gs ->
             let gr = gs # gr in
             let size_x = GraphicsY11.bsize_x () in
@@ -468,7 +463,9 @@ let draw s x y =
 ;;
 
 let add_headers = gv#add_headers;;
+
 let newpage = gv#newpage;;
+
 let flush () =
   if !Options.dops then
     try  gv#sync
