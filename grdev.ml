@@ -970,6 +970,7 @@ let cut s =
 
 let open_dev geom =
   if !opened then Graphics.close_graph ();
+  Graphics.set_window_title !title;
   Graphics.open_graph geom;
 
   (* We disable Graphics's event retrieving *)
@@ -984,8 +985,7 @@ let open_dev geom =
 
   update_device_geometry ();
   Graphics.remember_mode true;
-  GraphicsY11.display_mode !Options.global_display_mode;
-  Graphics.set_window_title !title;
+  GraphicsY11.display_mode (Global_options.get_global_display_mode ());
   color := !default_fgcolor;
   opened := true;
   !size_x, !size_y;;
@@ -1002,7 +1002,7 @@ let clear_dev () =
   Embed.kill_ephemeral_apps ();
   Launch.unmap_persistent_apps ();
   Misc.debug_stop "subwindows of persistent apps unmapped";
-  GraphicsY11.display_mode !Options.global_display_mode;
+  GraphicsY11.display_mode (Global_options.get_global_display_mode ());
   Graphics.clear_graph ();
   Misc.debug_stop "graphics cleared";
   H.clear ();
