@@ -15,9 +15,7 @@
 (*  Based on Mldvi by Alexandre Miquel.                                *)
 (***********************************************************************)
 
-let debug = ref false;;
-
-let debugs s = if !debug then prerr_endline s;;
+let debugs = Misc.debug_endline;;
 
 type ratiopts =
    | ScaleOriginal    (* leave the image at its original native size  *)
