@@ -67,14 +67,17 @@ clean: $(AUTO)
 # the rules. Hence,
 # make clean all
 # will recompute rules and the set of files again.
-.Makefile.auto : auto
 
-auto:
+$(AUTO): MakeHTML
+
+$(AUTO):
 	/bin/rm -f $(AUTO)
 	for i in $(FILES); do \
 	/bin/rm -f $(FILES); \
 	j=`basename $$i .htm`; \
 	echo $$i: $(SRC)/$(PACKAGE)-$$j.htm >> $(AUTO); \
+	echo >> $(AUTO); \
+	echo $(SRC)/$(PACKAGE)-$$j.htm: >> $(AUTO); \
 	echo "	cp -p $(SRC)/$(PACKAGE)-$$j.htm $$j.htm" >> $(AUTO); \
 	done
 
