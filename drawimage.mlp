@@ -317,7 +317,7 @@ else
 
 module M = struct
 
-  let f file whitetransp alpha blend bboxopt ratiopt (w,h) x0 y0 = 
+  let f file whitetransp alpha blend psbbox ratiopt (w,h) (x0,y0) =
     (* just ignore the image. *)
     ()
   let clean_cache () = ()
