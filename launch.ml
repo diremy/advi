@@ -47,7 +47,7 @@ let unmap_persistent_apps () =
   unmap_embeds := [];;
 
 (* Really launch embedded apps. *)
-let launch_embedded_apps () = 
+let launch_embedded_apps () =
   execute !embeds; embeds := [];
   execute !persists; persists := [];;
 
@@ -63,7 +63,7 @@ let advi_process = Unix.getpid ();;
 let exit code =
   (* at_exit code must be called only by the ADVI process.
      If it is one of the forked processes, it must DIE IMMEDIATELY:
-     no cleaning is allowed. *) 
+     no cleaning is allowed. *)
   if Unix.getpid () = advi_process then Pervasives.exit code
   else (* SUICIDE *) Unix.kill (Unix.getpid ()) 9;;
 
@@ -201,11 +201,11 @@ let fork_proc command_invocation command_tokens =
     begin (* child *)
       try
         execute_command can_exec command_invocation command_tokens;
-	exit 0
+        exit 0
       with
       | Unix.Unix_error (e, _, arg) ->
-	  Misc.warning (Printf.sprintf "%s: %s" (Unix.error_message e) arg);
-	  exit 127
+          Misc.warning (Printf.sprintf "%s: %s" (Unix.error_message e) arg);
+          exit 127
     end;
   pid;;
 
@@ -246,9 +246,9 @@ let add_white_run_command, dump_white_run_commands =
     let unique l =
       List.fold_right
         (fun c acc ->
-	  match acc with
+          match acc with
           | [] -> [c]
-	  | c' :: r as cl -> if c = c' then cl else c :: cl)
+          | c' :: r as cl -> if c = c' then cl else c :: cl)
         (List.sort compare l) [] in
     let comms = unique !white_run_commands in
     List.iter (fun c -> prerr_endline c) comms);;
