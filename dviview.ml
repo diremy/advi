@@ -756,6 +756,24 @@ let show_toc st =
 ;;
 
 
+let find_xref_here tag st =
+  try
+    let p = int_of_string (Misc.get_suffix "/page." tag) in
+    if p > 0 && p <= st.num_pages then p - 1 else raise Not_found
+  with Misc.Match ->
+    Hashtbl.find (xrefs st) tag
+      
+;;
+
+let page_start default st =
+  match !start_html with
+  | None -> default
+  | Some html ->
+      Driver.scan_special_pages st.cdvi max_int;
+      try find_xref_here html st
+      with Not_found -> default
+;;
+
 (* foreground if drawing is needed after reloading *)
 let rec reload foreground st =
   try
@@ -792,6 +810,7 @@ let rec reload foreground st =
           (Printf.sprintf
              "Dropping master %s (incompatible with client %s)"
              st.filename st'.filename);
+
         st'.duplex <- Alone;
         raise (if foreground then Duplex (redraw, st') else Not_found)
     | _ -> 
@@ -802,35 +821,44 @@ let rec reload foreground st =
     Misc.warning
       (Printf.sprintf "exception while reloading %s" (Printexc.to_string x));
     st.cont <- None 
-
-and find_xref tag default st =
-  try
-    let p = int_of_string (Misc.get_suffix "/page." tag) in
-    if p > 0 && p <= st.num_pages then p - 1 else default
-  with Misc.Match ->
-    try Hashtbl.find (xrefs st) tag
-    with Not_found ->
-      match st.duplex with
-      | Client _ | Alone -> default
-      | Master st' ->
-            try
-              if changed st' then reload false st';
-              st'.page_number <- Hashtbl.find (xrefs st') tag;
-              (* so as to pop to current view automatically *)
-              st'.page_stack <- (-1) :: st'.page_stack;
-              raise (Duplex (redraw, st'))
-            with
-              Not_found -> default
-
-and page_start default st =
-  match !start_html with
-  | None -> default
-  | Some html ->
-      Driver.scan_special_pages st.cdvi max_int;
-      find_xref html default st
-
 ;;
 
+  
+let find_xref_master tag default st =
+  try 
+    match st.duplex with
+    | Client _ | Alone -> default
+    | Master st' ->
+        if changed st' then reload false st';
+        st'.page_number <- Hashtbl.find (xrefs st') tag;
+        (* so as to pop to current view automatically *)
+        st'.page_stack <- (-1) :: st'.page_stack;
+        raise (Duplex (redraw, st'))
+  with Not_found -> default
+;;
+let find_xref tag default st =
+  try find_xref_here tag st
+  with Not_found -> find_xref_master tag default st 
+;;
+let duplex_sync st =
+  match st.duplex with
+  | Client _ | Alone -> ()
+  | Master st' ->
+      let none = -1 in
+      let p = page_start none st in
+      if p < 0 then ()
+      else
+        begin 
+          if changed st' then reload false st';
+          if p < st'.num_pages then
+            begin
+              Printf.printf "PAGE=%d" p; print_newline();
+              st'.page_number <- p;
+              st'.page_stack <- (-1) :: st'.page_stack;
+              raise (Duplex (redraw, st'))
+            end
+        end
+;;
 
 let redisplay st =
   st.pause_number <- 0;
@@ -1256,6 +1284,7 @@ module B =
         Master st' | Client st' -> raise (Duplex (redraw, st'))
       | Alone -> ()
     let toggle_autoswitch st = toggle_autoswitch ()
+    let duplex_sync = duplex_sync
   end;;
 
 let bindings = Array.create 256 B.nop;;
@@ -1356,8 +1385,9 @@ let bind_keys () =
    't', B.show_toc;
 
     (* Duplex *)
-   '', B.duplex;
-   'W', B.toggle_autoswitch;
+   '', B.toggle_autoswitch;
+   'w', B.duplex;
+   'W', B.duplex_sync;
   ];;
 
 bind_keys ();;

@@ -390,6 +390,12 @@ exchanging the background and foreground colors \\
 & as given on the command line to \doctt{advi}. \\
 \end{tabular}
 
+\subsubsection*{Miscelleanous options}
+\medskip\noindent\begin{tabular}{ll}
+\doctt{-autoswitch} & Set the {\tt autoswitch} flag, which allows
+implicit switch to master \\& on \texttt{usr1} signal (default if off).\\
+\end{tabular}
+
 \subsection{Cut and paste}
 
 Text can be copied from the {\ActiveDVI} previewer to an another application.
@@ -542,9 +548,13 @@ In this case, the first file is the master file and others are client
 files. The user can switch between files explicitly (see 
 \softlink{activedvikeys}{key bindings}) or implicitly.
 There is an implicit switch from master to client when an hyperlink that is
-not found in master file can be found in the client; there is also
+not found in master file can be found in the client; there is 
 an implicit switch from client to master when using the history stack and
 the previous event on the stack an implicit swtich from master.
+
+If \doctt{autoswitch} flag is set, there is also an implicit switch to
+master, whenever {\ActiveDVI} receives signal \doctt{usr1} (to mean 
+immediate refresh). 
 
 
 \section{The \softtarget{advi} {\doctt{advi.sty}} {\LaTeX} package}
