@@ -44,6 +44,29 @@ type blend =
    | ColorDodge | ColorBurn | Darken | Lighten | Difference
    | Exclusion (* | Luminosity | Color | Saturation | Hue *);;
 
+let string_of_blend = function
+  | Normal -> "Normal"
+  | Multiply -> "Multiply"
+  | Screen -> "Screen"
+  | Overlay ->"Overlay"
+  (*
+  | SoftLight -> "SoftLight"
+  | HardLight -> "HardLight"
+  *)
+  | ColorDodge -> "ColorDodge"
+  | ColorBurn -> "ColorBurn"
+  | Darken -> "Darken"
+  | Lighten -> "Lighten"
+  | Difference -> "Difference"
+  | Exclusion -> "Exclusion"
+  (* 
+  | Luminosity -> "Luminosity"
+  | Color -> "Color"
+  | Saturation -> "Saturation"
+  | Hue -> "Hue"
+  *);;
+
+
 type alpha = float;;
 
 (* look at gxblend.c of ghostscript *)
@@ -115,9 +138,10 @@ open GraphicsY11
 let cache_prefix = "cache";;
 let cache_key = "advicache";;
 
-let verbose_image_access = Options.flag false
+let verbose_image_access =
+  Options.flag false
     "--verbose-image-access"
-    "\tChange the cursor while image loadings";;
+    "\tChange the cursor while loading images";;
 
 let image_aa = 
   Options.flag true
@@ -432,8 +456,9 @@ let load_and_resize file whitetransp psbbox ratiopt (w, h) =
           if !verbose_image_access
             then GraphicsY11.set_cursor Cursor_left_ptr;
           im
-    with _ ->
-      if !verbose_image_access then GraphicsY11.set_cursor Cursor_exchange;
+    with
+    | _ ->
+        if !verbose_image_access then GraphicsY11.set_cursor Cursor_exchange;
         begin try Unix.unlink cache_name with _ -> () end;
         let image = image_load psbbox (w, h) file in
         let image =
@@ -455,7 +480,7 @@ let draw_image image cache_name alpha blend (w, h) (x0, y0) =
      we specified as (w, h) *)
   let iw, ih = Image.size image in
   match image with
-  | Rgb24 _ when alpha = 1.0 && blend = None ->
+  | Rgb24 _ when alpha = 1 && blend = None ->
       (* optimized *)
       let image_graphics =
         try Hashtbl.find images_graphics cache_name with
@@ -466,7 +491,6 @@ let draw_image image cache_name alpha blend (w, h) (x0, y0) =
       in
       Graphics.draw_image image_graphics x0 y0
   | Rgb24 _ | Rgba32 _ ->
-      let alpha = truncate (alpha *. 255.0) in
       let get_src_alpha =
         match image with
         | Rgb24 image -> fun x y -> Rgb24.unsafe_get image x y, alpha
@@ -515,8 +539,10 @@ let f file whitetransp alpha blend psbbox ratiopt (w, h) (x0, y0) =
       load_and_resize file whitetransp psbbox ratiopt (w, h) in
     (* load_and_resize may not return exactly the same size
        we specified as (w, h) *)
-    debugs (Printf.sprintf "Draw %s (alpha=%f blend=%s)" file
-              alpha "Don't know");
+    debugs
+      (Printf.sprintf "Draw %s (alpha=%f blend=%s)"
+         file alpha (string_of_blend blend));
+    let alpha = truncate (alpha *. 255.0) in
     draw_image image cache_name alpha blend (w, h) (x0, y0);
     debugs "Success Draw!";
   with
