@@ -94,8 +94,19 @@ let prepare_file file =
 
 (* User preferences and cache handling *)
 
-let default_user_dir = "~/.advi"
-;;
+let options_files = ref [];;
+
+let add_options_file s = options_files := s :: !options_files;;
+
+Options.add "-options-file STRING"
+ (Arg.String add_options_file)
+ "\tLoad this file when starting advi, to set up user's options";;
+
+let options_files () = !options_files;;
+
+let default_option_file = tilde_subst "~/.advirc";;
+
+let default_user_dir = "~/.advi";;
 
 let user_dir = 
   let dir = try Sys.getenv "ADVIDIR" with _ -> default_user_dir in
@@ -112,15 +123,33 @@ let cache_dir =
     Filename.concat user_dir "cache"
 ;;
 
-let advi_page_no_file = Filename.concat cache_dir "advi_page_no";;
+(* Writing page current number to the file advi_page_no_file. *)
+let write_page_no =
+ Options.flag false "-page-no"
+  "Ask advi to write the current page number in a file (default is no)";;
+
+let advi_page_no_file = ref (Filename.concat cache_dir "advi_page_no");;
+
+let set_page_no_file s = advi_page_no_file := s;;
+
+Options.add "-page-no-file"
+ (Arg.String set_page_no_file)
+ "\tSet the name of the file where advi could write the current page number
+  (default is file \"advi_page_no\" in directory \".advi\"";;
 
 let save_page_no n =
+ if !write_page_no then
  try
-   let oc = open_out advi_page_no_file in
+   let oc = open_out !advi_page_no_file in
    output_string oc (string_of_int n);
    output_char oc '\n';
    close_out oc
  with _ ->
    Misc.warning 
      (Printf.sprintf
-        "Cannot write file %s to record page number." advi_page_no_file);;
+        "Cannot write file %s to record page number." !advi_page_no_file);;
+
+let init_advi_page_no_file () =
+ if !write_page_no then prepare_file !advi_page_no_file;;
+
+Rc.at_init init_advi_page_no_file;;

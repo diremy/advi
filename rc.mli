@@ -31,3 +31,12 @@ val parse_string : string ->
   (string * spec * string) list -> (string -> unit) -> string -> unit
 (** [Rc.parse_string s speclist anonfun usage_msg] parses the string [s]
   as if it were the command line. *)
+
+val at_init : (unit -> unit) -> unit;;
+(** [at_init f] records initialization function [f] to be executed
+    when [init] will be invoked. *)
+val init : unit -> unit;;
+(** [init ()] initializes the program by calling all the functions
+    that have been recorded as initialization functions via
+    [add_init] (initialization functions are called in the order of
+    addition). *)

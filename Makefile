@@ -31,13 +31,13 @@ MLINCDIRS = $(CAMLIMAGESDIR)
 
 EXEC	  = advi
 
-MODULES	  = config timeout graphicsY11 misc options launch \
+MODULES	  = config timeout graphicsY11 misc rc options launch \
             userfile input symbol search \
             shot drawimage dvicolor \
 	    table pkfont ttfont jfm font glyph devfont \
 	    units dimension \
 	    gs transimpl grdev dvi driver dviview \
-            rc main
+            main
 LIBRARIES = graphics unix str $(CAMLIMAGESLIBS)
 CLIBS	  = graphics unix str
 

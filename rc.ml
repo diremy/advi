@@ -225,3 +225,9 @@ let spec_list = [
 
 parse ".advirc" spec_list set_dviname usage_msg;;
 *)
+
+let init_list = ref [];;
+
+let at_init f = init_list := f :: !init_list;;
+
+let init () = List.iter (fun f -> f ()) (List.rev !init_list);;

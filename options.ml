@@ -17,7 +17,9 @@
 
 (* To add options to the command line in different modules way *)
 let options = ref [];;
+
 let all () = !options;;
+
 let add option_name action man =
   options := (option_name, action, man) :: !options;;
 

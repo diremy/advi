@@ -20,7 +20,7 @@ open Format;;
 (*** Parsing command-line arguments ***)
 
 let crop_flag = ref true;;
-let dviname = ref None;;
+let dvi_filename = ref None;;
 let hmargin = ref (Dimension.Cm 1.0);;
 let vmargin = ref (Dimension.Cm 1.0);;
 let geometry = ref "864x864";;
@@ -49,20 +49,37 @@ let spec_list = [
    "DIMEN\tVertical margin    (default: 1cm)");
 ];;
 
+let advi_options () =
+  let sort = List.sort (fun (s1, _, _) (s2, _, _) -> compare s1 s2) in
+  Options.pretty (spec_list @ sort (Options.all ()));;
+
 let usage_msg =
   Printf.sprintf "usage: %s [OPTIONS] DVIFILE" Sys.argv.(0);;
 
-let set_dviname s =
-  match !dviname with
-  | None -> dviname := Some s
+let set_dvi_filename s =
+  match !dvi_filename with
+  | None -> dvi_filename := Some s
   | Some _ -> ();;
 
+let init_arguments () =
+ let options = advi_options () in
+ let optfs = List.rev (Userfile.options_files ()) in
+ List.iter
+   (fun fname -> Rc.parse_file fname options set_dvi_filename usage_msg)
+   optfs;
+ Arg.parse options set_dvi_filename usage_msg;
+;;
+
+let set_dvi_geometry () =
+  Dviview.set_crop !crop_flag;
+  Dviview.set_hmargin !hmargin;
+  Dviview.set_vmargin !vmargin;
+  Dviview.set_geometry !geometry;;
+
 let standalone_main () =
-  let sort = List.sort (fun (s1, _, _) (s2, _, _) -> compare s1 s2) in
-  let options =
-    Options.pretty (spec_list @ sort (Options.all ())) in
-  Arg.parse options set_dviname usage_msg;
-  let filename = match !dviname with
+  init_arguments ();
+  Rc.init ();
+  let filename = match !dvi_filename with
   | None -> 
       (* Test if file can be found, otherwise print console stuff. *)
       let name = Config.splash_screen in
@@ -75,20 +92,14 @@ let standalone_main () =
       end;
       name
   | Some s -> s in
-  Dviview.set_crop !crop_flag;
-  Dviview.set_hmargin !hmargin;
-  Dviview.set_vmargin !vmargin;
-  Dviview.set_geometry !geometry;
+  set_dvi_geometry ();
   Dviview.main_loop filename;;
 
 let rec interactive_main () =
   printf "Dvi file name: @?";
   let filename = input_line stdin in
   if Sys.file_exists filename then begin
-    Dviview.set_crop !crop_flag;
-    Dviview.set_hmargin !hmargin;
-    Dviview.set_vmargin !vmargin;
-    Dviview.set_geometry !geometry;
+    set_dvi_geometry ();
     try
       Dviview.main_loop filename
     with Dviview.Error s | Failure s | Graphics.Graphic_failure s ->

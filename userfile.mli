@@ -21,6 +21,12 @@ val user_dir : string;;
 val cache_dir : string;;
 (* Advi cache directory. *)
 
+val default_option_file : string;;
+(* Advi user default options file ("~/.advirc"). *)
+
+val options_files : unit -> string list;;
+(* [options_files ()] returns the list of files to find options to set. *)
+
 val fullpath : string -> string -> string;;
 (* [fullpath dir path] returns the normalized full path name of
    [path] which is relative to the directory [dir]. *)
@@ -39,3 +45,4 @@ val prepare_file : string -> unit;;
 val save_page_no : int -> unit;;
  (* [save_page_no no] saves the page number [no] to file
     [cache_dir ^ "/advi_page_no". *)
+
