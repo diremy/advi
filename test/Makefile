@@ -23,10 +23,13 @@ $(DVIFILES): ../tex/bar.jpg.eps demo.sty ../tex/advi.sty ../tex/advi-annot.sty
 .dvi.advi:
 	$(ADVI) $<
 
-.tex.dvi: 
+.tex.dvi:
 	if test "$<" = "jpdemo.tex" ; then $(PLATEX) $<; \
 	else $(LATEX) $<; \
-	fi 
+	fi
+
+background.dvi: background.tex
+	$(LATEX) $<; $(LATEX) $<;
 
 taquin: taquin_embed.ml
 ifeq ($(HAVE_CDK),true)
