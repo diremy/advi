@@ -328,8 +328,8 @@ end
      \advi@hide \aftergroup \advi@endhide \advi@hiddentrue 
    \fi}
 
-\def \advi@hide {\Advi@record{@hide}}
-\def \advi@endhide   {\endAdvi@record}
+\def \advi@hide {\advi@special {proc=@hide record=\advi@start}}
+\def \advi@endhide {\advi@special {proc=@hide record=end}}
 \def \make@advioverlay 
   {\let \advi@old@overlay \overlay
    \renewcommand {\overlay}{\advi@overlay \advi@ignore}}
