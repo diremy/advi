@@ -22,28 +22,25 @@ In addition to the regular features of the Active-DVI previewer:
 
 this release introduces a lot of new features
 
-   * Interactive demos, via launching of applications from within the slides
+   * Improved API for embedded applications.
 
-   * Background colors and background images for slides
+   * Support for X colors via an additional xcolor.sty LaTeX package.
 
-   * Annotations of texts (visible when the mouse is on the annotated text)
+   * Thumbnails to see the entire presentation at a glance (press T to
+     build the thumbnails, then t to toggle from thumbnails to your
+     presentation).
 
-   * Hyper references within the same document or to other dvi files
+   * Hyper references can now be made invisible.
 
-   * Animated transitions from slide to slide
+   * Enhanced background possibilities.
 
-   * Text movements within the slide
+   * An additional advi-slides.sty package for the impatient and/or
+     the beginner facilitates easy presentations. (Comments on this
+     new package warmly welcome.)
 
-   * Recording of text and arbitrary playback of recorded elements
+   * Additional examples, including simple ones for the slitex LaTeX package.
 
-   * Superposition effects for included images (alpha channels and blending)
-
-   * A manual
-
-   * A lot of examples, including talks using popular LaTeX packages seminar
-     and prosper (cf. http://prosper.sourceforge.net/).
-
-   * A new user's interface in the redesigned LaTeX package advi.sty.
+   * An improved manual.
 
 Play advi on the demonstration presentation demo.dvi that is in the test
 directory of the distribution. Look at source code of various talks in
@@ -59,5 +56,5 @@ Mailing list advi-list-request@pauillac.inria.fr
 Bug reports to advi-bugs@pauillac.inria.fr
 
 --
-For the Active-DVI development team, 30th May 2002
+For the Active-DVI development team, 31th Jan 2003
 Jun Furuse (Jun.Furuse@inria.fr) && Pierre Weis (Pierre.Weis@inria.fr)
