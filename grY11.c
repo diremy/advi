@@ -20,6 +20,7 @@
 #include <caml/fail.h>
 #include "libgraph.h"
 #include "image.h"
+
 #include "grwm.h"
 
 value gr_get_color(void)
@@ -136,9 +137,9 @@ void gr_origin(int* x, int* y)
   *x = 0; *y = 0;
   while (win != root) {
     XGetGeometry (grdisplay, win, &r, &dx, &dy, &w, &h, &b, &d);
-    *x += dx;
-    *y += dy;
+    *x += dx; *y += dy;
     XQueryTree (grdisplay, win, &r, &parent, &children, &b);
+    if(children != NULL) XFree(children); 
     win = parent;
   }
   return;
@@ -414,16 +415,36 @@ value gr_resize_window (value wid, value w, value h)
 
 value gr_reposition (value x, value y, value w, value h)
 {
-  Window win;
+  Window root, parent, r;
+  Window* children;
+  int ox, oy, naux; 
   XWindowAttributes att;
-
-  int width, height;
-  int decorate;
-  int fs_style; /* choose the appropriate wm style for full screen, as done in mplayer */
+  int posx, posy, width, height, dx, dy;
+  Bool fullscreen = False;
+  int fs_style;
 
   gr_check_open();
+  posx = Int_val(x);
+  posy = Int_val(y);
+  width = Int_val(w);
+  height = Int_val(h);
+  root = DefaultRootWindow(grdisplay);
+  /* choose the appropriate wm style for full screen, as done in mplayer */
 
-  XGetWindowAttributes (grdisplay, grwindow.win, &att);
+  XGetWindowAttributes(grdisplay, root, &att);
+  if (width < 0) { 
+    /* means take width and height of screen */
+    width = att.width; height = att.height;
+    fullscreen = True;
+  };
+  /* We mean to move win to (x,y), but instead we move the parent if not root
+     to (x + dx, y + dy) */
+  /* to get the parent window */
+  XQueryTree (grdisplay, grwindow.win, &r, &parent, &children, &naux);
+  if(children != NULL) XFree(children);
+
+  /* Should tell the manager not to decorate the window */
+  /* Begin Manage hints:  should probably be clean or go away */
 
   /* create the X atoms: should be done only once */
   init_atoms(grdisplay);
@@ -431,60 +452,61 @@ value gr_reposition (value x, value y, value w, value h)
   /* try to figure out what kind of fs capabilities the wm offers */
   fs_style=wm_detect(grdisplay, DefaultRootWindow(grdisplay));
 
-  width = Int_val(w); height = Int_val(h);
-  XGetWindowAttributes (grdisplay, DefaultRootWindow(grdisplay), &att);
-  if (width < 0) { 
-    width = att.width; height = att.height;
-  }; 
+  /* decorate iff we are not fullscreen mode */
+  /* The following does not really work and does not seem necessary */
+  /* x11_decoration(grdisplay, grwindow.win, !fullscreen, fs_style); */
 
-  /* Should we decorate the window? We choose according to fullscreen or not */
-  if (width==att.width && height==att.height)
-    { decorate = 0; /*fullscreen, no decoration */}
-  else { decorate = 1; /*not fullscreen, restore decoration */}
+  /* Giving size hints is _essential_ for the "fullscreen" effect,
+     at least in KDE */
 
-  // /* Removed as it fails in SawFish */
-  //  x11_decoration(grdisplay,grwindow.win,decorate,fs_style);
+  x11_sizehint(grdisplay, grwindow.win, posx, posy, width, height, 0);
+  /* End Manager Hints */
 
-  /* Giving size hints is _essential_ for the "fullscreen" effect, at least in KDE */
-  x11_sizehint(grdisplay,grwindow.win,Int_val(x), Int_val(y), width, height,0 );
+  XMoveResizeWindow(grdisplay, grwindow.win, posx, posy, width, height);
+  gr_origin (&ox, &oy);
+  /* in case it did not work, we move relative to the parent window */
+  if (ox != posx || oy != posy) {
+    XGetWindowAttributes(grdisplay, grwindow.win, &att);
+    XMoveWindow(grdisplay, grwindow.win, posx - att.x, posy - att.y);
+  }
 
-  /* Make sure our window is in front of all the others */
-  x11_ontop(grdisplay, grwindow.win, fs_style, !decorate); /* !decorate is true iff we are in fs mode */
+  /* Begin Manager Hints:  should probably be clean or go away */
+  /* Now make sure our window is in front of all the others */
+  /* ontop iff we are in fullscreen mode */
+  x11_ontop(grdisplay, grwindow.win, fs_style, fullscreen); 
+  /* End Manager Hints */
 
-  /* Move and resize window */
-  XMoveResizeWindow(grdisplay, grwindow.win, 
-                    Int_val(x), Int_val(y), width, height);
-    grwindow.w = width;
-    grwindow.h = height;
-    if (grwindow.w > grbstore.w || grwindow.h > grbstore.h) {
+  grwindow.w = width;
+  grwindow.h = height;
+  if (grwindow.w > grbstore.w || grwindow.h > grbstore.h) {
 
-      /* Allocate a new backing store large enough to accomodate
+    /* Allocate a new backing store large enough to accomodate
          both the old backing store and the current window. */
-      struct canvas newbstore;
-      newbstore.w = max(grwindow.w, grbstore.w);
-      newbstore.h = max(grwindow.h, grbstore.h);
-      newbstore.win =
-        XCreatePixmap(grdisplay, grwindow.win, newbstore.w, newbstore.h,
-                      XDefaultDepth(grdisplay, grscreen));
-      newbstore.gc = XCreateGC(grdisplay, newbstore.win, 0, NULL);
-      XSetBackground(grdisplay, newbstore.gc, grwhite);
-      XSetForeground(grdisplay, newbstore.gc, grwhite);
-      XFillRectangle(grdisplay, newbstore.win, newbstore.gc,
-                     0, 0, newbstore.w, newbstore.h);
-      XSetForeground(grdisplay, newbstore.gc, grcolor);
-      if (grfont != NULL)
-        XSetFont(grdisplay, newbstore.gc, grfont->fid);
+    struct canvas newbstore;
+    newbstore.w = max(grwindow.w, grbstore.w);
+    newbstore.h = max(grwindow.h, grbstore.h);
+    newbstore.win =
+      XCreatePixmap(grdisplay, grwindow.win, newbstore.w, newbstore.h,
+                    XDefaultDepth(grdisplay, grscreen));
+    newbstore.gc = XCreateGC(grdisplay, newbstore.win, 0, NULL);
+    XSetBackground(grdisplay, newbstore.gc, grwhite);
+    XSetForeground(grdisplay, newbstore.gc, grwhite);
+    XFillRectangle(grdisplay, newbstore.win, newbstore.gc,
+                   0, 0, newbstore.w, newbstore.h);
+    XSetForeground(grdisplay, newbstore.gc, grcolor);
+    if (grfont != NULL)
+      XSetFont(grdisplay, newbstore.gc, grfont->fid);
 
-      /* Copy the old backing store into the new one */
-      XCopyArea(grdisplay, grbstore.win, newbstore.win, newbstore.gc,
-                0, 0, grbstore.w, grbstore.h, 0, newbstore.h - grbstore.h);
+    /* Copy the old backing store into the new one */
+    XCopyArea(grdisplay, grbstore.win, newbstore.win, newbstore.gc,
+              0, 0, grbstore.w, grbstore.h, 0, newbstore.h - grbstore.h);
 
-      /* Free the old backing store */
-      XFreeGC(grdisplay, grbstore.gc);
-      XFreePixmap(grdisplay, grbstore.win);
+    /* Free the old backing store */
+    XFreeGC(grdisplay, grbstore.gc);
+    XFreePixmap(grdisplay, grbstore.win);
 
-      /* Use the new backing store */
-      grbstore = newbstore;
+    /* Use the new backing store */
+    grbstore = newbstore;
     }
 
   XFlush(grdisplay);
