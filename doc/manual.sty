@@ -1,3 +1,11 @@
+\expandafter \ifx \csname driver\endcsname\relax \def \driver{}\fi
+\def \advidriver {ignore}
+\def \dvipsdriver{dvips}
+\def \dvipdfmdriver{dvipdfm}
+\ifx \driver \dvipsdriver 
+\else \ifx \driver \dvipdfmdriver 
+\else \let \advidriver \empty \fi \fi
+
 \def \docdef #1{{\tt \string #1}}
 \def \docid #1{$\langle\hbox{\rm\em#1}\rangle$}
 \def \doctt #1{\texttt{#1}}

@@ -17,6 +17,14 @@
 
 % $Id$
 
+\expandafter \ifx \csname driver\endcsname\relax \def \driver{}\fi
+\def \advidriver {ignore}
+\def \dvipsdriver{dvips}
+\def \dvipdfmdriver{dvipdfm}
+\ifx \driver \dvipsdriver 
+\else \ifx \driver \dvipdfmdriver 
+\else \let \advidriver \empty \fi \fi
+
 \documentclass[12pt]{article}
 
 \usepackage {manual}
@@ -24,9 +32,12 @@
 \usepackage {makeidx}
 
 \usepackage {graphicx}
-\usepackage {advi}
+\usepackage [\advidriver]{advi}
 \usepackage {advi-annot}
 \usepackage {bubble}
+
+\def \ActiveDVI {Active-DVI}
+
 
 % For splash inclusion
 \usepackage{color}
@@ -34,7 +45,6 @@
 \usepackage{tabularx}
 %\usepackage{pst-all}
 \usepackage{xwindows-colors}
-\expandafter \ifx \csname driver\endcsname\relax \def \driver{}\fi
 \usepackage[\driver]{hyperref}
 % End of splash specific stuff
 
@@ -101,9 +111,9 @@ Xavier~Leroy, and Alan~Schmitt.
 
 \clearpage
 %\advitoc
-\hypertarget{/toc.first}{}
+\hypertarget{advitoc.first}{}
 \tableofcontents
-\hypertarget{/toc.last}{}
+\hypertarget{advitoc.last}{}
 %\endadvitoc
 \clearpage
 
@@ -487,7 +497,7 @@ There are two ways to include a floating table of contents while previewing.
 \begin {itemize}
 
 \item {\ActiveDVI} recognizes the reserved hyper-targets
-\doctt{/toc.first} and \doctt{/toc.last} as markers for the first and
+\doctt{advitoc.first} and \doctt{advitoc.last} as markers for the first and
 last pages of the table of contents. These pages then become floating,
 {\em i.e.} accessible from anywhere in the document with the default
 key binding \verb't'. The first stroke on \verb't' shows the first page
@@ -770,7 +780,7 @@ fragile commands.
 
 Images can be encapsulated into the presentation using the Caml library
 CamlImages provided with the distribution of {\ActiveDVI} (see
-section~\ref {advi-grahicx}).
+section~\ref {advi-graphicx}).
 
 Images can be lighten by specifying an alpha value (a
 floating point number between 0 and 1) that measures the mixing
@@ -1520,7 +1530,8 @@ the bubble appears within an active anchor.
 
 %Annotation location can also be invisible \advi{C}{\tt{ }}instead of visible.
 
-\subsection{\label {advi-grahicx}The {\doctt{advi-graphicx}} {\LaTeX} package}
+\subsection{The {\doctt{advi-graphicx}} {\LaTeX} package}
+\label {advi-graphicx}
 
 This 3-lines long package loads the {\tt graphicx.sty} package and provides
 declarations so that JPEG, EPS, TIF, TIFF source images can be embedded:

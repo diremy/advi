@@ -737,8 +737,8 @@ let make_thumbnails st =
 let make_toc st =
   try
     let refs = xrefs st in
-    let first = Hashtbl.find refs "/toc.first" in
-    let last = Hashtbl.find refs "/toc.last" in
+    let first = Hashtbl.find refs "advitoc.first" in
+    let last = Hashtbl.find refs "advitoc.last" in
     st.toc <- Some (Array.init (last - first + 1) (fun p -> Page (p + first)))
   with
   | Not_found -> ();;
