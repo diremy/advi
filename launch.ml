@@ -37,7 +37,7 @@ let unmapping_persistent_apps f arg =
   res
 ;;
 
-(* Unmap persitent apps windows (apps are still running). *)
+(* Unmap persistent apps windows (apps are still running). *)
 let unmap_persistent_apps () =
   execute !unmap_embeds;
   unmap_embeds := []

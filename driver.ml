@@ -503,8 +503,8 @@ let int_of_signal = function
   | "" -> Sys.sigquit
   | s -> int_of_string s;;
 
-let kill_embed_special st s =
-  (* advi: kill name=? signal=? *)
+let kill_embed_special kill_fun st s =
+  (* advi: kill[all]embed name=? signal=? *)
   let records = get_records s in
   let app_name =
     try unquote (List.assoc "name" records)
@@ -516,9 +516,40 @@ let kill_embed_special st s =
     with
     | Not_found -> raise (Failure ("No signal to kill command in " ^ s))
     | Failure _ -> raise (Failure ("Cannot understand signal in " ^ s))  in
-  Embed.kill_embedded_app sig_val app_name;;
+  Misc.debug_endline
+    (Printf.sprintf "Killing %s, in special %s." app_name s);
+  kill_fun sig_val app_name;;
+
+let kill_one_embed_special = kill_embed_special Embed.kill_embedded_app;;
+let kill_all_embed_special = kill_embed_special Embed.kill_all_embedded_app;;
+
+(* Hide or show the window containing the output of an embedded application. *)
+let show_hide_embed_special show_fun st s =
+  (* advi: [un]map[all]embed name=? *)
+  let records = get_records s in
+  let app_name =
+    try unquote (List.assoc "name" records)
+    with Not_found ->
+      raise (Failure ("No application, hence no window to operate in " ^ s)) in
+  Misc.debug_endline
+    (Printf.sprintf "Showing or hiding %s, in special %s." app_name s);
+  show_fun app_name;;
+
+let unmap_one_embed_special st s =
+  show_hide_embed_special Embed.unmap_embedded_app st s;;
+
+let unmap_all_embed_special st s =
+  show_hide_embed_special Embed.unmap_all_embedded_app st s;;
+
+let map_one_embed_special st s =
+  show_hide_embed_special Embed.map_embedded_app st s;;
+
+let map_all_embed_special st s =
+  show_hide_embed_special Embed.map_all_embedded_app st s;;
 
 let app_mode_of_string = function
+  | "fake" -> Embed.Fake
+  | "raw" -> Embed.Raw
   | "sticky" -> Embed.Sticky
   | "persistent" -> Embed.Persistent
   | "ephemeral" -> Embed.Ephemeral
@@ -536,6 +567,7 @@ let embed_special st s =
   let command =
     try unquote (List.assoc "command" records)
     with Not_found ->
+        if app_mode = Embed.Fake then "" else
         raise (Failure ("embed: no command to embed in special " ^ s)) in
   (* prerr_endline ("embed command=" ^ command); *)
   let get_dim dim records =
@@ -559,6 +591,9 @@ let embed_special st s =
     width_pixel, height_pixel in
   let x = st.x_origin + int_of_float (st.conv *. float st.h)
   and y = st.y_origin + int_of_float (st.conv *. float st.v) in
+  Misc.debug_endline
+    (Printf.sprintf "Embedding %s with command %S, in special %s."
+       app_name command s);
   if !visible then
     Grdev.embed_app command app_mode app_name width_pixel height_pixel x y;;
 
@@ -1215,7 +1250,8 @@ let special st s =
     if has_prefix "advi: pause" s then raise Pause else
     if has_prefix "advi: proc" s then proc_special st s else
     if has_prefix "advi: setbg " s then bkgd_special st s else
-    (* all following have effect and should be ignore if active is false *)
+    (* all the following have effects,
+       and should be ignored if active is false *)
     if !active then begin
       if has_prefix "advi: wait " s then wait_special st s else
       if has_prefix "advi: embed " s then
@@ -1225,8 +1261,18 @@ let special st s =
          transbox_save_special st s else
       if has_prefix "advi: transbox go " s then
          transbox_go_special st s else
-      if has_prefix "advi: kill " s then
-         (if !visible then kill_embed_special st s) else
+      if has_prefix "advi: killembed " s then
+         (if !visible then kill_one_embed_special st s) else
+      if has_prefix "advi: killallembed " s then
+         (if !visible then kill_all_embed_special st s) else
+      if has_prefix "advi: mapembed " s then
+         (if !visible then map_one_embed_special st s) else
+      if has_prefix "advi: mapallembed " s then
+         (if !visible then map_all_embed_special st s) else
+      if has_prefix "advi: unmapembed " s then
+         (if !visible then unmap_one_embed_special st s) else
+      if has_prefix "advi: unmapallembed " s then
+         (if !visible then unmap_all_embed_special st s) else
       Misc.warning ("unknown special: "^ s) end
     (* else we ignore it, whether well-formed or ill-formed *)
     end else

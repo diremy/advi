@@ -1,3 +1,22 @@
+#*********************************************************************#
+#                                                                     #
+#                             Active-DVI                              #
+#                                                                     #
+#                   Projet Cristal, INRIA Rocquencourt                #
+#                                                                     #
+#  Copyright 2002 Institut National de Recherche en Informatique et   #
+#  en Automatique.  All rights reserved.  This file is distributed    #
+#  under the terms of the GNU Lesser General Public License.          #
+#                                                                     #
+#  Jun Furuse, Didier Rémy and Pierre Weis.                           #
+#  Contributions by Roberto Di Cosmo, Didier Le Botlan,               #
+#  Xavier Leroy, and Alan Schmitt.                                    #
+#                                                                     #
+#  Based on Mldvi by Alexandre Miquel.                                #
+#*********************************************************************#
+
+# $Id$
+
 # To view the demo, use ../advi demo.dvi
 include ../Makefile.config
 
@@ -8,7 +27,7 @@ PLATEX=TEXINPUTS=.:../tex:$(TEXINPUTS): platex
 
 TEXFILES= demo.tex demo2.tex trigo_source.tex \
 trans.tex trans2.tex trans3.tex background.tex \
-color.tex
+color.tex demo_raw.tex
 #thumbnails.tex
 DVIFILES= $(TEXFILES:%.tex=%.dvi)
 ADVI=TEXPSHEADERS=../tex: ../advi

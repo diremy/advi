@@ -117,6 +117,8 @@ Maybe you mean \@currenvir ing}}
 \advi@definemode{ephemeral}
 \advi@definemode{persistent}
 \advi@definemode{sticky}
+\advi@definemode{raw}
+\advi@definemode{fake}
 
 \def \advi@embed@ #1#2#3#4#5{%
   \mbox{\advi@special
@@ -129,12 +131,26 @@ Maybe you mean \@currenvir ing}}
          \advi@embed@ {\advi@embed@name}{\advi@embed@mode}
              {\advi@embed@width}{\advi@embed@height}{#2}}}
 
-\newcommand{\advi@killembed}[2][]{\advi@special {kill name="#2" signal="#1"}}
+\newcommand{\advi@killembed}[2][]%
+  {\advi@special {killembed name="#2" signal="#1"}}
+
+\newcommand{\advi@killallembed}[2][]%
+  {\advi@special {killallembed name="#2" signal="#1"}}
+
+\newcommand{\advi@mapembed}[1][]%
+   {\advi@special {mapembed name="#1"}}
+\newcommand{\advi@unmapembed}[1][]{\advi@special {unmapembed name="#1"}}
+
+\newcommand{\advi@mapallembed}[1][]{\advi@special {mapallembed name="#1"}}
+\newcommand{\advi@unmapallembed}[1][]{\advi@special {unmapallembed name="#1"}}
 
 \advi@export \adviembed \advi@embed
-
+\advi@export \advimapembed \advi@mapembed 
+\advi@export \adviunmapembed \advi@unmapembed 
 \advi@export \advikillembed \advi@killembed 
-
+\advi@export \advimapallembed \advi@mapallembed 
+\advi@export \adviunmapallembed \advi@unmapallembed 
+\advi@export \advikillallembed \advi@killallembed 
 
 %%% Background colors and images
 
