@@ -34,8 +34,8 @@
 \usepackage{tabularx}
 %\usepackage{pst-all}
 \usepackage{xwindows-colors}
-\expandafter \ifx \csname driver\endcsname\relax \def \driver{}\fi 
-\usepackage [\driver]{hyperref}
+\expandafter \ifx \csname driver\endcsname\relax \def \driver{}\fi
+\usepackage[\driver]{hyperref}
 % End of splash specific stuff
 
 % We use Hevea to create the HTML version
@@ -197,8 +197,8 @@ designed to be a simple way to build a presentation for {\ActiveDVI}.
 \end{itemize}
 
 See {\tt examples/slitex/simplistic/} for a simplistic talk example.  There,
-the command {\tt \char92pause} is used to make the presenter stop while
-displaying the document.  More involved examples can be found in the
+the command {\tt \char92pause} is used to make the presenter to stop while
+displaying the document. More involved examples can be found in the
 directory {\tt examples} of the distribution.
 
 \section{Safety concerns when using the {\ActiveDVI} previewer}
@@ -286,15 +286,25 @@ contained in {\tt filename} (thus overriding the options set before by
 the default \doctt{\char126/.advirc}, \doctt{\char126/.advi/advirc}, or
 \doctt{./.advirc}, initialization files).
 
-\section{Using the {\softtarget{otherpage}{\ActiveDVI} previewer}}
+{\softtarget{otherpage}{%
+\section{Using the {\ActiveDVI} presenter}}}
 
-\subsection{Command line options}
+\subsection{Launching {\ActiveDVI}}
 
 {\ActiveDVI} is invoked with the following command syntax
 \begin{verbatim}
 advi [options] dvifile [dvifile]
 \end{verbatim}
-See section~\ref{multiplex} for the use of a secondary DVI file.
+
+Once {\ActiveDVI} is launched, just press {\bf \verb"?"} to get help
+on the keys you can use to control the presenter (type \verb"^f"
+(Control-F) to get full screen, \verb"<" or \verb">" to change
+the magnification of the text).
+
+When two file names are provided {\ActiveDVI} displays them both: see
+section~\ref{multiplex} for details on the use of a secondary DVI file.
+
+\subsection{Command line options}
 
 \noindent The \doctt{advi} commands recognized the following options:
 
@@ -431,7 +441,7 @@ Line numbers default to $0$ when not found. Note that line numbers may be
 inconsistent if there \docdef\special-line commands have not been inserted
 close enough to the position.
 
-\subsection{Hyper-ref}
+\subsection{Hyper-text references}
 
 {\ActiveDVI} supports the {\LaTeX} {\tt hyperref} package with both
 internal and cross-file references. For cross-file references, it
@@ -534,6 +544,39 @@ scratching process. See the relevant key bindings for
 mode} 
 in the appendix.
 
+\subsection{Using the laser pointer}
+
+If you press \verb"^X-l" (Control-X then l) the laser pointer appears
+on the slide; the pointer sticks to the mouse pointer and allows easy
+pointing to parts of the presentation. The laser pointer size and
+color can be set on the command line (options {\tt
+-laser-pointer-color} and {\tt laser-pointer-size}).
+
+\subsection{Saving slides}
+
+You can save a snapshot of the current slide at any time by pressing
+\verb"^X-^S" (Control-X then Control-S). An image file is written
+(by default a {\tt png} file). The name of the file produced can be
+set via the command line (see {\tt advi -help} for details) or
+directly from within the {\LaTeX} source file with commands
+\verb"\advisavepageimage" and \verb"\advisavepageimagefile{filename}").
+
+\subsection{Creating events from the {\LaTeX} source file}
+
+{\ActiveDVI} provides the command \verb"\advipushevents" that provides
+key presses to the presenter as if you had pressed it when viewing the
+presentation. For instance:
+\begin{verbatim}
+\advipushevents{"q"}
+\end{verbatim}
+ends the talk immediately. Similarly, the command
+
+\begin{verbatim}
+\advipushevents{"^F"}
+\end{verbatim}
+
+will switch to full screen mode.
+
 \subsection{Using and making special effects}
 
 Presentation examples can be found in the \verb"examples"
@@ -561,18 +604,18 @@ files, or by implementing extensions to the previewer itself.
 The first file is always used as the master file and others are client
 files. The user can switch between files explicitly (see 
 \softlink{activedvikeys}{key bindings}) or implicitly.
-There is an implicit switch from the master to client file $c$ when an
-hyperlink that is not found in master file can be found in the client file
-$c$; there is also a switch from client $c$ to master when using the
+There is an implicit switch from the master to the client file $c$ when an
+hyperlink that is not found in the master file can be found in the client file
+$c$; there is also a switch from the client $c$ to the master when using the
 history stack and the previous event on the stack was an implicit switch
-from master to client $c$. 
+from the master to the client $c$. 
 
 If \doctt{autoswitch} flag is set, there is also an implicit switch to
-master, whenever {\ActiveDVI} receives signal \doctt{usr1} (to mean 
+the master, whenever {\ActiveDVI} receives signal \doctt{usr1} (to mean 
 immediate refresh). 
 
-
-\section{The \softtarget{advistyle}{\doctt{advi.sty}} {\LaTeX} package}
+\softtarget{advistyle}{%
+\section{The {\doctt{advi.sty}} {\LaTeX} package}}
 
 {\ActiveDVI} provides some {\LaTeX} packages to facilitate animations and
 interaction with the presenter from within your {\LaTeX} source text.
@@ -834,12 +877,12 @@ blue color values, are given as floating point numbers in the range
 0.0 .. 1.0.  Hence, {\tt{{\char92}color[rgb]\{1.0,0.0,0.0\}}} is a
 valid specification for {\color[rgb]{1.0,0.0,0.0}{red}}.
 
-\subsubsection*{The X colors}
+\subsubsection*{The X -Window System colors}
 
 {\ActiveDVI} provides the package \doctt{xwindows-colors}, an
-extension to the \doctt{color} package, that defines a large set of X
-colors names, as found in the file {\tt rgb.txt} of a typical X
-installation (this file is generally located on {\tt
+extension to the \doctt{color} package, that defines a large set of
+the X Window System color names, as found in the file {\tt rgb.txt}
+of a typical X installation (this file is generally located on {\tt
 /usr/X11R6/lib/X11/rgb.txt}). To know which colors are available look
 at the source file of the package {\tt xwindows-colors.sty} in the
 directory {\tt tex} of the distribution.
@@ -1305,7 +1348,8 @@ Embeddded-Postcript figures, including scaling.
 Other PStricks may or may not work.
 
 
-\section{The \softtarget{advi-slides}{\doctt{advi-slides.sty}} {\LaTeX} package}
+\softtarget{advi-slides}{%
+\section{The {\doctt{advi-slides.sty}} {\LaTeX} package}}
 
 {\ActiveDVI} provides a specialized {\LaTeX} package to facilitate
 writing presentation slides in the spirit of SliTeX.
@@ -1475,7 +1519,8 @@ Please, send bug reports to
 See \url{http://pauillac.inria.fr/advi} for up to date information.
 
 
-\section{\softtarget{activedvikeys}{Key bindings}}
+\softtarget{activedvikeys}{%
+\section{{Key bindings}}}
 
 % Macros specific to splash.tex
 \definecolor{red}{rgb}{1.0,0.0,0.0}
@@ -1490,11 +1535,13 @@ See \url{http://pauillac.inria.fr/advi} for up to date information.
 
 \input{splash_contents.tex}
 
-\section{\softtarget{writingkeys}{Key bindings for scratch writings}}
+\softtarget{writingkeys}{%
+\section{{Key bindings for scratch writings}}}
 
 \input{scratch_write_splash_contents.tex}
 
-\section{\softtarget{drawingkeys}{Key bindings for scratch drawings}}
+\softtarget{drawingkeys}{%
+\section{{Key bindings for scratch drawings}}}
 
 \input{scratch_draw_splash_contents.tex}
 
