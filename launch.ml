@@ -35,23 +35,33 @@ let exit code =
   else (* SUICIDE *)
   Unix.kill (Unix.getpid ()) 9;;
 
-let paranoid =
-  Options.flag false "-safer"
-    "\tSafer mode: external applications are never launched";;
-
 let unsafe =
   Options.flag false "-unsafe"
     "\tUnsafer mode: allow all external applications to be launched";;
 
 let safe_commands =
   Sys.argv.(0) ::
-    [ "animate"; "display"; "xeyes"; "xterm"; "mpg123";
-      "advi"; "netscape"; ]
+    [ "animate"; "display"; "xeyes"; "mpg123"; "advi"; "netscape"; ]
 ;;
+
+let paranoid =
+  Options.flag false "-safer"
+    "\tSafer mode: external applications are never launched";;
 
 let exec_command command args =
   if !paranoid || not !unsafe && not (List.mem command safe_commands) then
-    Misc.warning (Printf.sprintf "Attempt to launch %s" command)
+    Misc.warning
+      (Printf.sprintf
+         "By default, the command:
+
+  %s %s
+
+is not executed for security reasons. To enable launching 
+any application, please rerun advi with the option -unsafe."
+        command
+        (String.concat " "
+           (match Array.to_list args with [] -> [] | h::t -> t))
+      )
   else
     Unix.execvp command args
 ;;
