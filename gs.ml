@@ -19,6 +19,11 @@
 
 let debugs = Misc.debug_endline;;
 
+let get_do_ps, set_do_ps =
+ let has_to_do_ps = ref !Global_options.pson in
+ (fun () -> !has_to_do_ps),
+ (fun b -> has_to_do_ps := b);;
+
 let antialias =
   Options.flag false
     "-A"
@@ -110,8 +115,8 @@ let rec select fd_in fd_out fd_exn timeout =
 ;;
 
 class gs () =
-  let gr =
-    { display = 0;
+  let gr = {
+      display = 0;
       window = GraphicsY11.window_id ();
       pixmap = GraphicsY11.bstore_id ();
       width = Graphics.size_x ();
@@ -122,7 +127,7 @@ class gs () =
       ydpi = 72.0;
       x = 0;
       y = 0;
-    }  in
+    } in
   let dpi = 72 (* unite utilise par dvi? *) in
   let command = Config.gs_path in
   let command_args =
@@ -138,27 +143,11 @@ class gs () =
   Array.iter debugs command_args in
 
   (* Set environment so that ghostscript writes in our window. *)
-  let int32_string k x =
-    let mask = Int32.of_int 0x11 in
-    let s = String.create k in
-    for i = 0 to k-1 do
-      let b = Int32.to_int (Int32.logand (Int32.shift_left x (i * 8)) mask) in
-      s.[k -1 - i] <- Char.chr b;
-    done;
-    s in
-  let int32_string x = Printf.sprintf "%lu" x in
-
-  let  _ = Unix.putenv "GHOSTVIEW"
-    (Printf.sprintf "%s %s "
-       (int32_string gr.window)
-       (if !Options.global_display_mode then "" else int32_string gr.pixmap)
-    ) in
   let _ =
     Unix.putenv "GHOSTVIEW"
-      (Printf.sprintf "%s %s "
-         (int32_string gr.window)
-         (if !Options.global_display_mode then "" else int32_string gr.pixmap)
-      ) in
+      (if Global_options.get_global_display_mode ()
+       then Printf.sprintf "%lu %lu " gr.window gr.pixmap
+       else Printf.sprintf "%lu " gr.window) in
 
   let iof = int_of_float and foi = float_of_int in
   let lx = iof ( (foi (gr.x * dpi)) /. gr.xdpi)
@@ -210,10 +199,11 @@ class gs () =
         self # line ack_request;
         flush leftout;
         self # ack;
-      with Killed s ->
-        self # kill;
-        Misc.warning s;
-        raise Terminated
+      with
+      | Killed s ->
+          self # kill;
+          Misc.warning s;
+          raise Terminated
       | exn ->
           Misc.warning (Printexc.to_string exn);
           self # kill; 
@@ -286,7 +276,7 @@ class gs () =
       with
         Killed s ->
           self # kill;
-          Options.dops := false;
+          set_do_ps false;
           prerr_endline s;
           prerr_endline "Continuing without gs\n";
           flush stderr
@@ -321,7 +311,7 @@ let texc_special_pro gv =
       Misc.warning "Cannot find Postscript prologues: texc.pro or special.pro";
       Misc.warning "Continuing without Postscript specials";
       gv # kill;
-      Options.dops := false;
+      set_do_ps false;
       [];;
 
 class gv =
@@ -418,7 +408,7 @@ class gv =
     method process =
       match process with
       | None ->
-          if not !Options.dops then raise Terminated;
+          if not (get_do_ps ()) then raise Terminated;
           let gs = new gs () in
           if headers = [] then headers <-  texc_special_pro self;
           (* should take matrix as a parameter ? *)
@@ -478,7 +468,7 @@ let gv = new gv;;
 let kill () = gv # kill;;
 
 let draw s x y =
-  if !Options.dops then
+  if get_do_ps () then
     try gv#ps (Misc.get_suffix  "ps: " s) x y  with Misc.Match ->
       try gv#special (Misc.get_suffix  "\" " s) x y  with Misc.Match ->
         try gv#def (Misc.get_suffix  "! " s) with Misc.Match -> ()
@@ -489,12 +479,12 @@ let add_headers = gv#add_headers;;
 let newpage = gv#newpage;;
 
 let flush () =
-  if !Options.dops then
+  if get_do_ps () then
     try  gv#sync
     with Terminated ->
       Misc.warning "Continuing without Postscript";
       gv#kill;
-      Options.dops := false;;
+      set_do_ps false;;
 
 let toggle_antialiasing () =
   antialias := not !antialias;

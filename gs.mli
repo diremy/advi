@@ -26,4 +26,6 @@ val flush : unit -> unit;;
 val toggle_antialiasing : unit -> unit;;
 val current_x : int ref;;
 val current_y : int ref;;
+val get_do_ps : unit -> bool;;
+val set_do_ps : bool -> unit;;
 
