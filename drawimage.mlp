@@ -1,4 +1,4 @@
-let debug = ref false
+let debug = ref true
 let debugs s = if !debug then prerr_endline s
 
 type ratiopts =
@@ -96,7 +96,7 @@ module M = struct
 	open_in_bin, close_in
       else
 	(fun file -> 
-	  let command = Printf.sprintf "gzip -c -d %s" file in
+	  let command = Printf.sprintf "%s -c -d %s" Config.gzip_path file in
 	  Unix.open_process_in command),
 	(fun ic -> ignore (Unix.close_process_in ic))
     in
@@ -105,7 +105,7 @@ module M = struct
       let rgba, width, height, data = load ic in
       if rgba then Rgba32 (Rgba32.create_with width height data) 
       else Rgb24 (Rgb24.create_with width height data))
-      (fun () -> closer ic)
+      (fun () -> try closer ic with _ -> ())
   ;;
 
   let cache_save file img = 
@@ -133,12 +133,12 @@ module M = struct
 	open_out_bin, close_out
       else
 	(fun file -> 
-	  let command = Printf.sprintf "gzip > %s" file in
+	  let command = Printf.sprintf "%s > %s" Config.gzip_path file in
 	  Unix.open_process_out command),
-	(fun oc -> ignore (Unix.close_process_out oc))
+	(fun oc -> Pervasives.flush oc; ignore (Unix.close_process_out oc))
     in
     let oc = opener file in
-    after (fun () -> save oc) (fun () -> closer oc)
+    after (fun () -> save oc) (fun () -> try closer oc with _ -> ())
   ;;
 
   let clean_cache () =
@@ -393,12 +393,14 @@ module M = struct
 	load_and_resize file whitetransp psbbox ratiopt (w,h) in
       (* load_and_resize may not return exactly the same size 
 	 we specified as (w,h) *)
-      debugs (Printf.sprintf "Draw (alpha=%f blend=%s)"
+      debugs (Printf.sprintf "Draw %s (alpha=%f blend=%s)" file
 		alpha (if blend = None then "NONE" else "SOME"));
       draw_image image cache_name alpha blend (w,h) (x0,y0);
       debugs "Success Draw!";
     with
     | Exit -> ()
+    | Unix.Unix_error (e,s1,s2) ->
+        Misc.warning (Printf.sprintf "%s %s: %s" s1 s2 (Unix.error_message e))
     | Failure s -> Misc.warning s
     | e -> Misc.warning (Printexc.to_string e)
   ;;
