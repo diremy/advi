@@ -408,7 +408,8 @@ let set_rule st a b =
 let ill_formed_special s =
   Misc.warning (Printf.sprintf "Ill formed special <<%s>>" s);;
 
-exception Ill_formed_special of string
+exception Ill_formed_special of string;;
+
 let line_of_special s k =
   match split_string s k with
   | line :: rest ->
@@ -441,6 +442,9 @@ let parse_float s =
  try float_of_string s with
  | _ ->
     failwith (Printf.sprintf "advi: cannot read a floating number in %S" s);;
+
+let parse_quoted_float s =
+ parse_float (unquote s);;
 
 let parse_float_option s r =
   try Some (parse_float (List.assoc s r)) with _ -> None;;
@@ -1008,12 +1012,12 @@ let inherit_background_info =
     \n\t (the default is not to inherit background settings).";;
 
 let setup_bkgd st =
-  (* propagate bkgd preferences to graphics device *)
-  (* storing the default/inherited prefs into Dev  *)
+  (* Propagate bkgd preferences to graphics device
+     storing the default/inherited prefs into Dev. *)
   Dev.blit_bkgd_data st.Cdvi.bkgd_prefs Dev.bkgd_data;
-  (* apply local modifications                  *)
+  (* Apply local modifications. *)
   Dev.set_bg_options st.Cdvi.bkgd_local_prefs;
-  (* recover modified preferences               *)
+  (* Recover modified preferences. *)
   Dev.blit_bkgd_data Dev.bkgd_data st.Cdvi.bkgd_prefs;;
 
 let ratios_alist = [
@@ -1057,7 +1061,7 @@ let bkgd_alist = [
      inherit_background_info := true;
      []);
   ("alpha", fun s st ->
-     let a = parse_float (unquote s) in
+     let a = parse_quoted_float s in
      [Dev.BgAlpha a]);
   ("blend", fun s st ->
      let b = parse_blend (unquote s) in
@@ -1073,22 +1077,22 @@ let bkgd_alist = [
      let c = Dvicolor.parse_color_args (split_string (unquote s) 0) in
      [Dev.BgColorStop c]);
   ("xstart", fun s st ->
-     let x = parse_float (unquote s) in
+     let x = parse_quoted_float s in
      [Dev.BgXStart x]);
   ("ystart", fun s st ->
-     let y = parse_float (unquote s) in
+     let y = parse_quoted_float s in
      [Dev.BgYStart y]);
   ("width", fun s st ->
-     let w = parse_float (unquote s) in
+     let w = parse_quoted_float s in
      [Dev.BgWidth w]);
   ("height", fun s st ->
-     let h = parse_float (unquote s) in
+     let h = parse_quoted_float s in
      [Dev.BgHeight h]);
   ("xcenter", fun s st ->
-     let x = parse_float (unquote s) in
+     let x = parse_quoted_float s in
      [Dev.BgXCenter x]);
   ("ycenter", fun s st ->
-     let y = parse_float (unquote s) in
+     let y = parse_quoted_float s in
      [Dev.BgYCenter y]);
   ("gradient", fun s st ->
      [Dev.BgGradient (find_bggradient (unquote s))]);
@@ -1571,8 +1575,7 @@ let render_step cdvi num ?trans ?chst dpi xorig yorig =
     let headers = ref []
     and xrefs = dvi.Cdvi.xrefs in
     let s = scan_special_page otherwise cdvi (headers, xrefs) num in
-    if !headers <> [] then
-      Dev.add_headers (find_prologues !headers);
+    if !headers <> [] then Dev.add_headers (find_prologues !headers);
     s in
   status.Cdvi.hasps <- Gs.get_do_ps ();
   let orid = function Some f -> f | None -> fun x -> x in
