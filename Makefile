@@ -178,7 +178,7 @@ rpm:
 	if test "X$$rpmdir" = "X"; then \
 		echo "cannot create rpm"; exit 2; fi; \
 	echo YOU NEED TO SU ROOT; \
-	su root -c "$(FTPSITEDIR)/$(ADVI).tar.gz $$rpmdir/SOURCES/; rpm -ba --clean ./advi.spec"; \
+	su root -c "cp $(FTPSITEDIR)/$(ADVI).tar.gz $$rpmdir/SOURCES/; rpm -ba --clean ./advi.spec"; \
 	cp $$rpmdir/SRPMS/advi-$(VERSION)-1.src.rpm \
 	   $$rpmdir/RPMS/*/advi-$(VERSION)-1.*.rpm $(FTPSITEDIR)
 
