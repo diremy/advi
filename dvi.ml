@@ -146,18 +146,22 @@ let arch32_read_int32 buf =
       else raise (Error "too large 32-bit integer") 
   | _ -> assert false;;
 
-let arch64_read_int32 buf =
-  let pos = buf.pos
-  and str = buf.str in
-  if pos + 4 > buf.len then
-    raise End_of_buffer ;
-  let n0 = Char.code str.[pos] in
-  let n1 = Char.code str.[pos + 1] in
-  let n2 = Char.code str.[pos + 2] in
-  let n3 = Char.code str.[pos + 3] in
-  buf.pos <- pos + 4 ;
-  let n = (n0 lsl 24) + (n1 lsl 16) + (n2 lsl 8) + n3 in
-  if n < 0x80000000 then n else n - 0x100000000;;
+let arch64_read_int32 = 
+  let v_0x80000000 = 0x8 lsl (4*7)
+  and v_0x100000000 = 0x1 lsl (4*8)
+  in
+  fun buf ->
+    let pos = buf.pos
+    and str = buf.str in
+    if pos + 4 > buf.len then
+      raise End_of_buffer ;
+    let n0 = Char.code str.[pos] in
+    let n1 = Char.code str.[pos + 1] in
+    let n2 = Char.code str.[pos + 2] in
+    let n3 = Char.code str.[pos + 3] in
+    buf.pos <- pos + 4 ;
+    let n = (n0 lsl 24) + (n1 lsl 16) + (n2 lsl 8) + n3 in
+    if n < v_0x80000000 then n else n - v_0x100000000;;
 
 let read_int32 =
   match Sys.word_size with
@@ -353,13 +357,17 @@ let arch32_input_int32 ch =
   | 1|2 -> raise (Error "too large 32-bit integer")
   | _ -> assert false;;
 
-let arch64_input_int32 ch =
+let arch64_input_int32 = 
+  let v_0x80000000 = 0x8 lsl (4*7)
+  and v_0x100000000 = 0x1 lsl (4*8)
+  in
+  fun ch ->
   let n0 = input_byte ch in
   let n1 = input_byte ch in
   let n2 = input_byte ch in
   let n3 = input_byte ch in
   let n = (n0 lsl 24) + (n1 lsl 16) + (n2 lsl 8) + n3 in
-  if n < 0x80000000 then n else n - 0x10000000;;
+  if n < v_0x80000000 then n else n - v_0x100000000;;
 
 let input_int32 =
   match Sys.word_size with

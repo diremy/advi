@@ -51,13 +51,17 @@ let input_int24 ch =
   let n = (n0 lsl 16) + (n1 lsl 8) + n2 in
   if n < 0x800000 then n else n - 0x1000000 ;;
 
-let arch64_input_int32 ch =
-  let n0 = input_byte ch in
-  let n1 = input_byte ch in
-  let n2 = input_byte ch in
-  let n3 = input_byte ch in
-  let n = (n0 lsl 24) + (n1 lsl 16) + (n2 lsl 8) + n3 in
-  if n < 0x80000000 then n else n - 0x100000000 ;;
+let arch64_input_int32 = 
+  let v_0x80000000 = 0x8 lsl (4*7)
+  and v_0x100000000 = 0x1 lsl (4*8)
+  in
+  fun ch ->
+    let n0 = input_byte ch in
+    let n1 = input_byte ch in
+    let n2 = input_byte ch in
+    let n3 = input_byte ch in
+    let n = (n0 lsl 24) + (n1 lsl 16) + (n2 lsl 8) + n3 in
+    if n < v_0x80000000 then n else n - v_0x100000000 ;;
 
 let arch32_input_int32 ch =
   let n0 = input_byte ch in
