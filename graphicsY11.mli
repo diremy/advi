@@ -12,7 +12,8 @@
 
 (* $Id$ *)
 
-(* Module [GraphicsX11]: additional graphics primitives for the X Windows system *)
+(* Module [GraphicsX11]:
+   additional graphics primitives for the X Windows system *)
 
 type color = Graphics.color;;
 
@@ -264,9 +265,9 @@ val key_pressed : unit -> bool;;
         (* Return [true] if a keypress is available; that is, if [read_key]
            would not block. *)
 
-val get_global_display_mode : unit -> bool;;
-(** [get_global_display_mode] returns the value of the
-  [global_display_mode] flag. This flags enables/disables the command
+val get_enable_display_mode : unit -> bool;;
+(** [get_enable_display_mode] returns the value of the
+  [enable_display_mode] flag. This flags enables/disables the command
   [display_mode]. By default the flag is [true], meaning that
   [display_mode] and [synchronize] commands are handled as usual.
   Otherwise [display_mode] commands are simply ignored and
@@ -274,18 +275,18 @@ val get_global_display_mode : unit -> bool;;
   [Graphics.synchronize] function since it copies the screen window
   into the backing store. *)
 
-val set_global_display_mode : bool -> unit;;
-(** [set_global_display_mode] sets the [global_display_mode] flags. *)
+val set_enable_display_mode : bool -> unit;;
+(** [set_enable_display_mode] sets the [enable_display_mode] flags. *)
 
 val synchronize : unit -> unit;;
-(** Same as [Graphics.synchronize] but according to [global_display_mode] *)
+(** Same as [Graphics.synchronize] but according to [enable_display_mode] *)
 
 val display_mode : bool -> unit;;
-(** Same as [Graphics.display_mode] but according to [global_display_mode] *)
+(** Same as [Graphics.display_mode] but according to [enable_display_mode] *)
 
 val point_color : int -> int -> color;;
 (** Same as the regular [point_color] but according to the value of
-  [global_display_mode], it takes the color from the backing store
+  [enable_display_mode], it takes the color from the backing store
   window or from the on-screen window.  Coordinates should be inside
   the limit. *)
 

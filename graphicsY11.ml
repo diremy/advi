@@ -384,15 +384,31 @@ external anti_synchronize : unit -> unit = "gr_anti_synchronize";;
 (** Synchronize the backing store drawings from the window display:
   performs the inverse operation as the regular [synchronize] function. *)
 
-let global_display_mode = ref true;;
-(** Global_display mode allows to inhibit display_mode commands *)
-let set_global_display_mode b = global_display_mode :=  b;;
-let get_global_display_mode () = !global_display_mode;;
+(* This should be defined in regular Graphics to provide a mean to
+   manage those flags with a stack discipline.  *)
+let get_display_mode, set_display_mode =
+  let display_mode_ref = ref false in
+  (fun () -> !display_mode_ref),
+  (fun b -> Graphics.display_mode b; display_mode_ref := b)
+;;
 
-(** Synchronize according to [global_display_mode]. *)
+(* This should be defined in regular Graphics. *)
+let get_remember_mode, set_remember_mode =
+  let remember_mode_ref = ref false in
+  (fun () -> !remember_mode_ref),
+  (fun b -> Graphics.remember_mode b; remember_mode_ref := b)
+;;
+
+(** Enable_display flag allows to inhibit display_mode commands. *)
+let get_enable_display_mode, set_enable_display_mode =
+  let enable_display_mode = ref true in
+  (fun () -> !enable_display_mode),
+  (fun b -> enable_display_mode :=  b);;
+
+(** Synchronize according to [enable_display_mode]. *)
 let synchronize () =
-  let status = get_global_display_mode () in
-  if status then (
+  let enable = get_enable_display_mode () in
+  if enable then (
     Misc.debug_stop "Graphics.synchronize";
     Graphics.synchronize ()
   ) else (
@@ -400,28 +416,47 @@ let synchronize () =
     anti_synchronize ()
   );;
 
-(** [display_mode] according to [global_display_mode]. *)
+(** [display_mode] according to [enable_display_mode]. *)
 let display_mode b =
   Misc.debug_endline ("GraphicsY11.display_mode " ^ string_of_bool b);
-  let status = get_global_display_mode () in
-  if status then
+  let enable = get_enable_display_mode () in
+  if enable then
    (Misc.debug_endline ("Graphics.display_mode " ^ string_of_bool b);
-    Graphics.display_mode b);;
+    set_display_mode b);;
 
-(** [point_color] according to [global_display_mode]. *)
+(** [point_color] according to [enable_display_mode]. *)
 let point_color x y =
-  let status = get_global_display_mode () in
-  if status then Graphics.point_color x y else window_point_color x y;;
+  let enable = get_enable_display_mode () in
+  if enable then Graphics.point_color x y else window_point_color x y;;
 
-(* This function performs f on the screen memory only,
-   not affecting the backing store. *) 
+let set_screen_only_mode () =
+  (* Don't draw on the backing store canvas. *)
+  set_remember_mode false;
+  (* Draw on the screen display window. *)
+  display_mode true;;
+
+let set_backing_store_only_mode () =
+  (* Draw on the backing store canvas. *)
+  set_remember_mode true;
+  (* Don't draw on the screen display window. *)
+  display_mode false;;
+
+(* Set the drawing modes to the given arguments. *)
+let restore_modes dm rm =
+  set_remember_mode rm;
+  display_mode dm;;
+
+(* This function performs f on the screen display only,
+   not affecting the backing store canvas.
+   After the call, the drawing modes are left unaffected. *)
 let only_on_screen f x =
-  Graphics.remember_mode false;
-  display_mode true;
-  let res = f x in
-  Graphics.remember_mode true;
-  display_mode false;
-  res;;
+  let dm, rm = get_display_mode (), get_remember_mode () in
+  set_screen_only_mode ();
+  try
+    let res = f x in
+    restore_modes dm rm;
+    res with
+  | exn -> restore_modes dm rm; raise exn;;
 
 (* Graphics.sigio_signal is not exported. We declare it here again. *)
 external sigio_signal: unit -> int = "gr_sigio_signal";;
