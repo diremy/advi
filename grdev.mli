@@ -72,8 +72,8 @@ val set_bbox : (int * int * int * int) option -> unit;;
 type color = int;;
 val fgcolor : unit -> color;;
 
-val set_color : int -> unit;;
-val push_bg_color : int -> unit;;
+val set_color : color -> unit;;
+val push_bg_color : color -> unit;;
 val pop_bg_color : unit -> unit;;
 val fill_rect : int -> int -> int -> int -> unit;;
 

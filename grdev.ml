@@ -15,7 +15,6 @@
 (*  Based on Mldvi by Alexandre Miquel.                                *)
 (***********************************************************************)
 
-
 let ignore_background = Options.flag false
     "--ignore_background"
     "\tIgnore background for antialiasing";;
@@ -308,7 +307,7 @@ type bkgd_prefs = {
 };;
 
 (* The Background preferences                        *)
-(* to be extended, should contain gradients etc. RDC *)
+(* to be extended, should contain gradients etc.     *)
 
 let set_default_color r s =
    r :=
@@ -937,8 +936,8 @@ module H =
       frame_rect e a.A.x a.A.y a.A.w a.A.h;
       Graphics.set_color !color
 
-    let rec make_anchors tag all_draw =
-      let make_anchor  draw (x, y as orig) w h voff =
+    let make_anchors tag all_draw =
+      let make_anchor draw (x, y as orig) w h voff =
         let anchor = {tag = tag; draw = List.rev draw } in
         let e =
           match tag with
@@ -948,8 +947,9 @@ module H =
         let y' = y - voff - 1 in
         let h' = h + 2 in
         let a =
+          let e = e + 1 in
           { A.x = x - e;
-            A.y =  (!size_y - y' - h') - e;
+            A.y = (!size_y - y' - h') - e;
             A.w = w + e + e;
             A.h = h' + e + e;
             A.action = anchor;
@@ -961,8 +961,7 @@ module H =
         | _ -> ()
       in
       let rec split draw (x, y as orig) w h voff = function
-        | [] -> make_anchor  draw orig w h voff
-
+        | [] -> make_anchor draw orig w h voff
         | (x1, y1, g1 as d) :: rest ->
             if x1 + width g1 > x then
               split (d :: draw) orig
@@ -971,7 +970,7 @@ module H =
                 (max voff (voffset g1)) rest
             else
               begin
-                make_anchor  (d :: draw) orig w h voff;
+                make_anchor (d :: draw) orig w h voff;
                 start rest
               end
       and start = function
@@ -990,10 +989,10 @@ module H =
 
 
     type backup =
-      | Nil
-      | Rect of Graphics.image * anchor A.active *
-            (Graphics.image * anchor A.active) list
-      | Screen of Graphics.image * anchor A.active * anchor A.t
+       | Nil
+       | Rect of Graphics.image * anchor A.active *
+           (Graphics.image * anchor A.active) list
+       | Screen of Graphics.image * anchor A.active * anchor A.t
 
     let up_to_date act = function
       | Rect (_, a, l) -> A.same_location a  act
@@ -1041,7 +1040,7 @@ module H =
       let ima = Graphics.get_image 0 0 !size_x !size_y in
       GraphicsY11.sync ();
       (* wait until all events have been processed, flush should suffice *)
-(*
+ (*
    Graphics.set_color (Graphics.point_color 0 0);
    (* it seems that the image is saved ``lazily'' and further instruction
       could be capture in the image *)

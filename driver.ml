@@ -1188,7 +1188,7 @@ let render_step cdvi num ?trans dpi xorig yorig =
       cur_gtable = dummy_gtable;
       cur_font = dummy_font;
       h = 0; v = 0; w = 0; x = 0; y = 0; z = 0;
-      stack = []; color = Grdev.fgcolor(); color_stack = [];
+      stack = []; color = Grdev.fgcolor (); color_stack = [];
       alpha = 1.0; alpha_stack = [];
       blend = Dev.Normal; blend_stack = [];
       epstransparent = true; epstransparent_stack = [];
