@@ -12,12 +12,19 @@
 \usepackage {advi-annot}
 \usepackage {bubble}
 
-\title {{\ActiveDVI} \\ reference manual}
-%\includegraphics[width=\textwidth]{../tex/bar.jpg.eps}}
+\def\ActiveDVI{Active-DVI}
 
+\newdimen \tmpdim
+\title {\setbox0 \hbox {\bf\ActiveDVI}\global \tmpdim \wd0
+\advance \tmpdim by 4em
+\begin{tabular}{c}
+\box0 \\
+\includegraphics[width=\the\tmpdim]{../tex/bar.jpg.eps}\\
+Reference manual
+\end{tabular}
+}
 \author {Didier R{\'{e}}my and Pierre Weis}
 
-\def\ActiveDVI{\textbf{Active-DVI}}
 
 % \def\adviheader{\noindent
 % {\bf\Large \ActiveDVI}\\
@@ -27,52 +34,55 @@
 % %\def \newpage {\Newpage \adviheader}
 % \def \Newpage {\newpage \adviheader}
 
+\thispagestyle{empty}
+
 \begin{document}
+
 
 \maketitle
 
+\def \abstractname {}
 \begin{abstract}
-\ActiveDVI~is a presentation graphics program to provide the highest
-quality slides presentation experience to \LaTeX~users.
+{\bf\ActiveDVI}~is a viewer for DVI files that also recognizes a new class of 
+\docdef \special's targeted to presentations via laptop computers:
+various special effects can easily be incorporated to the presentation,
+via a companion \doctt{advi} {\LaTeX} package. 
 
-\ActiveDVI~is a viewer and presenter for DVI files that is targeted to
-presentations via laptop computers: \ActiveDVI~uses the computer
-processing power to offer various special effects to animate the
-presentation.
+% {\ActiveDVI}~is a presentation graphics program to provide the highest
+% quality slides presentation experience to \LaTeX~users.
 
-\ActiveDVI~can be used as is, but will shine when driven by a user
-with a bias towards programming: new special effects can easily be
-added and creative advanced users like to program the presenter at
-various levels, either via \LaTeX~macros or \LaTeX~package
-files. Brave souls can even directly modify \ActiveDVI's source code
-since that code is freely available.
-
-Presentation examples can be found in the \verb"test" and
-\verb"examples" directories. Don't miss to play them! Then, feel free
-to read their source code and copy the effects they provide.
-
-If you ever succeed at adding a nice special effect that could be of
-a general interest, or if you can provide a nice and fancy presentation
-of your own that can serve as an example to the \ActiveDVI's users
-communauty, please don't hesitate to drop a mail to the implementors
-at \verb"advi@pauillac.inria.fr".
-
+{\ActiveDVI} is copyright from INRIA\footnote {\copyright\space 2002, INRIA}
+and distributed under the LGPL license ---see the LGPL file included in the
+distribution.
 \end{abstract}
 
-\vfill 
-\section* {Acknowledgements}
 
-- List all implementors?
+\vfill
+\section* {Contributors}
 
-- Special thank to Alexandre Miquel.
+The core of Active DVI is the plain DVI previewer, which was written by
+Alexandre~Miquel. The other main implementors are Jun~Furuse,
+Didier~R{\'{e}}my and Pierre~Weis. Other contributors are Didier~Le~Botlan,  
+Roberto~Di~Cosmo, Xavier~Leroy, and Alan~Schmidt. 
+
 
 \clearpage
 \tableofcontents
 \clearpage
 
+
 \section {Installation}
 
 \section {Using the {\ActiveDVI} previewer}
+
+\paragraph {\bf Warning!}
+
+{\ActiveDVI} may execute programs and commands embedded into the DVI file.
+To be safe, you should run \doctt{advi} with \doctt{-safer} option, 
+will inhibates the execution of embeded applications. 
+This applies in particular if you choose {\ActiveDVI} as your default 
+{\tt metamail} previewer for the {\tt application/x-dvi} mime-type . 
+
 
 \subsection {Command line options}
 
@@ -83,9 +93,9 @@ advi -help
 
 \subsection {Cut and paste}
 
-Text can copied from the  {\ActiveDVI} previewer to an another application. 
-However, this currently uses {\tt XCutbuffer} than the {\\t XSelection}
-mechanism. 
+Text can copied from the {\ActiveDVI} previewer to an another application.
+However, this uses \doctt{XBuffer} and not the \doctt{XSelection}
+mechanism.
 \begin {itemize}
 \item
 Shift middle-click copies the current word. 
@@ -118,9 +128,34 @@ close enough to the position.
 
 \subsection {Hyperrefs}
 
+{\ActiveDVI} supports {\LaTeX} {\tt hyperref} package 
+with both internal and cross-file references. For cross-file
+references, it launches a new \verb"advi" process. 
+
+
 \subsection {Moving around}
 
 See the key bindings in the appendix.
+
+\subsection {Using and making special effects}
+
+\ActiveDVI~can be used as is, but will shine when driven by a user
+with a bias towards programming: special effects can easily 
+be realized by using the \LaTeX package provided with the distribution. 
+
+Creative advanced users may program the presenter at various levels, either
+using or defining simple {\LaTeX} macros, writting new {\LaTeX} package
+files, or by implementing extension to the previewer itself.
+
+Presentation examples can be found in the 
+\verb"examples" directory. Don't miss to play them! Then, feel free
+to read their source code and copy the effects they provide.
+
+% If you ever succeed at adding a nice special effect that could be of
+% a general interest, or if you can provide a nice and fancy presentation
+% of your own that can serve as an example to the \ActiveDVI's users
+% communauty, please don't hesitate to drop a mail to the implementors
+% at \verb"advi@pauillac.inria.fr".
 
 
 \section {The {\tt advi.sty} \LaTeX~package}
@@ -427,7 +462,7 @@ Postscripts is not always working.
 \begin {itemize}
 
 \item
-Since characters are rendered by{\ActiveDVI}, some PStricks are not allowed.
+Since characters are rendered by {\ActiveDVI}, some PStricks are not allowed.
 \item
 Some change of repairs are also not yet correctly perfomed.  
 \end {itemize}
@@ -589,9 +624,13 @@ appears withing an active anchor.
 
 \appendix
 
-\section {Known bugs}
+\section {Limitations}
 
-\subsection*{Inlined postscript}
+\subsection*{Postscript Fonts}
+
+Postscript fonts are not currently supported. 
+
+\subsection*{Inlined Postscript and Ghostscript}
 
 PS relies on {\tt ghoscript} to display Postscript inlined specials.
 However, some earlier releases of {\tt ghostscript} 
@@ -611,12 +650,11 @@ fatal bug for \ActiveDVI, that will hopefully be fixed in future
 releases. A workaround is available here
 \url{http://cristal.inria.fr/~remy/ghostscript/}.
 
-\subsection*{Inlined postscript}
+\subsection*{Inlined Postscript change of coordinates}
 
-So far, the implementation of inline Postscript does not correctly handle
+So far, the implementation of inlined Postscript does not correctly handle
 complex change of coordinates.  (See PStricks section). 
 
-\section {Future}
 
 \section {Key bindings}
 

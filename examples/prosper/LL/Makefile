@@ -1,4 +1,4 @@
-TEXINPUTS := ../../lib:../../../tex:$(TEXINPUTS)
+TEXINPUTS := ..:../../lib:../../../tex:$(TEXINPUTS)
 ADVI=../../../advi.opt
 LATEX=TEXINPUTS=$(TEXINPUTS) latex 
 
