@@ -17,7 +17,8 @@
 
 (* $Id$ *)
 
-(* Saving shots. *)
+(* Saving screen shots of the actual Active-DVI display.
+   Pierre Weis.                                                        *)
 
 open Image;;
 
@@ -26,8 +27,7 @@ type x = int and y = int and w = int and h = int;;
 let get_page_image_file_suffix, set_page_image_file_suffix =
  let file_suffix = ref "png" in
  (fun () -> !file_suffix),
- (fun s -> file_suffix := s)
-;;
+ (fun s -> file_suffix := s);;
 
 Options.add
   "-page-image-file-suffix"
@@ -40,8 +40,7 @@ Options.add
 let get_page_image_file_prefix, set_page_image_file_prefix =
  let file_prefix = ref "shot" in
  (fun () -> !file_prefix),
- (fun s -> file_prefix := s)
-;;
+ (fun s -> file_prefix := s);;
 
 Options.add
   "-page-image-file-prefix"
@@ -82,11 +81,23 @@ let output_page_area_image_file fname x y w h =
 
 let save_page_area_image_file fname x y w h =
   let screen_w = Graphics.size_x () and screen_h = Graphics.size_y () in
-  if x >= 0 && x <= screen_w &&
-     y >= 0 && y <= screen_h &&
-     h >= 0 && y + h <= screen_h &&
-     w >= 0 && x + w <= screen_h then
-     output_page_area_image_file fname x y w h;;
+  let x =
+   if x < 0 then 0 else
+   if x > screen_w then screen_w - 1 else
+   x in
+  let y =
+   if y < 0 then 0 else
+   if y > screen_h then screen_h - 1 else
+   y in
+  let h =
+   if h < 0 then 0 else
+   if h + y > screen_h then screen_h - y else
+   h in
+  let w =
+   if w < 0 then 0 else
+   if w + x > screen_w then screen_w - x else
+   w in
+  output_page_area_image_file fname x y w h;;
 
 let save_page_area_image x y w h =
   let fname = new_fname () in

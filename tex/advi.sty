@@ -1,4 +1,4 @@
-%%% Active-DVI
+%% Active-DVI
 %%
 %% This is the original source file advi.sty
 %%
@@ -12,12 +12,12 @@
 
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{advi}
-         [2003/09/02 v1.75 LaTeX Package for the advi Previewer]
+         [2004/23/03 v1.75 LaTeX Package for the advi Previewer]
 
 % Which name is ours
 \def \advi@name {Active-DVI}
 % Which year of development are we (used for various copyrights message) ?
-\def \advi@year {2003}
+\def \advi@year {2004}
 % Which version is it ?
 \def \advi@version {1.50}
 
@@ -327,12 +327,39 @@ Maybe you mean \@currenvir ing}}
 \def\advi@pause {\advi@special{pause}}
 \def\advi@wait#1{\advi@special{wait sec=#1}}
 
-%% export
 \newcommand {\adviwait}[1][]%
    {\advi@ifempty {#1}{\advi@pause}{{\advi@dim %to check well-formedness
       #1\advi@dim}\advi@wait {#1}}}
 \advi@export \advipause \advi@pause
 
+%%% Saving pages or areas of pages
+
+\def\advi@savepageimage@ {\advi@special {savepageimage}}
+\def\advi@savepageimagefile@ #1{\advi@special {savepageimagefile file="#1"}}
+
+\newcommand{\advi@savepageimagefile}[1][]%
+   {\advi@ifempty {#1}{\advi@savepageimage@}%
+                      {\advi@savepageimagefile@ {#1}}}
+
+\advi@export \advisavepageimage \advi@savespageimage@
+\advi@export \advisavepageimagefile \advi@savespageimagefile
+
+\def\advi@savepageareaimage@ #1#2#3#4%
+  {\advi@special {savepageareaimagefile x=#1 y=#2 w=#3 h=#4}}
+\def\advi@savepageareaimagefile@ #1#2#3#4#5%
+  {\advi@special {savepageareaimagefile file="#1" x=#2 y=#3 w=#4 h=#5}}
+
+\newcommand{\advi@savepageareaimagefile}[5][]%
+   {\advi@ifempty {#1}{\advi@savepageareaimage@ {#2} {#3} {#4} {#5}}%
+                      {\advi@savepageareaimagefile@ {#1} {#2} {#3} {#4} {#5}}}
+
+\advi@export \advisavepageareaimage \advi@savespageareaimagefile@
+\advi@export \advisavepageareaimagefile \advi@savespageareaimagefile
+
+%%% Pushing key events
+
+\def\advi@pushevents #1{\advi@special {pushevents "#1"}}
+\advi@export \advipushevents \advi@pushevents
 
 %%% Transparency and alpha blending for EPS
 %%% To be revisited.

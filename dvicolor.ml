@@ -194,7 +194,7 @@ let parse_color_args = function
   | s :: l ->
      (* Try the regular way first. *)
      (try parse_color_encoding s l with
-      (* It it fails, emit a warning and give a default gray *)
+      (* If it fails, emit a warning and give a default gray *)
       | Failure _ -> cannot_understand_color s)
   | [] -> cannot_understand_color "[]";;
 

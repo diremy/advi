@@ -1333,8 +1333,49 @@ let scan_special_html (_, xrefs, _) page s =
 
 let scan_special_line (_, _, lastline) s k =
   try lastline := Some (line_of_special s k)
-  with Ill_formed_special s -> ill_formed_special s
-;;
+  with Ill_formed_special s -> ill_formed_special s;;
+
+let save_page_image_special st =
+ Shot.save_page_image ();;
+
+let get_file_name records =
+  try unquote (List.assoc "file" records) with
+  | Not_found ->
+      raise (Failure "advi_save_page: invalid special (no file name)");;
+
+let save_page_image_file_special st s =
+  let records = get_records s in
+  Shot.save_page_image_file (get_file_name records);;
+
+let save_page_area_image_special st s =
+  let records = get_records s in
+  try
+    let x = int_of_string (List.assoc "x" records)
+    and y = int_of_string (List.assoc "y" records)
+    and w = int_of_string (List.assoc "w" records)
+    and h = int_of_string (List.assoc "h" records) in
+    Shot.save_page_area_image x y w h with
+  | Not_found | Failure _ ->
+     failwith (Printf.sprintf "advi_save_page: invalid special %s" s);;
+
+let save_page_area_image_file_special st s =
+  let records = get_records s in
+  try
+    let fname = get_file_name records in
+    let x = int_of_string (List.assoc "x" records)
+    and y = int_of_string (List.assoc "y" records)
+    and w = int_of_string (List.assoc "w" records)
+    and h = int_of_string (List.assoc "h" records) in
+    Shot.save_page_area_image_file fname x y w h with
+  | Not_found | Failure _ ->
+     failwith (Printf.sprintf "advi_save_page: invalid special %s" s);;
+
+let push_events_special st s =
+ for i = String.length s - 1 to 0 do
+   match s.[i] with
+   | '' .. '' -> Misc.push_key_event s.[i] GraphicsY11.control
+   | _ -> Misc.push_key_event s.[i] GraphicsY11.nomod
+ done;;
 
 (* This function is iterated on the current DVI page BEFORE
    rendering it, to gather the information contained in some
@@ -1432,6 +1473,16 @@ let special st s =
         (if !visible then unmap_one_embed_special st s) else
       if has_prefix "advi: unmapallembed " s then
         (if !visible then unmap_all_embed_special st s) else
+      if has_prefix "advi: savepageimage" s then
+        (if !visible then save_page_image_special st) else
+      if has_prefix "advi: savepageimagefile " s then
+        (if !visible then save_page_image_file_special st s) else
+      if has_prefix "advi: savepageareaimage " s then
+        (if !visible then save_page_area_image_special st s) else
+      if has_prefix "advi: savepageareaimagefile " s then
+        (if !visible then save_page_area_image_file_special st s) else
+      if has_prefix "advi: pushevents " s then
+        (if !visible then push_events_special st s) else
       Misc.warning ("unknown special: " ^ s) end
     (* else we ignore it, whether well-formed or ill-formed *)
   end else

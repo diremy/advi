@@ -68,7 +68,7 @@ val debug_stop : string -> unit;;
 val debug_endline : string -> unit;;
 
 val push_key_event : char -> modifiers -> unit;;
-(** [push_back_key_event c ms] pushes a key press [c]
+(** [push_key_event c ms] pushes a key press [c]
   with a given modifier list [ms] into the Active-DVI's events queue. *)
 
 (* The necessary forwards: not to be called directly. *)

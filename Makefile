@@ -54,12 +54,12 @@ EXEC	  = advi
 MISC	  = config misc timeout ageometry 
 OPTIONS	  = options rc userfile
 GRAPHICS  = graphicsY11 global_options busy gradient gterm launch \
-	    laser_pointer
+	    dvicolor shot laser_pointer
 SYMBOL	  = symbol
-DVI	  = input dvicolor table pkfont ttfont jfm search \
+DVI	  = input table pkfont ttfont jfm search \
 	    font glyph devfont units dimension dvi
 EFFECTS	  = drawimage gs transimpl embed
-GUI	  = scratch cdvi driver thumbnails shot dviview
+GUI	  = scratch cdvi driver thumbnails dviview
 
 MODULES	  = $(MISC) $(OPTIONS) $(GRAPHICS) \
             $(SYMBOL) $(DVI) \

@@ -21,8 +21,22 @@
 (* $Id$ *)
 open Graphics;;
 
-let pointer_color = Graphics.red;;
-let not_pointer_color = Graphics.background;;
+let not_the_pointer_color = Graphics.background;;
+
+let set_pointer_color, get_pointer_color =
+  let pointer_color = ref Graphics.red in
+  (fun c -> if c > 0 then pointer_color := c),
+  (fun () -> !pointer_color);;
+
+let set_pointer_color_string s =
+  set_pointer_color (Dvicolor.parse_color s);;
+
+Options.add
+  "-laser-pointer-color"
+  (Arg.Int set_pointer_color)
+  (Printf.sprintf
+     "<color>: set the color of the ``laser'' pointer,\
+     \n\t (the default color is red).");;
 
 (* Pointer size is at least 4 *)
 let get_pointer_size, set_pointer_size =
@@ -35,7 +49,7 @@ Options.add
   (Arg.Int set_pointer_size)
   (Printf.sprintf
      "<size>: set the size of the ``laser'' pointer in points,\
-     \n\t (the default delay is %d points)." (get_pointer_size ()));;
+     \n\t (the default size is %d points)." (get_pointer_size ()));;
 
 type pointer = {
   mutable bkg_img : image;
@@ -58,7 +72,7 @@ In the backing store (not to disturb the screen).
 *)
 
 let make_white_image h w =
-  let pixmap = Array.make_matrix h w not_pointer_color in
+  let pixmap = Array.make_matrix h w not_the_pointer_color in
   make_image pixmap;;
 
 let color_as_transp c img =
@@ -75,13 +89,13 @@ let color_as_transp c img =
 let draw_pointer x y w =
   let r = w / 2 - 2 in
   let d = r / 2 in
-  set_color not_pointer_color;
+  set_color not_the_pointer_color;
   fill_rect x y w w;
-  set_color pointer_color;
+  set_color (get_pointer_color ());
   let xc = x + r + 1
   and yc = y + r + 1 in
   fill_circle xc yc r;
-  set_color not_pointer_color;
+  set_color not_the_pointer_color;
   fill_circle xc yc d;;
 
 (* Create a pointer with lower left corner at (x, y). *)
@@ -92,7 +106,7 @@ let create_pointer x y w =
   draw_pointer x y w;
   (* Get the corresponding image. *)
   let pointer_image =
-    color_as_transp not_pointer_color (get_image x y w w) in
+    color_as_transp not_the_pointer_color (get_image x y w w) in
   (* Restore the background. *)
   draw_image bkg_img x y;
   { bkg_img = bkg_img;
@@ -118,8 +132,38 @@ let show_pointer ptr x y =
   blit_image ptr.bkg_img x y;
   (* Move the pointer. *)
   ptr.x <- x; ptr.y <- y;
-  draw_image ptr.ptr_img x y;
-;;
+  draw_image ptr.ptr_img x y;;
+
+let null_key = '\000';;
+
+let rec treat_laser_event laser_pointer q =
+   match wait_next_event
+           [Mouse_motion; Button_down; Button_up; Key_pressed;] with
+   | { mouse_x = x; mouse_y = y;
+       button = btn;
+       keypressed = kp;
+       key = c; } ->
+       show_pointer laser_pointer x y;
+       if kp then begin
+         match c with
+         | '' | '' -> raise Exit
+         | '' when q = '' ->
+	    Shot.save_page_image ();
+            clear_pointer laser_pointer;
+            treat_laser_event laser_pointer null_key
+         | '' when q = '' ->
+            Misc.push_key_event '' GraphicsY11.control;
+            Misc.push_key_event '' GraphicsY11.control;
+            raise Exit
+         | '' -> treat_laser_event laser_pointer c
+         | 'l' when q = '' -> raise Exit
+         | c ->
+            Misc.push_key_event 'l' GraphicsY11.nomod;
+            Misc.push_key_event '' GraphicsY11.control;
+            Misc.push_key_event c (GraphicsY11.get_modifiers ());
+            if q = '' then Misc.push_key_event '' GraphicsY11.control;
+            raise Exit
+       end;;
 
 let switch_on_laser_beam () =
 
@@ -132,28 +176,7 @@ let switch_on_laser_beam () =
  let x, y = mouse_pos () in
  show_pointer laser_pointer x y;
 
- try while true do
-   match
-     wait_next_event
-       [Mouse_motion; Button_down; Button_up; Key_pressed;] with
-   | { mouse_x = x; mouse_y = y;
-       button = btn;
-       keypressed = kp;
-       key = c; } ->
-       show_pointer laser_pointer x y;
-       if kp then begin
-         match c with
-         | '' -> raise Exit
-         | '' ->
-            Misc.push_key_event c GraphicsY11.control;
-            raise Exit
-         | c ->
-            Misc.push_key_event ' ' GraphicsY11.nomod;
-            Misc.push_key_event '' GraphicsY11.control;
-            Misc.push_key_event c (GraphicsY11.get_modifiers ());
-            raise Exit
-       end
-   done with
+ try while true do treat_laser_event laser_pointer null_key done with
  | Exit -> clear_pointer laser_pointer;;
 
 let laser_beam =

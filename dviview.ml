@@ -1460,7 +1460,7 @@ let bind_control_x_key = bind_key control_x_keymap;;
 (* Bindings for ^X-prefixed keys. *)
 let bind_control_x_keys () =
   List.iter bind_control_x_key [
-    ' ', B.laser_beam;
+    'l', B.laser_beam;
     '', B.save_page_image;
     '', B.abort_key;
 ]

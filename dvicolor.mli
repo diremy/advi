@@ -25,7 +25,7 @@ val parse_color : string -> color;;
     - a color defined by [dvips], such as ["YellowOrange"] or ["Melon"],
     - a color predefined in the [Graphics] module, such as ["yellow"],
     - a color know by the [Camlimage] library (including X colors),
-    - an mere integer specification (as understood by the Caml
+    - a mere integer specification (as understood by the Caml
       [int_of_string] primitive.
     Raises [Failure "int_of_string"] if the given string is not understood.
 *)
