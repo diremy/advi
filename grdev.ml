@@ -21,7 +21,7 @@ open Misc;;
 
 let ignore_background =
     Options.flag false
-    "--ignore_background"
+    "-ignore-background"
     "  ignore background for antialiasing,\
     \n\t (the default is to look at the background during antialiasing).";;
 
@@ -569,18 +569,17 @@ let get_bg_color x y w h =
   if !ignore_background then Graphics.white else begin
     sync dvi;
     if !psused || bkgd_data.bgimg <> None ||
-       bkgd_data.bggradient <> None || bkgd_data.bgviewport <> None then
+    bkgd_data.bggradient <> None || bkgd_data.bgviewport <> None then
       let point_color x y =
         let x' = min (!size_x - 1) x and y' = min (!size_y - 1) y in
         GraphicsY11.point_color x' y' in
-      (*
       let c = point_color (x + 1) (y + 1) in
       let c' = point_color (x + w - 1) (y + h - 1) in
       if c = c' then c
-      else *)
-      if get_playing () > 0 then find_bg_color x y w h 
-      else (* mean_color c c' *)
-        point_color (x + w / 2) (y + h / 2)
+      else 
+        if get_playing () > 0 then find_bg_color x y w h 
+        else (* mean_color c c' *)
+          point_color (x + w / 2) (y + h / 2)
     else find_bg_color x y w h
   end;;
 

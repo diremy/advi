@@ -59,7 +59,7 @@ Options.add
   "<anchor>: ask Active-DVI to start at HTML reference named <anchor>.";;
 let debug_pages =
   Options.debug
-    "--debug_pages"
+    "--debug-pages"
     "  debug page motion.";;
 
 let browser = ref "netscape-communicator";;
