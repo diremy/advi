@@ -618,8 +618,7 @@ let redraw ?trans ?chst st =
         Transimpl.sleep := (fun _ -> true); (* always breaks *)
         while
           try f () with
-          | Driver.Wait _ | Driver.Pause ->
-              true
+          | Driver.Wait _ | Driver.Pause -> true
         do () done
       end
     with
@@ -705,8 +704,8 @@ let make_thumbnails st =
                   }
                }
              } in
-           without_pauses(redraw ?chst:(Some chgvp))
-             {ist with page_number = p};
+           without_pauses
+             (redraw ?chst:(Some chgvp)) {ist with page_number = p};
            (* Interrupt thumbnail computation in case of user interaction. *)
            begin try Grdev.continue() with
            | Grdev.Stop ->
@@ -947,14 +946,14 @@ let set_page_pause_num n pause_num st =
 
 let goto_page n st = set_page_pause_num n 0 st;;
 
-(* Fin the coocked DVI page that corresponds to a position in a source file. *)
+(* Find the coocked DVI page that corresponds to a position in a source file. *)
 let find_page_before_position (pos, fname) st =
   let rec find p =
     if p < 0 then raise Not_found else
     match st.dvi.Cdvi.pages.(p).Cdvi.line with
     | Some (pos', fname') when pos' <= pos && fname = fname' -> p
     | _ -> find (pred p) in
-  find (st.num_pages -1);;
+  find (st.num_pages - 1);;
 
 let duplex_switch sync st =
   let find_sync_page master client =
@@ -1147,8 +1146,9 @@ module B =
     let previous_pause st =
       if st.pause_number > 0
       then goto_previous_pause (max 1 st.num) st
-      else set_page_pause_num
-            (st.page_number - max 1 st.num) (st.last_pause_number) st
+      else
+        set_page_pause_num
+          (st.page_number - max 1 st.num) (st.last_pause_number) st
     let pop_page st =
       pop_page true 1 st
     let first_page st =
