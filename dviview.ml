@@ -20,13 +20,13 @@ let fullwidth = Options.flag false "-fullwidth" "Adjust size to width";;
 let bounding_box = Options.flag false "-bbox" "Show the bounding box";;
 
 let start_page = ref 0;;
-Options.set
+Options.add
   "-page"
   (Arg.Int (fun i -> start_page := i))
   "INT\tMake advi start at page INT";;
 
 let start_html = ref None;;
-Options.set
+Options.add
   "-html"
   (Arg.String (fun s -> start_html := Some s))
   "STRING\tMake advi start at html reference of name STRING";;
@@ -36,13 +36,13 @@ let debug_pages =
     "Debug page motion";;
 
 let browser = ref "netscape-communicator";;
-Options.set
+Options.add
   "-browser"
   (Arg.String (fun s -> browser := s))
   "STRING\tCommand to call the browser";;
 
 let pager = ref "xterm -e less";;
-Options.set
+Options.add
   "-pager"
   (Arg.String (fun s -> pager := s))
   "STRING\tCommand to call the pager";;
@@ -63,13 +63,13 @@ let set_scale x =
   else
     Misc.warning
       (Printf.sprintf "out of bounds scale_step %f ignored" x);;
-Options.set
+Options.add
   "-scalestep"
   (Arg.Float set_scale)
   "REAL\tScale step for '<' and '>' (default sqrt (sqrt (sqrt 2.0)))";;
 
 let autoresize = ref true;;
-Options.set
+Options.add
   "-noautoresize"
   (Arg.Clear autoresize)
   "\tPrevents scaling from resizing the window (done if geometry is provided)"
@@ -79,7 +79,7 @@ let dpi_resolution = ref 72.27;;
 let set_dpi_resolution r =
  dpi_resolution := max r 72.27;;
 
-Options.set
+Options.add
   "-resolution"
   (Arg.Float set_dpi_resolution)
   "REAL\tDpi resolution of the screen (min 72.27)))";;
@@ -891,9 +891,10 @@ module B =
         | No_offset -> 0
         | Plus x -> x
         | Minus y -> - y in
-      let pid = Launch.fork_process
+      let pid =
+        Launch.fork_process
           (Printf.sprintf "%s -g %dx%d %s"
-      Sys.argv.(0)
+             Sys.argv.(0)
              attr.geom.width
              attr.geom.height
              Config.splash_screen) in

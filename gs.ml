@@ -27,9 +27,11 @@ let pstricks =
     "Show moveto";;
 
 let showps = ref false;;
-Options.set
+
+Options.add
   "--showps" (Arg.Set showps)
   "\tPrint a copy of Postscript sent to gs to stdout";;
+
 let pspage = ref 0;;
 
 (* constants *)

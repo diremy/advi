@@ -16,12 +16,12 @@
 (***********************************************************************)
 
 val all : unit -> (string * Arg.spec * string) list;;
-val set : string -> Arg.spec -> string -> unit;;
+val add : string -> Arg.spec -> string -> unit;;
 (* 
-   [set_option opt spec man] add the option [opt] to the command line
+   [add opt spec man] add the option [opt] to the command line
    with specification [spec] and man info [man]   
 *)
-    
+
 val pretty : ((string * Arg.spec * string) list as 'a) -> 'a;;
 (* 
    To pretty print options, use '\t' in the info string, the part

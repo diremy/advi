@@ -18,13 +18,13 @@
 (* To add options to the command line in different modules way *)
 let options = ref [];;
 let all () = !options;;
-let set op action man =
+let add op action man =
   options := (op, action, man) :: !options;;
 
 (* A special case: flag options *)
 let flag initial option message =
   let r = ref initial in
-  set option
+  add option
     (if initial then Arg.Clear r else Arg.Set r)
     ("\t" ^ message);
   r;;
@@ -36,7 +36,7 @@ let make_debug r s =
 
 let debug option message =
   let r = ref false in
-  set option (Arg.Set r) ("\t" ^ message);
+  add option (Arg.Set r) ("\t" ^ message);
   make_debug r;;
 
 (* Some global options *)
@@ -60,7 +60,7 @@ let set_global_display_mode b =
   GraphicsY11.global_display_mode b;
   global_display_mode := b;;
 
-set "-fg"
+add "-fg"
  (Arg.Unit (fun () -> set_global_display_mode true))
  "\tDraw in the foreground";;
 

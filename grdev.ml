@@ -15,17 +15,19 @@
 (*  Based on Mldvi by Alexandre Miquel.                                *)
 (***********************************************************************)
 
-let ignore_background = Options.flag false
+let ignore_background =
+    Options.flag false
     "--ignore_background"
     "\tIgnore background for antialiasing";;
 
-let show_busy = Options.flag true
+let show_busy =
+    Options.flag true
     "-nowatch"
     "\tDon't display a watch when busy";;
 
 let busy_delay = ref 0.5;;
 
-Options.set
+Options.add
   "-watch"
   (Arg.Float (fun x -> busy_delay := x))
   "FLOAT\tDelay before the watch cursor appears (default 0.5s)";;
@@ -328,7 +330,7 @@ let fgcolor () = !default_fgcolor;;
 
 let color = ref !default_fgcolor;;
 
-Options.set
+Options.add
   "-fgcolor"
   (Arg.String (set_default_color default_fgcolor))
   "STRING\tSet default foreground color (Named or RGB)";;
@@ -445,7 +447,7 @@ let get_bg_color x y w h =
     else find_bg_color x y w h
   end;;
 
-Options.set
+Options.add
   "-bgcolor"
   (Arg.String
      (fun s ->

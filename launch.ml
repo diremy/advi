@@ -35,20 +35,47 @@ let exit code =
   else (* SUICIDE *)
   Unix.kill (Unix.getpid ()) 9;;
 
-let unsafe =
-  Options.flag false "-unsafe"
-    "\tUnsafer mode: allow all external applications to be launched";;
-
-let safe_commands =  [  ] 
-(* unsafe: il faudrait le chemin absolu.
-    [ "animate"; "display"; "xeyes"; "mpg123"; "advi"; "netscape"; ]
-*)
+type policy =
+   | Safer              (* No application is launched. *)
+   | Exec               (* Application are automatically launched. *)
+   | Ask                (* The user is prompted, whenever an
+                           application has to be launched. *)
 ;;
+
+let policy = ref Ask;;
+
+let set_policy = function
+  | Safer -> policy := Safer
+  | Exec ->
+     if !policy = Ask then policy := Exec
+  | Ask ->
+     if !policy = Exec ||
+        !policy = Safer then policy := Ask
+;;
+
+Options.add
+  "-exec"
+  (Arg.Unit
+    (fun () -> set_policy Exec))
+  "\tExec mode: allow all external applications to be executed";;
+
+Options.add
+  "-safer"
+  (Arg.Unit
+    (fun () -> set_policy Safer))
+  "\tSafer mode: external applications are never launched";;
+
+Options.add
+  "-ask"
+  (Arg.Unit
+    (fun () -> set_policy Ask))
+  "\tAsk mode: ask confirmation before launching an external application";;
 
 (* Support for white run via -n option *)
 
 let whiterun_commands = ref []
 and whiterun_flag = ref false;;
+
 let whiterun () = !whiterun_flag;;
 
 let add_whiterun_command command =
@@ -56,49 +83,57 @@ let add_whiterun_command command =
 let dump_whiterun_commands () =
   let unique l =
     List.fold_right
-      (fun c -> fun acc ->
+      (fun c acc ->
 	match acc with [] -> [c]
-	| (c'::r as cl) -> if c=c' then cl else c::cl)
-      (List.sort compare l) []
-  in
+	| c' :: r as cl -> if c = c' then cl else c :: cl)
+      (List.sort compare l) [] in
   let comms = unique !whiterun_commands in
   List.iter (fun c -> prerr_endline c) comms;;
 
-Options.set 
+Options.add 
     "-n"
     (Arg.Unit (fun () -> whiterun_flag := true))
-    "\tMake advi print the list of embedded commands in the file";;
+    "\tEchoes commands, but does not execute them.";;
 
 
 let paranoid =
   Options.flag false "-safer"
     "\tSafer mode: external applications are never launched";;
 
-let exec_command command args =
-  if !paranoid || not !unsafe && not (List.mem command safe_commands) then
+let cannot_execute_command command_invocation =
     Misc.warning
       (Printf.sprintf
-         "By default, the command:
+         "Attempt to launch the embedded command:\n\n\
+          \t%s\n\n\
+          For security reasons, it was not executed.\n\
+          Hence the presentation could be strange or incomplete.\n\
+          To enable execution of embedded applications,\n\
+          please rerun advi with option -ask or -exec."
+         command_invocation);;
 
-  %s %s
+let ask_user command_invocation =
+ prerr_endline command_invocation;
+ false;;
 
-is not executed for security reasons. To enable launching 
-any application, please rerun advi with the option -unsafe."
-        command
-        (String.concat " "
-           (match Array.to_list args with [] -> [] | h::t -> t))
-      )
-  else
-    Unix.execvp command args
-;;
+let execute_command command_invocation command_tokens =
+  let rec exec_command command_invocation command_tokens = function
+    | Exec -> Unix.execvp command_tokens.(0) command_tokens
+    | Ask ->
+        if ask_user command_invocation
+        then exec_command command_invocation command_tokens Exec
+        else exec_command command_invocation command_tokens Safer
+    | Safer ->
+        cannot_execute_command command_invocation in
 
-let fork_process command = 
-  let command_tokens = parse_shell_command command in
+  exec_command command_invocation command_tokens !policy;;
+
+let fork_process command_invocation = 
+  let command_tokens = parse_shell_command command_invocation in
   let pid = Unix.fork () in
   if pid = 0 then
     begin (* child *)
       try
-        exec_command command_tokens.(0) command_tokens;
+        execute_command command_invocation command_tokens;
 	exit 0
       with
       | Unix.Unix_error (e, _, arg) -> 
