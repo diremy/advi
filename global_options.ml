@@ -35,7 +35,7 @@ let get_global_display_mode, set_global_display_mode =
  let global_display_mode = ref false in
  (fun () -> !global_display_mode),
  (fun b ->
-    GraphicsY11.set_global_display_mode b;
+    GraphicsY11.set_enable_display_mode b;
     global_display_mode := b);;
 
 Options.add "-fg"
