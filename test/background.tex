@@ -15,8 +15,7 @@
 \usepackage{advi}
 \usepackage{advi-annot}
 
-%\usepackage{hyperref}
-
+\usepackage{hyperref}
 
 \def\mathsym#1{\ifmmode{#1}\else$#1$\fi}
 
@@ -76,9 +75,10 @@ You can modify the background of your presentations:
     \item add a background image (which can be alpha-blended on top of
     the background color).
   \end{itemize}
-If these options are used \emph{together}, they are currently applied
-in the abovementioned order
-(i.e.\ color, then function, then image).\\
+
+If these options are used \emph{together}, they are applied in this
+order: first solid background color, then gradient function, then
+image drawing.\\
 
 This file is a simple showcase for the current background effects.
 
@@ -92,106 +92,191 @@ in the LaTeX source of the page the following command:
 
 \begin{quote}
   \begin{verbatim}
-      \advibg{color = yellow} 
-   \end{verbatim}
+  \advibg{color = yellow} 
+  \end{verbatim}
 \end{quote}
 \advibg{color = yellow} 
 
 \newpage
 
+{\color[named]{Goldenrod}{
 \section{Setting the background color: gradients}
 
-By choosing one of the \verb|hgradient|, \verb|vgradient| or
-\verb|dgradient| predefined functions, we can convert the background
+By choosing one of the \verb|hgradient|, \verb|vgradient|,
+\verb|d1gradient|, \verb|d2gradient|, \verb|cgradient|, or
+\verb|circgradient| predefined functions, we can convert the entire background
 color into a color gradient from the chosen color to white.
 
-For example, here is the effect produced by insering in the LaTeX
-source of the page the following command:
+Additionally the gradient colors and the area where the gradient is drawn can be
+specified:
+\begin{itemize}
+\item \verb"colorstart" specify the starting color of the gradient,
+\item \verb"colorstop" specify the ending color of the gradient,
+\item \verb"xstart" and \verb"ystart" define the lower left point of the area,
+\item \verb"width" and \verb"height" specify the width and height of
+the area.
+\end{itemize}
+
+Dimensions of the area are floating point numbers in the range
+\verb|[0 .. 1]| that gives the ratio of the area with respect to the
+page ($0$ meaning a null dimension and $1$ the entire actual
+page relevant dimension).
+
+For centered or circular gradient, \verb"xcenter" and \verb"ycenter"
+define the coordinates of the center point of the gradient (those are
+also dimensions with the same encoding as in the preceding paragraph).
+
+\vfill
+
+The command to obtain this background is:
+
+\advibg{color = [named]{CadetBlue}}
 
 \begin{quote}
   \begin{verbatim}
-      \advibg{color = yellow, fun = "hgradient"} 
-   \end{verbatim}
+  \advibg{color = [named]{CadetBlue}} 
+  \end{verbatim}
+\end{quote}
+\vfill
+}}
+\newpage
+
+\vfill
+\subsection{Horizontal gradient}
+\vfill
+
+The command to obtain this background is:
+
+\begin{quote}
+  \begin{verbatim}
+  \advibg{color = yellow, fun = "hgradient"} 
+  \end{verbatim}
 \end{quote}
 \advibg{color = yellow, fun = "hgradient"} 
+\vfill
 
 \newpage
 
-Here is the effect produced by the following command:
+\vfill
+\subsection{Vertical gradient}
+\vfill
 
-\begin{quote}
-  \begin{verbatim}
-      \advibg{color = blue, fun = "vgradient"} 
-   \end{verbatim}
-\end{quote}
+The command to obtain this background is:
+
 \advibg{color = blue, fun = "vgradient"} 
 
-\newpage
-
-Here is the effect produced by the following command:
-
 \begin{quote}
   \begin{verbatim}
-      \advibg{color = green, fun = "d1gradient"} 
-   \end{verbatim}
+  \advibg{color = blue, fun = "vgradient"} 
+  \end{verbatim}
 \end{quote}
+\vfill
+
+\newpage
+
+\vfill
+\subsection{First diagonal gradient}
+\vfill
+
+The command to obtain this background is:
+
 \advibg{color = green, fun = "d1gradient"} 
 
+\begin{quote}
+  \begin{verbatim}
+  \advibg{color = green, fun = "d1gradient"} 
+  \end{verbatim}
+\end{quote}
+\vfill
 
 \newpage
 
-Here is the effect produced by the following command:
+\vfill
+\subsection{Second diagonal gradient}
+\vfill
 
-\begin{quote}
-  \begin{verbatim}
-      \advibg{color = green, fun = "d2gradient"} 
-   \end{verbatim}
-\end{quote}
+The command to obtain this background is:
+
 \advibg{color = green, fun = "d2gradient"} 
 
-\newpage
-
-Here is the effect produced by the following command:
-
 \begin{quote}
   \begin{verbatim}
-      \advibg{color = green, fun = "cgradient"} 
-   \end{verbatim}
+  \advibg{color = green, fun = "d2gradient"} 
+  \end{verbatim}
 \end{quote}
+\vfill
+
+\newpage
+
+\vfill
+\subsection{Centered gradient}
+\vfill
+
+The command to obtain this background is:
+
 \advibg{color = green, fun = "cgradient"} 
 
-\newpage
-
-Here is the effect produced by the following command:
-
 \begin{quote}
   \begin{verbatim}
-      \advibg{color = green, fun = "circgradient"} 
-   \end{verbatim}
+  \advibg{color = green, fun = "cgradient"} 
+  \end{verbatim}
 \end{quote}
+\vfill
+
+\newpage
+
+\vfill
+\subsection{Circular gradient}
+\vfill
+
+The command to obtain this background is:
+
 \advibg{color = green, fun = "circgradient"} 
 
-\newpage
-
-Here is the effect produced by the following command:
-
 \begin{quote}
   \begin{verbatim}
-  \advibg{color = green, fun = "circgradient", colorstart = "red"} 
-   \end{verbatim}
+  \advibg{color = green, fun = "circgradient"} 
+  \end{verbatim}
 \end{quote}
-\advibg{color = green, fun = "circgradient", colorstart = red}
+\vfill
 
 \newpage
 
-Here is the effect produced by the following command:
+\vfill
+\subsection{Circular gradient with starting color}
+\vfill
+
+The command to obtain this background is:
+
+\advibg{color = green, fun = "circgradient",
+        colorstart = red}
 
 \begin{quote}
   \begin{verbatim}
-  \advibg{color = cyan, fun = "cgradient", colorstart = "blue"} 
-   \end{verbatim}
+  \advibg{color = green, fun = "circgradient",
+          colorstart = "red"} 
+  \end{verbatim}
 \end{quote}
-\advibg{color = green, fun = "cgradient", colorstart = blue}
+\vfill
+
+\newpage
+
+\vfill
+\subsection{Centered gradient with starting color}
+\vfill
+
+The command to obtain this background is:
+
+\advibg{color = green, fun = "cgradient",
+        colorstart = blue}
+
+\begin{quote}
+  \begin{verbatim}
+  \advibg{color = cyan, fun = "cgradient",
+          colorstart = "blue"} 
+  \end{verbatim}
+\end{quote}
+\vfill
 
 \newpage
 
@@ -205,7 +290,7 @@ is in the test directory. The source of this page contains
 
   \begin{quote}
     \begin{verbatim}
-        \advibg{image = "world.jpg"} 
+    \advibg{image = "world.jpg"} 
     \end{verbatim}
   \end{quote}
 
@@ -225,39 +310,42 @@ size of the background to fill, and they are declared with the
 \dockey{fit}{} parameter to \verb|\advibg|:
 
 \dockey[auto]{fit}{fit style}
+
 \begin{quote}
+
 Fit the background image according to \docid{style}, which may only be 
 {\tt auto} or one of the following keywords:
+
 \begin{center}
-\tt
-auto \hfill {\rm or} \hfill
+\tt auto \hfill {\rm or} \hfill
 \begin{tabular}{l@{\qquad}c@{\qquad}r}
 topleft&   top& topright\\
 left&  center&  right \\
 bottomleft& bottom & bottomright\\
 \end{tabular}
 \end{center}
+
 The {\tt auto} fit mode means scale the image as desired in both directions
 so that it fits the page. The other styles only allows the same scaling
 factor in both directions:
+
 \begin {itemize}
 
-\item
-Corner-styles mean adjust the image in the corner
-and scale so that all the page is covered. 
+\item Corner-styles mean adjust the image in the corner and scale so
+that all the page is covered.
 
-\item
-{\tt center} means scale the
-image so that all the page is covered and center it on the page. 
+\item {\tt center} means scale the image so that all the page is
+covered and center it on the page.
 
-\item
-Segment-styles mean adjust the image and the page on the segment (in which
-case, the image may not totally cover the page on the opposite side). 
+\item Segment-styles mean adjust the image and the page on the segment
+(in which case, the image may not totally cover the page on the
+opposite side).
 
 \end {itemize}
+
 \end{quote}
 
-\framebox{Here come several slides meant to show the effect of these settings}
+\framebox{Here come several slides meant to show the effect of these settings.}
 
 \newpage
 \vfill
@@ -266,9 +354,9 @@ case, the image may not totally cover the page on the opposite side).
 This is obtained by not setting the \dockey{fit}{} parameter:\\
 \advibg{image = "world.jpg"}
 \begin{center}
-	\begin{verbatim}
-	\advibg{image = "world.jpg"}
-	\end{verbatim}
+  \begin{verbatim}
+  \advibg{image = "world.jpg"}
+  \end{verbatim}
 \end{center}
 \vfill
 Resize the display window to see how this positioning option works.
@@ -278,7 +366,7 @@ Resize the display window to see how this positioning option works.
 
 \newcommand{\ttadvibg}{$\backslash$advibg}
 \newcommand{\docfit}[1]{\vfill%
-This is obtained by:\\%
+The command to obtain this background is:\\%
 \begin{center}
 {#1}
 \end{center}
@@ -356,7 +444,7 @@ Set the alpha factor for the background image to \docid{float}
 (\doctt{none} means unset).
 \end{quote}
 
-\section*{Blending}
+\section{Blending}
 \dockey[none]{blend}{blend mode}
 \begin{quote}
 Set the blend mode to \docid{blend mode}, which should be one of the
@@ -445,13 +533,14 @@ In this page, the background is filled with an image for which we
 specify an alpha value of less than 1.\\ 
 Notice that this effect is nice, but expensive to realize.
 
-Here is the command used to obtain it:
+The command to obtain this background is:
 
 \begin{center}
 {\tt \char`\\advibg\{alpha = 0.25, image = "dojoji.gif"\}}
 \end{center}
 \advibg{alpha = 0.25, image = "dojoji.gif"}
 \vfill
+
 \newpage
 
 \vfill
@@ -461,16 +550,16 @@ In this page, the background is first set to light blue, then blended
 in {\tt difference} mode with the image which is scaled to fit the
 available area.\\
 
-Here is the command used to obtain this effect:
+The command to obtain this background is:
 
+\advibg{color = lightblue, alpha = 0.1,
+        blend = difference,
+        image = "dojoji.gif"} 
 \begin{center}
 {\tt \char`\\advibg\{color = lightblue, alpha = 0.1,
                      blend = difference,
                      image = "dojoji.gif"\}}
 \end{center}
-
-\advibg{color = lightblue, alpha = 0.1,
-        blend = difference, image = "dojoji.gif"} 
 \vfill
 
 \Newpage
@@ -489,21 +578,21 @@ of the page to black and the text color to white, as follows:
 
 \item set the background to black, anywhere in the text of the slide with
 
-  \begin{quote}
-    \begin{verbatim}
-        \advibg{color = black} 
-    \end{verbatim}
-  \end{quote}
+\begin{quote}
+  \begin{verbatim}
+  \advibg{color = black} 
+  \end{verbatim}
+\end{quote}
 
 \item set the text color of the entire page to white, by putting the
 text of the page between in the scope of a \verb"\color" macro call:
-  \begin{quote}
-    \begin{verbatim}
-        {\color{white}
-          Text of the page
-        }
-    \end{verbatim}
-  \end{quote}
+\begin{quote}
+  \begin{verbatim}
+  {\color{white}
+   Text of the page
+  }
+  \end{verbatim}
+\end{quote}
 
 \end{itemize}
 
@@ -518,7 +607,7 @@ want to revert to normal background.
 
 \section{Future work}
 
-\subsection* {Design considerations}
+\subsection {Design considerations}
 
   \begin{itemize}
     \item background preferences are ``asynchronous'', in the sense
@@ -544,81 +633,256 @@ sub window where the color gradient takes place ?\\Done.
     \item anybody willing to improve gradients to a more general
 scheme that could be programmable ?
   \end{itemize}
+\vfill
+
+\advibg{none}
+The command to obtain this background is:
+
+\begin{center}
+\begin{verbatim}
+  \advibg{none}
+\end{verbatim}
+\end{center}
+\vfill
 
 \newpage
+
+\vfill
+{\Huge Solid color background}
+\vfill
+
+The command to obtain this background is:
 
 \advibg{color = cyan}
 
-\vfill
-{\large {Plain cyan color:\\
- \verb|\advibg{color = cyan}|}}
+\begin{center}
+\begin{verbatim}
+  \advibg{color = cyan}
+\end{verbatim}
+\end{center}
 \vfill
 
 \newpage
+
+\vfill
+{\Huge Solid color\\ with vertical gradient}
+\vfill
+
+The command to obtain this background is:
 
 \advibg{color = cyan, fun = "vgradient"}
 
-\vfill
-{\large {Cyan with vertical gradient\\
- \verb|\advibg{color = cyan, fun = "vgradient"}|}}
+\begin{center}
+\begin{verbatim}
+  \advibg{color = cyan, fun = "vgradient"}
+\end{verbatim}
+\end{center}
 \vfill
 
 \newpage
 
-\advibg{alpha = "0.1", image = "dojojismall.jpg",
+\vfill
+{\Huge Vertical gradient\\ with blended image ($\alpha = 0.1$)}
+\vfill
+
+The command to obtain this background is:
+
+\advibg{alpha = "0.1", image = "dojoji.gif",
         color = cyan, fun = "vgradient"}
 
-\vfill
-{\large {Cyan with vertical gradient\\
- and alpha = 0.1 blended image\\
- \verb|\advibg{alpha = "0.1", image = "dojojismall.jpg",|\\
- \verb|        color = cyan, fun = "vgradient"}|
-}}
-\vfill
-
-\newpage
-
-\advibg{alpha = "0.2", color = cyan,
-        image = "dojojismall.jpg", fun = "vgradient"}
-
-\vfill
-{\large {Cyan with vertical gradient and alpha = 0.2 blended image\\
-\verb|\advibg{alpha = "0.2", color = cyan,|\\
-\verb| image = "dojojismall.jpg", fun = "vgradient"}|
-}}
+\begin{center}
+\begin{verbatim}
+  \advibg{alpha = "0.1", image = "dojoji.gif",
+          color = cyan, fun = "vgradient"}
+\end{verbatim}
+\end{center}
 \vfill
 
 \newpage
 
-\advibg{alpha = "0.4", fun = "vgradient", color = cyan, image =
-"dojojismall.jpg"}
-
 \vfill
-{\large {Cyan with vertical gradient\\
-and alpha = 0.4 blended image\\
-\verb|\advibg{alpha = "0.4", fun = "vgradient",|\\
-\verb|        color = cyan, image = "dojojismall.jpg"}|
-}}
+{\Huge Vertical gradient\\ with blended image ($\alpha = 0.2$)}
 \vfill
 
-\newpage
+The command to obtain this background is:
 
-\advibg{alpha = "0.8", fun = "vgradient", color = cyan, image =
-"dojojismall.jpg"}
+\advibg{alpha = "0.2", image = "dojoji.gif",
+        color = cyan, fun = "vgradient"}
 
-\vfill
-{\large {Cyan with vertical gradient\\
- and alpha = 0.8 blended image\\
-\verb|\advibg{alpha = "0.8", fun = "vgradient",|\\
-\verb|        color = cyan, image = "dojojismall.jpg"}|
-}}
+\begin{center}
+\begin{verbatim}
+  \advibg{alpha = "0.2", image = "dojoji.gif",
+          color = cyan, fun = "vgradient"}
+\end{verbatim}
+\end{center}
 \vfill
 
 \newpage
 
-\advibg{color = cyan, image = "dojojismall.jpg", alpha = 0.25}
-\verb|\advibg{color = cyan, image = "dojojismall.jpg",|\\
-\verb|        alpha = 0.25}|
+\vfill
+{\Huge Vertical gradient\\ with blended image ($\alpha = 0.4$)}
+\vfill
+
+The command to obtain this background is:
+
+\advibg{alpha = "0.4", image = "dojoji.gif",
+        color = cyan, fun = "vgradient"}
+
+\begin{center}
+\begin{verbatim}
+  \advibg{alpha = "0.4", image = "dojoji.gif",
+          color = cyan, fun = "vgradient"}
+\end{verbatim}
+\end{center}
+\vfill
+
+\newpage
+
+\vfill
+{\Huge Vertical gradient\\ with blended image ($\alpha = 0.8$)}
+\vfill
+
+The command to obtain this background is:
+
+\advibg{alpha = "0.8", image = "dojoji.gif",
+        color = cyan, fun = "vgradient"}
+
+\begin{center}
+\begin{verbatim}
+  \advibg{alpha = "0.8", image = "dojoji.gif",
+          color = cyan, fun = "vgradient"}
+\end{verbatim}
+\end{center}
+\vfill
+
+\newpage
+
+\vfill
+{\Huge Red circular gradient\\ with blended image ($\alpha = 0.25$)}
+\vfill
+
+The command to obtain this background is:
+
+\advibg{color = [named]{LemonChiffon},
+        fun = circgradient,
+        colorstart = red,
+        image = "dojoji.gif", alpha = 0.25}
+
+\begin{center}
+\begin{verbatim}
+  \advibg{color = [named]{LemonChiffon},
+          fun = circgradient,
+          colorstart = red,
+          image = "dojoji.gif", alpha = 0.25}
+\end{verbatim}
+\end{center}
+\vfill
+
+\newpage
+
+\vfill
+{\Huge Horizontal red gradient\\ with blended image ($\alpha = 0.25$)}
+\vfill
+
+The command to obtain this background is:
+
+\advibg{color = [named]{LemonChiffon},
+        fun = hgradient,
+        colorstart = red,
+        xstart = 0, ystart = 0,
+        width = 0.14, height = 1.,
+        image = "dojoji.gif", alpha = 0.25}
+
+\begin{center}
+\begin{verbatim}
+  \advibg{color = [named]{LemonChiffon},
+          fun = hgradient,
+          colorstart = red, xstart = 0, ystart = 0,
+          width = 0.14, height = 1.,
+          image = "dojoji.gif", alpha = 0.25}
+\end{verbatim}
+\end{center}
+\vfill
+
+\newpage
+
+\vfill
+{\Huge Horizontal gradient\\ with solid white}
+\vfill
+
+The command to obtain this background is:
+
+\advibg{color = white,
+       fun = hgradient,
+       colorstart = blue, colorstop = green,
+       xstart = 0, ystart = 0,
+       width = 0.14, height = 1.}
+
+\begin{center}
+\begin{verbatim}
+  \advibg{color = white},
+          fun = hgradient,
+          colorstart = blue, colorstop = green,
+          xstart = 0, ystart = 0,
+          width = 0.14, height = 1.}
+\end{verbatim}
+\end{center}
+\vfill
+
+\newpage
+
+\vfill
+{\Huge Horizontal gradient\\ with LemonChiffon}
+\vfill
+
+The command to obtain this background is:
+
+\advibg{color = [named]{LemonChiffon},
+       fun = hgradient,
+       colorstart = blue, colorstop = green,
+       xstart = 0, ystart = 0,
+       width = 0.14, height = 1.}
+
+\begin{center}
+\begin{verbatim}
+  \advibg{color = [named]{LemonChiffon},
+          fun = hgradient,
+          colorstart = blue, colorstop = green,
+          xstart = 0, ystart = 0,
+          width = 0.14, height = 1.}
+\end{verbatim}
+\end{center}
+\vfill
+
+\newpage
+
+\vfill
+{\Huge Horizontal gradient\\ with LemonChiffon\\
+       and blended image ($\alpha = 0.25$)}
+\vfill
+
+The command to obtain this background is:
+
+\advibg{color = [named]{LemonChiffon},
+       fun = hgradient,
+       colorstart = blue, colorstop = green,
+       xstart = 0, ystart = 0,
+       width = 0.14, height = 1.,
+      image = "dojoji.gif", alpha = 0.25}
+
+\begin{center}
+\begin{verbatim}
+  \advibg{color = [named]{LemonChiffon},
+          fun = hgradient,
+          colorstart = blue, colorstop = green,
+          xstart = 0, ystart = 0,
+          width = 0.14, height = 1.,
+          image = "dojoji.gif", alpha = 0.25}
+\end{verbatim}
+\end{center}
+\vfill
+
+\newpage
 
 \section{Future work}
 
@@ -639,63 +903,19 @@ background color after a pause. But at what price ?
 function arguments and more fancy variants ?\\
 Done.
   \end{itemize}
-
-\newpage
-
-\advibg{color = [named]{LemonChiffon},
-        fun = circgradient,
-        colorstart = red,
-        image = "dojojismall.jpg", alpha = 0.25}
-
-\verb|\advibg{color = [named]{LemonChiffon}, fun = circgradient,|\\
-\verb|        colorstart = red,|\\
-\verb|        image = "dojojismall.jpg", alpha = 0.25}|
-
-\newpage
-
-\vfill
-{This is {LemmonChiffon with vertical gradient\\
- and alpha = 0.25 blended image}}
 \vfill
 
-   \advibg{color = [named]{LemonChiffon},
-           fun = hgradient,
-           colorstart = red,
-           xstart = 0, ystart = 0,
-           width = 0.15, height = 1.,
-           image = "dojojismall.jpg", alpha = 0.25}
+The command to obtain this background is:
 
+\advibg{color = cyan, image = "dojoji.gif",
+        alpha = 0.25}
+
+\begin{center}
 \begin{verbatim}
-   \advibg{color = [named]{LemonChiffon},
-           fun = hgradient,
-           colorstart = red, xstart = 0, ystart = 0,
-           width = 0.15, height = 1.,
-           image = "dojojismall.jpg", alpha = 0.25}
+  \advibg{color = cyan, image = "dojoji.gif",
+          alpha = 0.25}
 \end{verbatim}
-
-\vfill
-
-\newpage
-
-\vfill
-{This is {LemmonChiffon with vertical gradient\\
- and alpha = 0.25 blended image}}
-\vfill
-
-   \advibg{color = [named]{LemonChiffon},
-           fun = hgradient,
-           colorstart = blue, colorstop = green,
-           xstart = 0, ystart = 0,
-           width = 0.15, height = 1.}
-
-\begin{verbatim}
-   \advibg{color = [named]{LemonChiffon},
-           fun = hgradient,
-           colorstart = blue, colorstop = green,
-           xstart = 0, ystart = 0,
-           width = 0.15, height = 1.}
-\end{verbatim}
-
+\end{center}
 \vfill
 
 \lastpage
