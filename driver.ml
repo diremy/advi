@@ -1094,7 +1094,7 @@ let open_html st link tag tag_string =
   and y = st.y_origin + int_of_float (st.conv *. float st.v) in
   begin match st.html with
   | Some (t, k) -> st.html <- Some (t, succ k)
-  | None -> st.html <- Some (tag link, 0)
+  | None -> st.html <- Some (tag (unquote link), 0)
   end;;
 
 let close_html st =
@@ -1113,8 +1113,8 @@ let html_special st html =
     let stripped = String.sub html 3 (String.length html-4) in
     let fields = split_record stripped in
     begin match fields with
-      ("name", _) :: _ ->
-        open_html st html (fun x -> Dev.H.Name x) "Name"
+      ("name", link) :: _ ->
+        open_html st link (fun x -> Dev.H.Name x) "Name"
     | ("href", link) :: _ -> 
         open_html st link (fun x -> Dev.H.Href x) "Href" 
     | (("advi" | "hdvi" as kind), link) :: rest ->
