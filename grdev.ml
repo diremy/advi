@@ -242,12 +242,12 @@ let copy_of_bkgd_data () =
 
 (* TODO: handle ratio and whitetransparent preferences *)
 
-let draw_bkgd_img (w,h) x0 y0 =
+let draw_bkgd_img (w, h) x0 y0 =
   match bkgd_data.bgimg with
   | None -> ()
   | Some fn ->
      Draw_image.f
-      fn bkgd_data.bgwhitetrans 1.0 None bkgd_data.bgratio (w,h) x0 y0;;
+      fn bkgd_data.bgwhitetrans 1.0 None bkgd_data.bgratio (w, h) x0 y0;;
 
 type bgoption =
    | BgColor of color
@@ -511,13 +511,13 @@ let blend_func = function
         let t = t + t lsr 8 in
         t lsr 8;;
 
-let draw_ps file bbox (w,h) x0 y0 =
+let draw_ps file bbox (w, h) x0 y0 =
   if not !opened then failwith "Grdev.fill_rect: no window";
   let x = x0
   and y = !size_y - y0 + h in
   try Drawps.f file !epstransparent !alpha
       (if !blend = Normal then None else Some (blend_func !blend))
-      bbox (w,h) x y
+      bbox (w, h) x y
   with
   | Not_found -> Misc.warning ("ps file " ^ file ^ " not found")
   | _ -> Misc.warning ("error happened while drawing ps file " ^ file);;
@@ -625,7 +625,7 @@ let unmap_embed_app command app_type app_name width height x y =
 
 let move_or_resize_persistent_app command app_type app_name width height x y =
   let _, (app_type, app_name, wid) = find_embedded_app app_name in
-  prerr_endline (Printf.sprintf "Moving %s to %i, %i" app_name x y);
+  prerr_endline (Printf.sprintf "Moving window %s to %i %i\n" app_name x y);
   GraphicsY11.move_subwindow wid x y;;
 
 (* In hash table t, verifies that at least one element verifies p. *)
@@ -641,12 +641,15 @@ let embed_app command app_type app_name width height x y =
   | Sticky ->
      if not (already_launched app_name) then
      embeds :=
-      (fun () -> raw_embed_app command app_type app_name width height x y) ::
+      (fun () ->
+         (* prerr_endline ("Launching " ^ app_name); *)
+         raw_embed_app command app_type app_name width height x y) ::
       !embeds else
      persists :=
       (fun () ->
+         (* prerr_endline ("Moving " ^ app_name); *)
          move_or_resize_persistent_app command
-           app_type app_name width height x y) ::
+         app_type app_name width height x y) ::
       !persists
   | Persistent ->
      if not (already_launched app_name) then
@@ -667,7 +670,9 @@ let embed_app command app_type app_name width height x y =
       !unmap_embeds;
   | Ephemeral ->
      embeds :=
-      (fun () -> raw_embed_app command app_type app_name width height x y) ::
+      (fun () ->
+         (* prerr_endline ("Launching " ^ app_name); *)
+         raw_embed_app command app_type app_name width height x y) ::
       !embeds;;
 
 let kill_app pid wid =
@@ -679,10 +684,9 @@ let kill_app pid wid =
       let pid, _ = Unix.waitpid [Unix.WNOHANG] 0 in
       pid <> 0
     with
-      Unix.Unix_error(Unix.ECHILD,_,_) -> false
+      Unix.Unix_error(Unix.ECHILD, _, _) -> false
   do () done;
-  GraphicsY11.close_subwindow wid
-;;
+  GraphicsY11.close_subwindow wid;;
 
 let kill_apps app_type =
   (* begin match app_type with
@@ -692,7 +696,8 @@ let kill_apps app_type =
   end; *)
   Hashtbl.iter
    (fun pid (apt, app_name, wid) ->
-      if app_type = apt then kill_app pid wid) app_table;;
+      if apt = app_type then kill_app pid wid)
+   app_table;;
 
 let kill_embedded_app app_name =
   try
@@ -797,7 +802,7 @@ module H =
         let e =
           match tag with
           | Href s -> 0
-          | Advi (s,f) -> 0
+          | Advi (s, f) -> 0
           | Name s -> 0 in
         let y' = y - voff -1 in
         let h' = h + 2 in
@@ -984,7 +989,7 @@ let clear_dev () =
   Graphics.set_color !bg_color;
   Graphics.fill_rect !xmin !ymin !xmax !ymax;
   (* now try to handle background images *)
-  draw_bkgd_img (!xmax,!ymax) 0 0;;
+  draw_bkgd_img (!xmax, !ymax) 0 0;;
 
 (*** Events ***)
 
@@ -1056,7 +1061,7 @@ let resized () =
       size_x := x;
       size_y := y;
       Gs.kill ();
-      Some (x,y)
+      Some (x, y)
     end
   else None;;
 
@@ -1099,7 +1104,7 @@ let rec draw_rectangle x y dx dy =
 
 let rec wait_signal_event events =
     match resized (), !usr1_status, event_waiting () with
-    | Some (x,y), _,_ -> Final (Resized (x,y))
+    | Some (x, y), _, _ -> Final (Resized (x, y))
     | _, true, _ -> clear_usr1 (); Final (Refreshed)
     | _, _, true -> Raw (pop_event ())
     | _, _, _ ->
@@ -1108,9 +1113,9 @@ let rec wait_signal_event events =
           let ev = Graphics.wait_next_event events in
           waiting := false;
           match resized () with
-          | Some (x,y) ->
+          | Some (x, y) ->
               push_back_event ev;
-              Final (Resized (x,y))
+              Final (Resized (x, y))
           | None ->
               Raw ev
         with
@@ -1305,7 +1310,7 @@ let wait_event () =
                       H.deemphasize true emph;
                       event (H.emphasize_and_flash href_emphasize act)
                     end
-              | {A.action = {H.tag = H.Advi (s,a); H.draw = d }} as act ->
+              | {A.action = {H.tag = H.Advi (s, a); H.draw = d }} as act ->
                   if H.up_to_date act emph then event emph
                   else
                     begin
@@ -1325,7 +1330,7 @@ let wait_event () =
                   | Final (Selection s as e) -> send e
                   | Final (Position (x, y) as e) -> send e
                   | Final (Move (dx, dy) as e) -> send e
-                  | Final (Click (_,_,_,_) as e) -> send e
+                  | Final (Click (_, _, _, _) as e) -> send e
                   | Final Nil -> send Nil
                   | Final e ->
                       push_back_event ev;
