@@ -17,6 +17,12 @@
 
 (* $Id$ *)
 
+(* Part I
+
+File names manipulations: path normalization, tilde substitution,
+file name directory (and sub directories) creation, etc.
+
+*)
 let is_absolute path = not (Filename.is_relative path);;
 
 let normalize path =
@@ -25,14 +31,13 @@ let normalize path =
   let tks = Misc.split_string path (function '/' -> true | _ -> false) 0 in
   let rec remove = function
     | x :: xs ->
-	begin match x :: remove xs with
-	| x :: [] -> [x]
-    	| "." :: xs -> xs (* remove . *)
-    	| x :: ".." :: xs when x <> ".." -> xs (* remove dir/.. *)
-	| l -> l
-	end
-    | [] -> []
-  in
+        begin match x :: remove xs with
+        | x :: [] -> [x]
+        | "." :: xs -> xs (* remove . *)
+        | x :: ".." :: xs when x <> ".." -> xs (* remove dir/.. *)
+        | l -> l
+        end
+    | [] -> [] in
   let path = String.concat "/" (remove tks) in
   Printf.sprintf "%s%s%s"
     (if full then "/" else "") path (if finalslash then "/" else "")
@@ -44,6 +49,7 @@ let fullpath fromdir path =
 ;;
 
 (* Tilde substitution *)
+
 (* skip to next / *)
 let rec next_slash s n =
   if  n >= String.length s || s.[n] = '/' then n else
@@ -52,25 +58,23 @@ let rec next_slash s n =
 
 let user_home_dir = try Sys.getenv "HOME" with _ -> "~";;
 
-let tilde_subst s =
+let tilde_subst fname =
  try
-  if s = "" || s.[0] <> '~' then s else
-  let len = String.length s in
+  if fname = "" || fname.[0] <> '~' then fname else
+  let len = String.length fname in
   if len = 1 then user_home_dir else
-  match s.[1] with
+  match fname.[1] with
   | '/' ->
-     Filename.concat user_home_dir (String.sub s 2 (len - 2))
+     Filename.concat user_home_dir (String.sub fname 2 (len - 2))
   | _ ->
-     let final = next_slash s 1 in
-     let user = String.sub s 1 (pred final) in
+     let final = next_slash fname 1 in
+     let user = String.sub fname 1 (pred final) in
      let pwnam = Unix.getpwnam user in
      if succ final >= len then pwnam.Unix.pw_dir else
       Filename.concat pwnam.Unix.pw_dir
-        (String.sub s (succ final) (len - succ final))
+        (String.sub fname (succ final) (len - succ final))
  with
- | Unix.Unix_error (_, _, _) -> s
- | Sys_error _ -> s
- | Not_found -> s
+ | Unix.Unix_error (_, _, _) | Sys_error _ | Not_found -> fname
 ;;
 
 let rec digdir dir perm =
@@ -87,19 +91,36 @@ let rec digdir dir perm =
    i.e. drwx------ *)
 let cautious_perm_digdir dir = digdir dir 0o0700;;
 
-let prepare_file file =
-  let dirname = Filename.dirname file in
+(* Prepare a file access: create its directory and sub-directories if any. *)
+let prepare_file fname =
+  let dirname = Filename.dirname fname in
   if not (Sys.file_exists dirname) then begin
-    try cautious_perm_digdir dirname
-    with
+    try cautious_perm_digdir dirname with
     | Unix.Unix_error (e, _, _) ->
-	Misc.warning (Unix.error_message e)
+        Misc.warning (Unix.error_message e)
     end
 ;;
 
+(* Prepare a file access and clear it before use. *)
+let prepare_and_clear_file fname =
+  prepare_file fname;
+  try
+    let oc = open_out_gen [Open_creat; Open_trunc; Open_binary] 0o0600 fname in
+    close_out oc
+  with
+  | Unix.Unix_error (e, _, _) ->
+      Misc.warning (Unix.error_message e)
+;;
+
+(* Part II
+
+File names definitions: DVI file to treat, user preferences files,
+cache directory name, etc.
+
+*)
 (* The DVI file currently read. *)
 let dvi_filename = ref None;;
-let set_dvi_filename s = dvi_filename := Some s;;
+let set_dvi_filename fname = dvi_filename := Some fname;;
 let get_dvi_filename () =
   match !dvi_filename with
   | None -> raise Not_found
@@ -109,7 +130,7 @@ let get_dvi_filename () =
 let get_dvi_file_dirname () =
   match !dvi_filename with
   | None -> raise Not_found
-  | Some fname -> Filename.dirname fname;;
+  | Some dirname -> Filename.dirname dirname;;
 
 (* User preferences. *)
 (* User options files. *)
@@ -194,8 +215,8 @@ let get_user_advi_cache_dir () =
           Misc.warning "Cannot find a cache directory, try to use .";
           Unix.getcwd ()
       | d :: ds ->
-         try mk_user_advi_cache_dir d with
-         | _ -> find_cache_dir ds in
+          try mk_user_advi_cache_dir d with
+          | _ -> find_cache_dir ds in
       find_cache_dir dirs;;
 
 let advi_cache_dir = ref None;;
@@ -207,15 +228,14 @@ let set_advi_cache_dir d =
   Misc.warning (Printf.sprintf "Cannot use %s as a cache directory" d);;
 
 Options.add
- "-cache-dir"
- (Arg.String set_advi_cache_dir)
- "STRING\tSet the cache directory (default /tmp)";;
+  "-cache-dir"
+  (Arg.String set_advi_cache_dir)
+  "STRING\tSet the cache directory (default /tmp)";;
 
 (* Get the actual advi cache directory.
    If it has not yet been set (i.e. it was not specified on the command
    line or in init files), try to figure out a reasonable default using
-   get_user_advi_cache_dir above.
-*)
+   get_user_advi_cache_dir above. *)
 let get_advi_cache_dir () =
   match !advi_cache_dir with
   | Some d -> d
@@ -228,6 +248,15 @@ let init_advi_cache_dir () = ignore (get_user_advi_cache_dir ());;
 
 Rc.at_init init_advi_cache_dir;;
 
+(* Part III
+
+ Writing information about the current page on a designated file,
+ for synchronisation purposes with other tools.
+ We write page number to the file advi_page_number_file
+ and page number + (absolute) time of visualisation to the file
+ advi_page_timing_file.
+ *)
+
 (* Writing page current number to the file advi_page_number_file. *)
 let write_page_number =
  Options.flag false "-page-number"
@@ -235,7 +264,8 @@ let write_page_number =
 
 let advi_page_number_file = ref None;;
 
-let set_page_number_file s = advi_page_number_file := Some s;;
+let set_page_number_file fname = advi_page_number_file := Some fname;;
+
 let get_page_number_file () =
   match !advi_page_number_file with
   | Some fname -> fname
@@ -252,13 +282,27 @@ Options.add "-page-number-file"
   \t(default is file \"advi_page_number\" in the cache directory\n\
   \t(default \"~/.advi\"))";;
 
+let open_append fname =
+  let oc =
+    open_out_gen [Open_append; Open_binary; Open_creat] 0o0600 fname in
+  oc;;
+
+let my_open_out = function
+  | "-" -> stdout
+  | fname -> open_out fname;;
+
+let my_open_append = function
+  | "-" -> stdout
+  | fname -> open_append fname;;
+
+let my_close_out oc = if oc == stdout then flush stdout else close_out oc;;
+
 let save_page_number n =
  if !write_page_number then
  try
-   let oc = open_out (get_page_number_file ()) in
-   output_string oc (string_of_int n);
-   output_char oc '\n';
-   close_out oc
+   let oc = my_open_out (get_page_number_file ()) in
+   output_string oc (Printf.sprintf "%i\n" n);
+   my_close_out oc
  with _ ->
    Misc.warning
      (Printf.sprintf
@@ -267,6 +311,57 @@ let save_page_number n =
 
 (* Initialization of advi_page_number_file. *)
 let init_advi_page_number_file () =
- if !write_page_number then prepare_file (get_page_number_file ());;
+ if !write_page_number then
+  let fname = get_page_number_file () in
+  if fname <> "-" then prepare_file fname;;
 
 Rc.at_init init_advi_page_number_file;;
+
+(* Writing slides timing to the file advi_page_timing_file.
+  Useful to any kind of post synchronization,
+  for instance the clock or a sound track. *)
+let write_page_timing =
+ Options.flag false "-page-timing"
+  "Ask advi to write the current page timing in a file (default is no)";;
+
+let advi_page_timing_file = ref None;;
+
+let set_page_timing_file fname =
+ Misc.debug_endline ("timing file is " ^ fname);
+ advi_page_timing_file := Some fname;;
+
+let get_page_timing_file () =
+  match !advi_page_timing_file with
+  | Some fname -> fname
+  | None ->
+      let fname =
+        Filename.concat (get_advi_cache_dir ()) "advi_page_timing" in
+      set_page_timing_file fname;
+      fname;;
+
+Options.add "-page-timing-file"
+ (Arg.String set_page_timing_file)
+ "STRING\tSet the name of the file where \
+  advi could write the current page timing\n\
+  \t(default is file \"advi_page_timing\" in the cache directory\n\
+  \t(default \"~/.advi\"))";;
+
+let save_page_timing n =
+ if !write_page_timing then
+ try
+   let oc = my_open_append (get_page_timing_file ()) in
+   output_string oc (Printf.sprintf "#PAGE %i AT %f\n" n (Unix.time ()));
+   my_close_out oc
+ with _ ->
+   Misc.warning
+     (Printf.sprintf
+        "Cannot write file %s to record page timing."
+        (get_page_timing_file ()));;
+
+(* Initialization of advi_page_timing_file. *)
+let init_advi_page_timing_file () =
+ if !write_page_timing then
+   let fname = get_page_timing_file () in
+   if fname <> "-" then prepare_and_clear_file fname;;
+
+Rc.at_init init_advi_page_timing_file;;
