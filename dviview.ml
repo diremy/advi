@@ -977,12 +977,13 @@ bind_keys ();;
 
 let main_loop filename =
   let st = init filename in
-  let cont = ref None in (* drawing continuation *)
-  (* check if whiterun *)
+  (* Forward redisplay function *)
+(*  Launch.forward_ask_redisplay := (fun () -> B.redraw st);*)
+  (* Check if whiterun *)
   if Launch.whiterun () then
     begin
       Driver.scan_special_pages st.cdvi (st.num_pages -1);
-      Launch.dump_whiterun_commands()
+      Launch.dump_whiterun_commands ()
     end
   else
     begin
@@ -994,7 +995,7 @@ let main_loop filename =
       else
 	set_page_number st (page_start 0 st);
       redraw st;
-  (* num is the current number entered by keyboard *)
+      (* num is the current number entered by keyboard *)
       try while true do
 	let ev = if changed st then Grdev.Refreshed else Grdev.wait_event () in
 	st.num <- st.next_num;
@@ -1022,13 +1023,11 @@ let main_loop filename =
             if !click_turn_page then B.pop_previous_page st
 	| Grdev.Click (_, Grdev.Button3, _, _) ->
             if !click_turn_page then B.next_pause st
-		
 (*
    | Grdev.Click (Grdev.Bottom_right, _) -> B.next_pause st
    | Grdev.Click (Grdev.Bottom_left, _) -> B.pop_previous_page st
    | Grdev.Click (Grdev.Top_right, _) -> B.push_page st
  *)
 	| _ -> ()
-	      
       done with Exit -> Grdev.close_dev ()
     end;;
