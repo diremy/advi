@@ -1,0 +1,22 @@
+ADK 1.0.0
+
+This is the adk, Advi Development Kit version 1.0.0.
+It contains the source code of the Active-DVI version 1.0.0 and
+the required libraries (camltk and camlimages).
+
+* Manual installation
+
+To compile Advi, you must make and install the libraries (camltk and 
+camlimages) first, including their native code versions. After the
+successful installation of the libraries, move to the directory advi-1.0.0 
+and compile Advi itself.
+
+* Automatic "brain-dead" installation
+
+Or, You can just type "make" in this directory and hope everything goes
+well. It automatically compiles and installs the libraries and advi...,
+only if you are extreamly lucky. (RedHat and Mandrake users tend to be 
+lucky, I guess... Otherwise you may encounter configuring troubles as usual.)
+
+If you have installed some software to solve installation problems,
+type "make reconfigure" to re-perform the configuration process.
