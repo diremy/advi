@@ -62,7 +62,6 @@ Alexandre~Miquel. The other main implementors are Jun~Furuse,
 Didier~R{\'{e}}my, and Pierre~Weis. Other contributors are Didier~Le~Botlan,  
 Roberto~Di~Cosmo, Xavier~Leroy, and Alan~Schmitt. 
 
-
 \clearpage
 \tableofcontents
 \clearpage
@@ -88,9 +87,37 @@ See the command help
 advi -help
 \end{verbatim}
 
+\begin{quote}
+\verb"geometry GEOM"
+\end{quote}
+
+Geometry \verb"GEOM" is specified in pixels, using the standard format
+to specify XWindow geometries (i.e: \verb"WIDTHxHEIGHT[+XOFFSET+YOFFSET]").
+
+\begin{quote}
+\verb"-hmargin" DIMEN        Horizontal margin  (default: 1cm)
+\verb"-vmargin" DIMEN        Vertical margin    (default: 1cm)
+\verb"-fullwidth             Adjust size to the width of the screen
+\end{quote}
+
+Dimensions (for options \verb"-hmargin" and \verb"-vmargin") are specified as
+numbers optionally followed by two letters representing units.
+When no units are given, dimensions are treated as numbers of pixels.
+Currently supported units are the standard TeX units as specified in
+the TeXbook (D. Knuth, Addison-Wesley, (C) 1986):
+\begin{blockquote}
+ `pt' (point), `pc' (pica), `in' (inch), `bp' (big point),
+ `cm' (centimeter), `mm' (millimeter), `dd' (didot point),
+ `cc' (cicero) and `sp' (scaled point).
+\end{blockquote}
+Note that dimensions are specified w.r.t the original TeX document,
+and do not correspond to what is actually shown on the screen, which
+can be displayed at a different resolution than specified in the
+original TeX source.
+
 \subsection {Cut and paste}
 
-Text can copied from the {\ActiveDVI} previewer to an another application.
+Text can be copied from the {\ActiveDVI} previewer to an another application.
 However, this uses \doctt{XBuffer} and not the \doctt{XSelection}
 mechanism.
 \begin {itemize}
@@ -121,7 +148,6 @@ position, and  file is the current file.
 Line numbers default to $0$ when not found. Note that line numbers may be
 inconsistent if they \docdef \special-line commands have not been inserted
 close enough to the position.
-
 
 \subsection {Hyperref}
 
@@ -246,6 +272,19 @@ Images can be encapsulated into the presentation using the package
 CamlImages provided with the distribution.
 
 \subsection {Backgrounds}
+
+Background of pages can be set in the \LaTeX source of the page,
+either as a plain color or as an image (or both!).
+You can specify a global option to the background setting, so that this
+background will be used for the remaining pages of the presentation
+(otherwise the presenter resets background options at each new page).
+
+Background images can be lighten by specifying an alpha value (a
+floating point number between 0 and 1) that mesures the melting
+between the background color and the image.
+
+Background images can also be blended, meaning specifying the
+algorithm that superposes the image to the background.
 
 \medskip\noindent
 \docdef \advibg \doctt {[global]}\docarg{key=value list}
