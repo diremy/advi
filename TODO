@@ -1,5 +1,18 @@
 BEFORE RELEASE:
 ===============
+Of course, I know it.
+But string a la 
+-scrathc-font -*-*-*-*-*-*-*-*-*-*-*-*-koi8-r
+is change font really, but advi not take any key-code with eighth bit (ie
++symbols with code >127)
+
+Else one bug or feature ;)
+advi from mandrake-rpm use gzip and gs and try find it in hard places
++/usr/local/bin/gs and /usr/bin/gzip.
+But in my mandrake-like system they palces at /usr/bin/gs and /usr/gzip.
+Of course, it is not difficult make symlinks ;) howether, I think it will be
++better if calling of programs not use full paths. I think these program places 
++in directories which is inscribed in $PATH variable.
 
  * Vérifier que adviwait[sec] marche.
 
