@@ -15,6 +15,7 @@
 (*  Based on Mldvi by Alexandre Miquel.                                *)
 (***********************************************************************)
 
+val can_execute_command : string -> bool;;
 val parse_shell_command : string -> string array
 val fork_process : string -> int
 val advi_process : int
