@@ -781,7 +781,7 @@ fi
 if test -f $CAMLIMAGESDIR/ci_ps.cma || $HAVE_CDK; then
 	echo "$ac_t""found" 1>&6
 	CAMLIMAGES_VERSION=`grep VERSION $CAMLIMAGESDIR/Makefile.config | sed -e 's/VERSION=//'`
-	if test `expr $CAMLIMAGES_VERSION \>= 2.10` = "1"; then
+	if test `expr $CAMLIMAGES_VERSION \>= 2.11` = "1"; then
 		HAVE_CAMLIMAGES="true"
 	        if $HAVE_CDK; then
 		        CAMLIMAGESLIBS="camlimages"
@@ -955,7 +955,7 @@ fi
 
 if test "$PATH_CAMLOPT" = "nope"; then
   echo "**************** Warning ******************"
-  echo "ocaml native code compiler is not found"
+  echo "The ocaml native code compiler is not found"
   echo "Only the bytecode version of Advi will be"
   echo "compiled and installed. We strongly recommend"
   echo "to install the ocamlopt compiler if available"
@@ -964,15 +964,15 @@ if test "$PATH_CAMLOPT" = "nope"; then
   INSTALLTARGET="advi"
 else
   if test -f "$CAMLIMAGESDIR/ci_ps.cmxa"; then
+    INSTALLTARGET="advi.opt"
+  else
     echo "**************** Warning ******************"
-    echo "You have ocamlopt compiler, but you have no"
+    echo "You have the ocamlopt compiler, but you have no"
     echo "native-code version of camlimages library installed."
     echo "Without it, we cannot compile the native-code"
     echo "version of advi, which we strongly recommend."
     echo "*******************************************"
     INSTALLTARGET="advi"
-  else
-    INSTALLTARGET="advi.opt"
   fi
 fi
 
