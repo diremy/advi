@@ -1386,7 +1386,7 @@ let scan_special status (headers, xrefs, lastline as args) pagenum s =
      has_prefix "advi: embed " s then scan_embed_special status s else
   (* Embedded Postscript, better be first for speed when scanning *)
   let do_ps = Gs.get_do_ps () in
-  if has_prefix "\" " s || has_prefix "ps: " s
+  if has_prefix "\" " s || has_prefix "ps:" s 
   || has_prefix "psfile=" s || has_prefix "PSfile=" s then
     status.Cdvi.hasps <- do_ps else
   if has_prefix "!" s then
@@ -1432,7 +1432,7 @@ let scan_special_page otherwise cdvi globals pagenum =
    | Cdvi.Known stored_status -> stored_status;;
 
 let special st s =
-  if has_prefix "\" " s || has_prefix "ps: " s
+  if has_prefix "\" " s || has_prefix "ps:" s
   || has_prefix "! " s then ps_special st s else
   if has_prefix "advi: put" s then
     put_special st (get_suffix "advi: put" s) else

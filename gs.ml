@@ -39,7 +39,7 @@ let pstricks =
 
 let showps_ref = ref false;;
 let showps s =
-  if !showps_ref then (prerr_endline  (Printf.sprintf "%s" s));;
+  if !showps_ref then (print_endline  (Printf.sprintf "%s" s));;
 
 (* (Printf.sprintf "SHOWPS: %s" s));;*)
 
@@ -273,10 +273,6 @@ class gs () =
     method ps b =
       List.iter self#line b;
 
-    method load_header (b, h) =
-      self # line
-        (if b then h else String.concat "" [ "("; h; ") run"; ])
-
   end;;
 
 let advi_pro =
@@ -289,6 +285,8 @@ setmatrix } def";;
 let advi_noshowpage = " /showpage { } /def"
 let advi_resetmatrix = "[1 0 0 -1 0 0] concat"
 
+type special = Unprotected | Protected | Begin | Continue | End 
+
 let texbegin = "TeXDict begin";;
 let texend = "flushpage end";;
 let moveto x y =
@@ -296,11 +294,20 @@ let moveto x y =
   Printf.sprintf "%d %d moveto" x y
 ;;
 
+let make_header (b, h) =
+  if b then
+    String.concat "\n"
+      [ "TeXDict begin @defspecial";
+        h;
+        "@fedspecial end"; ]
+  else String.concat "" [ "("; h; ") run" ];;
+
 let texc_special_pro gv =
   let l = [ "texc.pro"; "special.pro" ] in
   try
     let l' = Search.true_file_names [] l in
-    if List.length l = List.length l' then List.map (fun s -> false, s) l'
+    if List.length l = List.length l' then
+      List.map (fun s -> make_header (false, s)) l'
     else raise Not_found
   with
     Not_found ->
@@ -358,9 +365,10 @@ class gv =
 
     method add_headers l =
       if headers = [] then headers <- texc_special_pro self;
+      let l = List.map make_header l in
       match
-        List.filter
-          (function _, s -> List.for_all (function _, s' -> s <> s') headers)
+        List.filter 
+          (function s -> List.for_all (function s' -> s <> s') headers)
           l
       with
       | [] -> ()
@@ -369,15 +377,18 @@ class gv =
           match process with
           | Some gs ->
               gs # line "grestore SI restore";
-              List.iter gs # load_header l;
+              List.iter (gs # line) l;
+              (* to avoid no-current-point *)
+              gs # line "0 0 moveto";
               gs # line "/SI save def gsave";
           | None -> ()
 
     method newpage l sdpi m x y =
       self # check_size;
-      let l' = List.filter (fun s -> not (List.mem s headers)) l in
+      let l = List.map make_header l in
+      let l = List.filter (fun s -> not (List.mem s headers)) l in
       let gs = self # process in
-      if l' <> [] then headers <- headers @ l';
+      if l <> [] then headers <- headers @ l;
       dpi <- sdpi;
       mag <- m;
       xorig <- x;
@@ -387,7 +398,8 @@ class gv =
       showps (Printf.sprintf "%%%%Page: %d %d\n" !pspage !pspage);
       gs # line "\n%% Newpage\n";
       gs # line "grestore";
-      if l' <> [] then gs # line "SI restore";
+      gs # line "0 0 moveto";
+      if l <> [] then gs # line "SI restore";
       gs # line
         (Printf.sprintf
            "TeXDict begin %d %d div dup /Resolution X /VResolution X end"
@@ -396,8 +408,8 @@ class gv =
         (Printf.sprintf
            "TeXDict begin /DVImag %f def end"
            mag);
-      List.iter gs # load_header l';
-      if l' <> [] then gs # line  "/SI save def";
+      List.iter gs # line l;
+      if l <> [] then gs # line  "/SI save def";
       gs # line "gsave";
       gs # sync
 
@@ -411,7 +423,7 @@ class gv =
           (* should take matrix as a parameter ? *)
           showps "%!PS-Adobe-2.0\n%%Creator: Active-DVI\n%!";
           gs # line "[1 0 0 -1 0 0] concat";
-          List.iter (gs # load_header) headers;
+          List.iter (gs # line) headers;
           gs # line advi_pro;
           gs # line "TeXDict begin @landscape end";
           gs # line "/SI save def gsave";
@@ -419,7 +431,7 @@ class gv =
           gs
       | Some gs ->
 (*prerr_endline (Printf.sprintf "Calling existing gs interpreter");*)
- gs
+          gs
 
     method send b  =
 (*prerr_endline (Printf.sprintf "Calling gv#SEND with\n\t\t %s" (String.concat " " b));*)
@@ -427,30 +439,46 @@ class gv =
       self # process # ps b;
       sync <- false
 
-    method def b =
+    method def (b : string) =
       (* insert into postscript into user dictionnary, typically with '!'
          should not change graphic parameters *)
       (* does not draw---no flushpage *)
-      self # send [ b ]
+      (* in fact b should have already be loaded through *)
+      self # send [ ]
 
-    method ps b (x : int) (y : int) =
-(*prerr_endline (Printf.sprintf "Calling gv#PS with\n\t\t %s" b);*)
-      (* insert non protected postscript, typically with ``ps:''
-         may (not ?) change graphic parameters;
-         still need to set current point for initclip PStrick specials.
-       *)
-      self # send [ texbegin; self # moveto x y; b; texend ];
-      sync <- false
-
-    method special b (x : int) (y : int) =
-      (* insert protected postscript, typically with '"'
-         does (?) change graphic parameters *)
-      self # send [ texbegin;
-                    self # moveto x y;
-                    "@beginspecial @setspecial";
-                    b;
-                    "@endspecial"; texend;
-                  ] ;
+    method ps action b (x : int) (y : int) =
+      (* prerr_endline (Printf.sprintf "Calling gv#PS with\n\t\t %s" b); *)
+      self # send
+        begin match action with
+        | Unprotected ->
+            (* insert non protected postscript, typically with ``ps:''
+               may (not ?) change graphic parameters;
+               still need to set current point for initclip PStrick specials.
+             *)
+            [ texbegin; self # moveto x y; b; texend ];
+        | Protected ->
+            (* insert protected postscript, typically with '"'
+               does (?) change graphic parameters *)
+            [ texbegin;
+              self # moveto x y;
+              "@beginspecial @setspecial";
+              b;
+              "@endspecial"; texend;
+            ] ;
+        | Begin ->
+            (* Open SDict as @beginspecial
+               but do not reset graphical parameters *)
+            [ texbegin; 
+              self # moveto x y;
+              "@defspecial"; 
+              b ];
+        | Continue -> 
+            (* Continue [in SDict] *)
+            [ b ];
+        | End -> 
+            (* Close SDict *)
+            [ "@fedspecial"; texend; ];
+        end; 
       sync <- false
 
     method file name (llx, lly, urx, ury) (rwi, rhi : int * int) x y =
@@ -487,24 +515,29 @@ let gv = new gv;;
 
 let kill () = gv # kill;;
 
+let ps_forms =
+  [ 
+    "ps: ", Unprotected;
+    "\" ", Protected;
+    "ps::[begin]", Begin;
+    "ps::[end]", End;
+    "ps::", Continue;
+   ];;
+
 let draw s x y =
   if get_do_ps () then
-    try
-(*
-   Misc.debug_endline (Printf.sprintf "Calling gv#ps with\n\t\t %s" s);
- *)
-      gv#ps (Misc.get_suffix  "ps: " s) x y with
-    | Misc.Match ->
-        try gv#special (Misc.get_suffix  "\" " s) x y with
-        | Misc.Match ->
-            try gv#def (Misc.get_suffix  "! " s) with
+    let pred (prefix, action) =
+      try gv#ps action (Misc.get_suffix prefix s) x y; true
+      with Misc.Match -> false in
+    if not (List.exists pred ps_forms) then
+      try gv#ps Protected (Misc.get_suffix  "\" " s) x y with Misc.Match ->
+        try gv#def (Misc.get_suffix  "! " s) with Misc.Match -> 
 (*
    | Misc.Match ->
    try gv#file (Misc.get_suffix  "psfile: " s) bbox size x y with
  *)
-            | Misc.Match ->
-                Misc.warning
-                  (Printf.sprintf "Unknown PostScript commands\n\t\t %s" s)
+          Misc.warning
+            (Printf.sprintf "Unknown PostScript commands\n\t\t %s" s)
 ;;
 let draw_file fname bbox ri x y =
   if get_do_ps () then gv#file fname bbox ri x y;;
@@ -512,9 +545,11 @@ let draw_file fname bbox ri x y =
 let current_point() =
     gv#current_point;;
 
-let add_headers = gv#add_headers;;
+let add_headers x =
+  gv#add_headers x;;
 
-let newpage = gv#newpage;;
+let newpage x =
+  gv#newpage x;;
 
 let flush () =
   if get_do_ps () then
@@ -528,3 +563,4 @@ let flush () =
 let toggle_antialiasing () =
   antialias := not !antialias;
   kill ();;
+

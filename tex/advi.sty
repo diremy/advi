@@ -26,8 +26,10 @@
 %% Preliminary declarations
 
 \RequirePackage{keyval}
-%% color may take options, which may produce clashes. Load only if unloaded
-%% by main document
+%% Dirty trick: color may take options, which would produce clashes if the 
+%% user load the same package with some options. 
+%% Load only if unloaded by main document
+%%
 \AtBeginDocument
   {\@ifundefined {DefineNamedColor}{\usepackage{color}}{}%
    %% two abstract colors set by advi. Defaut to black and white
