@@ -1265,10 +1265,6 @@ let button_up = [
 
 let events = ref [];;
 
-let push_back_event ev =
-  if List.length !events > 1 then Misc.warning "STACK";
-  events := ev :: !events;;
-
 let event_waiting () = !events <> [];;
 
 let rec pop_event () =
@@ -1276,17 +1272,21 @@ let rec pop_event () =
   | [] -> assert false
   | h :: t -> events := t; h;;
 
-let push_back_key_event c m =
-  push_back_event {
+let push_event ev = events := ev :: !events;;
+let push_back_event = push_event;;
+
+let push_key_event c m =
+  let status = {
     mouse_x = 0; mouse_y = 0;
     button = false;
     keypressed = true;
     key = c;
     modifiers = m;
-  };;
+  } in
+  push_event status;;
 
 (* Setting the forward in Misc. *)
-Misc.set_forward_push_back_key_event push_back_key_event;;
+Misc.set_forward_push_key_event push_key_event;;
 
 let reposition ~x ~y ~w ~h ~screen =
   Gs.flush ();

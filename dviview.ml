@@ -1308,7 +1308,8 @@ module B =
              ncol nlines (* Size in columns and lines *) in
          Gterm.draw_term minibuff;
          let re = Gterm.ask_prefill minibuff message !prefill in
-         Misc.push_back_key_event '' GraphicsY11.control;
+         (* Forces future redisplay. *)
+         Misc.push_key_event '' GraphicsY11.control;
          prefill := re;
          re)
 
@@ -1336,8 +1337,7 @@ module B =
 
     let laser_beam st =
       set_keymap Default_keymap;
-      Laser_pointer.laser_beam ();
-      set_keymap Default_keymap
+      Laser_pointer.laser_beam ()
 
     let abort_key st =
       set_keymap Default_keymap

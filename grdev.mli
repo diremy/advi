@@ -230,6 +230,9 @@ type status = {
     modifiers : int;
 };;
 
+val push_event : status -> unit;;
+(** [push_event e] pushes event [e] into the advi events queue. *)
+
 module E :
     sig
       type info = {
