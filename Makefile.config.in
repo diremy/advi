@@ -17,7 +17,7 @@ LABLTKLIB=@LABLTKLIB@
 HAVE_CDK=@HAVE_CDK@
 
 HAVE_GS=@HAVE_GS@
-EXTRA_X11=@HAVE_XINERAMA@
+EXTRA_X11=@XINERAMA_FLAG@
 
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@

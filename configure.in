@@ -191,13 +191,13 @@ AC_PATH_XTRA
 
 dnl Check for xinerama support
 
-AC_CHECK_HEADERS(X11/extensions/Xinerama.h)
-if ! test "X$ac_cv_header_X11_extensions_Xinerama_h" = "X"; then
-HAVE_XINERAMA="-DHAVE_XINERAMA"
-XINE_LIBS="-lXinerama -lXext"
-fi
+HAVE_XINERAMA="false"
+AC_CHECK_HEADER(X11/extensions/Xinerama.h,
+HAVE_XINERAMA="true";
+XINERAMA_FLAG="-DHAVE_XINERAMA";
+XINERAMA_LIBS="-lXinerama -lXext")
 
-WITH_X="$X_LIBS $X_PRE_LIBS $XINE_LIBS -lX11 $X_EXTRA_LIBS"
+WITH_X="$X_LIBS $X_PRE_LIBS $XINERAMA_LIBS -lX11 $X_EXTRA_LIBS"
 
 dnl Checking hevea:
 
@@ -242,6 +242,7 @@ AC_SUBST(LABLTKDIR)
 AC_SUBST(LABLTKLIB)
 AC_SUBST(INSTALLTARGET)
 AC_SUBST(HAVE_XINERAMA)
+AC_SUBST(XINERAMA_FLAG)
 AC_SUBST(PATH_HEVEA)
 AC_SUBST(HAVE_HEVEA)
 
@@ -254,7 +255,7 @@ test "x$myexec_prefix" = xNONE && myexec_prefix=${myprefix}
 mylibdir=$libdir
 test "x$libdir" = 'x${exec_prefix}/lib' && mylibdir="$myexec_prefix/lib"
 
-if test -dw $TEXMFMAIN/tex/latex; then
+if test -d $TEXMFMAIN/tex/latex; then
   ADVI_LOC=$TEXMFMAIN/tex/latex/advi
 else 
   ADVI_LOC=$mylibdir/advi
@@ -275,4 +276,5 @@ echo "LablTk:      $HAVE_LABLTK"
 echo "GS:          $GS_UPTO_DATE version $GS_VERSION at $PATH_GS"
 echo "Resources:   $ADVI_LOC/"
 echo "Hevea:       $PATH_HEVEA"
+echo "Xinerama:    $HAVE_XINERAMA"		
 echo "------------------------------------------------------------------------"
