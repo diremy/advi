@@ -35,9 +35,9 @@ Press: \keymenu{n}ext page \keymenu{p}revious page
 \let \Newpage \newpage
 \def \newpage {\Newpage \advifooter\adviheader}
 
-\def\adviquitfooter{\vbox to 0em{\vbox to \vsize {\vfill
-\hfill \hbox{Press: \keymenu{q} to quit} \hfill~%
-} \vss}}
+\def\adviquitfooter{\noindent
+\centerline{\Large{Press: \keymenu{q} to quit}}
+}
 
 \def\lastpage{\Newpage\adviheader}
 
@@ -99,11 +99,8 @@ pace.
 \end{minipage}}
 }
 
-\transbox{slide from=top steps=150}{%
-{\begin{minipage}{\textwidth}
-\adviquitfooter
-\end{minipage}}
-}
+\vfill
 
+\transbox{slide from=top steps=250}{\adviquitfooter}
 
 \end{document}
