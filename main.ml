@@ -115,7 +115,7 @@ let rec interactive_main () =
   end;;
 
 at_exit Gs.kill;;
-at_exit Grdev.kill_all_embedded_apps;;
+at_exit Embed.kill_all_embedded_apps;;
 
 let quit = 3;;
 Sys.set_signal quit (Sys.Signal_handle (fun _ -> Launch.exit 0));;

@@ -19,9 +19,29 @@
 
 type term;;
 
+val htab : term -> int -> unit;;
+val vtab : term -> int -> unit;;
+
 val get_line : term -> string;;
+val ask : term -> string -> string;;
+
 val print_str : term -> string -> unit;;
 val print_chr : term -> char -> unit;;
+
+val make_term : int -> int -> int -> int -> term;;
+ (** [make_term x y nl ncol] build a terminal at position [x, y] with
+  [nl] lines and [ncol] columns. *)
+val draw_term : term -> unit;;
 val set_title : term -> string -> unit;;
 val edit : term -> unit;;
-val ask_to_launch : string -> bool;;
+
+val make_term_gen :
+ Graphics.color -> Graphics.color ->
+ int -> Graphics.color ->
+ Graphics.color ->
+ int -> int -> int -> int -> term;;
+
+ (** [make_term_gen fg bg bw bc x y nl ncol] build a terminal at
+  position [x, y] with [nl] lines and [ncol] columns.  Colors [fg],
+  [bg], [bc], and [cc] are respectively the background, foreground,
+  border, and cursor colors. [bw] is the width of the border width. *)

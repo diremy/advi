@@ -26,5 +26,3 @@ val exit : int -> unit
    registered by [at_exit] when the exiting process is forked one. 
    In the ADVI program, you MUST use this function instead of
    [Pervasives.exit] !!!! *)
-
-val forward_ask_redisplay : (unit -> unit) ref;;

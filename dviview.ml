@@ -977,8 +977,6 @@ bind_keys ();;
 
 let main_loop filename =
   let st = init filename in
-  (* Forward redisplay function *)
-(*  Launch.forward_ask_redisplay := (fun () -> B.redraw st);*)
   (* Check if whiterun *)
   if Launch.whiterun () then
     begin

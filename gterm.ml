@@ -146,7 +146,8 @@ let rec print_str t s =
    let l = String.length s in
    Graphics.moveto t.cursor_gx t.cursor_gy;
    Graphics.set_color t.background;
-   Graphics.fill_rect t.cursor_gx t.cursor_gy (l * t.font_size_x) t.font_size_y;
+   Graphics.fill_rect t.cursor_gx t.cursor_gy
+                      (l * t.font_size_x) t.font_size_y;
    Graphics.set_color t.foreground;
    Graphics.draw_string s;
    String.blit s 0 t.lines.(t.cursor_y) t.cursor_x l;
@@ -232,7 +233,7 @@ let make_term =
   make_term_gen
   Graphics.black Graphics.white
   10 Graphics.black
-   0x6FFFFF;;
+  0x6FFFFF;;
 
 (* Basic functions to edit. *)
 let end_of_line t =
@@ -246,18 +247,28 @@ let forward_char t = htab t (t.cursor_x + 1);;
 let backward_char t = htab t (t.cursor_x - 1);;
 let next_line t = vtab t (t.cursor_y - 1);;
 let previous_line t = vtab t (t.cursor_y + 1);;
+
+(* To be improved : does not work in the midle of a line. *)
 let backspace t =
  backward_char t;
  print_chr t ' ';
  backward_char t;;
-let kill_line t =
- (* Still to implement *)
- print_str t " ";;
 
 (* Still to implement
+    | '' -> delete_char t
+let delete_char t =
+  let line = t.lines.(t.cursor_y) in
+
+    | '' -> kill_line t
+let kill_line t =
+ print_str t " ";;
+    | '' -> scroll_one_line_down t
 let scroll_one_line_down t =
+    | 'z' -> scroll_one_line_down t
 let scroll_one_line_up t =
+    | 'v' -> scroll_one_window_down t
 let scroll_one_window_up t =
+    | '' -> scroll_one_window_down t
 let scroll_one_window_down t =
 *)
 
@@ -275,7 +286,6 @@ let rec edit t =
     | '' -> end_of_line t
     | '' -> forward_char t
     | '' | '' -> backspace t
-    | '' -> kill_line t
     | '' -> redraw t
     | '' -> next_line t
     | '' -> previous_line t
@@ -295,7 +305,7 @@ let get_line =
     let limx = t.cursor_x
     and limy = t.cursor_y in
     let rec read t =
-Graphics.synchronize ();
+      Graphics.synchronize ();
       let evt = Graphics.wait_next_event [Graphics.Key_pressed] in
       if evt.Graphics.keypressed then
       match evt.Graphics.key with
@@ -322,42 +332,8 @@ Graphics.synchronize ();
     read t in
   get;;
 
-(* Try it ! *)
-let ask_user t s1 s2 s3 =
-(*prerr_endline "Clearing terminal ";
-GraphicsY11.init ();*)
-(* clear t;
-redraw t;
-prerr_endline "Terminal Cleared "; *)
- vtab t 16; htab t 15; print_str t s1;
- vtab t 12; htab t 10; print_str t s2;
- vtab t 8; htab t 15; print_str t s3;
-prerr_endline "Setting prompt ";
+let ask t s =
+ print_str t s;
  let answer = get_line t in
  flush_keys ();
- match answer with
- | "yes" -> true
- | _ -> false;;
-
-let ask s1 s2 =
- let t = make_term_gen
- G.green G.black
- 25 G.red
- 0x6FFFFF
- 50 80 24 80 in
- draw_term t;
- prerr_endline "Starting input ";
-(*Graphics.synchronize ();*)
- let b = ask_user t s1 s2 in
- Graphics.synchronize ();
-prerr_endline "Synchronized!";
- b;;
-
-let ask_to_launch command =
-prerr_endline "Asking before launching";
- ask
-  "Attempt to launch the following command"
-  command
-  "Do you want to execute it ? <yes/no> " ;;
-
-(*Graphics.set_color Graphics.red; Graphics.fill_rect 0 0 800 600; redraw t;;*)
+ answer;;

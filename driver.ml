@@ -517,12 +517,12 @@ let kill_embed_special st s =
     with
     | Not_found -> raise (Failure ("No signal to kill command in " ^ s))
     | Failure _ -> raise (Failure ("Cannot understand signal in " ^ s))  in
-  Dev.kill_embedded_app sig_val app_name;;
+  Embed.kill_embedded_app sig_val app_name;;
 
 let app_mode_of_string = function
-  | "sticky" -> Dev.Sticky
-  | "persistent" -> Dev.Persistent
-  | "ephemeral" -> Dev.Ephemeral
+  | "sticky" -> Embed.Sticky
+  | "persistent" -> Embed.Persistent
+  | "ephemeral" -> Embed.Ephemeral
   | s -> raise (Failure ("Unknown embedding mode " ^ s));;
 
 
@@ -561,8 +561,8 @@ let embed_special st s =
     width_pixel, height_pixel in
   let x = st.x_origin + int_of_float (st.conv *. float st.h)
   and y = st.y_origin + int_of_float (st.conv *. float st.v) in
-  if !visible then Dev.embed_app
-      command app_mode app_name width_pixel height_pixel x y;;
+  if !visible then
+    Grdev.embed_app command app_mode app_name width_pixel height_pixel x y;;
 
 (* When scanning the page, we gather information on the embedded commands *)
 let scan_embed_special st s = 

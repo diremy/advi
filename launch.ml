@@ -32,8 +32,7 @@ let exit code =
      If it is one of the forked processes, it must DIE IMMEDIATELY:
      no cleaning is allowed. *) 
   if Unix.getpid () = advi_process then Pervasives.exit code
-  else (* SUICIDE *)
-  Unix.kill (Unix.getpid ()) 9;;
+  else (* SUICIDE *) Unix.kill (Unix.getpid ()) 9;;
 
 type policy =
    | Safer              (* No application is launched. *)
@@ -44,7 +43,7 @@ type policy =
 
 let policy = ref Ask;;
 
-(* Normal policy assignment. *)
+(* Policy assignment. *)
 let set_policy = function
   | Safer -> policy := Safer
   | Exec -> policy := Exec
@@ -86,34 +85,35 @@ let cannot_execute_command command_invocation =
           please rerun advi with option -ask or -exec."
          command_invocation);;
 
-(*let do_on_screen f x =
-  Graphics.remember_mode false;
-  GraphicsY11.display_mode true;
-  let r = f x in
-  Graphics.remember_mode true;
-  GraphicsY11.display_mode false;
-  r;;
-*)
-let forward_ask_redisplay =
-  ref (fun () -> failwith "Undefined forward ask_redisplay");;
+(* Opening a terminal to ask something to the user. *)
+open Gterm;;
+let ask_user t s1 s2 s3 =
+ vtab t 16; htab t 15; print_str t s1;
+ vtab t 12; htab t 10; print_str t s2;
+ vtab t 8; htab t 15; 
+ let answer = Gterm.ask t s3 in
+ match answer with
+ | "yes" -> true
+ | _ -> false;;
 
-let ask_user command_invocation =
-(* GraphicsY11.iter_subwindows (fun wid _ -> GraphicsY11.unmap_subwindow wid);
-prerr_endline "Subwindows unmapped!";
- let answer = do_on_screen Gterm.ask_to_launch command_invocation in
- GraphicsY11.iter_subwindows (fun wid _ -> GraphicsY11.map_subwindow wid);
-prerr_endline "Subwindows remapped!";
- answer*)
- let res = Gterm.ask_to_launch command_invocation in
- !forward_ask_redisplay ();
- res;;
- (* Misc.warning ("Do you want to launch " ^ command_invocation); 
- false;;*)
+let ask_to_launch command =
+ prerr_endline "Asking before launching";
+ let t =
+   make_term_gen
+     Graphics.green Graphics.black
+     25 Graphics.red
+     0x6FFFFF
+     50 80 24 80 in
+ draw_term t;
+ ask_user t
+  "Attempt to launch the following command"
+  command
+  "Do you want to execute it ? <yes/no> " ;;
 
 let can_launch command_invocation = function
   | Exec -> true
   | Safer -> false
-  | Ask -> ask_user command_invocation;;
+  | Ask -> ask_to_launch command_invocation;;
 
 let execute_command can_exec command_invocation command_tokens =
   if can_exec then Unix.execvp command_tokens.(0) command_tokens
