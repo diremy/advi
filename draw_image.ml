@@ -1,4 +1,4 @@
-(* RDC: this file is an adaptation of draw_ps, ahving possibly a different logic   *)
+(* RDC: this file is an adaptation of draw_ps, having possibly a different logic   *)
 (* we might want to merge it back into a single source once the logic is finalised *)
 
 open Image
@@ -96,31 +96,55 @@ let f file whitetransp alpha blend ratiopts (w, h) x0 y0 =
     | _ ->
 	if !verbose_image_access then GraphicsY11.set_cursor Cursor_exchange;
       	begin try Unix.unlink cache_name with _ -> () end;
-      	let image =
+      	let image = (* image can be Rgb24, Rgba32, Index8 ... *)
 	  (* we skip anti-aliasing for now ... *)
           try
             Image.load file []
-          with Image.Wrong_file_type ->
-            failwith ("Unsupported graphic format in: " ^ file)
+          with 
+            Image.Wrong_file_type -> 
+              Misc.warning ("Unsupported graphic format in: " ^ file);
+              raise Exit
+          | Failure s ->
+              Misc.warning ("Failed to load " ^ file ^ ": " ^ s);
+              raise Exit
       	in
+        (* convert the image to Rgba32 or Rgb24 *)
 	let image = match image with
-	| Rgb24 i ->
-  	    let width = i.Rgb24.width
-  	    and height = i.Rgb24.height
-  	    in
-	    if whitetransp then begin
+        | Rgba32 i -> image
+        | Rgb24 i ->
+            if whitetransp then begin
+  	      let width = i.Rgb24.width
+  	      and height = i.Rgb24.height
+  	      in
   	      let rgba = Rgba32.create width height in
   	      for y = 0 to height - 1 do
-               for x = 0 to width - 1 do
-                 let rgb = Rgb24.unsafe_get i x y in
-                 let a = if whitetransp && rgb = white_rgb then 0 else 255 in
-                 Rgba32.unsafe_set rgba x y { color = rgb; alpha = a }
-               done
+                for x = 0 to width - 1 do
+                  let rgb = Rgb24.unsafe_get i x y in
+                  let a = if rgb = white_rgb then 0 else 255 in
+                  Rgba32.unsafe_set rgba x y { color = rgb; alpha = a }
+                done
   	      done;
-  	      Rgba32 (Rgba32.resize None rgba w h)
-	    end else begin
-  	      Rgb24 (Rgb24.resize None i w h)
-	    end
+              Rgba32 rgba
+            end else image
+        | Index8 i ->
+            if whitetransp then begin
+  	      let width = i.Index8.width
+  	      and height = i.Index8.height
+  	      in
+  	      let rgba = Rgba32.create width height in
+  	      for y = 0 to height - 1 do
+                for x = 0 to width - 1 do
+                  let index = Index8.unsafe_get i x y in
+                  let rgb = i.Index8.colormap.Color.map.(index) in
+                  let a = 
+                    if index = i.Index8.transparent || rgb = white_rgb then 0
+                    else 255
+                  in
+                  Rgba32.unsafe_set rgba x y { color = rgb; alpha = a }
+                done
+  	      done;
+              Rgba32 rgba
+            end else Rgba32 (Index8.to_rgba32 i)
 	| _ -> assert false
 	in
       	begin try Unix.mkdir cache_dir 0o775 with _ -> () end;
@@ -192,6 +216,15 @@ let f file whitetransp alpha blend ratiopts (w, h) x0 y0 =
 *)
       ()
   | _ -> assert false;;
+
+(* Wrapped version of [f], which catches the Exit 
+   (i.e. image loading failures) *)
+let f file whitetransp alpha blend ratiopts (w, h) x0 y0 =
+  try
+    f file whitetransp alpha blend ratiopts (w, h) x0 y0
+  with
+  | Exit -> ()
+;; 
 
 let clean_cache () =
   (* erase the files whose name matches with "cache-*" *)
