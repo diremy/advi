@@ -60,7 +60,7 @@ module type DEVICE = sig
   val set_transition : Transitions.t -> unit
 
   type app_type = Sticky | Persistent | Embedded
-  val embed_app : string -> app_type -> int -> int -> int -> int -> unit
+  val embed_app : string -> app_type -> string -> int -> int -> int -> int -> unit
   val kill_embedded_apps : unit -> unit 
 
   module H :
@@ -652,15 +652,34 @@ module Make(Dev : DEVICE) = struct
     (* prerr_endline (Printf.sprintf "%d x %d pixel" width_pixel height_pixel); *)
     file, (llx, lly, urx, ury), (width_pixel, height_pixel)
 
+  let app_type_of_string = function
+    | "sticky" -> Dev.Sticky
+    | "persistent" -> Dev.Persistent
+    | "embedded" -> Dev.Embedded
+    | s -> raise (Failure ("Unknown embedding type " ^ s))
+
   let embed_special st s =
-    (* advi: embed width=? height=? command="command string" *)
+    (* advi: embed type=? width=? height=? command="command string" *)
     let records = List.map (fun (k,v) -> 
       String.lowercase k, v) (split_record s)
     in
+    let app_type =
+      try
+  	 app_type_of_string (List.assoc "type" records)
+      with Not_found ->
+        raise (Failure ("embed: no embedding type in special " ^ s))
+    in
+    let app_name =
+      try
+  	 unquote (List.assoc "name" records)
+      with Not_found -> ""
+    in
+   
     let command =
       try
   	  unquote (List.assoc "command" records)
-      with Not_found -> raise (Failure "embed: no command")
+      with Not_found ->
+          raise (Failure ("embed: no command to embed in special " ^ s))
     in
     (* prerr_endline ("embed command=" ^ command); *)
     let width_pixel, height_pixel =
@@ -684,7 +703,7 @@ module Make(Dev : DEVICE) = struct
 	  in
 	  width, height
 	with
-	| _ -> raise (Failure "embed: no size")
+	| _ -> raise (Failure ("embed: no size in special " ^ s))
       in
       let dpi = ldexp (float st.sdpi) (-16) in
       let width_pixel = truncate (w *. dpi) in
@@ -696,8 +715,8 @@ module Make(Dev : DEVICE) = struct
     in
     let x = st.x_origin + int_of_float (st.conv *. float st.h)
     and y = st.y_origin + int_of_float (st.conv *. float st.v) in
-    if not (is_hidden ()) then 
-      Dev.embed_app command Dev.Embedded width_pixel height_pixel x y
+    if not (is_hidden ()) then
+      Dev.embed_app command app_type app_name width_pixel height_pixel x y
 
 
   let parse_transition mode record =

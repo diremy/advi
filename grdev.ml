@@ -470,7 +470,7 @@ let clean_ps_cache () = Drawps.clean_cache ()
 type app_type = Sticky | Persistent | Embedded
 let app_table = Hashtbl.create 17
 
-let raw_embed_app command app_type width height x y =
+let raw_embed_app command app_type app_name width height x y =
   let string_replace pat templ str =
     let result = Buffer.create (String.length str * 2) in
     let patlen = String.length pat in
@@ -484,19 +484,19 @@ let raw_embed_app command app_type width height x y =
       with
 	_ -> raise Not_found
     in
-      let rec replace pos =
-	try
-	  let fpos = find pat str pos in
-	  Buffer.add_string result (String.sub str pos (fpos - pos));
-	  Buffer.add_string result templ;
-	  replace (fpos + patlen)
-	with
-	| Not_found ->
-	    Buffer.add_string result
-	      (String.sub str pos (String.length str - pos));
-	    Buffer.contents result 
-      in
-      replace 0
+    let rec replace pos =
+      try
+        let fpos = find pat str pos in
+        Buffer.add_string result (String.sub str pos (fpos - pos));
+        Buffer.add_string result templ;
+        replace (fpos + patlen)
+      with
+      | Not_found ->
+          Buffer.add_string result
+            (String.sub str pos (String.length str - pos));
+          Buffer.contents result 
+    in
+    replace 0
   in
 
   let wid = GraphicsX11.open_subwindow ~x ~y:(y - height) ~width ~height in
@@ -558,10 +558,10 @@ let raw_embed_app command app_type width height x y =
   Hashtbl.add app_table pid (app_type, wid)
 
 (* embedded apps must be displayed when synced *)
-let embed_app command app_type width height x y =
-  embeds := 
-    (fun () -> raw_embed_app command app_type width height x y) ::!embeds
-;;
+let embed_app command app_type app_name width height x y =
+  embeds :=
+    (fun () -> raw_embed_app command app_type app_name width height x y) ::
+    !embeds;;
 
 let kill_app pid wid =
   (try Unix.kill pid 9 with _ -> ());

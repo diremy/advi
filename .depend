@@ -53,5 +53,4 @@ dviview.cmx: config.cmx dimension.cmx driver.cmx dvi.cmx glyph.cmx misc.cmx \
     symbol.cmx transitions.cmi dviview.cmi 
 main.cmo: config.cmo dimension.cmi dviview.cmi grdev.cmi gs.cmi misc.cmi 
 main.cmx: config.cmx dimension.cmx dviview.cmx grdev.cmx gs.cmx misc.cmx 
-grY11.o: grY11.c  \
-   libgraph.h
+grY11.o: grY11.c libgraph.h

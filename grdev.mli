@@ -78,7 +78,7 @@ type app_type =
          to another slide. If the page is visible again, the
          application will be launched again as well. *)
 
-val embed_app : string -> app_type -> int -> int -> int -> int -> unit
+val embed_app : string -> app_type -> string -> int -> int -> int -> int -> unit
 val kill_embedded_apps : unit -> unit 
 
 (* Events *)
