@@ -236,7 +236,6 @@ static value gry_wait_event_blocking(long mask)
   }
 
   /* Block or deactivate the EVENT signal */
-/*
 #ifdef POSIX_SIGNALS
   sigemptyset(&sigset);
   sigaddset(&sigset, EVENT_SIGNAL);
@@ -244,7 +243,6 @@ static value gry_wait_event_blocking(long mask)
 #else
   oldsig = signal(EVENT_SIGNAL, SIG_IGN);
 #endif
-*/
 
   /* Replenish our event queue from that of X11 */
   while (1) {
@@ -265,13 +263,11 @@ static value gry_wait_event_blocking(long mask)
   }
 
   /* Restore the EVENT signal to its initial state */
-/*
 #ifdef POSIX_SIGNALS
   sigprocmask(SIG_UNBLOCK, &sigset, NULL);
 #else
   signal(EVENT_SIGNAL, oldsig);
 #endif
-*/
 
   /* Return result */
   return res;
