@@ -54,7 +54,8 @@ module Symbol :
       val add : int -> int -> int -> int -> symbol -> unit
       val to_ascii   : set -> string
       val to_escaped : set -> string
-      val commands_to_ascii: (int * Dvicommands.font_def) list -> Dvicommands.command list -> string
+      val commands_to_ascii:
+        (int * Dvicommands.font_def) list -> Dvicommands.command list -> string
       val inzone : int -> int -> int -> int -> set
       val intime : int -> int -> int -> int -> set
       val iter : (element -> unit) -> set -> unit
@@ -97,13 +98,17 @@ val fill_arc :
   x:int -> y:int -> rx:int -> ry:int ->
   start:int -> stop:int -> shade:float -> unit;;
 
-(* Alpha blending *)
+(* Various image drawing configurations *)
+(* Alpha channel *)
 val set_alpha : Drawimage.alpha -> unit;;
-val set_epstransparent : bool -> unit;;
-val set_epswithantialiasing : bool -> unit;;
-
+(* Alpha blending: fix the blending method (hence the blending function). *)
 val set_blend : Drawimage.blend -> unit;;
-(** Fix the blending method (hence the blending function). *)
+(* Transparency *)
+val set_epstransparent : bool -> unit;;
+(* Do we use Camlimages or Gs to draw eps images ? *)
+val set_epsbygs : bool -> unit;;
+(* Antialiasing *)
+val set_epswithantialiasing : bool -> unit;;
 
 val draw_ps :
   string -> (int * int * int * int) -> (int * int) -> int -> int -> unit;;
@@ -114,35 +119,38 @@ val sleep : float -> bool;; (* true= interrupted, false= fully performed *)
 
 val draw_img :
   Misc.file_name ->
-  Drawimage.ratiopts ->
-  bool ->
+  Drawimage.white_is_transparent ->
   Drawimage.alpha ->
   Drawimage.blend ->
   Drawimage.ps_bbox option ->
-    bool ->
-   int * int -> int -> int -> unit;;
-(** [draw_img fname ratio whitetrans alpha blend psbbox antialias (width, height) x y]
-  draws the image contained in file [fname] at [x, y]. The image is
-  resized to [(width, height)], blended with the background
+  Drawimage.ratiopt ->
+  Drawimage.antialias ->
+  Drawimage.image_size ->
+  int -> int -> unit;;
+(** [draw_img fname whitetransp alpha blend
+     psbbox ratiopt antialias (width, height) x y]
+  draws the image contained in file [fname] at location [x, y].
+  The image is resized to [(width, height)], blended with the background
   according to the blending option [blend], drawn with an alpha factor
-  of [alpha] and a transparency color [whitetrans]. The [psbbox]
-  argument is used to resize the image.
-*)
+  of [alpha], and a transparency color [whitetransp]. The [psbbox]
+  argument is used to resize the image. *)
 
 (* Background information *)
 
-(* Viewport:                *)
-(* xsize,ysize,xoff,yoff    *)
-(* in advi coordinates      *)
-
-type viewport = (int*int*int*int);;
+type viewport = {
+  v_size_x : int;
+  v_size_y : int;
+  v_off_x : int;
+  v_off_y : int
+};;
+(** Viewports: size_x, size_y, off_x, off_y in advi coordinates. *)
 
 type bkgd_prefs = {
-  mutable bgcolor : int;
-  mutable bgimg : string option;
-  mutable bgratio : Drawimage.ratiopts;
-  mutable bgwhitetrans : bool;
-  mutable bgalpha : float;
+  mutable bgcolor : color;
+  mutable bgimg : Misc.file_name option;
+  mutable bgratiopt : Drawimage.ratiopt;
+  mutable bgwhitetransp : Drawimage.white_is_transparent;
+  mutable bgalpha : Drawimage.alpha;
   mutable bgblend : Drawimage.blend;
   mutable bgviewport : viewport option;
   mutable bgfunction : (viewport -> unit) option;
@@ -159,7 +167,7 @@ type bgoption =
    | BgImg of Misc.file_name
    | BgAlpha of Drawimage.alpha
    | BgBlend of Drawimage.blend
-   | BgRatio of Drawimage.ratiopts
+   | BgRatio of Drawimage.ratiopt
    | BgViewport of viewport option
    | BgFun of (viewport -> unit) option
 ;;
@@ -175,13 +183,13 @@ type status = {
     keypressed : bool;
     key : char;
     modifiers : int;
-  };;
+};;
 
-module E : 
+module E :
     sig
       type direction = X | Y | XY | Z
       type info = { comm : string; name : string;
-                    line : string; file : string; 
+                    line : string; file : string;
                     origin : float rect; unit : float;
                     move : direction; resize : direction; }
       type figure = { rect : int rect; info : info; }
@@ -200,14 +208,14 @@ module H :
     sig
       type mode = Over | Click_down
       type style = Box | Underline | Invisible
-      type link =
-          { link : string;
-            action : (unit -> unit);
-            mode : mode;
-            style : style;
-            color : color option;
-            area : (int * int * int) option;
-          }
+      type link = {
+          link : string;
+          action : (unit -> unit);
+          mode : mode;
+          style : style;
+          color : color option;
+          area : (int * int * int) option;
+        }
       type tag =
         | Name of string
         | Href of string
@@ -227,7 +235,7 @@ module H :
 type area = Bottom_right | Bottom_left | Top_right | Top_left | Middle;;
 type button = Button1 | Button2 | Button3;;
 type event =
-    Resized of int * int
+  | Resized of int * int
   | Refreshed
   | Key of char
   | Move of int * int
@@ -236,7 +244,7 @@ type event =
   | Selection of string
   | Position of int * int
   | Href of string
-  | Advi of string * (unit -> unit) 
+  | Advi of string * (unit -> unit)
   | Click of area * button * int * int
   | Nil;;
 val wait_event : unit -> event;;
