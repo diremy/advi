@@ -5,4 +5,11 @@
 	found in the excellent mplayer project.
 
 	Seems to work on most Window Managers.
+	   KDE 3.1: OK
+	   Sawfish: OK
+	   Fluxbox: OK
+	   MWM: NO (decorations are not removed)
+	   Fvwm95: Partial (control bar is still on front)
+	   Fvwm: Partial (virtual screen window still on front)
+	   Twm: OK
 	

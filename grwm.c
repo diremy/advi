@@ -247,5 +247,6 @@ void x11_ontop( Display * dpy,Window w,int fs_type, int fs)
    XSendEvent(dpy,RootWindow(dpy,DefaultScreen(dpy)),0 ,(1L<<20) ,(XEvent*)&xev );
    state = XGetAtomName (dpy, xev.data.l[1]);
    XFree (state);
+
 }
 
