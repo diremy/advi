@@ -28,7 +28,8 @@ let vmargin = ref (Dimension.Cm 1.0);;
 let geometry = ref "864x864";;
 
 let set_geom g =
-  Dviview.set_autoresize false; Dviview.set_autoscale false; geometry := g;;
+  Dviview.set_autoresize false; Dviview.set_autoscale false; geometry := g
+;;
 
 let set_dim r s = r := Dimension.dimen_of_string s;;
 
@@ -37,14 +38,16 @@ let print_advi_version () =
    (Printf.sprintf
       "The Active-DVI previewer and graphics presenter, version %.2f"
       Config.advi_version_number);
-  exit 0;;
+  exit 0
+;;
 
 let print_advi_full_version () =
   prerr_endline
    (Printf.sprintf
       "The Active-DVI previewer and graphics presenter, version %s"
       Config.advi_full_version);
-  exit 0;;
+  exit 0
+;;
 
 let version_spec = function
   | "-v" as opt ->
@@ -75,14 +78,17 @@ let spec_list = [
   version_spec "--version";
   ] in
 
-List.iter (fun (nm, act, man) -> Options.add nm act man) spec_list;;
+List.iter (fun (nm, act, man) -> Options.add nm act man) spec_list
+;;
 
 let usage_msg =
-  Printf.sprintf "usage: %s [OPTIONS] DVIFILE" Sys.argv.(0);;
+  Printf.sprintf "usage: %s [OPTIONS] DVIFILE" Sys.argv.(0)
+;;
 
 let sort_advi_options () =
   let sort = List.sort (fun (s1, _, _) (s2, _, _) -> compare s1 s2) in
-  Options.pretty (sort (Options.all ()));;
+  Options.pretty (sort (Options.all ()))
+;;
 
 let get_advi_options () =
  (* We must add an option that uses the list of options we are defining.
@@ -98,7 +104,8 @@ let get_advi_options () =
       \t(to override the options of the default ~/.advirc or ~/.advi/advirc\n\
       init file).";
  advi_options := sort_advi_options ();
- !advi_options;;
+ !advi_options
+;;
 
 let advi_options = get_advi_options ();;
 
@@ -111,7 +118,8 @@ let set_dvi_geometry () =
   Dviview.set_crop !crop_flag;
   Dviview.set_hmargin !hmargin;
   Dviview.set_vmargin !vmargin;
-  Dviview.set_geometry !geometry;;
+  Dviview.set_geometry !geometry
+;;
 
 let treat_file filename =
   Rc.init ();
