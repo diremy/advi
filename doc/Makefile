@@ -26,11 +26,11 @@ IMAGEN=imagen
 PDFIMAGEN=pdfimagen
 DVIPDFM=dvipdfm
 
-all: manual.dvi manual.ps manual.pdf \
-splash.dvi splash.ps \
-scratch_write_splash.dvi scratch_write_splash.ps \
-scratch_draw_splash.dvi scratch_draw_splash.ps \
-mathmode.dvi manual.html
+all: manual.html manual.dvi manual.ps manual.pdf \
+    splash.dvi splash.ps \
+    scratch_write_splash.dvi scratch_write_splash.ps \
+    scratch_draw_splash.dvi scratch_draw_splash.ps \
+    mathmode.dvi manual.html
 
 clean: 
 	rm -f *.aux *.log manual.html *.dvi *.pdf *.pdfm *.ps *.ima *.out *.toc
@@ -42,13 +42,14 @@ distribute: clean all web
 web:
 	$(MAKE) -f MakeHTML all
 
-manual.dvi: splash_contents.tex scratch_write_splash_contents.tex scratch_draw_splash_contents.tex
+manual.dvi: splash_contents.tex scratch_write_splash_contents.tex \
+	 scratch_draw_splash_contents.tex
 splash.dvi: splash_contents.tex
 scratch_write_splash.dvi: scratch_write_splash_contents.tex
 scratch_draw_splash.dvi: scratch_draw_splash_contents.tex
 
 manual.dvi: manual.sty
-manual.html: manual.hva macros.hva
+manual.html: manual.tex manual.sty macros.hva 
 
 .SUFFIXES: .tex .dvi .advi .ps .pdf .pdfm .html .ima
 

@@ -24,7 +24,7 @@
 
 SUBDIRS=cash
 
-TEXFILES= simple.tex moderate.tex semi-complex.tex
+TEXFILES= simple.tex moderate.tex bubbles.tex
 
 ADVIDIR=../..
 
@@ -40,13 +40,14 @@ ADVI=TEXPSHEADERS=$(ADVIDIR)/tex: $(ADVIDIR)/advi
 
 MLPROG=
 
-all: dvi
+all: $(DVIFILES)
 	advi simple.dvi && \
-	advi moderate.dvi
+	advi moderate.dvi && \
+	advi bubbles.dvi 
 
 dvi : $(DVIFILES) $(MLPROG)
 
-$(DVIFILES): $(ADVIDIR)/tex/bar.jpg.eps $(ADVIDIR)/tex/advi.sty $(ADVIDIR)/tex/advi-annot.sty
+$(DVIFILES): $(ADVIDIR)/tex/bar.eps $(ADVIDIR)/tex/advi.sty $(ADVIDIR)/tex/advi-annot.sty 
 
 .dvi.advi:
 	$(ADVI) $<

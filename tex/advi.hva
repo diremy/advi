@@ -21,8 +21,8 @@
 
 %% Preliminary declarations
 
-\RequirePackage {keyval}
-\RequirePackage {color}
+\usepackage {keyval}
+\usepackage {color}
 
 %% Options
 

@@ -1171,7 +1171,7 @@ let open_dev geom =
   GraphicsY11.init ();
   Timeout.init ();
   (* Fill the event queue *)
-  Timeout.repeat 0.25 GraphicsY11.retrieve_events;
+  Timeout.repeat 0.1 GraphicsY11.retrieve_events;
   (* Watch if the DVI file is modified *)
   if !watch_file_interval > 0 then
     Timeout.repeat (float !watch_file_interval) watch_file_check; 

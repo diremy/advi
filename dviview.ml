@@ -18,6 +18,9 @@
 (* $Id$ *)
 
 let pauses =
+  Options.flag true "-version"
+  "  print version number";;
+let pauses =
   Options.flag true "-nopauses"
   "  switch pauses off,\
   \n\t (the default is to wait for specified pauses).";;
