@@ -47,6 +47,8 @@ module type DEVICE = sig
   val set_busy : busy -> unit;;
   val set_title : string -> unit
 
+  val set_transition : Transitions.t -> unit
+
   type app_type = Sticky | Persistent | Embedded
   val embed_app : string -> app_type -> int -> int -> int -> int -> unit
   val kill_embedded_apps : unit -> unit 

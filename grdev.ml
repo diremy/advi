@@ -65,10 +65,6 @@ let sync b =
   if !last_is_dvi = b then ()
   else begin flush_last(); last_is_dvi := b end;;
 
-let synchronize () =
-  Gs.flush();
-  Graphics.synchronize();;
-
 let control_cursor = G.Cursor_left_ptr
 let move_cursor = G.Cursor_fleur
 let select_cursor = G.Cursor_xterm
@@ -116,6 +112,33 @@ let set_usr1() =
     (Sys.Signal_handle
        (fun _ -> usr1_status := true; if !waiting then raise Usr1));;
 set_usr1();;
+
+let sleep_watch b n =
+  let start = Unix.gettimeofday() in
+  let rec delay t =
+    try
+      if b && (!usr1_status || Graphics.key_pressed()) then ()
+      else ignore (Unix.select [] [] [] t)
+    with Unix.Unix_error(Unix.EINTR, _, _) ->
+      let now = Unix.gettimeofday() in
+      let remaining = start +. n -. now in
+      if remaining > 0.0 then delay remaining in
+  delay n;;
+
+let sleep = sleep_watch true;;
+
+let set_transition trans = Transimpl.current_transition := trans
+;;
+
+let embeds = ref [] 
+
+let synchronize () =
+  Gs.flush();
+  Transimpl.synchronize_transition ();
+  Graphics.synchronize();
+  List.iter (fun f -> f ()) (List.rev !embeds);
+  embeds := []
+  ;;
 
 (*** Private glyphs ***)
 
@@ -427,27 +450,12 @@ let draw_ps file bbox (w,h) x0 y0 =
           
 let clean_ps_cache () = Drawps.clean_cache ()
     
-
-let sleep_watch b n =
-  let start = Unix.gettimeofday() in
-  let rec delay t =
-    try
-      if b && (!usr1_status || Graphics.key_pressed()) then ()
-      else ignore (Unix.select [] [] [] t)
-    with Unix.Unix_error(Unix.EINTR, _, _) ->
-      let now = Unix.gettimeofday() in
-      let remaining = start +. n -. now in
-      if remaining > 0.0 then delay remaining in
-  delay n;;
-
-let sleep = sleep_watch true;;
-
 (* Embedded (tcl/tk) applications *)
 
 type app_type = Sticky | Persistent | Embedded
 let app_table = Hashtbl.create 17
 
-let embed_app command app_type width height x y =
+let raw_embed_app command app_type width height x y =
   let string_replace pat templ str =
     let result = Buffer.create (String.length str * 2) in
     let patlen = String.length pat in
@@ -479,12 +487,17 @@ let embed_app command app_type width height x y =
   let wid = GraphicsX11.open_subwindow ~x ~y:(y - height) ~width ~height in
 
   (*** !x commands
-    !g : geometry like 100x100+20+30
     !p : embedding target window id (in digit)
+
+      If !p is not specified, the applications will be treated by WM.
+      (If they are X apps, of course...)
+       
+    !g : geometry like 100x100+20+30
     !w : width  of the target window in pixel
     !h : height of the target window in pixel
     !x : x of the application against the root
     !y : y of the application against the root
+
     Why "!"?  '\' is for TeX. "%" is for TeX. "$" is for TeX...
   ***)
 
@@ -537,6 +550,12 @@ let embed_app command app_type width height x y =
 			"pid %d is already in the app_table!" pid));
     Hashtbl.add app_table pid (app_type, wid)
   end
+
+(* embedded apps must be displayed when synced *)
+let embed_app command app_type width height x y =
+  embeds := 
+    (fun () -> raw_embed_app command app_type width height x y) ::!embeds
+;;
 
 let kill_app pid wid =
   (try Unix.kill pid 9 with _ -> ());

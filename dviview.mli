@@ -50,6 +50,8 @@ module type DEVICE = sig
   val clean_ps_cache : unit -> unit
   val sleep : float -> unit
 
+  val set_transition : Transitions.t -> unit
+
   type app_type = Sticky | Persistent | Embedded
   val embed_app : string -> app_type -> int -> int -> int -> int -> unit
   val kill_embedded_apps : unit -> unit 

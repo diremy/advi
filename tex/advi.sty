@@ -50,6 +50,8 @@
 \def\advi@setblend#1{\special{advi: blend push #1}\aftergroup\resetblend}
 \def\advi@resetblend{\special{advi: blend pop}}
 
+\def\advi@settransition#1{\special{advi: trans push #1}}
+\def\advi@resettransition{\special{advi: trans pop}}
 
 %%% For PS Tricks
 
@@ -179,6 +181,9 @@ end
 \advi@export \resetalpha \advi@resetalpha
 \advi@export \setblend \advi@setblend
 \advi@export \resetblend \advi@resetblend
+
+\advi@export \settransition \advi@settransition
+\advi@export \resettransition \advi@resettransition
 
 %% Conditional exports 
 

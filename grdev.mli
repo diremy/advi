@@ -139,4 +139,6 @@ val set_selection_mode : mode -> unit ;;
 type busy = Free | Busy | Pause | Disk
 val set_busy : busy -> unit;;
 
+val set_transition : Transitions.t -> unit
+
 val set_title : string -> unit;;

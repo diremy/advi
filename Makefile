@@ -33,7 +33,7 @@ MODULES   = config misc symbol search \
 	    graphicsY11 drawps \
             table pkfont font glyph devfont dvi \
 	    units dimension driver\
-	    gs grdev dviview main
+	    gs transimpl grdev dviview main
 LIBRARIES = graphics unix $(CAMLIMAGESLIBS)
 CLIBS     = unix graphics
 

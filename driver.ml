@@ -57,6 +57,8 @@ module type DEVICE = sig
 
   val set_title : string -> unit
 
+  val set_transition : Transitions.t -> unit
+
   type app_type = Sticky | Persistent | Embedded
   val embed_app : string -> app_type -> int -> int -> int -> int -> unit
   val kill_embedded_apps : unit -> unit 
@@ -308,6 +310,8 @@ module Make(Dev : DEVICE) = struct
       mutable blend_stack : Dev.blend list;
       mutable epstransparent : bool;
       mutable epstransparent_stack : bool list;
+      mutable transition : Transitions.t;
+      mutable transition_stack : Transitions.t list;
       (* TPIC specials state *)
       mutable tpic_pensize : float;
       mutable tpic_path : (float * float) list;
@@ -438,6 +442,19 @@ module Make(Dev : DEVICE) = struct
 	st.epstransparent <- v ;
 	if not (is_hidden ()) then Dev.set_epstransparent v ;
 	st.epstransparent_stack <- rest
+
+  let transition_push st v =
+    st.transition_stack <- st.transition :: st.transition_stack ;
+    st.transition <- v ;
+    if not (is_hidden ()) then Dev.set_transition v
+
+  let transition_pop st =
+    match st.transition_stack with
+    | [] -> ()
+    | v :: rest ->
+	st.transition <- v ;
+	if not (is_hidden ()) then Dev.set_transition v ;
+	st.transition_stack <- rest
 
   let fnt st n =
     let (mtable, gtable, cfont) =
@@ -639,6 +656,56 @@ module Make(Dev : DEVICE) = struct
     and y = st.y_origin + int_of_float (st.conv *. float st.v) in
     if not (is_hidden ()) then 
       Dev.embed_app command Dev.Embedded width_pixel height_pixel x y
+
+
+  let parse_transition mode record =
+    let parse_steps default =
+      try 
+	let stepsstr = List.assoc "steps" record in
+	try int_of_string stepsstr 
+	with _ -> 
+	  warning "special: trans push: steps parse failed"; 
+	  default
+      with Not_found -> default
+    in
+    let parse_direction key default =
+      try 
+	match String.lowercase (List.assoc key record) with
+	| "left" -> Transitions.DirLeft
+	| "right" -> Transitions.DirRight
+	| "top" -> Transitions.DirTop
+	| "bottom" -> Transitions.DirBottom
+	| "topleft" -> Transitions.DirTopLeft
+	| "topright" -> Transitions.DirTopRight
+	| "bottomleft" -> Transitions.DirBottomLeft
+	| "bottomright" -> Transitions.DirBottomRight
+	| "center" -> Transitions.DirCenter
+	| _ -> 	
+	    warning "special: trans push: steps parse failed" ;
+	    raise Exit
+      with _ -> Transitions.DirNone
+    in
+    match String.lowercase mode with
+    | "slide" -> Transitions.TransSlide (parse_steps 20, 
+			     parse_direction "from" Transitions.DirRight)
+    | "wipe" -> Transitions.TransWipe (parse_steps 20, 
+			     parse_direction "from" Transitions.DirRight)
+    | "block" -> Transitions.TransBlock (parse_steps 5000,
+			     parse_direction "from" Transitions.DirNone)
+    | "none" ->  Transitions.TransNone
+    | _ -> warning "special: trans push: mode parse failed"; Transitions.TransNone
+  ;;
+
+  let transition_special st s =
+    match split_string s 0 with
+    | "advi:" :: "trans" :: "push" :: mode :: args ->
+	let record = split_record (String.concat " " args) in 
+	let trans = parse_transition mode record in
+	transition_push st trans
+    | "advi:" :: "trans" :: "pop" :: [] ->
+	transition_pop st
+    | _ -> ()
+  ;;
 
     let eval_command_ref = ref (fun _ _ -> ())
 
@@ -971,6 +1038,7 @@ module Make(Dev : DEVICE) = struct
       	else if has_prefix "advi: proc=" s then proc_special st s
       	else if has_prefix "advi: wait " s then wait_special st s
 	else if has_prefix "advi: embed " s then embed_special st s
+	else if has_prefix "advi: trans " s then transition_special st s
       	else if has_prefix "advi:" s then 
 	  raise (Failure ("unknown special: "^ s))
       end else if has_prefix "pn " s || has_prefix "pa " s
@@ -1062,6 +1130,7 @@ module Make(Dev : DEVICE) = struct
 	alpha = 1.0; alpha_stack = [];
 	blend = Dev.Normal; blend_stack = [];
 	epstransparent = false; epstransparent_stack = [];
+	transition= Transitions.TransNone; transition_stack = [];
         tpic_pensize = 0.0; tpic_path = []; tpic_shading = 0.0;
         status =
         if not !Misc.dops then PS false
@@ -1076,6 +1145,7 @@ module Make(Dev : DEVICE) = struct
         checkpoint = 0;
       } in
     Dev.set_color st.color ;
+    Dev.set_transition st.transition ;
     (* To check whether printing of the page should be cancelled *)
     st.checkpoint <- 0;
     let check() =
@@ -1143,6 +1213,7 @@ module Make(Dev : DEVICE) = struct
 	alpha = 1.0; alpha_stack = [];
 	blend = Dev.Normal; blend_stack = [];
 	epstransparent = false; epstransparent_stack = [];
+	transition= Transitions.TransNone; transition_stack = [];
         tpic_pensize = 0.0; tpic_path = []; tpic_shading = 0.0;
         status = 
         if not !Misc.dops then PS false
@@ -1157,6 +1228,7 @@ module Make(Dev : DEVICE) = struct
         checkpoint = 0;
       } in
     Dev.set_color st.color ;
+    Dev.set_transition st.transition ;
     (* if page status is unknow, we first scan the page without drawing.
        since, unfortunately, Postscript headers seem to appear anywhere *)
     if scanning st then
