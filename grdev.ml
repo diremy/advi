@@ -856,7 +856,8 @@ module Symbol = Symbol.Make (Glyph);;
 let cut s =
   (* print_string s; print_newline (); *)
   (* cut does not work yet *)
-  GraphicsY11.cut s;;
+  GraphicsY11.cut s;
+;;
 
 let open_dev geom =
   if !opened then Graphics.close_graph ();
@@ -1110,7 +1111,9 @@ let wait_select_button_up m x y =
               Final Nil
             end
           else
+            begin
             Final (Selection (Symbol.region_to_ascii r'))
+                end;
     | x -> x in
   let color = !color in
   GraphicsY11.synchronize ();

@@ -189,8 +189,6 @@ value gr_sync(void)
    then be changed */
  
 value gr_cut (value string) {
-  /* clearly, does not work */
-  Window w;
   /* The following, suggested by Fabrice does not work */
   /* 
   Atom cut_buffers[] = 
@@ -206,7 +204,7 @@ value gr_cut (value string) {
   XRotateWindowProperties (grdisplay, grwindow.win,
                            cut_buffers, 8, 1);
   */
-  XRotateBuffers(grdisplay, 1);
+  /* XRotateBuffers(grdisplay, 1); */
   /*
   XChangeProperty (grdisplay, grwindow.win, 
                    XA_CUT_BUFFER0,	      
@@ -222,7 +220,7 @@ value gr_cut (value string) {
                       XA_PRIMARY,
                       None,
                       CurrentTime);
-  XSync (grdisplay, 0);
+  XSync (grdisplay, False);
   return Val_unit; 
 }
 
