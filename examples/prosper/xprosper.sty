@@ -95,6 +95,29 @@
 % Slides in overlays
 \global\pslongbox{posit@Box}{\rput}%
 
+\newinsert \ppp@footins
+\newcounter {pppfootnote}
+\def\thepppfootnote{\itshape\@alph\c@pppfootnote}
+
+\long\def\ppp@footnotetext#1{\ifpause[<0]{}{%
+  \global\setbox\ppp@footins\vbox{%
+    \unvbox\ppp@footins
+    \reset@font\footnotesize
+    \hsize\columnwidth
+    \@parboxrestore
+    \protected@edef\@currentlabel
+         {\csname p@footnote\endcsname\@thefnmark}%
+    \color@begingroup
+      \@makefntext{%
+        \rule\z@\footnotesep\ignorespaces#1\@finalstrut\strutbox}%
+    \color@endgroup}}{}}
+
+\let \latex@stepcounter \stepcounter
+\def\footnote{\@ifnextchar[\@xfootnote{\latex@stepcounter\@mpfn
+     \protected@xdef\@thefnmark{\thempfn}%
+     \@footnotemark\@footnotetext}}
+
+\newbox \ppp@box 
 
 \newenvironment{SlideOverlay}[1][\@defaultTransition]{%
   \let\overlay@loop=\relax
@@ -106,18 +129,37 @@
       \slide@seminar
             \@DefMyItem
   %\begin{minipage}{\hsize}%
+  % Before was:
+  %\hbox \bgroup \vtop to 0em \bgroup
+  % But the following seems to work better
+  % [maybe \vsize is not the right dimen] work
   \hbox \bgroup \vtop to 0em \bgroup
+  \hbox \bgroup \vtop to \vsize \bgroup
+      \def\@mpfn{pppfootnote}\def\thempfn{\thepppfootnote}\c@pppfootnote\z@
+      \let\@footnotetext\ppp@footnotetext
+      \let\footnotemark \ppp@footnote
   %\vskip -0em
   }{%
-  \vss
   \at@endslide
+  \ifvoid \ppp@footins \else
+  \vskip\skip \slide@footins
+  \kern \ht\ppp@footins \kern \dp\ppp@footins \fi
   \egroup \egroup
+  \ifvoid \ppp@footins \else
+     \kern -\ht\ppp@footins \vskip -\dp\ppp@footins
+      \normalcolor \footnoterule
+     \unvbox \ppp@footins\fi
+  \vss
+  \egroup
+  \egroup
+  %\end{minipage}
   \endslide@seminar
   \ifDVItoPS
   \else %% DVI -> PDF
-        \addtocounter{slide}{-1}%
+     \addtocounter{slide}{-1}%
   \fi
 }
+
 \let\slide=\SlideNormal
 \let\endslide=\endSlideNormal
 
@@ -315,7 +357,6 @@
   \fi
 }
 
-
 \AtBeginDocument{%
  \let\Label=\label
  \def\label#1{%
@@ -340,7 +381,7 @@
     \ifInOverlays
       \ifthenelse{\equal{#1}{slide}}{%
          \StepCounter{#1}}{%
-         \ifnum\value{overlaysCount}>1
+         \ifnum\value{overlaysCount}>1\relax
          \else
            \StepCounter{#1}%
          \fi}%

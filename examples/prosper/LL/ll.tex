@@ -10,6 +10,9 @@
 \usepackage[T1]{fontenc}
 
 \usepackage{argv}
+\defargv {ignore}[]{
+  \PassOptionsToPackage {ignore}{advi}
+}
 \defargv {ps2pdf}[]{
 %  \rundriver{ps2pdf}
   \usepackage {times}
