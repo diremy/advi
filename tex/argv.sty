@@ -1,0 +1,57 @@
+%%
+%% This is the original source file advi.sty
+%%
+%% Package `commandline' to use with LaTeX 2e
+%% Copyright Didier Remy.
+%% All rights reserved.
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{argv}
+         [2001/29/08 v0.40 Argv Package for parsing command line options]
+
+%%
+
+%% Identification
+%% Preliminary declarations
+
+\RequirePackage {keyval}
+
+%% Options
+
+\newif \ifrun@argv
+\DeclareOption {run}{\run@argvtrue}
+\ProcessOptions
+
+%% More Declarations
+
+\def \defargv {\define@key{argv}}
+\def \runargv
+  {\@ifundefined{argv}{}{\setkeys{argv}{\argv}}}
+
+%% Some predefine keys
+
+\defargv {use}{\AtEndOfPackage{\RequirePackage{#1}}}
+\defargv {driver}{\rundriver {#1}}
+\def \rundriver #1{\@nameuse {argv@#1@}}
+\def \do #1{
+  \expandafter \def \csname argv@#1@\endcsname {%
+    \PassOptionsToPackage{#1}{hyperref}%
+    \PassOptionsToPackage{#1}{graphicx}%
+  }}
+\do {dvipdfm}
+\do {dvips}
+\do {ps2pdf}
+\do {pdftex}
+
+\let \do \relax
+
+\ifrun@argv
+\runargv
+\fi
+
+\endinput
+
+
+
+
+  

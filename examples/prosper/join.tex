@@ -4,6 +4,15 @@
 
 \documentclass [landscape,semlayer,semcolor,semlcmss,a4]{seminar}
 
+\usepackage{argv}
+\defargv {ps2pdf}[]{
+  \rundriver{ps2pdf}
+  \usepackage {times}
+  \PassOptionsToPackage {ignore}{advi}
+  \PassOptionsToPackage {psbubble}{xprosper}
+}
+\runargv
+
 \slidewidth 235mm
 \slideheight 174mm
 \centerslidesfalse
@@ -11,11 +20,9 @@
 \renewcommand{\slidetopmargin}{20pt}
 \renewcommand{\slidebottommargin}{1cm}
 
-
-%\usepackage[psbubble]{xprosper}
-
 \usepackage{advi} 
 \usepackage{xprosper}
+
 
 %%% colors
 \usepackage {color}

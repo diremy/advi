@@ -16,7 +16,7 @@ all:: $(DVIFILES)
 	$(LATEX) $*
 
 .tex.ps:
-	$(LATEX) '\def\argv{advi=ignore,bubble=ps,hyperref=dvips}\input' $*
+	$(LATEX) '\PassOptionsToPackage{ignore}{advi}\input' $*
 	dvips -o $@ $*.dvi
 
 .tex.pdf:
