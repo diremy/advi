@@ -18,21 +18,22 @@
 (* $Id$ *)
 
 type 'a status =
-  | Unknown
-  | Known of 'a
-  | Error of exn;;
+   | Unknown
+   | Known of 'a
+   | Error of exn;;
 
 type 'a t = {
-    table : 'a status array;
-    build : int -> 'a;
-    (* extension for japanese characters (id>255) *)
-    hash : (int, 'a) Hashtbl.t
-  };;
+   table : 'a status array;
+   build : int -> 'a;
+   (* extension for japanese characters (id > 255) *)
+   hash : (int, 'a) Hashtbl.t;
+};;
 
-let make f =
-  { table = Array.make 256 Unknown;
-    build = f;
-    hash = Hashtbl.create 1031 };;
+let make f = {
+  table = Array.make 256 Unknown;
+  build = f;
+  hash = Hashtbl.create 1031;
+};;
 
 let get tbl n =
   if n < 0 || n > 0xFF then begin
@@ -52,4 +53,3 @@ let get tbl n =
       with e ->
         table.(n) <- Error e;
         raise e;;
-

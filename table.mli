@@ -17,6 +17,8 @@
 
 (* $Id$ *)
 
+(* Association tables for characters, filled in a lazy way. *)
+
 type 'a t;;
 
 val make : (int -> 'a) -> 'a t;;
