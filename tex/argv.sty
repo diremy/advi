@@ -55,6 +55,9 @@
 \expandafter \def \csname argv@ps2pdf@\endcsname 
   {\PassOptionsToPackage{ignore}{advi}%
    \PassOptionsToPackage{ps2pdf}{hyperref}}
+\def \argv@hypertex@ {%
+    \PassOptionsToPackage{hypertex}{hyperref}%
+}
 
 \let \do \relax
 
@@ -63,8 +66,3 @@
 \fi
 
 \endinput
-
-
-
-
-  
