@@ -47,10 +47,10 @@ grdev.cmo: drawps.cmi glyph.cmi graphicsY11.cmi gs.cmi misc.cmi transimpl.cmo \
     grdev.cmi 
 grdev.cmx: drawps.cmx glyph.cmx graphicsY11.cmx gs.cmx misc.cmx transimpl.cmx \
     grdev.cmi 
-dviview.cmo: config.cmo dimension.cmi driver.cmi dvi.cmi glyph.cmi misc.cmi \
-    symbol.cmi transitions.cmi dviview.cmi 
-dviview.cmx: config.cmx dimension.cmx driver.cmx dvi.cmx glyph.cmx misc.cmx \
-    symbol.cmx transitions.cmi dviview.cmi 
+dviview.cmo: config.cmo dimension.cmi driver.cmi dvi.cmi glyph.cmi grdev.cmi \
+    misc.cmi symbol.cmi transitions.cmi dviview.cmi 
+dviview.cmx: config.cmx dimension.cmx driver.cmx dvi.cmx glyph.cmx grdev.cmx \
+    misc.cmx symbol.cmx transitions.cmi dviview.cmi 
 main.cmo: config.cmo dimension.cmi dviview.cmi grdev.cmi gs.cmi misc.cmi 
 main.cmx: config.cmx dimension.cmx dviview.cmx grdev.cmx gs.cmx misc.cmx 
-grY11.o: grY11.c libgraph.h
+grY11.o: grY11.c libgraph.h image.h

@@ -40,4 +40,4 @@ val intime : int -> int -> int -> int -> 'g set -> 'g set
 (* Iterates function ff over the set of symbols. *)
 val iter : ('g symbol -> unit) -> 'g set -> unit
 
-val lines : int -> int -> 'g set -> int * int
+val lines : int -> int -> 'g set -> int * int * string * string

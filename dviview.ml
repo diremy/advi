@@ -45,11 +45,6 @@ let click_turn_page =
     "-click_turn"
     "Turn pages with mouse clicks (see the doc)"
 
-let click_position =
-  Misc.option_flag false
-    "-click_position"
-    "Return position on mouse clicks (see the doc)"
-
 let page_stack_to_string page stack =
   let stack = String.concat " " (List.map string_of_int stack) in
   Printf.sprintf "Page no: %d Page_stack: %s"
@@ -130,6 +125,7 @@ module type DEVICE = sig
     | Key of char
     | Move of int * int
     | Region of int * int * int * int
+    | Position of int * int
     | Href of string
     | Advi of string * (unit -> unit)
     | Click of area * button * int * int
@@ -515,15 +511,14 @@ module Make(Dev : DEVICE) = struct
     let y = st.size_y - y in
     x, y
       
-  let position st =
-    let x, y = Graphics.mouse_pos() in
-    let y = st.size_y - y in
+  let position st x y =
     let symbols = Drv.give_symbols() in
-    let l, r = Symbol.lines x y symbols in
-    let m = if l > 0 then l else r in
-    if m > 0 then
+    let line, bound, before, after = Symbol.lines x y symbols in
+    if bound > 0 then
+      let line = max 0 line in
       begin
-        Printf.printf "#line %d" m;
+        Printf.printf "#line %d, %d <<%s>><<%s>>"
+          line bound before after;
         print_newline()
       end     
     
@@ -593,9 +588,7 @@ module Make(Dev : DEVICE) = struct
     Symbol.iter show_colored_glyph input ;
     
     let output = Symbol.to_ascii input in
-    print_string output;
-    print_newline ();
-    flush stdout;
+    Grdev.cut output;
     ()
       
   (* 
@@ -1142,18 +1135,16 @@ module Make(Dev : DEVICE) = struct
           redraw st
       | Dev.Region (x, y, w, h) ->
           selection Interval st x y w (-h)
-            
+      | Dev.Position (x, y) ->
+          position st x y 
       | Dev.Click (Dev.Top_left, _,_,_) ->
           if !click_turn_page then B.pop_page st
-          else if !click_position then position st
       | Dev.Click (_, Dev.Button1,_,_) ->
           if !click_turn_page then B.previous_pause st
-          else if !click_position then position st
       | Dev.Click (_, Dev.Button2,_,_) ->
           if !click_turn_page then B.pop_previous_page st
       | Dev.Click (_, Dev.Button3,_,_) ->
           if !click_turn_page then B.next_pause st
-          else if !click_position then position st
             
 (*
    | Dev.Click (Dev.Bottom_right, _) -> B.next_pause st

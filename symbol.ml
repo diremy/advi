@@ -203,6 +203,17 @@ let encodings_c = compile_regexp encodings
 let erase="/back/"
     
 (* Returns the name of the symbol s, pre is the symbol before s. *)
+let true_symbol_name s =
+  let font = s.fontname in
+  (* For normal symbols, find a matching regexp. *)
+  let handler = 
+    try snd (List.find
+	       (fun (r,h) -> Str.string_match r font 0)
+	       encodings_c)
+    with Not_found -> fun f s -> "["^f^"]"^(default_encoding f s)
+  in
+  handler font s.code
+    
 let symbol_name pre s =
   let font = s.fontname in
   (* Is it a rule ? *)
@@ -212,15 +223,7 @@ let symbol_name pre s =
     begin
       let name =
 	if font == rulename then get_rule pre s
-	else
-          (* For normal symbols, find a matching regexp. *)
-	  let handler = 
-	    try snd (List.find
-		       (fun (r,h) -> Str.string_match r font 0)
-		       encodings_c)
-	    with Not_found -> fun f s -> "["^f^"]"^(default_encoding f s)
-	  in
-	  handler font s.code
+	else true_symbol_name s          
       in
       if pre.fontname == spacename && overlap pre s <> 0 then erase^name
       else name
@@ -355,6 +358,53 @@ let to_escaped set = String.escaped (to_ascii set)
 (* get the closest lines to a given position on the screen *)
     
 let lines x y set =
+  let is_before s =
+    let top = s.locy - s.voffset in
+    let bot = top + s.height in
+    let left = s.locx in
+    let right = left + s.width in
+    bot < y || (top < y && right < x) in
+  let rec roll after = function
+    | h :: rest as before ->
+        if is_before h then  before, after else roll (h::after) rest 
+    | [] -> [], after in
+  let before, after = roll [] !set in
+  let rec skip_spaces = function
+      h :: rest when h.fontname == spacename -> skip_spaces rest
+    | rest -> rest in
+  let rec word b pre w = function
+    | h :: rest when h.fontname = spacename ->
+        let c = symbol_name pre h in
+        if c = " " then w
+        else word b h w rest
+    | h :: rest when h.fontname = linename -> word b h w rest
+    | h :: rest when h.fontname = rulename -> w
+    | h :: rest ->
+        if pre <> dummy_symbol && above pre h <> 0 then w
+        else
+          let c = symbol_name pre h in
+          let add x y = if b then x ^ y else y ^ x in
+          word b h (add (true_symbol_name h) w) rest
+    | [] -> w  in
+  let rec prefix b l =
+    match l with
+    | h :: rest when h.fontname == spacename ->
+        let c = symbol_name dummy_symbol h in
+        if c = " " then word b h c (skip_spaces rest)
+        else prefix b rest
+    | rest -> word b dummy_symbol "" rest in
+  let after_word = prefix false after in
+  let before_word = prefix true before in
+  let find_line d l =
+    try (List.find (fun h -> h.fontname == linename) l).code
+    with Not_found -> d in
+  let line = find_line (-1) before in
+  let bound = find_line line after in
+  line, bound, before_word, after_word
+    ;;
+
+(*    
+let lines x y set =
   let before p = p.locx < x  || p.locy >  y in
   let rec left l = function
     | h:: t as ht ->
@@ -369,3 +419,4 @@ let lines x y set =
   let l,r = left (-1) !set in
   l, r 
     ;;
+*)

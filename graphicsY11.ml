@@ -25,6 +25,13 @@ external flush : unit -> unit = "gr_flush"
 external sync : unit -> unit = "gr_sync"
         (* flush pending events and wait until all have been processed *)
 
+external raw_draw_area : Graphics.image -> (int * int * int * int) ->
+  int -> int -> unit = "gr_draw_area"
+
+let draw_area ~ima ~srcx ~srcy ~width ~height ~destx ~desty =
+  if srcx < 0 || srcy < 0 then raise (Invalid_argument "draw_area")
+  else raw_draw_area ima (srcx, srcy, width, height) destx desty;;
+
 external window_id : unit -> window_id = "gr_window_id";;
 
 let subwindows = Hashtbl.create 13;;
@@ -36,7 +43,6 @@ external raw_close_subwindow : window_id -> unit
 
 let open_subwindow ~x ~y ~width ~height =
   let wid = raw_open_subwindow x y width height in
-  prerr_endline (Printf.sprintf "subwindow %s allocated" wid);
   Hashtbl.add subwindows wid ();
   wid;;
 
@@ -279,3 +285,8 @@ let control = 0x200
 let mod1 = 0x400
 let mod2 = 0x800
 let mod3 = 0x1000
+let mod4 = 0x2000
+let mod5 = 0x4000
+
+external cut : string -> unit = "gr_cut"
+        (* paste string to the cut and paste buffer *)

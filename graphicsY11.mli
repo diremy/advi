@@ -165,4 +165,13 @@ val control : int
 val mod1 : int
 val mod2 : int
 val mod3 : int
+val mod4 : int
+val mod5 : int
         (* mask for modifiers *)
+
+external cut : string -> unit = "gr_cut"
+        (* paste string to the cut and paste buffer *)
+
+val draw_area : 
+    ima:Graphics.image -> srcx:int -> srcy:int -> width:int -> height:int ->
+      destx:int -> desty:int -> unit

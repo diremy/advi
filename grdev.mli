@@ -100,6 +100,7 @@ type event =
   | Key of char
   | Move of int * int
   | Region of int * int * int * int
+  | Position of int * int
   | Href of string
   | Advi of string * (unit -> unit)
   | Click of area * button * int * int
@@ -138,5 +139,6 @@ type busy = Free | Busy | Pause | Disk
 val set_busy : busy -> unit;;
 
 val set_transition : Transitions.t -> unit
-
 val set_title : string -> unit;;
+val cut : string -> unit;;
+

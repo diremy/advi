@@ -555,7 +555,6 @@ let raw_embed_app command app_type app_name width height x y =
   if Hashtbl.mem app_table pid then 
     raise (Failure (Printf.sprintf 
 		      "pid %d is already in the app_table!" pid));
-  prerr_endline (Printf.sprintf "%s launched in window %s" app_name wid);
   Hashtbl.add app_table pid (app_type, app_name, wid)
 
 (* In hash table t, returns the first element that verifies p. *)
@@ -621,7 +620,9 @@ let embed_app command app_type app_name width height x y =
       !embeds;;
 
 let kill_app pid wid =
+(*
   prerr_endline (Printf.sprintf "Killing %d in window %s " pid wid);
+*)
   Hashtbl.remove app_table pid;
   (try Unix.kill pid 9 with _ -> ());
   while
@@ -890,6 +891,11 @@ module H =
         
 (*** Clearing device ***)
 
+let cut s =
+  print_string s; print_newline ();
+  (* cut does not work yet *)
+  GraphicsY11.cut s;;
+
 
 let open_dev geom =
   if !opened then
@@ -947,6 +953,7 @@ type event =
   | Key of char
   | Move of int * int
   | Region of int * int * int * int
+  | Position of int * int
   | Href of string
   | Advi of string * (unit -> unit)
   | Click of area * button * int * int
@@ -1145,12 +1152,16 @@ let test() =
 
 let wait_button_up m x y =
   if m land G.control <> 0 then wait_move_button_up x y
-  else if m land G.shift <> 0 then wait_select_button_up x y
+  else if m land G.shift <> 0 && m land G.button1 = 0 then
+    wait_select_button_up x y
   else
     begin
       match wait_signal_event button_up with
         Raw e ->
-          Final (Click (click_area x y, button m, x, !size_y - y))
+          if m land G.shift <> 0 then
+            Final (Position (x, !size_y - y))
+          else
+            Final (Click (click_area x y, button m, x, !size_y - y))
       | x -> x 
     end
 
@@ -1203,6 +1214,7 @@ let wait_event () =
                   let m = G.get_modifiers() in
                   match wait_button_up m ev.mouse_x ev.mouse_y with
                   | Final (Region (x, y, dx, dy) as e) -> send e
+                  | Final (Position (x, y) as e) -> send e
                   | Final (Move (dx, dy) as e) -> send e
                   | Final (Click (_,_,_,_) as e) -> send e
                   | Final e ->

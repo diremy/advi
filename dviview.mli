@@ -65,6 +65,7 @@ module type DEVICE = sig
     | Key of char
     | Move of int * int
     | Region of int * int * int * int
+    | Position of int * int
     | Href of string
     | Advi of string * (unit -> unit)
     | Click of area * button * int * int

@@ -19,12 +19,60 @@
 #include <X11/cursorfont.h>
 #include <fail.h>
 #include "libgraph.h"
+#include "image.h"
 
 value gr_bsize_x(void)
 {
   gr_check_open();
   return Val_int(grbstore.w);
 }
+
+value gr_draw_area(value im, value xywh, value vx, value vy)
+{
+  int x = Int_val(vx);
+  int y = Int_val(vy);
+  int wy = Wcvt(y) + 1 - Height_im(im);
+  int by = Bcvt(y) + 1 - Height_im(im);
+  int width = Int_val(Field (xywh, 2));
+  int height = Int_val(Field (xywh, 3));
+  int dx = Int_val(Field (xywh, 0));
+  int dy = Int_val(Field (xywh, 1));
+
+  gr_check_open();
+  if (width > Width_im(im) - dx) width = Width_im(im) - dx;
+  if (height > Height_im(im) - dy) height = Width_im(im) - dy;
+  if (Mask_im(im) != None) {
+    if(grremember_mode) {
+      XSetClipOrigin(grdisplay, grbstore.gc, x, by);
+      XSetClipMask(grdisplay, grbstore.gc, Mask_im(im));
+    }
+    if(grdisplay_mode) {
+      XSetClipOrigin(grdisplay, grwindow.gc, x, wy);
+      XSetClipMask(grdisplay, grwindow.gc, Mask_im(im));
+    }
+  }
+  if(grremember_mode)
+    XCopyArea(grdisplay, Data_im(im), grbstore.win, grbstore.gc,
+              dx, dy,
+              width, height,
+              x, by);
+  if(grdisplay_mode)
+    XCopyArea(grdisplay, Data_im(im), grwindow.win, grwindow.gc,
+          dx, dy,
+          width, height,
+          x, wy);
+  if (Mask_im(im) != None) {
+    if(grremember_mode)
+      XSetClipMask(grdisplay, grbstore.gc, None);
+    if(grdisplay_mode)
+      XSetClipMask(grdisplay, grwindow.gc, None);
+  }
+  if(grdisplay_mode)
+    XFlush(grdisplay);
+  return Val_unit;
+}
+
+
 
 value gr_bsize_y(void)
 {
@@ -66,6 +114,25 @@ value gr_sync(void)
   gr_check_open();
   XSync(grdisplay, 0);
   return Val_unit ;
+}
+
+value gr_cut (value string) {
+  /* clearly, does not work */
+  XChangeProperty (grdisplay, grwindow.win, 
+                   XA_PRIMARY,			/* property */ 
+                   XA_STRING,                   /* xa_string */ 
+                   8,       			/* format */
+                   PropModeReplace, 		/* mode */
+                   String_val(string), 		/* data */
+                   string_length (string) 	/* nelements */
+                   );
+  XStoreBuffer (grdisplay,
+                String_val (string),
+                string_length (string),
+                XA_CUT_BUFFER0
+               );
+  XSync (grdisplay, 0);
+  return Val_unit; 
 }
 
 value gr_set_named_atom_property (value name, value string) {
@@ -198,6 +265,7 @@ value gr_close_subwindow(value wid)
   return Val_unit;
 }
 ***/
+
 
 value gr_map_window(value wid)
 {
