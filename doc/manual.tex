@@ -35,12 +35,12 @@
 %\usepackage{pst-all}
 \usepackage{xcolor}
 \usepackage{hyperref}
-% End of splash specific stuf
+% End of splash specific stuff
 
 %\expandafter \ifx \csname driver\endcsname\relax \def \driver{}\fi 
 %\usepackage [\driver]{hyperref}
 
-% We use hevea to create hte HTML version
+% We use Hevea to create the HTML version
 \usepackage{hevea}
 
 \ifhevea\title{
@@ -90,7 +90,7 @@ file included in the distribution.
 \end{abstract}
 
 \vfill
- \section*{Acknowledgements and contributors}
+ \section*{Acknowledgments and contributors}
 
 {\ActiveDVI} is based on Mldvi which constitutes its core rendering
 engine. Alexandre~Miquel wrote Mldvi and distributes it under the LGPL
@@ -108,7 +108,7 @@ Xavier~Leroy, and Alan~Schmitt.
 
 \section{Installation}
 
-After sucessful installation of {\ActiveDVI}, don't forget to have a
+After successful installation of {\ActiveDVI}, don't forget to have a
 look at example presentations provided with the distribution, in the
 directories:
 
@@ -133,7 +133,7 @@ to automate the process of keeping the presentation up-to-date with
 the sources. Nothing difficult here.
 
     \item {\tt seminar}: one presentation using the popular {\tt
-sminar.sty} {\LaTeX} package in the {\tt clock} sub-directory.
+seminar.sty} {\LaTeX} package in the {\tt clock} sub-directory.
 
     \item {\tt prosper}: two example presentations using the {\tt
 prosper {\LaTeX} package} in sub-directories {\tt LL} and {\tt
@@ -145,7 +145,7 @@ Join}. Quite impressive and involved.
 \subsection{Automatic installation}
 
 In some cases, your Unix system provider will ensure an up-to-date
-port of the {\ActiveDVI} binaries; in such a case, use the recommanded
+port of the {\ActiveDVI} binaries; in such a case, use the recommended
 procedure to download, compile, and install the software.
 
 In any other case, you have to install {\ActiveDVI} manually.
@@ -158,7 +158,7 @@ To compile {\ActiveDVI}, you must install the {\tt camlimages} library
 first, including its native code version.
 
 Hence, download and install {\tt camlimages} first. After successful
-installation of this library, dowload and extract the {\ActiveDVI}
+installation of this library, download and extract the {\ActiveDVI}
 source files, move to the new source directory of {\ActiveDVI},
 and compile {\ActiveDVI} itself.
 
@@ -231,7 +231,7 @@ the burden of answering yes to {\ActiveDVI}'s questions).
 As mentioned, the safe \doctt{-ask} option is the default,
 automatically set when nothing has been explicitly specified by the
 user. If desired, the default safety option can be set via {\em
-initialisation files}, either on a system large scale by the machine
+initialization files}, either on a system large scale by the machine
 administrator (in the file \doctt{/etc/advirc}), on a local scale by
 individual users (setting the default policy for that user), or even
 on a per directory basis (setting the default policy to show DVI files
@@ -239,11 +239,11 @@ in this directory)! (This last option is convenient to gracefully run
 your own talks, while still being cautious when running talks from
 others.)
 
-\section{Initialisation files for {\ActiveDVI}}
+\section{Initialization files for {\ActiveDVI}}
 
-\subsection{Syntax of initialisation files}
+\subsection{Syntax of initialization files}
 
-An initialisation file for {\ActiveDVI} is simply a text file that
+An initialization file for {\ActiveDVI} is simply a text file that
 contains options exactly similar to those you can give on the command
 line (with the exception of comments, made of a sharp sign
 (\doctt{\char35}) followed by some text that is ignored until the end
@@ -254,24 +254,24 @@ of line). For instance:
 -bgcolor grey16
 -fgcolor grey95
 \end{verbatim}
-is a valid initialisation file that sets the safety policy to
+is a valid initialization file that sets the safety policy to
 \doctt{-exec}, then sets the background and foreground colors to
 obtain a nice reverse video effect.
 
-\subsection{Loading initialisation files}
+\subsection{Loading initialization files}
 
 Before parsing options on the command line, {\ActiveDVI} loads, in the
-order listed below, the following initialisation files (nothing
+order listed below, the following initialization files (nothing
 happens if any of them does not exist):
 
 \begin{itemize}
 
-\item system wide initialisation file: \doctt{/etc/advirc},
+\item system wide initialization file: \doctt{/etc/advirc},
 
-\item user specific initialisation files: \doctt{\char126/.advirc} then
+\item user specific initialization files: \doctt{\char126/.advirc} then
 \doctt{\char126/.advi/advirc},
 
-\item directory specific initialisation file: \doctt{./.advirc}.
+\item directory specific initialization file: \doctt{./.advirc}.
 
 \end{itemize}
 
@@ -283,7 +283,7 @@ specifying the file path via the command line argument
 loads {\tt filename} when parsing this option to set up the options
 contained in {\tt filename} (thus overriding the options set before by
 the default \doctt{\char126/.advirc}, \doctt{\char126/.advi/advirc}, or
-\doctt{./.advirc}, init files).
+\doctt{./.advirc}, initialization files).
 
 \section{Using the {\ActiveDVI} previewer}
 
@@ -312,7 +312,7 @@ exits \\
 \end{tabular}
 
 Geometry \verb"geom" is specified in pixels, using the standard format
-for XWindow geometry specifications (i.e:
+for X-Window geometry specifications (i.e:
 \verb"WIDTHxHEIGHT[+XOFFSET+YOFFSET]").
 
 \medskip\noindent\begin{tabular}{ll}
@@ -328,7 +328,7 @@ for XWindow geometry specifications (i.e:
 Dimensions are specified as numbers optionally followed by two letters
 representing units. When no units are given, dimensions are treated
 as numbers of pixels. Currently supported units are the standard TeX
-units as specified in the TeXbook (D. Knuth, Addison-Wesley, (C)
+units as specified in the TeX book (D. Knuth, Addison-Wesley, (C)
 1986):
  `pt' (point), `pc' (pica), `in' (inch), `bp' (big point),
  `cm' (centimeter), `mm' (millimeter), `dd' (didot point),
@@ -348,7 +348,7 @@ original TeX source.
 \verb"-fgcolor <color>" & Specify the color of the foreground color \\
 \verb"-bgcolor <color>" & Specify the color of the background color \\
 \verb"-rv" & Specify that reverse video should be simulated by
-exchanging the backgound and foreground colors \\
+exchanging the background and foreground colors \\
 \verb"-gamma <float>" & Specify gamma correction ($>0.0$) of glyphs\\
 \end{tabular}
 
@@ -371,7 +371,7 @@ exchanging the backgound and foreground colors \\
 \subsubsection*{Rendering options}
 
 \medskip\noindent\begin{tabular}{ll}
-\verb"-A" & Toggle Postscript antialiasing \\
+\verb"-A" & Toggle Postscript anti-aliasing \\
 \verb"-passive" & Inhibit effects that are visible when redrawing the page
 \\ & (Transitions, delays, embedded applications) \\
 \end{tabular}
@@ -423,14 +423,14 @@ Line numbers default to $0$ when not found. Note that line numbers may be
 inconsistent if there \docdef\special-line commands have not been inserted
 close enough to the position.
 
-\subsection{Hyperref}
+\subsection{Hyper-ref}
 
 {\ActiveDVI} supports the {\LaTeX} {\tt hyperref} package with both
 internal and cross-file references. For cross-file references, it
 launches a new \doctt{advi} process to view the target.
 
-{\ActiveDVI} improves the treatment of hyperrefs over convential previewers,
-by emphasizing the hypertarget text of an hyperlink. Thus, an hypertarget
+{\ActiveDVI} improves the treatment of hyper-refs over conventional previewers,
+by emphasizing the hyper-target text of an hyper-link. Thus, an hyper-target
 definition
 
 \docdef\hypertarget \docarg{tag}\docarg{text}
@@ -439,7 +439,7 @@ should make the activation of the link \docid{tag} not only move to
 the page where \docid{text} occurs, but also emphasize the target \docid{text}.
 %
 However, since {\docdef\hypertarget} does include its second argument
-withing the target, we use the following command instead:
+within the target, we use the following command instead:
 \begin{verbatim}
 \newcommand{\softtarget}[2]%
   {\special{html:<A name=\hyper@quote #1\hyperquote>}#2\special{html:</A>}}
@@ -455,18 +455,18 @@ There are two ways to include a floating table of contents while previewing.
 
 \begin {itemize}
 
-\item {\ActiveDVI} recognizes the reserved hypertargets
+\item {\ActiveDVI} recognizes the reserved hyper-targets
 \doctt{/toc.first} and \doctt{/toc.last} as markers for the first and
 last pages of the table of contents. These pages then become floating,
 {\em i.e.} accessible from anywhere in the document with the default
-keybinding \verb't'. The first stroke on \verb't' shows the first page
+key binding \verb't'. The first stroke on \verb't' shows the first page
 of the table of contents. Successive stokes will show the following
 pages. (As usual, prefix integer argument may be used to directly
 access a specific page of the table of contents.)
 
 The package \softlink{advi}{\doctt{advi}} described below redefines the macro
 {\docdef\tableofcontents} so that it automatically inserts the
-reserved hypertargets markers around the table of contents. It also
+reserved hyper-targets markers around the table of contents. It also
 provides two new macros, {\docdef\advitoc} and \docdef\endadvitoc,
 that serve to insert these markers when the table of contents is
 hand-made.
@@ -483,7 +483,7 @@ same page. This value can be changed using the option
 \doctt{-thumbnail\_scale}.
 
 Normally, thumbnails are drawn for all the pages. However, thumbnail
-pages can also be defined manually, with an hypertarget whose anchor
+pages can also be defined manually, with an hyper-target whose anchor
 is of the form \doctt{/page.\docid{suffix}}. In this case, all the
 desired thumbnails must be explicitly marked.
 
@@ -726,7 +726,7 @@ To give an idea, the names and colors available on a standard installation of
 
 \subsubsection*{The CMYK specifications of colors}
 
-You may also explicitely use a CMYK (Cyan, Magenta, Yellow, Black)
+You may also explicitly use a CMYK (Cyan, Magenta, Yellow, Black)
 specification. In this case the cyan, magenta, yellow and black values
 follow the \docid{cmyk} keyword, and are given as a list of four
 integers in the range 0.0 .. 1.0.
@@ -759,11 +759,11 @@ background will be used for the remaining pages of the presentation
 (otherwise the presenter resets background options at each new page).
 
 Background images can be lighten by specifying an alpha value (a
-floating point number between 0 and 1) that mesures the mixing
+floating point number between 0 and 1) that measures the mixing
 between the color of the background and the image.
 
 Background images can also be blended, meaning that you can choose the
-algorithm that surimposes the image to the background.
+algorithm that sur-imposes the image to the background.
 
 \medskip\noindent
 \docdef \advibg \doctt {[global]}\docarg{decl}
@@ -984,8 +984,8 @@ the command string.
 To monitor embedded applications, {\ActiveDVI} provides the
 \doctt{advikillembed} primitive to send a signal to any named embedded
 application. For \doctt{raw} applications, there are additional
-functions to map or unmap the window allocated to a named \doctt{raw}
-application. Mapping or unmapping windows of non-\doctt{raw}
+functions to map or un-map the window allocated to a named \doctt{raw}
+application. Mapping or un-mapping windows of non-\doctt{raw}
 applications is unspecified, since it may interfere in a non trivial
 way with {\ActiveDVI}'s automatic treatment of those applications.
 
@@ -1012,7 +1012,7 @@ Map the window of the (\doctt{raw}) embedded application named \docid{name}.
 \medskip\noindent
 \docdef \adviunmapembed \docarg{name}
 \begin{quote}
-Unmap the window of the (\doctt{raw}) embedded application named \docid{name}.
+Un-map the window of the (\doctt{raw}) embedded application named \docid{name}.
 \end{quote}
 
 \subsubsection*{Monitoring a group of embedded applications}
@@ -1039,7 +1039,7 @@ Map the windows of all the (\doctt{raw}) embedded applications named
 \medskip\noindent
 \docdef \adviunmapallembed \docarg{name}
 \begin{quote}
-Unmap the windows of all the (\doctt{raw}) embedded applications named
+Un-map the windows of all the (\doctt{raw}) embedded applications named
 \docid{name}.
 \end{quote}
 
@@ -1139,7 +1139,7 @@ Labels over arrows \verb"\Aput", \verb"Bput", etc.
 \end {itemize}
 
 
-\section{Auxilliary {\LaTeX} packages}
+\section{Auxiliary {\LaTeX} packages}
 
 \subsection{The superpose package}
 
@@ -1171,7 +1171,7 @@ This package draws bubbles over some text.
 By default bubbles are produced using the \doctt{epic} and \doctt{eepic}
 packages, for portability. However, for better rendering and easier 
 parameterization, bubbles can also be drawn using the \doctt{ pst-node}
-package of the pstricks collection. This is what the \doctt{ps} option
+package of the PStricks collection. This is what the \doctt{ps} option
 is designed for.
 
 The package defines a single command:
@@ -1271,19 +1271,19 @@ fonts before visualization with {\ActiveDVI}.
 (For instance, {\tt dvicopy talk.dvi talk.expanded; advi talk.expanded} very
 often does the trick.)
 
-\subsection*{Inlined Postscript and Ghostscript}
+\subsection*{In-lined Postscript and Ghostscript}
 
-PS relies on {\tt ghostscript} to display Postscript inlined specials.
+PS relies on {\tt ghostscript} to display Postscript in-lined specials.
 However, some earlier releases of {\tt ghostscript} 
 implements the Postscript {\tt flushpage} command as a {\tt XFlush} call
 which does not force the evaluation of commands, and thus makes the 
 synchronization between {\tt ghostscript} and {\ActiveDVI} drawings
-uncontrollable. In this case, the interleaving of inlined postscript 
+uncontrollable. In this case, the interleaving of in-lined postscript 
 and other material may be inconsistent. 
 
 Fortunately, recent versions of ghostscript $(> 6.5)$ have
 fixed this problem by using {\tt XSync(false)} instead.
-If you use those versions of ghostscript, inlined specials should be
+If you use those versions of ghostscript, in-lined specials should be
 correctly rendered.
 
 Unfortunately, some releases of version 6.5x also carry a small but
@@ -1291,9 +1291,9 @@ fatal bug for \ActiveDVI, that will hopefully be fixed in future
 releases. A workaround is available here
 \url{http://cristal.inria.fr/~remy/ghostscript/}.
 
-\subsection*{Inlined Postscript change of coordinates}
+\subsection*{In-lined Postscript change of coordinates}
 
-So far, the implementation of inlined Postscript does not correctly handle
+So far, the implementation of in-lined Postscript does not correctly handle
 complex change of coordinates.  (See PStricks section). 
 
 \section{Reporting bugs}
@@ -1330,5 +1330,5 @@ See \url{http://pauillac.inria.fr/advi} for up to date information.
 % LocalWords:  DVI Didier Weis advi INRIA LGPL Miquel Furuse Botlan XBuffer pst
 % LocalWords:  XSelection Hyperref hyperref dvips advirecording advianchoring
 % LocalWords:  CamlImages topleft topright bottomleft bottomright hbox PStricks
-% LocalWords:  advianchor eepic pstricks ps pos bg colspec bubbleset inlined
+% LocalWords:  advianchor eepic pstricks ps pos bg colspec bubbleset in-lined
 % LocalWords:  flushpage XFlush XSync
