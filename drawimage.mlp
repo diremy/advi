@@ -190,7 +190,6 @@ module M = struct
 
   let resize_and_make_transparent image whitetransp ratiopt (ow,oh) = 
     let iw,ih = Image.size image in
-    let dominantx = (iw/ow) > (ih/oh) in    (* is X the coordinate that needs more stretching? *)
     let w,h = (* compute the size of the scaled image according to the options *)
       match ratiopt with
       |	ScaleOriginal    -> iw, ih
@@ -199,15 +198,19 @@ module M = struct
       |	ScaleBottom      -> ow, Pervasives.truncate (float ih *. float ow /. float iw)        
       |	ScaleLeft        
       |	ScaleRight       -> Pervasives.truncate (float iw *. float oh /. float ih), oh
-      |	ScaleCenter      
-      |	ScaleTopLeft     
-      |	ScaleBottomLeft  
-      |	ScaleTopRight    
-      |	ScaleBottomRight -> if dominantx 
-                            then ow, Pervasives.truncate (float ih *. float ow /. float iw)        
-                            else Pervasives.truncate (float iw *. float oh /. float ih), oh
+      |	ScaleCenter         (* in all these cases, we need to resize the image just enough    *)
+      |	ScaleTopLeft        (* to cover the requested area of size ow,oh                      *)
+      |	ScaleBottomLeft     (* it is when blitting the image that we will clip it differently *)
+      |	ScaleTopRight       (* according to these directives                                  *)
+      |	ScaleBottomRight -> let ratiow =  float ow /. float iw and ratioh = float oh /. float ih in
+                            if ratiow > ratioh then ow, Pervasives.truncate (float ih *. ratiow)        
+                                               else Pervasives.truncate (float iw *. ratioh), oh
     in
-    let blitinfo = (* compute the blitting information for the image *)
+    let blitinfo = (* compute the blitting information for the image        *)
+                   (* None means do not blit the image                      *)
+                   (* Some(sx,sy,dx,dy,w,h) means copy area of widht w and  *)
+                   (* height h located in source at sx,dy into destination  *)
+                   (* at dx,dy                                              *)
       match ratiopt with
       |	ScaleOriginal    -> None
       |	ScaleAuto        -> None
@@ -217,20 +220,18 @@ module M = struct
                             else Some(0,max 0 (h-oh),0,max 0 (oh-h),min w ow,min h oh)
       |	ScaleLeft        -> if ow=w then None
                             else Some(0,0,0,0,min w ow,h)
-(*
       |	ScaleRight       -> if ow=w then None
                             else Some(max 0 (w-ow),0,max 0 (ow-w),0,min w ow,h)
       |	ScaleCenter      -> if oh = h & ow = w then None
-                            else Some((ow-w)/2,(oh-h)/2,0,0,min w ow,min h oh)
+                            else Some((max 0 (w-ow))/2,(max 0 (h-oh))/2,0,0,min w ow,min h oh)
       |	ScaleTopLeft     -> if oh = h & ow = w then None
                             else Some(0,0,0,0,min w ow,min h oh)
       |	ScaleBottomLeft  -> if oh = h & ow = w then None
-                            else Some(0,max 0 (oh-h),0,0,min w ow,min h oh)
+                            else Some(0,max 0 (h-oh),0,0,min w ow,min h oh)
       |	ScaleTopRight    -> if oh = h & ow = w then None
-                            else Some(max 0 (ow-w),0,0,0,min w ow,min h oh)
+                            else Some(max 0 (w-ow),0,0,0,min w ow,min h oh)
       |	ScaleBottomRight -> if oh = h & ow = w then None
-                            else Some(max 0 (ow-w),max 0 (oh-h),0,0,min w ow,min h oh)
-*)
+                            else Some(max 0 (w-ow),max 0 (h-oh),0,0,min w ow,min h oh)
       |	_  -> (Misc.warning "Unfinished case in drawimage.ml(blitinfo)";None)
     in
     let image' =
