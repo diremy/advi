@@ -19,6 +19,7 @@
 
 <P>Active-DVI est un <STRONG>afficheur de fichiers DVI</STRONG>
 et un <STRONG>présentateur programmable d'exposés</STRONG> écrits en LaTeX.
+Il ne tourne que sous Unix.
 
 <HR>
 <P ALIGN=CENTER>
@@ -97,6 +98,14 @@ des volontaires pour se charger de la traduction).
 <H2 ALIGN=LEFT><A name="FAQ">Foire aux questions</A></H2>
 
 <DL>
+
+<DT><STRONG>Y-a-t-il une version Win32 ?</STRONG>
+ <DD>Réponse: <I>Malheureusement, non.</I>
+ Toutefois, vous pouvez utiliser le CD-ROM <I>DemoLinux</I> qui
+contient une version d'Active-DVI: si vous pouvez rebooter la machine
+windows, redémarrez-la depuis le CD-ROM et lancer advi. Après la
+présentation redémarrez simplement la machine: DemoLinux n'écrit rien
+sur le disque dur si bien que la machine repart sans aucune modification.
 
 <DT><STRONG>Comment obtenir une présentation plein écran ?</STRONG>
  <DD>Réponse: <I>Lancez Active-DVI et tapez <CODE>^F</CODE>
@@ -214,9 +223,9 @@ qui pose problème, parmi l'ensemble des fontes Computer-Modern qui a
 
 <DT><STRONG>Comment se fait-il que Active-DVI ait des problèmes de
 marges (alors que <CODE>xdvi</CODE> n'en a pas) ?</STRONG>
- <DD>Réponse: <I><CODE>xdvi</CODE> et <CODE>advi</CODE> n'utilise pas
+ <DD>Réponse: <I><CODE>xdvi</CODE> et <CODE>advi</CODE> n'utilisent pas
 les mêmes marges. <CODE>Advi</CODE> utilise la spécification
-d'encombrement (bounding box) émise par tex dans le fichier DVI et
+d'encombrement (bounding box) émise par TeX dans le fichier DVI et
 n'ajoute aucune marge supplémentaire. Malheureusement, beaucoup de
 styles et de librairies LaTeX ne donnent pas une valeur correcte à la
 bounding box.
@@ -257,7 +266,7 @@ disposer d'une version récente du compilateur Objective Caml.
 
  </DL>
 
-<LI>Advanced installation
+<LI>Installation advancée
 
  <DL>
   <DT><STRONG>Note:</STRONG>
