@@ -412,15 +412,15 @@ exception Ill_formed_special of string
 let line_of_special s k =
   match split_string s k with
   | line :: rest ->
-      Printf.eprintf "%s @ %s\n%!" line (match rest with h::_ -> h | _ -> ""); 
+      Printf.eprintf "%s @ %s\n%!" line
+       (match rest with h :: _ -> h | _ -> ""); 
       begin try
         let l = int_of_string line in
         let f = match rest with | file :: _ -> Some file | _ -> None in
         (l, f)
       with Failure _ -> raise (Ill_formed_special s)
       end
-  | _ -> raise (Ill_formed_special s)
-;;
+  | _ -> raise (Ill_formed_special s);;
 
 let line_special st s k =
   try add_line st (line_of_special s k)
@@ -548,7 +548,6 @@ let psfile_special st s =
 
     let x = st.x_origin + Misc.round (st.conv *. float st.h) in
     let y = st.y_origin + Misc.round (st.conv *. float st.v) in
-    let dpi = ldexp (float st.sdpi) (-16) in
     if !visible then
       if drawbygs then
         let dx = st.x_origin in
@@ -556,18 +555,19 @@ let psfile_special st s =
         Dev.draw_ps_by_gs file bbox (rwi, rhi)
           (x - st.x_origin) (y - st.y_origin)
       else 
-        let (width, height as size) = 
+        let width, height = 
           match rwi, rhi with
           | 0, 0 -> float (urx - llx), float (ury - lly)
           | 0, _ ->
-              let h = float rhi *. 0.1 in
-              let w = float (urx - llx) *. (h /. float (ury - lly)) in
-              w, h
+             let h = float rhi *. 0.1 in
+             let w = float (urx - llx) *. (h /. float (ury - lly)) in
+             w, h
           | _, 0 ->
-              let w = float rwi *. 0.1 in
-              let h = float (ury - lly) *. (w /. float (urx - llx)) in
-              w, h
+             let w = float rwi *. 0.1 in
+             let h = float (ury - lly) *. (w /. float (urx - llx)) in
+             w, h
           | _, _ -> float rwi *. 0.1, float rhi *. 0.1 in
+        let dpi = ldexp (float st.sdpi) (-16) in
         let width_pixel = truncate (width /. 72.0 *. dpi) in
         let height_pixel = truncate (height /. 72.0 *. dpi) in
         Dev.draw_img file st.epstransparent st.alpha st.blend (Some bbox)
@@ -576,7 +576,7 @@ let psfile_special st s =
   with
   | exc ->
       Misc.warning
-        (Printf.sprintf "Failed to load psfile: %s" (Printexc.to_string exc))
+        (Printf.sprintf "Failed to load psfile: %s" (Printexc.to_string exc));;
 
 (* Killing embedded applications:
    (1) we parse Unix signals in specials. *)
@@ -1343,8 +1343,7 @@ let scan_special status (headers, xrefs, lastline as args) pagenum s =
   if has_prefix "\" " s || has_prefix "ps: " s then
     (status.Dvi.hasps <- do_ps) else
   if has_prefix "!" s then
-    (if do_ps then
-      headers := (true, get_suffix "!" s) :: !headers) else
+    (if do_ps then headers := (true, get_suffix "!" s) :: !headers) else
   (* Embedded Postscript, better be first for speed when scanning *)
   if has_prefix "header=" s then
     (if do_ps then headers := (false, get_suffix "header=" s) :: !headers) else
@@ -1383,26 +1382,26 @@ let scan_special_page otherwise cdvi globals pagenum =
    | Dvi.Known stored_status -> stored_status;;
 
 let special st s =
-  if has_prefix "\" " s ||
-  has_prefix "ps: " s || has_prefix "! " s then ps_special st s
-  else if has_prefix "advi: put" s then
-    put_special st (get_suffix "advi: put" s) 
+  if has_prefix "\" " s || has_prefix "ps: " s
+  || has_prefix "! " s then ps_special st s else
+  if has_prefix "advi: put" s then
+    put_special st (get_suffix "advi: put" s) else
 
-      (* Other specials *)
-  else if has_prefix "color " s then color_special st s 
-  else if has_prefix "html:" s then html_special st (get_suffix "html:" s) 
-  else if has_prefix "PSfile=" s || has_prefix "psfile=" s then
-    psfile_special st s 
-  else if has_prefix "advi: " s then begin
+  (* Other specials *)
+  if has_prefix "color " s then color_special st s else
+  if has_prefix "html:" s then html_special st (get_suffix "html:" s) else
+  if has_prefix "PSfile=" s
+  || has_prefix "psfile=" s then psfile_special st s else
+  if has_prefix "advi: " s then begin
     if has_prefix "advi: edit" s then edit_special st s else
     if has_prefix "advi: alpha" s then alpha_special st s else
     if has_prefix "advi: blend" s then blend_special st s else
     if has_prefix "advi: epstransparent" s then
-      epstransparent_special st s
-    else if has_prefix "advi: epsbygs" s then epsbygs_special st s
-    else if has_prefix "advi: epswithantialiasing" s then
-      epswithantialiasing_special st s
-    else if has_prefix "advi: pause" s then raise Pause else
+      epstransparent_special st s else
+    if has_prefix "advi: epsbygs" s then epsbygs_special st s else
+    if has_prefix "advi: epswithantialiasing" s then
+      epswithantialiasing_special st s else
+    if has_prefix "advi: pause" s then raise Pause else
     if has_prefix "advi: proc" s then proc_special st s else
     if has_prefix "advi: setbg " s then bkgd_special st s else
     (* all the following have effects,
@@ -1410,44 +1409,46 @@ let special st s =
     if !active then begin
       if has_prefix "advi: wait " s then wait_special st s else
       if has_prefix "advi: embed " s then
-        (if !visible then embed_special st s)
-      else if has_prefix "advi: trans " s then transition_special st s else
+        (if !visible then embed_special st s) else
+      if has_prefix "advi: trans " s then transition_special st s else
       if has_prefix "advi: transbox save " s then
-        transbox_save_special st s
-      else if has_prefix "advi: transbox go " s then
-        transbox_go_special st s
-      else if has_prefix "advi: killembed " s then
-        (if !visible then kill_one_embed_special st s)
-      else if has_prefix "advi: killallembed " s then
-        (if !visible then kill_all_embed_special st s)
-      else if has_prefix "advi: mapembed " s then
-        (if !visible then map_one_embed_special st s)
-      else if has_prefix "advi: mapallembed " s then
+        transbox_save_special st s else
+      if has_prefix "advi: transbox go " s then
+        transbox_go_special st s else
+      if has_prefix "advi: killembed " s then
+        (if !visible then kill_one_embed_special st s) else
+      if has_prefix "advi: killallembed " s then
+        (if !visible then kill_all_embed_special st s) else
+      if has_prefix "advi: mapembed " s then
+        (if !visible then map_one_embed_special st s) else
+      if has_prefix "advi: mapallembed " s then
         (if !visible then map_all_embed_special st s) else
-        if has_prefix "advi: unmapembed " s then
-          (if !visible then unmap_one_embed_special st s) else
-          if has_prefix "advi: unmapallembed " s then
-            (if !visible then unmap_all_embed_special st s) else
-            Misc.warning ("unknown special: " ^ s) end
-        (* else we ignore it, whether well-formed or ill-formed *)
-  end
-  else if has_prefix "line: " s then line_special st s 6
+      if has_prefix "advi: unmapembed " s then
+        (if !visible then unmap_one_embed_special st s) else
+      if has_prefix "advi: unmapallembed " s then
+        (if !visible then unmap_all_embed_special st s) else
+      Misc.warning ("unknown special: " ^ s) end
+    (* else we ignore it, whether well-formed or ill-formed *)
+  end else
+  if has_prefix "line: " s then line_special st s 6 else
 (*
-  else if has_prefix "src:" s then line_special st s 4
+  if has_prefix "src:" s then line_special st s 4 else
 *)
-  else if
-    has_prefix "pn " s || has_prefix "pa " s || s = "fp" || s = "ip" ||
-    has_prefix "da " s || has_prefix "dt " s || s = "sp" ||
-    has_prefix "sp " s || has_prefix "ar " s || has_prefix "ia " s ||
-    has_prefix "sh " s || s = "wh" || s = "bk"
-  then tpic_specials st s;;
+  if has_prefix "pn " s || has_prefix "pa " s || s = "fp" || s = "ip"
+  || has_prefix "da " s || has_prefix "dt " s || s = "sp"
+  || has_prefix "sp " s || has_prefix "ar " s || has_prefix "ia " s
+  || has_prefix "sh " s || s = "wh" || s = "bk"
+ then tpic_specials st s;;
 
 (*** Page rendering ***)
 let eval_dvi_command st = function
   | Dvicommands.C_set code -> set st code
-  | Dvicommands.C_put code -> put st code
   | Dvicommands.C_set_rule(a, b) -> set_rule st a b
+  | Dvicommands.C_put code -> put st code
   | Dvicommands.C_put_rule(a, b) -> put_rule st a b
+  | Dvicommands.C_nop
+  | Dvicommands.C_bop _
+  | Dvicommands.C_eop -> ()
   | Dvicommands.C_push -> push st
   | Dvicommands.C_pop -> pop st
   | Dvicommands.C_right k -> add_blank 1 st k; st.h <- st.h + k
@@ -1462,7 +1463,10 @@ let eval_dvi_command st = function
   | Dvicommands.C_z k -> st.z <- k; st.v <- st.v + st.z
   | Dvicommands.C_fnt n -> fnt st n
   | Dvicommands.C_xxx s -> special st s
-  | _ -> ();;
+  | Dvicommands.C_fnt_def (_, _)
+  | Dvicommands.C_pre _
+  | Dvicommands.C_post (_, _)
+  | Dvicommands.C_post_post _ -> ();;
 
 let eval_command st c =
   let record r =

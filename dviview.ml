@@ -387,7 +387,7 @@ let init master filename =
       synchronize = true;
     } in
   init_geometry true st;
-  if master then begin 
+  if master then begin
     attr.geom.Ageometry.width <- st.size_x;
     attr.geom.Ageometry.height <- st.size_y;
   end;
@@ -395,17 +395,17 @@ let init master filename =
 
 let compatible st st' =
   (*
-  Printf.eprintf 
+  Printf.eprintf
     "x=%d/%d, y=%d/%d, width=%d/%d height=%d/%d dpi=%f/%f\n%!"
     st.size_x  st'.size_x
     st.size_y  st'.size_y
     st.dvi_width  st'.dvi_width
     st.dvi_height  st'.dvi_height
     st.base_dpi  st'.base_dpi;
-  st.base_dpi = st'.base_dpi && 
-  st.dvi_width = st'.dvi_width && 
+  st.base_dpi = st'.base_dpi &&
+  st.dvi_width = st'.dvi_width &&
   st.dvi_height = st'.dvi_height && *)
-  st.size_x = st'.size_x && 
+  st.size_x = st'.size_x &&
   st.size_y = st'.size_y
 ;;
 
@@ -416,14 +416,14 @@ let update_dvi_size all ?dx ?dy st =
   init_geometry all st;
   begin match dx with None -> () | Some z -> st.orig_x <- z end;
   begin match dy with None -> () | Some z -> st.orig_y <- z end;
-  set_bbox st;
+  set_bbox st;;
   (*
   match st.duplex with
-    Master st' | Client st' ->
+  | Master st' | Client st' ->
       st'.orig_x <- st.orig_x;
       st'.orig_y <- st.orig_y;
       set_bbox st';
-  | Alone -> *) ()
+  | Alone -> () *)
 
 (* Reloading *)
 
@@ -440,7 +440,7 @@ let rec clear_page_stack max stack =
     | p :: stack ->
         let s = clear stack in
         if p = -1 then s
-        else 
+        else
           let pa = if p < 0 then -2 - p else p in
           if pa < max && not pages.(pa) then
             begin
@@ -763,7 +763,7 @@ let find_xref_here tag st =
     if p > 0 && p <= st.num_pages then p - 1 else raise Not_found
   with Misc.Match ->
     Hashtbl.find (xrefs st) tag
-      
+
 ;;
 
 let page_start default st =
@@ -806,27 +806,26 @@ let rec reload foreground st =
     st.frozen <- true;
     st.aborted <- true;
     match st.duplex with
-      Client st' when not (compatible st st') -> 
+    | Client st' when not (compatible st st') ->
         Misc.warning
           (Printf.sprintf
              "Dropping master %s (incompatible with client %s)"
              st.filename st'.filename);
-
         st'.duplex <- Alone;
         raise (if foreground then Duplex (redraw, st') else Not_found)
-    | _ -> 
+    | _ ->
         update_dvi_size false st;
         Gs.init_do_ps ();
         if foreground then redraw ?trans:(Some Transitions.DirTop) st
   with x ->
     Misc.warning
       (Printf.sprintf "exception while reloading %s" (Printexc.to_string x));
-    st.cont <- None 
+    st.cont <- None
 ;;
 
-  
+
 let find_xref_master tag default st =
-  try 
+  try
     match st.duplex with
     | Client _ | Alone -> default
     | Master st' ->
@@ -839,7 +838,7 @@ let find_xref_master tag default st =
 ;;
 let find_xref tag default st =
   try find_xref_here tag st
-  with Not_found -> find_xref_master tag default st 
+  with Not_found -> find_xref_master tag default st
 ;;
 
 let redisplay st =
@@ -904,7 +903,7 @@ let exec_xref link =
 let pop_duplex st =
   match st.duplex with
   | Client st' -> raise (Duplex (redraw, st'))
-  | Alone | Master _ -> ()
+  | Alone | Master _ -> ();;
 
 (* Go to the begining of the page. *)
 let goto_page n st =
@@ -938,18 +937,17 @@ let find_page_before_position (pos, file) st =
   find (st.num_pages -1)
 
 let duplex_switch sync st =
-  let find_sync_page master client = 
+  let find_sync_page master client =
     match master.dvi.Dvi.pages.(master.page_number).Dvi.line with
     | None -> raise Not_found
-    | Some (q, _ as pos) -> find_page_before_position pos client in 
+    | Some (q, _ as pos) -> find_page_before_position pos client in
   match st.duplex with
   | Alone -> ()
   | (Client st' | Master st') when not sync -> raise (Duplex (redraw, st'))
   | Client master ->
-      begin try goto_page (find_sync_page master st) st with Not_found -> ()
-      end
+      (try goto_page (find_sync_page master st) st with Not_found -> ())
   | Master client ->
-      try 
+      try
         if changed client then reload false client;
         (* should rather find the page with the linenumber *)
         begin try
@@ -959,8 +957,7 @@ let duplex_switch sync st =
         with Not_found -> ()
         end;
         raise (Duplex (redraw, client))
-      with Not_found -> ()
-;;
+      with Not_found -> ();;
 
 let push_stack b n st =
   match st.page_stack with
@@ -997,8 +994,8 @@ let pop_page b n st =
   let npage, stack = pop n st.page_number st.page_stack st.page_stack in
   st.page_stack <- stack;
   let new_page = if npage > 0 then npage else -2 - npage in
-  if new_page = st.page_number then redraw st
-  else if new_page < 0 (* necessarily -1 *) then pop_duplex st
+  if new_page = st.page_number then redraw st else
+  if new_page < 0 (* necessarily -1 *) then pop_duplex st
   else goto_page new_page st;;
 
 let mark_page st =
@@ -1215,7 +1212,8 @@ module B =
             let y = GraphicsY11.origin_y () in
             st.fullscreen <-
               Some (x, y, st.size_x, st.size_y, (st.orig_x, st.orig_y));
-            (* negative width and height mean fullscreen, last parameter is screen number *)
+            (* negative width and height mean fullscreen,
+               last parameter is screen number *)
             Grdev.reposition ~x:0 ~y:0 ~w:(-1) ~h:(-1) ~screen:st.num,
             (0, 0);
         | Some (x, y, w, h, dxy) ->
@@ -1296,8 +1294,9 @@ module B =
     let search_backward st =
       let re_string = ask_to_search "Search Backward (re): " in
       Misc.warning (Printf.sprintf "Search backward %s" re_string);
+      let re = Str.regexp re_string in
       ()
-        
+
     let duplex = duplex_switch false
     let duplex_sync = duplex_switch true
     let toggle_autoswitch st = toggle_autoswitch ()
@@ -1352,7 +1351,7 @@ let bind_keys () =
    'P', B.previous_pause;
    'N', B.next_pause;
 
-   (* ^P, ^N in edit mode means previous- or next-slice *)
+   (* ^P, ^N in edit mode means previous -or next- slice *)
    '', B.next_slice;
    '', B.previous_slice;
 
@@ -1362,7 +1361,7 @@ let bind_keys () =
    'g', B.goto;
    'G', B.goto_pageref;
 
-   (* r, Control-l, R, to redraw or reload. *)
+   (* r, Control-l, R, to redraw, redisplay, or reload. *)
    'r', B.redraw;
    'R', B.reload;
    '', B.redisplay;
@@ -1411,19 +1410,16 @@ bind_keys ();;
 let main_loop mastername clients =
   let st = init true mastername in
   begin match clients with
-    duplexname :: _ ->
+  | duplexname :: _ ->
       let st' = init false duplexname in
-      if compatible st st' then
-        begin
-          st.duplex <- Master st';
-          st'.duplex <- Client st;
-        end
-      else
+      if compatible st st' then begin
+        st.duplex <- Master st';
+        st'.duplex <- Client st;
+      end else
         Misc.warning
           (Printf.sprintf
              "Ignoring client %s incompatible with master file %s"
-             duplexname st.filename
-          )
+             duplexname st.filename)
   | [] -> ()
   end;
   (* Check if whiterun *)
@@ -1442,7 +1438,7 @@ let main_loop mastername clients =
       if st.page_number > 0 && Gs.get_do_ps () then
         Driver.scan_special_pages st.cdvi st.page_number
       else set_page_number st (page_start 0 st);
-      if changed st then reload false st; 
+      if changed st then reload false st;
       idraw st;
       (* num is the current number entered by keyboard *)
       try while true do
@@ -1456,7 +1452,7 @@ let main_loop mastername clients =
                 B.reload st
             | Client st' ->
                 if !autoswitch then raise (Duplex (B.reload, st'))
-                else Grdev.clear_usr1();
+                else Grdev.clear_usr1 ();
             end
         | Grdev.Resized (x, y) -> resize st x y
         | Grdev.Key c -> bindings.(Char.code c) st
@@ -1497,6 +1493,6 @@ let main_loop mastername clients =
       done
       with
       | Exit -> Grdev.close_dev ()
-      | Duplex (action, st') -> duplex action st'
-    in duplex redraw st            
+      | Duplex (action, st') -> duplex action st' in
+    duplex redraw st
   end;;
