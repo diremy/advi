@@ -56,8 +56,10 @@ Press: %
 % The size of the logo is 69x79 (in pixels)
 % this ratio is respected by fixing width,
 % then calculating height = 79. /. 69. *. twidth
-\hfill{\adviembed[sticky=advianim,width=0.1\textwidth,height=0.1015\textwidth]%
-{animate -geometry !g! -window !p advilogo.anim.gif}}
+% xanim +Sx@x +Sy@y +W @p advilogo.anim.gif
+%
+\hfill{\adviembed[sticky=advianim,width=1.56cm,height=1.824cm]%
+{xanim -Zr +q +Sx@w +Sy@h +W@p +Wx@x +Wy@y advilogo.anim.gif}}
 }\medskip \leftline
  {\hbox to 3em {\ifnum \thepage >1\theTarget [0]{First}{1}\fi\hfil}
   \hbox to 3em {\ifnum \thepage >1\theTarget {Prev}{-1}\fi\hfil}
