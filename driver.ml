@@ -615,53 +615,56 @@ let proc_clean () =
 
 let proc_special st s =
   let records = get_records s in
-  let procname =
-    try unquote (List.assoc "proc" records)
-    with Not_found -> raise (Failure "proc: invalid special") in
   try
     let v = List.assoc "record" records in
     match v with
     | "start" ->
+        let procname =
+          try unquote (List.assoc "proc" records)
+          with Not_found -> raise (Failure "proc: invalid special") in
         if !current_recording_proc_name <> None ||
         !current_recording_proc_unit <> None then begin
           prerr_endline
-           (Printf.sprintf "proc=%s record=start: cannot be recorded"
-             procname)
+            (Printf.sprintf "proc=%s record=start: cannot be recorded"
+               procname)
         end else begin
           hidden :=
             (try ignore (List.assoc "play" records); false with _ -> true);
           current_recording_proc_name := Some procname;
           current_recording_proc_unit :=
-             Some { escaped_register= get_register_set st;
-                    escaped_cur_mtable= st.cur_mtable;
-                    escaped_cur_gtable= st.cur_gtable;
-                    escaped_cur_font = st.cur_font;
-                    escaped_commands= [] }
+            Some { escaped_register= get_register_set st;
+                   escaped_cur_mtable= st.cur_mtable;
+                   escaped_cur_gtable= st.cur_gtable;
+                   escaped_cur_font = st.cur_font;
+                   escaped_commands= [] }
         end
     | "end" ->
-        if !current_recording_proc_name <> Some (procname) ||
-        !current_recording_proc_unit = None then begin
-          prerr_endline
-           (Printf.sprintf "proc=%s record=end: not recorded" procname)
-        end else begin
-          let v =
-            try
-              let v = Hashtbl.find procs procname in
-              Hashtbl.remove procs procname;
-              v
-            with Not_found -> []
-          in
-          match !current_recording_proc_unit with
-          | Some u ->
-              Hashtbl.add procs procname (v @ [u]);
-              current_recording_proc_name := None;
-              current_recording_proc_unit := None;
-              hidden := false
-          | None -> assert false
+        begin match !current_recording_proc_name with
+          None ->
+            prerr_endline
+              (Printf.sprintf "'xxx %s' not recording" s)
+        | Some procname -> 
+            let v =
+              try
+                let v = Hashtbl.find procs procname in
+                Hashtbl.remove procs procname;
+                v
+              with Not_found -> []
+            in
+            match !current_recording_proc_unit with
+            | Some u ->
+                Hashtbl.add procs procname (v @ [u]);
+                current_recording_proc_name := None;
+                current_recording_proc_unit := None;
+                hidden := false
+            | None -> assert false
         end
     | _ -> ()
   with
   | Not_found ->
+      let procname =
+        try unquote (List.assoc "proc" records)
+        with Not_found -> raise (Failure "proc: invalid special") in
       try
         ignore (List.assoc "play" records);
         let us = Hashtbl.find procs procname in
@@ -675,8 +678,8 @@ let proc_special st s =
           st.cur_gtable <- u.escaped_cur_gtable;
           st.cur_font <- u.escaped_cur_font;
           List.iter
-           (fun com -> !forward_eval_command st com) u.escaped_commands)
-           us;
+            (fun com -> !forward_eval_command st com) u.escaped_commands)
+          us;
         st.stack <- escaped_stack; pop st;
         st.cur_mtable <- escaped_cur_mtable;
         st.cur_gtable <- escaped_cur_gtable;
@@ -684,7 +687,7 @@ let proc_special st s =
       with
       | Not_found ->
           prerr_endline
-            (Printf.sprintf "proc=%s play: not recorded" procname);;
+            (Printf.sprintf "xxx '%s': %s not recorded" s procname);;
 
 let wait_special st s =
   let records = get_records s in
@@ -989,7 +992,7 @@ let special st s =
     if has_prefix "advi: blend" s then blend_special st s else
     if has_prefix "advi: epstransparent" s then epstransparent_special st s else
     if has_prefix "advi: pause" s then raise Pause else
-    if has_prefix "advi: proc=" s then proc_special st s else
+    if has_prefix "advi: proc" s then proc_special st s else
     if has_prefix "advi: wait " s then wait_special st s else
     if has_prefix "advi: embed " s then embed_special st s else
     if has_prefix "advi: trans " s then transition_special st s else
@@ -1038,7 +1041,7 @@ let eval_command st c =
    | Some u ->
        match c with
           (* The advi: proc specials are not recorded *)
-       | Dvi.C_xxx s when has_prefix "advi: proc=" s -> ()
+       | Dvi.C_xxx s when has_prefix "advi: proc" s -> ()
        |  _ -> u.escaped_commands <- u.escaped_commands @ [c]
    end;
    eval_dvi_command st c;;

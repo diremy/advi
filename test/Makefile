@@ -1,5 +1,6 @@
 # To view the demo, use ../advi demo.dvi
 include ../Makefile.config
+TEXINPUTS := ../lib/tex:$(TEXINPUTS)
 
 RM=/bin/rm -f
 

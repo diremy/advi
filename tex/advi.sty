@@ -1,8 +1,9 @@
 %%
-%% This is the original source file mathpar.sty
+%% This is the original source file advi.sty
 %%
-%% Package `mathpar' to use with LaTeX 2e
-%% Copyright Jun Furuse and Didier Remy, all rights reserved.
+%% Package `advi' to use with LaTeX 2e
+%% Copyright Roberto Di Cosmo, Jun Furuse, Didier Remy, and Pierre Weis
+%% All rights reserved.
 
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{advi}
@@ -13,166 +14,196 @@
 %% Identification
 %% Preliminary declarations
 
+\RequirePackage {keyval}
+
 %% Options
 
 \newif \ifadvi@annot \advi@annotfalse
 \newif \ifadvi@ignore \advi@ignorefalse
-\DeclareOption {annot}{\advi@annottrue}
 \DeclareOption {ignore}{\advi@ignoretrue}
-\ProcessOptions
 
-\@ifundefined {advi}{}{\advi@annottrue}
+\ProcessOptions
 
 \ifadvi@annot \RequirePackage {pst-node}\fi
 
-% Low level macros
+%% More declarations
 
-\ifadvi@ignore
-\def \advi@special #1{\hbox{}}
+% Auxilliary macros
+
+\ifadvi@ignore 
+\def \advi@special@ #1{\hbox{}}
 \else
-\let \advi@special \special
+\let \advi@special@ \special
 \fi
+\def \advi@special #1{\advi@special@ {advi: #1}}
+\def \advi@export #1#2{\@ifdefinable #1{\let #1#2}}
+\def \advi@exportenv #1#2{%
+  \@ifundefined {#1}{\expandafter \let \csname #1\expandafter \endcsname
+                     \csname end#1\endcsname }\relax  
+  \expandafter \@ifdefinable \csname #1\endcsname
+  {\expandafter \let \csname #1\expandafter \endcsname \csname #2\endcsname
+   \expandafter \let \csname end#1\expandafter \endcsname 
+        \csname end#2\endcsname}}
 
+%%% record and play
 
-\def \advi@@start #1{\advi@special {advi: proc=#1 record=start}}
-\def \advi@@end #1{\advi@special {advi: proc=#1 record=end}}
-\def \advi@@startplay #1{\advi@special {advi: proc=#1 record=start play}}
-\def\advi@record #1#2{\advi@@start{#1}#2\advi@@end{#1}}
-\def\advi@recplay #1#2{\advi@@startplay{#1}#2\advi@@end{#1}}
+\def \advi@start {start}
+\define@key{record}{play}[]{\def \advi@start {start play}}
+\newenvironment {advi@record}[2][]
+  {\setkeys{record}{#1}\advi@special {proc=#2 record=\advi@start}}
+  {\advi@special {proc record=end}}
+\define@key{play}{color}[blue]{\color{#1}}
+\newcommand {\advi@play}[2][]
+   {\bgroup \setkeys {play}{#1}\advi@special {proc=#2 play}\egroup}
+
+\advi@exportenv {record*}{advi@record}
+\newcommand {\record}[3][]{\begin{advi@record}[#1]{#2}#3\end{advi@record}}
+\advi@export \play \advi@play
+
 
 %%% Embedded applications
 
-\newcommand{\advi@embed}[4][anonymous]{\mbox{\advi@special
-  {advi: embed name="#1" type=ephemeral width=#2 height=#3 command="#4"}{\vbox to #3{\hbox to #2{}}}}}
+\def \advi@empty{}
+\def \advi@embed@name{anonymous}
+\def \advi@embed@type{ephemeral}
+\define@key {advi@embed}{name}{\def \advi@embed@name {#1}}
+\define@key {advi@embed}{type}{\def \advi@embed@type {#1}}
+\define@key {advi@embed}{ephemeral}[]{\def \advi@embed@type {ephemeral}}
+\define@key {advi@embed}{persistent}[]{\def \advi@embed@type {persistent}}
+\define@key {advi@embed}{sticky}[]{\def \advi@embed@type {sticky}}
+\def \advi@embed@ #1#2#3#4#5{%
+  \mbox{\advi@special
+          {embed name="#1" type=#2 width=#3 height=#4 command="#5"}%
+          {\vbox to #4{\hbox to #3{}}}}%
+}
 
-\def\advi@embedephemeral#1#2#3#4{\mbox{\advi@special
-  {advi: embed name="#1" type=ephemeral width=#2 height=#3 command="#4"}{\vbox to #3{\hbox to #2{}}}}}
+\newcommand{\advi@embed}[4][]{
+  \mbox {\setkeys {advi@embed}{#1}%
+         \advi@embed@ {\advi@embed@name}{\advi@embed@type}{#2}{#3}{#4}}%
+}
+\newcommand{\advi@killembed}[1]{\advi@special {kill name="#1"}}
+\advi@export \adviembed \advi@embed
+\advi@export \advikillembed \advi@killembed 
 
-\def\advi@embedsticky#1#2#3#4{\mbox{\advi@special
-  {advi: embed name="#1" type=sticky width=#2 height=#3 command="#4"}{\vbox to #3{\hbox to #2{}}}}}
-
-\def\advi@embedpersistent#1#2#3#4{\mbox{\advi@special
-  {advi: embed name="#1" type=persistent width=#2 height=#3 command="#4"}{\vbox to #3{\hbox to #2{}}}}}
-\def\advi@killembed#1{\advi@special
-  {advi: kill name="#1"}}
 
 %%% Background colors and images
 
-\def\advi@setbgcolor#1{\advi@special{advi: setbg col=#1}}
-\def\advi@setbgimage#1{\advi@special{advi: setbg img=#1}}
-\def\advi@setbgalpha#1{\advi@special{advi: setbg alpha=#1}}
-\def\advi@setbgblend#1{\advi@special{advi: setbg blend=#1}}
-\def\advi@resetbg{\advi@special{advi: setbg reset}}
-\def\advi@inheritbg{\advi@special{advi: setbg inherit}}
+\define@key {advibg}{color}{\advi@special{setbg col=#1}}
+\define@key {advibg}{reset}[]{\advi@special{setbg reset}}
+\newcommand{\advibg}{\setkeys{advi@bg}}
 
 %%% Pausing and waiting
 
-\def\advi@pause{\advi@special{advi: pause}}
-\def\advi@wait#1{\advi@special{advi: wait sec=#1}}
+\def\advi@pause{\advi@special{pause}}
+\def\advi@wait#1{\advi@special{wait sec=#1}}
 
-%%% Record and play
-
-\def\advi@play#1{\advi@special{advi: proc=#1 play}}
-\def\advi@hilight#1#2{{\color{#2}\advi@play{#1}}}
+%% export
+\newcommand {\pause}{\advi@pause}
+\newcommand {\wait}{\advi@wait}
 
 %%% Transparency and alpha blending
 
 \def\advi@epstransparent
-   {\advi@special{advi: epstransparent push true}\aftergroup\resetepstransparent}
+   {\advi@special{epstransparent push true}%
+    \aftergroup \advi@resetepstransparent} 
 \def\advi@epswhite
-   {\advi@special{advi: epstransparent push false}\aftergroup\resetepstransparent}
-\def\advi@resetepstransparent{\advi@special{advi: epstransparent pop}}
-\def\advi@setalpha#1{\advi@special{advi: alpha push #1}\aftergroup\resetalpha}
-\def\advi@resetalpha{\advi@special{advi: alpha pop}}
-\def\advi@setblend#1{\advi@special{advi: blend push #1}\aftergroup\resetblend}
-\def\advi@resetblend{\advi@special{advi: blend pop}}
+   {\advi@special{epstransparent push false}%
+    \aftergroup \advi@resetepstransparent} 
+\def\advi@setalpha#1%
+   {\advi@special{alpha push #1}%
+    \aftergroup \advi@resetalpha} 
+\def\advi@setblend#1%
+   {\advi@special{blend push #1}%
+    \aftergroup\advi@resetblend}
+\def\advi@resetepstransparent {\advi@special{epstransparent pop}}
+\def\advi@resetalpha {\advi@special{alpha pop}}
+\def\advi@resetblend {\advi@special{blend pop}}
+
+\advi@export \epstransparent \advi@epstransparent
+\advi@export \epswhite \advi@epswhite
+\advi@export \setalpha \advi@setalpha
+\advi@export \setblend \advi@setblend
+
 
 %%% Animated transitions
 
-\def\advi@settransition#1{\advi@special{advi: trans push #1}}
-\def\advi@resettransition{\advi@special{advi: trans pop}}
+\def\advi@settransition#1{\advi@special{trans push #1}}
+\def\advi@resettransition{\advi@special{trans pop}}
 
-\def\advi@transbox@save#1#2#3{\special{advi: transbox save width=#1 height=#2 depth=#3}}
-\def\advi@transbox@go#1{\special{advi: transbox go #1}}
-\def\advi@transbox#1#2{%
-  \hbox{\setbox0\hbox{#2}%
-  \advi@transbox@save{\the\wd0 }{\the\ht0 }{\the\dp0}%
-  \hbox{#2}%
-  \advi@transbox@go{#1}}}
+\def\advi@transbox@save#1#2#3{\advi@special
+  {transbox save width=#1 height=#2 depth=#3}}
+\def\advi@transbox@go#1{\advi@special{transbox go #1}}
+% \def\advi@transbox#1#2{%
+%   \hbox{\setbox0\hbox{#2}%
+%   \advi@transbox@save{\the\wd0 }{\the\ht0 }{\the\dp0}%
+%   \unhbox0 
+%   \advi@transbox@go{#1}}}
+
+\def \advi@transbox #1{%
+   \def \advi@afterbox 
+      {\hbox {\advi@transbox@save{\the\wd0 }{\the\ht0 }{\the\dp0}%
+              \unhbox0\advi@transbox@go{#1}}}%
+   \def \advi@@afterbox {\aftergroup \advi@afterbox} 
+   \afterassignment \advi@@afterbox \setbox0 \hbox } 
+
+\def \advitrans {\setkeys{trans}}
+\define@key{trans}{push}{\advi@special {trans push #1}}
+\define@key{trans}{pop}[]{\advi@special{trans pop}}
+\advi@export \advitransbox \advi@transbox
+
+\advi@export \settransition \advi@settransition
+\advi@export \resettransition \advi@resettransition
 
 %%% For PS Tricks
 
-\def \advi@rel { 4 1 roll sub exch 3 -1 roll sub exch }
-\def \advi@moveto {\advi@special {advi: moveto}}
-\def \advi@rmoveto {\advi@special {advi: rmoveto}}
-
-\def\advi@psput@special#1{\hbox {\pst@Verb
-{{ \pst@coor } \advi@tx@PutCoor \tx@PutBegin }\advi@moveto 
-\box#1\pst@Verb{\tx@PutEnd}}}
-\def \advi@tx@PutCoor {PutCoor }
-
-\def\advi@ncput@iii 
-{\leavevmode \hbox{\pst@Verb {\pst@nodedict /t \psk@npos def 
-\advi@tx@LPut end \tx@PutBegin }\advi@moveto \box\pst@hbox
+\def \advi@moveto {\advi@special {moveto}}
+\def\advi@psput@special#1{%
+\hbox{%
+\pst@Verb{{ \pst@coor }  
+dup exec 2 copy moveto advi@Dict begin printpos end
+\tx@PutCoor 
+\tx@PutBegin}
+\hbox {\advi@moveto \box#1}%
 \pst@Verb{\tx@PutEnd}}}
-\def \advi@tx@LPut { LPut }
 
-\ifadvi@ignore\else
+\def\advi@ncput@iii{%
+\leavevmode
+\hbox{%
+\pst@Verb{%
+\pst@nodedict
+/t \psk@npos def
+tx@NodeDict /LPutPos known { LPutPos } { CP /Y ED /X ED /NAngle 0
+def } ifelse 
+LPutCoor 
+end
+\tx@PutBegin
+}%
+\hbox {\box\pst@hbox}%
+\pst@Verb{\tx@PutEnd}}}
+
 \@ifundefined {psput@special}{}
 {\let \psput@special \advi@psput@special
- %\@ifundefined {ncput@iii}{}{\let \ncput@iii \advi@ncput@iii}
- \AtBeginDocument {\advi@special {header=advi.pro}}}
-\fi
+ %\@ifundefined {ncput@iii}{}{\let \ncput@iii \advi@ncput@iii}%
+ \advi@special@ {header=advi.pro}}
+
 %%% Active DVI
 
-\ifadvi@ignore
-  \def \advi@begin #1{}
-  \def \advi@end  {}
-\else
-  \def \advi@begin #1{\advi@special {html:<a advi="#1">}}
-  \def \advi@end {\advi@special {html:</a>}}
-\fi
-\def \advi@active #1#2{\advi@begin {#1}{#2}\advi@end}
-
-%%% Bulles
-
-\newcommand {\AdviBulleBG}{\def \advibulle@bg}
-\newcommand {\AdviBulleArc}[2]
-  {\ncarc [linestyle=solid,arcangleA=-0,arcangleB=-3]{#1}{advi@to}%
-   \ncarc [linestyle=solid,arcangleA=0,arcangleB=3]{#1}{advi@to}}
-
-\AdviBulleBG{yellow}
-
-\newcount \advi@c@annot
-\newcommand {\advi@annot}[2][]{\global \advance \advi@c@annot by 1%
-   \bgroup
-   \Rnode {advi@from\the\advi@c@annot}%
-          {\advi@begin {advi@annot\the\advi@c@annot}#2\advi@end}
-   \annot@i}
-\newcommand {\annot@i}[1]
-  [linecolor=\advibulle@bg,linewidth=1pt,%
-   fillstyle=solid,fillcolor=\advibulle@bg]
-  {\psset {#1}\@ifnextchar({\annot@ii}{\annot@ii(1,1)}}
-
-\ifadvi@ignore
-\def \annot@ii(#1)#2{\egroup}
-\else
-\def \annot@ii(#1)#2{%
-  \advi@record {advi@annot\the\advi@c@annot}
-    {\rput(#1){\ovalnode {advi@to}{#2}}%
-     \AdviBulleArc{advi@from\the\advi@c@annot}{advi@to}\egroup
-   }}
-\fi
+\newenvironment {advi@active}[1]
+  {\advi@special@ {html:<a advi="#1">}}
+  {\advi@special@ {html:</a>}}
+\advi@exportenv {advi*}{advi@active}
+\newcommand {\advi}[2]{\begin{advi@active}{#1}#2\end{advi@active}}
 
 %%% Partial patch for overlays -- 0 will be shown > 0 will not be shown
 
 \newif \ifadvi@hide \advi@hidefalse
 \def \advi@overlay 
-  {\ifadvi@hide
-   \else \advi@beginhide \aftergroup\advi@endhide \advi@hidetrue \fi}
+  {\ifadvi@hide \else
+     \advi@beginhide \aftergroup \advi@endhide \advi@hidetrue 
+   \fi}
 
-\def \advi@beginhide {\advi@@start {@hide}}
-\def \advi@endhide   {\advi@@end {@hide}}
+\def \advi@beginhide {\advi@record{@hide}}
+\def \advi@endhide   {\endadvi@record}
 \def \make@advioverlay 
   {\let \advi@old@overlay \overlay
    \renewcommand {\overlay}{\advi@overlay \advi@ignore}}
@@ -186,51 +217,5 @@
      \AtBeginDocument {\make@advioverlay}
    \fi}
 
-
-%%% Exports
-
-\def \advi@export #1#2{\@ifdefinable {#1}{\let #1#2}}
-
-\advi@export \Advi \advi@begin \let \endAdvi \advi@end
-\advi@export \advi \advi@active
-
-\advi@export \record \advi@record
-\advi@export \recplay \advi@recplay
-\advi@export \play \advi@play
-\advi@export \embed \advi@embed
-\advi@export \embedephemeral \advi@embedephemeral
-\advi@export \embedsticky \advi@embedsticky
-\advi@export \embedpersistent \advi@embedpersistent
-\advi@export \killembed \advi@killembed
-
-\advi@export \pause \advi@pause
-\advi@export \wait \advi@wait
-
-\advi@export \setbgcolor \advi@setbgcolor
-\advi@export \setbgimage \advi@setbgimage
-\advi@export \setbgalpha \advi@setbgalpha
-\advi@export \setbgblend \advi@setbgblend
-\advi@export \resetbg \advi@resetbg
-\advi@export \inheritbg \advi@inheritbg
-
-\advi@export \tag \advi@recplay
-\advi@export \hide \advi@record
-\advi@export \hilight \advi@hilight
-\advi@export \epstransparent \advi@epstransparent
-\advi@export \epswhite \advi@epswhite
-\advi@export \resetepstransparent \advi@resetepstransparent
-\advi@export \setalpha \advi@setalpha
-\advi@export \resetalpha \advi@resetalpha
-\advi@export \setblend \advi@setblend
-\advi@export \resetblend \advi@resetblend
-
-\advi@export \settransition \advi@settransition
-\advi@export \resettransition \advi@resettransition
-
-\advi@export \transbox \advi@transbox
-
-%% Conditional exports 
-
-\ifadvi@annot \advi@export \annot \advi@annot \fi
 
 \endinput
