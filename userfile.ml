@@ -120,7 +120,8 @@ let add_options_file s = options_files := s :: !options_files;;
 
 Options.add "-options_file"
  (Arg.String add_options_file)
- "STRING\tLoad this file when starting advi, to set up user's options";;
+ "STRING\tLoad this file when starting advi to set up user's options\n\
+ (to override the options of the default ~/.advirc init file).";;
 
 let options_files () = !options_files;;
 
