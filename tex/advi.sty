@@ -25,14 +25,17 @@
 
 %% Preliminary declarations
 
-\RequirePackage {keyval}
-\RequirePackage {color}
-
-%% two abstract colors set by advi. Defaut to black and white
-\DefineNamedColor{named}{background}{rgb}{1,1,1} %white
-\definecolor{bgcolor}{named}{background}
-\DefineNamedColor{named}{foreground}{rgb}{0,0,0} %black
-\definecolor{fgcolor}{named}{foreground}
+\RequirePackage{keyval}
+%% color may take options, which may produce clashes. Load only if unloaded
+%% by main document
+\AtBeginDocument
+  {\@ifundefined {DefineNamedColor}{\usepackage{color}}{}%
+   %% two abstract colors set by advi. Defaut to black and white
+   \DefineNamedColor{named}{background}{rgb}{1,1,1} %white
+   \definecolor{bgcolor}{named}{background}%
+   \DefineNamedColor{named}{foreground}{rgb}{0,0,0} %black
+   \definecolor{fgcolor}{named}{foreground}%
+  }
 
 %% Options
 

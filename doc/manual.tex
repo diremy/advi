@@ -550,14 +550,15 @@ files, or by implementing extensions to the previewer itself.
 \subsection{Viewing multiple files simultaneously}
 
 \label{multiplex}
-{\ActiveDVI} can be invoked with several DVI files (currentlt only two).
-In this case, the first file is the master file and others are client
+{\ActiveDVI} can be invoked with several DVI files (currently only two).
+The first file is always used as the master file and others are client
 files. The user can switch between files explicitly (see 
 \softlink{activedvikeys}{key bindings}) or implicitly.
-There is an implicit switch from master to client when an hyperlink that is
-not found in master file can be found in the client; there is 
-an implicit switch from client to master when using the history stack and
-the previous event on the stack an implicit swtich from master.
+There is an implicit switch from the master to client file $c$ when an
+hyperlink that is not found in master file can be found in the client file
+$c$; there is also a switch from client $c$ to master when using the
+history stack and the previous event on the stack was an implicit switch
+from master to client $c$. 
 
 If \doctt{autoswitch} flag is set, there is also an implicit switch to
 master, whenever {\ActiveDVI} receives signal \doctt{usr1} (to mean 
@@ -1241,18 +1242,11 @@ will redraw text in a box colored with \docid{color}, which defaults to
 
 \subsection{Postscript specials}
 
-{\ActiveDVI} can deal with most of PStricks by calling {\tt
-ghostscript} on included Postscripts. However, the interactivity
-between {\ActiveDVI} and Postscripts is not always properly working.
-
-\begin{itemize}
-
-\item Since characters are rendered by {\ActiveDVI}, some PStricks are
-not allowed.
-
-\item Some change of repairs are also not yet correctly performed.  
-
-\end {itemize}
+{\ActiveDVI} can deal with most of PStricks by calling {\tt ghostscript} on
+included Postscripts. Basic change of coordinates are implemented, but this
+feature remain fragile, as {\ActiveDVI} must in turn call {\tt ghostscript}
+to get the new coordinates. Also, rotations will definitely not work for
+text, which is rendered by {\ActiveDVI} and cannot be rotated.
 
 \subsubsection{Overlays}
 
@@ -1269,7 +1263,7 @@ the {\tt overlay} class and works with {\ActiveDVI} in exactly the same
 way (relaxing the \verb|\overlay@loop| macro inhibits all layers, but the first
 page).
 
-\subsubsection{PStricks}
+\subsubsection{PStricks known to work}
 
 {\ActiveDVI} can deal with main PStricks. In particular, 
 the following work
@@ -1279,7 +1273,7 @@ the following work
 Simple drawings, such as \verb"\psframe", \verb"\ovalnode", \ldots.
 
 \item[+]
-Connections between nodes {\tt \string \ncarc}, {\tt \string \ncarc},
+Connections between nodes {\tt \string \ncline}, {\tt \string \ncarc},
 also works.
 
 \item[+]
@@ -1289,8 +1283,11 @@ Labels over arrows \verb"\Aput", \verb"Bput", etc.
 {\tt\string\SpecialCoor}, {\em i.e.} commands of the form
 {\tt \string \rput (A)\{bla bla\}} works where {\tt A} is a node name. 
 
+\item[+]
+Embeddded-Postcript figures, including scaling.
+
 \end {itemize}
-However, some other PStricks may not to work.
+Other PStricks may or may not work.
 
 
 \section{The \softtarget{advi-slides} {\doctt{advi-slides.sty}} {\LaTeX} package}
@@ -1461,6 +1458,7 @@ Please, send bug reports to
 \url{mailto:advi@pauillac.inria.fr}. 
 \\
 See \url{http://pauillac.inria.fr/advi} for up to date information.
+
 
 \section{\softtarget{activedvikeys}{Key bindings}}
 
