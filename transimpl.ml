@@ -30,16 +30,16 @@ let slide delay steps from =
   try
     for i = steps - 1 downto 1 do
       if delay <> 0.0 then if !sleep delay then raise Exit;
-      let px,py =
+      let px, py =
   	match from with
-  	| DirLeft   -> -w/steps*i, 0
-  	| DirBottom -> 0, -h/steps*i
-  	| DirTop    -> 0, h/steps*i
-  	| DirTopLeft   -> -w/steps*i, h/steps*i
-  	| DirTopRight  -> w/steps*i, h/steps*i
-  	| DirBottomRight -> w/steps*i, -h/steps*i
-  	| DirBottomLeft  -> -w/steps*i, -h/steps*i
-  	| DirRight | _ -> w/steps*i, 0
+  	| DirLeft -> -w / steps * i, 0
+  	| DirBottom -> 0, -h / steps * i
+  	| DirTop -> 0, h / steps * i
+  	| DirTopLeft -> -w / steps * i, h / steps * i
+  	| DirTopRight -> w / steps * i, h / steps * i
+  	| DirBottomRight -> w / steps * i, -h / steps * i
+  	| DirBottomLeft -> -w / steps * i, -h / steps * i
+  	| DirRight | _ -> w / steps * i, 0
       in
       Graphics.draw_image img px py;
     done
@@ -47,53 +47,52 @@ let slide delay steps from =
   | Exit -> ()
 ;;
 
-let wipe delay steps from (w,h) (x,y) =
+let wipe delay steps from (w, h) (x, y) =
   (* bit naive implementation (=inefficient) *)
   try
     for i = steps - 1 downto 1 do
       if !sleep delay then raise Exit;
-      let px,py,w,h =
+      let px, py, w, h =
   	match from with
-  	| DirLeft   -> -w/steps*i, 0, w, h
-  	| DirBottom -> 0, -h/steps*i, w, h
-  	| DirTop    -> 0, h/steps*i, w, h
-  	| DirTopLeft   -> -w/steps*i, h/steps*i, w, h
-  	| DirTopRight  -> w/steps*i, h/steps*i, w, h
-  	| DirBottomRight -> w/steps*i, -h/steps*i, w, h
-  	| DirBottomLeft  -> -w/steps*i, -h/steps*i, w, h
+  	| DirLeft -> -w / steps * i, 0, w, h
+  	| DirBottom -> 0, -h / steps * i, w, h
+  	| DirTop -> 0, h / steps * i, w, h
+  	| DirTopLeft -> -w / steps * i, h / steps * i, w, h
+  	| DirTopRight -> w / steps * i, h / steps * i, w, h
+  	| DirBottomRight -> w / steps * i, -h / steps * i, w, h
+  	| DirBottomLeft -> -w / steps * i, -h / steps * i, w, h
   	| DirCenter -> 
   	    let j = steps - i in
-  	    w/2 - w/(steps*2)*j,
-  		       h/2 - h/(steps*2)*j,
-  			w/steps*j, h/steps*j
-  	|	DirRight | _ -> w/steps*i, 0, w, h
+  	    w / 2 - w / (steps * 2) * j,
+            h / 2 - h / (steps * 2) * j,
+  	    w / steps * j, h / steps * j
+  	| DirRight | _ -> w / steps * i, 0, w, h
       in
       if w = 0 || h = 0 then ()
       else
-  	let img = Graphics.get_image (px+x) (py+y) w h in
-  	Graphics.draw_image img (px+x) (py+y);
+  	let img = Graphics.get_image (px + x) (py + y) w h in
+  	Graphics.draw_image img (px + x) (py + y);
     done
   with
   | Exit -> ()
 ;;
 
-let block delay steps from (w,h) (x,y) =
+let block delay steps from (w, h) (x, y) =
   let rec find_division dx dy =
-  	if dx * dy > steps then dx, dy
-  	else
-  	  (* try to add dx 1 *)
-  	  let dx1 = dx + 1 in
-	  let w_dx1 = w / dx1 in
-  	  let dy1 = if w_dx1 = 0 then 100000 else h / (w / dx1) + 1 in
-  	  (* try to add dy 1 *)
-  	  let dy2 = dy + 1 in
-	  let h_dy2 = h / dy2 in
-  	  let dx2 = if h_dy2 = 0 then 100000 else w / (h / dy2) + 1 in
-  	  if dx1 * dy1 < dx2 * dy2 then find_division dx1 dy1 
-  	  else find_division dx2 dy2
+    if dx * dy > steps then dx, dy else
+    (* try to add dx 1 *)
+    let dx1 = dx + 1 in
+    let w_dx1 = w / dx1 in
+    let dy1 = if w_dx1 = 0 then 100000 else h / (w / dx1) + 1 in
+    (* try to add dy 1 *)
+    let dy2 = dy + 1 in
+    let h_dy2 = h / dy2 in
+    let dx2 = if h_dy2 = 0 then 100000 else w / (h / dy2) + 1 in
+    if dx1 * dy1 < dx2 * dy2 then find_division dx1 dy1 
+    else find_division dx2 dy2
   in
-  let dx,dy = 
-    let dx,dy = find_division 1 1  in
+  let dx, dy =
+    let dx, dy = find_division 1 1  in
     let dx = if dx = 0 then 1 else dx
     and dy = if dy = 0 then 1 else dy in 
     if dx * dy > w * h then w, h else dx, dy
@@ -117,16 +116,16 @@ let block delay steps from (w,h) (x,y) =
       |	DirRight -> fun x y -> -x
       | DirBottom -> fun x y -> y
       |	DirTop -> fun x y -> -y
-      |	DirTopLeft -> fun x y -> x-y
-      |	DirTopRight -> fun x y -> -x-y
-      |	DirBottomLeft -> fun x y -> x+y
-      |	DirBottomRight -> fun x y -> -x+y
-      |	DirCenter -> fun x y -> abs (x-dx/2) + abs (y-dy/2)
+      |	DirTopLeft -> fun x y -> x - y
+      |	DirTopRight -> fun x y -> -x - y
+      |	DirBottomLeft -> fun x y -> x + y
+      |	DirBottomRight -> fun x y -> -x + y
+      |	DirCenter -> fun x y -> abs (x - dx / 2) + abs (y - dy / 2)
       | DirNone | _ -> fun x y -> Random.int (dx * dy)
     in
     let order = Array.init (dx * dy) (fun i -> 
       let x = i mod dx and y = i / dx in 
-      priority x y, (x,y) )
+      priority x y, (x, y) )
     in
     Array.sort compare order;
     for i = 0 to dx * dy - 1 do
@@ -139,7 +138,7 @@ let block delay steps from (w,h) (x,y) =
   try
     for i = 0 to dx * dy - 1 do
       if !sleep delay then raise Exit;
-      let _,(bx,by) = order.(i) in
+      let _, (bx, by) = order.(i) in
       Graphics.blit_image img (bx * bw + x) (by * bh + y);
       Graphics.draw_image img (bx * bw + x) (by * bh + y);
     done
@@ -155,9 +154,12 @@ let synchronize_transition () =
     Graphics.remember_mode false;
     GraphicsY11.display_mode true;
     begin match !current_transition with
-    | TransSlide (step,from) -> slide 0.0 (get_steps 20 step) from
-    | TransWipe (step,from) -> wipe 0.0 (get_steps 20 step) from (w,h) (0,0)
-    | TransBlock (step,from) -> block 0.0 (get_steps 5000 step) from (w,h) (0,0)
+    | TransSlide (step, from) ->
+        slide 0.0 (get_steps 20 step) from
+    | TransWipe (step, from) ->
+        wipe 0.0 (get_steps 20 step) from (w, h) (0, 0)
+    | TransBlock (step, from) ->
+        block 0.0 (get_steps 5000 step) from (w, h) (0, 0)
     | TransNone -> assert false
     end;
     Graphics.remember_mode true;
@@ -171,15 +173,15 @@ let init_sprite () = prev_geom := None;;
 
 let draw_sprite newimg x y width height =
   let orgimg = Graphics.get_image x y width height in
-  let (wx,wy,wwidth,wheight) =
+  let (wx, wy, wwidth, wheight) =
     match !prev_geom with
-    | None -> x,y,width,height 
-    | Some (x',y',width',height') ->
+    | None -> x, y, width, height 
+    | Some (x', y', width', height') ->
 	let x'' = min x x'
 	and y'' = min y y' in
-	let width''  = max (x+width -1) (x'+width' -1) - x'' + 1
-	and height'' = max (y+height-1) (y'+height'-1) - y'' + 1 in
-	x'',y'',width'',height''
+	let width''  = max (x + width - 1) (x' + width' - 1) - x'' + 1
+	and height'' = max (y + height - 1) (y' + height' - 1) - y'' + 1 in
+	x'', y'', width'', height''
   in
   Graphics.draw_image newimg x y;
   let workimg = Graphics.get_image wx wy wwidth wheight in
@@ -190,7 +192,7 @@ let draw_sprite newimg x y width height =
   Graphics.draw_image workimg wx wy;
   Graphics.remember_mode true;
   GraphicsY11.display_mode false;
-  prev_geom := Some (x,y,width,height)
+  prev_geom := Some (x, y, width, height)
 ;;
 
 let string_of_transmode = function
@@ -202,24 +204,29 @@ let string_of_transmode = function
 ;;
 
 (* collection of path generators wired in *)
-
 let get_genpath = function 
-    "spiral" -> (fun steps (sx,sy,ss,sr) (tx,ty,ts,tr) i -> failwith "Spiral not yet implemented") 
-  | "line" -> (fun steps (sx,sy,ss,sr) (tx,ty,ts,tr) ->
-                 let stepx = (tx-.sx)/.(float steps) and stepy=(ty-.sy)/.(float steps) in
-		 fun i ->
-                   let x, y = sx+.(float i)*.stepx,sy+.(float i)*.stepy in
-                   (x, y, ss, sr))
-  | s    -> failwith ("Unknown path"^s)
+  | "spiral" ->
+     (fun steps (sx, sy, ss, sr) (tx, ty, ts, tr) i ->
+        failwith "Spiral not yet implemented") 
+  | "line" ->
+     (fun steps (sx, sy, ss, sr) (tx, ty, ts, tr) ->
+        let stepx = (tx -. sx) /. float steps
+        and stepy = (ty -. sy) /. float steps in
+        fun i ->
+          let x, y = 
+            sx +. float i *. stepx,
+            sy +. float i *. stepy in
+          (x, y, ss, sr))
+  | s -> failwith ("Unknown path " ^ s)
 ;;
 
 (* rendering function for sprites along a path *)
-
 let render newimg width height 
-    (prevx,prevy,prevscale,prevrot)
-    (nextx,nexty,nextscale,nextrot)
-    =
-    draw_sprite newimg (int_of_float nextx) (int_of_float nexty) width height
+    (prevx, prevy, prevscale, prevrot)
+    (nextx, nexty, nextscale, nextrot) =
+    draw_sprite newimg
+      (int_of_float nextx) (int_of_float nexty) width height
+;;
 
 let box_transition trans oldimg newimg x y width height =
   let screen_w = Graphics.size_x () and screen_h = Graphics.size_y () in
@@ -239,19 +246,23 @@ let box_transition trans oldimg newimg x y width height =
 	| DirRight -> 
 	    let len = screen_w - x + width - 1 in
             let newsteps, speed = calc_new_steps_and_speed len in
-	    (fun i -> draw_sprite newimg (x+i*speed) y width height), newsteps
+	    (fun i ->
+               draw_sprite newimg (x + i * speed) y width height), newsteps
 	| DirLeft ->
 	    let len = x in
             let newsteps, speed = calc_new_steps_and_speed len in
-	    (fun i -> draw_sprite newimg (x-i*speed) y width height), newsteps
+	    (fun i ->
+               draw_sprite newimg (x - i * speed) y width height), newsteps
 	| DirTop -> 
 	    let len = screen_h - y + height - 1 in
             let newsteps, speed = calc_new_steps_and_speed len in
-	    (fun i -> draw_sprite newimg x (y+i*speed) width height), newsteps
+	    (fun i ->
+               draw_sprite newimg x (y + i * speed) width height), newsteps
 	| DirBottom | _ ->
 	    let len = y in
             let newsteps, speed = calc_new_steps_and_speed len in
-	    (fun i -> draw_sprite newimg x (y-i*speed) width height), newsteps
+	    (fun i ->
+               draw_sprite newimg x (y - i * speed) width height), newsteps
       in
       begin try 
 	for i = newsteps - 1 downto 1 do 
@@ -261,33 +272,30 @@ let box_transition trans oldimg newimg x y width height =
       with
       |	Exit -> ()
       end
-  | TransPath (steps,genpath,start,stop) ->
+  | TransPath (steps, genpath, start, stop) ->
       let steps = get_steps 50 steps in
       let genpath = get_genpath genpath steps start stop in
       let rec loop prev i =
-	if i >= steps then () else
+	if i < steps then
 	  let next = genpath i in
           render newimg width height prev next;
-	  loop next (i+1)
-      in
-      begin try 
-	loop start 0
-       with
-      |	Exit -> ()
-      end
-     
+	  loop next (i + 1) in
+      begin try
+        loop start 0 
+      with
+      | Exit -> () end     
   | TransBlock (step, from) ->
       let step = get_steps 50 step in
       Graphics.remember_mode false;
       GraphicsY11.display_mode true;
-      block 0.01 step from (width,height) (x,y);
+      block 0.01 step from (width, height) (x, y);
       Graphics.remember_mode true;
       GraphicsY11.display_mode false
   | TransWipe (step, from) ->
       let step = get_steps 50 step in
       Graphics.remember_mode false;
       GraphicsY11.display_mode true;
-      wipe 0.01 step from (width,height) (x,y);
+      wipe 0.01 step from (width, height) (x, y);
       Graphics.remember_mode true;
       GraphicsY11.display_mode false
   (*| _ ->
@@ -309,7 +317,11 @@ let transbox_go trans =
   | Some (oldimg, x, y, width, height) ->
       let newimg = Graphics.get_image x y width height in
       box_transition trans oldimg newimg x y width height 
-  | None -> assert false (* ??? forgot to call transbox_save before ??? *)
+  | None -> assert false
+    (* ??? forgot to call transbox_save before ??? *)
+    (* ??? Seems to be room for simplification there: transbox_save should not
+       be called from within tex but as the first action of trans_go ??? *)
   end;
   saved_transbox := None;
 ;;
+
