@@ -48,6 +48,9 @@
 \def\advi@embedpersistent#1#2#3#4{\mbox{\advi@special
   {advi: embed name="#1" type=persistent width=#2 height=#3 command="#4"}{\vbox to #3{\hbox to #2{}}}}}
 
+\def\advi@killembed#1{\advi@special
+  {advi: kill embed=#1}}
+
 \def\advi@pause{\advi@special{advi: pause}}
 \def\advi@wait#1{\advi@special{advi: wait sec=#1}}
 \def\advi@play#1{\advi@special{advi: proc=#1 play}}
@@ -181,8 +184,9 @@ end
 \advi@export \recplay \advi@recplay
 \advi@export \play \advi@play
 \advi@export \embed \advi@embed
-\advi@export \stickyembed \advi@stickyembed
-\advi@export \persistentembed \advi@persistentembed
+\advi@export \embedsticky \advi@embedsticky
+\advi@export \embedpersistent \advi@embedpersistent
+\advi@export \killembed \advi@killembed
 
 \advi@export \pause \advi@pause
 \advi@export \wait \advi@wait
