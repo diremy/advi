@@ -14,7 +14,7 @@
 
 #include <signal.h>
 #include "libgraph.h"
-#include <alloc.h>
+#include <caml/alloc.h>
 #include <sys/types.h>
 #include <sys/time.h>
 #ifdef HAS_SYS_SELECT_H

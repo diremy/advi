@@ -13,11 +13,11 @@
 
 /* $Id$ */
 
-#include <memory.h>
-#include <alloc.h>
+#include <caml/memory.h>
+#include <caml/alloc.h>
 #include <X11/Xatom.h>
 #include <X11/cursorfont.h>
-#include <fail.h>
+#include <caml/fail.h>
 #include "libgraph.h"
 #include "image.h"
 

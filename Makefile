@@ -64,8 +64,7 @@ LINK_OPTS = $(addprefix -ccopt -L, $(CLIBDIRS)) \
 
 X11_INCLUDES=-I/usr/X11R6/include
 BYTECCCOMPOPTS=-fno-defer-pop -Wall -Wno-unused
-#CFLAGS=-I$(CAMLDIR)/caml $(X11_INCLUDES) -O $(BYTECCCOMPOPTS)
-CFLAGS=-I$(CAMLDIR)/caml $(X11_INCLUDES) -O $(BYTECCCOMPOPTS)
+CFLAGS=$(X11_INCLUDES) -O $(BYTECCCOMPOPTS)
 
 byte: $(EXEC)
 opt: $(EXEC).opt 
@@ -134,7 +133,7 @@ install:: advi.opt tex/splash.dvi
 MLFILES = $(addsuffix .ml, $(MODULES))
 .depend:: *.mli $(MLFILES) Makefile 
 	$(OCAMLDEP) *.mli $(MLFILES) > .depend
-	gcc -MM $(CFLAGS) $(COBJS:.o=.c) | sed -e 's|$(CAMLDIR)/caml/[^ ]*||' >> .depend
+	gcc -MM -I$(CAMLDIR)/caml $(CFLAGS) $(COBJS:.o=.c) | sed -e 's|$(CAMLDIR)/caml/[^ ]*||' >> .depend
 
 # just for the authors
 VERSION=0.4.0
