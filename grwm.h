@@ -26,7 +26,7 @@
 
 #define __grwm__
 
-void x11_fullscreen(Display *dpy, Window w, int posx, int posy,int width, int height);
+void x11_fullscreen(Display *dpy, Window w, int posx, int posy,int width, int height, int fs);
 
 void x11_decoration(Display *dpy,Window w,int decorate);
 

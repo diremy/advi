@@ -528,8 +528,7 @@ value gr_reposition (value x, value y, value w, value h, value screen)
   /* update size hints, essential for KDE */
   x11_sizehint(grdisplay, grwindow.win, posx, posy, width, height); 
 
-  if (fullscreen)
-    x11_fullscreen(grdisplay,grwindow.win,posx,posy,width,height);
+  x11_fullscreen(grdisplay,grwindow.win,posx,posy,width,height, fullscreen ? True:False);
 
   XMoveResizeWindow(grdisplay, grwindow.win, posx, posy, width, height);
   //#ifdef HAVE_XINERAMA

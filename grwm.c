@@ -164,7 +164,7 @@ int wm_detect(Display *dpy, Window w)
  return wm;
 }    
 
-void x11_setlayer(Display * dpy,Window w,int fs_type, int layer)
+void x11_setlayer(Display * dpy,Window w,int fs_type, int fs)
 {
    XClientMessageEvent  xev;
    char *state;
@@ -176,7 +176,7 @@ void x11_setlayer(Display * dpy,Window w,int fs_type, int layer)
    xev.display=dpy;
    xev.window=w;
    xev.format=32;
-   xev.data.l[0]=layer;
+   xev.data.l[0]=fs; /* True sets the property, False removes it */
 
    if ( fs_type & wm_STAYS_ON_TOP )
      xev.data.l[1]=XA_NET_WM_STATE_STAYS_ON_TOP;
@@ -201,7 +201,7 @@ void x11_setlayer(Display * dpy,Window w,int fs_type, int layer)
 }
 
 
-void x11_fullscreen(Display * dpy,Window w, int posx, int posy, int width, int height)
+void x11_fullscreen(Display * dpy,Window w, int posx, int posy, int width, int height, int fs)
 {
   int fs_style;
   Window root;
@@ -215,8 +215,8 @@ void x11_fullscreen(Display * dpy,Window w, int posx, int posy, int width, int h
 
   fprintf(stderr,"FS_STYLE=%d\n",fs_style);
 
-  /* Make sure our window is in front of all the others */
-  x11_setlayer(dpy, w, fs_style, True); 
+  /* If fullscreen, make sure our window is in front of all the others */
+  x11_setlayer(dpy, w, fs_style, fs? True: False); 
 
   // This is required for MWM, but kills the decorations on other WMs.. (sawfish, fvwm95)
   //if(fs_style==0) XWithdrawWindow(dpy,w,screen); // required for MWM
