@@ -251,10 +251,10 @@ let scratch_write_settings_handle_char c =
   | c ->
     Misc.warning (Printf.sprintf "Unknown scratch write setting key: %C" c);;
 
-let enter_scratch_settings scratch_settings c =
+let enter_scratch_settings settings c =
   match c with
   | '' | 'q' -> end_write ()
-  | '' -> scratch_settings ()
+  | '' -> settings ()
   | c ->
     Misc.warning
       (Printf.sprintf "Unknown key %C. Click to start scratching" c);;
@@ -347,7 +347,7 @@ and start_scratch_write () =
 let do_write () =
   save_excursion cursor_write (get_scratch_font_color ()) start_scratch_write;;
 
-let write () = only_on_screen do_write ();;
+let write = only_on_screen do_write;;
 
 (*** Scratch drawing on screen: defining events. *)
 
@@ -467,18 +467,6 @@ let draw_circle (x0, y0) (x1, y1) =
   and r = Misc.round (distance x0 y0 x1 y1 /. 2.) in
   G.draw_circle c_x c_y r;;
 
-let draw_figure_with_no_point f = f ();;
-
-let forward_scratch_draw_char_event =
-  ref (fun _ -> failwith "Undefined forward scratch_draw_char_event.");;
-
-let scratch_draw_char_event c = !forward_scratch_draw_char_event c;;
-
-let draw_figure_with_one_point f = f (wait_click scratch_draw_char_event);;
-
-let draw_figure_with_two_points f =
-  draw_figure_with_one_point (draw_figure_with_one_point f);;
-
 (* Drawing paths. *)
 let get_path_starting_point,
     set_path_starting_point,
@@ -501,16 +489,16 @@ let draw_close_path () =
     clear_path_starting_point ();;
 
 (* The main figure drawing routine. *)
-let handle_figure scratch =
+let handle_figure no_point one_point two_points =
   match get_scratch_figure () with
-  | Free_hand -> draw_figure_with_no_point scratch
-  | Point -> draw_figure_with_one_point draw_point
-  | Hline -> draw_figure_with_two_points draw_hline
-  | Vline -> draw_figure_with_two_points draw_vline
-  | Segment -> draw_figure_with_two_points draw_segment
-  | Circle -> draw_figure_with_two_points draw_circle
-  | Path -> draw_figure_with_one_point draw_path
-  | Close_path -> draw_figure_with_no_point draw_close_path;;
+  | Free_hand -> no_point ()
+  | Point -> one_point draw_point
+  | Hline -> two_points draw_hline
+  | Vline -> two_points draw_vline
+  | Segment -> two_points draw_segment
+  | Circle -> two_points draw_circle
+  | Path -> one_point draw_path
+  | Close_path -> draw_close_path ();;
 
 (*** Scratching figures: drawing lines and figures on the screen. *)
 
@@ -551,18 +539,20 @@ prerr_endline (Printf.sprintf "Setting key %C" c);
   G.set_color (get_scratch_line_color ());;
 
 (* Drawing on slide until the mouse is moving. *)
-let scratch_until button_up button_down =
+let scratch_until figure key_pressed button_up button_down =
   let rec go_on () =
     match find_scratch_events () with
     | { mouse_motion_event =
           (  E_Big_Move (x, y)
            | E_Small_Move (x, y)); } ->
-      handle_figure (fun () -> G.lineto x y);
+      figure x y;
       go_on ()
     | { mouse_motion_event = E_No_Move; key_event = E_Key c; } -> 
-      scratch_draw_char_event c
-    | { mouse_motion_event = E_No_Move; button_event = E_Up; } -> button_up ()
-    | { mouse_motion_event = E_No_Move; button_event = E_Down; } -> button_down () in
+      key_pressed c
+    | { mouse_motion_event = E_No_Move; button_event = E_Up; } ->
+      button_up ()
+    | { mouse_motion_event = E_No_Move; button_event = E_Down; } ->
+      button_down () in
   go_on;;
 
 (* Main scratch draw loop:
@@ -578,24 +568,34 @@ let rec scratch_draw () =
     Misc.warning "Scratch_draw_up";
     scratch_draw_up ()
   | { mouse_motion_event = E_No_Move; key_event = E_Key c; } ->
-    scratch_draw_char_event c
+    Misc.warning "Scratch_draw_char_event";
+    key_pressed c
   | _ ->
     Misc.warning "Scratch_draw_down";
     scratch_draw_down ()
 
-and scratch_draw_up () = scratch_until scratch_draw_up start_scratch_draw ()
+and scratch_draw_up () =
+  scratch_until figure key_pressed scratch_draw_up start_scratch_draw ()
 
-and scratch_draw_down () = scratch_until start_scratch_draw scratch_draw_down ()
+and scratch_draw_down () =
+  scratch_until figure key_pressed start_scratch_draw scratch_draw_down ()
 
-and scratch_draw_char_event c =
-  Misc.warning "Scratch_draw_char_event";
+and key_pressed c =
   match c with
   | '' | 'q' -> end_draw ()
   | '' -> scratch_draw_settings ()
   | c ->
-     let x,y = G.mouse_pos () in
+     let x, y = G.mouse_pos () in
      try scratch_write_char c x y with
      | Exit -> start_scratch_draw ()
+
+and one_point_figure f = f (wait_click key_pressed)
+and two_points_figure f =
+  (* Mu-rule ... *)
+  Obj.magic one_point_figure (Obj.magic one_point_figure f)
+
+and figure x y =
+ handle_figure (fun () -> G.lineto x y) one_point_figure two_points_figure
 
 (* Button has been clicked: we move to the current mouse position,
    set up color and line thickness, and start scratch drawing. *)
@@ -637,9 +637,7 @@ and start_scratch_draw () =
   wait_button_pressed (enter_scratch_settings scratch_draw_settings);
   enter_scratch_draw ();;
 
-forward_scratch_draw_char_event := scratch_draw_char_event;;
-
 let do_draw () =
   save_excursion cursor_draw (get_scratch_line_color ()) start_scratch_draw;;
 
-let draw () = only_on_screen do_draw ();;
+let draw = only_on_screen do_draw;;
