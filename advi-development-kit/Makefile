@@ -10,5 +10,5 @@ distribute: clean
 
 clean:
 	rm -f adk-1.2.0.tar.gz
-	(cd adk-1.2.0; \
+	(cd adk; \
 	   /bin/rm -rf camlimages* advi*)
