@@ -954,10 +954,10 @@ module H =
       | Nil -> false
 
 
-    let deemphasize now emph =
+    let deemphasize emph =
       match emph with
       | Rect (img, act, l) ->
-          GraphicsY11.display_mode now;
+          GraphicsY11.display_mode true;
           List.iter
             (function img, act -> Graphics.draw_image img act.A.x act.A.y) l;
           Graphics.draw_image img act.A.x act.A.y;
@@ -1024,7 +1024,7 @@ module H =
       | Not_found | Misc.Match -> Nil
 
     let flashlight t =
-      deemphasize true (light t)
+      deemphasize (light t)
 
     let emphasize_and_flash color act =
       let fill, color =
@@ -1040,10 +1040,6 @@ module H =
       | Rect (img, a, l), Rect (img', a', l') ->
           Rect (img, a, (img', a') :: (l' @ l))
       | x, _ -> x
-
-    let reemphasize emph act =
-      deemphasize false emph;
-      emphasize_and_flash href_emphasize_color act
 
   end;;
 
@@ -1511,10 +1507,9 @@ let wait_button_up m x y =
 let wait_event () =
   (* We reached a pause. Now we can reset the sleep break *)
   clear_sleep ();
-  let deemphasize emph = H.deemphasize true emph in
   let rec event emph b =
-    let send ev = deemphasize emph; ev in
-    let rescan () = deemphasize emph; event H.Nil false in
+    let send ev = H.deemphasize emph; ev in
+    let rescan () = H.deemphasize emph; event H.Nil false in
     match wait_signal_event all_events with
     | Final e -> send e
     | Raw ev ->
@@ -1525,23 +1520,23 @@ let wait_event () =
               let ev' = GraphicsY11.wait_next_event button_up in
               send (Href h) else
             if H.up_to_date act emph then event emph b else begin
-              deemphasize emph;
+              H.deemphasize emph;
               event (H.emphasize_and_flash href_emphasize_color act) b end
         | {A.action =
            {H.tag = H.Advi {H.link = s; H.action = a; H.mode = H.Over};
             H.draw = d}} as act ->
               if H.up_to_date act emph then event emph b else begin
-                deemphasize emph;
+                H.deemphasize emph;
                 event (H.save_screen_exec act a) b end
         | {A.action =
            {H.tag = H.Advi {H.link = s; H.action = a; H.mode = H.Click_down};
             H.draw = d}} as act ->
               if ev.button && not b then begin
-                deemphasize emph;
+                H.deemphasize emph;
                 event (H.save_screen_exec act a) true end else
               if ev.button then event emph b else
               if H.up_to_date act emph then event emph b else begin
-                deemphasize emph;
+                H.deemphasize emph;
                 event (H.emphasize_and_flash href_emphasize_color act) b end
         | _ -> rescan ()
         with Not_found ->
