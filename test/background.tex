@@ -1,3 +1,8 @@
+%% Copyright Roberto Di Cosmo, Jun Furuse, Didier Remy, and Pierre Weis
+%% All rights reserved.
+
+%% $Id$
+
 \documentclass[12pt]{article}
 
 % You need graphics package
@@ -105,27 +110,45 @@ in the {\LaTeX} source of the page the following command:
 
 By choosing one of the \verb|hgradient|, \verb|vgradient|,
 \verb|d1gradient|, \verb|d2gradient|, \verb|cgradient|, or
-\verb|circgradient| predefined functions, we can convert the entire background
-color into a color gradient from the chosen color to white.
+\verb|circgradient| predefined functions, we convert the plain
+background color into a color gradient from the chosen color to white
+(by default).
 
-Additionally the gradient colors and the area where the gradient is drawn can be
-specified:
+In fact, the gradient color bounds can be precised with fields:
+
 \begin{itemize}
-\item \verb"colorstart" specify the starting color of the gradient,
-\item \verb"colorstop" specify the ending color of the gradient,
+ \item \verb"colorstart" to specify the starting color of the gradient,
+ \item \verb"colorstop" to specify the ending color of the gradient.
+\end{itemize}
+
+When left unspecified, those colors respectively default to
+\verb"white" and the background color.
+
+You specify the area where the gradient is drawn by giving the
+coordinates of the rectangle that defines the area:
+\begin{itemize}
 \item \verb"xstart" and \verb"ystart" define the lower left point of the area,
 \item \verb"width" and \verb"height" specify the width and height of
 the area.
 \end{itemize}
 
-Dimensions of the area are floating point numbers in the range
-\verb|[0 .. 1]| that gives the ratio of the area with respect to the
-page ($0$ meaning a null dimension and $1$ the entire actual
-page relevant dimension).
+When left unspecified, the gradient's area defaults to the entire page.
 
-For centered or circular gradient, \verb"xcenter" and \verb"ycenter"
-define the coordinates of the center point of the gradient (those are
-also dimensions with the same encoding as in the preceding paragraph).
+Area dimension specifications are floating point numbers in the range
+\verb|[0 .. 1]|. Each number gives the ratio of the specified
+dimension with respect to the corresponding page dimension (hence $0$
+means a null dimension and $1$ means the entire actual page relevant
+dimension).
+
+For centered or circular gradient, the fields \verb"xcenter" and
+\verb"ycenter" define the coordinates of the center point of the
+gradient into the gradient area (the \verb"xcenter" and \verb"ycenter"
+specifications use the same convention as in the preceding paragraph:
+a ratio of a given dimension, in this case a ratio of the gradient
+area's width and height respectively).
+
+When left unspecified, the gradient's center defaults to the center of
+its area.
 
 \vfill
 
@@ -273,7 +296,7 @@ The command to obtain this background is:
 
 \begin{quote}
   \begin{verbatim}
-  \advibg{color = cyan, fun = "cgradient",
+  \advibg{color = green, fun = "cgradient",
           colorstart = "blue"} 
   \end{verbatim}
 \end{quote}
@@ -304,7 +327,7 @@ The command to obtain this background is:
             colorstart = blue,
             colorstop = red,
             xcenter = 0.25,
-            ycenter = 0.25,
+            ycenter = 0.5,
             xstart = 0.5,
             ystart = 0.5,
             width = 0.1,
@@ -882,10 +905,10 @@ The command to obtain this background is:
 The command to obtain this background is:
 
 \advibg{color = white,
-       fun = hgradient,
-       colorstart = blue, colorstop = green,
-       xstart = 0, ystart = 0,
-       width = 0.14, height = 1.}
+        fun = hgradient,
+        colorstart = blue, colorstop = green,
+        xstart = 0, ystart = 0,
+        width = 0.14, height = 1.}
 
 \begin{center}
 \begin{verbatim}
