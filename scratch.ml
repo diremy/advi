@@ -61,11 +61,29 @@ Options.add "-scratch-font"
  "STRING\tSet the font used when scratching slides (default times bold)"
 ;;
 
-let rec scratch_write_char c x y =
+let rec scratch_write_char =
+  let prev_xs = ref [] in
+  let prev_size_y = ref 0 in
+  fun c x y ->
    G.moveto x y;
-   let tx, ty = G.text_size (String.make 1 c) in
-   G.draw_char c;
-   scratch_write (x + tx) y
+   if c = '' then begin
+     prerr_endline "backspace";
+     let px =
+      match !prev_xs with
+      | [] -> 0
+      | px :: xs -> prev_xs := xs; px in
+     let py = y in
+     let ty = !prev_size_y in
+     G.set_color G.background;
+     G.fill_rect (px - 1) py (x - px + 2) ty;
+     G.set_color !scratch_font_color;
+     scratch_write px py
+   end else begin
+     let tx, ty = G.text_size (String.make 1 c) in
+     prev_xs := x :: !prev_xs;
+     prev_size_y := max ty !prev_size_y;
+     G.draw_char c;
+     scratch_write (x + tx) y end
 
 and scratch_write x y =
    match Graphics.wait_next_event [Button_down; Key_pressed] with

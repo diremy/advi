@@ -145,13 +145,10 @@ let ask_to_launch command command_invocation =
 
  unmapping_persistent_apps (fun () ->
    draw_term t;
-
-   let res =
    ask_user t
     "Attempt to launch the following command"
     command_invocation
-    "Do you want to execute it ? <yes/no> " in
-    res) ();;
+    "Do you want to execute it ? <yes>[no] ") ();;
 
 let can_launch command command_invocation =
   match !policy with
