@@ -136,7 +136,7 @@ let can_be_cache_directory dirname =
 let default_user_advi_cache_dir =
   let d0 = Filename.concat (Unix.getcwd ()) ".advi" in
   if can_be_cache_directory d0 then d0 else
-  let d1 = Filename.concat "" "tmp" in
+  let d1 = Filename.concat "" (Filename.concat "tmp" ".advi") in
   if can_be_cache_directory d1 then d1 else begin
     Misc.warning "Cannot find a cache directory";
     d0
