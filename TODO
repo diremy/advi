@@ -115,3 +115,6 @@ the user (for instance to launch applications on a on demand basis).
 to interact smoothly with it (for instance to have a key to hide it)...
 
  - Need a key to hide and show windows
+
+ - Need a key binding similar to 'g' such that it goes to the page and pushes
+   on the stack alll the pages from here to the target page

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 if [ -f ./taquin ]; then
-  taquin $*
+  ./taquin $*
 else
-  sorry.wish $*
+  ./sorry.wish $*
 fi
