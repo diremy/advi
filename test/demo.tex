@@ -35,7 +35,7 @@
 \def\advifooter{\vbox to 0em{\vbox to \vsize {\vfill
 Press: \keymenu{n}ext page \keymenu{p}revious page
 \keymenu{\textvisiblespace} next pause%
-\hfill{\embedsticky{advianim}{1cm}{1cm}{animate -geometry !g -window !p advi.anim.gif}}
+\hfill{\embedsticky{advianim}{1.56cm}{1.824cm}{animate -geometry !g! -window !p advianmlogosmall.gif}}
 } \vss}}
 
 \def\adviheader{\noindent
@@ -193,13 +193,13 @@ rectangle where the application will draw material.
 \begin{itemize}
 \item The \verb"display" command (from ImageMagick) can show any image into your
 presentation using:\\
-\verb|\embed{3cm}{3.3cm}|\verb|{display -geometry !g -window !p advilogo.gif}|\\
-\embed{3cm}{3.3260869cm}{display -geometry !g -window !p advilogo.gif}
+\verb|\embed{3cm}{3.3cm}|\verb|{display -geometry !g! -window !p logo.gif}|\\
+\embed{3cm}{3.3260869cm}{display -geometry !g! -window !p advilogo.gif}
 
 \item Similarly, \verb|animate| can display animations\\
     \verb+animate -geometry !g -window !p file.gif+:\\
-    \verb|\embed{2cm}{2cm}{animate -geometry !g -window !p mmm.anim.gif}|\\
-    \embed{2cm}{2cm}{animate -geometry !g -window !p mmm.anim.gif}
+    \verb|\embed{2cm}{2cm}{animate -geometry !g! -window !p anim.gif}|\\
+    \embed{2cm}{2cm}{animate -geometry !g! -window !p mmm.anim.gif}
 \end{itemize}
 
 % \newpage
