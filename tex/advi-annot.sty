@@ -40,7 +40,8 @@
 
 
 \def \advi@skipparen #1(#2){#1}
-\newcommand {\advi@annot@footi}[2][]{\footnote {#2}}
+\newcommand{\advi@slashslash}[1][]{}
+\newcommand {\advi@annot@footi}[2][]{\footnote {\let \\\advi@slashslash#2}}
 
 \newcommand {\advi@annot@foot}[2][]%
     {{#2}\@ifnextchar({\advi@skipparen{\advi@annot@footi}}%

@@ -23,6 +23,11 @@ let active =
   Options.flag true "-passive" "Cancel all advi-effects";;
 let toggle_active () = active := not !active
 
+let with_active b f x =
+  let a = !active in
+  try let v = f x in active := a; v with z -> active := a; raise z;;
+
+
 
 (* number of steps before checking for user interruptions *)
 let checkpoint_frequency = 10;;
@@ -873,7 +878,8 @@ let wait_special st s =
   let second =
     try parse_float (List.assoc "sec" records)
     with
-    | Not_found | Failure _ -> raise (Failure "wait: invalid special") in
+    | Not_found | Failure _ -> 
+        raise (Failure ("wait: invalid special: ["^s^"]")) in
   (* Wait is treated like Pause, as an exception *)
   if !visible then raise (Wait second);
   st.checkpoint <- 0;;

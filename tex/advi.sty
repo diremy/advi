@@ -262,7 +262,8 @@ Maybe you mean \@currenvir ing}}
 
 %% export
 \newcommand {\adviwait}[1][]%
-   {\advi@ifempty {#1}{\advi@pause}{\advi@wait {#1}}}
+   {\advi@ifempty {#1}{\advi@pause}{{\advi@dim %to check well-formedness
+      #1\advi@dim}\advi@wait {#1}}}
 
 %%% Transparency and alpha blending
 %%% To be revisited. 
@@ -600,8 +601,6 @@ end
 
 \newcommand{\adviedit}[2][]{\advi@edit{\adviedit}{#2}}
 %\advi@export \adviedit \advi@edit
-
-
 
 %%% End
 

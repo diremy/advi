@@ -17,7 +17,10 @@
 
 (* $Id$ *)
 
-let temp_filename = Filename.temp_file "advi" "";;
+(* -Why use an auxilliary file that may be left as garbage with abrupt 
+   exit here? removed all occurrences of this. -Didier *) 
+
+(* let temp_filename = Filename.temp_file "advi" "";; *)
 let database_mtime = ref 0.0;;
 let database_table = Hashtbl.create 257;;
 
@@ -25,6 +28,7 @@ let database_table = Hashtbl.create 257;;
 
 exception Command;;
 
+(*
 let command_string com opt =
   let command = Printf.sprintf "%s %s > %s" com opt temp_filename in
   let exit_status = Sys.command command in
@@ -41,6 +45,21 @@ let command_string com opt =
       (Printf.sprintf "Error %d while executing %s %s" exit_status com opt);
     raise Command
 ;;
+*)
+
+let unwind_protect f x g y =
+  try let v = f x in g y; v with z -> g y; raise z 
+
+let command_string com opt = 
+  let command = Printf.sprintf "%s %s" com opt in
+  try 
+    let chan = Unix.open_process_in command in
+    unwind_protect input_line chan close_in chan
+  with Unix.Unix_error(c,_,_) -> 
+    Misc.warning
+      (Printf.sprintf "Error %s while executing %s %s"
+         (Unix.error_message c) com opt);
+    raise Command
 
 let addpath elem var kind =
   let oldv =
@@ -56,8 +75,9 @@ let addpath elem var kind =
 addpath Config.advi_loc "PSHEADERS" Config.psheaders_kind;
 addpath Config.advi_loc "TEXPICTS"  Config.texpicts_kind;;
 
+(*
 at_exit (fun () -> try Sys.remove temp_filename with _ -> ());;
-
+*)
 let is_space = function
   | ' ' | '\n' | '\r' | '\t' -> true
   | _ -> false

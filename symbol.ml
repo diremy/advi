@@ -272,6 +272,11 @@ let encodings = [
   "ectt[0-9]+",    accents cmtt_encoding ;
   "lcmssb?[0-9]+",   accents cmr_encoding ;
   "lcmssi[0-9]+",  accents cmmi_encoding ;
+(* is this correct ? *)
+  "ptm[rbi][0-9]+r",  accents ecmr_encoding ;
+  "ptmri[0-9]+r",  accents ecmr_encoding ;
+  "phvb[0-9]+r",  accents ecmr_encoding ;
+  "msam[0-9]+",  accents ecmr_encoding ;
 ]
 
 let compile_regexp source =

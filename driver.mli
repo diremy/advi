@@ -20,6 +20,7 @@
 exception Pause;;
 exception Wait of float
 type cooked_dvi;;
+val with_active : bool -> ('a -> 'b) -> 'a -> 'b;;
 val toggle_active : unit -> unit;;
 val cook_dvi : Dvi.t -> cooked_dvi;;
 val render_step : cooked_dvi -> int -> ?trans:Transitions.direction -> 

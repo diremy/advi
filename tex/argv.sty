@@ -31,15 +31,19 @@
 
 %% Some predefine keys
 
+\defargv {ignoreadvi}[]{\PassOptionsToPackage{ignore}{advi}}
 \defargv {use}{\AtEndOfPackage{\RequirePackage{#1}}}
 \defargv {driver}{\rundriver {#1}}
 \def \rundriver #1{\@ifundefined {argv@#1@}
    {\PackageWarning {Argv}{Undefined driver #1}{}}
-   {\@nameuse {argv@#1@}}}
+   {\message{Driver=#1}\@nameuse {argv@#1@}}}
+
 \def \do #1{
   \expandafter \def \csname argv@#1@\endcsname {%
     \PassOptionsToPackage{ignore}{advi}%
     \PassOptionsToPackage{#1}{hyperref}%
+    \PassOptionsToPackage{#1}{bubble}%
+    \PassOptionsToPackage{#1}{pst}%
     \PassOptionsToPackage{#1}{graphicx}%
   }}
 \do {dvipdfm}

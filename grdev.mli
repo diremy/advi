@@ -81,6 +81,7 @@ type 'a rect = { x : 'a; y : 'a; h : 'a; w : 'a };;
 type color = int;;
 val fgcolor : unit -> color;;
 
+val with_color : color -> ('a -> 'b) -> 'a -> 'b
 val set_color : color -> unit;;
 val push_bg_color : color -> unit;;
 val pop_bg_color : unit -> unit;;

@@ -17,6 +17,7 @@
 
 \newif \ifbbb@tricks 
 \DeclareOption {ps}{\bbb@trickstrue}
+\DeclareOption {dvips}{\bbb@trickstrue}
 
 \ProcessOptions
 
@@ -42,13 +43,31 @@
 \newdimen \bbb@dima
 \newdimen \bbb@dimb
 
+\def \bbb@x{1}
+\let \bbb@y \bbb@x
 \def \bbb@bg{yellow}
 \def \bbb@col{c}
 \let \bbb@anchor \bbb@id
 \let \bbb@bubble \bbb@id
+\def \bbb@shapebox {\bbb@ovalbox}
+\def \bbb@boxsep {0pt}
 
+\define@key {bubble} {x}  {\def \bbb@x {#1}}
+\define@key {bubble} {y}  {\def \bbb@y {#1}}
+\define@key {bubble} {boxsep}  {\def \bbb@boxsep {#1}}
 \define@key {bubble} {anchor}  {\def \bbb@anchor {#1}}
 \define@key {bubble} {bubble}  {\def \bbb@bubble {#1}}
+\ifbbb@tricks
+\define@key {bubble} {shape}   {\def \bbb@shapenode {#1}}
+\define@key {bubble} {oval}[]{\def \bbb@shapenode {\bbb@ovalnode}}
+\define@key {bubble} {rect}[]{\def \bbb@shapenode {\bbb@rectnode}}
+\define@key {bubble} {round}[]{\def \bbb@shapenode {\bbb@roundnode}}
+\else
+\define@key {bubble} {shape}{\def \bbb@shapebox {#1}}
+\define@key {bubble} {oval}[]{\def \bbb@shapebox {\bbb@ovalbox}}
+\define@key {bubble} {rect}[]{\def \bbb@shapebox {\bbb@rectbox}}
+\define@key {bubble} {round}[]{\def \bbb@shapebox {\bbb@rectbox}}
+\fi
 \define@key {bubble} {unit}  {\bbb@unit=#1\relax}
 \define@key {bubble} {bg} {\def \bbb@bg  {#1}}
 \define@key {bubble} {l}[]{\def \bbb@col {@{}l@{}}}
@@ -62,8 +81,14 @@
 \define@key {bubble} {col}{\def \bbb@col {#1}}
 
 \newcommand {\BubblePsArc}[2]%
-  {\ncarc [linestyle=solid,arcangleA=-0,arcangleB=-3]{#1}{bbb@to}%
-   \ncarc [linestyle=solid,arcangleA=0,arcangleB=3]{#1}{bbb@to}}
+  {{\psset{linestyle=solid,linewidth=2pt}%
+   \ncarc [arcangleA=-0,arcangleB=-3]{#1}{bbb@to}%
+   \ncarc [arcangleA=-0,arcangleB=-2]{#1}{bbb@to}%
+   \ncarc [arcangleA=-0,arcangleB=-1]{#1}{bbb@to}%
+   \ncarc [arcangleA=-0,arcangleB=0]{#1}{bbb@to}%
+   \ncarc [arcangleA=-0,arcangleB=1]{#1}{bbb@to}%
+   \ncarc [arcangleA=-0,arcangleB=2]{#1}{bbb@to}%
+   \ncarc [arcangleA=-0,arcangleB=3]{#1}{bbb@to}}}
 
 \newcommand {\bbb@}[2][]{%
    \bgroup
@@ -80,7 +105,7 @@
 
 \newcommand {\bbb@i}[1][linecolor=\bbb@bg,%
                         linewidth=2pt,fillstyle=solid,fillcolor=\bbb@bg]
-  {\bbb@set{#1}\@ifnextchar({\bbb@ii}{\bbb@ii(1,1)}}
+  {\bbb@set{#1}\@ifnextchar({\bbb@ii}{\bbb@ii(\bbb@x,\bbb@y)}}
 
 \def \bbb@ii(#1)#2{%
   \bbb@bubble {\bbb@put (#1){\begin{tabular}{a}#2\end{tabular}}}\egroup
@@ -91,12 +116,16 @@
 
 \let \bbb@set \psset
 \def \bbb@node {\Rnode {bbb@from}}
+\def \bbb@shapenode {\bbb@ovalnode}
+\def \bbb@ovalnode {\ovalnode[framesep=0pt]}
+\def \bbb@rectnode #1#2{\Rnode{#1}{\psframebox{#2}}}
+\def \bbb@roundnode #1#2{\Rnode{#1}{\psframebox[framearc=.8]{#2}}}
 \def \bbb@put (#1,#2)#3{%
    \bbb@iftricks{\NormalCoor \psset{unit=\bbb@unit}}{}%
    \bbb@dima #2\bbb@unit \ifdim \bbb@dima<0em \@tempdimb -1\@tempdimc\fi
    \raise \@tempdimb \hb@xt@ \z@ 
        {\kern -0.5\@tempdima
-        \rput (#1,#2){\ovalnode {bbb@to}{#3}}%
+        \rput (#1,#2){\bbb@shapenode {bbb@to}{#3}}%
         \BubblePsArc{bbb@from}{bbb@to}%
         \hss}%
 }
@@ -107,7 +136,6 @@
 \let \bbb@node \bbb@id
 
 \newdimen \bbb@dima
-\def \bbb@boxsep {0pt}
 \def \bbb@ovalbox #1#2{%
     \bgroup
       \setbox0 \hbox {\fboxsep 0em\colorbox{#1}{#2}}%
@@ -122,14 +150,19 @@
           \@tempdima 1.414\wd0
           \advance \@tempdima by \bbb@boxsep
           \let \unitlength \relax
-          \ellipse* {\@tempdima}{\@tempdimb}%
+          \ellipse*{\@tempdima}{\@tempdimb}%
           \hss}%
       \box0
     \egroup}
-
+\def \bbb@rectbox #1#2{%
+    \bgroup
+      \setbox0 \hbox {\fboxsep \bbb@boxsep\colorbox{#1}{#2}}%
+      \leavevmode
+      \box0
+    \egroup}
 \def \bbb@put (#1,#2)#3{%
      \setbox0 \hb@xt@ \z@ 
-        {\setbox0 \hbox {\bbb@ovalbox{\bbb@bg}{#3}}%
+        {\setbox0 \hbox {\bbb@shapebox{\bbb@bg}{#3}}%
          \textcolor{\bbb@bg}%
             {\Thicklines \let \@t \@tempcnta
              \@t \wd0 \divide \@t by \@gphlinewidth

@@ -70,12 +70,18 @@
 \def \ppp@error #1{\PackageError {xprosper}{#1}{Type <RETURN> to proceed.}}
 
 %% Redefinition of the slide environment
+\def \l@addto@macro #1#2{%\begingroup 
+  \toks@ \expandafter {#1#2}\edef #1{\the \toks@}%\endgroup
+}
+
 \def \at@endslide
   {\ifnum \value{overlaysCount}=0\at@endlastoverlay\else
    \ifnum \value{overlaysCount}=\value{pause}\at@endlastoverlay\fi \fi}
 \def \AtEndSlide {\g@addto@macro {\at@endslide}}
+\def \AtEndThisSlide{\l@addto@macro {\at@endslide}}
 \def \at@endlastoverlay {}
 \def \AtEndLastOverlay {\g@addto@macro {\at@endlastoverlay}}
+\def \AtEndThisLastOverlay {\l@addto@macro {\at@endlastoverlay}}
 
 \newcounter{trueSlideCounter}
 \def\thetrueslideCounter{\arabic{trueSlideCounter}}
@@ -545,11 +551,13 @@
 \newcommand {\rowpause}{\noalign{\step@pause{1}}}
 \def \rowemphi{\rowpause\rowemph}
 
-\def \gray@pause{\ifpause[=1]{\colors@restore}{}\normal@pause}
+\def \gray@pause{\ifpause[=1]{\colors@restore@black}{}\normal@pause}
+%\def \gray@pause{\ifpause[=1]{\colors@restore}{}\normal@pause}
 \let \pause \normal@pause
 \let \color@pst@color \pst@color
 \let \color@color \color
 \def \relax@color#1{}
+\def \relax@textcolor#1#2{#2}
 \def \colors@cancel #1{%
    \color{#1}\global \let \color \relax@color 
    \global \let \pst@color \relax@color}

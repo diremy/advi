@@ -550,18 +550,26 @@ let make_thumbnails st =
   let dx = size_x / r
   and dy = size_y / r in
   let all =
-    without_pauses (
-      Array.map
-        (fun p ->
-          (* let p' = p mod (r * r) in (* unused! *) *)
-          let chgvp s =
-            {s with
-             Dvi.bkgd_prefs =
-               {s.Dvi.bkgd_prefs with
-                Grdev.bgviewport = Some (dx,dy,0,size_y - dy)}} in
-          redraw ?chst:(Some chgvp) {ist with page_number = p};
-          p, Graphics.get_image 0 (size_y - dy) dx dy))
-      page_nails in
+    Driver.with_active false
+      (Array.map
+         (fun p -> 
+           (* let p' = p mod (r * r) in (* unused! *) *)
+           let chgvp s = 
+             {s with 
+	      Dvi.bkgd_prefs = 
+              {s.Dvi.bkgd_prefs with
+	       Grdev.bgviewport = Some (dx,dy,0,size_y -dy)}} in
+           without_pauses (redraw ?chst:(Some chgvp)) 
+             { ist with page_number = p};
+           begin try Grdev.continue() with
+             Grdev.Stop -> 
+               let gray = Graphics.rgb 200 200 200 in
+               Grdev.with_color gray
+                 (Graphics.fill_rect 0 (size_y -dy) (dx-1)) (dy-1)
+           end;
+           p, Graphics.get_image 0 (size_y -dy) dx dy;
+         ))
+         page_nails in
   let rolls = (Array.length all + r * r - 1) / r / r in
   let split =
     Array.init rolls
@@ -1055,9 +1063,7 @@ module B =
          ()
         
     let show_toc st =
-       Busy.set Busy.Busy;
-       Launch.without_launching show_toc st;
-       Busy.stop ()
+       Launch.without_launching show_toc st
   end;;
 
 let bindings = Array.create 256 B.nop;;

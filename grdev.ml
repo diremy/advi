@@ -440,6 +440,12 @@ let set_color col =
   color := col;
   Graphics.set_color col;;
 
+let with_color c f x =
+  let old = !color in
+  set_color c;
+  try let v = f x in set_color old; v
+  with z -> set_color old; raise z
+
 let draw_glyph g x0 y0 =
   if not !opened then failwith "Grdev.draw_glyph: no window";
   let w = Glyph.width g
