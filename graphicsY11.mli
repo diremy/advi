@@ -30,6 +30,14 @@ val close_subwindow : window_id -> unit
 
 val map_subwindow : window_id -> unit
 val unmap_subwindow : window_id -> unit
+         (* Map or unmap the sub-window having the given identifier. *)
+
+val move_subwindow : window_id -> int -> int -> unit
+         (* [move_subwindow wid x y] moves the sub-window having the
+            given identifier to [x, y]. *)
+val resize_subwindow : window_id -> int -> int -> unit
+         (* [resize_subwindow wid w h] resizes the sub-window having
+            the given identifier to height [h] and width [w]. *)
 
 external bstore_id : unit -> window_id = "gr_bstore"
         (* return the X pixmap of the bstore window as an integer *)

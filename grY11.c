@@ -20,7 +20,6 @@
 #include <fail.h>
 #include "libgraph.h"
 
-
 value gr_bsize_x(void)
 {
   gr_check_open();
@@ -196,7 +195,7 @@ value gr_close_subwindow(value wid)
 }
 ***/
 
-value gr_map_subwindow(value wid)
+value gr_map_window(value wid)
 {
   Window win;
 
@@ -207,13 +206,35 @@ value gr_map_subwindow(value wid)
   return Val_unit;
 }
 
-value gr_unmap_subwindow(value wid)
+value gr_unmap_window(value wid)
 {
   Window win;
 
   gr_check_open();
   sscanf( String_val(wid), "%lu", (unsigned long *)(&win) );
   XUnmapWindow(grdisplay, win);
+  XFlush(grdisplay);
+  return Val_unit;
+}
+
+value gr_move_window (value wid, value x, value y)
+{
+  Window win;
+
+  gr_check_open();
+  sscanf( String_val(wid), "%lu", (unsigned long *)(&win) );
+  XMoveWindow(grdisplay, win, Int_val(x), Int_val(y));
+  XFlush(grdisplay);
+  return Val_unit;
+}
+
+value gr_resize_window (value wid, value w, value h)
+{
+  Window win;
+
+  gr_check_open();
+  sscanf( String_val(wid), "%lu", (unsigned long *)(&win) );
+  XResizeWindow(grdisplay, win, Int_val(w), Int_val(h));
   XFlush(grdisplay);
   return Val_unit;
 }

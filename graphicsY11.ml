@@ -36,7 +36,7 @@ external raw_close_subwindow : window_id -> unit
 
 let open_subwindow ~x ~y ~width ~height =
   let wid = raw_open_subwindow x y width height in
-prerr_endline (Printf.sprintf "subwindow %s allocated" wid);
+  prerr_endline (Printf.sprintf "subwindow %s allocated" wid);
   Hashtbl.add subwindows wid ();
   wid;;
 
@@ -51,17 +51,31 @@ let close_subwindow wid =
   raw_close_subwindow wid;
   Hashtbl.remove subwindows wid;;
 
-external raw_map_subwindow : window_id  -> unit = "gr_map_subwindow";;
-external raw_unmap_subwindow : window_id -> unit = "gr_unmap_subwindow";;
+external raw_map_window : window_id  -> unit = "gr_map_window";;
+external raw_unmap_window : window_id -> unit = "gr_unmap_window";;
 
 let map_subwindow wid =
 prerr_endline (Printf.sprintf "mapping subwindow %s" wid);
   check_window "map_subwindow" wid;
-  raw_map_subwindow wid;;
+  raw_map_window wid;;
   
 let unmap_subwindow wid =
   check_window "unmap_subwindow" wid;
-  raw_unmap_subwindow wid;;
+  raw_unmap_window wid;;
+
+external raw_move_window : window_id -> int -> int -> unit
+    = "gr_move_window";;
+
+external raw_resize_window : window_id -> int -> int -> unit
+    = "gr_resize_window";;
+
+let resize_subwindow wid =
+  check_window "resize_subwindow" wid;
+  raw_resize_window wid;;
+
+let move_subwindow wid =
+  check_window "move_subwindow" wid;
+  raw_move_window wid;;
 
 external flush : unit -> unit = "gr_flush"
         (* flush the content of the backing store *)
