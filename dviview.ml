@@ -434,15 +434,14 @@ let redraw ?trans st =
       Grdev.continue ();
       Driver.clear_symbols ();
       if !bounding_box then draw_bounding_box st;
-      if !pauses then
-        let f =
-          Driver.render_step st.cdvi st.page_number ?trans
-            (st.base_dpi *. st.ratio) st.orig_x st.orig_y in
+      let f = Driver.render_step st.cdvi st.page_number ?trans
+          (st.base_dpi *. st.ratio) st.orig_x st.orig_y in
+      if !pauses then begin
         let current_pause = ref 0 in
         try
           while
             try f () with
-	    | Driver.Wait _ -> true
+  	    | Driver.Wait _ -> true	
             | Driver.Pause ->
                 if !current_pause = st.pause_number then raise Driver.Pause
                 else begin incr current_pause; true end
@@ -451,9 +450,11 @@ let redraw ?trans st =
             st.pause_number <- !current_pause
         with
         | Driver.Pause -> st.cont <- Some f
-      else
-        Driver.render_page st.cdvi st.page_number 
-          (st.base_dpi *. st.ratio) st.orig_x st.orig_y;
+      end else begin
+	Transimpl.sleep := (fun _ -> true); (* always breaks *)
+	while try f () with Driver.Wait _ | Driver.Pause -> true 
+	do () done
+      end
     with Grdev.Stop ->
       st.aborted <- true 
   end;
@@ -829,7 +830,7 @@ module B =
       resize st x y
 
     let exit st = raise Exit
-    let clear_image_cash st = (* clear image cache *)
+    let clear_image_cache st = (* clear image cache *)
       Grdev.clean_ps_cache ()
     let help st =
       let pid =
@@ -911,7 +912,7 @@ let bind_keys () =
    (* Efficiency related keys. *)
    'f', B.unfreeze_fonts;
    'F', B.unfreeze_glyphs;
-   'C', B.clear_image_cash;
+   'C', B.clear_image_cache;
   ];;
 
 bind_keys ();;

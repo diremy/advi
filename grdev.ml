@@ -178,6 +178,8 @@ let sleep = sleep_watch true true;;
 
 (* trans *)
 
+(* if -nopauses is specified, Transimpl.sleep function is overridden by
+   (fun _ -> true) (look at dviview.ml) *)   
 Transimpl.sleep := sleep_watch true false;;
 
 let set_transition trans = Transimpl.current_transition := trans;;
