@@ -39,6 +39,18 @@
 
 %% Options 
 
+%% Requires the seminar class and the semlayer option
+
+\@ifundefined {ver@seminar.cls}
+  {\PackageError{xprosper}
+      {Document class  seminar does not seem to be loaded}{}}
+\@ifundefined {overlay@loop}
+  {\PackageError{xprosper}
+      {the seminar-class option [semlayer] is required}{}}
+
+%%
+
+
 \newif \ifDVItoPS \DVItoPSfalse
 \newif \ifAccumulate \Accumulatefalse
 

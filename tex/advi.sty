@@ -460,7 +460,7 @@ end
 
 %%% Patch for hyperrefs
 
-\AtBeginDocument {\@ifundefined {ifHy@nesting}{}{\Hy@nestingtrue}}
+% \AtBeginDocument {\@ifundefined {ifHy@nesting}{}{\Hy@nestingtrue}}
 
 
 %%% Thumbnails and Tocs
@@ -469,9 +469,16 @@ end
 \def\advitoc {\advi@html {/toc.first}}
 \def\endadvitoc {\advi@html {/toc.last}}
 \newcommand {\advithumbnail}[1][\thepage]{\advi@html {/page.#1}}
+\@ifundefined {@starttoc}{}
+  {\let \latex@starttoc \@starttoc
+   \def \@starttoc 
+     {\advitoc \let \@starttoc \latex@starttoc \@starttoc}}
 \@ifundefined {tableofcontents}{}
   {\let \latex@tableofcontents \tableofcontents
-   \def \tableofcontents {\advitoc \latex@tableofcontents \endadvitoc}}
+   \def \tableofcontents 
+      {\@ifundefined{latex@starttoc}{\advitoc}{}%
+       \latex@tableofcontents
+       \endadvitoc}}
 
 %%% Edit: special for edition with WhizzyTeX
 

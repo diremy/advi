@@ -20,14 +20,6 @@
 
 \usepackage {xprosper}
 \AtEndLastOverlay{\advithumbnail}
-\AtEndSlide
-  {\ifnum \value{overlaysCount}=0\relax
-    \else
-    \message {\theoverlaysCount/\thepause}
-       \ifnum \value{overlaysCount}=\value{pause}\relax
-       \advithumbnail[\theslide.\theoverlaysCount]\relax 
-       \fi
-   \fi}
 
 
 \usepackage {amssymb}

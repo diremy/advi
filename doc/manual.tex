@@ -203,13 +203,19 @@ references, it launches a new \verb"advi" process.
 
 {\ActiveDVI} improves the treatment of hyperrefs over convential previewers,
 by emphasizing the hypertarget text of an hyperlink. Thus, an hypertarget
-definition \docdef\hypertarget \docarg{tag}\docarg{text}
-will allow the command an activation of the link \docid{tag}
+definition \docdef\hypertarget \docarg{tag}\-\docarg{text}
+should make the activation of the link \docid{tag}
 not only move to the page where \docid{text} occurs, but also emphasize
 \docid{text}. 
-
-(If you are viewing this document with \hypertarget{a}{\ActiveDVI}, you may
-move click \hyperlink{a}{here} to see.) 
+%
+However, since {\docdef\hypertarget} does include its second argument
+withing the target, we use the following command instead:
+\begin{verbatim}
+\newcommand{\softtarget}[2]%
+  {\special{html:<A name=\hyper@quote #1\hyperquote>}#2\special{html:</A>}}
+\end{verbatim}
+(If you are viewing this document with \softtarget{a}{\ActiveDVI}, you may
+move over or click on \hyperlink{a}{this area} to see the effect.) 
 
 \subsection {Floating table of content and thumbnails}
 
