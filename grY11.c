@@ -295,21 +295,26 @@ value gr_get_modifiers(void)
 }
 
 /* Sub windows */
-/*** Still in the graphics library
-value gr_open_subwindow(value x, value y, value width, value height)
+value gr_open_sub_window(value vx, value vy, value width, value height)
 {
   Window win;
 
+  int h = Int_val(height);
+  int w = Int_val(width);
+  int x = Int_val(vx);
+  int y = Int_val(vy);
+
   gr_check_open();
   win = XCreateSimpleWindow(grdisplay, grwindow.win,
-                            Int_val(x), Int_val(y), 
-                            Int_val(width), Int_val(height),
+                            x, Wcvt(y + h), 
+                            w, h,
                             0, grblack, grbackground);
   XMapWindow(grdisplay, win);
   XFlush(grdisplay);
-  return (id_of_window ( win ));
+  return (id_of_window(win));
 }
 
+/* In graphics
 value gr_close_subwindow(value wid)
 {
   Window win;
@@ -320,8 +325,7 @@ value gr_close_subwindow(value wid)
   XFlush(grdisplay);
   return Val_unit;
 }
-***/
-
+*/
 
 value gr_map_window(value wid)
 {
@@ -345,13 +349,17 @@ value gr_unmap_window(value wid)
   return Val_unit;
 }
 
-value gr_move_window (value wid, value x, value y)
+value gr_move_window (value wid, value grx, value gry, value height)
 {
   Window win;
 
+  int x = Int_val(grx);
+  int y = Int_val(gry);
+  int h = Int_val(height);
+
   gr_check_open();
   sscanf( String_val(wid), "%lu", (unsigned long *)(&win) );
-  XMoveWindow(grdisplay, win, Int_val(x), Int_val(y));
+  XMoveWindow(grdisplay, win, x, Wcvt(y + h));
   XFlush(grdisplay);
   return Val_unit;
 }
