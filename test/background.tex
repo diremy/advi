@@ -36,8 +36,7 @@
 \def\advifooter{\vbox to 0em{\vbox to \vsize {\vfill
 Press: \keymenu{n}ext page \keymenu{p}revious page
 \keymenu{\textvisiblespace} next pause%
-\hfill{\embedsticky{advianim}{1.56cm}{1.824cm}{animate -geometry !g! -window !p advilogo.anim.gif}}
-%\hfill{\embedsticky{advianim}{2cm}{3cm}{animate -geometry !g! -window !p advilogo.anim.gif}}
+\hfill{\adviembed[name=advianim,mode=sticky]{1.56cm}{1.824cm}{animate -geometry !g! -window !p advilogo.anim.gif}}
 } \vss}}
 
 \def\adviheader{\noindent
@@ -48,7 +47,7 @@ Press: \keymenu{n}ext page \keymenu{p}revious page
 \def \newpage {\Newpage \advifooter\adviheader}
 
 \def\adviemptyfooter{\vbox to 0em{\vbox to \vsize {\vfill
-~~\vss\killembed{advianim}}}}
+~~\vss\advikillembed{advianim}}}}
 
 \def\lastpage{\Newpage\adviemptyfooter\adviheader}
 
@@ -82,23 +81,23 @@ in the LaTeX source of the page the following command:
 
   \begin{quote}
     \begin{verbatim}
-	\setbgcolor{Yellow} 
+        \advibg{color=Yellow} 
     \end{verbatim}
   \end{quote}
-\setbgcolor{Yellow} 
+\advibg{color=Yellow} 
 
 \newpage
 
 \subsection* {Setting the background image}
 
-\setbgimage{world.jpg} 
+\advibg{image="world.jpg"} 
 
 Wee can also set a background image, like \verb|world.jpg| which
 is now in the test directory, by including in the page the command
 
   \begin{quote}
     \begin{verbatim}
-        \setbgimage{world.jpg} 
+        \advibg{image="world.jpg"} 
     \end{verbatim}
   \end{quote}
 
@@ -131,21 +130,21 @@ directives explicitly declared in a page, you have two options:
   \begin{itemize}
     \item run advi with the \verb|--reset_bkgd| option: this way,
      background inheritance is disabled in all the file, or
-    \item you can locally issue a \verb|\resetbg| command, that resets
+    \item you can locally issue a \verb|\advibg{reset}| command, that resets
      the background eliminating everything which is inherited. This is how
      we got rid of the background image in this page, that only sports a
      nice Cyan background color.
   \end{itemize}
 
-\resetbg
+\advibg{reset}
 
-\setbgcolor{Cyan} 
+\advibg{color=Cyan} 
 
 Of course, you can use the usual LaTeX colors (or define new ones the usual way) for backgrounds.
 
 \Newpage
 \special{color push white}
-\setbgcolor{black}
+\advibg{color=black}
  \advifooter\adviheader
 
 \subsection* {Reverse video effect}
@@ -159,14 +158,14 @@ of the page to black and the text color to white, as follows:
 
   \begin{quote}
     \begin{verbatim}
-	\setbgcolor{Black} 
+        \advibg{color=Black} 
     \end{verbatim}
   \end{quote}
 
 \item set the text color to white using
   \begin{quote}
     \begin{verbatim}
-	\special{color push white}
+        \special{color push white}
     \end{verbatim}
   \end{quote}
 at the beginning of the slide.
@@ -177,33 +176,33 @@ To revert to normal text color, use
 
   \begin{quote}
     \begin{verbatim}
-	\special{color pop}
+        \special{color pop}
     \end{verbatim}
   \end{quote}
 
-at the end of the slide. (Write \verb"\resetbg" at the
-biginning of next slide, if you also want to revert to normal background.)
+at the end of the slide. (Write \verb"\advibg{reset}" at the
+beginning of next slide, if you also want to revert to normal background.)
 
 \special{color pop}
 
 \newpage
 
-\resetbg
+\advibg{reset}
 
 \subsection* {TODO:}
 
   \begin{itemize}
-    \item implement command options to \verb|\setbgimg| to allow
+    \item implement command options to \verb|\advibg{image=???}| to allow
 various scaling preferences,
     \item anybody willing to add support for color gradients?
-    \item implement command options to \verb|\setbgimg| to support
-partially transparent background.
+%   \item implement command options to \verb|\advibg{alpha=???}| to support
+% partially transparent background.
   \end{itemize}
 
 \lastpage
 
-\setbgalpha{0.25}
-\setbgimage{dojoji.gif}
+% \advibg{alpha=0.25}
+\advibg{image="dojoji.gif"}
 
 \subsection* {Design considerations:}
 

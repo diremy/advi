@@ -6,7 +6,8 @@
 
 \usepackage{pst-all}
 
-\usepackage[annot]{../tex/advi}
+\usepackage {advi}
+\usepackage {advi-annot}
 
 \usepackage{hyperref}
 
@@ -38,7 +39,7 @@ Press: \keymenu{n}ext page \keymenu{p}revious page
 \def \newpage {\Newpage \advifooter\adviheader}
 
 \def\adviemptyfooter{\vbox to 0em{\vbox to \vsize {\vfill
-~~\vss\killembed{advianim}}}}
+~~\vss\advikillembed{advianim}}}}
 
 \def\adviquitfooter{\vbox to 0em{\vbox to \vsize {\vfill
 \hfill Press: \keymenu{q} to quit%

@@ -65,12 +65,12 @@
 
 \def \advi@empty{}
 \def \advi@embed@name{anonymous}
-\def \advi@embed@type{ephemeral}
+\def \advi@embed@mode{ephemeral}
 \define@key {advi@embed}{name}{\def \advi@embed@name {#1}}
-\define@key {advi@embed}{type}{\def \advi@embed@type {#1}}
-\define@key {advi@embed}{ephemeral}[]{\def \advi@embed@type {ephemeral}}
-\define@key {advi@embed}{persistent}[]{\def \advi@embed@type {persistent}}
-\define@key {advi@embed}{sticky}[]{\def \advi@embed@type {sticky}}
+\define@key {advi@embed}{mode}{\def \advi@embed@mode {#1}}
+\define@key {advi@embed}{ephemeral}[]{\def \advi@embed@mode {ephemeral}}
+\define@key {advi@embed}{persistent}[]{\def \advi@embed@mode {persistent}}
+\define@key {advi@embed}{sticky}[]{\def \advi@embed@mode {sticky}}
 \def \advi@embed@ #1#2#3#4#5{%
   \mbox{\advi@special
           {embed name="#1" type=#2 width=#3 height=#4 command="#5"}%
@@ -79,7 +79,7 @@
 
 \newcommand{\advi@embed}[4][]{
   \mbox {\setkeys {advi@embed}{#1}%
-         \advi@embed@ {\advi@embed@name}{\advi@embed@type}{#2}{#3}{#4}}%
+         \advi@embed@ {\advi@embed@name}{\advi@embed@mode}{#2}{#3}{#4}}%
 }
 \newcommand{\advi@killembed}[1]{\advi@special {kill name="#1"}}
 \advi@export \adviembed \advi@embed
@@ -88,8 +88,12 @@
 
 %%% Background colors and images
 
-\define@key {advibg}{color}{\advi@special{setbg col=#1}}
-\define@key {advibg}{reset}[]{\advi@special{setbg reset}}
+\define@key {advi@bg}{color}{\advi@special{setbg col=#1}}
+\define@key {advi@bg}{image}{\advi@special{setbg img=#1}}
+\define@key {advi@bg}{reset}[]{\advi@special{setbg reset}}
+\define@key {advi@bg}{inherit}[]{\advi@special{setbg inherit}}
+\define@key {advi@bg}{alpha}{\advi@special{setbg alpha=#1}}
+\define@key {advi@bg}{blend}{\advi@special{setbg blend=#1}}
 \newcommand{\advibg}{\setkeys{advi@bg}}
 
 %%% Pausing and waiting

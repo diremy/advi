@@ -36,7 +36,7 @@
 \def\advifooter{\vbox to 0em{\vbox to \vsize {\vfill
 Press: \keymenu{n}ext page \keymenu{p}revious page
 \keymenu{\textvisiblespace} next pause%
-\hfill{\adviembed[sticky=advianim]{1.56cm}{1.824cm}{animate -geometry !g! -window !p advilogo.anim.gif}}
+\hfill{\adviembed[name=advianim,mode=sticky]{1.56cm}{1.824cm}{animate -geometry !g! -window !p advilogo.anim.gif}}
 } \vss}}
 
 \def\adviheader{\noindent
@@ -61,8 +61,6 @@ Press: \keymenu{n}ext page \keymenu{p}revious page
 \newpage
 
 \subsection* {Active dvi has two components}
-
-%\adviembed[sticky=advixanim]{1cm}{1cm}{xanim +F +Sx40 +Sy40 +Sr -Zr +q -Wr +W!g +W!p advi.anim.gif}
 
 \begin{itemize}
 \item {\tt mldvi}: {\bf a dvi} previewer (by Alexandre Miquel)
@@ -89,9 +87,9 @@ Press: \keymenu{n}ext page \keymenu{p}revious page
 \item A simple way to launch arbitrary demonstration and/or animation
 programs from inside your slides
 (by Jun Furuse and Pierre Weis).
-% \item We can have a BGM:\\
-%   \verb|\adviembed{5cm}{5cm}{mpg123 -q music.mp3}|\\
-%   \adviembed{5cm}{5cm}{mpg123 -q music.mp3}
+ \item We can have a BGM:\\
+   \verb|\adviembed{5cm}{5cm}{mpg123 -q music.mp3}|\\
+   \adviembed{5cm}{5cm}{mpg123 -q music.mp3}
 \end{itemize}
 
 \newpage
@@ -224,12 +222,12 @@ presentation using:\\
   \item Any CamlTk application using\\
    \verb+\adviembed{w}{h}{prog -geometry !g -use !p}+\\
    For instance (using wish)\\
-   \verb|\adviembed{5cm}{1cm}{wish ./watch -geometry !g -use !p}|\\
-   \adviembed[persistent=button]{5cm}{0.71cm}{wish ./watch -geometry !g -use !p}
+   \verb|\adviembed[mode=persistent]{5cm}{1cm}{wish ./watch -geometry !g -use !p}|\\
+   \adviembed[mode=persistent]{5cm}{0.71cm}{wish ./watch -geometry !g -use !p}
 \pause
   \item Possibly interactive ! (using CamlTk)\\
-   \verb|\adviembed{6.5cm}{9.5cm}{./taquin -geometry !g -use !p dojoji.gif}|\\
-  \adviembed[persistent=taquin]{7.5cm}{11cm}{./taquin -geometry !g -use !p dojoji.gif}
+   \verb|\adviembed[mode=persistent]{6.5cm}{9.5cm}{./taquin -geometry !g -use !p dojoji.gif}|\\
+  \adviembed[mode=persistent]{7.5cm}{11cm}{./taquin -geometry !g -use !p dojoji.gif}
 
 \end{itemize}
 
