@@ -1,12 +1,8 @@
 \documentclass[12pt]{article}
 
-\usepackage {advi}
 \usepackage {manual}
 \usepackage {fullpage}
 \usepackage {makeidx}
-
-\expandafter \ifx \csname driver\endcsname\relax \def \driver{}\fi 
-\usepackage [\driver]{hyperref}
 
 \usepackage {graphicx}
 \usepackage {advi}
@@ -19,20 +15,24 @@
 \usepackage {tabularx}
 %\usepackage {pst-all}
 \usepackage {xcolor}
+\usepackage{hyperref}
 
 % End of splash specific stuf
+\usepackage[latin1]{inputenc}
 \usepackage [francais]{babel}
-\usepackage [cyr]{aeguill}
-\usepackage{hyperref}
+%\usepackage [cyr]{aeguill}
 
 \begin{document}
 
 \section{Comment contrôler {\ActiveDVI} avec une télécommande}
 
-Sous Linux, le projet \href{www.lirc.org}{{\tt lirc}} procure
+Sous Linux, le projet {\furl{www.lirc.org/} {\tt lirc}}
+
+\href{www.lirc.org}{{\tt lirc}} procure
 différents types d'interaction entre une télécommande et votre machine
 Linux. Vous en découvrirez toutes les fonctionnalités sur le site de
-\href{www.lirc.org}{{\tt lirc}} \ldots
+\softtarget{http://www.lirc.org/}{{\tt lirc}} \ldots
+\href{www.lirc.org/}{{\tt lirc}} \ldots
 
 La distribution actuelle (4/9/2003) de {\tt lirc} se télécharge 
 \href{http://prdownloads.sourceforge.net/lirc/lirc-0.6.6.tar.bz2}{ici}.

@@ -11,12 +11,16 @@
 
 \edef\hyper@quote{\string"}
 \edef\hyper@sharp{\string#}
+\edef\hyper@colon{\string:}
 
 \newcommand{\softtarget}[2]%
   {\special{html:<a name=\hyper@quote#1\hyper@quote>}#2%
    \special{html:</a>}}
 \newcommand{\softlink}[2]%
   {\special{html:<a href=\hyper@quote\hyper@sharp#1\hyper@quote>}#2%
+   \special{html:</a>}}
+\newcommand{\furl}[2]%
+  {\special{html:<a href=\hyper@quote http\hyper@colon//#1\hyper@quote>}#2%
    \special{html:</a>}}
 
 \newenvironment{citemize}{\begin{list}{$\bullet$}%

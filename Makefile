@@ -19,7 +19,7 @@
 
 include Makefile.config
 
-VERSION=1.5
+VERSION=1.6
 OLDVERSION=1.5
 PACKAGEVERSIONFILE=config.ml
 DOCVERSIONFILES=tex/advi.sty doc_src/Includes/advi-version.html doc/advi.1
