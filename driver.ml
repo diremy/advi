@@ -408,19 +408,21 @@ let set_rule st a b =
 let ill_formed_special s =
   Misc.warning (Printf.sprintf "Ill formed special <<%s>>" s);;
 
-let line_special st s =
+exception Ill_formed_special of string
+let line_of_special s =
   match split_string s 0 with
   | key :: line :: rest ->
       begin try
         let l = int_of_string line in
-        let f =
-          match rest with
-          | file :: _ -> Some file
-          | _ -> None in
-        add_line st (l, f) with
-      | Failure _ -> ill_formed_special s
+        let f = match rest with | file :: _ -> Some file | _ -> None in
+        (l, f)
+      with Failure _ -> raise (Ill_formed_special s)
       end
-  | _ -> ill_formed_special s;;
+  | _ -> raise (Ill_formed_special s);;
+
+let line_special st s =
+  try add_line st (line_of_special s)
+  with Ill_formed_special s -> ill_formed_special s;;
 
 let color_special st s =
   match split_string s 0 with
@@ -1279,15 +1281,20 @@ let html_special st html =
   if has_prefix "</A>" html || has_prefix "</a>" html then close_html st else
   warning ("Unknown html suffix" ^ html);;
 
-let scan_special_html (headers, xrefs) page s =
+let scan_special_html (_, xrefs, _) page s =
   let name = String.sub s 14 (String.length s - 16) in
   Hashtbl.add xrefs name page;;
+
+let scan_special_line (_, _, lastline) s =
+  try lastline := Some (line_of_special s)
+  with Ill_formed_special s -> ill_formed_special s
+;;
 
 (* This function is iterated on the current DVI page BEFORE
    rendering it, to gather the information contained in some
    "asynchronous" specials (typically, PS headers, background
    commands, html references) *)
-let scan_special status (headers, xrefs) pagenum s =
+let scan_special status (headers, xrefs, lastline as args) pagenum s =
   if Launch.whiterun () &&
      has_prefix "advi: embed " s then scan_embed_special status s else
   (* Embedded Postscript, better be first for speed when scanning *)
@@ -1301,8 +1308,9 @@ let scan_special status (headers, xrefs) pagenum s =
   if has_prefix "header=" s then
     (if do_ps then headers := (false, get_suffix "header=" s) :: !headers) else
   if has_prefix "advi: setbg " s then scan_bkgd_special status s else
+  if has_prefix "line: " s then scan_special_line args s else
   if has_prefix "html:<A name=\"" s || has_prefix "html:<a name=\"" s then
-    scan_special_html (headers, xrefs) pagenum s;;
+    scan_special_html args pagenum s;;
 
 (* Scan a page calling function scan_special when seeing a special and
    the function otherwise for other DVI stuff. *)
@@ -1318,10 +1326,14 @@ let scan_special_page otherwise cdvi globals pagenum =
             (if !inherit_background_info
              then Dev.copy_of_bkgd_data ()
              else Dev.default_bkgd_data ())} in
+       let lastline = ref None in
        let eval = function
-         | Dvicommands.C_xxx s -> scan_special status globals pagenum s
+         | Dvicommands.C_xxx s ->
+             let globals = (fst globals, snd globals, lastline) in
+             scan_special status globals pagenum s
          | x -> otherwise x in
        Dvi.page_iter eval cdvi.base_dvi.Dvi.pages.(pagenum);
+       page.Dvi.line <- !lastline;
        page.Dvi.status <- Dvi.Known status;
        status
    | Dvi.Known stored_status -> stored_status;;

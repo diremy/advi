@@ -32,6 +32,7 @@ type page = {
     counters : int array ;
     commands : string;
     mutable status : status;
+    mutable line : (int * string option) option;
     text : string;
   } ;;
 

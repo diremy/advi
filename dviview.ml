@@ -840,24 +840,38 @@ let find_xref tag default st =
   try find_xref_here tag st
   with Not_found -> find_xref_master tag default st 
 ;;
-let duplex_sync st =
+
+let find_page_before_position (pos, file) st =
+  let rec find p =
+    if p < 0 then raise Not_found
+    else
+      match st.dvi.Dvi.pages.(p).Dvi.line with
+      | Some (pos', file') when pos' <= pos && file = file' -> p
+      | _ -> find (pred p) in
+  find (st.num_pages -1)
+
+let duplex_switch sync st =
   match st.duplex with
-  | Client _ | Alone -> ()
+  | Alone -> ()
+  | Client st' -> raise (Duplex (redraw, st'))
+  | Master st' when not sync -> raise (Duplex (redraw, st'))
   | Master st' ->
-      let none = -1 in
-      let p = page_start none st in
-      if p < 0 then ()
-      else
-        begin 
-          if changed st' then reload false st';
-          if p < st'.num_pages then
-            begin
-              Printf.printf "PAGE=%d" p; print_newline();
-              st'.page_number <- p;
+      match st.dvi.Dvi.pages.(st.page_number).Dvi.line with
+      | None ->
+          raise (Duplex (redraw, st'))
+      | Some (q, _ as pos) ->
+          try
+            if changed st' then reload false st';
+            (* should rather find the page with the linenumber *)
+            begin try
+              let p' = find_page_before_position pos st' in
+              st'.page_number <- p';
               st'.page_stack <- (-1) :: st'.page_stack;
-              raise (Duplex (redraw, st'))
-            end
-        end
+            with Not_found -> ()
+            end;
+            raise (Duplex (redraw, st'))
+          with Not_found (* launched by reload *) ->
+            ()
 ;;
 
 let redisplay st =
@@ -1279,12 +1293,9 @@ module B =
       Misc.warning (Printf.sprintf "Search backward %s" re_string);
       ()
         
-    let duplex st =
-      match st.duplex with
-        Master st' | Client st' -> raise (Duplex (redraw, st'))
-      | Alone -> ()
+    let duplex = duplex_switch false
+    let duplex_sync = duplex_switch true
     let toggle_autoswitch st = toggle_autoswitch ()
-    let duplex_sync = duplex_sync
   end;;
 
 let bindings = Array.create 256 B.nop;;

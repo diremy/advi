@@ -33,6 +33,7 @@ type page = {
    counters : int array ;
    commands : string;
    mutable status : status;
+   mutable line : (int * string option) option;
    text : string;
   };;
 
@@ -449,6 +450,7 @@ let input_dvi ch =
 	  { counters = counters ;
 	    commands = commands ;
             status = Unknown;
+            line = None;
             text =
               Grdev.Symbol.commands_to_ascii font_map (parse_commands commands);
           } in
@@ -463,12 +465,15 @@ let input_dvi ch =
     raise (Error "not a DVI file") ;
   seek_in ch prel_pos ;
   let prelude = input_string ch (!lim - prel_pos) in
-  { preamble = preamble ;
-    prelude = prelude ;
-    pages = Array.of_list !stack ;
-    postamble = postamble ;
-    xrefs =  Hashtbl.create 13;
-    font_map = font_map };;
+  let pages = Array.of_list !stack in
+  let xrefs = Hashtbl.create 13 in
+  { preamble = preamble; 
+    prelude = prelude; 
+    pages = pages; 
+    postamble = postamble; 
+    xrefs =  xrefs;
+    font_map = font_map }
+;;
 
 (*** Loading a DVI file ***)
 
