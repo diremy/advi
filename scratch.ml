@@ -336,7 +336,7 @@ and scratch_write_settings () =
      (* Button is down. *)
      (* Pushing the mouse button exits from settings and goes on
         scratch writing where the mouse is. *)
-     enter_scratch_write ()
+     start_scratch_write ()
 
 (* The main routine to begin write scratching:
    - wait for a click then enter scratching. *)
@@ -470,23 +470,35 @@ let draw_circle (x0, y0) (x1, y1) =
 (* Drawing paths. *)
 let get_path_starting_point,
     set_path_starting_point,
-    clear_path_starting_point =
+    clear_path_starting_point,
+    get_path_current_point,
+    set_path_current_point,
+    clear_path_current_point =
   let path_starting_point = ref None in
+  let path_current_point = ref None in
   (fun () -> !path_starting_point),
   (fun (x, y as p) -> path_starting_point := Some p),
-  (fun () -> path_starting_point := None);;
+  (fun () -> path_starting_point := None),
+  (fun () -> !path_current_point),
+  (fun (x, y as p) -> path_current_point := Some p),
+  (fun () -> path_current_point := None);;
+
+let new_path () = clear_path_starting_point (); clear_path_current_point ();;
 
 let draw_path (x, y as p) =
-  match get_path_starting_point () with
-  | None -> set_path_starting_point p; draw_point p
-  | Some _ -> G.lineto x y;;
+  match get_path_current_point () with
+  | None -> set_path_starting_point p; set_path_current_point p; draw_point p
+  | Some _ -> set_path_current_point p; G.lineto x y;;
 
 let draw_close_path () =
   match get_path_starting_point () with
   | None -> Misc.warning "Cannot close any path, none is currently open."
   | Some (x0, y0) ->
-    G.lineto x0 y0;
-    clear_path_starting_point ();;
+     match get_path_current_point () with
+     | None -> Misc.warning "Cannot close any path, none is currently open."
+     | Some (x, y) ->
+       G.moveto x y; G.lineto x0 y0;
+       new_path (); set_scratch_figure Path;;
 
 (* The main figure drawing routine. *)
 let handle_figure no_point one_point two_points =
@@ -513,7 +525,7 @@ prerr_endline (Printf.sprintf "Setting key %C" c);
    | 'C' -> set_scratch_figure Circle
    | 'e' -> set_scratch_figure Close_path
    | 'p' -> set_scratch_figure Point
-   | 'P' -> set_scratch_figure Path
+   | 'P' -> new_path (); set_scratch_figure Path
    | 'F' -> set_scratch_figure Free_hand
    | ' ' -> clear_scratch_figure ()
    | '>' -> incr_scratch_line_width ()
@@ -532,6 +544,7 @@ prerr_endline (Printf.sprintf "Setting key %C" c);
    | '+' -> set_positive_color_increment ()
    | '-' -> set_negative_color_increment ()
    | '?' -> Grdev.help_screen Config.scratch_draw_splash_screen
+    (* ^G or q means quit scratch draw. *)
    | '' | 'q' -> end_draw ()
    | c ->
      Misc.warning (Printf.sprintf "Unknown scratch draw settings key: %C" c));
@@ -610,7 +623,7 @@ and enter_scratch_draw () =
 (* Main draw settings loop. *)
 and scratch_draw_settings () =
    set_cursor cursor_settings;
-   match Graphics.wait_next_event [Key_pressed] with
+   match Graphics.wait_next_event [Button_down; Key_pressed] with
    | {keypressed = kp; key = c} ->
      if kp then begin
        match c with
@@ -629,7 +642,7 @@ and scratch_draw_settings () =
      (* Button is down. *)
      (* Pushing the mouse button exits from settings and goes on
         scratch writing where the mouse is. *)
-     enter_scratch_draw ()
+     start_scratch_draw ()
 
 (* The main routine to begin draw scratching:
    - wait for a click then enter scratching. *)
