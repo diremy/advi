@@ -18,9 +18,10 @@ type 'g set
 (* Empty set. *)
 val empty_set : int -> int -> 'g set
 
-(* Rules and spaces are symbols with special fontnames *)
+(* Rules, spaces and positions are symbols with special fontnames *)
 val rulename  : string
 val spacename : string
+val linename : string
 
 (* Add an element, imperative. *)
 val add : 'g symbol -> 'g set -> unit
@@ -39,3 +40,4 @@ val intime : int -> int -> int -> int -> 'g set -> 'g set
 (* Iterates function ff over the set of symbols. *)
 val iter : ('g symbol -> unit) -> 'g set -> unit
 
+val lines : int -> int -> 'g set -> int * int

@@ -1,3 +1,4 @@
+
 (* Symbols information. *)
 type 'g symbol =
     { color   : int ; 
@@ -11,7 +12,7 @@ type 'g symbol =
       fontname  : string ;
       fontratio : float ;
       glyph   : 'g option }
-
+      
 let dummy_symbol =
   { color = 0 ;
     locx  =  0 ;
@@ -24,34 +25,35 @@ let dummy_symbol =
     fontname = "" ;
     fontratio = 1.0 ;
     glyph = None }
-
-type 'g set = ('g symbol list) ref
-
+    
+type 'g set = 'g symbol list ref
+      
 type 'g line = 
     { min : int ;
       max : int ;
       content : ('g symbol list) }
-
+      
 (* Rules and spaces are symbols with special fontnames *)
 let rulename  = "RULE"
 let spacename = "SPACE"
-
+let linename = "LINE"
+    
 (* Iterates ff over the set. *)
 let iter ff set = List.iter ff !set
-
+    
 (* Empty set, we probably do not need to optimize according to page dimensions. *)
 let empty_set p_width p_height = ref []
-  
+    
 (* Add an element. *)
 let add el set = set := el :: !set
-
+                               
 (* Says if the character code is probably the ascii code. *)
 let is_pure code =
   match Char.chr code with
   | 'A'..'Z' | 'a'..'z' | '0'..'9' -> true
   | '!'..'~' -> true (* "false" helps for debugging. *)
   | _ -> false
-
+        
 (* Tells if s1 and s2, known to be on the same line, overlaps (1), goes beyond (2), or not (0). *)
 let overlap s1 s2 =
  (* Threshold in percent is used to tells when a space goes beyond a symbol, or just overlaps it. *)
@@ -70,10 +72,12 @@ let overlap s1 s2 =
     else if dx * 100 < common_width * threshold
     then 1
     else 2 
-
+        
+(* Lines. *)
+let get_line pre s = ""
 (* Rules. *)
 let get_rule pre s = "_"
-
+    
 (* Spaces are a pain: *)
 (* 3 kinds of spaces exist in dvi: 'r', 'w' and 'x' spaces. *)
 (* Though 'w' should only be used to separate words, *)
@@ -95,7 +99,7 @@ let get_space pre s =
     (* Same test as in get_rule. *)
     else if overlap pre s = 1 then ""
     else " "
-
+        
 (* Keep it for debug : dumps different spaces with size information. *)
 let get_space2 pre s =
   let result = 
@@ -115,55 +119,55 @@ let get_space2 pre s =
   in
   if overlap pre s = 1 then ("{"^result^"}")
   else result
-
+      
 let default_encoding font code =
   if is_pure code then String.make 1 (Char.chr code)
   else Printf.sprintf "[[%s:%d]]" font code
-
+      
 (* cmr is one of the usual tex fonts. *)	
 let cmr_encoding font code =
-    match code with
-    | 0 -> "\\Gamma"
-    | 1 -> "\\Delta"
-    | 2 -> "\\Theta"
-    | 3 -> "\\Lambda"
-    | 4 -> "\\Xi"
-    | 5 -> "\\Pi"
-    | 6 -> "\\Sigma"
-    | 7 -> "\\Upsilon"
-    | 8 -> "\\Phi"
-    | 9 -> "\\Psi"
-    | 10 -> "\\Omega"
-    | 11 -> "ff"
-    | 12 -> "fi"
-    | 16 -> "i"
-    | 18 -> "\\`"
-    | 19 -> "\\'"
-    | 24 -> "\\c"
-    | 26 -> "\\ae"
-    | 34 -> ">>"
-    | 60 -> "!"
-    | 62 -> "?"
-    | 92 -> "<<"
-    | 94 -> "\\^"
-    | 123 -> "--"
-    | 124 -> "---"
-    | 126 -> "~"
-    | _ -> default_encoding font code
-	  
+  match code with
+  | 0 -> "\\Gamma"
+  | 1 -> "\\Delta"
+  | 2 -> "\\Theta"
+  | 3 -> "\\Lambda"
+  | 4 -> "\\Xi"
+  | 5 -> "\\Pi"
+  | 6 -> "\\Sigma"
+  | 7 -> "\\Upsilon"
+  | 8 -> "\\Phi"
+  | 9 -> "\\Psi"
+  | 10 -> "\\Omega"
+  | 11 -> "ff"
+  | 12 -> "fi"
+  | 16 -> "i"
+  | 18 -> "\\`"
+  | 19 -> "\\'"
+  | 24 -> "\\c"
+  | 26 -> "\\ae"
+  | 34 -> ">>"
+  | 60 -> "!"
+  | 62 -> "?"
+  | 92 -> "<<"
+  | 94 -> "\\^"
+  | 123 -> "--"
+  | 124 -> "---"
+  | 126 -> "~"
+  | _ -> default_encoding font code
+	
 (* Greek font. *)
 let cmmi_encoding font code =
   if code >= 11 && code <= 41 then
     let alph =
       ["\\alpha" ; "\\beta"; "\\gamma"; "\\delta"; "\\epsilon"; "\\zeta"; "\\eta" ;
-       "\\theta"; "[**unknown greek letter**]"; "\\kappa"; "\\lambda"; "\\mu"; "\\nu"; "\\xi"; "\\pi";
-       "\\rho"; "\\sigma"; "\\tau"; "\\upsilon"; "\\phi"; "\\chi"; "\\psi";
-       "\\omega"; "\\varepsilon"; "\\vartheta"; "\\varpi"; "\\varrho";
-       "\\varsigma"; "\\varphi" ] 
+        "\\theta"; "[**unknown greek letter**]"; "\\kappa"; "\\lambda"; "\\mu"; "\\nu"; "\\xi"; "\\pi";
+        "\\rho"; "\\sigma"; "\\tau"; "\\upsilon"; "\\phi"; "\\chi"; "\\psi";
+        "\\omega"; "\\varepsilon"; "\\vartheta"; "\\varpi"; "\\varrho";
+        "\\varsigma"; "\\varphi" ] 
     in 
     List.nth alph (code-11)
   else default_encoding font code
-
+      
 (* Math font. *)
 let cmex_encoding font code =
   match code with
@@ -177,7 +181,7 @@ let cmex_encoding font code =
   | 112 -> "[sqrt]"
   | 113 -> "[SQRT]"
   | _ -> default_encoding font code
-
+        
 (* List of recognized fonts (regexp) * handler *)
 (* Don't optimize the regexps, it is readable that way. *)
 let encodings = [
@@ -189,20 +193,21 @@ let encodings = [
   "cmex[0-9]+"   , cmex_encoding ;
   "cmsy[0-9]+"   , cmex_encoding ;
 ] 
-
+    
 let compile_regexp source =
   List.map (fun (pat,zz) -> Str.regexp pat, zz) source
-
+    
 (* Compiled regexps. *)
 let encodings_c = compile_regexp encodings
-
+    
 let erase="/back/"
-
+    
 (* Returns the name of the symbol s, pre is the symbol before s. *)
 let symbol_name pre s =
   let font = s.fontname in
   (* Is it a rule ? *)
   if font == spacename then get_space pre s
+  else if font == linename then get_line pre s
   else
     begin
       let name =
@@ -220,8 +225,8 @@ let symbol_name pre s =
       if pre.fontname == spacename && overlap pre s <> 0 then erase^name
       else name
     end
-  
-
+      
+      
 (* Says if the symbol is in zone x1-x2 y1-y2. *)
 (* Size of the symbol should be used...we'll see later. *)
 let symbol_inzone x1 y1 x2 y2 =
@@ -230,10 +235,10 @@ let symbol_inzone x1 y1 x2 y2 =
   function s -> 
     (s.locx - s.hoffset <= x2) && (s.locx - s.hoffset + s.width >= x1) &&
     (s.locy - s.voffset <= y2) && (s.locy - s.voffset + s.height >= y1)
-
-let inzone x1 y1 x2 y2 set =
-   ref (Misc.reverse_filter (symbol_inzone x1 y1 x2 y2) !set)
       
+let inzone x1 y1 x2 y2 set =
+  ref (Misc.reverse_filter (symbol_inzone x1 y1 x2 y2) !set)
+    
 let intime x1 y1 x2 y2 set =
   let inz = symbol_inzone x1 y1 x2 y2 in
   let rec discard sl =
@@ -243,58 +248,58 @@ let intime x1 y1 x2 y2 set =
   in
   ref (discard (List.rev (discard !set)))
     
-
+    
 (** FORMATING **)
-
+    
 exception Break of int*int
-
+    
 (* Four (4 !) backslashes because of two-level escapes !!! *)
-
+    
 let process_all =
   ["."^erase, "" ; (* Remove backspaces. *)
-   "c\\\\c", "\\cc" ] (* Sometimes cedil \c is after the 'c'. *)
-
+    "c\\\\c", "\\cc" ] (* Sometimes cedil \c is after the 'c'. *)
+    
 let process_totext =
   ["\\\\bullet", "o " ]
-
+    
 (* Compiled versions. *)
 let process_all_c = compile_regexp process_all
 let process_totext_c = compile_regexp process_totext
-
+    
 (* Apply a process list to input. *)
 let apply_process pl input =
   List.fold_left
     (fun input (pat, temp) -> Str.global_replace pat temp input)
     input pl
-
+    
 let post_process input =
   let input2 = apply_process process_all_c input in
   let input3 = apply_process process_totext_c input2 in
   input3
-
+    
 let above_lines bot1 top1 bot2 top2 =
   (* How much two lines must share in common (percent) to be declared overlaping. *)
   let threshold = 30 in
   if bot1 < top2 then -1
   else if bot2 < top1 then 1
   else 
-      let minsize = min (bot1 - top1) (bot2 - top2)
-      and share = (min bot1 bot2) - (max top1 top2) in
-      if share * 100 > threshold * minsize then 0
-      else if top1 < top2 then -1 else 1
-
+    let minsize = min (bot1 - top1) (bot2 - top2)
+    and share = (min bot1 bot2) - (max top1 top2) in
+    if share * 100 > threshold * minsize then 0
+    else if top1 < top2 then -1 else 1
+      
 let above s1 s2 =
   let top1 = s1.locy - s1.voffset
   and top2 = s2.locy - s2.voffset in
   let bot1 = top1 + s1.height 
   and bot2 = top2 + s2.height in
   above_lines bot1 top1 bot2 top2
-
+    
 (* Provided symbols s1 and s2 are on the same line, -1 means that s1 is at the left of s2. *)
 (* It is important to compare right sides of symbols since spaces, for example, can stretch wide. *)
 let at_right s1 s2 =
   if s1.locx - s1.hoffset + s1.width < s2.locx - s2.hoffset + s2.width then -1 else 1
-
+    
 (* Gives a string corresponding to line l .*)
 let dump_line l =
   let l2 = List.sort at_right l.content in
@@ -303,7 +308,7 @@ let dump_line l =
   and old_sym = ref dummy_symbol in
   List.iter
     (fun s ->
-      if s != dummy_symbol then
+      if s != dummy_symbol || s.fontname != linename then
 	begin
 	  let ascii = symbol_name !old_sym s in
 	  if ascii <> "" then
@@ -313,12 +318,12 @@ let dump_line l =
 	    end;
 	  if s.fontname != spacename then some := true ;
 	end
-    )
+          )
     l2;
-
+  
   let return = post_process !line in
   if !some then return^"\n" else ""
-
+    
 (* Split a list of symbols in lines. *)
 let rec split current lines = function
   | [] -> current :: lines
@@ -327,23 +332,40 @@ let rec split current lines = function
       let bot = top + s.height in 
       if above_lines bot top current.max current.min <> 0
       then split {min = top;
-		  max = bot;
-		  content = [s]}
+		   max = bot;
+		   content = [s]}
 	  (current :: lines) sl
       else split {min = min current.min top;
-		  max = max current.max bot;
-		  content = s :: current.content}
+		   max = max current.max bot;
+		   content = s :: current.content}
 	  lines sl
-
+          
 (* to_ascii returns a string representing the symbols in set. *)
 (* Elements are filtered according to the first argument. *)
 let to_ascii set =
-
+  
   (* Split lines. *)
   let lines = split {min = 0; max = 0; content = []} [] !set in
   let ascii = Misc.reverse_map dump_line lines in
   String.concat "" ascii
-  
+    
 (* to_escaped does the same, but the final string is 'escaped'. *)
 let to_escaped set = String.escaped (to_ascii set)
-
+    
+(* get the closest lines to a given position on the screen *)
+    
+let lines x y set =
+  let before p = p.locx < x  || p.locy >  y in
+  let rec left l = function
+    | h:: t as ht ->
+        if before h then
+          if h.fontname == linename then left h.code t else left l t
+        else
+          l, right l ht
+    | [] -> l, l
+  and right r t =
+      try (List.find (fun h -> h.fontname == linename) t).code
+      with Not_found -> r in
+  let l,r = left (-1) !set in
+  l, r 
+    ;;

@@ -67,7 +67,7 @@ module type DEVICE = sig
     | Region of int * int * int * int
     | Href of string
     | Advi of string * (unit -> unit)
-    | Click of area * button
+    | Click of area * button * int * int
     | Nil
 
   val wait_event : unit -> event

@@ -40,6 +40,16 @@ let _ = Misc.set_option
     (Arg.String (fun s -> browser := s))
     "STRING\tCommand to call the browser";;
 
+let click_turn_page =
+  Misc.option_flag false
+    "-click_turn"
+    "Turn pages with mouse clicks (see the doc)"
+
+let click_position =
+  Misc.option_flag false
+    "-click_position"
+    "Return position on mouse clicks (see the doc)"
+
 let page_stack_to_string page stack =
   let stack = String.concat " " (List.map string_of_int stack) in
   Printf.sprintf "Page no: %d Page_stack: %s"
@@ -122,7 +132,7 @@ module type DEVICE = sig
     | Region of int * int * int * int
     | Href of string
     | Advi of string * (unit -> unit)
-    | Click of area * button
+    | Click of area * button * int * int
     | Nil
 
   val wait_event : unit -> event
@@ -505,6 +515,18 @@ module Make(Dev : DEVICE) = struct
     let y = st.size_y - y in
     x, y
       
+  let position st =
+    let x, y = Graphics.mouse_pos() in
+    let y = st.size_y - y in
+    let symbols = Drv.give_symbols() in
+    let l, r = Symbol.lines x y symbols in
+    let m = if l > 0 then l else r in
+    if m > 0 then
+      begin
+        Printf.printf "#line %d" m;
+        print_newline()
+      end     
+    
   (* User has selected a region with the mouse. We dump characters. *)
   let selection mode st x y dx dy =
     let docx , docy  = document_xy st x y
@@ -1121,10 +1143,17 @@ module Make(Dev : DEVICE) = struct
       | Dev.Region (x, y, w, h) ->
           selection Interval st x y w (-h)
             
-      | Dev.Click (Dev.Top_left, _) -> B.pop_page st
-      | Dev.Click (_, Dev.Button1) -> B.previous_pause st
-      | Dev.Click (_, Dev.Button2) -> B.pop_previous_page st
-      | Dev.Click (_, Dev.Button3) -> B.next_pause st
+      | Dev.Click (Dev.Top_left, _,_,_) ->
+          if !click_turn_page then B.pop_page st
+          else if !click_position then position st
+      | Dev.Click (_, Dev.Button1,_,_) ->
+          if !click_turn_page then B.previous_pause st
+          else if !click_position then position st
+      | Dev.Click (_, Dev.Button2,_,_) ->
+          if !click_turn_page then B.pop_previous_page st
+      | Dev.Click (_, Dev.Button3,_,_) ->
+          if !click_turn_page then B.next_pause st
+          else if !click_position then position st
             
 (*
    | Dev.Click (Dev.Bottom_right, _) -> B.next_pause st

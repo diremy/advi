@@ -103,10 +103,12 @@ end
 \box\pst@hbox}%
 \pst@Verb{\tx@PutEnd}}}
 
+\ifadvi@ignore\else
 \@ifundefined {psput@special}{}
 {\let \psput@special \advi@psput@special
  \@ifundefined {ncput@iii}{}{\let \ncput@iii \advi@ncput@iii}%
  \advi@special {header=advi.pro}}
+\fi
 
 %%% Active DVI
 
@@ -180,6 +182,9 @@ end
 \advi@export \Advi \advi@begin \let \endAdvi \advi@end
 \advi@export \advi \advi@active
 
+\newenvironment{Record}[1]
+    {\def \advi@tag{#1}\advi@@start{\advi@tag}}
+    {\advi@@end{\advi@tag}}
 \advi@export \record \advi@record
 \advi@export \recplay \advi@recplay
 \advi@export \play \advi@play

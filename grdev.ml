@@ -634,16 +634,17 @@ let kill_app pid wid =
   GraphicsY11.close_subwindow wid;;
 
 let kill_embedded_app app_name =
-  prerr_endline (Printf.sprintf "Killing %s" app_name);
   let pid, (app_type, app_name, wid) = find_embedded_app app_name in
   kill_app pid wid;;
 
-let kill_apps app_type = 
+let kill_apps app_type =
+(*  
   begin match app_type with
   | Persistent -> prerr_endline "Killing persistent apps"
   | Sticky -> prerr_endline "Killing sticky apps"
   | Embedded -> prerr_endline "Killing embedded apps"
   end;  
+*)
   Hashtbl.iter (fun pid (apt, app_name, wid) -> 
     if app_type = apt then kill_app pid wid) app_table;;
 
@@ -948,7 +949,7 @@ type event =
   | Region of int * int * int * int
   | Href of string
   | Advi of string * (unit -> unit)
-  | Click of area * button
+  | Click of area * button * int * int
   | Nil
 ;;
 
@@ -1149,7 +1150,7 @@ let wait_button_up m x y =
     begin
       match wait_signal_event button_up with
         Raw e ->
-          Final (Click (click_area x y, button m))
+          Final (Click (click_area x y, button m, x, !size_y - y))
       | x -> x 
     end
 
@@ -1203,7 +1204,7 @@ let wait_event () =
                   match wait_button_up m ev.mouse_x ev.mouse_y with
                   | Final (Region (x, y, dx, dy) as e) -> send e
                   | Final (Move (dx, dy) as e) -> send e
-                  | Final (Click (a,b) as e) -> send e
+                  | Final (Click (_,_,_,_) as e) -> send e
                   | Final e ->
                       push_back_event ev; 
                       send e
@@ -1224,7 +1225,7 @@ let resized() =
 
 let continue () =
   busy_check_timer();
-  if resized() || !usr1_status || Graphics.key_pressed() then
+  if resized() || Graphics.key_pressed() (*  || !usr1_status *) then
     begin
       Gs.flush();
       raise Stop

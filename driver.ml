@@ -212,26 +212,26 @@ let parse_color_args = function
 (*****************)
 
 module Make(Dev : DEVICE) = struct
-
+  
   module DFont = Devfont.Make(Dev)
   let base_dpi = 600
-
+      
   (*** Cooked fonts ***)
-
+      
   exception Pause
-
+      
   type cooked_font = {
       name : string ;
       ratio : float ;
       mtable : (int * int) Table.t ;
       mutable gtables : (int * Dev.glyph Table.t) list
     }
-
+        
   let dummy_mtable = Table.make (fun _ -> raise Not_found)
   let dummy_gtable = Table.make (fun _ -> raise Not_found)
   let dummy_font =
     { name = "--nofont--" ; ratio = 1.0 ; mtable = dummy_mtable ; gtables = [] }
-
+      
   let cook_font fdef dvi_res =
     let name = fdef.Dvi.name
     and sf = fdef.Dvi.scale_factor
@@ -244,7 +244,7 @@ module Make(Dev : DEVICE) = struct
       ratio = ratio ;
       mtable = mtable ;
       gtables = [] }
-
+      
   let get_gtable cfont sdpi =
     try List.assoc sdpi cfont.gtables
     with Not_found ->
@@ -254,15 +254,15 @@ module Make(Dev : DEVICE) = struct
 	with Not_found -> dummy_gtable in
       cfont.gtables <- (sdpi, table) :: cfont.gtables ;
       table
-
+        
   (*** Cooked DVI's ***)
-
+        
   type cooked_dvi = {
       base_dvi : Dvi.t ;
       dvi_res : float ;
       font_table : cooked_font Table.t
     }
-
+        
   let cook_dvi dvi =
     let dvi_res = 72.27 in
     let build n =
@@ -270,9 +270,9 @@ module Make(Dev : DEVICE) = struct
     { base_dvi = dvi ;
       dvi_res = dvi_res ;
       font_table = Table.make build }
-
+      
   (*** The rendering state ***)
-
+      
   type reg_set = {
       reg_h : int ;
       reg_v : int ;
@@ -281,9 +281,9 @@ module Make(Dev : DEVICE) = struct
       reg_y : int ;
       reg_z : int
     }
-
+        
   type color = int
-
+        
   type state = {
       cdvi : cooked_dvi ;
       sdpi : int ;
@@ -326,7 +326,7 @@ module Make(Dev : DEVICE) = struct
       mutable draw_html : (int * int * Dev.glyph) list;
       mutable checkpoint : int; 
     }
-
+        
   type proc_unit = {
       escaped_register : reg_set;
       escaped_cur_font : cooked_font ;
@@ -343,16 +343,16 @@ module Make(Dev : DEVICE) = struct
   let is_recording () = !current_recording_proc_name <> None
       
   (*** Rendering primitives ***)
-
+      
   let drawn_symbols = ref (Symbol.empty_set 1 1)
   let last_height = ref 0 
-
+      
   let give_symbols () = !drawn_symbols
   let clear_symbols page_w page_h blank_w blank_h =
     last_height := 2 ;
     drawn_symbols := Symbol.empty_set page_w page_h;
     ()
-
+      
   let add_char st x y glyph code =
     let dev_glyph = Dev.get_glyph glyph in
     let symbol =
@@ -372,8 +372,27 @@ module Make(Dev : DEVICE) = struct
     Symbol.add symbol !drawn_symbols ;
     ()
 
+  let add_line st (line, file) =
+    let x = st.x_origin + int_of_float (st.conv *. float st.h)
+    and y = st.y_origin + int_of_float (st.conv *. float st.v) in
+    let symbol =
+      { Symbol.color = st.color ;
+	Symbol.locx = x ;
+	Symbol.locy = y ;
+	Symbol.voffset = 0 ;
+	Symbol.hoffset = 0 ;
+	Symbol.width = 0 ;
+	Symbol.height = 0 ;
+	Symbol.code = line ;
+	Symbol.fontname = Symbol.linename ;
+	Symbol.fontratio = 0.0 ;
+	Symbol.glyph = None }
+    in
+    Symbol.add symbol !drawn_symbols ;
+    ()
+      
   let add_blank nn st width =
-
+    
     let x = st.x_origin + int_of_float (st.conv *. float st.h)
     and y = st.y_origin + int_of_float (st.conv *. float st.v)
     in
@@ -392,7 +411,7 @@ module Make(Dev : DEVICE) = struct
     in
     Symbol.add symbol !drawn_symbols ;
     ()
-
+      
   let add_rule st x y w h =
     let symbol =
       { Symbol.color = st.color ;
@@ -409,35 +428,35 @@ module Make(Dev : DEVICE) = struct
     in
     Symbol.add symbol !drawn_symbols ;
     ()
-
+      
   let get_register_set st =
-      { reg_h = st.h ; reg_v = st.v ;
-	reg_w = st.w ; reg_x = st.x ;
-	reg_y = st.y ; reg_z = st.z }
-    
+    { reg_h = st.h ; reg_v = st.v ;
+      reg_w = st.w ; reg_x = st.x ;
+      reg_y = st.y ; reg_z = st.z }
+      
   let set_register_set st rset =
-	st.h <- rset.reg_h ;
-	st.v <- rset.reg_v ;
-	st.w <- rset.reg_w ;
-	st.x <- rset.reg_x ;
-	st.y <- rset.reg_y ;
-	st.z <- rset.reg_z
-    
+    st.h <- rset.reg_h ;
+    st.v <- rset.reg_v ;
+    st.w <- rset.reg_w ;
+    st.x <- rset.reg_x ;
+    st.y <- rset.reg_y ;
+    st.z <- rset.reg_z
+        
   let push st =
     st.stack <- (get_register_set st) :: st.stack
-
+                                          
   let pop st =
     match st.stack with
     | [] -> ()
     | rset :: rest ->
 	set_register_set st rset;
 	st.stack <- rest
-
+            
   let color_push st col =
     st.color_stack <- st.color :: st.color_stack ;
     st.color <- col ;
     if not (is_hidden ()) then Dev.set_color col
-
+        
   let color_pop st =
     match st.color_stack with
     | [] -> ()
@@ -445,12 +464,12 @@ module Make(Dev : DEVICE) = struct
 	st.color <- col ;
 	if not (is_hidden ()) then Dev.set_color col ;
 	st.color_stack <- rest
-
+            
   let alpha_push st v =
     st.alpha_stack <- st.alpha :: st.alpha_stack ;
     st.alpha <- v ;
     if not (is_hidden ()) then Dev.set_alpha v
-
+        
   let alpha_pop st =
     match st.alpha_stack with
     | [] -> ()
@@ -458,12 +477,12 @@ module Make(Dev : DEVICE) = struct
 	st.alpha <- v ;
 	if not (is_hidden ()) then Dev.set_alpha v ;
 	st.alpha_stack <- rest
-
+            
   let blend_push st v =
     st.blend_stack <- st.blend :: st.blend_stack ;
     st.blend <- v ;
     if not (is_hidden ()) then Dev.set_blend v
-
+        
   let blend_pop st =
     match st.blend_stack with
     | [] -> ()
@@ -471,12 +490,12 @@ module Make(Dev : DEVICE) = struct
 	st.blend <- v ;
 	if not (is_hidden ()) then Dev.set_blend v ;
 	st.blend_stack <- rest
-
+            
   let epstransparent_push st v =
     st.epstransparent_stack <- st.epstransparent :: st.epstransparent_stack ;
     st.epstransparent <- v ;
     if not (is_hidden ()) then Dev.set_epstransparent v
-
+        
   let epstransparent_pop st =
     match st.epstransparent_stack with
     | [] -> ()
@@ -484,12 +503,12 @@ module Make(Dev : DEVICE) = struct
 	st.epstransparent <- v ;
 	if not (is_hidden ()) then Dev.set_epstransparent v ;
 	st.epstransparent_stack <- rest
-
+            
   let transition_push st v =
     st.transition_stack <- st.transition :: st.transition_stack ;
     st.transition <- v ;
     if not (is_hidden ()) then Dev.set_transition v
-
+        
   let transition_pop st =
     match st.transition_stack with
     | [] -> ()
@@ -497,7 +516,7 @@ module Make(Dev : DEVICE) = struct
 	st.transition <- v ;
 	if not (is_hidden ()) then Dev.set_transition v ;
 	st.transition_stack <- rest
-
+            
   let fnt st n =
     let (mtable, gtable, cfont) =
       try
@@ -508,7 +527,7 @@ module Make(Dev : DEVICE) = struct
     st.cur_gtable <- gtable ;
     st.cur_font <- cfont ;
     ()
- 
+      
   let put st code =
     try
       let x = st.x_origin + int_of_float (st.conv *. float st.h)
@@ -525,7 +544,7 @@ module Make(Dev : DEVICE) = struct
 	  add_char st x y glyph code ;
         end
     with _ -> ()
-
+        
   let set st code =
     put st code ;
     try
@@ -533,7 +552,7 @@ module Make(Dev : DEVICE) = struct
       st.h <- st.h + dx ;
       st.v <- st.v + dy
     with _ -> ()
-
+        
   let put_rule st a b =
     let x = st.x_origin + int_of_float (st.conv *. float st.h)
     and y = st.y_origin + int_of_float (st.conv *. float st.v)
@@ -541,13 +560,27 @@ module Make(Dev : DEVICE) = struct
     and h = int_of_float (ceil (st.conv *. float a)) in
     add_rule st x (y-h) w h ;
     if not (is_hidden ()) then Dev.fill_rect x (y - h) w h
-
+        
   let set_rule st a b =
     put_rule st a b ;
     st.h <- st.h + b
-
+        
   (*** Specials ***)
+        
+  let line_special st s =
+      match split_string s 0 with
+      | key :: line :: rest ->
+          begin try
+            let l = int_of_string line in
+            let f = match rest with file :: _ -> Some file | _ -> None in
+            add_line st (l, f)
+          with Failure _ ->
+            Misc.warning
+              (Printf.sprintf "Ill formed special <<%s>>" s)
+          end
+      | _ -> Misc.warning "Ill formed line: special" 
 
+      
   let color_special st s =
     match split_string s 0 with
     | "color" :: "push" :: args ->
@@ -555,7 +588,7 @@ module Make(Dev : DEVICE) = struct
     | "color" :: "pop" :: [] ->
         color_pop st
     | _ -> ()
-  ;;
+          ;;
 
   let alpha_special st s =
     match split_string s 0 with
@@ -1097,33 +1130,39 @@ module Make(Dev : DEVICE) = struct
       (* Other specials *)
       if has_prefix "color " s then color_special st s
       else if has_prefix "html:" s then html_special st (get_suffix "html:" s)
-      else if has_prefix "PSfile=" s || has_prefix "psfile=" s then begin
-  	let file, bbox, size = psfile_special st s in
-      	let x = st.x_origin + int_of_float (st.conv *. float st.h)
-      	and y = st.y_origin + int_of_float (st.conv *. float st.v) in
-	if not (is_hidden ()) then Dev.draw_ps file bbox size x y
-      end else if has_prefix "advi: " s then begin
-	if has_prefix "advi: alpha" s then
-	  alpha_special st s
-	else if has_prefix "advi: blend" s then
-	  blend_special st s
-	else if has_prefix "advi: epstransparent" s then
-	  epstransparent_special st s
-      	else if has_prefix "advi: pause" s then raise Pause
-      	else if has_prefix "advi: proc=" s then proc_special st s
-      	else if has_prefix "advi: wait " s then wait_special st s
-	else if has_prefix "advi: embed " s then embed_special st s
-	else if has_prefix "advi: trans " s then transition_special st s
-	else if has_prefix "advi: kill " s then kill_embed_special st s
-      	else if has_prefix "advi:" s then 
-	  raise (Failure ("unknown special: "^ s))
-      end else if has_prefix "pn " s || has_prefix "pa " s
-               || s = "fp" || s = "ip"
-               || has_prefix "da " s || has_prefix "dt " s
-               || s = "sp" || has_prefix "sp " s || has_prefix "ar " s
-               || has_prefix "ia " s || has_prefix "sh " s
-               || s = "wh" || s = "bk" then
-          tpic_specials st s
+      else if has_prefix "PSfile=" s || has_prefix "psfile=" s then
+        begin
+  	  let file, bbox, size = psfile_special st s in
+      	  let x = st.x_origin + int_of_float (st.conv *. float st.h)
+      	  and y = st.y_origin + int_of_float (st.conv *. float st.v) in
+	  if not (is_hidden ()) then Dev.draw_ps file bbox size x y
+        end
+      else if has_prefix "advi: " s then
+        begin
+	  if has_prefix "advi: alpha" s then
+	    alpha_special st s
+	  else if has_prefix "advi: blend" s then
+	    blend_special st s
+	  else if has_prefix "advi: epstransparent" s then
+	    epstransparent_special st s
+      	  else if has_prefix "advi: pause" s then raise Pause
+      	  else if has_prefix "advi: proc=" s then proc_special st s
+      	  else if has_prefix "advi: wait " s then wait_special st s
+	  else if has_prefix "advi: embed " s then embed_special st s
+	  else if has_prefix "advi: trans " s then transition_special st s
+	  else if has_prefix "advi: kill " s then kill_embed_special st s
+      	  else if has_prefix "advi:" s then 
+	    raise (Failure ("unknown special: "^ s))
+        end
+      else if has_prefix "line: " s then line_special st s
+      else if
+        has_prefix "pn " s || has_prefix "pa " s
+      || s = "fp" || s = "ip"
+      || has_prefix "da " s || has_prefix "dt " s
+      || s = "sp" || has_prefix "sp " s || has_prefix "ar " s
+      || has_prefix "ia " s || has_prefix "sh " s
+      || s = "wh" || s = "bk" then
+        tpic_specials st s
 
   (*** Page rendering ***)
 

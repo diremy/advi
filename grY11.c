@@ -157,10 +157,14 @@ value gr_get_modifiers(void)
     if (modifiers & Button1Mask) button = button | 0x1;
     if (modifiers & Button2Mask) button = button | 0x2;
     if (modifiers & Button3Mask) button = button | 0x4;
+    if (modifiers & Button4Mask) button = button | 0x8;
+    if (modifiers & Button5Mask) button = button | 0x10;
     
-    if (modifiers & ShiftMask) button = button | 0x10;
-    if (modifiers & ControlMask) button = button | 0x20;
-    if (modifiers & Mod1Mask) button = button | 0x40;
+    if (modifiers & ShiftMask) button = button | 0x100;
+    if (modifiers & ControlMask) button = button | 0x200;
+    if (modifiers & Mod1Mask) button = button | 0x400;
+    if (modifiers & Mod2Mask) button = button | 0x800;
+    if (modifiers & Mod3Mask) button = button | 0x1000;
   } else {
     button = -1;
   }

@@ -158,7 +158,11 @@ external get_modifiers : unit -> int = "gr_get_modifiers"
 val button1 : int
 val button2 : int
 val button3 : int
+val button4 : int
+val button5 : int
 val shift : int
 val control : int
 val mod1 : int
+val mod2 : int
+val mod3 : int
         (* mask for modifiers *)
