@@ -31,7 +31,11 @@ TEXSTYFILES= \
     advi-annot.sty advi-slides.sty argv.sty superpose.sty \
     advi-graphicx.sty advi.sty bubble.sty xcolor.sty
 
+TEXEPSFILES= \
+    advilogo.eps bar.eps caml.eps
+
 STYFILES= $(addprefix tex/, $(TEXSTYFILES))
+EPSFILES= $(addprefix tex/, $(TEXEPSFILES))
 
 COPTIONS = -warn-error A -g
 COPTOPTIONS = -warn-error A -unsafe -inline 9
@@ -160,9 +164,7 @@ install:: $(INSTALLTARGET) $(HELPFILES)
 	- install -d ${bindir}
 	install -m 755 $(INSTALLTARGET) ${bindir}/advi
 	- install -d $(ADVI_LOC)
-	install -m 644 $(HELPFILES) tex/advilogo.eps tex/caml.eps \
-		tex/bar.jpg.eps \
-		$(STYFILES) $(ADVI_LOC)
+	install -m 644 $(HELPFILES) $(EPSFILES)	$(STYFILES) $(ADVI_LOC)
 	if [ -f conf/jpfonts.conf ]; then \
 		install -m 644 conf/jpfonts.conf $(ADVI_LOC); fi
 	texhash
