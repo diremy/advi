@@ -622,17 +622,19 @@ let waiting_to_enter_scratch_draw =
      | c -> Misc.warning "Click to start scratch drawing");;
 
 (* Enter drawing on slide *)
-(****
-let scratch_until scratch abort go_on enter =
-  match find_scratch_events () with
-  | { mouse_motion_event =
-        (  E_Big_Move (x, y)
-         | E_Small_Move (x, y)); } -> G.lineto x y; scratch x y
-  | { mouse_motion_event = E_No_Move; key_event = E_Key c; } -> 
-    scratch_draw_char_event c
-  | { mouse_motion_event = E_No_Move; button_event = E_Up; } -> abort ()
-  | { mouse_motion_event = E_No_Move; button_event = E_Down; } -> go_on ();;
-****)
+let scratch_until button_up button_down =
+  let rec go_on () =
+    match find_scratch_events () with
+    | { mouse_motion_event =
+          (  E_Big_Move (x, y)
+           | E_Small_Move (x, y)); } ->
+      handle_figure (fun () -> G.lineto x y);
+      go_on ()
+    | { mouse_motion_event = E_No_Move; key_event = E_Key c; } -> 
+      scratch_draw_char_event c
+    | { mouse_motion_event = E_No_Move; button_event = E_Up; } -> button_up ()
+    | { mouse_motion_event = E_No_Move; button_event = E_Down; } -> button_down () in
+  go_on;;
 
 (* Main scratch draw loop:
    - each button press changes the place where scratching occurs,
@@ -641,74 +643,20 @@ let scratch_until scratch abort go_on enter =
    - each key press is written at current scratching position using
      scratch_draw_char that tail calls back scratch_draw
      at the new scratching position. *)
-let rec scratch_draw x y =
+let rec scratch_draw () =
   match find_scratch_events () with
   | { mouse_motion_event = E_No_Move; button_event = E_Up; } ->
-    scratch_draw_up x y
+    Misc.warning "Scratch_draw_up";
+    scratch_draw_up ()
   | { mouse_motion_event = E_No_Move; key_event = E_Key c; } ->
     scratch_draw_char_event c
-  | _ -> scratch_draw_down x y
+  | _ ->
+    Misc.warning "Scratch_draw_down";
+    scratch_draw_down ()
 
-and scratch_draw_up x y =
-  Misc.warning "Scratch_draw_up";
-  match find_scratch_events () with
-  | { button_event = E_Down; } ->
-    re_enter_scratch_draw ()
-  | { mouse_motion_event = E_No_Move; key_event = E_Key c; } ->
-    scratch_draw_char_event c
-  | { mouse_motion_event =
-        (  E_Big_Move (x, y)
-         | E_Small_Move (x, y)); } ->
-    handle_figure (fun () -> G.lineto x y);
-    scratch_draw_up x y
-  | _ -> scratch_draw_up x y
+and scratch_draw_up () = scratch_until scratch_draw_up re_enter_scratch_draw ()
 
-and scratch_draw_down x y =
-  Misc.warning "Scratch_draw_down";
-  match find_scratch_events () with
-  | { button_event = E_Up; } ->
-    re_enter_scratch_draw ()
-  | { mouse_motion_event = E_No_Move; key_event = E_Key c; } ->
-    scratch_draw_char_event c
-  | { mouse_motion_event =
-        (  E_Big_Move (x, y)
-         | E_Small_Move (x, y)); } ->
-    handle_figure (fun () -> G.lineto x y);
-    scratch_draw_down x y
-  | _ -> scratch_draw_down x y
-
-(* Move and draw while button is pressed. *)
-and scratch_draw1 x y =
-  G.lineto x y;
-  scratch_draw10 ()
-
-and scratch_draw10 () =
-  match find_scratch_events () with
-  | { mouse_motion_event =
-        (  E_Big_Move (x, y)
-         | E_Small_Move (x, y)); } -> scratch_draw1 x y
-  | { mouse_motion_event = E_No_Move; key_event = E_Key c; } ->
-    scratch_draw_char_event c
-  | { mouse_motion_event = E_No_Move; button_event = E_Up; } ->
-    enter_scratch_draw ()
-  | _ -> scratch_draw10 ()
-
-(* Move and draw while button is up. *)
-and scratch_draw2 x y =
-  G.lineto x y;
-  scratch_draw20 ()
-
-and scratch_draw20 () =
-  match find_scratch_events () with
-  | { mouse_motion_event =
-        (  E_Big_Move (x, y)
-         | E_Small_Move (x, y)); } ->
-    scratch_draw2 x y
-  | { mouse_motion_event = E_No_Move; key_event = E_Key c; } ->
-    scratch_draw_char_event c
-  | { mouse_motion_event = E_No_Move; button_event = E_Down; } ->
-    enter_scratch_draw ()
-  | _ -> scratch_draw20 ()
+and scratch_draw_down () = scratch_until re_enter_scratch_draw scratch_draw_down ()
 
 and scratch_draw_char_event c =
   Misc.warning "Scratch_draw_char_event";
@@ -730,7 +678,7 @@ and enter_scratch_draw () =
   set_font_to_scratch_font ();
   set_cursor cursor_draw;
   G.set_color (get_scratch_line_color ());
-  scratch_draw x y
+  scratch_draw ()
 
 (* Main draw settings loop. *)
 and scratch_draw_settings () =
