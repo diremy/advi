@@ -19,7 +19,7 @@ manual.ima: manual.html
 
 manual.pdf: manual.tex
 	$(LATEX) '\def\driver{dvipdfm}\input' $<
-	dvipdfm -o $@ $*.dvi
+	- dvipdfm -o $@ $*.dvi
 
 clean: 
 	rm -f manual.{aux,log,html,dvi,pdf,pdfm,ps,eps,ima,out} \
