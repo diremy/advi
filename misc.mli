@@ -22,6 +22,7 @@ val round : float -> int;;
 
 type file_name = string;;
 type dir_name = string;;
+type line_number = int;;
 
 (* filters and returns list. *)
 val reverse_filter : ('a -> bool) -> 'a list -> 'a list;;

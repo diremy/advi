@@ -19,6 +19,7 @@
 
 type file_name = string;;
 type dir_name = string;;
+type line_number = int;;
 
 (* To round properly a float to an int. *)
 let round_pos x = int_of_float (x +. 0.5);;
