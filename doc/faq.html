@@ -161,22 +161,26 @@ instance:</I>
   \adviembed {netscape -remote 'openURL(http://www.acm.org)'}
 }
 </PRE>
-
 </DD>
-<DD><I>For <CODE>mozilla</CODE>, you must use the option 
-<CODE>mozilla -remote</CODE>. Unfortunately, this option supposes that
-a mozilla browser is already up and running. If you want to have a
-command that works in any case, even if no mozilla is launched, you could use a
-shell script like:</I>
+
+<DD><I>For <CODE>mozilla</CODE>, you must also use the option
+<CODE>mozilla -remote</CODE>. Similarly to the previous question, this
+option supposes that a mozilla browser is already up and running. If
+you want to have a command that works in any case, even if no mozilla
+is launched, you could use a shell script like:</I>
 <PRE>
 #!/bin/bash
 
-MOZILLA=/usr/local/mozilla/mozilla
+# Here you write the path corresponding to your mozilla binary command,
+# for instance
+#MOZILLA=/usr/local/mozilla/mozilla
+MOZILLA=`which mozilla`
+
 case $# in
  1) 
    if $MOZILLA -remote "ping()" 2>/dev/null
    then 
-     $MOZILLA -remote "openurl($1,new-window)" || \
+     $MOZILLA -remote "openURL($1,new-window)" || \
      $MOZILLA "$@" 
    else
      $MOZILLA "$@" 
