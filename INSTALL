@@ -3,34 +3,35 @@ PREREQUISITES
 
 You need Objective Caml 3.02 or higher to compile the sources.
 
-However, you need a strickly higher version of Graphics (you can pick the
-one under CVS a more recent release), especially if you are using Advi
-as your WhizzyTeX previewer.  Otherwise, it should work but you will not
+However, you need a strictly higher version of Graphics (you can pick the
+one under CVS of a more recent release), especially if you are using Advi
+as your WhizzyTeX previewer. Otherwise, it should work but you will not
 obtain a correct handling of signals (USR1 is used to tell Advi to reload).
 
 You also need the `kpsewhich' utility of the `kpathsea' library
 provided by many TeX distributions.
 
-For the encapsulated postscript file inclusion, you require
-camlimages library, found at 
+For the encapsulated postscript file inclusion, you require the
+camlimages library, available at 
 	http://pauillac.inria.fr/camlimages/
 
 COMPILATION AND INSTALLATION
 ============================
 
-"./configure", then edit the Makefile if necessary, 
-and compile with "make". It creates a binary file "advi".
+1. Configure using
+   "./configure" (then edit the Makefile if necessary)
 
-If your platform supports native compilation, you can also do
-"make opt", which creates a (faster) binary "advi.opt"
-(this is highly recommended).
+2. Compile with "make". It creates a binary file "advi".
+   If your platform supports native compilation, you can also do
+   "make opt", which creates a (faster) binary "advi.opt"
+   (this is highly recommended).
 
-Install the binary(ies) by hand, by simply copying it (them) to the
-appropriate directories.
-
-Copy the files advi.sty to a place where it is a visible latex package.
-(kpewhich advi.pro should succeed from where LaTeX is run)
-
-Copy the file advi.pro to a place where is it a visible PS header.
-(kpewhich advi.pro should succeed from where advi is run)
+3. Install the files by running make install.
+   Alternatively:
+   * Install the binary(ies) by hand, by simply copying it (them) to the
+   appropriate directory.
+   * Copy the files advi.sty to a place where it is a visible latex package.
+   (kpewhich advi.sty should succeed from where LaTeX is run)
+   * Copy the file advi.pro to a place where is it a visible PS header.
+   (kpewhich advi.pro should succeed from where advi is run)
 
