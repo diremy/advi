@@ -22,20 +22,6 @@ CAMLVERSION=`"$CAML"c -v | grep "compiler" | sed 's/.* version //' | sed 's/ .*$
 AC_MSG_RESULT(version $CAMLVERSION at $CAMLDIR)
 
 CAMLOPT="$CAML"opt
-AC_PATH_PROG(PATH_CAMLOPT, $CAMLOPT, "nope")
-if test "$PATH_CAMLOPT" = "nope"; then
-  echo "**************** Warning ******************"
-  echo "ocaml native code compiler is not found"
-  echo "Only the bytecode version of Advi will be"
-  echo "compiled and installed. We strongly recommend"
-  echo "to install the ocamlopt compiler if available"
-  echo "in your OS."
-  echo "*******************************************"
-  INSTALLTARGET="advi"
-else
-  INSTALLTARGET="advi.opt"
-fi
-
 dnl Checking cdk_config
 AC_PATH_PROG(PATH_CDK, cdk_config, "nope")
 if test "X$PATH_CDK" != "Xnope"; then
@@ -186,6 +172,30 @@ else
 fi
 
 dnl Check for libraries: END
+
+AC_PATH_PROG(PATH_CAMLOPT, $CAMLOPT, "nope")
+if test "$PATH_CAMLOPT" = "nope"; then
+  echo "**************** Warning ******************"
+  echo "ocaml native code compiler is not found"
+  echo "Only the bytecode version of Advi will be"
+  echo "compiled and installed. We strongly recommend"
+  echo "to install the ocamlopt compiler if available"
+  echo "in your OS."
+  echo "*******************************************"
+  INSTALLTARGET="advi"
+else
+  if test -f "$CAMLIMAGESDIR/ci_ps.cmxa"; then
+    echo "**************** Warning ******************"
+    echo "You have ocamlopt compiler, but you have no"
+    echo "native-code version of camlimages library installed."
+    echo "Without it, we cannot compile the native-code"
+    echo "version of advi, which we strongly recommend."
+    echo "*******************************************"
+    INSTALLTARGET="advi"
+  else
+    INSTALLTARGET="advi.opt"
+  fi
+fi
 
 AC_PATH_XTRA
 WITH_X="$X_LIBS $X_PRE_LIBS -lX11 $X_EXTRA_LIBS"
