@@ -36,8 +36,10 @@ val option_flag : bool -> string -> string -> bool ref
     message [mes] that sets or unsets the flag, according to the value 
     of [init]  
 *)
-val dops : bool ref;;
+val pson : bool ref;;
 (* [nogs] when set means do not call gs for drawing inline Postscript. *)
+val dops : bool ref;;
+(* temporary value, reset to pson when reloading the file. *)
     
 val handle_fatal_error : (unit -> unit) -> unit -> unit
 val fatal_error : string -> 'a

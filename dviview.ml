@@ -341,6 +341,7 @@ module Make(Dev : DEVICE) = struct
       try (Unix.stat filename).Unix.st_mtime
       with _ -> 0.0 in
     let pages = Array.length dvi.Dvi.pages in
+    Misc.dops := !Misc.pson;
     { filename = filename ;
       dvi = dvi ;
       cdvi = cdvi ;
@@ -586,6 +587,7 @@ module Make(Dev : DEVICE) = struct
       st.frozen <- true;
       st.aborted <- true;
       update_dvi_size false st ;
+      Misc.dops := !Misc.pson;
       redraw st
     with x ->
       assert (Misc.debug (Printexc.to_string x));      

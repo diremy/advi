@@ -107,11 +107,13 @@ let debug = debug_option
     "--debug"
     "General debug";;
 
-let dops = 
+let pson = 
   if Config.have_gs then
     option_flag true
       "-nogs" "Turn off display of inlined Postscript"
   else ref false;;
+
+let dops = ref (!pson);;
 
 let warning mes =
   Printf.fprintf stderr "Warning: %s" mes;

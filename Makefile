@@ -106,7 +106,7 @@ veryclean:
 	rm -f Makefile.config config.cache config.log \
 	config.status drawps.ml config.ml
 
-install: advi.opt
+install:: advi.opt
 	cp advi.opt ${bindir}/advi
 	- mkdir -p $(ADVI_LOC)
 	cp splash.dvi caml.eps advi.sty advi.pro $(ADVI_LOC)
