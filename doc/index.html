@@ -115,7 +115,7 @@ before launching.</I>
 
 <DT><STRONG>How do I know in advance the set of applications that a
 DVI file can launch ?</STRONG>
- <DD>Answer: <I>Just launch Active-DVI the <CODE>-n</CODE> option.
+ <DD>Answer: <I>Just launch Active-DVI with the <CODE>-n</CODE> option.
 <CODE>advi -n file.dvi</CODE> will analyse the file <CODE>file.dvi</CODE>
 and print out the list of embedded commands it contains.</I>
 
@@ -157,6 +157,14 @@ let r = \{foo = 1; bar = "toto"\};;
 \end{alltt}
 </PRE>
 
+Renders (much better than the following :)
+<PRE>
+<I>(* Remark that double semi-colon is mandatory here. *)</I>
+let x = 1<FONT COLOR=red>;;</FONT>
+let r = {foo = 1; bar = "toto"};;
+<FONT COLOR=red>let</FONT> z = r.foo;;
+</PRE>
+
 <DT><STRONG>How to write on my slides programs which have mathematical
 formulas in them ?</STRONG>
  <DD>Answer: <I>If you need mathematical formulas into your programs,
@@ -180,8 +188,8 @@ perfect) ?</STRONG>
  <DD>Answer: <I><CODE>xdvi</CODE> and <CODE>advi</CODE> do not use the
 same margins. <CODE>Advi</CODE> uses the specification that TeX emits
 into the DVI file (bounding box) and does not add extra space for
-margins. Unfortunately, many LaTeX
-styles and packages do not give a relevant value to the bounding box.
+margins. Unfortunately, many LaTeX styles and packages do not give a
+relevant value to the bounding box. 
  <DD>The workaround is to modify margins, either by moving the
 bounding-box around with the mouse (Control+button), or to use the
 relevant option on the command line when launching <CODE>advi</CODE>
