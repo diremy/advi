@@ -539,7 +539,8 @@ let draw_image image cache_name alpha blend (w, h) (x0, y0) =
 
 type alpha = float;;
 
-let f file whitetransp (alpha : alpha) blend psbbox ratiopt antialias (w, h) (x0, y0) =
+let f file whitetransp (alpha : alpha) blend psbbox ratiopt
+    antialias (w, h) (x0, y0) =
   try
     let antialias = if not !image_aa then false else antialias in
     let cache_name, image =

@@ -482,7 +482,7 @@ let psfile_special st s =
       and lly = int_or_float_of_string (List.assoc "lly" records)
       and urx = int_or_float_of_string (List.assoc "urx" records)
       and ury = int_or_float_of_string (List.assoc "ury" records) in
-      prerr_endline
+      Misc.debug_endline
          (Printf.sprintf "BBOX=%d %d %d %d" llx lly urx ury);
       llx, lly, urx, ury
     with
@@ -1252,12 +1252,24 @@ let special st s =
   if has_prefix "PSfile=" s || has_prefix "psfile=" s then begin
     try
       let file, bbox, size = psfile_special st s in
-prerr_endline ("IMAGE " ^ file);
+      let file, drawbygs =
+       let get_second_token s =
+         Scanf.sscanf s "`%_s %s" (fun token -> token) in
+       try
+          if file.[0] = '`' then (* ex. `jpeg2ps world.jpg *)
+            get_second_token file, false (* it must not be eps *)
+          else file, st.epsbygs
+        with
+        | _ -> 
+            (* file must be an eps *)
+            file, st.epsbygs
+      in
+      Misc.debug_endline ("IMAGE " ^ file);
       let x = st.x_origin + int_of_float (st.conv *. float st.h)
       and y = st.y_origin + int_of_float (st.conv *. float st.v) in
       if !visible then
         let draw =
-          if st.epsbygs then begin
+          if drawbygs then begin
             Misc.debug_endline (Printf.sprintf "Drawing by gs %s" file);
             Dev.draw_ps file bbox
           end else begin
