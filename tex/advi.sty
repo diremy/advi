@@ -115,8 +115,11 @@ Maybe you mean \@currenvir ing}}
   \mbox {\setkeys {advi@embed}{#1}%
          \advi@embed@ {\advi@embed@name}{\advi@embed@mode}
              {\advi@embed@width}{\advi@embed@height}{#2}}}
-\newcommand{\advi@killembed}[1]{\advi@special {kill name="#1"}}
+
+\newcommand{\advi@killembed}[2][]{\advi@special {kill name="#2" signal="#1"}}
+
 \advi@export \adviembed \advi@embed
+
 \advi@export \advikillembed \advi@killembed 
 
 
