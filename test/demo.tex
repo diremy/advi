@@ -526,13 +526,13 @@ Here, \docid{text} can have fragile commands.
 
 \newpage
 
-\subsection*{\annot{Active Annotations}(2,1.5){Annotations \\are great!}}
+\subsection*{\adviannot{Active Annotations}(2,1.5){Annotations \\are great!}}
 
 \noindent
-\annot[p=9em]{Active anchors}(1,1.5)
+\adviannot[p=9em]{Active anchors}(1,1.5)
 {\centering Active anchors are even greater!}
-can also be used to annotate \annot[bg=green]{text}{Or math formulas} as
-here, \annot{for instance}[linecolor=red](-1.5,1){for example}. 
+can also be used to annotate \adviannot[C,bg=green]{text}{text=t+e+x+t} as
+here, \adviannot{for instance}[linecolor=red](-1.5,1){for example}. 
 
 \medskip
 
@@ -540,14 +540,14 @@ here, \annot{for instance}[linecolor=red](-1.5,1){for example}.
 These annotations have been typeset respectively as:
 \begin{small}
 \begin{verbatim}
-\annot{Active Annotations}(2,1.5){Annotations \\are great!}
+\adviannot{Active Annotations}(2,1.5){Annotations \\are great!}
 
-\annot[p=9em]{Active anchors}(1,1.5)
+\adviannot[p=9em]{Active anchors}(1,1.5)
    {\centering Active anchors are even greater!}
 
-\annot[bg=green]{text}{Or math formulas}
+\adviannot[C,bg=green]{text}{text=+t+e+x+t}
 
-\annot{for instance}[linecolor=red](-1.5,1){for example}
+\adviannot[C]{for instance}[linecolor=red](-1.5,1){for example?}
 \end{verbatim}
 \end{small}
 
@@ -578,14 +578,25 @@ Where \docid{colspec} is a column specification for the tabular
 environment. Moreover, the following abbreviations are recognized:
 
 \smallskip
+\tt
 \begin{tabular}{|l|l|}
 \hline
-{\em key} & expands to \\
+\rm\em key & \rm expands to \\
 \hline
-\dockey{c}{} &  \doctt{col=c}\\
-\dockey{l}{} &  \doctt{col=l}\\
-\dockey{r}{} &  \doctt{col=r}\\
-\dockey{p}{dim} &  \doctt{col=p\docarg{dim}}\\
+c &  col=c\\
+l &  col=l\\
+r &  col=r\\
+p=\docid{w} & col=p\docarg{w}\\
+\cline{1-2}
+\end{tabular}
+\begin{tabular}{|l|l|}
+\hline
+\rm\em key & \rm expands to \\
+\hline
+C &  col=\{>\{\$\}c<\{\$\}\}\\
+L &  col=\{>\{\$\}l<\{\$\}\}\\
+R &  col=\{>\{\$\}r<\{\$\}\}\\
+P\docid{w} &  \doctt{col=\{>\{\$\}p\docarg{w}<\{\$\}\}}\\
 \cline{1-2}
 \end{tabular}
 \end{quote}

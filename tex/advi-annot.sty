@@ -14,18 +14,23 @@
 %% Preliminary declarations
 
 \RequirePackage {advi}
+\RequirePackage {array}
 \RequirePackage {pst-node}
 
 %% Options
 
 \def \advi@annot@bg{yellow}
 \def \advi@annot@col{c}
-\define@key{adviannot}{bg}{\def \advi@annot@bg{#1}}
-\define@key{adviannot}{l}{\def \advi@annot@col{l}}
-\define@key{adviannot}{c}{\def \advi@annot@col{c}}
-\define@key{adviannot}{r}{\def \advi@annot@col{r}}
-\define@key{adviannot}{p}{\def \advi@annot@col{p{#1}}}
-\define@key{adviannot}{col}{\def \advi@annot@col{#1}}
+\define@key {adviannot} {bg} {\def \advi@annot@bg  {#1}}
+\define@key {adviannot} {l}[]{\def \advi@annot@col {@{}l@{}}}
+\define@key {adviannot} {c}[]{\def \advi@annot@col {@{}c@{}}}
+\define@key {adviannot} {r}[]{\def \advi@annot@col {@{}r@{}}}
+\define@key {adviannot} {L}[]{\def \advi@annot@col {@{}>{$}l<{$}@{}}}
+\define@key {adviannot} {C}[]{\def \advi@annot@col {@{}>{$}c<{$}@{}}}
+\define@key {adviannot} {R}[]{\def \advi@annot@col {@{}>{$}r<{$}@{}}}
+\define@key {adviannot} {p}  {\def \advi@annot@col {@{}p{#1}@{}}}
+\define@key {adviannot} {P}  {\def \advi@annot@col {@{}>{$}p{#1}<{$}@{}}}
+\define@key {adviannot} {col}{\def \advi@annot@col {#1}}
 
 \newcommand {\AdviAnnotArc}[2]
   {\ncarc [linestyle=solid,arcangleA=-0,arcangleB=-3]{#1}{advi@to}%
@@ -36,8 +41,9 @@
    \bgroup
    \NormalCoor
    \setkeys {adviannot}{#1}%
+   \expandafter \newcolumntype \expandafter a\expandafter {\advi@annot@col}%
    \Rnode {advi@from\the\advi@c@annot}%
-      {\Advi@anchor{advi@annot\the\advi@c@annot}{#2}}\annot@i}
+      {\advi@anchor{advi@annot\the\advi@c@annot}{#2}}\annot@i}
 
 \def \advi@annot@setdefault  {\psset{}}
 
@@ -49,11 +55,11 @@
 \ifadvi@ignore
 \def \annot@ii(#1)#2{\egroup}
 \else
-\def \advi@annottab #1#2{\begin{tabular}{@{}#1@{}}#2\end{tabular}}%
+\def \advi@annottab #1#2{\begin{tabular}{@{}a@{}}#2\end{tabular}}%
 \def \annot@ii(#1)#2{%
   \begin{Advi@record}{advi@annot\the\advi@c@annot}
     \rput(#1){\ovalnode {advi@to}%
-                 {\advi@annottab {\advi@annot@col}{#2}}}%
+                 {\begin{tabular}{a}#2\end{tabular}}}%
      \AdviAnnotArc{advi@from\the\advi@c@annot}{advi@to}%
   \end{Advi@record}\egroup}
 \fi
@@ -74,4 +80,4 @@
 
 %% exports
 
-\advi@export \annot \advi@annot 
+\advi@export \adviannot \advi@annot 
