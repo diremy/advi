@@ -93,6 +93,12 @@ programs from inside your slides
 
 \newpage
 
+%Didier's flashy macro
+\def \flash #1{\let \do\leflash \do #1\relax}
+\def \leflash #1{\ifx #1\relax \def \do{}\else \def \do {#1\wait{0.05}\leflash}\fi \do}
+
+\def\goon{\hbox{{\Large $\Rightarrow$}~Type~space~to~go~on}}
+
 \subsection* {Macros enable}
   \begin{itemize}
   \item EPS graphics inclusion using Camlimages\\
@@ -104,58 +110,63 @@ programs from inside your slides
     \begin{itemize}
     \item \verb+\pause+ \pause
       and \verb+\wait{+{\em sec}\verb+}+ 
-     %Didier's falshy macro 
-     \def \flash #1{\let \do\leflash \do #1\relax}
-     \def \leflash #1{\ifx #1\relax \def \do{}\else \def \do
-     {#1\wait{0.05}\leflash}\fi \do}
-      \flash {for~simple~ animation}
+      \flash{for~simple~animation}
 
     \item \verb+\record+ \& \verb+\play+ feature to change the colour
      of a text:
      \begin{itemize}
        \item mark the text with a tag name:\\
-         $\tt{\backslash}record\{this\}\{\recplay{this}{Warning~to~the~casual~user}\}$
+         $\tt{\backslash}record\{this\}\
+              \{\recplay{this}{Warning~to~the~casual~user}\}$
        \item then change the current text color and replay the tagged text:
       $\tt{\backslash}play\{this\}$.
      \end{itemize}
-      For instance, display {\tt this} in red:\\
-      \pause
-      \verb+\textcolor{red}{\play{this}}+
-      \textcolor{c1}{\play{this}}\pause\\
-      or in green
-      \verb+\textcolor{green}{\play{this}}+
-      \textcolor{green}{\play{this}}\pause\\
-      Using pauses and color settings you can get
-      \recplay{this}{various}
-      \textcolor{red}{\play{this}}\pause%
-      \recplay{this}{color}
-      \textcolor{c2}{\play{this}}\pause%
-      \recplay{this}{effects}
-      \textcolor{c3}{\play{this}}\pause%
-      \recplay{this}{in}
-      \textcolor{c4}{\play{this}}\pause%
-      \recplay{this}{your}
-      \textcolor{c5}{\play{this}}\pause%
-      \recplay{this}{texts}
-      \textcolor{c6}{\play{this}}\pause%
-      \recplay{this}{!}\\
-      \textcolor{red}{\play{this}}\pause%
-      Including some strange flashing effect!
-      \textcolor{c6}{\play{this}}\wait{\smallpause}%
-      \textcolor{c1}{\play{this}}\wait{\smallpause}%
-      \textcolor{c2}{\play{this}}\wait{\smallpause}%
-      \textcolor{c3}{\play{this}}\wait{\smallpause}%
-      \textcolor{c4}{\play{this}}\wait{\smallpause}%
-      \textcolor{c5}{\play{this}}\wait{\smallpause}%
-      \textcolor{c6}{\play{this}}\wait{\smallpause}%
-      \textcolor{c1}{\play{this}}\wait{\smallpause}%
-      \textcolor{c2}{\play{this}}\wait{\smallpause}%
-      \textcolor{c3}{\play{this}}\wait{\smallpause}%
-      \textcolor{c4}{\play{this}}\wait{\smallpause}%
-      \textcolor{c5}{\play{this}}\wait{\smallpause}%
-      \textcolor{c6}{\play{this}}\wait{\smallpause}%
     \end{itemize}
 \end{itemize}
+
+\noindent
+For instance, to display in red the text associated to the tag
+{\tt this} above, insert the command
+\verb+\textcolor{red}{\play{this}}+\\
+\recplay{that}{\goon}\pause%
+\textcolor{c1}{\play{this}\play{that}}\pause{\play{this}\play{that}}\pause
+
+\noindent
+To display the same text in green, type\\
+\verb+\textcolor{green}{\play{this}}+\\
+\recplay{goon}{\goon}\pause\textcolor{green}{\play{this}\play{goon}\pause}
+
+\noindent
+Using pauses and color settings, you can get
+\recplay{this}{various}
+\textcolor{red}{\play{this}\play{goon}}\pause
+\recplay{this}{color (and fonts)}
+\textcolor{c2}{\play{this}\play{goon}}\pause
+\recplay{this}{effects}
+\textcolor{c3}{\play{this}\play{goon}}\pause
+\recplay{this}{in}
+\textcolor{c4}{\play{this}\play{goon}}\pause
+\recplay{this}{your}
+\textcolor{c5}{\play{this}\play{goon}}\pause
+\recplay{this}{texts}
+\textcolor{c6}{\play{this}\play{goon}}\pause
+\recplay{this}{!}\\
+\textcolor{red}{\play{this}\play{goon}}\pause
+Including some strange flashing effect!
+\play{goon}
+\textcolor{c6}{\play{this}}\wait{\smallpause}%
+\textcolor{c1}{\play{this}}\wait{\smallpause}%
+\textcolor{c2}{\play{this}}\wait{\smallpause}%
+\textcolor{c3}{\play{this}}\wait{\smallpause}%
+\textcolor{c4}{\play{this}}\wait{\smallpause}%
+\textcolor{c5}{\play{this}}\wait{\smallpause}%
+\textcolor{c6}{\play{this}}\wait{\smallpause}%
+\textcolor{c1}{\play{this}}\wait{\smallpause}%
+\textcolor{c2}{\play{this}}\wait{\smallpause}%
+\textcolor{c3}{\play{this}}\wait{\smallpause}%
+\textcolor{c4}{\play{this}}\wait{\smallpause}%
+\textcolor{c5}{\play{this}}\wait{\smallpause}%
+\textcolor{c6}{\play{this}}\wait{\smallpause}%
 
 
 \newpage
@@ -176,7 +187,10 @@ You launch a command using
 \noindent
 where \verb"!g" specifies the required geometry, \verb"!p" the Active dvi
 window identifier, and \verb"w", \verb"h" the width \& height of the
-rectangle where the application will draw material.
+rectangle where the application will draw its material.
+Values of \verb"!p" and \verb"!g" are automatically computed by Active
+dvi and passed as arguments to the specified \verb"command".
+ Examples:
 
 \begin{itemize}
 \item The \verb"display" command (from ImageMagick) can show any image into your
