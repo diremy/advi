@@ -13,12 +13,12 @@ all: demo.dvi trigo_source.dvi ./trans.dvi trans2.dvi background.dvi \
 .tex.dvi:
 	$(LATEX) $<
 
-but: start_embed.ml
-ifeq ($(HAVE_CDK),true)  
-	ocamlc -custom -o but `cdk_config camltk` start_embed.ml
-else
-	ocamlc -custom -o but -I +camltk camltk.cma start_embed.ml
-endif
+# but: start_embed.ml
+# ifeq ($(HAVE_CDK),true)  
+# 	  ocamlc -custom -o but `cdk_config camltk` start_embed.ml
+# else
+# 	  ocamlc -custom -o but -I +camltk camltk.cma start_embed.ml
+# endif
 
 taquin: taquin_embed.ml
 ifeq ($(HAVE_CDK),true)
