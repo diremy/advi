@@ -3,4 +3,6 @@
 *.log
 *.toc
 *.pdf
+*.ps
+*.out
 .advi
