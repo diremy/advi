@@ -291,8 +291,9 @@ the default \doctt{\char126/.advirc}, \doctt{\char126/.advi/advirc}, or
 
 {\ActiveDVI} is invoked with the following command syntax
 \begin{verbatim}
-advi [options] dvifile
+advi [options] dvifile [dvifile]
 \end{verbatim}
+See section~\ref{multiplex} for the use of a secondary DVI file.
 
 \noindent The \doctt{advi} commands recognized the following options:
 
@@ -532,6 +533,19 @@ files, or by implementing extensions to the previewer itself.
 % of your own that can serve as an example to the \ActiveDVI's users
 % community, please don't hesitate to drop a mail to the implementors
 % at \verb"advi@pauillac.inria.fr".
+
+\subsection{Viewing multiple files simultaneously}
+
+\label{multiplex}
+{\ActiveDVI} can be invoked with several DVI files (currentlt only two).
+In this case, the first file is the master file and others are client
+files. The user can switch between files explicitly (see 
+\softlink{activedvikeys}{key bindings}) or implicitly.
+There is an implicit switch from master to client when an hyperlink that is
+not found in master file can be found in the client; there is also
+an implicit switch from client to master when using the history stack and
+the previous event on the stack an implicit swtich from master.
+
 
 \section{The \softtarget{advi} {\doctt{advi.sty}} {\LaTeX} package}
 
