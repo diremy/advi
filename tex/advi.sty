@@ -48,13 +48,13 @@
 %%% record and play
 
 \def \advi@start {start}
-\define@key{record}{play}[]{\def \advi@start {start play}}
+\define@key{advi@record}{play}[]{\def \advi@start {start play}}
 \newenvironment {advi@record}[2][]
-  {\setkeys{record}{#1}\advi@special {proc=#2 record=\advi@start}}
+  {\setkeys{advi@record}{#1}\advi@special {proc=#2 record=\advi@start}}
   {\advi@special {proc record=end}}
-\define@key{play}{color}[blue]{\color{#1}}
+\define@key{advi@play}{color}[blue]{\color{#1}}
 \newcommand {\advi@play}[2][]
-   {\bgroup \setkeys {play}{#1}\advi@special {proc=#2 play}\egroup}
+   {\bgroup \setkeys {advi@play}{#1}\advi@special {proc=#2 play}\egroup}
 
 \advi@exportenv {record*}{advi@record}
 \newcommand {\record}[3][]{\begin{advi@record}[#1]{#2}#3\end{advi@record}}
@@ -67,10 +67,13 @@
 \def \advi@embed@name{anonymous}
 \def \advi@embed@mode{ephemeral}
 \define@key {advi@embed}{name}{\def \advi@embed@name {#1}}
-\define@key {advi@embed}{mode}{\def \advi@embed@mode {#1}}
-\define@key {advi@embed}{ephemeral}[]{\def \advi@embed@mode {ephemeral}}
-\define@key {advi@embed}{persistent}[]{\def \advi@embed@mode {persistent}}
-\define@key {advi@embed}{sticky}[]{\def \advi@embed@mode {sticky}}
+\define@key {advi@embed}{type}{\def \advi@embed@type {#1}}
+\define@key {advi@embed}{ephemeral}
+  {\def \advi@embed@type {ephemeral}\def\advi@embed@name {#1}}
+\define@key {advi@embed}{persistent}
+  {\def \advi@embed@type {persistent}\def\advi@embed@name {#1}}
+\define@key {advi@embed}{sticky}
+  {\def \advi@embed@type {sticky}\def\advi@embed@name {#1}}
 \def \advi@embed@ #1#2#3#4#5{%
   \mbox{\advi@special
           {embed name="#1" type=#2 width=#3 height=#4 command="#5"}%
@@ -89,11 +92,11 @@
 %%% Background colors and images
 
 \define@key {advi@bg}{color}{\advi@special{setbg col=#1}}
-\define@key {advi@bg}{image}{\advi@special{setbg img=#1}}
+\define@key {advi@bg}{image}{\advi@special{setbg ima=#1}}
+\define@key {advi@bg}{alpha}{\advi@special{setbg blend=#1}}
+\define@key {advi@bg}{blend}{\advi@special{setbg alpha=#1}}
 \define@key {advi@bg}{reset}[]{\advi@special{setbg reset}}
 \define@key {advi@bg}{inherit}[]{\advi@special{setbg inherit}}
-\define@key {advi@bg}{alpha}{\advi@special{setbg alpha=#1}}
-\define@key {advi@bg}{blend}{\advi@special{setbg blend=#1}}
 \newcommand{\advibg}{\setkeys{advi@bg}}
 
 %%% Pausing and waiting
@@ -150,9 +153,9 @@
    \def \advi@@afterbox {\aftergroup \advi@afterbox} 
    \afterassignment \advi@@afterbox \setbox0 \hbox } 
 
-\def \advitrans {\setkeys{trans}}
-\define@key{trans}{push}{\advi@special {trans push #1}}
-\define@key{trans}{pop}[]{\advi@special{trans pop}}
+\def \advi@trans {\setkeys{advi@trans}}
+\define@key{advi@trans}{push}{\advi@special {trans push #1}}
+\define@key{advi@trans}{pop}[]{\advi@special{trans pop}}
 \advi@export \advitransbox \advi@transbox
 
 \advi@export \settransition \advi@settransition
