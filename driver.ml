@@ -792,8 +792,8 @@ let edit_special st s =
       let record = split_record (String.concat " " args) in
       let field x =
         try List.assoc x record
-        with Not_found ->
-          warning (Printf.sprintf "Field %s missing in special %s" x s);
+        with Not_found -> 
+            warning (Printf.sprintf "Field %s missing in special %s" x s);
           raise Ignore in
       let dpi = ldexp (float st.sdpi) (-16) in
       let pixels dim =
@@ -801,23 +801,31 @@ let edit_special st s =
         | Dimension.Px x -> float x
         | Dimension.In x -> x *. dpi
         | _ -> assert false in
-      let prop = function
-        | "X" -> Dev.E.X | "Y" -> Dev.E.Y | "XY" -> Dev.E.XY | "Z" -> Dev.E.Z
-        | _ -> ill_formed_special s; Dev.E.Z in
       let unit = pixels (field "unit") in
-      let float_field x =
-        let fx = field x in
-        try float_of_string fx
+      let float_field x x' =
+        let b, fx =
+          try true, List.assoc x record
+          with Not_found -> false, field x' in
+        try b, float_of_string fx
         with _  ->
           warning
             (Printf.sprintf "Field %s=%s not a float in special %s" x fx s);
             raise Ignore in
       let float_to_pixel f = truncate (f *. unit) in
-      let r = {
-        Dev.rx = float_field "x"; Dev.ry = float_field "y";
-        Dev.rw = float_field "w"; Dev.rh = float_field "h";
-        Dev.rd = float_field "d"; 
+      let raw_fields = {
+        Dev.rx = float_field "x" "X"; Dev.ry = float_field "y" "Y";
+        Dev.rw = float_field "w" "W"; Dev.rh = float_field "h" "H";
+        Dev.rd = float_field "d" "D"; 
       } in
+      let rmap f r = {
+         Dev.rx = f r.Dev.rx; 
+         Dev.ry = f r.Dev.ry; 
+         Dev.rw = f r.Dev.rw; 
+         Dev.rh = f r.Dev.rh; 
+         Dev.rd = f r.Dev.rd;
+      } in
+      let r = rmap snd raw_fields in
+      let m = rmap fst raw_fields in
       let rect = {
         Dev.rx = st.x_origin + Misc.round (st.conv *. float st.h)
           + float_to_pixel r.Dev.rx;
@@ -834,10 +842,7 @@ let edit_special st s =
           Dev.E.file = field "file";
           Dev.E.unit = unit;
           Dev.E.origin = r;
-          Dev.E.move =
-            (try prop (List.assoc "move" record) with Not_found -> Dev.E.Z);
-          Dev.E.resize =
-            (try prop (List.assoc "resize" record) with Not_found -> Dev.E.Z);
+          Dev.E.action = m;
         } in
       Dev.E.add rect info
 

@@ -1065,11 +1065,10 @@ module H =
 
 module E =
   struct
-    type direction = X | Y | XY | Z
-    type info = { comm : string; name : string;
-                  line : string; file : string;
-                  origin : float rect; unit : float;
-                  move : direction; resize : direction; }
+    type info = {
+        comm : string; name : string; line : string; file : string;
+        origin : float rect; action : bool rect; unit : float;
+      }
     type figure = { rect : int rect; info : info; }
     type action = Move of int * int | Resize of bool * int * int
 
@@ -1128,9 +1127,9 @@ module E =
         match a with
         | Move (dx, dy) ->
             "moveto", delta origin.rx dx, delta origin.ry dy
-        | Resize (false, dx, dy) ->
-            "resizetop", delta origin.rw dx, delta origin.rh dy
         | Resize (true, dx, dy) ->
+            "resizetop", delta origin.rw dx, delta origin.rh dy
+        | Resize (false, dx, dy) ->
             "resizebot", delta origin.rw dx, delta origin.rd dy
       in
       Printf.sprintf "<edit %s %s #%s @%s %s %s,%s>"
@@ -1402,46 +1401,23 @@ let wait_select_button_up m x y =
       | _ -> raise exn;;
 
 (* Graphical transformations to apply to rectangles. *)
-type rect_transformation =
-  | Move_xy
-  | Move_x
-  | Move_y
-  | Resize_hw
-  | Resize_dw
-  | Resize_w
-  | Resize_h
-  | Resize_d
-;;
+let transform_rect action r dx dy =
+  { rx = if action.rx then r.rx + dx else r.rx;
+    ry = if action.ry then r.ry + dy else r.ry;
+    rw = if action.rw then r.rw + dx else r.rw;
+    rh = if action.rh then r.rh + dy else r.rh;
+    rd = if action.rd then r.rd - dy else r.rd;
+  }
 
-(* Their implementations. *)
-let move_rect r dx dy = { r with rx = r.rx + dx; ry = r.ry + dy }
-let move_rect_x r dx dy = { r with rx = r.rx + dx }
-let move_rect_y r dx dy = { r with ry = r.ry + dy }
-let resize_rect_hw r dx dy = { r with rw = r.rw + dx; rh = r.rh + dy }
-let resize_rect_dw r dx dy = { r with rw = r.rw + dx; rd = r.rd - dy }
-let resize_rect_w r dx dy = { r with rw = r.rw + dx }
-let resize_rect_h r dx dy = { r with rh = r.rh + dy }
-let resize_rect_d r dx dy = { r with rd = r.rd - dy }
+let transform_cursor action =
+  if action.rx || action.ry then Busy.Move
+  else match action.rw, action.rh, action.rd with
+  | true, false, false -> Busy.Resize_w
+  | true, _, _ -> Busy.Resize
+  | _, true, _ -> Busy.Resize_h
+  | _, _, true -> Busy.Resize_d
+  | _, _, _ -> Busy.Move
 
-let transform_rect = function
-  | Move_xy -> move_rect
-  | Move_x -> move_rect_x
-  | Move_y -> move_rect_y
-  | Resize_hw -> resize_rect_hw
-  | Resize_dw -> resize_rect_dw
-  | Resize_h -> resize_rect_h
-  | Resize_d -> resize_rect_d
-  | Resize_w -> resize_rect_w
-
-let transform_cursor = function
-  | Move_xy -> Busy.Move
-  | Move_x -> Busy.Move
-  | Move_y -> Busy.Move
-  | Resize_hw -> Busy.Resize
-  | Resize_dw -> Busy.Resize
-  | Resize_w -> Busy.Resize_w
-  | Resize_h -> Busy.Resize_h
-  | Resize_d -> Busy.Resize_d
 
 (* ?? *)
 let filter trans event dx dy =
@@ -1509,7 +1485,7 @@ let wait_button_up m x y =
           match click_area close x y with
           | Middle -> Final (Position (x, !size_y - y))
           | c -> Final (Click (c, button m, x, !size_y - y))
-          end
+        end
         else Final (Click (click_area near x y, button m, x, !size_y - y))
     | x -> x in
   if !editing && pressed m G.button1 then wait_position () else
@@ -1518,34 +1494,34 @@ let wait_button_up m x y =
       let p = E.find x y in
       let rect = p.E.rect in
       let info = p.E.info in
-      if pressed m G.button2 && info.E.move <> E.Z then
+      let action = info.E.action in
+      if pressed m G.button2 && (action.rx || action.ry) then
         let event dx dy = Edit (p, E.Move (dx, dy)) in
-        let action =
-          match info.E.move with
-          | E.X -> Move_x | E.Y -> Move_y | _ -> Move_xy in
-        wait_move_button_up rect action event x y else
-      if (pressed m G.button3 || pressed m G.button1)
-        && info.E.resize <> E.Z then
+        let action = { action with rw = false; rh = false; rd = false} in
+        wait_move_button_up rect action event x y
+      else if (pressed m G.button3 || pressed m G.button1)
+          && (action.rh || action.rd || action.rw) then
         let b = pressed m G.shift in
-        let event dx dy = Edit (p, E.Resize (b, dx, dy)) in
+        let action_h = action.rh && (not action.rd || b) in
+        let action_d = action.rd && (not action.rh || not b) in
+        let event dx dy = Edit (p, E.Resize (action_h, dx, dy)) in
         let action =
-          match info.E.resize with
-          | E.X -> Resize_w
-          | E.Y -> if b then Resize_d else Resize_h
-          | _ -> if b then Resize_dw else Resize_hw
-        in
+          { action with rx = false; ry = false;
+            rh = action_h; rd = action_d } in
         wait_move_button_up rect action event x y
       else Final Nil
     with
     | Not_found ->
         if pressed m G.control then
           let event dx dy = Move (dx, dy) in
-          wait_move_button_up !bbox Move_xy event x y
+          let move =
+            { rx = true; ry = true; rw = false; rh = false; rd = false } in
+          wait_move_button_up !bbox move event x y
         else wait_position ()
   end else
-  if pressed m G.shift && released m G.button1
-  then wait_select_button_up m x y
-  else wait_position ();;
+    if pressed m G.shift && released m G.button1
+    then wait_select_button_up m x y
+    else wait_position ();;
 
 let wait_event () =
   (* We reached a pause. Now we can reset the sleep break *)

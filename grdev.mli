@@ -231,11 +231,10 @@ type status = {
 
 module E :
     sig
-      type direction = X | Y | XY | Z
-      type info = { comm : string; name : string;
-                    line : string; file : string;
-                    origin : float rect; unit : float;
-                    move : direction; resize : direction; }
+      type info = {
+          comm : string; name : string; line : string; file : string;
+          origin : float rect; action : bool rect; unit : float;
+        }
       type figure = { rect : int rect; info : info; }
       type action = Move of int * int | Resize of bool * int * int
 

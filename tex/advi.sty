@@ -630,38 +630,27 @@ end
   \def \advi@edit@h{0}%
   \def \advi@edit@w{1}%
   \def \advi@edit@d{0}%
-  \def \advi@edit@move{Z}%
-  \def \advi@edit@resize{Z}%
+  \def \advi@edit@X{X}
+  \def \advi@edit@Y{Y}
+  \def \advi@edit@W{W}
+  \def \advi@edit@H{H}
+  \def \advi@edit@D{D}
 }
-\def \advi@edit@Z{Z}
-\def \advi@edit@X{X}
-% \def \advi@edit@Y{Y}
-% \def \advi@edit@XY{Y}
 \define@key {advi@embed}{width}%
    {\@tempdima#1\relax \edef \advi@embed@width {\the\@tempdima}}
 
-% \def \define@keydim #1#2{%
-%    \define@key {#1}{#2}%
-%      {\@tempdima##1\relax \expandafter
-%         \edef \csname #1@#2\endcsname {\the\@tempdima}}}
-\def \define@keyset #1#2#3#4{%
-   \expandafter \define@key@set \csname #1@#2\endcsname {#1}{#2}{#3}{#4}%
-}
-\def \define@key@set #1#2#3#4#5{\define@key {#2}{#3}{%
-  \def #1{##1}%
-  \ifx #4\advi@edit@Z \def #4{#5}\else
-    \ifx #4\advi@edit@X \edef #4{#4#5}\fi}}
-% \def \advi@mandatory #1#2{%
-%   \@ifundefined {advi@#1@#2}%
-%      {\advi@error {Undefined field #2 in \string\advi#1 command}}{}}
 \define@key {advi@edit}{unit}{\advi@edit@unit #1}
-\define@keyset {advi@edit}{x}{\advi@edit@move}{X}
-\define@keyset {advi@edit}{y}{\advi@edit@move}{Y}
-\define@keyset {advi@edit}{w}{\advi@edit@resize}{X}
-\define@keyset {advi@edit}{h}{\advi@edit@resize}{Y}
-\define@keyset {advi@edit}{d}{\advi@edit@resize}{Y}
-\define@key {advi@edit}{move}[XY]{\def \advi@edit@move{#1}}
-\define@key {advi@edit}{resize}[XY]{\def \advi@edit@resize{#1}}
+\define@key {advi@edit}{X}{\def \advi@edit@x{#1}}
+\define@key {advi@edit}{Y}{\def \advi@edit@y{#1}}
+\define@key {advi@edit}{W}{\def \advi@edit@w{#1}}
+\define@key {advi@edit}{H}{\def \advi@edit@h{#1}}
+\define@key {advi@edit}{D}{\def \advi@edit@d{#1}}
+
+\define@key {advi@edit}{x}{\def \advi@edit@x{#1}\def\advi@edit@X{x}}
+\define@key {advi@edit}{y}{\def \advi@edit@y{#1}\def\advi@edit@Y{y}}
+\define@key {advi@edit}{w}{\def \advi@edit@w{#1}\def\advi@edit@W{w}}
+\define@key {advi@edit}{h}{\def \advi@edit@h{#1}\def\advi@edit@H{h}}
+\define@key {advi@edit}{d}{\def \advi@edit@d{#1}\def\advi@edit@D{d}}
 
 \def \advi@edit@comm {\string\adviedit}
 \def \advi@edit@line {\the \inputlineno}
@@ -672,7 +661,7 @@ end
 
 %\advi@edit {command}{name}{keys}][keys]{precode}{keys}{code}
 \newcommand{\advi@edit}[3]{%
-  \begingroup
+  \hbox \bgroup
     \def \advi@edit@comm {\string#1}%
     \def \advi@edit@name {#2}%
     \advi@edit@defaults
@@ -693,18 +682,17 @@ end
        line=\advi@edit@line\space
        file=\advi@edit@file\space
        unit=\the\advi@edit@unit\space
-       x=\advi@edit@x\space
-       y=\advi@edit@y\space
-       w=\advi@edit@w\space
-       h=\advi@edit@h\space
-       d=\advi@edit@d\space
-       move=\advi@edit@move\space
-       resize=\advi@edit@resize}%
+       \advi@edit@X=\advi@edit@x\space
+       \advi@edit@Y=\advi@edit@y\space
+       \advi@edit@W=\advi@edit@w\space
+       \advi@edit@H=\advi@edit@h\space
+       \advi@edit@D=\advi@edit@d\space
+       }%
   \advi@dim \advi@edit@h\advi@edit@unit
   \advance \advi@dim by \advi@edit@d\advi@edit@unit
   \edef \advihd {\the \advi@dim}%
   #4%
-  \endgroup}
+  \egroup}
 \def \advix {\advi@edit@x \advi@edit@unit}
 \def \adviy {\advi@edit@y \advi@edit@unit}
 \def \adviw {\advi@edit@w \advi@edit@unit}
@@ -740,10 +728,10 @@ end
    {\setbox0=\hbox to \adviw {\hsize=\adviw\vtop to \advihd
         {\vsize=\advihd\vskip -\advih\relax
          #3\relax\vfil}\hss}%
-    \let \do=1
+    \let \do=1\relax
     \ifx \advi@edit@x \advi@edit@zero
        \ifx \advi@edit@y \advi@edit@zero \let \do=0\fi\fi
-    \ifx \do 1
+    \ifx \do 1\relax
        \setbox0=\hbox {\raise \adviy \hbox {\kern \advix\box0}}%
        \dp0=0pt\wd0=0pt\ht0=0pt
     \fi
