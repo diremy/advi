@@ -10,28 +10,29 @@ Advi recognizes the keystrokes listed below when drawing on the slide.
 
 In the scratch drawing settings mode, the cursor is modified and you
 can set some charateristics of the scratch drawing facility.
-When in doubt, press
 
-\begin{itemize}
- \item press \key{?} to get help,
-% \item press \key{\char94G} to quit scratching immediately,
- \item press \key{Esc} to quit the setting mode.
-\end{itemize}
-
-\vspace{\stretch{1}}
-
-\newpage
 
 \subsection*{Scratch drawing settings mode keys}
 
 When in the scratch drawing settings mode, the following keys have the
 following respective meanings:
 
+\subsubsection*{General scratch drawing settings keys}
+
+\begin{itemize}
+ \item press \key{?} to get help,
+ \item press \key{Esc} to quit the settings mode,
+ \item press \key{\char94g} to quit scratching immediately.
+\end{itemize}
+
+\vspace{\stretch{1}}
+
+\newpage
+
 \subsubsection*{Setting the drawing line color}
 
 \noindent
 \begin{tabularx}{\linewidth}{clcX}
-\ikey{$?$}{help}{Give the list of settings available.}
 \ikey{b}{blue}{Set the color of the font to blue.}
 \ikey{c}{cyan}{Set the color of the font to cyan.}
 \ikey{g}{green}{Set the color of the font to green.}
@@ -40,13 +41,11 @@ following respective meanings:
 \ikey{r}{red}{Set the color of the font to red.}
 \ikey{w}{white}{Set the color of the font to white.}
 \ikey{y}{yellow}{Set the color of the font to yellow.}
-\ikey{B}{more blue}{Increment the blue component of the color.}
+\ikey{B}{more blue}{Increment the blue component of the current color.}
 \ikey{G}{more green}{Increment the green component of the current color.}
 \ikey{R}{more red}{Increment the red component of the current color.}
 \ikey{$+$}{positive increment}{Set the color increment to positive.}
 \ikey{$-$}{negative increment}{Set the color increment to negative.}
-\ikey{$q$}{quit}{Quit scratching mode.}
-\ikey{Escape}{quit}{Quit scratching mode.}
 \end{tabularx}
 
 \subsubsection*{Setting the drawing line size}
@@ -63,22 +62,20 @@ following respective meanings:
 
 \subsubsection*{Setting the kind of figure to draw}
 
-In the setting mode pressing on of the following keys enter the (still
+In the setting mode, pressing one of the following keys enter the (still
 experimental) figure drawing mode:
 
 \noindent
 \begin{tabularx}{\linewidth}{clcX}
-\ikey{v}{vertical line}{Draw a vertical line.}
-\ikey{h}{horizontal line}{Draw a horizontal line.}
-\ikey{s}{segment}{Draw a segment.}
+\ikey{V}{vertical line}{Draw a vertical line.}
+\ikey{H}{horizontal line}{Draw a horizontal line.}
+\ikey{S}{segment}{Draw a segment.}
 \ikey{C}{circle}{Draw a circle.}
 \ikey{p}{point}{Draw a point.}
 \ikey{P}{polygone}{Draw a polygone.}
-\ikey{f}{finish}{Close a polygone that is beeing drawn.}
+\ikey{e}{endpoly}{Close the polygone that is beeing drawn.}
+\ikey{F}{free hand}{Draw a line following the pointer.}
 \ikey{' '}{cancel}{Cancel the figure setting.}
 \end{tabularx}
 
 \vspace{\stretch{1}}
-
-
-

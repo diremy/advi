@@ -37,9 +37,9 @@ let set_scratch_line_color, get_scratch_line_color =
   let scratch_line_color = ref G.red in
   (fun c ->
     (* Be careful not to emit a warning if there is no modification. *)
-    if c > 0 && c <> !scratch_line_color then begin
+    if c >= 0 && c <> !scratch_line_color then begin
       scratch_line_color := c;
-      Misc.warning (Printf.sprintf "Setting scratch font color to %d" c)
+      Misc.warning (Printf.sprintf "Setting scratch line color to %d" c)
     end),
   (fun () -> !scratch_line_color);;
 
@@ -48,7 +48,7 @@ let set_scratch_line_color_string s =
 Options.add "-scratch-line-color"
  (Arg.String set_scratch_line_color_string)
  "<color>  set the color of the pen used\
- \n\t when scratching slides,\
+ \n\t when scratch drawing slides,\
  \n\t (the default scratch pen color is red)."
 ;;
 
@@ -85,14 +85,12 @@ Options.add "-scratch-line-width"
    "<int>  set the width of the pen used\
    \n\t when scratching slides,\
    \n\t (the default scratch pen width is %i)."
-   default_scratch_line_width)
-;;
+   default_scratch_line_width);;
 
 let incr_scratch_line_width () =
   set_scratch_line_width (get_scratch_line_width () + 1);;
 let decr_scratch_line_width () =
-  set_scratch_line_width (get_scratch_line_width () - 1)
-;;
+  set_scratch_line_width (get_scratch_line_width () - 1);;
 
 (*** Scratch font color, kind, and size settings. *)
 
@@ -109,9 +107,9 @@ let set_scratch_font_color, get_scratch_font_color =
   let scratch_font_color = ref G.red in
   (fun c ->
     (* Be careful not to emit a warning if there is no modification. *)
-    if c > 0 && c <> !scratch_font_color then begin
+    if c >= 0 && c <> !scratch_font_color then begin
       scratch_font_color := c;
-      Misc.warning (Printf.sprintf "Setting scratch font color to %d" c)
+      Misc.warning (Printf.sprintf "Setting the scratch font color to %d" c)
     end),
   (fun () -> !scratch_font_color);;
 
@@ -121,17 +119,16 @@ Options.add "-scratch-font-color"
  (Arg.String set_scratch_font_color_string)
  "<color>  set the color of the font used\
  \n\t when scratching slides,\
- \n\t (the default scratch font color is \"red\")."
-;;
+ \n\t (the default scratch font color is \"red\").";;
 
 let incr_scratch_font_r_color () =
- set_scratch_font_color (get_scratch_font_color () + (!color_incr lsl 16));;
+  set_scratch_font_color (get_scratch_font_color () + (!color_incr lsl 16));;
 
 let incr_scratch_font_g_color () =
- set_scratch_font_color (get_scratch_font_color () + (!color_incr lsl 8));;
+  set_scratch_font_color (get_scratch_font_color () + (!color_incr lsl 8));;
 
 let incr_scratch_font_b_color () =
- set_scratch_font_color (get_scratch_font_color () + !color_incr);;
+  set_scratch_font_color (get_scratch_font_color () + !color_incr);;
 
 
 (* Font type setting. *)
@@ -151,8 +148,7 @@ Options.add "-scratch-font"
  (Arg.String set_scratch_font)
  "<font>  set the font used when scratching slides,\
  \n\t (the default scratch font is the X font specification\
- \n\t \"-*-times-bold-r-normal--18-180-75-75-p-99-iso8859-1\")."
-;;
+ \n\t \"-*-times-bold-r-normal--18-180-75-75-p-99-iso8859-1\").";;
 
 (* Font size. *)
 let default_scratch_font_size = 18;;
@@ -160,8 +156,7 @@ let get_scratch_font_size, set_scratch_font_size =
   let scratch_font_size = ref default_scratch_font_size in
   (fun () -> !scratch_font_size),
   (fun sz ->
-     scratch_font_size := sz)
-;;
+     scratch_font_size := sz);;
 
 let make_scratch_font font =
   scan_font_name font (build_font_name (get_scratch_font_size ()));;
@@ -171,13 +166,11 @@ let update_scratch_font () =
 
 let incr_scratch_font_size () =
   set_scratch_font_size (get_scratch_font_size () + 1);
-  update_scratch_font ()
-;;
+  update_scratch_font ();;
 
 let decr_scratch_font_size () =
   set_scratch_font_size (get_scratch_font_size () - 1);
-  update_scratch_font ()
-;;
+  update_scratch_font ();;
 
 (*** Scratching utilities:
      - cautious_set_font sets the font to a given argument.
@@ -209,14 +202,24 @@ let save_excursion cursor color f =
   set_font_to_scratch_font ();
   set_cursor cursor;
 
-  try f (); restore ()
-  with x -> restore (); if x <> Exit then raise x;;
+  try f (); restore () with
+  | x -> restore (); if x <> Exit then raise x;;
 
 let rec wait_button_pressed f =
-  match Graphics.wait_next_event [Button_down; Key_pressed] with
-  | {mouse_x = x; mouse_y = y; button = btn; keypressed = kp; key = c} ->
-      if kp then begin f c; wait_button_pressed f end else
-      if not btn then wait_button_pressed f;;
+  set_cursor Graphics.Cursor_leftbutton;
+  let rec loop_while_keys () =
+    match Graphics.wait_next_event [Button_down; Key_pressed] with
+    | {mouse_x = x; mouse_y = y; button = btn; keypressed = kp; key = c} ->
+      if kp then begin f c; loop_while_keys () end else
+      if not btn then wait_button_pressed f in
+  loop_while_keys ();;
+
+let rec wait_click f =
+  wait_button_pressed f;
+  let p = G.mouse_pos () in
+  ignore (Graphics.wait_next_event [Button_up]);
+  Misc.warning "Got a click!";
+  p;;
 
 (*** Scratching characters on the screen. *)
 
@@ -225,7 +228,8 @@ let end_write () = GraphicsY11.anti_synchronize (); raise Exit;;
 (* Scratch write settings:
    for each setting bound char we call the corresponding setting function.
    Otherwise we just warn. *)
-let scratch_write_settings_handle_char = function
+let scratch_write_settings_handle_char c =
+  match c with
   | '>' -> incr_scratch_font_size ()
   | '<' -> decr_scratch_font_size ()
   | 'R' -> incr_scratch_font_r_color ()
@@ -242,86 +246,12 @@ let scratch_write_settings_handle_char = function
   | '+' -> set_positive_color_increment ()
   | '-' -> set_negative_color_increment ()
   | '?' -> Grdev.help_screen Config.scratch_write_splash_screen
+    (* ^G always means quit scratch write. *)
+  | '' -> end_write ()
   | c ->
-     Misc.warning (Printf.sprintf "Unknown scratch write setting key: %C" c);;
+    Misc.warning (Printf.sprintf "Unknown scratch write setting key: %C" c);;
 
-(* The writing function:
-   write char c at position x y then computes next scratching position
-   and calls the main write scractching loop. *)
-let rec scratch_write_char =
-  let prev_xs = ref [] in
-  let prev_size_y = ref 0 in
-  fun c x y ->
-   G.moveto x y;
-   if c = '' then begin
-     (* prerr_endline "backspace"; *)
-     let px =
-      match !prev_xs with
-      | [] -> 0
-      | px :: xs -> prev_xs := xs; px in
-     let py = y in
-     let ty = !prev_size_y in
-     G.set_color G.background;
-     G.fill_rect (px - 1) py (x - px + 2) ty;
-     G.set_color (get_scratch_font_color ());
-     scratch_write px py
-   end else begin
-     let tx, ty = G.text_size (String.make 1 c) in
-     prev_xs := x :: !prev_xs;
-     prev_size_y := max ty !prev_size_y;
-     G.draw_char c;
-     scratch_write (x + tx) y end
-
-(* Main scratch write loop:
-   - each button press changes the place where scratching occurs,
-   - ^G ends scratching.
-   - Esc enters scratch write settings mode.
-   - each key press is written at current scratching position using
-     scratch_write_char that tail calls back scratch_write
-     at the new scratching position. *)
-and scratch_write x y =
-   match Graphics.wait_next_event [Button_down; Key_pressed] with
-   | {mouse_x = nx; mouse_y = ny; button = btn;
-      keypressed = kp; key = c} ->
-       if kp then
-        begin match c with
-        | '' -> end_write ()
-        | '' ->
-          set_cursor cursor_settings;
-          scratch_write_settings ()
-        | c -> scratch_write_char c x y
-        end else
-       if btn then scratch_write nx ny else scratch_write x y
-
-and enter_scratch_write () =
-  let x, y = G.mouse_pos () in
-  G.moveto x y;
-  set_font_to_scratch_font ();
-  G.set_color (get_scratch_font_color ());
-  set_cursor cursor_write;
-  scratch_write x y
-
-(* Main write settings loop. *)
-and scratch_write_settings () =
-   match Graphics.wait_next_event [Button_down; Key_pressed] with
-   | {mouse_x = nx; mouse_y = ny; button = btn;
-      keypressed = kp; key = c} ->
-       if kp then
-        begin match c with
-        | '' ->
-        (* Esc means quit the scratch write settings mode
-           and reenter the scratch writing mode.
-           Hence, two successive Esc just do nothing (except changing
-           the cursor chape for a while). *)
-           set_cursor cursor_write;
-           enter_scratch_write ()
-        | c ->
-        (* In any other case, treat the setting according to the character,
-           and go on write settings. *)
-           scratch_write_settings_handle_char c;
-           scratch_write_settings ()
-        end;;
-
+(***
 (* Handling key presses while waiting for a mouse click
    that designates the place where write scratching should begin:
    - ^G means quit write,
@@ -329,7 +259,8 @@ and scratch_write_settings () =
    - any other character when scratch write settings mode is on
      means a setting (to handle with scratch_write_settings_handle_char),
    - any other character when not in scratch write settings mode,
-     means warning the user that he must click somewhere. *)
+     means warning the user that he has to click somewhere on the
+     slide to start scratching. *)
 let waiting_to_enter_scratch_write =
   let scratch_write_settings_mode = ref false in
   (function c ->
@@ -347,7 +278,7 @@ let waiting_to_enter_scratch_write =
          scratch_write_settings_mode := false;
          set_cursor cursor_write
        end else begin
-       (* Esc now means enter scratch write settings mode. *)
+         (* Esc now means enter scratch write settings mode. *)
          set_cursor cursor_settings;
          scratch_write_settings_mode := true
        end
@@ -355,11 +286,98 @@ let waiting_to_enter_scratch_write =
        scratch_write_settings_handle_char c
      | '?' -> Grdev.help_screen Config.scratch_write_splash_screen
      | c -> Misc.warning "Click to start scratch writing");;
+*)
+(* The writing function:
+   write char c at position x y then computes next scratching position
+   and calls the main write scratching loop. *)
+let rec scratch_write_char =
+  let prev_xs = ref [] in
+  let prev_size_y = ref 0 in
+  fun c x y ->
+    G.moveto x y;
+    if c = '' then begin
+      (* prerr_endline "backspace"; *)
+      let px =
+        match !prev_xs with
+        | [] -> 0
+        | px :: xs -> prev_xs := xs; px in
+      let py = y in
+      let ty = !prev_size_y in
+      G.set_color G.background;
+      G.fill_rect (px - 1) py (x - px + 2) ty;
+      G.set_color (get_scratch_font_color ());
+      scratch_write px py
+    end else begin
+      let tx, ty = G.text_size (String.make 1 c) in
+      prev_xs := x :: !prev_xs;
+      prev_size_y := max ty !prev_size_y;
+      G.draw_char c;
+      scratch_write (x + tx) y end
+
+(* Main scratch write loop:
+   - each button press changes the place where scratching occurs,
+   - ^G ends scratching.
+   - Esc enters scratch write settings mode.
+   - each key press is written at current scratching position using
+     scratch_write_char that tail calls back scratch_write
+     at the new scratching position. *)
+and scratch_write x y =
+   match Graphics.wait_next_event [Button_down; Key_pressed] with
+   | {mouse_x = nx; mouse_y = ny; button = btn;
+      keypressed = kp; key = c} ->
+      if kp then begin
+        match c with
+        | '' -> end_write ()
+        | '' -> scratch_write_settings ()
+        | c -> scratch_write_char c x y
+      end else
+      if btn then scratch_write nx ny else scratch_write x y
+
+and enter_scratch_write () =
+  let x, y = G.mouse_pos () in
+  G.moveto x y;
+  set_font_to_scratch_font ();
+  set_cursor cursor_write;
+  G.set_color (get_scratch_font_color ());
+  scratch_write x y
+
+and enter_scratch_settings c =
+  match c with
+  | '' -> end_write ()
+  | '' -> scratch_write_settings ()
+  | c ->
+    Misc.warning
+      (Printf.sprintf "Unknown key %C. Click to start scratch writing" c)
+
+(* Main write settings loop.
+   We enter this loop when Esc has been pressed. *)
+and scratch_write_settings () =
+   set_cursor cursor_settings;
+   match Graphics.wait_next_event [Button_down; Key_pressed] with
+   | {keypressed = kp; key = c} ->
+     if kp then begin
+       match c with
+       | '' ->
+         (* Esc means quit the scratch write settings mode
+            and reenter the scratch writing mode.
+            Hence, two successive Esc just do nothing (except changing
+            the cursor chape for a while). *)
+         start_scratch_write ()
+        | c ->
+          (* In any other case, treat the setting according to the character,
+             and go on write settings. *)
+          scratch_write_settings_handle_char c;
+          scratch_write_settings ()
+     end else
+     (* Button is down. *)
+     (* Pushing the mouse button exits from settings and goes on
+        scratch writing where the mouse is. *)
+     enter_scratch_write ()
 
 (* The main routine to begin write scratching:
    - wait for a click then enter scratching. *)
-let start_scratch_write () =
-  wait_button_pressed waiting_to_enter_scratch_write;
+and start_scratch_write () =
+  wait_button_pressed enter_scratch_settings;
   enter_scratch_write ();;
 
 let do_write () =
@@ -367,101 +385,100 @@ let do_write () =
 
 let write () = only_on_screen do_write ();;
 
-(*** Scratching figures: drawing lines and figures on the screen. *)
+(*** Scratch drawing on screen: defining events. *)
 
-let end_draw = end_write;;
+type key_event =
+   | E_No_Key
+   | E_Key of char;;
 
-type scratch_figure =
-   | Point | Hline | Vline | Segment | Circle | Polygone | Finish | No_figure;;
-let scratch_figure = ref No_figure;;
-let set_scratch_figure f = scratch_figure := f;;
-let clear_scratch_figure () = set_scratch_figure No_figure;;
-
-let scratch_draw_settings_handle_char c =
-  (match c with
-   | '>' -> incr_scratch_line_width ()
-   | '<' -> decr_scratch_line_width ()
-   | 'R' -> incr_scratch_line_r_color ()
-   | 'G' -> incr_scratch_line_g_color ()
-   | 'B' -> incr_scratch_line_b_color ()
-   | 'b' -> set_scratch_line_color G.blue
-   | 'g' -> set_scratch_line_color G.green
-   | 'w' -> set_scratch_line_color G.white
-   | 'c' -> set_scratch_line_color G.cyan
-   | 'm' -> set_scratch_line_color G.magenta
-   | 'r' -> set_scratch_line_color G.red
-   | 'y' -> set_scratch_line_color G.yellow
-   | 'k' -> set_scratch_line_color G.black
-   | 'v' -> set_scratch_figure Vline
-   | 'h' -> set_scratch_figure Hline
-   | 's' -> set_scratch_figure Segment
-   | 'C' -> set_scratch_figure Circle
-   | 'p' -> set_scratch_figure Point
-   | 'P' -> set_scratch_figure Polygone
-   | 'f' -> set_scratch_figure Finish
-   | ' ' -> clear_scratch_figure ()
-   | '+' -> set_positive_color_increment ()
-   | '-' -> set_negative_color_increment ()
-   | '?' -> Grdev.help_screen Config.scratch_draw_splash_screen
-   | c ->
-      Misc.warning (Printf.sprintf "Unknown scratch draw settings key: %C" c));
-  Graphics.set_line_width (get_scratch_line_width ());
-  G.set_color (get_scratch_line_color ());;
-
-type event =
+type button_event =
    | E_Up
-   | E_Down
-   | E_Key of char
+   | E_Down;;
+
+type mouse_motion_event =
    | E_No_Move
    | E_Big_Move of int * int
    | E_Small_Move of int * int;;
 
-let print_event oc = function
+type event = {
+  key_event : key_event;
+  button_event : button_event;
+  mouse_motion_event : mouse_motion_event;
+};;
+
+let print_key_event oc = function
+  | E_No_Key -> Printf.fprintf oc "No Key"
+  | E_Key c -> Printf.fprintf oc "Key: %c" c;;
+
+let print_button_event oc = function
   | E_Up -> Printf.fprintf oc "up"
   | E_Down -> Printf.fprintf oc "down"
-  | E_Key c -> Printf.fprintf oc "Key: %c" c
+
+let print_mouse_motion_event oc = function
   | E_No_Move -> Printf.fprintf oc "no move"
   | E_Big_Move (x, y) -> Printf.fprintf oc "big move: %i %i" x y
   | E_Small_Move (x, y) -> Printf.fprintf oc "small move: %i %i" x y;;
+
+let print_event oc = function {
+  key_event = k;
+  button_event = b;
+  mouse_motion_event = m;} ->
+  Printf.printf "{key_event = %a; button_event = %a; mouse_motion_event = %a}"
+    print_key_event k
+    print_button_event b
+    print_mouse_motion_event m;;
 
 let print_events oc =
   List.iter (fun e -> Printf.fprintf oc " %a" print_event e);; 
 
 let get_events =
-  let add_key kp c evs = if kp then E_Key c :: evs else evs in
-  let add_button b evs = if b then E_Down :: evs else E_Up :: evs in
-  let get_move e e0 =
+  let get_mouse_motion e0 e1 =
     let x0 = e0.mouse_x and y0 = e0.mouse_y in
-    let x = e.mouse_x and y = e.mouse_y in
-    let l = abs (x - x0) + abs (y - y0) in
+    let x1 = e1.mouse_x and y1 = e1.mouse_y in
+    let l = abs (x1 - x0) + abs (y1 - y0) in
     if l = 0 then E_No_Move else
-    if l <= 2 then E_Small_Move (x, y) else E_Big_Move (x, y) in
-  let add_move e e0 evs = get_move e e0 :: evs in
-  (fun e0 e ->
-   match e with
-   | {mouse_x = x; mouse_y = y; button = b; keypressed = kp; key = c} ->
-       add_move e e0 (add_button b (add_key kp c [])));;
+    if l <= 2 then E_Small_Move (x1, y1) else E_Big_Move (x1, y1) in
+  let get_key kp c = if kp then E_Key c else E_No_Key in
+  let get_button b = if b then E_Down else E_Up in
+  (fun e0 e1 ->
+   match e1 with
+   | {button = b; keypressed = kp; key = c} -> {
+     key_event = get_key kp c;
+     button_event = get_button b;
+     mouse_motion_event = get_mouse_motion e0 e1;
+     });;
 
 let find_next_events l =
   let e0 = Graphics.wait_next_event [Poll] in
-  get_events e0 (Graphics.wait_next_event l);;
+  let e1 = Graphics.wait_next_event l in
+  get_events e0 e1;;
 
 let find_scratch_events () =
-  let evts =
-    find_next_events [Mouse_motion; Button_down; Button_up; Key_pressed] in
-  (* print_events stderr evts; prerr_endline "";*)
-  evts;;
+  find_next_events [Mouse_motion; Button_down; Button_up; Key_pressed];;
 
-let draw_point x y =
+(*** Scratch drawing on screen: defining figures. *)
+
+type scratch_figure =
+   | Free_hand
+   | Point
+   | Hline | Vline | Segment
+   | Circle
+   | Path
+   | Close_path;;
+
+let get_scratch_figure, set_scratch_figure =
+  let scratch_figure = ref Free_hand in
+  (fun () -> !scratch_figure),
+  (fun f -> scratch_figure := f);;
+
+let clear_scratch_figure () = set_scratch_figure Free_hand;;
+
+(*** Drawing figures. *)
+
+let draw_point (x, y) =
   match get_scratch_line_width () with
   | 1 -> G.plot x y
   | _ -> G.fill_circle x y ((2 * get_scratch_line_width () + 3) / 4);;
-
-let draw_figure f =
-  let (x0, y0 as p0) = G.mouse_pos () in
-  wait_button_pressed scratch_draw_settings_handle_char; 
-  let (x1, y1 as p1) = G.mouse_pos () in
-  f p0 p1;;
 
 (* Draws an horizontal line segment between origin point (x0, y0) to
    end point (x1, y1). *)
@@ -483,24 +500,182 @@ let distance x0 y0 x1 y1 =
 let draw_circle (x0, y0) (x1, y1) =
   let c_x = (x0 + x1 + 1) / 2
   and c_y = (y0 + y1 + 1) / 2
-  and r = Misc.round (distance x0 y0 x1 y1) in
+  and r = Misc.round (distance x0 y0 x1 y1 /. 2.) in
   G.draw_circle c_x c_y r;;
 
-(* Enter drawing on slide *)
-let rec scratch_draw00 () =
-  let x, y = G.mouse_pos () in
-  G.moveto x y;
-  G.set_color (get_scratch_line_color ());
-  scratch_draw0 ()
+let draw_figure_with_no_point f = f ();;
 
-(* Waiting for movements, button is pressed. *)
-and scratch_draw0 () =
+let forward_scratch_draw_char_event =
+  ref (fun _ -> failwith "Undefined forward scratch_draw_char_event.");;
+
+let scratch_draw_char_event c = !forward_scratch_draw_char_event c;;
+
+let draw_figure_with_one_point f = f (wait_click scratch_draw_char_event);;
+
+let draw_figure_with_two_points f =
+  draw_figure_with_one_point (draw_figure_with_one_point f);;
+
+(* Drawing paths. *)
+let get_path_starting_point,
+    set_path_starting_point,
+    clear_path_starting_point =
+  let path_starting_point = ref None in
+  (fun () -> !path_starting_point),
+  (fun (x, y as p) -> path_starting_point := Some p),
+  (fun () -> path_starting_point := None);;
+
+let draw_path (x, y as p) =
+  match get_path_starting_point () with
+  | None -> set_path_starting_point p; draw_point p
+  | Some _ -> G.lineto x y;;
+
+let draw_close_path () =
+  match get_path_starting_point () with
+  | None -> Misc.warning "Cannot close any path, none is currently open."
+  | Some (x0, y0) ->
+    G.lineto x0 y0;
+    clear_path_starting_point ();;
+
+(* The main figure drawing routine. *)
+let handle_figure scratch =
+  match get_scratch_figure () with
+  | Free_hand -> draw_figure_with_no_point scratch
+  | Point -> draw_figure_with_one_point draw_point
+  | Hline -> draw_figure_with_two_points draw_hline
+  | Vline -> draw_figure_with_two_points draw_vline
+  | Segment -> draw_figure_with_two_points draw_segment
+  | Circle -> draw_figure_with_two_points draw_circle
+  | Path -> draw_figure_with_one_point draw_path
+  | Close_path -> draw_figure_with_no_point draw_close_path;;
+
+(*** Scratching figures: drawing lines and figures on the screen. *)
+
+let end_draw = end_write;;
+
+let scratch_draw_settings_handle_char c =
+prerr_endline (Printf.sprintf "Setting key %C" c);
+  (match c with
+   | 'V' -> set_scratch_figure Vline
+   | 'H' -> set_scratch_figure Hline
+   | 'S' -> set_scratch_figure Segment
+   | 'C' -> set_scratch_figure Circle
+   | 'e' -> set_scratch_figure Close_path
+   | 'p' -> set_scratch_figure Point
+   | 'P' -> set_scratch_figure Path
+   | 'F' -> set_scratch_figure Free_hand
+   | ' ' -> clear_scratch_figure ()
+   | '>' -> incr_scratch_line_width ()
+   | '<' -> decr_scratch_line_width ()
+   | 'R' -> incr_scratch_line_r_color ()
+   | 'G' -> incr_scratch_line_g_color ()
+   | 'B' -> incr_scratch_line_b_color ()
+   | 'b' -> set_scratch_line_color G.blue
+   | 'g' -> set_scratch_line_color G.green
+   | 'w' -> set_scratch_line_color G.white
+   | 'c' -> set_scratch_line_color G.cyan
+   | 'm' -> set_scratch_line_color G.magenta
+   | 'r' -> set_scratch_line_color G.red
+   | 'y' -> set_scratch_line_color G.yellow
+   | 'k' -> set_scratch_line_color G.black
+   | '+' -> set_positive_color_increment ()
+   | '-' -> set_negative_color_increment ()
+   | '?' -> Grdev.help_screen Config.scratch_draw_splash_screen
+   | '' -> end_draw ()
+   | c ->
+     Misc.warning (Printf.sprintf "Unknown scratch draw settings key: %C" c));
+  Graphics.set_line_width (get_scratch_line_width ());
+  G.set_color (get_scratch_line_color ());;
+
+(* Handling key presses while waiting for a mouse click
+   that designates the place where draw scratching should begin:
+   - ^G means quit draw,
+   - Esc means toggle the scratch draw settings mode,
+   - any other character when scratch draw settings mode is on
+     means a setting (to handle with scratch_draw_settings_handle_char),
+   - any other character when not in scratch draw settings mode,
+     means warning the user that he has to click somewhere on the
+     slide to start scratching. *)
+let waiting_to_enter_scratch_draw =
+  let scratch_draw_settings_mode = ref false in
+  (function c ->
+     match c with
+     (* ^G always means quit scratch draw. *)
+     | '' ->
+       (* Quit preserving invariant. *)
+       scratch_draw_settings_mode := false;
+       end_draw ()
+     | '' ->
+       (* If scratch draw settings mode is already on,
+          Esc means quit scratch draw settings mode. *)
+       if !scratch_draw_settings_mode then begin
+         (* Quit preserving invariant. *)
+         scratch_draw_settings_mode := false;
+         set_cursor cursor_draw
+       end else begin
+         (* Esc now means enter scratch draw settings mode. *)
+         set_cursor cursor_settings;
+         scratch_draw_settings_mode := true
+       end
+     | c when !scratch_draw_settings_mode ->
+       scratch_draw_settings_handle_char c
+     | '?' -> Grdev.help_screen Config.scratch_draw_splash_screen
+     | c -> Misc.warning "Click to start scratch drawing");;
+
+(* Enter drawing on slide *)
+(****
+let scratch_until scratch abort go_on enter =
   match find_scratch_events () with
-  | (E_Big_Move (x, y) | E_Small_Move (x, y)) :: _ -> scratch_draw1 x y
-  | E_No_Move :: E_Up :: _ -> scratch_draw20 ()
-  | E_No_Move :: _ :: E_Key c :: _ -> scratch_char_from scratch_draw0 c
-  | E_No_Move :: E_Down :: _ -> scratch_draw10 ()
-  | _ -> scratch_draw0 ()
+  | { mouse_motion_event =
+        (  E_Big_Move (x, y)
+         | E_Small_Move (x, y)); } -> G.lineto x y; scratch x y
+  | { mouse_motion_event = E_No_Move; key_event = E_Key c; } -> 
+    scratch_draw_char_event c
+  | { mouse_motion_event = E_No_Move; button_event = E_Up; } -> abort ()
+  | { mouse_motion_event = E_No_Move; button_event = E_Down; } -> go_on ();;
+****)
+
+(* Main scratch draw loop:
+   - each button press changes the place where scratching occurs,
+   - ^G ends scratching.
+   - Esc enters scratch draw settings mode.
+   - each key press is written at current scratching position using
+     scratch_draw_char that tail calls back scratch_draw
+     at the new scratching position. *)
+let rec scratch_draw x y =
+  match find_scratch_events () with
+  | { mouse_motion_event = E_No_Move; button_event = E_Up; } ->
+    scratch_draw_up x y
+  | { mouse_motion_event = E_No_Move; key_event = E_Key c; } ->
+    scratch_draw_char_event c
+  | _ -> scratch_draw_down x y
+
+and scratch_draw_up x y =
+  Misc.warning "Scratch_draw_up";
+  match find_scratch_events () with
+  | { button_event = E_Down; } ->
+    re_enter_scratch_draw ()
+  | { mouse_motion_event = E_No_Move; key_event = E_Key c; } ->
+    scratch_draw_char_event c
+  | { mouse_motion_event =
+        (  E_Big_Move (x, y)
+         | E_Small_Move (x, y)); } ->
+    handle_figure (fun () -> G.lineto x y);
+    scratch_draw_up x y
+  | _ -> scratch_draw_up x y
+
+and scratch_draw_down x y =
+  Misc.warning "Scratch_draw_down";
+  match find_scratch_events () with
+  | { button_event = E_Up; } ->
+    re_enter_scratch_draw ()
+  | { mouse_motion_event = E_No_Move; key_event = E_Key c; } ->
+    scratch_draw_char_event c
+  | { mouse_motion_event =
+        (  E_Big_Move (x, y)
+         | E_Small_Move (x, y)); } ->
+    handle_figure (fun () -> G.lineto x y);
+    scratch_draw_down x y
+  | _ -> scratch_draw_down x y
 
 (* Move and draw while button is pressed. *)
 and scratch_draw1 x y =
@@ -509,11 +684,15 @@ and scratch_draw1 x y =
 
 and scratch_draw10 () =
   match find_scratch_events () with
-  | (E_Big_Move (x, y) | E_Small_Move (x, y)) :: _ -> scratch_draw1 x y
-  | E_No_Move :: _ :: E_Key c :: _ -> scratch_char_from scratch_draw10 c
-  | E_No_Move :: E_Up :: _ -> enter_draw ()
+  | { mouse_motion_event =
+        (  E_Big_Move (x, y)
+         | E_Small_Move (x, y)); } -> scratch_draw1 x y
+  | { mouse_motion_event = E_No_Move; key_event = E_Key c; } ->
+    scratch_draw_char_event c
+  | { mouse_motion_event = E_No_Move; button_event = E_Up; } ->
+    enter_scratch_draw ()
   | _ -> scratch_draw10 ()
-  
+
 (* Move and draw while button is up. *)
 and scratch_draw2 x y =
   G.lineto x y;
@@ -521,46 +700,69 @@ and scratch_draw2 x y =
 
 and scratch_draw20 () =
   match find_scratch_events () with
-  | (E_Big_Move (x, y) | E_Small_Move (x, y)) :: _ -> scratch_draw2 x y
-  | E_No_Move :: _ :: E_Key c :: _ -> scratch_char_from scratch_draw20 c
-  | E_No_Move :: E_Down :: _ -> enter_draw ()
+  | { mouse_motion_event =
+        (  E_Big_Move (x, y)
+         | E_Small_Move (x, y)); } ->
+    scratch_draw2 x y
+  | { mouse_motion_event = E_No_Move; key_event = E_Key c; } ->
+    scratch_draw_char_event c
+  | { mouse_motion_event = E_No_Move; button_event = E_Down; } ->
+    enter_scratch_draw ()
   | _ -> scratch_draw20 ()
 
-(* Starting drawing: wait for a clic to begin. *)
-and enter_draw () =
-   (* prerr_endline "enter_draw up or down"; Pervasives.flush stderr; *)
-   wait_button_pressed (scratch_char_from enter_draw);
-   (* prerr_endline "pressed"; Pervasives.flush stderr;
-   let x, y = G.mouse_pos () in
-   prerr_endline (Printf.sprintf "in enter_draw x = %i y = %i" x y); *)
-   scratch_draw00 ()
+and scratch_draw_char_event c =
+  Misc.warning "Scratch_draw_char_event";
+  match c with
+  | '' -> end_draw ()
+  | '' ->
+     set_cursor cursor_settings;
+     scratch_draw_settings ()
+  | c ->
+     let x,y = G.mouse_pos () in
+     try scratch_write_char c x y with
+     | Exit -> re_enter_scratch_draw ()
 
-and scratch_char_from scratch c =
-  if c = '' then end_draw () else begin
-  scratch_draw_settings_handle_char c;
-  handle_figure scratch end
-
-and handle_figure scratch =
-  match !scratch_figure with
-  | No_figure -> scratch ()
-  | Point -> scratch_points scratch
-  | Hline -> draw_figure draw_hline; handle_figure scratch
-  | Vline -> draw_figure draw_vline; handle_figure scratch
-  | Segment -> draw_figure draw_segment; handle_figure scratch
-  | Circle -> draw_figure draw_circle; handle_figure scratch
-  | Polygone | Finish ->
-      wait_button_pressed scratch_draw_settings_handle_char; 
-      let (x1, y1 as p1) = mouse_pos () in
-      clear_scratch_figure ();
-      handle_figure scratch
-
-and scratch_points scratch =
-  wait_button_pressed (scratch_char_from scratch);
+(* Button has been clicked: we move to the current mouse position,
+   set up color and line thickness, and start scratch drawing. *)
+and enter_scratch_draw () =
   let x, y = G.mouse_pos () in
-  draw_point x y;
-  handle_figure scratch;;
+  G.moveto x y;
+  set_font_to_scratch_font ();
+  set_cursor cursor_draw;
+  G.set_color (get_scratch_line_color ());
+  scratch_draw x y
+
+(* Main draw settings loop. *)
+and scratch_draw_settings () =
+   match Graphics.wait_next_event [Key_pressed] with
+   | {keypressed = kp; key = c} ->
+     if kp then begin
+       match c with
+       | '' ->
+         (* Esc means quit the scratch draw settings mode
+            and reenter the scratch drawing mode.
+            Hence, two successive Esc just do nothing (except changing
+            the cursor chape for a while). *)
+         set_cursor cursor_draw;
+         enter_scratch_draw ()
+        | c ->
+          (* In any other case, treat the setting according to the character,
+             and go on draw settings. *)
+          scratch_draw_settings_handle_char c;
+          scratch_draw_settings ()
+     end
+
+(* The main routine to begin draw scratching:
+   - wait for a click then enter scratching. *)
+and start_scratch_draw () =
+  wait_button_pressed waiting_to_enter_scratch_draw;
+  enter_scratch_draw ()
+
+and re_enter_scratch_draw () = start_scratch_draw ();;
+
+forward_scratch_draw_char_event := scratch_draw_char_event;;
 
 let do_draw () =
-  save_excursion cursor_draw (get_scratch_line_color ()) enter_draw;;
+  save_excursion cursor_draw (get_scratch_line_color ()) start_scratch_draw;;
 
 let draw () = only_on_screen do_draw ();;

@@ -29,7 +29,7 @@ val parse_file : Misc.file_name ->
   are allowed (a comment starts with a sharp sign and ends at the end
   of the line). *)
 
-val cautious_parse_file : string ->
+val cautious_parse_file : Misc.file_name ->
   (string * spec * string) list -> (string -> unit) -> string -> unit
 (** [Rc.cautious_parse_file] is equivalent to [parse_file], except
  that it traps syntactic mistakes in the source file and emits a
