@@ -35,9 +35,6 @@ test
 all: f.png
 
 f.png:
-	for i in $(DIRS); do \
-	  $(MKTHUMBNAIL) $$i/*.png; \
-	done;
 	$(MKFRISE)
 
 clean:

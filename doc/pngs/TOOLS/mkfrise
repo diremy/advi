@@ -29,6 +29,14 @@ SEMINARIMGS=`find seminar -name '*.png'`
 SLITEXIMGS=`find slitex -name '*.png'`
 TESTIMGS=`find test -name '*.png'`
 
+# The size of individual image in the resulting frise
+HEIGHT=85
+WIDTH=115
+
+#echo $HEIGHT
+
+IMGS="$BASICSIMGS $JAPANESEIMGS $PROSPERIMGS $SEMINARIMGS $SLITEXIMGS $TESTIMGS"
+
 #echo Basics images
 #echo $BASICSIMGS
 #echo
@@ -47,25 +55,17 @@ TESTIMGS=`find test -name '*.png'`
 #echo Test images
 #echo $TESTIMGS
 
-IMGS="$BASICSIMGS $JAPANESEIMGS $PROSPERIMGS $SEMINARIMGS $SLITEXIMGS $TESTIMGS"
-
 #echo Images
 #echo
 #echo $IMGS
 #echo
 
-# The size of individual image in the resulting frise
-HEIGHT=85
-WIDTH=115
-
-#echo $HEIGHT
-
 echo Resizing source images
 echo
 for i in $IMGS;
-do
+ do
   j=`basename $i`; \
-  echo Converting $i to thumb_`basename $j`; \
+  echo Converting $i to thumb_$j; \
   convert -geometry ${WIDTH}x${HEIGHT}! $i thumb_$j
 done
 
@@ -74,29 +74,26 @@ echo Joining images
 echo Upper frise
 montage -tile 1600x$HEIGHT -mode Concatenate -background white -adjoin \
 thumb_LL*.png thumb_O*.png thumb_a*.png uf.png
+
 echo Center frise
 montage -tile 1600x$HEIGHT -mode Concatenate -background white -adjoin \
 thumb_b*.png thumb_c*.png thumb_d*.png thumb_i*.png thumb_j*.png cf.png
+
 echo Lower frise
 montage -tile 1600x$HEIGHT -mode Concatenate -background white -adjoin \
 thumb_m*.png thumb_p*.png thumb_s*.png thumb_t*.png thumb_y*.png lf.png
 
 echo Making final montage
-
 HHEIGHT=85
 HWIDTH=1600
-
 montage -tile 1x3 -geometry ${HWIDTH}x$HHEIGHT! uf.png cf.png lf.png bigf.png
 
 echo Making frise f.png
-
 convert -geometry 800x150! bigf.png f.png
 
 echo Clean up
-
 rm -f thumb_*
 rm -f uf.png
 rm -f cf.png
 rm -f lf.png
 rm -f bigf.png
-
