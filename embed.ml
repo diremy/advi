@@ -19,13 +19,52 @@
 
 (* Embedding applications (in particular tcl/tk) applications. *)
 
+(* In hash table t, returns the first element that verifies predicate p. *)
+(* No more used in advi.
+let hashtbl_find t p =
+  let res = ref None in
+  try
+   Hashtbl.iter (fun k x -> if p x then (res := Some (k, x); raise Exit)) t;
+   raise Exit
+  with Exit ->
+   match !res with
+   | None -> raise Not_found
+   | Some k_x -> k_x;; *)
+
+(* In hash table t, returns all elements (vals) that verify predicate p. *)
+let hashtbl_find_all t p =
+  let res = ref [] in
+  try
+   Hashtbl.iter (fun k x -> if p x then res := x :: !res) t;
+   raise Exit
+  with Exit -> !res;;
+
 type app_mode = | Fake | Raw | Sticky | Persistent | Ephemeral;;
 
 type app_name = string;;
 type signal = int;;
 type command = string;;
 
+type app = {
+  app_name : app_name;
+  app_mode : app_mode;
+  app_pid : int;
+  app_wid : GraphicsY11.window_id;
+};;
+
 let app_table = Hashtbl.create 17;;
+
+let add_app app_name app_mode pid wid =
+ Hashtbl.add app_table app_name {
+   app_name = app_name;
+   app_mode = app_mode;
+   app_pid = pid;
+   app_wid = wid;
+  }
+;;
+
+let pid_in_app_table pid =
+ hashtbl_find_all app_table (fun app -> app.app_pid == pid) <> [];;
 
 (* Register an application with its mode, name, (sub)window id,
    and a fake process id (actually max_int).
@@ -33,7 +72,7 @@ let app_table = Hashtbl.create 17;;
    allocates the ressources to launch it afterwards. *)
 let fake_embed_app command app_mode app_name width height x gry =
  let wid = GraphicsY11.open_subwindow ~x ~y:gry ~width ~height in
- Hashtbl.add app_table max_int (app_mode, app_name, wid)
+ add_app app_name app_mode max_int wid
 ;;
 
 (* The function that launches all embedded applications.
@@ -90,43 +129,20 @@ let raw_embed_app command app_mode app_name width height x gry =
                   (Misc.string_replace "!y" opt_y
                      command0)))) in
   let pid = Launch.fork_process command in
-  if Hashtbl.mem app_table pid then
+  if pid_in_app_table pid then
     raise (Failure
              (Printf.sprintf
                "pid %d is already in the app_table!" pid));
-  Hashtbl.add app_table pid (app_mode, app_name, wid)
+  add_app app_name app_mode pid wid
  end;;
 
-(* In hash table t, returns the first element that verifies predicate p. *)
-let hashtbl_find t p =
-  let res = ref None in
-  try
-   Hashtbl.iter (fun k x -> if p x then (res := Some (k, x); raise Exit)) t;
-   raise Exit
-  with Exit ->
-   match !res with
-   | None -> raise Not_found
-   | Some k_x -> k_x;;
-
-(* In hash table t, returns all elements that verify predicate p. *)
-let hashtbl_find_all t p =
-  let res = ref [] in
-  try
-   Hashtbl.iter (fun k x -> if p x then res := (k, x) :: !res) t;
-   raise Exit
-  with Exit ->
-   match !res with
-   | [] -> raise Not_found
-   | k_xs -> k_xs;;
-
-let find_embedded_app app_name =
-  hashtbl_find app_table (fun (_, name, _) -> name = app_name);;
+let find_embedded_app app_name = Hashtbl.find app_table app_name;;
 
 let find_all_embedded_app app_name =
-  hashtbl_find_all app_table (fun (_, name, _) -> name = app_name);;
+  hashtbl_find_all app_table (fun app -> app.app_name = app_name);;
 
-let map_embed (_, (app_mode, app_name, wid)) =
-  GraphicsY11.map_subwindow wid;;
+let map_embed app =
+  GraphicsY11.map_subwindow app.app_wid;;
 
 let map_embedded_app app_name =
   try
@@ -134,12 +150,9 @@ let map_embedded_app app_name =
   with Not_found -> ();;
 
 let map_all_embedded_app app_name =
-  try
-    List.iter map_embed (find_all_embedded_app app_name)
-  with Not_found -> ();;
+  List.iter map_embed (find_all_embedded_app app_name);;
 
-let unmap_embed (_, (app_mode, app_name, wid)) =
-  GraphicsY11.unmap_subwindow wid;;
+let unmap_embed app = GraphicsY11.unmap_subwindow app.app_wid;;
 
 let unmap_embedded_app app_name =
   try
@@ -147,14 +160,13 @@ let unmap_embedded_app app_name =
   with Not_found -> ();;
 
 let unmap_all_embedded_app app_name =
-  try
-    List.iter unmap_embed (find_all_embedded_app app_name)
-  with Not_found -> ();;
+  List.iter unmap_embed (find_all_embedded_app app_name);;
 
 let move_or_resize_persistent_app
     command app_mode app_name width height x gry =
   try
-    let _, (app_mode, app_name, wid) = find_embedded_app app_name in
+    let app = find_embedded_app app_name in
+    let wid = app.app_wid in
     GraphicsY11.resize_subwindow wid width height;
     let gry = gry + height - width in
     GraphicsY11.move_subwindow wid x gry
@@ -167,8 +179,7 @@ let hashtbl_exists t f =
 
 (* embedded apps must be displayed when synced. *)
 let embed_app command app_mode app_name width height x gry =
-  let already_launched app_name =
-    hashtbl_exists app_table (fun (ty, name, wid) -> name = app_name) in
+  let already_launched app_name = Hashtbl.mem app_table app_name in
   match app_mode with
   | Fake ->
      Launch.add_embed
@@ -212,15 +223,16 @@ let embed_app command app_mode app_name width height x gry =
         raw_embed_app command app_mode app_name width height x gry);;
 
 (* Kill the process and close the associated window. *)
-let unembed_app (pid, (app_mode, app_name, wid)) =
+let unembed_app app =
     (* prerr_endline (Printf.sprintf "kill_app (pid=%d, window=%s)" pid wid); *)
-    begin try Hashtbl.remove app_table pid with _ ->
-      Misc.warning
-        (Printf.sprintf "kill_app failed to remove application %d..." pid)
-    end;
+  begin try Hashtbl.remove app_table app.app_name with _ ->
+     Misc.warning
+      (Printf.sprintf "kill_app failed to remove application %s..."
+         app.app_name)
+  end;
   (* Fake apps cannot be killed! *)
-  if app_mode <> Fake then begin
-    begin try Unix.kill pid Sys.sigquit with _ -> 
+  if app.app_mode <> Fake then begin
+    begin try Unix.kill app.app_pid Sys.sigquit with _ -> 
       (* prerr_endline
          (Printf.sprintf
             "kill_app (pid=%d,window=%s): process already dead" pid wid); *)
@@ -234,13 +246,14 @@ let unembed_app (pid, (app_mode, app_name, wid)) =
       | Unix.Unix_error(Unix.ECHILD, _, _) -> false
     do () done;
     (* prerr_endline (Printf.sprintf "kill_app (pid=%d, window=%s)" pid wid); *)
-    end;
+  end;
   (* if this is the forked process, do not close the window!!! *)
-  if Unix.getpid () = Launch.advi_process then GraphicsY11.close_subwindow wid
+  if Unix.getpid () = Launch.advi_process
+  then GraphicsY11.close_subwindow app.app_wid
 ;;
 
-let unembed_apps_with_mode app_mode =
-  (* begin match app_mode with
+let unembed_apps_with_mode mode =
+  (* begin match mode with
   | Fake -> prerr_endline "Killing fake apps"
   | Raw -> prerr_endline "Killing raw apps"
   | Persistent -> prerr_endline "Killing persistent apps"
@@ -248,17 +261,16 @@ let unembed_apps_with_mode app_mode =
   | Ephemeral -> prerr_endline "Killing ephemeral apps"
   end; *)
   let to_be_removed =
-    Hashtbl.fold (fun pid (mode, app_name, wid as embed) acc ->
-      if mode = app_mode then (pid, embed) :: acc else acc) app_table [] in
+    hashtbl_find_all app_table (fun app -> app.app_mode = mode) in
   List.iter unembed_app to_be_removed;;
 
-let signal_app signal (pid, (app_mode, app_name, wid) as app) =
+let signal_app signal app =
   (* prerr_endline
     (Printf.sprintf
       "signal_app (pid=%d, window=%s) signal=%i killing=%b kill is %i"
-      pid wid sig_val (sig_val = Sys.sigquit) Sys.sigquit); *)
+      app.app_pid app.app_wid sig_val (sig_val = Sys.sigquit) Sys.sigquit); *)
   if signal = Sys.sigquit then unembed_app app else
-  try Unix.kill pid signal with _ ->
+  try Unix.kill app.app_pid signal with _ ->
     (* prerr_endline
         (Printf.sprintf
           "signal_app (pid=%d, window=%s) signal=%i: cannot signal process"
@@ -272,7 +284,7 @@ let kill_embedded_app signal app_name =
      "kill_embedded_app (signal=%i app_name=%s)"
      signal app_name); *)
   try
-    let pid, (app_mode, app_name, wid) as app = find_embedded_app app_name in
+    let app = find_embedded_app app_name in
     signal_app signal app with
   | Not_found ->
       Misc.warning (Printf.sprintf "application %s is not running" app_name)
@@ -283,12 +295,8 @@ let kill_all_embedded_app signal app_name =
    (Printf.sprintf
      "kill_all_embedded_app (signal=%i app_name=%s)"
      signal app_name); *)
-  try
-    let apps = find_all_embedded_app app_name in
-    List.iter (signal_app signal) apps
-  with
-  | Not_found ->
-      Misc.warning (Printf.sprintf "application %s is not running" app_name)
+  let apps = find_all_embedded_app app_name in
+  List.iter (signal_app signal) apps
 ;;
 
 let kill_ephemeral_apps () =
