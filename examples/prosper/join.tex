@@ -14,8 +14,8 @@
 
 %\usepackage[psbubble]{xprosper}
 
+\usepackage{advi} 
 \usepackage{xprosper}
-\usepackage{advi}  % Must be after xprosper
 
 %%% colors
 \usepackage {color}
@@ -137,25 +137,25 @@ $$
 \fromPause[1]{\ovalnode* [fillstyle=solid,fillcolor=lightgreen]{u3b}
         {\hbox{$\u!(w)$}}}
 \\[2ex]
-\ifpause[=3]{\CancelColors}{}
+\ifpause[=3]{\CancelColorsGray}{}
 \betweenPauses23
   {\ovalnode* [fillstyle=solid,fillcolor=lightblue]{u5}
         {\hbox{$dyn!(\psframebox*[fillstyle=solid,fillcolor=lightred]{\u})$}}
 }
-\RestoreColors
+\RestoreColorsBlack
 \hfill
 \\
 &
 \betweenPauses23{\rnode{u45}{\color{blue}\star}}& 
 \fromPause[3]{\ovalnode* [fillstyle=solid,fillcolor=lightred]{u6}{\u?(x) \, S}}
 \\
-\ifpause[=3]{\CancelColors}{}
+\ifpause[=3]{\CancelColorsGray}{}
 \betweenPauses23{\ovalnode* [fillstyle=solid,fillcolor=lightblue]{u4}
   {dyn?(\psframebox*[fillstyle=solid,fillcolor=yellow]{\z}) 
         \psovalbox*[fillstyle=solid,fillcolor=lightred]
           {{\psframebox*[fillcolor=yellow]{\z}}{?(x) \,S}}}}
 \hskip -3em
-\RestoreColors
+\RestoreColorsBlack
 \\
 \end{array}
 \ncarc[linestyle=dashed,linecolor=red]{-}{u2}{u1}
@@ -241,7 +241,7 @@ $$
 \hfill \circlenode* {s}{\color{blue}\star}
 }
 \\[1em]
-\ifpause[=3]{\CancelColors}{}
+\ifpause[=3]{\CancelColorsGray}{}
 \betweenPauses23{
 \rnode {xy}{\psframebox* [fillstyle=solid,fillcolor=lightblue]
       {dyn(\psframebox* [fillcolor=yellow]{z}) \jc
@@ -249,7 +249,7 @@ $$
       {\psframebox* [fillcolor=yellow]{z}!(k)}}
 }}
 }
-\RestoreColors
+\RestoreColorsBlack
 \hfill 
 &
 \\

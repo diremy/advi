@@ -36,7 +36,7 @@
 \def \advi@warning #1{\PackageWarning {Advi}{#1}}
 \def \advi@undefinedenv {\advi@error {Environment \@currenvir\space undefined.
 Maybe you mean \@currenvir ing}}
-\def \advi@special@ {\advi@ifadvi{\special}{\hbox{}\advi@ignore}}
+\def \advi@special@ {\advi@ifadvi{\special}{\advi@ignore}}
 \def \advi@special #1{\advi@special@ {advi: #1}}
 \def \advi@export #1#2{\@ifdefinable #1{\let #1#2}}
 \def \advi@exportenv #1#2{%
@@ -372,13 +372,12 @@ end
 %%% Partial patch for overlays -- 0 will be shown > 0 will not be shown
 
 \def \advi@max {0}
-\newcommand {\advi@overlay}[1]%
-  {\advi@ifadvi 
-   {\advance \c@overlay by 1
-    \ifnum \c@overlay>\advi@max \global \xdef \advi@max {\the \c@overlay}\fi
-    \advi@recording {overlay@#1}
-    \aftergroup \endadvi@recording}
-   {\latex@overlay}}
+\def \advi@overlay #1{%
+  \advi@ifadvi 
+    {%\advance \c@overlay by 1
+     \ifnum \c@overlay>\advi@max \global \xdef \advi@max {\the \c@overlay}\fi
+     \advi@recording {overlay@#1}\aftergroup \endadvi@recording}
+    {\latex@overlay {#1}}}
 
 \def \advi@overlay@loop
  {\advi@ifadvi 
@@ -395,10 +394,10 @@ end
   {\advi@ifadvi {\overlay@loop}{}\latex@end@slide}
 
 \def \advi@overlay@patch {%
-   \let \latex@overlay \overlay
+   \let \latex@overlay \@overlay
    \let \latex@end@slide \end@slide
    \let \latex@overlay@loop \overlay@loop
-   \let \overlay \advi@overlay
+   \let \@overlay \advi@overlay
    \let \overlay@loop \advi@overlay@loop
    \let \end@slide \advi@end@slide
   }
