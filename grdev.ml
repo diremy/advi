@@ -32,7 +32,7 @@ Options.add
   (Arg.Float (fun x -> busy_delay := x))
   "FLOAT\tDelay before the watch cursor appears (default 0.5s)";;
 
-type color = int;;
+type color = Graphics.color;;
 let href_frame = 0x00ff00;;
 let advi_frame = 0xaaaaff;;
 let href_emphasize = 0xffff00;;
@@ -135,7 +135,7 @@ let synchronize () =
   GraphicsY11.synchronize ();
   launch_embedded_apps ();;
 
-(* for refreshed signal on usr1 *)
+(* For refreshed signal on usr1 *)
 exception Usr1;;
 
 let waiting = ref false;;
@@ -301,7 +301,7 @@ let blend_func = function
 
 (* Background implementation *)
 type bkgd_prefs = {
-  mutable bgcolor : int;
+  mutable bgcolor : color;
   mutable bgimg : string option;
   mutable bgratio : Drawimage.ratiopts;
   mutable bgwhitetrans : bool;
