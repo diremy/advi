@@ -113,11 +113,13 @@ let default_init_file0 = "/etc/advirc";;
 let default_init_file1 = tilde_subst "~/.advirc";;
 let default_init_file2 =
   tilde_subst (Filename.concat default_user_advi_dir "advirc");;
+let default_init_file3 = ".advirc";;
 
 let init_files = [
   default_init_file0;
   default_init_file1;
-  default_init_file2
+  default_init_file2;
+  default_init_file3;
 ];;
 
 let load_options_file options set_dvi_filename usage_msg fname =
