@@ -293,14 +293,32 @@ Maybe you mean \@currenvir ing}}
 \def\advi@setblend#1%
    {\advi@special{blend push #1}%
     \aftergroup\advi@resetblend}
+\def\advi@epsbygs
+   {\advi@special{epsbygs push true}%
+    \aftergroup \advi@resetepsbygs} 
+\def\advi@epsbycamlimages
+   {\advi@special{epsbygs push false}%
+    \aftergroup \advi@resetepsbygs} 
+\def\advi@epswithantialiasing
+   {\advi@special{epswithantialiasing push true}%
+    \aftergroup \advi@resetepsantialiasing} 
+\def\advi@epswithoutantialiasing
+   {\advi@special{epswithantialiasing push false}%
+    \aftergroup \advi@resetepswithantialiasing} 
 \def\advi@resetepstransparent {\advi@special{epstransparent pop}}
 \def\advi@resetalpha {\advi@special{alpha pop}}
 \def\advi@resetblend {\advi@special{blend pop}}
+\def\advi@resetepsbygs{\advi@special{epsbygs pop}}
+\def\advi@resetepswithantialiasing{\advi@special{epswithantialiasing pop}}
 
 \advi@export \epstransparent \advi@epstransparent
 \advi@export \epswhite \advi@epswhite
 \advi@export \setalpha \advi@setalpha
 \advi@export \setblend \advi@setblend
+\advi@export \epsbygs \advi@epsbygs
+\advi@export \epsbycamlimages \advi@epsbycamlimages
+\advi@export \epswithantialiasing \advi@epswithantialiasing
+\advi@export \epswithoutantialiasing \advi@epswithoutantialiasing
 
 %%% Animated transitions
 
