@@ -23,6 +23,7 @@ val round : float -> int;;
 type file_name = string;;
 type dir_name = string;;
 type line_number = int;;
+type modifiers = int;;
 
 (* filters and returns list. *)
 val reverse_filter : ('a -> bool) -> 'a list -> 'a list;;
@@ -66,6 +67,11 @@ val debug_stop : string -> unit;;
 (* To print a message if debugging is on. *)
 val debug_endline : string -> unit;;
 
+val push_back_key_event : char -> modifiers -> unit;;
+(** [push_back_key_event c ms] pushes a key press [c]
+  with a given modifier list [ms] into the Active-DVI's events queue. *)
+
+(* The necessary forwards: not to be called directly. *)
 val forward_debug_endline : (string -> unit) ref;;
 val forward_push_back_key_event : (char -> int -> unit) ref;;
 

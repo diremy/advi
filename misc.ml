@@ -21,6 +21,7 @@
 type file_name = string;;
 type dir_name = string;;
 type line_number = int;;
+type modifiers = int;;
 
 (* Fatal error in advi's code. *)
 exception Fatal_error of string;;
@@ -44,7 +45,7 @@ let set_warnings, warning =
 let forward_debug_endline =
   ref (function (_ : string) -> failwith "undefined forward debug_endline");;
 
-let debug_endline s = !forward_debug_endline s;;
+let debug_endline s = (!forward_debug_endline s : unit);;
 
 let debug_stop s =
   if false then begin
@@ -54,9 +55,13 @@ let debug_stop s =
    prerr_endline "Ok"
   end;;
 
-(* Pushing a key (a char) in advi's events queue. *)
+(* Pushing a key (a char), with a given list of modifiers,
+   in the advi's events queue. *)
 let forward_push_back_key_event =
-  ref (fun (c : char) -> failwith "undefined forward push_back_event_key");;
+  ref (fun (c : char) (ms : modifiers) ->
+         failwith "undefined forward push_back_event_key");;
+
+let push_back_key_event c ms = (!forward_push_back_key_event c ms: unit);;
 
 (* To round properly a float to an int (round it to the nearest integer). *)
 let round_pos x = int_of_float (x +. 0.5);;
