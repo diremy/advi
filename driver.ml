@@ -982,7 +982,7 @@ let special st s =
     if has_prefix "advi: transbox go " s then transbox_go_special st s else
     if has_prefix "advi: kill " s then kill_embed_special st s else
     if has_prefix "advi: setbg " s then bkgd_special st s else
-    if has_prefix "advi:" s then raise (Failure ("unknown special: "^ s))
+    if has_prefix "advi:" s then Misc.warning ("unknown special: "^ s)
    end else
   if has_prefix "line: " s then line_special st s else
   if has_prefix "pn " s || has_prefix "pa " s || s = "fp" || s = "ip" ||
