@@ -750,10 +750,12 @@ let draw_ps file bbox (w, h) x0 y0 =
   try Drawimage.f file !epstransparent !alpha !blend
         (Some bbox) Drawimage.ScaleAuto !epswithantialiasing (w, h) (x, y - h)
   with
-  | Not_found -> Misc.warning ("ps file " ^ file ^ " was not found")
+  | Not_found ->
+      Misc.warning
+        (Printf.sprintf "ps file %S was not found" file)
   | exn ->
       Misc.warning
-        (Printf.sprintf "error happened while drawing ps file %s: %s"
+        (Printf.sprintf "error happened while drawing ps file %S: %s"
            file (Printexc.to_string exn))
 ;;
 
@@ -1179,7 +1181,7 @@ let open_dev geom =
     Timeout.repeat (float !watch_file_interval) watch_file_check; 
 
   update_device_geometry ();
-  Graphics.remember_mode true;
+  GraphicsY11.set_remember_mode true;
   GraphicsY11.display_mode (Global_options.get_global_display_mode ());
   set_color (get_fgcolor ());
   !size_x, !size_y;;
