@@ -26,63 +26,211 @@ module Graphics = GraphicsY11;;
 
 open Graphics;;
 
-let scratch_line_color = ref G.red;;
-let set_scratch_line_color s = scratch_line_color := Dvicolor.parse_color s;;
+(* Cursors. *)
+let cursor_write = Cursor_pencil;;
+let cursor_draw = Cursor_spraycan;;
+let cursor_settings = Cursor_sizing;;
+
+(* Scratch line color and width. *)
+
+let set_scratch_line_color, get_scratch_line_color =
+  let scratch_line_color = ref G.red in
+  (fun c ->
+    Misc.warning (Printf.sprintf "Setting scratch font color to %d" c);
+    if c > 0 then scratch_line_color := c),
+  (fun () -> !scratch_line_color);;
+
+let set_scratch_line_color_string s =
+  set_scratch_line_color (Dvicolor.parse_color s);;
 Options.add "-scratch-line-color"
- (Arg.String set_scratch_line_color)
- "<color>: set the color of the pen used\
+ (Arg.String set_scratch_line_color_string)
+ "<color>  set the color of the pen used\
  \n\t when scratching slides,\
  \n\t (the default scratch pen color is red)."
 ;;
 
 let color_incr = ref 10;;
+let set_positive_color_increment () =
+  Misc.warning (Printf.sprintf "Setting color increment to positive");
+  color_incr := abs !color_incr;;
+let set_negative_color_increment () =
+  Misc.warning (Printf.sprintf "Setting color increment to negative");
+  color_incr := - abs !color_incr;;
 
 let incr_scratch_line_r_color () =
- scratch_line_color := !scratch_line_color + (!color_incr lsl 16);;
+ set_scratch_line_color (get_scratch_line_color () + (!color_incr lsl 16));;
 
 let incr_scratch_line_g_color () =
- scratch_line_color := !scratch_line_color + (!color_incr lsl 8);;
+ set_scratch_line_color (get_scratch_line_color () + (!color_incr lsl 8));;
 
 let incr_scratch_line_b_color () =
- scratch_line_color := !scratch_line_color + !color_incr;;
+ set_scratch_line_color (get_scratch_line_color () + !color_incr);;
 
 let default_scratch_line_width = 2;;
-let scratch_line_width = ref default_scratch_line_width;;
-let set_scratch_line_width i = if i > 0 then scratch_line_width := i;;
+let set_scratch_line_width, get_scratch_line_width =
+  let scratch_line_width = ref default_scratch_line_width in
+  (fun i ->
+    Misc.warning (Printf.sprintf "Setting scratch line width to %d" i);
+    if i > 0 then scratch_line_width := i),
+  (fun () -> !scratch_line_width);;
 Options.add "-scratch-line-width"
  (Arg.Int set_scratch_line_width)
  (Printf.sprintf
-   "<int>: set the width of the pen used\
+   "<int>  set the width of the pen used\
    \n\t when scratching slides,\
    \n\t (the default scratch pen width is %i)."
    default_scratch_line_width)
 ;;
 
 let incr_scratch_line_width () =
-  incr scratch_line_width;;
+  set_scratch_line_width (get_scratch_line_width () + 1);;
 let decr_scratch_line_width () =
-  if !scratch_line_width > 1 then decr scratch_line_width;;
+  set_scratch_line_width (get_scratch_line_width () - 1)
+;;
 
-let scratch_font_color = ref G.red;;
-let set_scratch_font_color s = scratch_font_color := Dvicolor.parse_color s;;
+(*** Scratch font color, kind, and size settings. *)
+
+(* Font parsing and printing utilities. *)
+let scan_font_name font = Scanf.sscanf font "-%s@-%s@-%s@-%s@-%s@-";;
+
+let build_font_name sz s1 s2 s3 s4 s5 =
+  Printf.sprintf
+    "-%s-%s-%s-%s-%s--%d-*-*-*-*-*-iso8859-1"
+    s1 s2 s3 s4 s5 sz;;
+
+(* Font color. *)
+let set_scratch_font_color, get_scratch_font_color =
+  let scratch_font_color = ref G.red in
+  (fun c ->
+    Misc.warning (Printf.sprintf "Setting scratch font color to %d" c);
+    scratch_font_color := c),
+  (fun () -> !scratch_font_color);;
+
+let set_scratch_font_color_string s =
+  set_scratch_font_color (Dvicolor.parse_color s);;
 Options.add "-scratch-font-color"
- (Arg.String set_scratch_font_color)
- "<color>: set the color of the font used\
+ (Arg.String set_scratch_font_color_string)
+ "<color>  set the color of the font used\
  \n\t when scratching slides,\
  \n\t (the default scratch font color is \"red\")."
 ;;
 
-let scratch_font =
-  ref "-adobe-times-bold-r-normal--18-180-75-75-p-99-iso8859-1";;
-let set_scratch_font s = scratch_font := s;;
+let incr_scratch_font_r_color () =
+ set_scratch_font_color (get_scratch_font_color () + (!color_incr lsl 16));;
+
+let incr_scratch_font_g_color () =
+ set_scratch_font_color (get_scratch_font_color () + (!color_incr lsl 8));;
+
+let incr_scratch_font_b_color () =
+ set_scratch_font_color (get_scratch_font_color () + !color_incr);;
+
+
+(* Font type setting. *)
+let set_scratch_font, get_scratch_font =
+  let scratch_font_ref =
+    ref "-adobe-times-bold-r-normal--18-180-75-75-p-99-iso8859-1" in
+  (fun s ->
+     Misc.warning
+      (Printf.sprintf "Setting scratch font to %s" s);
+     scratch_font_ref := s),
+  (fun () -> !scratch_font_ref);;
+
 Options.add "-scratch-font"
  (Arg.String set_scratch_font)
- "<font>: set the font used when scratching slides,\
+ "<font>  set the font used when scratching slides,\
  \n\t (the default scratch font is the X font specification\
  \n\t \"-*-times-bold-r-normal--18-180-75-75-p-99-iso8859-1\")."
 ;;
 
+(* Font size. *)
+let default_scratch_font_size = 18;;
+let get_scratch_font_size, set_scratch_font_size =
+  let scratch_font_size = ref default_scratch_font_size in
+  (fun () -> !scratch_font_size),
+  (fun sz ->
+     scratch_font_size := sz)
+;;
+
+let make_scratch_font font =
+  scan_font_name font (build_font_name (get_scratch_font_size ()));;
+
+let update_scratch_font () =
+  set_scratch_font (make_scratch_font (get_scratch_font ()));;
+
+let incr_scratch_font_size () =
+  set_scratch_font_size (get_scratch_font_size () + 1);
+  update_scratch_font ()
+;;
+
+let decr_scratch_font_size () =
+  set_scratch_font_size (get_scratch_font_size () - 1);
+  update_scratch_font ()
+;;
+
+(*** Scratching utilities:
+     - cautious_set_font sets the font to a given argument.
+     - save_excursion executes a function with the current scratching
+       settings and restore the original ones at the end.
+     - wait_button_pressed executes a function on keys entered, while
+       waiting for a click that will end the execution of f. *)
+let cautious_set_font fnt =
+  try Graphics.set_font fnt with
+  | G.Graphic_failure s -> Misc.warning s;;
+
+let set_font_to_scratch_font () = cautious_set_font (get_scratch_font ());;
+
+let save_excursion cursor color f =
+
+  let current_color = Graphics.get_color () in
+  let current_line_width = Graphics.get_line_width () in
+  let current_cursor = Graphics.get_cursor () in
+  let current_font = Graphics.get_font () in
+
+  let restore () =
+    G.set_color current_color;
+    Graphics.set_line_width current_line_width;
+    Graphics.set_font current_font;
+    set_cursor current_cursor in
+
+  G.set_color color;
+  Graphics.set_line_width (get_scratch_line_width ());
+  set_font_to_scratch_font ();
+  set_cursor cursor;
+
+  try f (); restore ()
+  with x -> restore (); if x <> Exit then raise x
+;;
+
+let rec wait_button_pressed f =
+  match Graphics.wait_next_event [Button_down; Key_pressed] with
+  | {mouse_x = x; mouse_y = y; button = btn; keypressed = kp; key = c} ->
+      if kp then begin f c; wait_button_pressed f end else
+      if not btn then wait_button_pressed f;;
+
+(*** Scratching characters on the screen. *)
+
 let end_write () = raise Exit;;
+
+let write_handle_char c =
+  (match c with
+   | '' | 'q' -> end_write ()
+   | '' | '' -> set_cursor cursor_settings
+   | '>' -> incr_scratch_font_size ()
+   | '<' -> decr_scratch_font_size ()
+   | 'R' -> incr_scratch_font_r_color ()
+   | 'G' -> incr_scratch_font_g_color ()
+   | 'B' -> incr_scratch_font_b_color ()
+   | 'b' -> set_scratch_font_color G.blue
+   | 'g' -> set_scratch_font_color G.green
+   | 'w' -> set_scratch_font_color G.white
+   | 'c' -> set_scratch_font_color G.cyan
+   | 'm' -> set_scratch_font_color G.magenta
+   | 'r' -> set_scratch_font_color G.red
+   | 'y' -> set_scratch_font_color G.yellow
+   | 'k' -> set_scratch_font_color G.black
+   | '+' -> set_positive_color_increment ()
+   | '-' -> set_negative_color_increment ()
+   | _ -> ());;
 
 let rec scratch_write_char =
   let prev_xs = ref [] in
@@ -99,7 +247,7 @@ let rec scratch_write_char =
      let ty = !prev_size_y in
      G.set_color G.background;
      G.fill_rect (px - 1) py (x - px + 2) ty;
-     G.set_color !scratch_font_color;
+     G.set_color (get_scratch_font_color ());
      scratch_write px py
    end else begin
      let tx, ty = G.text_size (String.make 1 c) in
@@ -115,6 +263,7 @@ and scratch_write x y =
        if kp then
         begin match c with
         | '' -> end_write ()
+        | '' | '' -> scratch_write_settings ()
         | c -> scratch_write_char c x y
         end else
        if btn then scratch_write nx ny else
@@ -123,62 +272,38 @@ and scratch_write x y =
 and scratch_write00 () =
   let x, y = G.mouse_pos () in
   G.moveto x y;
-  G.set_color !scratch_font_color;
+  set_font_to_scratch_font ();
+  G.set_color (get_scratch_font_color ());
+  set_cursor cursor_write;
   scratch_write x y
+
+and scratch_write_settings () =
+   set_cursor cursor_settings;
+   match Graphics.wait_next_event [Button_down; Key_pressed] with
+   | {mouse_x = nx; mouse_y = ny; button = btn;
+      keypressed = kp; key = c} ->
+       if kp then
+        begin match c with
+        | '' | 'q' -> scratch_write00 ()
+        | c ->
+           let k =
+             try write_handle_char c; scratch_write_settings with
+             | Exit -> scratch_write00 in
+           k ()
+        end else
+       scratch_write00 ()
 ;;
-
-let save_excursion curs col f =
-
-  let cautious_set_font fnt =
-    try Graphics.set_font fnt with
-    | G.Graphic_failure s -> Misc.warning s in
-
-  let color = Graphics.get_color () in
-  let line_width = Graphics.get_line_width () in
-  let cursor = Graphics.get_cursor () in
-  let font = Graphics.get_font () in
-
-  let restore () =
-    G.set_color color;
-    Graphics.set_line_width line_width;
-    Graphics.set_font font;
-    set_cursor cursor in
-
-  G.set_color col;
-  Graphics.set_line_width !scratch_line_width;
-  cautious_set_font !scratch_font;
-  set_cursor curs;
-
-  try f (); restore ()
-  with x -> restore (); if x <> Exit then raise x
-;;
-
-let rec wait_button_pressed f =
-  match Graphics.wait_next_event [Button_down; Key_pressed] with
-  | {mouse_x = x; mouse_y = y; button = btn; keypressed = kp; key = c} ->
-      if kp then begin f c; wait_button_pressed f end else
-      if not btn then wait_button_pressed f;;
-
-let write_handle_char c =
-  (match c with
-   | '' -> end_write ()
-   | 'b' -> set_scratch_font_color "blue"
-   | 'g' -> set_scratch_font_color "green"
-   | 'w' -> set_scratch_font_color "white"
-   | 'c' -> set_scratch_font_color "cyan"
-   | 'm' -> set_scratch_font_color "magenta"
-   | 'r' -> set_scratch_font_color "red"
-   | 'y' -> set_scratch_font_color "yellow"
-   | 'k' -> set_scratch_font_color "black"
-   | _ -> ());;
 
 let enter_write () =
   wait_button_pressed write_handle_char;
   scratch_write00 ();;
 
-let do_write () = save_excursion Cursor_pencil !scratch_font_color enter_write;;
+let do_write () =
+  save_excursion cursor_write (get_scratch_font_color ()) enter_write;;
 
 let write () = only_on_screen do_write ();;
+
+(*** Scratching figures: drawing lines and figures on the screen. *)
 
 let end_draw () = raise Exit;;
 
@@ -190,20 +315,21 @@ let clear_scratch_figure () = set_scratch_figure No_figure;;
 
 let draw_handle_char c =
   (match c with
-   | '' -> end_draw ()
+   | '' | 'q' -> end_draw ()
+   | '' | '' -> set_cursor cursor_settings
    | '>' -> incr_scratch_line_width ()
    | '<' -> decr_scratch_line_width ()
    | 'R' -> incr_scratch_line_r_color ()
    | 'G' -> incr_scratch_line_g_color ()
    | 'B' -> incr_scratch_line_b_color ()
-   | 'b' -> set_scratch_line_color "blue"
-   | 'g' -> set_scratch_line_color "green"
-   | 'w' -> set_scratch_line_color "white"
-   | 'c' -> set_scratch_line_color "cyan"
-   | 'm' -> set_scratch_line_color "magenta"
-   | 'r' -> set_scratch_line_color "red"
-   | 'y' -> set_scratch_line_color "yellow"
-   | 'k' -> set_scratch_line_color "black"
+   | 'b' -> set_scratch_line_color G.blue
+   | 'g' -> set_scratch_line_color G.green
+   | 'w' -> set_scratch_line_color G.white
+   | 'c' -> set_scratch_line_color G.cyan
+   | 'm' -> set_scratch_line_color G.magenta
+   | 'r' -> set_scratch_line_color G.red
+   | 'y' -> set_scratch_line_color G.yellow
+   | 'k' -> set_scratch_line_color G.black
    | 'v' -> set_scratch_figure Vline
    | 'h' -> set_scratch_figure Hline
    | 's' -> set_scratch_figure Segment
@@ -212,11 +338,11 @@ let draw_handle_char c =
    | 'P' -> set_scratch_figure Polygone
    | 'f' -> set_scratch_figure Finish
    | ' ' -> clear_scratch_figure ()
-   | '+' -> color_incr := abs !color_incr
-   | '-' -> color_incr := - abs !color_incr
+   | '+' -> set_positive_color_increment ()
+   | '-' -> set_negative_color_increment ()
    | _ -> ());
-  Graphics.set_line_width !scratch_line_width;
-  G.set_color !scratch_line_color;;
+  Graphics.set_line_width (get_scratch_line_width ());
+  G.set_color (get_scratch_line_color ());;
 
 type event =
    | E_Up
@@ -263,9 +389,9 @@ let find_scratch_events () =
   evts;;
 
 let draw_point x y =
-  match !scratch_line_width with
+  match get_scratch_line_width () with
   | 1 -> G.plot x y
-  | _ -> G.fill_circle x y ((2 * !scratch_line_width + 3) / 4);;
+  | _ -> G.fill_circle x y ((2 * get_scratch_line_width () + 3) / 4);;
 
 let draw_figure f =
   let (x0, y0 as p0) = G.mouse_pos () in
@@ -363,7 +489,8 @@ and scratch_points scratch =
   draw_point x y;
   handle_figure scratch;;
 
-let do_draw () = save_excursion Cursor_spraycan !scratch_line_color enter_draw;;
+let do_draw () =
+  save_excursion cursor_draw (get_scratch_line_color ()) enter_draw;;
 
 let draw () = only_on_screen do_draw ();;
 
