@@ -1124,7 +1124,9 @@ let bind_keys () =
    (* space, n, p, P, N to go on, or go back to next pause or page. *)
    ' ', B.next_pause;
    'n', B.next_page;
+   '', B.next_page;
    'p', B.previous_page;
+   'ö', B.previous_page;
    'P', B.previous_pause;
    'N', B.next_pause;
 
