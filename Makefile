@@ -98,8 +98,8 @@ CMXA_OBJS = $(addsuffix .cmxa, $(LIBRARIES))
 CAMLP4_FLAG = -I +camlp4
 endif
 
-BYTE_OBJS = $(COBJS) $(CMA_OBJS) $(CMO_OBJS)
-OPT_OBJS  = $(COBJS) $(CMXA_OBJS) $(CMX_OBJS)
+BYT_OBJS = $(COBJS) $(CMA_OBJS) $(CMO_OBJS)
+OPT_OBJS = $(COBJS) $(CMXA_OBJS) $(CMX_OBJS)
 
 INCLUDES  = $(addprefix -I , $(MLINCDIRS))
 LINK_OPTS = $(addprefix -ccopt -L, $(CLIBDIRS)) \
@@ -107,16 +107,14 @@ LINK_OPTS = $(addprefix -ccopt -L, $(CLIBDIRS)) \
 	    $(addprefix -cclib , $(WITH_X))
 
 X11_INCLUDES=-I/usr/X11R6/include
-BYTECCCOMPOPTS=-fno-defer-pop -Wall -Wno-unused
-CFLAGS= $(EXTRA_X11) $(X11_INCLUDES) -O $(BYTECCCOMPOPTS)
+BYTCCCOMPOPTS=-fno-defer-pop -Wall -Wno-unused
+CFLAGS=$(EXTRA_X11) $(X11_INCLUDES) -O $(BYTCCCOMPOPTS)
 
 default: Makefile.config $(INSTALLTARGET) $(HELPFILES)
 
 all: $(INSTALLTARGET) documentation
 allopt: opt documentation
-allbyte: byte documentation
-opt: $(EXEC).opt
-byte: $(EXEC)
+allbyt: byt documentation
 
 i_want_opt:
 	@echo "************************** Warning ***************************"
@@ -127,16 +125,16 @@ i_want_opt:
 	@echo "    http://caml.inria.fr/"
 	@echo "  If there is no ocamlopt compiler version for your platform,"
 	@echo "  you can still get a slow but fully functional version of"
-	@echo "  Active-DVI, by typing \"make allbyte\" that would build a byte"
-	@echo "  code version (\"make installbyte\" for install.)"
+	@echo "  Active-DVI, by typing \"make allbyt\" that would build a byte"
+	@echo "  code version (\"make installbyt\" for install.)"
 	@echo "**************************************************************"
 	@exit 1
 
-$(EXEC): $(COBJS) $(CMO_OBJS)
-	$(OCAMLC) -custom $(INCLUDES) $(BYTE_OBJS) $(LINK_OPTS) -o $(EXEC)
+byt: $(COBJS) $(CMO_OBJS)
+	$(OCAMLC) -custom $(INCLUDES) $(BYT_OBJS) $(LINK_OPTS) -o $(EXEC).byt
 
-$(EXEC).opt: $(COBJS) $(CMX_OBJS)
-	$(OCAMLOPT) $(INCLUDES) $(OPT_OBJS) $(LINK_OPTS) -o $(EXEC).opt
+opt: $(COBJS) $(CMX_OBJS)
+	$(OCAMLOPT) $(INCLUDES) $(OPT_OBJS) $(LINK_OPTS) -o $(EXEC)
 
 config.ml: config.ml.in configure
 	./configure
@@ -168,7 +166,7 @@ count:
 	wc -l *.ml *.mli | sort -n
 
 clean:
-	rm -f *.cm[oix] *.o $(EXEC) $(EXEC).opt *~ .depend *.log *.aux
+	rm -f *.cm[oix] *.o $(EXEC) $(EXEC).byt *~ .depend *.log *.aux
 	cd test && $(MAKE) clean
 	cd doc && $(MAKE) clean
 	cd examples && $(MAKE) clean
@@ -180,16 +178,17 @@ veryclean: clean
 veryveryclean: veryclean
 	rm -f configure
 
-installopt: install
-installbyte:
+install: installopt installman
+
+installbyt:
 	$(MAKE) install INSTALLTARGET=advi
-install:: $(INSTALLTARGET) $(HELPFILES)
+
+installopt:: $(INSTALLTARGET) $(HELPFILES)
 	- install -d ${bindir}
 	install -m 755 $(INSTALLTARGET) ${bindir}/advi
 	- install -d $(ADVI_LOC)
 	install -m 644 $(HELPFILES) $(EPSFILES)	$(STYFILES) $(ADVI_LOC)
 	- install -d $(MANDIR)/man$(MANEXT)
-	install -m 644 $(MANFILES) $(MANDIR)/man$(MANEXT)
 	if [ -f conf/jpfonts.conf ]; then \
 		install -m 644 conf/jpfonts.conf $(ADVI_LOC); fi
 	texhash
@@ -199,6 +198,9 @@ install:: $(INSTALLTARGET) $(HELPFILES)
 	  echo to your TEXINPUTS environment variable\!; \
 	  echo '***********************' ;\
 	fi
+
+installman:
+	install -m 644 $(MANFILES) $(MANDIR)/man$(MANEXT)
 
 MLFILES = $(addsuffix .ml, $(MODULES))
 
@@ -277,6 +279,9 @@ web_site:
 clean_release:
 	rm -rf release
 
+distribution: all documentation
+	$(MAKE) -f Makefile.distrib distribute
+
 release:
 	cvs rtag -R $(CVSRELEASETAG) bazar-ocaml/$(PACKAGE)
 
@@ -284,16 +289,18 @@ announce:
 	mail -n -s "New release of $(PACKAGE)" \
 		caml-announce@inria.fr < $(ANNOUNCEFILE)
 
-rpm:
-	if test -d /usr/src/redhat; then rpmdir=/usr/src/redhat; \
-	else if test -d /usr/src/RPM; then rpmdir=/usr/src/RPM; \
-	else if test -d /usr/src/rpm; then rpmdir=/usr/src/rpm; fi fi; fi; \
-	if test "X$$rpmdir" = "X"; then \
-		echo "cannot create rpm"; exit 2; fi; \
-	echo YOU NEED TO SU ROOT; \
-	su root -c "cp $(FTPSITEDIR)/$(ADVI).tar.gz $$rpmdir/SOURCES/; \
-	rpm -ba --clean ./advi.spec"; \
-	cp $$rpmdir/SRPMS/advi-$(VERSION)-1.src.rpm \
-	   $$rpmdir/RPMS/*/advi-$(VERSION)-1.*.rpm $(FTPSITEDIR)
+package_distribution: release distribution announce	
+
+#rpm:
+#	if test -d /usr/src/redhat; then rpmdir=/usr/src/redhat; \
+#	else if test -d /usr/src/RPM; then rpmdir=/usr/src/RPM; \
+#	else if test -d /usr/src/rpm; then rpmdir=/usr/src/rpm; fi fi; fi; \
+#	if test "X$$rpmdir" = "X"; then \
+#		echo "cannot create rpm"; exit 2; fi; \
+#	echo YOU NEED TO SU ROOT; \
+#	su root -c "cp $(FTPSITEDIR)/$(ADVI).tar.gz $$rpmdir/SOURCES/; \
+#	rpm -ba --clean ./advi.spec"; \
+#	cp $$rpmdir/SRPMS/advi-$(VERSION)-1.src.rpm \
+#	   $$rpmdir/RPMS/*/advi-$(VERSION)-1.*.rpm $(FTPSITEDIR)
 
 include .depend

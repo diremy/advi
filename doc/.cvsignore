@@ -2,6 +2,7 @@
 manual.html
 *.aux
 *.dvi
+*.bdvi
 *.log
 *.toc
 *.pdf

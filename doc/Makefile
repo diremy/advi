@@ -35,7 +35,8 @@ all: manual.dvi manual.ps manual.pdf manual.html \
     scratch_write_splash.dvi scratch_write_splash.ps \
     scratch_draw_splash.dvi scratch_draw_splash.ps \
     mathmode.dvi \
-    advi_remote.dvi advi_remote.html
+    advi_remote.dvi advi_remote.html \
+    advi.1
 
 clean::
 	$(RM) manual.advi manual.html
@@ -51,6 +52,10 @@ distribute: clean all web
 web:
 	$(MAKE) -f MakeHTML all
 	$(MAKE) -f MakeMan all
+
+advi.1:
+	$(MAKE) -f MakeMan all
+
 
 manual.dvi: ../tex/advi.sty manual.sty splash_contents.tex \
        scratch_write_splash_contents.tex scratch_draw_splash_contents.tex
