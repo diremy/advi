@@ -475,6 +475,13 @@ let xrefs st =
     end;
   st.dvi.Dvi.xrefs;;
 
+(*******************************
+  st reference = top left corner
+  orig_x, orig_y = margins from the top
+  size_x, size_y = size of the dvi + margins
+  thus, if paper is too large, white space is bottom or right, not shared.
+**********************************)
+
 let make_thumbnails st  =
   let xnails =
     Hashtbl.fold
@@ -495,11 +502,11 @@ let make_thumbnails st  =
   let num_nails = Array.length page_nails in
   let r_fit = int_of_float (ceil (sqrt (float num_nails))) in
   let r = min r_fit !thumbnail_limit in
-  let dx = st.size_x / r and dy = st.size_y / r in
   let pages = num_nails -1 / r / r in
   let ist =
     { st with
-      (* size_x = dx; size_y = dy; *)
+      size_x = st.size_x / r;
+      size_y = st.size_y / r; 
       synchronize = false;
       orig_x = st.orig_x / r; 
       orig_y = st.orig_y / r; 
@@ -507,18 +514,16 @@ let make_thumbnails st  =
       base_dpi = st.base_dpi /. float r;
       dvi_height = st.dvi_height / r;
     } in
+  let size_x = Graphics.size_x() in
+  let size_y = Graphics.size_y() in
+  let dx = size_x / r
+  and dy = size_y / r in
   let all =
     Array.map
       (fun p ->
         let p' = p mod (r * r) in
-        let x = st.size_x * (p' mod r) / r in
-        let y = st.size_y * (p' / r) / r in
-        without_pauses redraw
-          { ist with page_number = p;
-            orig_x = x + ist.orig_x;
-            orig_y = y + ist.orig_y;
-          };
-        p, Graphics.get_image x (st.size_y - y - dy) dx dy
+        without_pauses redraw { ist with page_number = p};
+        p, Graphics.get_image 0 (size_y -dy) dx dy
       )
       page_nails in
   let rolls = (Array.length all + r * r - 1) / r / r in
@@ -541,15 +546,18 @@ let make_toc st =
     Not_found -> make_thumbnails st
 
 let show_thumbnails st r page =
-  let dx = st.size_x/r and dy = st.size_y/r in
+  let size_x = Graphics.size_x() in
+  let size_y = Graphics.size_y() in
+  let dx = size_x / r
+  and dy = size_y / r in
   let pages = Array.length page / r / r in
   Array.iteri (fun p' (p, img) -> 
-    let x = st.size_x * (p' mod r) / r in
-    let y = st.size_y * (p' / r) / r in
-    Graphics.draw_image img x (st.size_y - y -dy);
+    let x = size_x * (p' mod r) / r in
+    let y = size_y * (p' / r) / r in
+    Graphics.draw_image img x (size_y - y -dy);
     Grdev.H.area
       (Grdev.H.Href ("#/page." ^ string_of_int (p+1))) x
-      (st.size_y - y - dy) dx dy) page;
+      (size_y - y - dy) dx dy) page;
   (* to force the page under thumbnails to be redrawn *)
   st.aborted <- true;
 ;;
@@ -950,6 +958,7 @@ module B =
     let redisplay = redisplay
 
     let fullscreen st =
+      let b = (st.fullscreen = None) in
       let (x, y), (dx, dy) =
         match st.fullscreen with
         | None ->
@@ -961,7 +970,8 @@ module B =
         | Some (x, y, w, h, dxy) ->
             st.fullscreen <- None;
             Grdev.reposition ~x ~y ~w ~h, dxy in
-      resize st ~dx ~dy x y
+      resize st ~dx ~dy x y;
+      if b then center st
 
     let exit st = raise Exit
     let switch_edit_mode st =

@@ -113,6 +113,14 @@ the corresponding <CODE>.pk</CODE> files for Active-DVI.</I>
 in the Computer-Modern font set, that has been designed by Donald Knuth
 to be the default fonts for TeX.</I>
 
+ <DD>Another possibility is to preprocess the file with the command
+<A href="http://www.ctan.org/tex-archive/dviware/dvicopy/">dvicopy</a>
+which will expand virtual fonts:
+<pre>
+        dvicopy foo.dvi foo.advi && advi foo.advi
+</pre>
+usually works fine.
+
 <DT><STRONG>How to solve the margin problems of Active-DVI (margins
 are wrong with <CODE>advi</CODE> while <CODE>xdvi</CODE> works
 perfect) ?</STRONG>
