@@ -38,7 +38,8 @@ SRC=../doc_src
 PACKAGE=advi
 
 # The list of files for this part of the Web site
-FILES=index.htm fra.htm eng.htm faq-fra.htm faq-eng.htm
+FILES=index.htm fra.htm eng.htm faq-fra.htm faq-eng.htm \
+screen-shots-fra.htm screen-shots-eng.htm
 
 ######## This part of the Makefile should automatically handle the
 ######## generation of object files for the list $(FILES)
@@ -48,7 +49,10 @@ FILES=index.htm fra.htm eng.htm faq-fra.htm faq-eng.htm
 # the end of this Makefile.
 AUTO=.Makefile.auto
 
-all: $(AUTO) expand $(FILES)
+all: $(AUTO) expand $(FILES) thumbnails
+
+thumbnails:
+	cd pngs; $(MAKE) all
 
 expand:
 	cd $(SRC); $(MAKE)
@@ -68,6 +72,7 @@ clean: $(AUTO)
 auto:
 	/bin/rm -f $(AUTO)
 	for i in $(FILES); do \
+	/bin/rm -f $(FILES); \
 	j=`basename $$i .htm`; \
 	echo $$i: $(SRC)/$(PACKAGE)-$$j.htm >> $(AUTO); \
 	echo "	cp -p $(SRC)/$(PACKAGE)-$$j.htm $$j.htm" >> $(AUTO); \

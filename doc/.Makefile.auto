@@ -8,3 +8,7 @@ faq-fra.htm: ../doc_src/advi-faq-fra.htm
 	cp -p ../doc_src/advi-faq-fra.htm faq-fra.htm
 faq-eng.htm: ../doc_src/advi-faq-eng.htm
 	cp -p ../doc_src/advi-faq-eng.htm faq-eng.htm
+screen-shots-fra.htm: ../doc_src/advi-screen-shots-fra.htm
+	cp -p ../doc_src/advi-screen-shots-fra.htm screen-shots-fra.htm
+screen-shots-eng.htm: ../doc_src/advi-screen-shots-eng.htm
+	cp -p ../doc_src/advi-screen-shots-eng.htm screen-shots-eng.htm
