@@ -93,7 +93,7 @@ let busy_start () =
   try
     busy_timeout := 
       Some (Timeout.add !busy_delay 
-	      (fun () -> busy_set_cursor GY.Cursor_watch))
+              (fun () -> busy_set_cursor GY.Cursor_watch))
   with
   | _ -> ();;
 
@@ -107,10 +107,10 @@ let set_busy sw =
   if !show_busy then
     match sw with
     | Pause ->
-	busy_end ();
+        busy_end ();
         busy_set_cursor GY.Cursor_right_side
     | Free ->
-	busy_end ();
+        busy_end ();
         busy_set_cursor !free_cursor
     | Disk ->
         busy_set_cursor GY.Cursor_exchange
@@ -424,26 +424,27 @@ let find_bg_color x y w h =
 (* Forward to Driver.playing. *)
 let get_playing = ref (fun () -> 0);;
 
+let mean_color c c' =
+  let rgb_of_color c =
+    let b = (c land 0x0000ff) in 
+    let g = (c land 0x00ff00) lsr 8 in
+    let r = (c land 0xff0000) lsr 16 in
+    r, g, b in
+  let r, g, b  = rgb_of_color c  in
+  let r', g', b' = rgb_of_color c' in
+  Graphics.rgb ((r + r' + 1) / 2) ((g + g' + 1) / 2) ((b + b' + 1) / 2);;
+
 let get_bg_color x y w h =
-  if !ignore_background then Graphics.white else
-  if !get_playing () > 0 then !bg_color else
-    begin
-      sync dvi;
-      if !psused || bkgd_data.bgimg <> None then
-        let c = GY.point_color (x + 1) (y + 1) in
-	let c' = GY.point_color (x + w - 1) (y + h - 1) in
-        if c = c' then c else
-	let rgb_of_color c =
-	  let b = (c land 0x0000ff) in 
-	  let g = (c land 0x00ff00) lsr 8 in
-	  let r = (c land 0xff0000) lsr 16 in
-	  r,g,b
-	in
-	let r, g, b  = rgb_of_color c  in
-	let r', g', b' = rgb_of_color c' in
-	Graphics.rgb ((r + r' + 1) / 2) ((g + g' + 1) / 2) ((b + b' + 1) / 2)
-      else find_bg_color x y w h
-    end;;
+  if !ignore_background then Graphics.white else begin
+    sync dvi;
+    if !psused || bkgd_data.bgimg <> None then
+      let c = GY.point_color (x + 1) (y + 1) in
+      let c' = GY.point_color (x + w - 1) (y + h - 1) in
+      if c = c' then c else
+      if !get_playing () > 0 then find_bg_color x y w h else
+      mean_color c c'
+    else find_bg_color x y w h
+  end;;
 
 Options.set
   "-bgcolor"
@@ -748,7 +749,7 @@ let embed_app command app_mode app_name width height x y =
      persists :=
       (fun () ->
           (* prerr_endline ("Moving " ^ app_name); *)
-	  move_or_resize_persistent_app command app_mode app_name
+          move_or_resize_persistent_app command app_mode app_name
           width height x y) :: 
       !persists
   | Persistent ->
@@ -1519,7 +1520,7 @@ let wait_event () =
                   else if !temp_cursor then
                     (temp_cursor:= false; reset_cursor ());
                   rescan ()
-		end
+                end
             end
         end
     | Final e -> send e in
