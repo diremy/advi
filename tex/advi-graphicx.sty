@@ -31,10 +31,8 @@
 % Notice though that the list of filters is not complete . . .
 % We need to provide a converter for .png, .gif etc.
 
-\DeclareGraphicsExtensions{.jpg,.eps,.tif,.tiff}
+\DeclareGraphicsExtensions{.jpg,.eps,.tif,.tiff,.gif,.png}
 \DeclareGraphicsRule{.jpg}{eps}{.bb}{`jpeg2ps #1} % this provides for a compact conversion in PS Level >=2
-\DeclareGraphicsRule{.tif,.tiff,.gif,.png}{eps}{.bb}{`convert #1 eps:-} % 
-
-
+\DeclareGraphicsRule{.tif,.tiff,.gif,.png}{eps}{.bb}{`convert #1 eps:-} %
 
 %% exports
