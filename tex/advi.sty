@@ -49,7 +49,7 @@
   {advi: embed name="#1" type=persistent width=#2 height=#3 command="#4"}{\vbox to #3{\hbox to #2{}}}}}
 
 \def\advi@killembed#1{\advi@special
-  {advi: kill embed=#1}}
+  {advi: kill name="#1"}}
 
 \def\advi@pause{\advi@special{advi: pause}}
 \def\advi@wait#1{\advi@special{advi: wait sec=#1}}
