@@ -550,42 +550,7 @@ prerr_endline (Printf.sprintf "Setting key %C" c);
   Graphics.set_line_width (get_scratch_line_width ());
   G.set_color (get_scratch_line_color ());;
 
-(* Handling key presses while waiting for a mouse click
-   that designates the place where draw scratching should begin:
-   - ^G or q means quit draw,
-   - Esc means toggle the scratch draw settings mode,
-   - any other character when scratch draw settings mode is on
-     means a setting (to handle with scratch_draw_settings_handle_char),
-   - any other character when not in scratch draw settings mode,
-     means warning the user that he has to click somewhere on the
-     slide to start scratching. *)
-let waiting_to_enter_scratch_draw =
-  let scratch_draw_settings_mode = ref false in
-  (function c ->
-     match c with
-     (* ^G always means quit scratch draw. *)
-     | '' | 'q' ->
-       (* Quit preserving invariant. *)
-       scratch_draw_settings_mode := false;
-       end_draw ()
-     | '' ->
-       (* If scratch draw settings mode is already on,
-          Esc means quit scratch draw settings mode. *)
-       if !scratch_draw_settings_mode then begin
-         (* Quit preserving invariant. *)
-         scratch_draw_settings_mode := false;
-         set_cursor cursor_draw
-       end else begin
-         (* Esc now means enter scratch draw settings mode. *)
-         set_cursor cursor_settings;
-         scratch_draw_settings_mode := true
-       end
-     | c when !scratch_draw_settings_mode ->
-       scratch_draw_settings_handle_char c
-     | '?' -> Grdev.help_screen Config.scratch_draw_splash_screen
-     | c -> Misc.warning "Click to start scratch drawing");;
-
-(* Enter drawing on slide *)
+(* Drawing on slide until the mouse is moving. *)
 let scratch_until button_up button_down =
   let rec go_on () =
     match find_scratch_events () with
@@ -626,9 +591,7 @@ and scratch_draw_char_event c =
   Misc.warning "Scratch_draw_char_event";
   match c with
   | '' | 'q' -> end_draw ()
-  | '' ->
-     set_cursor cursor_settings;
-     scratch_draw_settings ()
+  | '' -> scratch_draw_settings ()
   | c ->
      let x,y = G.mouse_pos () in
      try scratch_write_char c x y with
