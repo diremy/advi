@@ -359,8 +359,11 @@ let position st x y =
       let line = max 0 line in
       let bound = max 0 bound in
       let file = match file with Some f ->  f | _ -> "" in
-      Printf.printf "#line %d, %d <<%s>><<%s>> %s\n"
-        line bound before after file
+      begin
+        Printf.printf "#line %d, %d <<%s>><<%s>> %s\n"
+          line bound before after file;
+        flush stdout;
+      end
   | None -> ();;
 
 (* User has selected a region with the mouse. We dump characters. *)

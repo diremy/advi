@@ -121,7 +121,6 @@ Maybe you mean \@currenvir ing}}
 \def \advi@length #1{\@tempdima #1\relax \the\@tempdima}
 \newcommand{\advi@embed}[2][]{%
   \mbox {\setkeys {advi@embed}{#1}%
-         \message {/\advi@embed@name/}%
          \advi@ifempty {\advi@embed@name}{\def \advi@embed@name{anonymous}}{}%
          \advi@embed@ {\advi@embed@name}{\advi@embed@mode}
              {\advi@embed@width}{\advi@embed@height}{#2}}}
@@ -191,7 +190,6 @@ Maybe you mean \@currenvir ing}}
     {\csname color@#1\endcsname\advi@tmp {#2}%
 %     \expandafter \advi@nospace@tmp \advi@tmp\relax
      \advi@global \edef \advi@bgcolor{ color="\advi@tmp"}%
-     \Meaning \advi@tmp
      \advi@global \advi@bgactivetrue}}
 
 \define@key {advi@bg}{color}[]{\advi@setbgcolor{#1}}
