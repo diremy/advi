@@ -324,9 +324,11 @@ let init filename =
     try Dvi.load filename
     with
     | Sys_error _ -> raise (Error (Printf.sprintf "cannot open `%s'" filename))
-    | Dvi.Error s -> raise (Error (Printf.sprintf "%s: %s" filename s))
-    | _ ->
-       raise (Error (Printf.sprintf "error while loading `%s'" filename)) in
+    | Dvi.Error s -> raise (Error (Printf.sprintf "%s: (Dvi) %s" filename s))
+    | e ->
+       raise (Error
+                (Printf.sprintf "error while loading `%s': %s"
+                   filename (Printexc.to_string e))) in
   let cdvi = Driver.cook_dvi dvi in
   let int = 0 in
   let float = 0. in
