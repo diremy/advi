@@ -18,6 +18,10 @@ type 'g set
 (* Empty set. *)
 val empty_set : pagewidth:int -> pageheight:int -> 'g set
 
+(* Rules and spaces are symbols with special fontnames *)
+val rulename  : string
+val spacename : string
+
 (* Add an element, imperative. *)
 val add : 'g symbol -> 'g set -> unit
 

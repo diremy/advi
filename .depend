@@ -5,6 +5,8 @@ glyph.cmi: font.cmi
 grdev.cmi: glyph.cmi transitions.cmi 
 misc.cmo: config.cmo misc.cmi 
 misc.cmx: config.cmx misc.cmi 
+input.cmo: input.cmi 
+input.cmx: input.cmi 
 symbol.cmo: misc.cmi symbol.cmi 
 symbol.cmx: misc.cmx symbol.cmi 
 search.cmo: config.cmo search.cmi 
@@ -15,8 +17,8 @@ drawps.cmo: graphicsY11.cmi misc.cmi search.cmi drawps.cmi
 drawps.cmx: graphicsY11.cmx misc.cmx search.cmx drawps.cmi 
 table.cmo: table.cmi 
 table.cmx: table.cmi 
-pkfont.cmo: pkfont.cmi 
-pkfont.cmx: pkfont.cmi 
+pkfont.cmo: input.cmi pkfont.cmi 
+pkfont.cmx: input.cmx pkfont.cmi 
 font.cmo: pkfont.cmi search.cmi table.cmi font.cmi 
 font.cmx: pkfont.cmx search.cmx table.cmx font.cmi 
 glyph.cmo: font.cmi glyph.cmi 

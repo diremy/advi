@@ -344,16 +344,16 @@ module Make(Dev : DEVICE) = struct
   (*** Rendering primitives ***)
 
   let drawn_symbols = ref (Symbol.empty_set 1 1)
+  let last_height = ref 0 
 
   let give_symbols () = !drawn_symbols
   let clear_symbols page_w page_h blank_w blank_h =
+    last_height := 2 ;
     drawn_symbols := Symbol.empty_set page_w page_h;
     ()
 
   let add_char st x y glyph code =
-
     let dev_glyph = Dev.get_glyph glyph in
-
     let symbol =
       { Symbol.color = st.color ;
 	Symbol.locx = x ;
@@ -366,6 +366,45 @@ module Make(Dev : DEVICE) = struct
 	Symbol.fontname = st.cur_font.name ;
 	Symbol.fontratio = st.cur_font.ratio ;
 	Symbol.glyph = Some glyph }
+    in
+    last_height := symbol.Symbol.voffset ;
+    Symbol.add symbol !drawn_symbols ;
+    ()
+
+  let add_blank nn st width =
+
+    let x = st.x_origin + int_of_float (st.conv *. float st.h)
+    and y = st.y_origin + int_of_float (st.conv *. float st.v)
+    in
+    let symbol =
+      { Symbol.color = st.color ; (* Color of a blank space he he he. *)
+	Symbol.locx = x ;
+	Symbol.locy = y ;
+	Symbol.voffset = !last_height ;
+	Symbol.hoffset = 0 ;
+	Symbol.width = int_of_float (st.conv *. float width);
+	Symbol.height = !last_height ;
+	Symbol.code = nn ;
+	Symbol.fontname = Symbol.spacename ;
+	Symbol.fontratio = 0.0 ;
+	Symbol.glyph = None } 
+    in
+    Symbol.add symbol !drawn_symbols ;
+    ()
+
+  let add_rule st x y w h =
+    let symbol =
+      { Symbol.color = st.color ;
+	Symbol.locx = x ;
+	Symbol.locy = y ;
+	Symbol.voffset = 0 ;
+	Symbol.hoffset = 0 ;
+	Symbol.width = w ;
+	Symbol.height = h ;
+	Symbol.code = 0 ;
+	Symbol.fontname = Symbol.rulename ;
+	Symbol.fontratio = 0.0 ;
+	Symbol.glyph = None }
     in
     Symbol.add symbol !drawn_symbols ;
     ()
@@ -499,6 +538,7 @@ module Make(Dev : DEVICE) = struct
     and y = st.y_origin + int_of_float (st.conv *. float st.v)
     and w = int_of_float (ceil (st.conv *. float b))
     and h = int_of_float (ceil (st.conv *. float a)) in
+    add_rule st x (y-h) w h ;
     if not (is_hidden ()) then Dev.fill_rect x (y - h) w h
 
   let set_rule st a b =
@@ -1060,11 +1100,11 @@ module Make(Dev : DEVICE) = struct
     | Dvi.C_put_rule(a, b) -> put_rule st a b
     | Dvi.C_push -> push st
     | Dvi.C_pop -> pop st
-    | Dvi.C_right k -> st.h <- st.h + k
-    | Dvi.C_w0 -> st.h <- st.h + st.w
-    | Dvi.C_w k -> st.w <- k ; st.h <- st.h + st.w
-    | Dvi.C_x0 -> st.h <- st.h + st.x
-    | Dvi.C_x k -> st.x <- k ; st.h <- st.h + st.x
+    | Dvi.C_right k -> add_blank 1 st k; st.h <- st.h + k
+    | Dvi.C_w0 ->  add_blank 2 st st.w; st.h <- st.h + st.w
+    | Dvi.C_w k -> st.w <- k ; add_blank 3 st st.w; st.h <- st.h + st.w
+    | Dvi.C_x0 ->  add_blank 4 st st.x; st.h <- st.h + st.x
+    | Dvi.C_x k -> st.x <- k ;  add_blank 5 st st.x; st.h <- st.h + st.x
     | Dvi.C_down k -> st.v <- st.v + k
     | Dvi.C_y0 -> st.v <- st.v + st.y
     | Dvi.C_y k -> st.y <- k ; st.v <- st.v + st.y

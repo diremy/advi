@@ -29,7 +29,7 @@ OCAMLDEP  = $(CAML)dep
 MLINCDIRS = $(CAMLIMAGESDIR)
 
 EXEC      = advi
-MODULES   = config misc symbol search \
+MODULES   = config misc input symbol search \
 	    graphicsY11 drawps \
             table pkfont font glyph devfont dvi \
 	    units dimension driver\

@@ -157,4 +157,3 @@ let fatal_error x = raise (Fatal_error x);;
 let handle_fatal_error f () =
   try f () with Fatal_error s -> prerr_string s; prerr_newline()
 ;;
-

@@ -411,10 +411,8 @@ module Make(Dev : DEVICE) = struct
       } in
     st
 
-
   let set_bbox st =
-    Dev.set_bbox (Some (st.orig_x, st.orig_y, st.dvi_width, st.dvi_height))
-    
+    Dev.set_bbox (Some (st.orig_x, st.orig_y, st.dvi_width, st.dvi_height))    
       
   let update_dvi_size init st =
     let dvi_res = 72.27
@@ -510,23 +508,56 @@ module Make(Dev : DEVICE) = struct
       |	Interval -> Symbol.intime docx docy docx2 docy2 symbols
       |	Rectangle -> Symbol.inzone docx docy docx2 docy2 symbols
     in
-    (* Show the selection. *)
+
+    (* Local printing functions. *)
+    (* Show a rule. *)
+    let ifrule s =
+      if s.Symbol.fontname = Symbol.rulename then
+	Dev.fill_rect s.Symbol.locx s.Symbol.locy s.Symbol.width s.Symbol.height
+      else ()
+    in
+    (* Show glyphs. *)
     let show_glyph s =
 	match s.Symbol.glyph with
-	| None -> ()
+	| None -> ifrule s
 	| Some g -> Dev.draw_glyph g s.Symbol.locx s.Symbol.locy
     in
     let show_colored_glyph s =
-	match s.Symbol.glyph with
-	| None -> ()
-	| Some g ->
-	    Dev.set_color s.Symbol.color ;
-	    Dev.draw_glyph g s.Symbol.locx s.Symbol.locy
+      Dev.set_color s.Symbol.color ;
+      show_glyph s
     in
+    (* Show symbols bbox. *)
+    let show_bbox s =
+      match s.Symbol.glyph with
+      |	None ->
+	  (* (* Show the spaces. *)
+	  if s.Symbol.fontname = Symbol.spacename
+	  then 
+	    let a1 = s.Symbol.locx - s.Symbol.hoffset
+	    and b1 = s.Symbol.locy - s.Symbol.voffset in
+	    let a2 = a1 + s.Symbol.width
+	    and b2 = b1 + s.Symbol.height in
+	    Dev.draw_path [| a1,b1 ; a1,b2 ; a2,b2 ; a2,b1 ; a1,b1|] 1
+	  else *)
+	  ()
+      |	Some b ->
+	  let a1 = s.Symbol.locx - s.Symbol.hoffset
+	  and b1 = s.Symbol.locy - s.Symbol.voffset in
+	  let a2 = a1 + s.Symbol.width
+	  and b2 = b1 + s.Symbol.height in
+	  Dev.set_color Graphics.cyan ;
+	  Dev.draw_path [| a1,b1 ; a1,b2 ; a2,b2 ; a2,b1 ; a1,b1|] 1
+    in
+    (* Show the selection. *)
     Dev.set_color Graphics.cyan;
     Symbol.iter show_glyph input ;
- (* Dev.draw_path [| docx,docy ; docx2,docy ; docx2,docy2 ; docx,docy2 ; docx,docy |] 1; *)
+    (* Symbol.iter show_bbox input ; *) (* This shows the bounding box of each symbol. *)
+    (* Dev.draw_path [| docx,docy ; docx2,docy ; docx2,docy2 ; docx,docy2 ; docx,docy |] 1; *)
     Dev.synchronize();
+
+    (* Immediately erase the glyph, but do not synchronize. *)
+    (* We won't be able to erase them later since many things can occur between : *)
+    (* Next page, overlay, whatever...*)
     Symbol.iter show_colored_glyph input ;
 
     let output = Symbol.to_ascii input in
