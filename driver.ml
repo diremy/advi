@@ -512,7 +512,7 @@ let kill_embed_special st s =
     try unquote (List.assoc "name" records)
     with Not_found -> raise (Failure ("No command to kill in " ^ s)) in
   let sign = List.assoc "signal" records in
-  prerr_endline (Printf.sprintf "Signal is ``%s''" sign);
+  (* prerr_endline (Printf.sprintf "Signal is ``%s''" sign); *)
   let sig_val =
     try int_of_signal (unquote (List.assoc "signal" records))
     with
@@ -702,11 +702,11 @@ let proc_special st s =
               let u = recording.unit in
               Hashtbl.add procs procname u;
               match u.escaped_commands with
-              | h::rest -> u.escaped_commands <- List.rev rest
+              | h :: rest -> u.escaped_commands <- List.rev rest
               | [] -> assert false
           end;
         begin match !visible_stack with
-          h :: rest ->
+        | h :: rest ->
             visible := h; visible_stack := rest;
         | [] -> assert false; 
         end;
@@ -719,7 +719,7 @@ let proc_special st s =
         with Not_found -> raise (Failure "proc: invalid special") in
       try
         ignore (List.assoc "play" records);
-        if not (is_recording()) then
+        if not (is_recording ()) then
           begin
             let us = Hashtbl.find_all procs procname in
             let escaped_cur_font = st.cur_font

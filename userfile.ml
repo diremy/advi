@@ -37,7 +37,7 @@ let tilde_subst s =
     let len = String.length s in
     if len = 1 then Sys.getenv "HOME"
     else match s.[1] with
-      '/' -> 
+     | '/' -> 
         Filename.concat (Sys.getenv "HOME") (String.sub s 2 (len - 2))
      | _ ->
        let final = next_slash s 1 in
@@ -48,9 +48,10 @@ let tilde_subst s =
           Filename.concat pwnam.Unix.pw_dir 
                (String.sub s (succ final) (len - (succ final)))
  with
-    Unix.Unix_error(_,_,_) -> s
+  | Unix.Unix_error(_, _, _) -> s
   | Sys_error _ -> s
   | Not_found -> s
+;;
 
 let rec digdir dir perm =
   (* try to create the directory dir *)
@@ -66,12 +67,12 @@ let prepare_file file =
   let dirname = Filename.dirname file in
   if Sys.file_exists dirname then ()
   else begin
-    prerr_string ("Creating directory " ^ dirname ^ "... " );
+    Misc.debug_endline ("Creating directory " ^ dirname ^ "... " );
     try 
       digdir dirname 0o700;
-      prerr_endline "done"
+      Misc.debug_endline "done"
     with
-    | Unix.Unix_error (e,_,_) ->
+    | Unix.Unix_error (e, _, _) ->
 	prerr_endline (Unix.error_message e)
   end
 ;;

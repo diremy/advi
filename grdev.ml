@@ -747,7 +747,7 @@ let embed_app command app_mode app_name width height x y =
       !embeds else
      persists :=
       (fun () ->
-          prerr_endline ("Moving " ^ app_name);
+          (* prerr_endline ("Moving " ^ app_name); *)
 	  move_or_resize_persistent_app command app_mode app_name
           width height x y) :: 
       !persists
@@ -773,7 +773,7 @@ let embed_app command app_mode app_name width height x y =
       !embeds;;
 
 let kill_app pid wid =
-  (*prerr_endline (Printf.sprintf "kill_app (pid=%d, window=%s)" pid wid);*)
+  (* prerr_endline (Printf.sprintf "kill_app (pid=%d, window=%s)" pid wid); *)
   begin try Hashtbl.remove app_table pid with _ -> 
     prerr_endline "kill_app failed to remove application..."
   end;
