@@ -24,13 +24,13 @@ IMAGEN=imagen
 PDFIMAGEN=pdfimagen
 DVIPDFM=dvipdfm
 
-all: html manual.ps manual.pdf splash.dvi splash.ps mathmode.dvi
+all: web manual.ps manual.html manual.pdf splash.dvi splash.ps mathmode.dvi
 
 clean: 
 	rm -f *.aux *.log manual.html *.dvi *.pdf *.pdfm *.ps *.ima *.out *.toc
 	$(MAKE) -f MakeHTML clean
 
-html:
+web:
 	$(MAKE) -f MakeHTML all
 
 splash.dvi manual.dvi: splash_contents.tex
@@ -58,8 +58,8 @@ manual.dvi: manual.sty
 	if [ -f $*.image.tex ]; then $(PDFIMAGEN) $*; fi
 	touch $*.ima
 
-.html.tex:
-	$(HEVEA) -o $*.html $*.tex
+.tex.html:
+	$(HEVEA) -fix macro.hva manual -o $*.html $*.tex
 	if [ -f $<.image.tex ]; then mv $<.image.tex $*.image.tex; fi
 	if [ -f $*.image.tex ]; then $(IMAGEN) $*; fi
 
