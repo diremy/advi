@@ -525,6 +525,7 @@ let app_mode_of_string = function
   | "ephemeral" -> Dev.Ephemeral
   | s -> raise (Failure ("Unknown embedding mode " ^ s));;
 
+
 let embed_special st s =
   (* advi: embed mode=? width=? height=? command="command string" *)
   let records = get_records s in
@@ -560,8 +561,17 @@ let embed_special st s =
     width_pixel, height_pixel in
   let x = st.x_origin + int_of_float (st.conv *. float st.h)
   and y = st.y_origin + int_of_float (st.conv *. float st.v) in
-  if !visible then
-    Dev.embed_app command app_mode app_name width_pixel height_pixel x y;;
+  if !visible then Dev.embed_app
+      command app_mode app_name width_pixel height_pixel x y;;
+
+(* When scanning the page, we gather information on the embedded commands *)
+let scan_embed_special st s = 
+  let records = get_records s in
+  let command =
+    try unquote (List.assoc "command" records)
+    with Not_found ->
+        raise (Failure ("embed: no command to embed in special " ^ s)) in
+  Launch.add_whiterun_command command ;;
 
 let parse_transition dir mode record =
   let default_dir =
@@ -1037,7 +1047,15 @@ let scan_special_html (headers,xrefs) page s =
   let name = String.sub s 14 (String.length s - 16) in
   Hashtbl.add xrefs name page;;
 
+(* This function is iterated on the current DVI page BEFORE
+   rendering it, to gather the information contained in some
+   "asynchronous" specials (typically, PS headers, background
+   commands, html references) 
+ *)
+
 let scan_special status (headers,xrefs) pagenum s =
+  if Launch.whiterun () && has_prefix "advi: embed " s
+  then scan_embed_special status s else
   (* Embedded Postscript, better be first for speed when scanning *)
   if has_prefix "\" " s || has_prefix "ps: " s then
     (if !Options.dops then status.Dvi.hasps <- true) else

@@ -977,48 +977,57 @@ bind_keys ();;
 let main_loop filename =
   let st = init filename in
   let cont = ref None in (* drawing continuation *)
-  Grdev.set_title ("Advi: " ^ Filename.basename filename);
-  Grdev.open_dev (" " ^ string_of_geometry attr.geom);
-  set_bbox st;
-  if st.page_no > 0 && !Options.dops then
-    Driver.scan_special_pages st.cdvi st.page_no
+  (* check if whiterun *)
+  if Launch.whiterun () then
+    begin
+      Driver.scan_special_pages st.cdvi (st.num_pages -1);
+      Launch.dump_whiterun_commands()
+    end
   else
-    set_page_no st (page_start 0 st);
-  redraw st;
+    begin
+      Grdev.set_title ("Advi: " ^ Filename.basename filename);
+      Grdev.open_dev (" " ^ string_of_geometry attr.geom);
+      set_bbox st;
+      if st.page_no > 0 && !Options.dops then
+	Driver.scan_special_pages st.cdvi st.page_no
+      else
+	set_page_no st (page_start 0 st);
+      redraw st;
   (* num is the current number entered by keyboard *)
-  try while true do
-    let ev = if changed st then Grdev.Refreshed else Grdev.wait_event () in
-    st.num <- st.next_num;
-    st.next_num <- 0;
-    match ev with
-    | Grdev.Refreshed -> reload st
-    | Grdev.Resized (x, y) -> resize st x y
-    | Grdev.Key c -> bindings.(Char.code c) st
-    | Grdev.Href h -> goto_href h st
-    | Grdev.Advi (s, a) -> a ()
-    | Grdev.Move (w, h) ->
-        st.orig_x <- st.orig_x + w;
-        st.orig_y <- st.orig_y + h;
-        set_bbox st;
-        redraw st
-    | Grdev.Region (x, y, w, h) -> ()
-    | Grdev.Selection s -> selection s
-    | Grdev.Position (x, y) ->
-        position st x y
-    | Grdev.Click (Grdev.Top_left, _, _, _) ->
-        if !click_turn_page then B.pop_page st
-    | Grdev.Click (_, Grdev.Button1, _, _) ->
-        if !click_turn_page then B.previous_pause st
-    | Grdev.Click (_, Grdev.Button2, _, _) ->
-        if !click_turn_page then B.pop_previous_page st
-    | Grdev.Click (_, Grdev.Button3, _, _) ->
-        if !click_turn_page then B.next_pause st
-
+      try while true do
+	let ev = if changed st then Grdev.Refreshed else Grdev.wait_event () in
+	st.num <- st.next_num;
+	st.next_num <- 0;
+	match ev with
+	| Grdev.Refreshed -> reload st
+	| Grdev.Resized (x, y) -> resize st x y
+	| Grdev.Key c -> bindings.(Char.code c) st
+	| Grdev.Href h -> goto_href h st
+	| Grdev.Advi (s, a) -> a ()
+	| Grdev.Move (w, h) ->
+            st.orig_x <- st.orig_x + w;
+            st.orig_y <- st.orig_y + h;
+            set_bbox st;
+            redraw st
+	| Grdev.Region (x, y, w, h) -> ()
+	| Grdev.Selection s -> selection s
+	| Grdev.Position (x, y) ->
+            position st x y
+	| Grdev.Click (Grdev.Top_left, _, _, _) ->
+            if !click_turn_page then B.pop_page st
+	| Grdev.Click (_, Grdev.Button1, _, _) ->
+            if !click_turn_page then B.previous_pause st
+	| Grdev.Click (_, Grdev.Button2, _, _) ->
+            if !click_turn_page then B.pop_previous_page st
+	| Grdev.Click (_, Grdev.Button3, _, _) ->
+            if !click_turn_page then B.next_pause st
+		
 (*
    | Grdev.Click (Grdev.Bottom_right, _) -> B.next_pause st
    | Grdev.Click (Grdev.Bottom_left, _) -> B.pop_previous_page st
    | Grdev.Click (Grdev.Top_right, _) -> B.push_page st
-*)
-    | _ -> ()
-
-  done with Exit -> Grdev.close_dev ();;
+ *)
+	| _ -> ()
+	      
+      done with Exit -> Grdev.close_dev ()
+    end;;

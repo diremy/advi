@@ -45,6 +45,31 @@ let safe_commands =  [  ]
 *)
 ;;
 
+(* Support for white run via -n option *)
+
+let whiterun_commands = ref []
+and whiterun_flag = ref false;;
+let whiterun () = !whiterun_flag;;
+
+let add_whiterun_command command =
+  whiterun_commands := command::!whiterun_commands;;
+let dump_whiterun_commands () =
+  let unique l =
+    List.fold_right
+      (fun c -> fun acc ->
+	match acc with [] -> [c]
+	| (c'::r as cl) -> if c=c' then cl else c::cl)
+      (List.sort compare l) []
+  in
+  let comms = unique !whiterun_commands in
+  List.iter (fun c -> prerr_endline c) comms;;
+
+Options.set 
+    "-n"
+    (Arg.Unit (fun () -> whiterun_flag := true))
+    "\tMake advi print the list of embedded commands in the file";;
+
+
 let paranoid =
   Options.flag false "-safer"
     "\tSafer mode: external applications are never launched";;
