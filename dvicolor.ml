@@ -24,12 +24,31 @@ type color = GraphicsY11.color;;
 let cmyk c m y k = 
   (* found at http://community.borland.com/article/0,1410,17948,00.html *)
   (* I believe this is not at all correct... 
-     but there is no free altanatives. *)
+     but there is no free alternatives. *)
   let r = if c +. k < 1.0 then 1.0 -. (c +. k) else 0.0 in
   let g = if m +. k < 1.0 then 1.0 -. (m +. k) else 0.0 in
   let b = if y +. k < 1.0 then 1.0 -. (y +. k) else 0.0 in 
   let f c = Misc.round (c *. 255.0) in
   rgb (f r) (f g) (f b);;
+
+let color_of_hsb h s b =
+  let nround x y = (2 * x + y) / (2 * y) in
+  let mxround x = nround (0xFF * x) 0xFF in
+  let h = h * 6 in
+  let i = h / 0xFF * 0xFF in
+  let f = h - i in
+  let m = b * (0xFF - s) / 0xFF
+  and n = b * (0xFF - s * f / 0xFF) / 0xFF
+  and k = b * (0xFF - s * (0xFF - f) / 0xFF) / 0xFF in
+
+  match i / 0xFF with
+  | 0 | 6 -> rgb (mxround b) (mxround k) (mxround m)
+  | 1 -> rgb (mxround n) (mxround b) (mxround m)
+  | 2 -> rgb (mxround m) (mxround b) (mxround k)
+  | 3 -> rgb (mxround m) (mxround n) (mxround b)
+  | 4 -> rgb (mxround k) (mxround m) (mxround b)
+  | 5 -> rgb (mxround b) (mxround m) (mxround n)
+  | _ -> failwith "rgb_of_hsb";;
 
 let dvips_named_colors = [
   "GreenYellow", (cmyk 0.15 0. 0.69 0.);
@@ -126,61 +145,56 @@ let find_named_color n = Hashtbl.find named_colors (String.lowercase n);;
 let default_color = find_named_color "gray";;
 
 let parse_color s =
-  (*prerr_endline ("Parsing " ^ s);*)
   (* Try known colors *)
   try
     let c = find_named_color s in
-    (*prerr_endline (s ^ " named color");*)
     c
   with Not_found ->
     try
       let {Color.r = r; Color.g = g; Color.b = b} = Color.color_parse s in
-      (*prerr_endline (s ^ " X color");*)
       rgb r g b
     with _ ->
       (* Try an explicit 0xFFFFFF integer *)
       int_of_string s;;
 
-let cautious_parse_color s =
-  (* Try the regular way first. *)
-  try parse_color s
-  (* It it fails, emit a warning and give a default gray *)
-  with Failure _ ->
-    Misc.warning (Printf.sprintf "unknown color %s." s);
-    default_color;;
+let cannot_understand_color s =
+  Misc.warning
+    (Printf.sprintf "cannot understand %S color specification." s);
+  default_color;;
+
+let parse_color_encoding s l =
+  match s, l with
+  | "rgb", [rs; gs; bs] ->
+      let r = Misc.round (255.0 *. float_of_string rs)
+      and g = Misc.round (255.0 *. float_of_string gs)
+      and b = Misc.round (255.0 *. float_of_string bs) in
+      rgb r g b
+  | "cmyk", [cs; ms; ys; ks] ->
+      let c = float_of_string cs
+      and m = float_of_string ms
+      and y = float_of_string ys
+      and k = float_of_string ks in
+      cmyk c m y k
+  | ("gray" | "grey"), [gs] ->
+      let g = Misc.round (255.0 *. float_of_string gs) in
+      rgb g g g
+  | "hsb", [hs; ss; bs] ->
+      let h = int_of_string hs
+      and s = int_of_string ss
+      and b = int_of_string bs in
+      color_of_hsb h s b
+  | s, [] ->
+      parse_color s
+  | s, l ->
+      (* Unknown color encoding, just fail
+         (parse_color will return some plausible result). *)
+      failwith s;;
 
 let parse_color_args = function
-  | [("rgb" as s); rs; gs; bs] ->
-      (try
-         let r = Misc.round (* int_of_float *) (255.0 *. float_of_string rs)
-         and g = Misc.round (* int_of_float *) (255.0 *. float_of_string gs)
-         and b = Misc.round (* int_of_float *) (255.0 *. float_of_string bs) in
-         rgb r g b
-       with
-       | Failure _ ->
-          Misc.warning
-            (Printf.sprintf "cannot understand %s color parameters." s);
-          default_color)
-  | [("cmyk" as s); cs; ms; ys; ks] ->
-      (try
-         let c = float_of_string cs
-         and m = float_of_string ms
-         and y = float_of_string ys
-         and k = float_of_string ks in
-         cmyk c m y k
-       with
-       | Failure _ ->
-          Misc.warning
-            (Printf.sprintf "cannot understand %s color parameters." s);
-          default_color)
-  | [("gray" | "grey" as s); gs] ->
-      (try 
-         let g = Misc.round (* int_of_float *) (255.0 *. float_of_string gs) in
-         rgb g g g
-       with
-       | Failure _ ->
-          Misc.warning
-            (Printf.sprintf "cannot understand %s color parameters." s);
-          default_color)
-  | [s] -> cautious_parse_color s
-  | _ -> default_color;;
+  | s :: l ->
+     (* Try the regular way first. *)
+     (try parse_color_encoding s l with
+      (* It it fails, emit a warning and give a default gray *)
+      | Failure _ -> cannot_understand_color s)
+  | [] -> cannot_understand_color "[]";;
+
