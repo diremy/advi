@@ -15,6 +15,8 @@
 (*  Based on Mldvi by Alexandre Miquel.                                *)
 (***********************************************************************)
 
+(* $Id$ *)
+
 val user_advi_dir : Misc.dir_name;;
 (* Advi user directory. *)
 

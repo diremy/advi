@@ -15,6 +15,8 @@
 (*  Based on Mldvi by Alexandre Miquel.                                *)
 (***********************************************************************)
 
+(* $Id$ *)
+
 let is_absolute path = not (Filename.is_relative path);;
 
 let normalize path =
