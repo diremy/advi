@@ -1,0 +1,138 @@
+\documentclass[12pt]{article}
+
+% You need graphics package
+\usepackage{color}
+\usepackage{graphicx}
+\usepackage{tabularx}
+
+\usepackage{pst-all}
+
+\usepackage[annot]{advi}
+\usepackage{hyperref}
+
+%% \usepackage[annot]{advi} 
+%% must occur after packages using PStricks macros 
+%% (it redefines some of them) 
+
+\definecolor{red}{rgb}{1.0,0.0,0.0}
+\definecolor{blue}{rgb}{0.0,0.0,1.0}
+
+\def\email#1{\textcolor{gray}{$<${#1}$>$ }}
+
+\def\key#1{\textcolor{red}{#1}}
+\def\ikey#1#2#3{\key{#1} & #2 & -- & #3\\}
+\def\arg{\textcolor{blue}{arg }}
+
+\pagestyle{empty}
+
+\begin{document}
+ 
+\newpage
+
+\section*{Active dvi}
+
+\begin{tabularx}{\linewidth}{Xl}
+The presentation tool of choice for discriminating hackers.
+See \texttt{http://pauillac.inria.fr/activedvi/}
+&
+\raisebox{-30pt}{\includegraphics{test/caml.eps}}
+\end{tabularx}
+
+\subsection*{Usage}
+\texttt{advi [OPTIONS] DVIFILE}\\
+Try \texttt{advi -help} for more information.
+
+\subsection*{Key Bindings}
+
+Advi recognizes the following keystrokes when typed in its window.
+Each may optionally be preceded by a number, called \arg below, whose
+interpretation is keystroke dependant. If \arg is unset, its value is
+1, unless specified otherwise.
+
+Advi maintains an history of previously visited pages organized as a stack. 
+Additionnally, the history contains marks pages which are stronger than
+unmarked pages. 
+
+\vspace{\stretch{1}}
+\noindent
+\begin{tabularx}{\linewidth}{clcX}
+\ikey{q}{quit}{End of show.}
+\ikey{n}{next}
+{Move \arg physical pages forward, leaving the history unchanged.}
+\ikey{p}{previous}
+{Move \arg physical pages backward, leaving the history unchanged.}
+\ikey{,}{begin}{Move to the first page.}
+\ikey{.}{end}{Move to the last page.}
+\ikey{c}{center}{Center the page in the window, and resets the default resolution.}
+\ikey{$<$}{smaller}{Scale the resolution by $1/1.414$}
+\ikey{$>$}{bigger}{Scale the resolution by $1.414$}
+\end{tabularx}
+
+\vspace{\stretch{1}}
+
+\begin{center}
+Press \key{n} for next page.
+\end{center}
+
+\newpage
+
+\Large
+\begin{center}
+\textbf{Key bindings}
+\end{center}
+\normalsize
+
+\vspace{\stretch{1}}
+
+\noindent
+\begin{tabularx}{\linewidth}{clcX}
+\ikey{return}{forward}
+{Push the current page on the history stack, and move forward n physical page}
+\ikey{tab}{mark and next}
+{Push the current page on the history as marked, and move forward n physical page.}
+\ikey{space}{continue}
+{Move to the next pause if any, or do as \key{return} otherwise.}
+\ikey{backspace}{back}
+{Move \arg pages backward according to the history. The history stack is poped, accordingly.}
+\ikey{escape}{find mark}
+{Move \arg marked pages backward according to the history.
+ Do nothing if the history does no contain any marked page.}
+\ikey{g}{go}
+{If \arg is unset move to the last page.
+ If \arg is the current page do nothing.
+ Otherwise, push the current page on the history as marked, and move
+ to the physical page \arg.}
+\ikey{f}{load fonts}{Load all the fonts used in the documents.  By default, fonts are loaded only when needed.}
+\ikey{r}{redraw}{Redraw the current page.}
+\ikey{R}{reload}{Reload the file and redraw the current page.}
+\ikey{F}{make fonts}
+{Does the same as \key{f}, and precomputes the glyphs of all characters used in the document.
+This takes more time than loading the fonts, but the pages are drawn faster.}
+\ikey{C}{clear}{Erase the image cache (buggy).}
+\end{tabularx}
+
+\vspace{\stretch{1}}
+
+\newpage
+
+\subsection*{Acknowledgments}
+
+Authors and contributors are :
+
+\begin{itemize}
+\item Alexandre Miquel \email{Alexandre.Miquel@inria.fr}
+\item Jun Furuse \email{Jun.Furuse@inria.fr}
+\item Didier R\'emy \email{Didier.Remy@inria.fr}
+\item Xavier Leroy \email{Xavier.Leroy@inria.fr}
+\end{itemize}
+
+\vspace{\stretch{1}}
+
+\begin{center}
+This program is distributed under the GNU LGPL. \\
+See the enclosed file COPYING.
+\end{center}
+
+\vspace{\stretch{3}}
+
+\end{document}

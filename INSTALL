@@ -1,0 +1,36 @@
+PREREQUISITES
+=============
+
+You need Objective Caml 3.02 or higher to compile the sources.
+
+However, you need a strickly higher version of Graphics (you can pick the
+one under CVS a more recent release), especially if you are using Advi
+as your WhizzyTeX previewer.  Otherwise, it should work but you will not
+obtain a correct handling of signals (USR1 is used to tell Advi to reload).
+
+You also need the `kpsewhich' utility of the `kpathsea' library
+provided by many TeX distributions.
+
+For the encapsulated postscript file inclusion, you require
+camlimages library, found at 
+	http://pauillac.inria.fr/camlimages/
+
+COMPILATION AND INSTALLATION
+============================
+
+"./configure", then edit the Makefile if necessary, 
+and compile with "make". It creates a binary file "advi".
+
+If your platform supports native compilation, you can also do
+"make opt", which creates a (faster) binary "advi.opt"
+(this is highly recommended).
+
+Install the binary(ies) by hand, by simply copying it (them) to the
+appropriate directories.
+
+Copy the files advi.sty to a place where it is a visible latex package.
+(kpewhich advi.pro should succeed from when LaTeX is run)
+
+Copy the file advi.pro to a place where is it a visible PS header.
+(kpewhich advi.pro should succeed from when advi is run)
+

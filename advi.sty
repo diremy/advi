@@ -1,0 +1,187 @@
+%%
+%% This is the original source file mathpar.sty
+%%
+%% Package `mathpar' to use with LaTeX 2e
+%% Copyright Jun Furuse and Didier Remy, all rights reserved.
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{advi}
+         [2001/29/08 v0.40 Advi Package for advi Previewer]
+
+%%
+
+%% Identification
+%% Preliminary declarations
+
+%% Options
+
+\newif \ifadvi@annot \advi@annotfalse
+\newif \ifadvi@batch \advi@batchfalse
+\DeclareOption {annot}{\advi@annottrue}
+\DeclareOption {batch}{\advi@batchtrue}
+
+\ProcessOptions
+
+\ifadvi@annot \RequirePackage {pst-node}\fi
+
+% Low level macros
+
+\def \advi@@start #1{\special {advi: proc=#1 record=start}}
+\def \advi@@end #1{\special {advi: proc=#1 record=end}}
+\def \advi@@startplay #1{\special {advi: proc=#1 record=start play}}
+\def\advi@record #1#2{\advi@@start{#1}#2\advi@@end{#1}}
+\def\advi@recplay #1#2{\advi@@startplay{#1}#2\advi@@end{#1}}
+
+\def\advi@embed#1#2#3{\mbox{\special
+  {advi: embed width=#1 height=#2 command="#3"}{\vbox to #2{\hbox to #1{}}}}}
+
+\def\advi@pause{\special{advi: pause}}
+\def\advi@wait#1{\special{advi: wait sec=#1}}
+\def\advi@play#1{\special{advi: proc=#1 play}}
+\def\advi@hilight#1#2{{\color{#2}\advi@play{#1}}}
+
+\def\advi@epstransparent
+   {\special{advi: epstransparent push true}\aftergroup\resetepstransparent}
+\def\advi@epswhite
+   {\special{advi: epstransparent push false}\aftergroup\resetepstransparent}
+\def\advi@resetepstransparent{\special{advi: epstransparent pop}}
+\def\advi@setalpha#1{\special{advi: alpha push #1}\aftergroup\resetalpha}
+\def\advi@resetalpha{\special{advi: alpha pop}}
+\def\advi@setblend#1{\special{advi: blend push #1}\aftergroup\resetblend}
+\def\advi@resetblend{\special{advi: blend pop}}
+
+
+%%% For PS Tricks
+
+\def \advi@moveto {\special {advi: moveto}}
+\def \advi@set #1#2{\pst@Verb {#1 #2 advi@Dict begin printpos end}}
+\def\advi@psput@special#1{%
+\hbox{%
+\pst@Verb{{ \pst@coor }  dup exec
+advi@Dict begin
+2 copy moveto
+printpos 
+end
+\tx@PutCoor 
+\tx@PutBegin}
+\hbox {\advi@moveto \box#1}%
+\pst@Verb{\tx@PutEnd}}}
+
+\def\advi@ncput@iii{%
+\leavevmode
+\hbox{%
+\pst@Verb{%
+\pst@nodedict
+/t \psk@npos def
+tx@NodeDict /LPutPos known { LPutPos } { CP /Y ED /X ED /NAngle 0
+def } ifelse 
+LPutCoor 
+100 200 moveto 
+100 200 advi@Dict begin printpos end
+end
+\tx@PutBegin
+}
+\hbox {\advi@moveto
+\box\pst@hbox}%
+\pst@Verb{\tx@PutEnd}}}
+
+\@ifundefined {psput@special}{}
+{\let \psput@special \advi@psput@special
+ \@ifundefined {ncput@iii}{}{\let \ncput@iii \advi@ncput@iii}%
+ \special {header=advi.pro}}
+
+%%% Active DVI
+
+\ifadvi@batch
+  \def \advi@begin #1{}
+  \def \advi@end  {}
+\else
+  \def \advi@begin #1{\special {html:<a advi="#1">}}
+  \def \advi@end {\special {html:</a>}}
+\fi
+\def \advi@active #1#2{\advi@begin {#1}{#2}\advi@end}
+
+
+%%% Bulles
+
+\newcommand {\AdviBulleBG}{\def \advibulle@bg}
+\newcommand {\AdviBulleArc}[2]
+  {\ncarc [linestyle=solid,arcangleA=-0,arcangleB=-3]{#1}{advi@to}%
+   \ncarc [linestyle=solid,arcangleA=0,arcangleB=3]{#1}{advi@to}}
+
+\AdviBulleBG{yellow}
+
+\newcount \advi@c@annot
+\newcommand {\advi@annot}[2][]{\global \advance \advi@c@annot by 1%
+   \bgroup
+   \Rnode {advi@from\the\advi@c@annot}%
+          {\advi@begin {advi@annot\the\advi@c@annot}#2\advi@end}
+   \annot@i}
+\newcommand {\annot@i}[1]
+  [linecolor=\advibulle@bg,linewidth=1pt,%
+   fillstyle=solid,fillcolor=\advibulle@bg]
+  {\psset {#1}\@ifnextchar({\annot@ii}{\annot@ii(1,1)}}
+
+\ifadvi@batch
+\def \annot@ii(#1)#2{\egroup}
+\else
+\def \annot@ii(#1)#2{%
+  \advi@record {advi@annot\the\advi@c@annot}
+    {\rput(#1){\ovalnode {advi@to}{#2}}%
+     \AdviBulleArc{advi@from\the\advi@c@annot}{advi@to}\egroup
+   }}
+\fi
+
+%%% Partial patch for overlays -- 0 will be shown > 0 will not be shown
+
+\newif \ifadvi@hide \advi@hidefalse
+\def \advi@overlay 
+  {\ifadvi@hide
+   \else \advi@beginhide \aftergroup\advi@endhide \advi@hidetrue \fi}
+
+\def \advi@beginhide {\advi@@start {@hide}}
+\def \advi@endhide   {\advi@@end {@hide}}
+\def \make@advioverlay 
+  {\let \advi@old@overlay \overlay
+   \renewcommand {\overlay}{\advi@overlay \advi@ignore}}
+\def \advi@ignore #1{}
+\@ifundefined {overlay}{}
+  {\ifadvi@batch
+     \def \advi@@start #1{\bgroup \overlay 9}
+     \def \advi@@startplay #1{\bgroup}
+     \def \advi@@end #1{\egroup}
+   \else
+     \AtBeginDocument {\make@advioverlay}
+   \fi}
+
+
+%%% Exports
+
+\def \advi@export #1#2{\@ifdefinable {#1}{\let #1#2}}
+
+\advi@export \Advi \advi@begin \let \endAdvi \advi@end
+\advi@export \advi \advi@active
+
+\advi@export \record \advi@record
+\advi@export \recplay \advi@recplay
+\advi@export \play \advi@play
+\advi@export \embed \advi@embed
+
+\advi@export \pause \advi@pause
+\advi@export \wait \advi@wait
+\advi@export \tag \advi@recplay
+\advi@export \hide \advi@record
+\advi@export \hilight \advi@hilight
+\advi@export \epstransparent \advi@epstransparent
+\advi@export \epswhite \advi@epswhite
+\advi@export \resetepstransparent \advi@resetepstransparent
+\advi@export \setalpha \advi@setalpha
+\advi@export \resetalpha \advi@resetalpha
+\advi@export \setblend \advi@setblend
+\advi@export \resetblend \advi@resetblend
+
+%% Conditional exports 
+
+\ifadvi@annot \advi@export \annot \advi@annot \fi
+
+\endinput

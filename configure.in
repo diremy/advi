@@ -1,0 +1,74 @@
+dnl Process this file with autoconf to produce a configure script.
+AC_INIT(main.ml)
+
+dnl try to find your compiler package
+AC_MSG_CHECKING(your compiler package)
+
+CAML=ocaml
+
+CAMLDIR=`"$CAML"c -v | grep "^Standard" | sed "s/.*: *//"`
+CAMLVERSION=`"$CAML"c -v | grep "compiler" | sed 's/.* version //' | sed 's/ .*$//'`
+
+AC_MSG_RESULT(version $CAMLVERSION at $CAMLDIR)
+
+dnl Checks for libraries.
+
+dnl CamlImages
+
+CAMLIMAGESDIR=$CAMLDIR/camlimages
+
+AC_ARG_WITH(camlimages, [  --with-camlimages=dir      specify camlimages library directory],
+  if test "$withval" != "no" ; then  
+	CAMLIMAGESDIR=$withval
+  else
+	CAMLIMAGESDIR=nope
+  fi)
+
+if test -f $CAMLIMAGESDIR/ps_img.cma; then
+	echo "Camlimages: ok"
+	HAVE_CAMLIMAGES="true"
+	CAMLIMAGESLIBS="img ppm_img ps_img graphic_image"
+else
+	echo "**************** Warning ******************"
+	echo "camlimages is not found or incomplete in the directory \"$CAMLIMAGESDIR\""
+	echo "*******************************************"
+	HAVE_CAMLIMAGES="false"
+	CAMLIMAGESLIBS=""
+fi
+
+AC_PATH_XTRA
+WITH_X="$X_LIBS $X_PRE_LIBS -lX11 $X_EXTRA_LIBS"
+
+dnl Checking gs:
+AC_PATH_PROG(PATH_GS, gs, "nope") 
+if test "X$PATH_GS" != "Xnope" ; then
+  HAVE_GS="true"
+else
+  HAVE_GS="false"
+fi
+
+dnl Resources location
+ADVI_LOC=`pwd`
+
+dnl Substitute variables
+
+AC_SUBST(CAML)
+AC_SUBST(CAMLDIR)
+AC_SUBST(CAMLVERSION)
+
+AC_SUBST(CAMLIMAGESDIR)
+AC_SUBST(HAVE_CAMLIMAGES)
+AC_SUBST(CAMLIMAGESLIBS)
+AC_SUBST(HAVE_GS)
+AC_SUBST(ADVI_LOC)
+
+AC_SUBST(WITH_X)
+AC_SUBST(HAVE_GS)
+AC_OUTPUT(Makefile.config config.ml)
+
+echo -------------------------------------------------- Configuration finished
+echo Language:            $CAML version $CAMLVERSION
+echo Camlimages:          $HAVE_CAMLIMAGES
+echo GS:		  $HAVE_GS
+echo Resources:           $ADVI_LOC/
+echo -------------------------------------------------------------------------

@@ -1,0 +1,196 @@
+Active dvi is a DVI previewer and presenter written in Objective Caml
+(http://caml.inria.fr/ocaml/) with some eye candy effects for presentation.
+
+ActiveDvi is largely based on Mldvi written by Alexandre Miquel
+(http://pauillac.inria.fr/~miquel/).
+
+Version: 0.5 (second release)
+available at http://pauillac.inria.fr/activedvi/
+
+Contributions: 
+
+ * Jun Furuse and Pierre Weis: for Encapsulated Postscripts and effects
+ * Xavier Leroy: for gpic specials
+ * Didier Remy: for inlined Postcript, hyperlinks
+
+CURRENTLY SUPPORTED FEATURES:
+=============================
+
++ Encapsulated Postscript File inclusion (using graphics package)
++ Effects for presentation (pause, delay, text color change) 
++ Embedded applications for interactive demonstration
+
++ Pictures visualization via gpic specials
+
++ Display of inlined Postscript using gs
++ Font antialiasing that takes background colors into account
++ Page display is interrupted on user input
++ Resizing the page adjusts the magnification
++ Start displaying at a given page or at a given link reference
++ The file is reloading on signal SIGUSR1
++ Hyperlinks
++ Active areas (execute an action when the mouse is over)
+
+INVOCATION
+==========
+
+The invocation is
+
+        advi [OPTIONS...] DVIFILE
+
+where OPTIONS are:
+
+  -geometry GEOM        Sets the (maximum) geometry GEOM
+  -g GEOM               Same as -geometry GEOM
+  -crop                 Crop the window to the best size (default)
+  -nocrop               Disable cropping
+  -hmargin DIMEN        Horizontal margin  (default: 1cm)
+  -vmargin DIMEN        Vertical margin    (default: 1cm)
+
+  -A                    Set Postscript antialias
+  -bg                   Draw in the background
+  -fullwidth            Adjust size to width
+  -html STRING          Make advi start at html reference of name STRING
+  -nogs                 Turn off dipslay of inlined Postscript
+  -nopauses             Swictch pauses off
+  -page INT             Make advi start at page INT
+
+Geometry GEOM is specified in pixels, using the standard format
+for specifying geometries (i.e: "WIDTHxHEIGHT[+XOFFSET+YOFFSET]").
+
+Dimensions (for options `-hmargin' and `-vmargin') are specified as
+numbers optionally followed by two letters representing units.
+
+When no units are given, dimensions are treated as numbers of pixels.
+
+Currently supported units are the standard TeX units as specified in
+the TeXbook (D. Knuth, Addison-Wesley, (C) 1986):
+
+  `pt' (point), `pc' (pica), `in' (inch), `bp' (big point),
+  `cm' (centimeter), `mm' (millimeter), `dd' (didot point),
+  `cc' (cicero) and `sp' (scaled point).
+
+Note that dimensions are specified w.r.t the original TeX document,
+and do not correspond to what is actually shown on the screen, which
+can be displayed at a different resolution than specified in the
+original TeX source.
+
+
+KEYSTROKES
+==========
+
+Advi recognizes the following keystrokes when typed in its window.
+Each may optionally be preceded by a number, called ARG below, whose
+interpretation is keystroke dependant. If ARG is unset, its value is
+1, unless specified otherwise.
+
+Advi maintains an history of previously visited pages organized as a stack. 
+Additionnally, the history contains mark pages which are stronger than
+unmarked pages.
+
+q       Quits the program
+
+return  If ARG is non zero, push the current page on the history stack,
+        and move forward Arg physical pages.
+
+n       Move ARG physical pages forward, leaving the history unchanged.
+
+p       Move ARG physical pages backward, leaving the history unchanged.
+
+tab     Push the current page on top of the history as a marked page,
+        do no move.
+
+space   Move to the next pause if any, or do as return otherwise.
+
+backspace
+        Move ARG pages backward according to the history.
+        The history stack is poped, accordingly. 
+
+escape
+        Move ARG marked pages backward according to the history.
+        Do nothing if the history does no contain any marked page.
+
+g       If ARG is unset move to the last page.
+        If ARG is the current page do nothing.
+        Otherwise, push the current page on the history as a marked
+        page, and move to the physical page ARG.
+
+,       Move to the first page.
+        
+.       Move to the last page.
+        
+c       Center the page in the window, and resets the default resolution.
+        
+<       Scale the resolution by 1/1.414
+
+>       Scale the resolution by 1.414
+
+f       Load all the fonts used in the documents. By default, fonts
+        are loaded only when needed.
+
+r       Redraw the current page.
+
+R       Reload the file and redraw the current page.
+
+F       Does the same as `f', and precomputes the glyphs of all
+        characters used in the document. This takes more time than
+        loading the fonts, but the pages are drawn faster.
+
+C       Erase the image cache.
+
+A click on an hyperlink, push the current page on this history as marked
+(unless the target page is the current page) and move to the target page.
+If the target is visible, it highlights the target.
+
+Moreover, the user can drag the currently displayed page in the window
+in order to change its relative position. (This is useful when the
+page is displayed at a resolution such that cannot fit in the
+window.)
+
+
+EYE CANDY MACROS
+================
+
+Using the LaTeX style advi.sty provided with the package, you can
+embed some Active dvi specials into your TeX documents. Advi
+interprets those specials to provide some eye candy features for your
+presentation.
+
+\pause
+	Advi stops rendering at this point of the source document and 
+	waits a user key stroke.
+
+\wait{sec}
+	Delay the rendering at the point of the document for sec seconds. 
+
+\tag{this}{material}
+	Define an "advi tag" named ``this'' to refer to the text
+        enclosed in the following brackets. The tag can be used to
+        change the color of the text later. 
+
+\hide{this}{material}
+	Same as \tag{this}{material}, but does not render the text at
+        this point. You can display the text later, using the \play macro.
+
+\play{this}
+	Display the texts associated with the tag ``this''.
+
+\hilight{this}{col}
+	Display the texts associated with the tag ``this'', using the
+        color ``col''.
+
+Please look at test/demo.{tex|dvi} and test/macros.{tex|dvi} for
+more information and examples.
+
+COPYRIGHT
+=========
+
+This program is distributed under the GNU LGPL. 
+See the enclosed file COPYING.
+
+
+AUTHOR
+======
+
+Alexandre Miquel  <Alexandre.Miquel@inria.fr>
+Jun Furuse <Jun.Furuse@inria.fr>

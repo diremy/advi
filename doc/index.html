@@ -1,0 +1,99 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html> <head>
+<title>Active dvi</title>
+</head>
+
+<body bgcolor="white">
+<h1>Active dvi -- A dvi Presenter written in O'Caml</h1>
+
+<center><img src="advilogo.gif"><br>
+<a href="advi.jpg">screen shot</a>
+</center>
+
+<p>
+Active dvi is a DVI previewer and presenter written in <a
+href="http://caml.inria.fr/ocaml/">Objective Caml</a> with some eye
+candy effects for presentation.
+
+<p>
+Active dvi is largely based on Mldvi version 1.0 written 
+by <a href="http://pauillac.inria.fr/~miquel/">Alexandre Miquel</a>.
+
+<hr>
+<center>
+<a href="#features">Features</a> |
+<a href="#requirements">Requirements</a> |
+<a href="#download">Download</a> |
+<a href="#copyright">Copyright</a> |
+<a href="#authors">Authors</a>
+</center>
+<hr>
+
+<a name="features">
+<h2>Currently supported features:</h2>
+</a>
+
+Active dvi features
+<UL>
+<LI> Encapsulated Postscript File inclusion (using graphics macros package)
+<LI> Some effects for presentation (pause, delay, text color change)
+<LI> Embedded applications (launched on demand)
+<LI> Hyper links from slide to slide
+<LI> Annotations displayed on demand (similar to pop-up balloons)
+<LI> Gpic specials to display pictures
+</UL>
+
+
+<h2>Installation of Active dvi</h2>
+
+<a name="requirements">
+<h3>Requirements</h3>
+</a>
+
+You need Objective Caml 3.02 or higher to compile the sources.
+
+<p>
+You also need the `kpsewhich' utility of the `kpathsea' library
+provided by many TeX distributions.
+
+<p>
+For the encapsulated postscript file inclusion, you require the
+<a href="http://pauillac.inria.fr/camlimages/">camlimages library</a>.
+
+<a name="download">
+<h3>Download</h3></a>
+
+<UL>
+  <LI> <a href="activedvi-0.5.0.tar.gz">Version 0.5.0 
+      (GPIC and PS Specials, hyperrefs, page history, etc.)</a>
+  <LI>
+      <a href="http://camlcvs.inria.fr/cgi-bin/cvsweb.out/bazar-ocaml/advi/">
+      Current CVS version</a> at the
+      <a href="http://camlcvs.inria.fr/">Caml Anonymous CVS repository</a>
+</UL>
+
+<a name="copyright">
+<h2>COPYRIGHT</h2></a>
+
+This program is distributed under the GNU LGPL. 
+See the enclosed file COPYING.
+
+<a name="authors">
+<h2>AUTHORS</h2></a>
+
+<UL>
+  <LI>PS specials, hyperrefs, page history, etc. by
+      <a href="http://pauillac.inria.fr/~remy/">Didier Rémy</a>
+  <LI>GPIC specials by
+      <a href="http://pauillac.inria.fr/~xleroy/">Xavier Leroy</a>
+  <LI>Active dvi presenter by
+      <a href="http://pauillac.inria.fr/~furuse/">Jun Furuse</a>
+  <LI>The original MlDvi previewer by
+      <a href="http://pauillac.inria.fr/~miquel/">Alexandre Miquel</a>
+</DL>
+
+<hr>
+<!-- hhmts start -->
+Last modified: Wed May  2 09:19:20 CEST 2001
+<!-- hhmts end -->
+</body> </html>
