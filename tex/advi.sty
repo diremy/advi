@@ -89,12 +89,14 @@
 \def \advi@embed@ #1#2#3#4#5{%
   \mbox{\advi@special
           {embed name="#1" mode=#2 width=#3 height=#4 command="#5"}%
-          {\vbox to #4{\hbox to #3{}}}}%
-}
-\newcommand{\advi@embed}[4][]{
+          {\vbox to #4{\hbox to #3{}}}}}
+\def \advi@length #1{\@tempdima #1\relax \the\@tempdima}
+\newcommand{\advi@embed}[4][]{%
   \mbox {\setkeys {advi@embed}{#1}%
-         \advi@embed@ {\advi@embed@name}{\advi@embed@mode}{#2}{#3}{#4}}%
-}
+         \@tempdima#2\relax \edef \advi@embed@w {\the\@tempdima}%
+         \@tempdima#3\relax \edef \advi@embed@h {\the\@tempdima}%
+         \advi@embed@ {\advi@embed@name}{\advi@embed@mode}
+             {\advi@embed@w}{\advi@embed@h}{#4}}}
 \newcommand{\advi@killembed}[1]{\advi@special {kill name="#1"}}
 \advi@export \adviembed \advi@embed
 \advi@export \advikillembed \advi@killembed 
