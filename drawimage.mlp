@@ -89,7 +89,7 @@ module M = struct
       | ScaleTopRight    -> "-tr"
       | ScaleBottomRight -> "-br"
     in
-    Filename.concat Userfile.cache_dir
+    Filename.concat (Userfile.get_cache_dir ())
       (Printf.sprintf "%s%s-%dx%d%s%s%s"
          cache_prefix
          file'
@@ -166,7 +166,7 @@ module M = struct
     (* erase the files match with "cache-*" *)
     let prefix = cache_prefix in
     let suffix = "" in
-    let dh = Unix.opendir Userfile.cache_dir in
+    let dh = Unix.opendir (Userfile.get_cache_dir ()) in
     try while true do
       let file = Unix.readdir dh in
       if String.length file > 10 &&
