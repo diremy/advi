@@ -51,16 +51,23 @@ MLINCDIRS = $(CAMLIMAGESDIR)
 
 EXEC	  = advi
 
-MODULES	  = config misc graphicsY11 timeout \
-            options global_options busy rc \
-            gradient gterm launch \
-            userfile input symbol search \
-            shot drawimage dvicolor \
-	    table pkfont ttfont jfm font glyph devfont \
-	    units dimension \
-	    gs transimpl embed grdev scratch \
-	    dvi addons driver ageometry thumbnails \
-            dviview main
+MISC	  = config misc timeout ageometry 
+OPTIONS	  = options rc userfile search 
+GRAPHICS  = graphicsY11 busy gradient gterm launch
+DVI	  = input dvicolor table pkfont ttfont jfm font glyph devfont \
+	    units dimension
+SYMBOL	  = symbol
+EFFECTS	  = drawimage gs transimpl embed
+GUI	  = scratch driver thumbnails dviview
+UNUSED	  = shot
+
+MODULES	  = $(MISC) $(OPTIONS) $(GRAPHICS) global_options \
+            $(DVI) $(SYMBOL) \
+            $(EFFECTS) grdev \
+	    dvi addons \
+	    $(GUI) main \
+	    $(UNUSED)
+
 LIBRARIES = graphics unix str $(CAMLIMAGESLIBS)
 CLIBS	  = graphics unix str
 
@@ -199,7 +206,7 @@ doc/scratch_write_splash.dvi:
 	(cd doc; $(MAKE) scratch_write_splash.dvi)
 
 documentation:
-	(cd doc; $(MAKE) all)
+	if test $(HAVE_HEVEA) = "true"; then (cd doc; $(MAKE) all); fi
 
 distribute: tar_and_web
 
