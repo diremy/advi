@@ -17,6 +17,13 @@
 
 (* $Id$ *)
 
+type color = GraphicsY11.color;;
+
+type x = GraphicsY11.x
+and y = GraphicsY11.y
+and w = GraphicsY11.w
+and h = GraphicsY11.h;;
+
 module Make
     (G :
        sig
@@ -25,30 +32,49 @@ module Make
          val voffset : t -> int
          val width : t -> int
          val height : t -> int
-       end) =
-  struct
+       end) = struct
 
-type glyph = G.t;;
-type fontname = string;;
-type fontratio = float;;
-type g = {
-  fontname : string;
-  fontratio : float;
-  glyph : glyph;
+
+   type glyph = G.t;;
+   type fontname = string;;
+   type fontratio = float;;
+
+   type g = {
+     fontname : string;
+     fontratio : float;
+     glyph : glyph;
+   };;
+
+   type symbol =
+      | Glyph of g
+      | Space of int * int
+      | Rule of int * int
+      | Line of int * string option;;
+
+   type code = int;;
+
+   type display_symbol = {
+     color : color;
+     locx : x;
+     locy : y;
+     code : code;
+     symbol : symbol;
+   };;
+
+   type display_set = display_symbol list;;
+
+(* get the closest lines to a given position on the screen *)
+type rect = {
+  mutable top : int;
+  mutable bottom : int;
+  mutable left : int;
+  mutable right : int };;
+
+type region = {
+  history : display_symbol array;
+  first : int;
+  last : int;
 };;
-type symbol =
-   | Glyph of g
-   | Space of int * int
-   | Rule of int * int
-   | Line of int * string option;;
-type element = {
-  color   : int ;
-  locx    : int ;
-  locy    : int ;
-  code    : int ;
-  symbol : symbol
-};;
-type set = element list;;
 
 let fontname s =
   match s.symbol with
@@ -57,7 +83,8 @@ let fontname s =
   | Rule (w, h) -> "rule"
   | Line (w, h) -> "line";;
 
-let space s = match s.symbol with | Space _ -> true | _ -> false;;
+(* Tells if a given symbol is a space. *)
+let is_space s = match s.symbol with | Space _ -> true | _ -> false;;
 
 let voffset s =
   match s.symbol with
@@ -85,28 +112,21 @@ let width s =
 (* Symbols information. *)
 
 let dummy_symbol = {
-  color  = 0 ;
-  locx   = 0 ;
-  locy   = 0 ;
-  code   = 0 ;
+  color = 0 ;
+  locx = 0 ;
+  locy = 0 ;
+  code = 0 ;
   symbol = Line (-1, None)
 };;
 
-let set : set ref = ref [];;
-let clear () = set := [];;
-let give () = !set;;
+let get_global_display_set, set_global_display_set =
+  let global_display_set = ref [] in
+  (fun () -> !global_display_set),
+  (fun set -> global_display_set := set);;
 
-type line = {
-   min : int ;
-   max : int ;
-   content : element list
-};;
-
-(* Iterates ff over the set. *)
-let iter ff set = List.iter ff set;;
-
-(* Add an element. *)
-let add color x y code s =
+let clear_global_display_set () = set_global_display_set [];;
+let add_to_global_display_set color x y code s =
+ (* Add a display_symbol to the global_display_set. *)
   let symbol = {
     color = color ;
     locx = x ;
@@ -114,7 +134,17 @@ let add color x y code s =
     code = code ;
     symbol = s;
   } in
-  set := symbol :: !set;;
+  set_global_display_set (symbol :: get_global_display_set ());;
+
+
+type line = {
+   min : int ;
+   max : int ;
+   contents : display_symbol list
+};;
+
+(* Iterates ff over the display_set. *)
+let iter ff display_set = List.iter ff display_set;;
 
 (* Says if the character code is probably the ascii code. *)
 let is_pure code =
@@ -268,32 +298,32 @@ let cmtt_encoding font code =
 (* List of recognized fonts (regexp) * handler *)
 (* Don't optimize the regexps, it is readable that way. *)
 let encodings = [
-  "cm[rs][0-9]+" , cmr_encoding ;
-  "cmt[ti][0-9]+", cmtt_encoding ; 
-  "cms[lxs][0-9]+", cmr_encoding ;
-  "cmbx[0-9]+"   , cmr_encoding ;
-  "cmmi[0-9]+"   , cmmi_encoding ;
-  "cmex[0-9]+"   , cmex_encoding ;
-  "cmsy[0-9]+"   , cmex_encoding ;
+  "cm[rs][0-9]+",     cmr_encoding ;
+  "cmt[ti][0-9]+",    cmtt_encoding ; 
+  "cms[lxs][0-9]+",   cmr_encoding ;
+  "cmbx[0-9]+",       cmr_encoding ;
+  "cmmi[0-9]+",       cmmi_encoding ;
+  "cmex[0-9]+",       cmex_encoding ;
+  "cmsy[0-9]+",       cmex_encoding ;
 (* does not seem correct. eg. ff is \027 instead of \011? what else? *)
-  "ecrm[0-9]+",    accents ecmr_encoding ;
-  "ecti[0-9]+",    accents ecmr_encoding ;
-  "ecbx[0-9]+",    accents ecmr_encoding ;
-  "ectt[0-9]+",    accents cmtt_encoding ;
-  "lcmssb?[0-9]+",   accents cmr_encoding ;
-  "lcmssi[0-9]+",  accents cmmi_encoding ;
+  "ecrm[0-9]+",       accents ecmr_encoding ;
+  "ecti[0-9]+",       accents ecmr_encoding ;
+  "ecbx[0-9]+",       accents ecmr_encoding ;
+  "ectt[0-9]+",       accents cmtt_encoding ;
+  "lcmssb?[0-9]+",    accents cmr_encoding ;
+  "lcmssi[0-9]+",     accents cmmi_encoding ;
 (* is this correct ? *)
   "ptm[rbi][0-9]+r",  accents ecmr_encoding ;
-  "ptmri[0-9]+r",  accents ecmr_encoding ;
-  "phvb[0-9]+r",  accents ecmr_encoding ;
-  "msam[0-9]+",  accents ecmr_encoding ;
+  "ptmri[0-9]+r",     accents ecmr_encoding ;
+  "phvb[0-9]+r",      accents ecmr_encoding ;
+  "msam[0-9]+",       accents ecmr_encoding ;
 ];;
 
-let compile_regexp source =
-  List.map (fun (pat, zz) -> Str.regexp pat, zz) source;;
+let compile_regexps source =
+  List.map (fun (pat, fn) -> Str.regexp pat, fn) source;;
 
 (* Compiled regexps. *)
-let encodings_c = compile_regexp encodings;;
+let encodings_c = compile_regexps encodings;;
 
 let erase = "/back/";;
 
@@ -317,11 +347,11 @@ let symbol_name pre s =
   | Rule (w, h) -> get_line pre s
   | _ ->
       let name = true_symbol_name s in
-      if space pre && overlap pre s <> 0 then erase ^ name else name;;
+      if is_space pre && overlap pre s <> 0 then erase ^ name else name;;
 
 
 (* Says if the symbol is in zone x1-x2 y1-y2.
-   Size of the symbol should be used...we'll see later. *)
+   Size of the symbol should be used... we'll see later. *)
 let symbol_inzone x1 y1 x2 y2 =
   let (x1, x2) = if x1 <= x2 then x1, x2 else x2, x1
   and (y1, y2) = if y1 <= y2 then y1, y2 else y2, y1 in
@@ -330,7 +360,7 @@ let symbol_inzone x1 y1 x2 y2 =
     (s.locy - voffset s <= y2) && (s.locy - voffset s + height s >= y1);;
 
 let inzone x1 y1 x2 y2 =
-  Misc.reverse_filter (symbol_inzone x1 y1 x2 y2) !set;;
+  Misc.reverse_filter (symbol_inzone x1 y1 x2 y2) (get_global_display_set ());;
 
 let intime x1 y1 x2 y2 =
   let inz = symbol_inzone x1 y1 x2 y2 in
@@ -338,7 +368,7 @@ let intime x1 y1 x2 y2 =
     match sl with
     | [] -> []
     | s :: l -> if inz s then sl else discard l in
-  discard (List.rev (discard !set));;
+  discard (List.rev (discard (get_global_display_set ())));;
 
 
 (** FORMATING **)
@@ -347,17 +377,18 @@ exception Break of int * int;;
 
 (* Four (4 !) backslashes because of two-level escapes !!! *)
 
-let process_all =
-  ["." ^ erase, "" ; (* Remove backspaces. *)
-    "c\\\\c", "\\cc" ] (* Sometimes cedil \c is after the 'c'. *)
-;;
+let process_all = [
+  "." ^ erase, "";  (* Remove backspaces. *)
+  "c\\\\c", "\\cc"; (* Sometimes cedil \c is after the 'c'. *)
+];;
 
-let process_totext =
-  ["\\\\bullet", "o " ];;
+let process_totext = [
+  "\\\\bullet", "o ";
+];;
 
 (* Compiled versions. *)
-let process_all_c = compile_regexp process_all;;
-let process_totext_c = compile_regexp process_totext;;
+let process_all_c = compile_regexps process_all;;
+let process_totext_c = compile_regexps process_totext;;
 
 (* Apply a process list to input. *)
 let apply_process pl input =
@@ -376,10 +407,10 @@ let above_lines bot1 top1 bot2 top2 =
   let threshold = 30 in
   if bot1 < top2 then -1 else
   if bot2 < top1 then 1 else
-    let minsize = min (bot1 - top1) (bot2 - top2)
-    and share = (min bot1 bot2) - (max top1 top2) in
-    if share * 100 > threshold * minsize then 0 else
-    if top1 < top2 then -1 else 1;;
+  let minsize = min (bot1 - top1) (bot2 - top2)
+  and share = (min bot1 bot2) - (max top1 top2) in
+  if share * 100 > threshold * minsize then 0 else
+  if top1 < top2 then -1 else 1;;
 
 let above s1 s2 =
   let top1 = s1.locy - voffset s1
@@ -398,7 +429,7 @@ let at_right s1 s2 =
 
 (* Gives a string corresponding to line l .*)
 let dump_line l =
-  let l2 = List.sort at_right l.content in
+  let l2 = List.sort at_right l.contents in
   let line = ref ""
   and some = ref false (* Tells if at least one symbol is on the line. *)
   and old_sym = ref dummy_symbol in
@@ -410,9 +441,9 @@ let dump_line l =
         if ascii <> "" then
           begin
             line := !line ^ ascii ;
-            if not (space s) || width s > 0 then old_sym := s;
+            if not (is_space s) || width s > 0 then old_sym := s;
           end;
-        if not (space s) then some := true in
+        if not (is_space s) then some := true in
   List.iter action l2;
 
   let return = post_process !line in
@@ -427,18 +458,18 @@ let rec split current lines = function
       if above_lines bot top current.max current.min <> 0
       then split {min = top;
                   max = bot;
-                  content = [s]}
+                  contents = [s]}
              (current :: lines) sl
       else split {min = min current.min top;
                   max = max current.max bot;
-                  content = s :: current.content}
+                  contents = s :: current.contents}
             lines sl;;
 
-(* to_ascii returns a string representing the symbols in set.
+(* to_ascii returns a string representing the symbols in display_set.
    Elements are filtered according to the first argument. *)
-let to_ascii set =
+let to_ascii display_set =
   (* Split lines. *)
-  let lines = split {min = 0; max = 0; content = []} [] set in
+  let lines = split {min = 0; max = 0; contents = []} [] display_set in
   let ascii = Misc.reverse_map dump_line lines in
   String.concat "" ascii;;
 
@@ -465,21 +496,8 @@ let commands_to_ascii fnt_map commands =
     commands;
   Buffer.contents cset;;
 
-(* to_escaped does the same, but the final string is 'escaped'. *)
-let to_escaped set = String.escaped (to_ascii set);;
-
-(* get the closest lines to a given position on the screen *)
-type rect = {
-  mutable top : int;
-  mutable bot : int;
-  mutable left : int;
-  mutable right : int };;
-
-type region = {
-  history : element array;
-  first : int;
-  last : int;
-};;
+(* to_ascii_escaped does the same, but the final string is 'escaped'. *)
+let to_ascii_escaped display_set = String.escaped (to_ascii display_set);;
 
 let region_to_ascii r =
   let pos = min r.first r.last in
@@ -528,7 +546,7 @@ let nearest r x y =
   with Invalid_argument _ -> assert false;;
 
 let position x y =
-  let history = Array.of_list !set in
+  let history = Array.of_list (get_global_display_set ()) in
   if Array.length history > 0 then
     let time = closest history x y in
     { history = history; first = time; last = time; }
@@ -544,7 +562,7 @@ let around b x y =
     let rec skip_spaces move i =
       if valid i then
         let h = position.history.(i) in
-        if space h then skip_spaces move (move i) else i
+        if is_space h then skip_spaces move (move i) else i
       else i in
     let rec word move p w i =
       if valid i then
@@ -568,7 +586,7 @@ let around b x y =
       if valid i then
         let h = position.history.(i) in
         let pre = position.history.(0 - (move (0 - i))) in
-        if space h then
+        if is_space h then
           let c = symbol_name pre h in
           if c = " " then word move i c (skip_spaces move (move i))
           else prefix move (move i)
@@ -611,8 +629,13 @@ let lines x y =
       let space_ref = region.history.(region.first) in
       let l1, f1 = find_line succ (succ i1) in
       let l2, f2 = find_line pred (pred i2) in
-      let l1 = if l1 > l2 && l2 > 0 then least !set l2 else l1 in
-      let f = match f1 with Some _ -> f1 | _ -> f2 in
+      let l1 =
+        if l1 > l2 && l2 > 0 then least (get_global_display_set ()) l2
+        else l1 in
+      let f =
+        match f1 with
+        | Some _ -> f1
+        | _ -> f2 in
       Some (space_ref, l1, l2, left, w1, w2, right, f);;
 
 let word x y =
@@ -649,7 +672,7 @@ let iter_regions delete add r r' =
     if l' > l then iter l l' delete else iter l l' add else
   (iter f l  delete; iter f l' add);;
 
-let rect r = r.left, r.bot, r.right - r.left, r.top - r.bot;;
+let rect r = r.left, r.bottom, r.right - r.left, r.top - r.bottom;;
 
 let new_region r x y =
   let l = r.history.(r.last) in
