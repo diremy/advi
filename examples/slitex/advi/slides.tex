@@ -1,0 +1,79 @@
+\vspace*{3cm}
+
+\stitle{Active-DVI}
+
+\vspace*{2cm}
+
+\begin{center}
+
+{\large \bf \em Pierre Weis}
+
+\vspace*{3cm}
+
+Paris -- December $16$ 2002 
+
+\end{center}
+
+\newslide{What's that ?}
+
+\advitransition{slide}
+
+\def\tpause{\advitransition{none}\pause}
+\pause Xdvi ?%
+\tpause{\advitransbox{slide,from=right}{\textcolor{red}{No}}}%
+\tpause~Ghostview ?%
+\tpause{\advitransbox{slide,from=right}{\textcolor{red}{No}}}%
+\tpause~Acroread ?%
+\tpause{\advitransbox{slide,from=right}{\textcolor{red}{No}}}%
+\tpause~Powerpoint ?%
+\tpause{\advitransbox{slide,from=right}{\textcolor{red}{No}}}
+
+\tpause Its \textcolor{blue}{\bf Active-DVI !}
+\tpause Entirely written in Caml, \textcolor{red}{\bf hence~}\tpause reliable and easy to extend.
+\tpause Entirely programmable, this is:\tpause
+
+\bigskip
+\begin{center}
+\textcolor{blue}{\Large{\bf The presenter of choice}}
+
+\textcolor{blue}{\Large{\bf for the discriminative hacker!}}
+\end{center}
+
+\pause
+
+\newslide{Antialised images}
+\advitransition{wipe}
+
+\begin{center}
+\includegraphics[width=0.25\textwidth]{advilogo.eps}
+\end{center}
+
+\vfill
+
+\newslide{Interaction}
+
+\adviembed[width=0.15\textwidth,height=0.04\textheight]{xterm -geometry !g -e ocaml}
+
+\newslide{The code of previous slide}
+
+\begin{verbatim}
+\newslide{Interaction}
+
+\adviembed[width=0.15\textwidth,height=0.04\textheight]%
+  {xterm -geometry !g -e ocaml}
+\end{verbatim}
+
+\newslide{That's all, folks!!!}
+\advitransition{wipe}
+
+\begin{center}
+\includegraphics[width=0.25\textwidth]{advilogo.eps}
+\end{center}
+
+\def\advimasquotte{\adviembed[width=1.56cm,height=1.824cm]%
+{animate -geometry !g! -window !p advilogo.anim.gif}}
+
+\hbox to \hsize{\pause\hfill\advimasquotte\pause\hfill\advimasquotte\pause\hfill\advimasquotte\pause\hfill\advimasquotte\pause\hfill\advimasquotte\hfill}
+
+\vfill
+

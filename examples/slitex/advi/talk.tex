@@ -1,0 +1,26 @@
+\documentclass[landscape]{slides}
+
+\input{sladvi}
+
+\begin{document}
+
+% Definition of header and footer of the presentation
+% Institution logo
+\def\thelogo{\includegraphics[width=3EM,height=1EM]{inria.ps}}
+
+\def\footer{{\thelogo\hfill \em {Pierre.Weis@inria.fr\hfill 16-12-2002}}}
+
+% The title to be written on each page
+\def\header{Objective Caml}
+
+% The explicit new page to change slide
+\def \newpage {\vfill\Newpage \advifooter{\footer}\adviheader{\header}}
+
+% The newslide macro that also add the title
+\def\newslide#1{\newpage\stitle{#1}}
+
+\input{slides}
+
+\end{document}
+
+
