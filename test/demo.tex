@@ -1,3 +1,8 @@
+%% Copyright Roberto Di Cosmo, Jun Furuse, Didier Remy, and Pierre Weis
+%% All rights reserved.
+
+%% $Id$
+
 \documentclass[12pt]{article}
 
 \usepackage{graphicx}
@@ -238,9 +243,10 @@ For each application to launch, {\ActiveDVI} allocates a new sub
 window of the specified size.  If provided, the identifier \verb"!p"
 is replaced by the (X) identifier of that sub window, in order for the
 application to use that sub window as its root window. Options to
-specify the root window may vary (\verb"-use" or \verb"-window" are
-common). Unfortunately, not every X-application is capable of using
-a specified window as its (root) window.  If an application can be
+specify the root window may vary depending of the application at hand
+(however, \verb"-use" or \verb"-window" are common to specify this
+option). Unfortunately, not every X-application is capable of using a
+specified window as its (root) window.  If an application can be
 rerooted, it is truely embeddable into {\ActiveDVI} (meaning it is
 really a part of the {\ActiveDVI} window). Otherwise the application
 is not embeddable.
@@ -341,8 +347,8 @@ where you want it to play your sounds.
 
 \advirecord{play}
  {\adviembed[name=mpg123,width=1mm,height=1mm]{mpg123 -q music.mp3}}
-\advirecord {stop}
- {\advikillembed {mpg123}}
+\advirecord{stop}
+ {\advikillembed{mpg123}}
 \advianchor[click]{play}{Play}
 \advianchor[click]{stop}{Stop}
 
@@ -476,7 +482,7 @@ demo.tex}. A link to it is produced by
 
 A click on the link opens the file in a new window, as if 
 
-\qquad\verb"less demo.tex"
+\qquad\verb"more demo.tex"
 
 had been typed in a shell.
 
@@ -485,11 +491,14 @@ had been typed in a shell.
 in the future this should use Mine man Mailcap to find the type of the
 file and the proper previewer for that file.
 
-\item A warning is emitted if the extension is not recognized or the file
-is non-existent:
-\hyperref{nonexistent.dvi}{}{}{\tt nonexistent.dvi}
-or
+\item A warning is emitted on standard error (Unix {\tt stderr}), if
+the file extension is not recognized:
+
 \hyperref{../tex/advi.sty}{}{}{\tt ../tex/advi.sty}
+
+or the file is non-existent:
+
+\hyperref{nonexistent.dvi}{}{}{\tt nonexistent.dvi}
 
 \end {itemize}
 
@@ -519,15 +528,15 @@ will  be rendered by
 \begin {enumerate}
 
 \item Type space to change the text color. 
-\adviwait \textcolor{red}{\adviplay{taga}}
+\adviwait\textcolor{red}{\adviplay{taga}}
 \begin{verbatim}
-    \adviwait \textcolor{red}{\adviplay{taga}}
+    \textcolor{red}{\adviplay{taga}}
 \end{verbatim}
 
 \item Type space to change the background.
 \adviwait\textcolor{red}{\adviplay{tagb}}
 \begin{verbatim}
-    \adviwait\textcolor{red}{\adviplay{tagb}}
+    \textcolor{red}{\adviplay{tagb}}
 \end{verbatim}
 
 \end {enumerate}
@@ -576,24 +585,27 @@ The effect of active anchors can also be
 
 
 \noindent
-Another form of
+Another form of simple annotations is the overriding of words.
+
+\noindent
+Another form of%
 \begin{superpose}
 \advirecord[play]{a1}{\advianchor{a2}{ simple }}\\
 \advirecord{a2}{\adviplay[white]{a1}\colorbox{yellow}{ cool }}
-\end{superpose}
-annotations is the overriding of
+\end{superpose}%
+annotations is the overriding of%
 \begin{superpose}
 \advianchor{7}{ words. }\\
 \advirecord{7}{\adviplay[white]{6}\colorbox{white}{{ text. }}}\\
 \end{superpose}
 
 \noindent
-You can also replace larger pieces of text by other
+You can also replace larger pieces of text by other%
 \begin{superpose}
-\advirecord[play]{1}{pieces \advianchor{2}{of} text}\\
+\advirecord[play]{1}{pieces \advianchor{2}{of} \advianchor{3}{text}}\\
 \advirecord{2}{\colorbox{white}{\begin{tabular}{@{}l@{}}
-inner tabulars\\ should be between\\ parentheses\end{tabular}}}\\
-\advirecord{3}{The \qquad End}
+inner tabulars\\ should be enclosed\\ by parentheses\end{tabular}}}\\
+\advirecord{3}{\colorbox{white}{The \qquad End.}}\\
 \end{superpose}
 
 \newpage
@@ -658,17 +670,17 @@ Some invisible anchors have been hidden in this page, could you find them?}
 
 \subsection*{Superpose Package}
 
-This very small package allows the superimposition of boxes, making the
+This very small package provides superimposition of boxes, making the
 surrounding box large enough to fit all the included boxes. This is convenient
 when displaying each included box at different pauses.
 
 \noindent
-Kind of {\ActiveDVI} movie
+A kind of {\ActiveDVI} movie
 \advirecord{0}{\colorbox{white}
 {\begin{superpose}
 \advirecord{1}{\textcolor{c2}{can be played}}\\
 \advirecord{15}{\textcolor{c1}{changing text at each space}}\\
-\advirecord{2}{\textcolor{c3}{you can also use graphics}}\\
+\advirecord{2}{\textcolor{c3}{you can also use pictures}}\\
 \advirecord{31}{\
 {\includegraphics[width=0.02\textwidth]{../tex/caml.eps}}}\\
 \advirecord{32}{\
@@ -698,7 +710,8 @@ Kind of {\ActiveDVI} movie
 {\includegraphics[width=0.1\textwidth]{../tex/caml.eps}}}\\
 \advirecord{37}{{\includegraphics[width=0.1\textwidth]{world}}}\\
 \advirecord{4}{{\begin{tabular}{@{}l@{}}
-Note that inner tabular\\ should be between\\ parentheses\end{tabular}}}\\
+Note that inner tabulars\\ should still be enclosed\\
+by parentheses\end{tabular}}}\\
 \advirecord{5}{\textcolor{c4}{The End}}
 \end{superpose}}}
 here.
