@@ -83,7 +83,7 @@ module Args = struct
       "<base>  Set the value for 360° of the minor hand \
        (float, in milliseconds)";
     "-rev", Arg.Set reverse, " Countdown style";
-    "-time", Arg.Int (fun m -> total_time := float_of_int (m * 60000)),
+    "-time", Arg.Float (fun m -> total_time := (m *. 60000.)),
       "<time>  Theoretical total time in minutes";
     "-f", Arg.Float (fun f -> frequency := f),
       "<f>  Set the refresh frequency (in milliseconds, default is 1000.0)";
@@ -182,10 +182,16 @@ let create_clock () =
 
 let draw_overtime_arc c old_major =
   let d = !diametre in
-  let inf = if !reverse then 0.0 else !total_time in
+  let inf = if !reverse then 0.0 else -. !total_time in
   let angle_base = 360.0 in
   let angle_inf = (inf /. !base_major) *. angle_base +. 90.0 in
-  let angle_sup = -. ((c.major_elapsed /. !base_major) *. angle_base) in
+  let angle_sup = 
+    if !reverse then
+      -. ((c.major_elapsed /. !base_major) *. angle_base)
+    else
+      -. (((c.major_elapsed -. !total_time) /. !base_major) *. angle_base)
+      (* -. ((c.major_elapsed /. !base_major) *. angle_base +. inf) *)
+  in
   (* prerr_endline
       (Printf.sprintf "overtime inf=%f sup=%f" angle_inf angle_sup); *)
   let arc =
@@ -203,9 +209,9 @@ let create_secteurs clock times =
   | t :: q ->
       let d = !diametre in
       let angle_base = 360.0 in
-      let inf = if !reverse then !total_time -. acc else acc in
+      let inf = if !reverse then -. !total_time +. acc else -. acc in
       let angle_inf = (inf /. !base_major) *. angle_base +. 90.0 in
-      let new_acc = acc -. t in
+      let new_acc = acc +. t in
       if !total_time < (-. new_acc) then 
         (prerr_endline
            "The sum of the given times is greater than the total time.";
