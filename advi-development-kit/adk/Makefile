@@ -1,5 +1,5 @@
-CAMLIMAGES=camlimages-2.11
-ADVI=advi-1.4.0
+CAMLIMAGES=camlimages-2.2
+ADVI=advi-1.6.0
 
 install:
 	(cd $(CAMLIMAGES); \

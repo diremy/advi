@@ -1,6 +1,6 @@
 # make a big tar ball
-ADKVERSION=1.4.0
-CAMLIMAGESVERSION=2.11
+ADKVERSION=1.6.0
+CAMLIMAGESVERSION=2.2
 
 FTPSITEDIR=/net/pauillac/infosystems/ftp/cristal
 
