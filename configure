@@ -1788,6 +1788,8 @@ ADVI_LOC=`pwd`
 
 
 
+
+
 myprefix=$prefix
 myexec_prefix=$exec_prefix
 mylibdir=$libdir
@@ -1964,6 +1966,8 @@ s%@HAVE_CAMLIMAGES@%$HAVE_CAMLIMAGES%g
 s%@CAMLIMAGESLIBS@%$CAMLIMAGESLIBS%g
 s%@HAVE_GS@%$HAVE_GS%g
 s%@TEXMFMAIN@%$TEXMFMAIN%g
+s%@HAVE_CAMLTK@%$HAVE_CAMLTK%g
+s%@CAMLTKDIR@%$CAMLTKDIR%g
 s%@ADVI_LOC@%$ADVI_LOC%g
 s%@WITH_X@%$WITH_X%g
 
