@@ -104,7 +104,7 @@ let advi_options = get_advi_options ();;
 
 let init_arguments () =
  Userfile.load_init_files advi_options Userfile.set_dvi_filename usage_msg;
- Arg.parse advi_options Userfile.set_dvi_filename usage_msg;
+ Arg.parse advi_options Userfile.set_dvi_filename usage_msg
 ;;
 
 let set_dvi_geometry () =
@@ -116,37 +116,40 @@ let set_dvi_geometry () =
 let treat_file filename =
   Rc.init ();
   set_dvi_geometry ();
-  try Dviview.main_loop filename
-  with Dviview.Error s | Failure s | Graphics.Graphic_failure s ->
-      eprintf "Fatal error: %s@." s
+  try Dviview.main_loop filename with
+  | Dviview.Error s | Failure s | Graphics.Graphic_failure s ->
+      eprintf "Fatal error when running: %s@." s;
 ;;
 
 let standalone_main () =
   init_arguments ();
-  let filename = Userfile.get_dvi_filename () in
+  let filename =
+    try Userfile.get_dvi_filename () with
+    | Not_found -> Config.splash_screen in
   (* Test if file can be found, otherwise print console stuff. *)
-  begin try let channel = open_in filename in close_in channel
-  with Sys_error s ->
-    eprintf "%s@.Try %s -help for more information@." usage_msg Sys.argv.(0);
-    Launch.exit 1
+  begin try let channel = open_in filename in close_in channel with
+  | Sys_error s ->
+      eprintf "%s@.Try %s -help for more information@." usage_msg Sys.argv.(0);
+      Launch.exit 1
   end;
   treat_file filename
 ;;
 
 let interactive_main () =
   (* Load the .advirc file ... *)
-  Userfile.load_init_files advi_options Userfile.set_dvi_filename usage_msg; 
+  Userfile.load_init_files advi_options Userfile.set_dvi_filename usage_msg;
   let filename =
-    try Userfile.get_dvi_filename ()
-    with Not_found ->
-      let name = 
-        Format.printf "Dvi file name: @?";
-        input_line stdin in
-      try let channel = open_in name in close_in channel; name
-      with Sys_error s ->
-        eprintf "%s@.Try %s -help for more information@."
-          usage_msg Sys.argv.(0);
-        Config.splash_screen in
+    try Userfile.get_dvi_filename () with
+    | Not_found ->
+       let name =
+         Format.printf "Dvi file name: @?";
+         input_line stdin in
+       try let channel = open_in name in close_in channel; name
+       with
+       | Sys_error s ->
+           eprintf "%s@.Try %s -help for more information@."
+           usage_msg Sys.argv.(0);
+           Config.splash_screen in
   Userfile.set_dvi_filename filename;
   treat_file filename
 ;;
