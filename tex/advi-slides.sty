@@ -87,6 +87,7 @@
 \usepackage{graphicx}
 \usepackage{advi}
 \usepackage{alltt}
+\usepackage{xcolor}
 
 % The simple pause command
 \def\pause{\adviwait}
@@ -118,7 +119,7 @@
 \vss}}}
 
 % Headers of the slides
-\def\adviheader#1{\vbox to 0em{\vbox to \vsize {\noindent
+\def\adviheader{\vbox to 0em{\vbox to \vsize {\noindent
 ~\hfill\includegraphics[width=\textwidth,height=2em]{bar.eps}\hfill~%
 \vfill
 }
@@ -126,9 +127,18 @@
 }}
 
 % To preserve the original \newpage macro
-\let \Newpage \newpage
+\let\Newpage \newpage
+
+% The explicit new page to change slide
+\def\defnewpage{\def \newpage {\vfill\Newpage \advifooter{\footer}\adviheader}}
+
+% The newslide macro that also add the title
+\def\newslide#1{\defnewpage\newpage\stitle{#1}}
 
 \def\emptyfooter{\vbox to 0em{\vbox to \vsize {\vfill~~\vss}}}
 
+\def\firstslide#1{\vfill\emptyfooter\adviheader\stitle{#1}}
+
 % The last page of the presentation: no footer.
-\def\lastpage{\Newpage\emptyfooter\header}
+\def\lastslide{\Newpage\emptyfooter}
+
