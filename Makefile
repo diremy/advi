@@ -22,7 +22,7 @@ include Makefile.config
 VERSION=1.5
 OLDVERSION=1.5
 PACKAGEVERSIONFILE=config.ml
-DOCVERSIONFILE=tex/advi.sty doc/index-en.html doc/index-fr.html doc/advi.1
+DOCVERSIONFILES=tex/advi.sty doc_src/Includes/advi-version.html doc/advi.1
 
 COPTIONS = -warn-error A -g
 COPTOPTIONS = -warn-error A -unsafe -inline 9
@@ -230,7 +230,7 @@ web: tex/splash.dvi
 	find . -name 'CVS' -print | xargs rm -rf; \
 	find . -name 'advi-development-kit' -print | xargs rm -rf; \
 	(cd bazar-ocaml/advi/doc/; \
-	ln -s index.html index-en.html; cd ../../..); \
+	ln -sf eng.html index.html; cd ../../..); \
 	cp -pr bazar-ocaml/advi/doc/* $(WEBSITEDIR)
 	- chgrp -R caml $(WEBSITEDIR)
 	- chmod -R g+w $(WEBSITEDIR)
