@@ -61,7 +61,7 @@ module M = struct
   ;;
 
   let cache_load file =
-  prerr_endline ("cache_load " ^ file);
+(*  prerr_endline ("cache_load " ^ file); *)
     let load ic =
       let s = String.create (String.length cache_key) in
       ignore (input ic s 0 (String.length cache_key));
@@ -82,7 +82,7 @@ module M = struct
   ;;
 
   let cache_save file img = 
-  prerr_endline ("cache_save " ^ file);
+(*  prerr_endline ("cache_save " ^ file); *)
     let save oc =
       output oc cache_key 0 (String.length cache_key);
       match img with
@@ -90,9 +90,9 @@ module M = struct
   	  output_value oc true;
   	  output_value oc image.Rgba32.width;
   	  output_value oc image.Rgba32.height;
-prerr_endline (Printf.sprintf "(%dx%d) %d bytes written" 
+(* prerr_endline (Printf.sprintf "(%dx%d) %d bytes written"
 		 image.Rgba32.width image.Rgba32.height
-		 (String.length (Bitmap.dump image.Rgba32.data)));
+		 (String.length (Bitmap.dump image.Rgba32.data))); *)
   	  output_value oc (Bitmap.dump image.Rgba32.data);
       | Rgb24 image ->
   	  output_value oc false;
