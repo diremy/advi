@@ -5,6 +5,7 @@ LATEX=latex
 .SUFFIXES: .tex
 
 all: talk
+	advi talk.dvi
 
 clean:
 	/bin/rm -f *.z[io] *.aux *.log *~ *.txt spelling #*#
