@@ -16,14 +16,15 @@ type set
 (* Empty set. *)
 val empty_set : pagewidth:int -> pageheight:int -> set
 
-
 (* Add an element. *)
 val add : symbol -> set -> unit
 
-(* to_ascii returns a string representing the symbols that are in zone 'zone'. *)
-(* Elements are filtered according to the first argument. *)
-val to_ascii   : (int*int*int*int) -> set -> string
-val to_escaped : (int*int*int*int) -> set -> string
+(* to_ascii returns a string representing the symbols that are in the set. *)
+val to_ascii   : set -> string
+val to_escaped : set -> string
 
-(* Says if the symbol is in zone x1,y1 -> x2,y2. *)
-val inzone : int -> int -> int -> int -> symbol -> bool
+(* Gives a copy of set where only symbol in zone x1 y1 x2 y2 are kept. *)
+val inzone : int -> int -> int -> int -> set -> set
+
+(* Idem where but the resulting set is time-convex . *)
+val intime : int -> int -> int -> int -> set -> set

@@ -22,34 +22,18 @@ let dummy_symbol =
     fontname = "" ;
     fontratio = 1.0 }
 
-type set = {
-    sym_width  : int ;
-    sym_height : int ;
-    matrix : (symbol list) array array
-  } 
+type set = (symbol list) ref
 
 let draw_symbol s c =
   Graphics.set_color c;
   Graphics.draw_rect (s.locx-s.hoffset) (s.locy-s.voffset) s.width s.height;
   Graphics.synchronize()
 
-(* Page is cut into small cells : *)
-let dimx = 100
-and dimy = 100
-
-(* Empty set *)
-let empty_set ~pagewidth:p_width ~pageheight:p_height =
-  let matrix = Array.create_matrix dimx dimy [] in
-  { sym_width = 1 + p_width / dimx ;
-    sym_height = 1 + p_height / dimy ;
-    matrix = matrix }
+(* Empty set, we probably do not need to optimize according to page dimensions. *)
+let empty_set ~pagewidth:p_width ~pageheight:p_height = ref []
   
 (* Add an element. *)
-let add el set =
-  let posx = el.locx / set.sym_width
-  and posy = el.locy / set.sym_height in
-  if (posx < dimx) && (posy < dimy) && (posx >= 0) && (posy >= 0) then
-    set.matrix.(posx).(posy) <- el :: set.matrix.(posx).(posy)
+let add el set = set := el :: !set
 
 (* Says if the character code is probably the ascii code. *)
 let is_pure code =
@@ -73,10 +57,25 @@ let name_to_ascii n = n
 
 (* Says if the symbol is in zone x1-x2 y1-y2. *)
 (* Size of the symbol should be used...we'll see later. *)
-let inzone x1 y1 x2 y2 s =
-  (s.locx - s.hoffset <= x2) && (s.locx - s.hoffset + s.width >= x1) &&
-  (s.locy - s.voffset <= y2) && (s.locy - s.voffset + s.height >= y1)
+let symbol_inzone x1 y1 x2 y2 =
+  let (x1,x2) = if x1 <= x2 then x1,x2 else x2,x1
+  and (y1,y2) = if y1 <= y2 then y1,y2 else y2,y1 in
+  function s -> 
+    (s.locx - s.hoffset <= x2) && (s.locx - s.hoffset + s.width >= x1) &&
+    (s.locy - s.voffset <= y2) && (s.locy - s.voffset + s.height >= y1)
 
+let inzone x1 y1 x2 y2 set =
+   ref (Misc.reverse_filter (symbol_inzone x1 y1 x2 y2) !set)
+      
+let intime x1 y1 x2 y2 set =
+  let inz = symbol_inzone x1 y1 x2 y2 in
+  let rec discard sl =
+    match sl with
+    | [] -> []
+    | s :: l -> if inz s then sl else discard l
+  in
+  ref (discard (List.rev (discard !set)))
+    
 
 (** FORMATING **)
 
@@ -97,7 +96,7 @@ let at_right s1 s2 =
 
 (* Thresholds to detect a blank, see below. *)
 let threshold1 = 25 (* For normal symbols. *)
-let threshold2 = 60 (* For certain punctuation signs. *)
+let threshold2 = 60 (* For some punctuation signs. *)
 
 (* Says if there is a blank between s1 and s2. Here hoffset must be taken into account. *)
 let blank () =
@@ -113,8 +112,7 @@ let blank () =
   fun s1 s2 ->
   if (s1 == dummy_symbol) || (s2 == dummy_symbol) then false
   else
-    begin
-      
+    begin      
       (* Stats. *)
       let tot = !total_width in
       let tot = if !stat_nb = nb then tot - stat_syms.(!stat_index).width else (incr stat_nb; tot) in
@@ -193,30 +191,12 @@ let glue lines =
     )
     [] lines 
 
-(* to_ascii returns a string representing the symbols that are in zone 'zone'. *)
+(* to_ascii returns a string representing the symbols in set. *)
 (* Elements are filtered according to the first argument. *)
-let to_ascii (x1,y1,x2,y2) set =
-
-  let (x1,x2) = if x1 <= x2 then x1,x2 else x2,x1
-  and (y1,y2) = if y1 <= y2 then y1,y2 else y2,y1 in
-
-  let cx1 = x1/set.sym_width
-  and cx2 = 1 + x2/set.sym_width
-  and cy1 = y1/set.sym_height
-  and cy2 = 1 + y2/set.sym_height in
-
-  let result = ref [] in
-
-  for j = cy1 to cy2 do
-    for i = cx1 to cx2 do
-      let l1 = set.matrix.(i).(j) in
-      let l2 = Misc.reverse_filter (inzone x1 y1 x2 y2) l1 in
-      result := Misc.reverse_concat l2 !result
-    done;
-  done;
+let to_ascii set =
 
   (* Split lines. *)
-  let sorted = List.sort above !result in
+  let sorted = List.sort above !set in
   let rec split res l =
     match l,res with
     | _, ([] | []::_) -> failwith "Symbol.to_ascii(split) impossible error."
@@ -233,5 +213,5 @@ let to_ascii (x1,y1,x2,y2) set =
   String.concat "\n" ascii
   
 (* to_escaped does the same, but the final string is 'escaped'. *)
-let to_escaped zone set = String.escaped (to_ascii zone set)
+let to_escaped set = String.escaped (to_ascii set)
 

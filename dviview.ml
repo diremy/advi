@@ -15,6 +15,7 @@
  * details (enclosed in the file LGPL).
  *)
 
+type select_mode = Interval | Rectangle
 
 let pauses = Misc.option_flag true "-nopauses" "Switch pauses off";;
 let fullwidth = Misc.option_flag false "-fullwidth" "Adjust size to width";;
@@ -495,13 +496,17 @@ module Make(Dev : DEVICE) = struct
     in docx, docy
       
   (* User has selected a region with the mouse. We dump characters. *)
-  let selection st x y dx dy =
+  let selection mode st x y dx dy =
     let docx , docy  = document_xy st x y
     and docx2, docy2 = document_xy st (x+dx) (y+dy) in
     (* Printf.printf "Zone de %d, %d à %d, %d" docx docy docx2 docy2 ; *)
     let symbols = Drv.give_symbols() in
-    let zone = (docx, docy, docx2, docy2) in
-    let output = Symbol.to_ascii zone symbols in
+    let input = 
+      match mode with
+      |	Interval -> Symbol.intime docx docy docx2 docy2 symbols
+      |	Rectangle -> Symbol.inzone docx docy docx2 docy2 symbols
+    in
+    let output = Symbol.to_ascii input in
     print_string output;
     print_newline ();
     flush stdout;
@@ -1033,7 +1038,7 @@ module Make(Dev : DEVICE) = struct
           set_bbox st;
           redraw st
       | Dev.Region (x, y, w, h) ->
-          selection st x y w (-h)
+          selection Interval st x y w (-h)
             
       | Dev.Click (Dev.Top_left, _) -> B.pop_page st
       | Dev.Click (_, Dev.Button1) -> B.pop_previous_page st
