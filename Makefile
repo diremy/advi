@@ -161,7 +161,7 @@ tar_and_web: tex/splash.dvi
 	mkdir release
 	cd release; cvs co bazar-ocaml/advi; \
 	cp -p ../test/*.dvi bazar-ocaml/advi/test/; \
-	cp -p ../tex/splash.dvi bazar-ocaml/advi/tex/; \
+	cp -p ../doc/splash.dvi bazar-ocaml/advi/doc/; \
 	cp -p ../tex/advi.pro bazar-ocaml/advi/test/; \
 	find . -name '.cvsignore' -print | xargs rm; \
 	find . -name 'CVS' -print | xargs rm -rf; \
