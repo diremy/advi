@@ -895,7 +895,7 @@ module H =
 module Symbol = Symbol.Make (Glyph);;
 
 let cut s =
-  print_string s; print_newline ();
+  (*  print_string s; print_newline (); *)
   (* cut does not work yet *)
   GraphicsY11.cut s;;
 

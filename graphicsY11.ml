@@ -297,4 +297,4 @@ let mod4 = 0x2000
 let mod5 = 0x4000
 
 external cut : string -> unit = "gr_cut"
-        (* paste string to the cut and paste buffer *)
+        (* store string in the cut buffer *)

@@ -116,21 +116,44 @@ value gr_sync(void)
   return Val_unit ;
 }
 
+/* The following is not the best, since it unsets the selection 
+   It would be better to own the selection. However, the event loop should
+   then be changed */
+ 
 value gr_cut (value string) {
   /* clearly, does not work */
+  Window w;
+  /* The following, suggested by Fabrice does not work */
+  /* 
+  Atom cut_buffers[] = 
+     { XA_CUT_BUFFER0,
+       XA_CUT_BUFFER1, 
+       XA_CUT_BUFFER2, 
+       XA_CUT_BUFFER3, 
+       XA_CUT_BUFFER4, 
+       XA_CUT_BUFFER5, 
+       XA_CUT_BUFFER6, 
+       XA_CUT_BUFFER7
+     };
+  XRotateWindowProperties (grdisplay, grwindow.win,
+                           cut_buffers, 8, 1);
+  */
+  XRotateBuffers(grdisplay, 1);
+  /*
   XChangeProperty (grdisplay, grwindow.win, 
-                   XA_PRIMARY,			/* property */ 
-                   XA_STRING,                   /* xa_string */ 
-                   8,       			/* format */
-                   PropModeReplace, 		/* mode */
-                   String_val(string), 		/* data */
-                   string_length (string) 	/* nelements */
+                   XA_CUT_BUFFER0,	      
+                   XA_STRING,                  
+                   8,       			
+                   PropModeReplace, 		
+                   String_val (string),
+                   String_length (string)
                    );
-  XStoreBuffer (grdisplay,
-                String_val (string),
-                string_length (string),
-                XA_CUT_BUFFER0
-               );
+  */
+  XStoreBytes (grdisplay, String_val (string), string_length (string)); 
+  XSetSelectionOwner (grdisplay,
+                      XA_PRIMARY,
+                      None,
+                      CurrentTime);
   XSync (grdisplay, 0);
   return Val_unit; 
 }
@@ -310,3 +333,4 @@ value gr_resize_window (value wid, value w, value h)
   XFlush(grdisplay);
   return Val_unit;
 }
+
