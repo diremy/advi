@@ -40,3 +40,8 @@ WISH LIST:
 
   
 
+
+- images (background): il faut decider si on fixe a priori la couleur
+  de la partie d'ecran non recouverte par l'image ou sin on laisse a
+  LaTeX passer cela en parametre.
+
