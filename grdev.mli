@@ -275,6 +275,7 @@ module H :
           draw : (int * int * glyph) list
         }
 
+      val string_of_tag : tag -> string
       val add : anchor -> unit
       val area : tag -> int -> int -> int -> int -> unit
       val flashlight : tag -> unit

@@ -396,8 +396,7 @@ let draw_img file whitetransp alpha blend
       psbbox ratiopt antialias (w, h) x0 y0 =
   if not !opened then failwith "Grdev.draw_img: no window";
   Drawimage.f file whitetransp alpha blend
-    psbbox ratiopt antialias (w, h) (x0, !size_y - y0)
-;;
+    psbbox ratiopt antialias (w, h) (x0, !size_y - y0);;
 
 let round_dim r t = Misc.round (r *. float t);;
 let round_dim_x r = round_dim r !size_x;;
@@ -423,8 +422,7 @@ let make_funviewport bkgd_data viewport =
   Misc.debug_endline (Printf.sprintf
     "The function viewport is {vx = %d; vy = %d; vw = %d; vh = %d}."
     fx fy fw fh);
-  {vx = fx; vy = fy; vw = fw; vh = fh}
-;;
+  {vx = fx; vy = fy; vw = fw; vh = fh};;
 
 (* Try to figure out what can be used as a center:
    if the specified center in the funviewport is
@@ -482,8 +480,7 @@ let draw_bkgd () =
   (* Background: solid color.
      Fix me: why this test ? could have a white bg, no ?
      -> Yes, but then it is useless to draw the rectangle.
-     -> Mmm is it worth the burden to test ?
-   *)
+     -> Mmm is it worth the burden to test ? *)
   if !bg_color <> Graphics.white then Graphics.fill_rect x y w h;
 
   (* Background: apply the gradient function if any. *)
@@ -624,8 +621,7 @@ let get_glyph_image g col =
           for i = 0 to h - 1 do
             for j = 0 to w - 1 do
               let gamma_fix c =
-                Misc.round (((float c /. 255.0) ** !glyph_gamma) *. 255.0)
-              in
+                Misc.round (((float c /. 255.0) ** !glyph_gamma) *. 255.0) in
               dst.(i).(j) <- table.(gamma_fix (Char.code gmap.[!p]));
               incr p
             done
@@ -759,8 +755,7 @@ let draw_ps file bbox (w, h) x0 y0 =
   | exn ->
       Misc.warning
         (Printf.sprintf "error happened while drawing ps file %S: %s"
-           file (Printexc.to_string exn))
-;;
+           file (Printexc.to_string exn));;
 
 let clean_ps_cache () = Drawimage.clean_cache ();;
 
@@ -774,7 +769,7 @@ type rectangle_frame_image = {
   };;
 
 (* To save a rectangular frame (4 images of 1 pixel width, each one
-for one side of the rectangle). *)
+   for one side of the rectangle). *)
 let save_rectangle x y dx dy =
   let x = min x (x + dx) in
   let y = min y (y + dy) in
@@ -810,7 +805,7 @@ let draw_line x y dx dy =
 let draw_point x y =
   Graphics.draw_circle x y 3;;
 
-(* Should be improve later using quad-tree or similar 2d structure *)
+(* Could be improved later on, using quad-tree or similar 2d structure. *)
 module type ACTIVE =
   sig
     type 'a active =
@@ -888,6 +883,13 @@ module H =
 
     let anchors = ref A.empty
     let clear () = anchors := A.empty
+
+    let string_of_link {link = s} = s
+
+    let string_of_tag = function
+      | Name s -> Printf.sprintf "Name %s" s
+      | Href s -> Printf.sprintf "Href %s" s
+      | Advi l -> Printf.sprintf "Advi %s" (string_of_link l)
 
     (* Draws a rectangle with border width bw if possible. *)
     let frame_rect bw x y w h =
@@ -1272,7 +1274,7 @@ let rec pop_event () =
   | [] -> assert false
   | h :: t -> events := t; h;;
 
-let push_event ev = events := ev :: !events;;
+let push_event e = events := e :: !events;;
 let push_back_event = push_event;;
 
 let push_key_event c m =
@@ -1280,6 +1282,26 @@ let push_key_event c m =
     mouse_x = 0; mouse_y = 0;
     button = false;
     keypressed = true;
+    key = c;
+    modifiers = m;
+  } in
+  push_event status;;
+
+let push_mouse_event mx my b =
+  let status = {
+    mouse_x = mx; mouse_y = my;
+    button = b;
+    keypressed = false;
+    key = '\000';
+    modifiers = GraphicsY11.nomod;
+  } in
+  push_event status;;
+
+let push_full_event c m kp mx my b =
+  let status = {
+    mouse_x = mx; mouse_y = my;
+    button = b;
+    keypressed = kp;
     key = c;
     modifiers = m;
   } in
