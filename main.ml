@@ -52,33 +52,33 @@ let print_advi_full_version () =
 let version_spec = function
   | "-v" as opt ->
        opt, Arg.Unit print_advi_version,
-       ": print Active-DVI version."
+       "  print Active-DVI version."
   | opt ->
        opt, Arg.Unit print_advi_full_version,
-       ": print full Active-DVI (version, sub-version and release date)."
+       "  print the full Active-DVI version, sub-version and release date."
 ;;
 
 let spec_list = [
   ("-geometry", Arg.String set_geom,
    Printf.sprintf
-     "<geom>: set the (maximum) geometry to <geom>,\
+     "<geom>  set the (maximum) geometry to <geom>,\
      \n\t (the default geometry is %S." !geometry);
   ("-g", Arg.String set_geom,
-   "<geom>: same as -geometry <geom>.");
+   "<geom>  same as -geometry <geom>.");
   ("-crop", Arg.Set crop_flag,
-   ": crop the window to the best size,\
+   "  crop the window to the best size,\
    \n\t (this is the default).");
   ("-nocrop", Arg.Clear crop_flag,
-   ": disable the default cropping behaviour.");
+   "  disable the default cropping behaviour.");
   ("-nomargins", Arg.Unit
      (fun () -> set_dimen hmargin "0cm"; set_dimen vmargin "0cm"),
-   ": suppress the horizontal and vertical margins,\
+   "  suppress the horizontal and vertical margins,\
    \n\t (the default is respectively 1cm and 1cm).");
   ("-hmargin", Arg.String (set_dimen hmargin),
-   "<dimen>: set the horizontal margin\
+   "<dimen>  set the horizontal margin\
    \n\t (the default is 1cm).");
   ("-vmargin", Arg.String (set_dimen vmargin),
-   "<dimen>: set the vertical margin\
+   "<dimen>  set the vertical margin\
    \n\t (the default is 1cm).");
   version_spec "-v";
   version_spec "--version";
@@ -88,7 +88,7 @@ List.iter (fun (nm, act, man) -> Options.add nm act man) spec_list
 ;;
 
 let usage_msg =
-  Printf.sprintf "usage: %s [options] dvifile" Sys.argv.(0)
+  Printf.sprintf "usage:  %s [options] dvifile" Sys.argv.(0)
 ;;
 
 let sort_advi_options () =
@@ -106,8 +106,8 @@ let get_advi_options () =
       (fun fname ->
         Userfile.load_options_file
           !advi_options Userfile.set_dvi_filename usage_msg fname))
-     "<file>: load <file> when parsing this option to set up\
-     \n\t options to override the options set in the default ~/.advirc\
+     "<file>  load <file>, when parsing this option, to set up\
+     \n\t options and override the default ones set in ~/.advirc\
      \n\t or ~/.advi/advirc init files.";
  advi_options := sort_advi_options ();
  !advi_options
