@@ -90,7 +90,7 @@ OPT_OBJS  = $(COBJS) $(CMXA_OBJS) $(CMX_OBJS)
 INCLUDES  = $(addprefix -I , $(MLINCDIRS))
 LINK_OPTS = $(addprefix -ccopt -L, $(CLIBDIRS)) \
 	    $(addprefix -cclib -l, $(CLIBS)) \
-	    -cclib "$(WITH_X)"
+	    $(addprefix -cclib , $(WITH_X))
 
 X11_INCLUDES=-I/usr/X11R6/include
 BYTECCCOMPOPTS=-fno-defer-pop -Wall -Wno-unused
