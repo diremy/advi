@@ -19,7 +19,7 @@
 
 open Graphics;;
 
-type color = Graphics.color;;
+type color = GraphicsY11.color;;
 
 let cmyk c m y k = 
   (* found at http://community.borland.com/article/0,1410,17948,00.html *)

@@ -17,7 +17,8 @@
 
 (* $Id$ *)
 
-type color = Graphics.color;;
+type color = GraphicsY11.color;;
+
 val parse_color : string -> color;;
 (** Parses a string and return a color.
     A valid input string can be:
@@ -28,6 +29,7 @@ val parse_color : string -> color;;
       [int_of_string] primitive.
     Raises [Failure "int_of_string"] if the given string is not understood.
 *)
+
 val parse_color_args : string list -> color;;
 (** Parses a list of strings as a color.
     The list may be:
