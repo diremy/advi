@@ -1039,9 +1039,11 @@ let next_slice st =
 
 (* goto page of hyperref h *)
 let goto_href link st =
+  (*prerr_endline ("Goto reference " ^ link);*)
   let p =
     if Misc.has_prefix "#" link then
       let tag = Misc.get_suffix "#" link in
+      (*prerr_endline ("Find xref " ^ tag);*)
       find_xref tag st.page_number st
     else begin
       exec_xref link;
