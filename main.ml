@@ -47,6 +47,9 @@ let spec_list = [
    "DIMEN\tHorizontal margin  (default: 1cm)");
   ("-vmargin", Arg.String (set_dim vmargin),
    "DIMEN\tVertical margin    (default: 1cm)");
+  ("-rcfile", Arg.String RC.cautious_parse_file,
+   "STRING\tThe path of advi initialization file (default: ~/.advirc)");
+ 
 ];;
 
 let advi_options () =

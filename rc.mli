@@ -29,12 +29,9 @@ val parse_file : string ->
 
 val cautious_parse_file : string ->
   (string * spec * string) list -> (string -> unit) -> string -> unit
-(** [Rc.cautious_parse_file fname speclist anonfun usage_msg] parses the file
-  fname as if it were the command line.
-  Syntax is exactly similar to a shell call to the command, except
-  that the command call can spread on more than one line and comments
-  are allowed (a comment starts with a sharp sign and ends at the end
-  of the line). *)
+(** [Rc.cautious_parse_file] is equivalent to [parse_file], except
+ that it traps syntactic mistakes in the source file and emits a
+ warning instead of raising an exception. *)
 
 val parse_string : string ->
   (string * spec * string) list -> (string -> unit) -> string -> unit
