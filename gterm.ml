@@ -19,12 +19,12 @@
 
 (* A simple terminal to handle simple editions and user's interaction. *)
 
-type x = int
-and y = int
-and w = int
-and h = int;;
+type x = GraphicsY11.x
+and y = GraphicsY11.y
+and w = GraphicsY11.w
+and h = GraphicsY11.h;;
 
-type rectangle = {x : x; y : y; w : w; h : h};;
+type rectangle = GraphicsY11.rectangle = {x : x; y : y; w : w; h : h};;
 
 type term = {
   (* Character contents of the terminal. *)
@@ -57,7 +57,7 @@ type term = {
   mutable font_size_x : int;
   mutable font_size_y : int;
   (* Excursion *)
-  mutable excursion : rectangle;
+  mutable excursion : GraphicsY11.rectangle;
 };;
 
 let get_gx t x = t.font_size_x * x + t.gx;;

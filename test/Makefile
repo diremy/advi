@@ -68,7 +68,7 @@ else
 endif
 
 clean::
-	$(RM) a.out *.aux *.log *.dvi *~ 
+	$(RM) a.out *.toc *.aux *.log *.dvi *~ 
 	$(RM) $(MLPROG) *.cmi *.cmo
 	$(RM) .advi/*
 

@@ -19,11 +19,11 @@
 
 (* A simple terminal to handle simple editions and user's interaction. *)
 
-type x = int
-and y = int
-and w = int
-and h = int;;
- 
+type x = GraphicsY11.x
+and y = GraphicsY11.y
+and w = GraphicsY11.w
+and h = GraphicsY11.h;;
+
 type term;; (* = private {
  (* Character contents of the terminal. *)
  mutable lines : string array;

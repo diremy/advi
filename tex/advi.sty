@@ -181,7 +181,11 @@ Maybe you mean \@currenvir ing}}
 \newif \ifadvi@bgactive
 
 \def \advi@bg@do
- {\do \advi@bgcolor \do \advi@bgimage \do \advi@bgalpha \do \advi@bgblend \do \advi@bgfun \do \advi@bgcolorstart}
+ {\do \advi@bgcolor \do \advi@bgimage \do \advi@bgalpha
+  \do \advi@bgblend \do \advi@bgfun \do \advi@bgcolorstart
+  \do \advi@bgxstart \do \advi@bgystart
+  \do \advi@bgwidth \do \advi@bgheight
+}
 \def \advi@auto@ { fit=auto}
 \def \advi@bgreset
  {\def \do ##1{\expandafter \advi@global
@@ -230,6 +234,10 @@ Maybe you mean \@currenvir ing}}
 \define@key {advi@bg}{color}[]{\advi@setbgcolor{#1}}
 \define@key {advi@bg}{colorstart}[]%
             {\advi@setbg{\advi@bgcolorstart}{colorstart}{#1}}
+\define@key {advi@bg}{xstart}[]{\advi@setbg{\advi@bgxstart}{xstart}{#1}}
+\define@key {advi@bg}{ystart}[]{\advi@setbg{\advi@bgystart}{ystart}{#1}}
+\define@key {advi@bg}{width}[]{\advi@setbg{\advi@bgwidth}{width}{#1}}
+\define@key {advi@bg}{height}[]{\advi@setbg{\advi@bgheight}{height}{#1}}
 \define@key {advi@bg}{fun}[]{\advi@setbg{\advi@bgfun}{fun}{#1}}
 \define@key {advi@bg}{image}[]{\advi@setbg{\advi@bgimage}{image}{#1}}
 \define@key {advi@bg}{alpha}[]{\advi@setbg{\advi@bgalpha}{alpha}{#1}}
@@ -248,6 +256,7 @@ Maybe you mean \@currenvir ing}}
   {\advi@special
      {setbg \advi@bgcolor \advi@bgimage \advi@bgalpha \advi@bgblend
       \advi@bgfit \advi@bgfun \advi@bgcolorstart
+      \advi@bgxstart \advi@bgystart \advi@bgheight \advi@bgwidth
       }}
 \newif \ifadvi@bglocal
 

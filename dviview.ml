@@ -609,10 +609,10 @@ let make_thumbnails st =
                {s.Dvi.bkgd_prefs with
 	        Grdev.bgviewport =
                   Some {
-                   Grdev.v_size_x = dx;
-                   Grdev.v_size_y = dy;
-                   Grdev.v_off_x = 0;
-                   Grdev.v_off_y = size_y - dy;
+                   Grdev.vx = 0;
+                   Grdev.vy = size_y - dy;
+                   Grdev.vw = dx;
+                   Grdev.vh = dy;
                   }
                }
              } in

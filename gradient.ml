@@ -20,6 +20,8 @@ open Graphics;;
 
 type x = int
 and y = int;;
+type w = int
+and h = int;;
 
 type r = int
 and rx = int
@@ -30,9 +32,6 @@ and to_angle = int;;
 
 type from_color = Graphics.color
 and to_color = Graphics.color;;
-
-type w = int
-and h = int;;
 
 type arc_gradient_mode =
    | Arc_Horizontal of from_color * to_color

@@ -137,31 +137,38 @@ val draw_img :
 
 (* Background information *)
 
-type viewport = {
-  v_size_x : int;
-  v_size_y : int;
-  v_off_x : int;
-  v_off_y : int
-};;
-(** Viewports: size_x, size_y, off_x, off_y in advi coordinates. *)
+type x = GraphicsY11.x
+and y = GraphicsY11.y
+and w = GraphicsY11.w
+and h = GraphicsY11.h;;
 
+type viewport = {vx : x; vy : y; vw : w; vh : h};;
+
+(* The Background preferences *)
 type bkgd_prefs = {
   mutable bgcolor : color;
   mutable bgcolorstart : color;
-  mutable bgimg : Misc.file_name option;
+  mutable bgimg : string option;
   mutable bgratiopt : Drawimage.ratiopt;
-  mutable bgwhitetransp : Drawimage.white_is_transparent;
+  mutable bgwhitetransp : bool;
   mutable bgalpha : Drawimage.alpha;
   mutable bgblend : Drawimage.blend;
-  mutable bgviewport : viewport option;
-  mutable bgfunction : (color -> color -> viewport -> unit) option;
-};;
+  mutable bgxstart : int;
+  mutable bgystart : int;
+  mutable bgwidth : int;
+  mutable bgheight : int;
+  mutable bgviewport: viewport option;
+  (* hook for sophisticated programmed graphics backgrounds *)
+  mutable bgfunction: (bgfunarg -> unit) option;
+}
 
-val blit_bkgd_data : bkgd_prefs -> bkgd_prefs -> unit;;
-val copy_of_bkgd_data : unit -> bkgd_prefs;;
-val default_bkgd_data : unit -> bkgd_prefs;;
-val bkgd_data : bkgd_prefs;;
-val get_playing : (unit -> int) ref;;
+(* The type of argument of a background gradient function. *)
+and bgfunarg = {
+ argcolor : color;
+ argcolorstart : color;
+ argfunviewport : viewport;
+ argviewport : viewport;
+};;
 
 type bgoption =
    | BgColor of color
@@ -171,8 +178,17 @@ type bgoption =
    | BgBlend of Drawimage.blend
    | BgRatio of Drawimage.ratiopt
    | BgViewport of viewport option
-   | BgFun of (color -> color -> viewport -> unit) option
-;;
+   | BgXStart of float
+   | BgYStart of float
+   | BgHeight of float
+   | BgWidth of float
+   | BgFun of (bgfunarg -> unit) option;;
+
+val blit_bkgd_data : bkgd_prefs -> bkgd_prefs -> unit;;
+val copy_of_bkgd_data : unit -> bkgd_prefs;;
+val default_bkgd_data : unit -> bkgd_prefs;;
+val bkgd_data : bkgd_prefs;;
+val get_playing : (unit -> int) ref;;
 
 val set_bg_options : bgoption list -> unit;;
 

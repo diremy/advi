@@ -217,19 +217,14 @@ let set_epswithantialiasing a = epswithantialiasing := a;;
 (* Background implementation *)
 
 (* Viewport type definition *)
-type viewport = {
-  v_size_x : int;
-  v_size_y : int;
-  v_off_x : int;
-  v_off_y : int
-};;
-(** Viewports: size_x, size_y, off_x, off_y in advi coordinates. *)
 
-let full_screen_view () =
-  {v_size_x = !size_x;
-   v_size_y = !size_y;
-   v_off_x = !xmin;
-   v_off_y = !ymin};;
+type x = GraphicsY11.x
+and y = GraphicsY11.y
+and w = GraphicsY11.w
+and h = GraphicsY11.h;;
+
+type viewport = {vx : x; vy : y; vw : w; vh : h};;
+(** Viewports: off_x, off_y, size_x, size_y, in advi coordinates. *)
 
 (* The Background preferences                    *)
 type bkgd_prefs = {
@@ -240,11 +235,23 @@ type bkgd_prefs = {
   mutable bgwhitetransp : bool;
   mutable bgalpha : Drawimage.alpha;
   mutable bgblend : Drawimage.blend;
+  mutable bgxstart : int;
+  mutable bgystart : int;
+  mutable bgwidth : int;
+  mutable bgheight : int;
   mutable bgviewport: viewport option;
   (* hook for sophisticated programmed graphics backgrounds *)
-  mutable bgfunction:
-   (Graphics.color -> Graphics.color -> viewport -> unit) option;
+  mutable bgfunction: (bgfunarg -> unit) option;
+}
+
+and bgfunarg = {
+ argcolor : color;
+ argcolorstart : color;
+ argfunviewport : viewport;
+ argviewport : viewport;
 };;
+
+let full_screen_view () = {vx = !xmin; vy = !ymin; vw = !size_x; vh = !size_y};;
 
 let default_bkgd_prefs c = {
     bgcolor = c;
@@ -255,7 +262,11 @@ let default_bkgd_prefs c = {
     bgalpha = 1.0;
     bgblend = Drawimage.Normal;
     bgviewport = None;
-    bgfunction = None
+    bgxstart = 0;
+    bgystart = 0;
+    bgwidth = max_int;
+    bgheight = max_int;
+    bgfunction = None;
 };;
 
 let bkgd_data = default_bkgd_prefs Graphics.white;;
@@ -313,6 +324,10 @@ let blit_bkgd_data s d =
   d.bgalpha <- s.bgalpha;
   d.bgblend <- s.bgblend;
   d.bgviewport <- s.bgviewport;
+  d.bgxstart <- s.bgxstart;
+  d.bgystart <- s.bgystart;
+  d.bgwidth <- s.bgwidth;
+  d.bgheight <- s.bgheight;
   d.bgfunction <- s.bgfunction;;
 
 let copy_of_bkgd_data () =
@@ -330,26 +345,57 @@ let draw_img file whitetransp alpha blend
     psbbox ratiopt antialias (w, h) (x0, !size_y - y0)
 ;;
 
+let make_funviewport bkgd_data viewport =
+  let fx = bkgd_data.bgxstart
+  and fy = bkgd_data.bgystart
+  and fw = bkgd_data.bgwidth
+  and fh = bkgd_data.bgheight in
+  Misc.debug_endline (Printf.sprintf
+    "The parsed function viewport is {vx = %d; vy = %d; vw = %d; vh = %d}."
+    fx fy fw fh);
+  let {vx = vx; vy = vy; vw = vw; vh = vh} = viewport in
+  (* Clipping of the function view to the current viewport *)
+  let fx = max fx vx
+  and fy = max fy vy
+  and fw = min fw vw
+  and fh = min fh vh in
+  Misc.debug_endline (Printf.sprintf
+    "The viewport is {vx = %d; vy = %d; vw = %d; vh = %d}."
+    vx vy vw vh);
+  Misc.debug_endline (Printf.sprintf
+    "The function viewport is {vx = %d; vy = %d; vw = %d; vh = %d}."
+    fx fy fw fh);
+  {vx = fx; vy = fy; vw = fw; vh = fh}
+;;
+
 let draw_bkgd () =
-  (* find the viewport *)
+  (* Find the viewport *)
   let viewport =
     match bkgd_data.bgviewport with
     | None -> full_screen_view ()
     | Some v -> v in
-  let {v_size_x = w; v_size_y = h; v_off_x = x; v_off_y = y} = viewport in
   (* Background: color. *)
   bg_color := bkgd_data.bgcolor;
   Graphics.set_color !bg_color;
-  (* Fix me: why this test ? could have a white bg, no ?
-     Yes but then useless to draw the rectangle.
-     Mmm is it worth the burden to test ?
+  let {vx = x; vy = y; vw = w; vh = h} = viewport in
+  (* Background: solid color.
+     Fix me: why this test ? could have a white bg, no ?
+     -> Yes, but then it is useless to draw the rectangle.
+     -> Mmm is it worth the burden to test ?
    *)
-  if !bg_color <> Graphics.white then
-  Graphics.fill_rect x y w h;
-  (* Background: function. *)
-  lift (fun bgfunction ->
-          bgfunction bkgd_data.bgcolorstart bkgd_data.bgcolor viewport)
-       bkgd_data.bgfunction;
+  if !bg_color <> Graphics.white then Graphics.fill_rect x y w h;
+  (* Background: apply the gradient function if any. *)
+  begin match bkgd_data.bgfunction with
+  | None -> ()
+  | Some bgfunction ->
+      let funviewport = make_funviewport bkgd_data viewport in
+      let bgfunarg = {
+        argcolor = bkgd_data.bgcolor;
+        argcolorstart = bkgd_data.bgcolorstart;
+        argfunviewport = funviewport;
+        argviewport = viewport;
+       } in
+      bgfunction bgfunarg end;
   (* Background: image. *)
   let draw_bg file =
     Drawimage.f file bkgd_data.bgwhitetransp bkgd_data.bgalpha
@@ -367,7 +413,14 @@ type bgoption =
    | BgBlend of Drawimage.blend
    | BgRatio of Drawimage.ratiopt
    | BgViewport of viewport option
-   | BgFun of (Graphics.color -> Graphics.color -> viewport -> unit) option;;
+   | BgXStart of float
+   | BgYStart of float
+   | BgHeight of float
+   | BgWidth of float
+   | BgFun of (bgfunarg -> unit) option;;
+
+let round_dim_x r = int_of_float (0.5 +. r *. float !size_x);;
+let round_dim_y r = int_of_float (0.5 +. r *. float !size_y);;
 
 let set_bg_option = function
   | BgColor c -> bkgd_data.bgcolor <- c
@@ -377,6 +430,10 @@ let set_bg_option = function
   | BgBlend b -> bkgd_data.bgblend <- b
   | BgRatio f -> bkgd_data.bgratiopt <- f
   | BgViewport v -> bkgd_data.bgviewport <- v
+  | BgXStart x -> bkgd_data.bgxstart <- round_dim_x x
+  | BgYStart y -> bkgd_data.bgystart <- round_dim_y y
+  | BgWidth w -> bkgd_data.bgwidth <- round_dim_x w
+  | BgHeight h -> bkgd_data.bgheight <- round_dim_y h
   | BgFun f -> bkgd_data.bgfunction <- f;;
 
 let set_bg_options l = List.iter set_bg_option l;;

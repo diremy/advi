@@ -16,10 +16,10 @@
 
 (* $Id$ *)
 
-val hgradient : Graphics.color -> Graphics.color -> Grdev.viewport -> unit;;
-val vgradient : Graphics.color -> Graphics.color -> Grdev.viewport -> unit;;
-val dgradient : Graphics.color -> Graphics.color -> Grdev.viewport -> unit;;
-val d1gradient : Graphics.color -> Graphics.color -> Grdev.viewport -> unit;;
-val d2gradient : Graphics.color -> Graphics.color -> Grdev.viewport -> unit;;
-val cgradient : Graphics.color -> Graphics.color -> Grdev.viewport -> unit;;
-val circgradient : Graphics.color -> Graphics.color -> Grdev.viewport -> unit;;
+val hgradient : Grdev.bgfunarg -> unit;;
+val vgradient : Grdev.bgfunarg -> unit;;
+val dgradient : Grdev.bgfunarg -> unit;;
+val d1gradient : Grdev.bgfunarg -> unit;;
+val d2gradient : Grdev.bgfunarg -> unit;;
+val cgradient : Grdev.bgfunarg -> unit;;
+val circgradient : Grdev.bgfunarg -> unit;;

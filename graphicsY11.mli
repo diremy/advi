@@ -16,6 +16,13 @@
 
 type color = Graphics.color;;
 
+type x = int
+and y = int
+and w = int
+and h = int;;
+
+type rectangle = {x : x; y : y; w : w; h : h};;
+
 val set_font : string -> unit;;
 val get_font : unit -> string;;
 

@@ -15,7 +15,7 @@
 \usepackage{advi}
 \usepackage{advi-annot}
 
-\usepackage{hyperref}
+%\usepackage{hyperref}
 
 
 \def\mathsym#1{\ifmmode{#1}\else$#1$\fi}
@@ -40,12 +40,12 @@
 \def\advifooter{\vbox to 0em{\vbox to \vsize {\vfill
 Press: \keymenu{n}ext page \keymenu{p}revious page
 \keymenu{\textvisiblespace} next pause%
-\hfill{\adviembed[sticky=advianim,width=1.56cm,height=1.824cm]{animate -geometry !g! -window !p advilogo.anim.gif}}
+\hfill{\adviembed[sticky = advianim, width = 1.56cm, height = 1.824cm]{animate -geometry !g! -window !p advilogo.anim.gif}}
 } \vss}}
 
 \def\adviheader{\noindent
 {\bf\Large \ActiveDVI}\\
-\includegraphics[width=\textwidth]{../tex/bar.jpg.eps}}
+\includegraphics[width = \textwidth]{../tex/bar.jpg.eps}}
 
 \let \Newpage \newpage
 \def \newpage {\Newpage \advifooter\adviheader}
@@ -92,10 +92,10 @@ in the LaTeX source of the page the following command:
 
 \begin{quote}
   \begin{verbatim}
-      \advibg{color=yellow} 
+      \advibg{color = yellow} 
    \end{verbatim}
 \end{quote}
-\advibg{color=yellow} 
+\advibg{color = yellow} 
 
 \newpage
 
@@ -110,10 +110,10 @@ source of the page the following command:
 
 \begin{quote}
   \begin{verbatim}
-      \advibg{color=yellow,fun="hgradient"} 
+      \advibg{color = yellow, fun = "hgradient"} 
    \end{verbatim}
 \end{quote}
-\advibg{color=yellow,fun="hgradient"} 
+\advibg{color = yellow, fun = "hgradient"} 
 
 \newpage
 
@@ -121,10 +121,10 @@ Here is the effect produced by the following command:
 
 \begin{quote}
   \begin{verbatim}
-      \advibg{color=blue,fun="vgradient"} 
+      \advibg{color = blue, fun = "vgradient"} 
    \end{verbatim}
 \end{quote}
-\advibg{color=blue,fun="vgradient"} 
+\advibg{color = blue, fun = "vgradient"} 
 
 \newpage
 
@@ -132,10 +132,10 @@ Here is the effect produced by the following command:
 
 \begin{quote}
   \begin{verbatim}
-      \advibg{color=green,fun="d1gradient"} 
+      \advibg{color = green, fun = "d1gradient"} 
    \end{verbatim}
 \end{quote}
-\advibg{color=green,fun="d1gradient"} 
+\advibg{color = green, fun = "d1gradient"} 
 
 
 \newpage
@@ -144,10 +144,10 @@ Here is the effect produced by the following command:
 
 \begin{quote}
   \begin{verbatim}
-      \advibg{color=green,fun="d2gradient"} 
+      \advibg{color = green, fun = "d2gradient"} 
    \end{verbatim}
 \end{quote}
-\advibg{color=green,fun="d2gradient"} 
+\advibg{color = green, fun = "d2gradient"} 
 
 \newpage
 
@@ -155,10 +155,10 @@ Here is the effect produced by the following command:
 
 \begin{quote}
   \begin{verbatim}
-      \advibg{color=green,fun="cgradient"} 
+      \advibg{color = green, fun = "cgradient"} 
    \end{verbatim}
 \end{quote}
-\advibg{color=green,fun="cgradient"} 
+\advibg{color = green, fun = "cgradient"} 
 
 \newpage
 
@@ -166,10 +166,10 @@ Here is the effect produced by the following command:
 
 \begin{quote}
   \begin{verbatim}
-      \advibg{color=green,fun="circgradient"} 
+      \advibg{color = green, fun = "circgradient"} 
    \end{verbatim}
 \end{quote}
-\advibg{color=green,fun="circgradient"} 
+\advibg{color = green, fun = "circgradient"} 
 
 \newpage
 
@@ -177,10 +177,10 @@ Here is the effect produced by the following command:
 
 \begin{quote}
   \begin{verbatim}
-  \advibg{color=green,fun="circgradient",colorstart="red"} 
+  \advibg{color = green, fun = "circgradient", colorstart = "red"} 
    \end{verbatim}
 \end{quote}
-\advibg{color=green,fun="circgradient",colorstart=red}
+\advibg{color = green, fun = "circgradient", colorstart = red}
 
 \newpage
 
@@ -188,16 +188,16 @@ Here is the effect produced by the following command:
 
 \begin{quote}
   \begin{verbatim}
-  \advibg{color=cyan,fun="cgradient",colorstart="blue"} 
+  \advibg{color = cyan, fun = "cgradient", colorstart = "blue"} 
    \end{verbatim}
 \end{quote}
-\advibg{color=green,fun="cgradient",colorstart=blue}
+\advibg{color = green, fun = "cgradient", colorstart = blue}
 
 \newpage
 
 \section{Setting the background image}
 
-\advibg{image="world.jpg"} 
+\advibg{image = "world.jpg"} 
 
 We can use an image as background.
 This page's background is made of \verb|world.jpg| which
@@ -205,7 +205,7 @@ is in the test directory. The source of this page contains
 
   \begin{quote}
     \begin{verbatim}
-        \advibg{image="world.jpg"} 
+        \advibg{image = "world.jpg"} 
     \end{verbatim}
   \end{quote}
 
@@ -264,10 +264,10 @@ case, the image may not totally cover the page on the opposite side).
 {\Huge Automatic fit (default)}
 \vfill
 This is obtained by not setting the \dockey{fit}{} parameter:\\
-\advibg{image="world.jpg"}
+\advibg{image = "world.jpg"}
 \begin{center}
 	\begin{verbatim}
-	\advibg{image="world.jpg"}
+	\advibg{image = "world.jpg"}
 	\end{verbatim}
 \end{center}
 \vfill
@@ -289,70 +289,63 @@ Resize the display window to see how this positioning option works.%
 
 \vfill
 {\Huge Top}
-\advibg{image="world.jpg",fit=top}
-\docfit{\tt \ttadvibg\{image="world.jpg",fit=top\}}
+\advibg{image = "world.jpg", fit = top}
+\docfit{\tt \ttadvibg\{image = "world.jpg", fit = top\}}
 \newpage
-
 
 \vfill
 {\Huge Bottom}
-\advibg{image="world.jpg",fit=bottom}
-\docfit{\tt \ttadvibg\{image="world.jpg",fit=bottom\}}
+\advibg{image = "world.jpg", fit = bottom}
+\docfit{\tt \ttadvibg\{image = "world.jpg", fit = bottom\}}
 
 \newpage
 
 \vfill
 {\Huge Left}
-\advibg{image="world.jpg",fit=left}
-\docfit{\tt \ttadvibg\{image="world.jpg",fit=left\}}
+\advibg{image = "world.jpg", fit = left}
+\docfit{\tt \ttadvibg\{image = "world.jpg", fit = left\}}
 
 \newpage
-
 
 \vfill
 {\Huge Right}
-\advibg{image="world.jpg",fit=right}
-\docfit{\tt \ttadvibg\{image="world.jpg",fit=right\}}
+\advibg{image = "world.jpg", fit = right}
+\docfit{\tt \ttadvibg\{image = "world.jpg", fit = right\}}
 
 \newpage
-
 
 \vfill
 {\Huge Center}
-\advibg{image="world.jpg",fit=center}
-\docfit{\tt \ttadvibg\{image="world.jpg",fit=center\}}
+\advibg{image = "world.jpg", fit = center}
+\docfit{\tt \ttadvibg\{image = "world.jpg", fit = center\}}
 
 \newpage
-
 
 \vfill
 {\Huge TopLeft}
-\advibg{image="world.jpg",fit=topleft}
-\docfit{\tt \ttadvibg\{image="world.jpg",fit=topleft\}}
+\advibg{image = "world.jpg", fit = topleft}
+\docfit{\tt \ttadvibg\{image = "world.jpg", fit = topleft\}}
 
 \newpage
-
 
 \vfill
 {\Huge TopRight}
-\advibg{image="world.jpg",fit=topright}
-\docfit{\tt \ttadvibg\{image="world.jpg",fit=topright\}}
+\advibg{image = "world.jpg", fit = topright}
+\docfit{\tt \ttadvibg\{image = "world.jpg", fit = topright\}}
 
 \newpage
-
 
 \vfill
 {\Huge BottomLeft}
-\advibg{image="world.jpg",fit=bottomleft}
-\docfit{\tt \ttadvibg\{image="world.jpg",fit=bottomleft\}}
+\advibg{image = "world.jpg", fit = bottomleft}
+\docfit{\tt \ttadvibg\{image = "world.jpg", fit = bottomleft\}}
 
 \newpage
 
-
 \vfill
 {\Huge BottomRight}
-\advibg{image="world.jpg",fit=bottomright}
-\docfit{\tt \ttadvibg\{image="world.jpg",fit=bottomright\}}
+\advibg{image = "world.jpg", fit = bottomright}
+\docfit{\tt \ttadvibg\{image = "world.jpg", fit = bottomright\}}
 
 \newpage
 
@@ -379,8 +372,8 @@ following: {\tt normal}, {\tt multiply}, {\tt screen},
 \bigskip
 
 \def\exampleimage{
- {\includegraphics[width=\textwidth]{../tex/bar.jpg.eps}}
- {\includegraphics[width=0.2\textwidth]{dojojismall.jpg}}
+ {\includegraphics[width = \textwidth]{../tex/bar.jpg.eps}}
+ {\includegraphics[width = 0.2\textwidth]{dojojismall.jpg}}
 }
 
 {\large Normal mode}
@@ -395,7 +388,7 @@ following: {\tt normal}, {\tt multiply}, {\tt screen},
 
 {\setblend{screen}{\exampleimage}}
 
-\advibg{color=lightgray} 
+\advibg{color = lightgray} 
 
 \newpage
 
@@ -413,7 +406,7 @@ following: {\tt normal}, {\tt multiply}, {\tt screen},
 
 {\setblend{burn}{\exampleimage}}
 
-\advibg{color=lightgray} 
+\advibg{color = lightgray} 
 
 \newpage
 
@@ -427,7 +420,7 @@ following: {\tt normal}, {\tt multiply}, {\tt screen},
 
 {\setblend{lighten}{\exampleimage}}
 
-\advibg{color=lightgray} 
+\advibg{color = lightgray} 
 
 \newpage
 
@@ -441,7 +434,7 @@ following: {\tt normal}, {\tt multiply}, {\tt screen},
 
 {\setblend{exclusion}{\exampleimage}}
 
-\advibg{color=lightgray} 
+\advibg{color = lightgray} 
 
 \newpage
 
@@ -455,9 +448,9 @@ Notice that this effect is nice, but expensive to realize.
 Here is the command used to obtain it:
 
 \begin{center}
-{\tt \char`\\advibg\{alpha=0.25,image="dojoji.gif"\}}
+{\tt \char`\\advibg\{alpha = 0.25, image = "dojoji.gif"\}}
 \end{center}
-\advibg{alpha=0.25,image="dojoji.gif"}
+\advibg{alpha = 0.25, image = "dojoji.gif"}
 \vfill
 \newpage
 
@@ -471,15 +464,18 @@ available area.\\
 Here is the command used to obtain this effect:
 
 \begin{center}
-{\tt \char`\\advibg\{color=lightblue, alpha=0.1, blend=difference, image="dojoji.gif"\}}
+{\tt \char`\\advibg\{color = lightblue, alpha = 0.1,
+                     blend = difference,
+                     image = "dojoji.gif"\}}
 \end{center}
 
-\advibg{color=lightblue, alpha=0.1, blend=difference, image="dojoji.gif"} 
+\advibg{color = lightblue, alpha = 0.1,
+        blend = difference, image = "dojoji.gif"} 
 \vfill
 
 \Newpage
 
-\advibg{color=black}
+\advibg{color = black}
 
 {\color{white}
 \advifooter\adviheader
@@ -495,7 +491,7 @@ of the page to black and the text color to white, as follows:
 
   \begin{quote}
     \begin{verbatim}
-        \advibg{color=black} 
+        \advibg{color = black} 
     \end{verbatim}
   \end{quote}
 
@@ -538,71 +534,91 @@ headers, that also appear asynchronously.
 background color after a pause. But at what price ?
 
     \item anybody willing to add support for color gradients?\\Done.
+
+    \item anybody willing to improve gradients so that we can have
+images above a color gradient ?\\Done.
+
+    \item anybody willing to improve gradients so that we can define a
+sub window where the color gradient takes place ?\\Done.
+
+    \item anybody willing to improve gradients to a more general
+scheme that could be programmable ?
   \end{itemize}
 
 \newpage
 
-\advibg{color=cyan}
+\advibg{color = cyan}
 
 \vfill
-{\large {Plain cyan color: {\verb|\advibg{color=cyan}|}}}
-\vfill
-
-\newpage
-
-\advibg{color=cyan,fun="vgradient"}
-
-\vfill
-{\large {Cyan with vertical gradient
-\verb|\advibg{color=cyan,fun="vgradient"}|}}
+{\large {Plain cyan color:\\
+ \verb|\advibg{color = cyan}|}}
 \vfill
 
 \newpage
 
-\advibg{alpha="0.1",image="dojojismall.jpg",color=cyan,fun="vgradient"}
+\advibg{color = cyan, fun = "vgradient"}
 
 \vfill
-{\large {Cyan with vertical gradient and alpha = 0.1 blended image
-\verb|\advibg{alpha="0.1",image="dojojismall.jpg",color=cyan,fun="vgradient"}|
+{\large {Cyan with vertical gradient\\
+ \verb|\advibg{color = cyan, fun = "vgradient"}|}}
+\vfill
+
+\newpage
+
+\advibg{alpha = "0.1", image = "dojojismall.jpg",
+        color = cyan, fun = "vgradient"}
+
+\vfill
+{\large {Cyan with vertical gradient\\
+ and alpha = 0.1 blended image\\
+ \verb|\advibg{alpha = "0.1", image = "dojojismall.jpg",|\\
+ \verb|        color = cyan, fun = "vgradient"}|
 }}
 \vfill
 
 \newpage
 
-\advibg{alpha="0.2",color=cyan,image="dojojismall.jpg",fun="vgradient"}
+\advibg{alpha = "0.2", color = cyan,
+        image = "dojojismall.jpg", fun = "vgradient"}
 
 \vfill
 {\large {Cyan with vertical gradient and alpha = 0.2 blended image\\
-\verb|\advibg{alpha="0.2",color=cyan,image="dojojismall.jpg",fun="vgradient"}|
+\verb|\advibg{alpha = "0.2", color = cyan,|\\
+\verb| image = "dojojismall.jpg", fun = "vgradient"}|
 }}
 \vfill
 
 \newpage
 
-\advibg{alpha="0.4",fun="vgradient",color=cyan,image="dojojismall.jpg"}
+\advibg{alpha = "0.4", fun = "vgradient", color = cyan, image =
+"dojojismall.jpg"}
 
 \vfill
-{\large {Cyan with vertical gradient and alpha = 0.4 blended
-image\\
-\verb|\advibg{alpha="0.4",fun="vgradient",color=cyan,image="dojojismall.jpg"}|
+{\large {Cyan with vertical gradient\\
+and alpha = 0.4 blended image\\
+\verb|\advibg{alpha = "0.4", fun = "vgradient",|\\
+\verb|        color = cyan, image = "dojojismall.jpg"}|
 }}
 \vfill
 
 \newpage
 
-\advibg{alpha="0.8",fun="vgradient",color=cyan,image="dojojismall.jpg"}
+\advibg{alpha = "0.8", fun = "vgradient", color = cyan, image =
+"dojojismall.jpg"}
 
 \vfill
-{\large {Cyan with vertical gradient and alpha = 0.8 blended
-image\\
-\verb|\advibg{alpha="0.8",fun="vgradient",color=cyan,image="dojojismall.jpg"}|
+{\large {Cyan with vertical gradient\\
+ and alpha = 0.8 blended image\\
+\verb|\advibg{alpha = "0.8", fun = "vgradient",|\\
+\verb|        color = cyan, image = "dojojismall.jpg"}|
 }}
 \vfill
 
 \newpage
 
-\advibg{color=cyan,image="dojojismall.jpg",alpha=0.25}
-\verb|\advibg{color=cyan,image="dojojismall.jpg",alpha=0.25}|
+\advibg{color = cyan, image = "dojojismall.jpg", alpha = 0.25}
+\verb|\advibg{color = cyan, image = "dojojismall.jpg",|\\
+\verb|        alpha = 0.25}|
 
 \section{Future work}
 
@@ -626,28 +642,35 @@ Done.
 
 \newpage
 
-\advibg{color=[named]{LemonChiffon},fun=circgradient,colorstart=red,image="dojojismall.jpg",alpha=0.25}
-\verb|\advibg{color=cyan,image="dojojismall.jpg",alpha=0.25}|
+\advibg{color = [named]{LemonChiffon}, fun = circgradient,
+ colorstart = red, image = "dojojismall.jpg", alpha = 0.25}
 
-\section{Future work}
+\verb|\advibg{color = [named]{LemonChiffon}, fun = circgradient,|\\
+\verb|        colorstart = red,|\\
+\verb|        image = "dojojismall.jpg", alpha = 0.25}|
 
-  \begin{itemize}
-    \item background preferences are ``asynchronous'', in the sense
-that they can imply rendering modifications in a part of the page that
-has already been displayed; this is why we first scan a page, looking
-for background specials (example, a red background), and only after we
-render it (setting the background to red before everything else). By
-the way, this mechanism was already in place to handle PostScript
-headers, that also appear asynchronously.
+\newpage
 
-    \item is it worthwhile to consider the possibility of making a
-``synchronous'' variant? This would allow for example to change the
-background color after a pause. But at what price ?
+\vfill
+{\large {LemmonChiffon with vertical gradient\\
+ and alpha = 0.25 blended
+image}}
+\vfill
 
-    \item anybody willing to add support for color gradients with
-function arguments and more fancy variants ?\\
-Done.
-  \end{itemize}
+   \advibg{color = [named]{LemonChiffon},
+           fun = hgradient,
+           colorstart = red,
+           xstart = 0, ystart = 0,
+           width = 0.15, height = 1.,
+           image = "dojojismall.jpg", alpha = 0.25}
+
+\begin{verbatim}
+   \advibg{color = [named]{LemonChiffon},
+           fun = hgradient,
+           colorstart = red, xstart = 0, ystart = 0,
+           width = 0.15, height = 1.,
+           image = "dojojismall.jpg", alpha = 0.25}
+\end{verbatim}
 
 \lastpage
 

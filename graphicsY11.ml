@@ -19,6 +19,13 @@
 
 type color = Graphics.color;;
 
+type x = int
+and y = int
+and w = int
+and h = int;;
+
+type rectangle = {x : x; y : y; w : w; h : h};;
+
 (* Introducing get_ variants of regular set_ functions from Graphics. *)
 let set_font, get_font =
  let current_font = ref "8x13" in

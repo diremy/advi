@@ -992,7 +992,6 @@ let find_bgfun s =
 let bkgd_alist = [
   ("color", fun s st ->
      let c = Dvicolor.parse_color_args (split_string (unquote s) 0) in
-     (*prerr_endline s;*)
      [Dev.BgColor c]);
   ("image", fun s st ->
      [Dev.BgImg s]);
@@ -1014,8 +1013,19 @@ let bkgd_alist = [
      [Dev.BgRatio f]);
   ("colorstart", fun s st ->
      let c = Dvicolor.parse_color_args (split_string (unquote s) 0) in
-     (*prerr_endline s;*)
      [Dev.BgColorStart c]);
+  ("xstart", fun s st ->
+     let x = parse_float (unquote s) in
+     [Dev.BgXStart x]);
+  ("ystart", fun s st ->
+     let y = parse_float (unquote s) in
+     [Dev.BgYStart y]);
+  ("width", fun s st ->
+     let w = parse_float (unquote s) in
+     [Dev.BgWidth w]);
+  ("height", fun s st ->
+     let h = parse_float (unquote s) in
+     [Dev.BgHeight h]);
   ("fun", fun s st ->
      [Dev.BgFun (find_bgfun (unquote s))]);
 ];;

@@ -1,12 +1,14 @@
 Version 1.5+2
 2003/10/09
+        Background enhancement with specification of the geometry and colors.
+2003/10/09
         Added an HTML version of the manual with the help of HeVeA and
         Luc Maranget.
 2003/10/08
         Change the background command execution order:
-        1) Solid background,
-        2) Gradient function,
-        3) Image.
+        1) Solid background first,
+        2) Then apply the gradient function,
+        3) Then draw the image.
         This way you can use an (alpha blended) image on a gradient background.
 2003/10/03
         Long time standing bug of set_title has been fixed: the
