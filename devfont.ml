@@ -17,8 +17,8 @@
 
 
 module type DEVICE = sig
-  type glyph
-  val make_glyph : Glyph.t -> glyph
+  type t
+  val make : Glyph.t -> t
 end ;;
 
 module type DEVFONT = sig
@@ -28,7 +28,7 @@ module type DEVFONT = sig
 end ;;
 
 module Make (Dev : DEVICE) = struct
-  type glyph = Dev.glyph
+  type glyph = Dev.t
 
   let base_dpi = 600
 
@@ -60,7 +60,7 @@ module Make (Dev : DEVICE) = struct
 	and ratio = dpi /. float base_dpi in
 	let build code =
 	  let cdef = Font.find_char_def font code in
-          Dev.make_glyph (Glyph.from_char_def cdef ratio) in
+          Dev.make (Glyph.from_char_def cdef ratio) in
 	let table = Table.make build in
 	Hashtbl.add htable (fontname, sdpi) table ;
 	table

@@ -17,11 +17,11 @@
 
 open Dimension;;
 val set_autoresize : bool -> unit;;
-val set_geometry : string -> unit;;
+val set_geometry : Ageometry.t -> unit;;
 val set_crop : bool -> unit;;
 val set_hmargin : dimen -> unit;;
 val set_vmargin : dimen -> unit;;
 
 exception Error of string;;
 
-val main_loop : string -> unit;;
+val init : GrDev.dvidevice -> string -> unit;;

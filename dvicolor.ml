@@ -15,9 +15,11 @@
 (*  Based on Mldvi by Alexandre Miquel.                                *)
 (***********************************************************************)
 
-open Graphics;;
+exception Error of string
 
-type color = Graphics.color;;
+type color = int;;
+
+let rgb r g b = r lsl 16 + g lsl 8 + b;;
 
 let cmyk c m y k = 
   (* found at http://community.borland.com/article/0,1410,17948,00.html *)
@@ -101,14 +103,14 @@ let dvips_named_colors = [
 ];;
 
 let gr_named_color = [
-  "black", black;
-  "white", white;
-  "red", red;
-  "green", green;
-  "blue", blue;
-  "yellow", yellow;
-  "cyan", cyan;
-  "magenta", magenta;
+  "black", 0x000000;
+  "white", 0xffffff;
+  "red", 0xff0000;
+  "green", 0x00ff00;
+  "blue", 0x0000ff;
+  "yellow", 0xffff00;
+  "cyan", 0x00ffff;
+  "magenta", 0xff00ff
 ];;
 
 let named_colors =
@@ -121,7 +123,7 @@ let named_colors =
 
 let find_named_color n = Hashtbl.find named_colors (String.lowercase n);;
 
-let parse_color s =
+let parse s =
   (*prerr_endline ("Parsing " ^ s);*)
   (* Try known colors *)
   try
@@ -135,13 +137,10 @@ let parse_color s =
       rgb r g b
     with _ ->
       (* Try an explicit 0xFFFFFF integer *)
-      try int_of_string s
-        (* Otherwise emit a warning and give a default *)
-      with Failure _ ->
-        Misc.warning (Printf.sprintf "unknown color %s." s);
-        0x000000;;
+      raise (Error (Printf.sprintf "unknown color %s." s))
+;;
 
-let parse_color_args = function
+let parse_args = function
   | ["rgb"; rs; gs; bs] ->
       let r = int_of_float (255.0 *. float_of_string rs)
       and g = int_of_float (255.0 *. float_of_string gs)
@@ -156,6 +155,8 @@ let parse_color_args = function
   | ["gray"; gs] ->
       let g = int_of_float (255.0 *. float_of_string gs) in
       rgb g g g
-  | [s] -> parse_color s
-  | _ -> 0x000000;;
+  | [s] -> parse s
+  | args -> raise (Error (Printf.sprintf "unknown color %s." 
+			    (String.concat " " args)))
+;;
 

@@ -15,6 +15,8 @@
 (*  Based on Mldvi by Alexandre Miquel.                                *)
 (***********************************************************************)
 
+let debug = Options.debug ~label: "dviview" "--debug-dviview" "Debug dviview module";;
+
 let pauses = Options.flag true "-nopauses" "Switch pauses off";;
 let fullwidth =
   Options.flag false "-fullwidth" "Adjust size to width";;
@@ -30,6 +32,7 @@ Options.add
 let starting_page npages =
  if !start_page > 0 then min !start_page npages - 1 else 0;;
 
+(*
 let start_html = ref None;;
 Options.add
 "-html"
@@ -39,6 +42,7 @@ let debug_pages =
   Options.debug
     "--debug_pages"
     "Debug page motion";;
+*)
 
 let browser = ref "netscape-communicator";;
 Options.add
@@ -88,7 +92,7 @@ Options.add
   (Arg.Float set_dpi_resolution)
   "REAL\tDpi resolution of the screen (min 72.27)))";;
 
-module Symbol = Grdev.Symbol;;
+module Symbol = GrDev.Symbol;;
 
 open Dimension;;
 
@@ -106,8 +110,10 @@ type attr = {
 
 (*** The view state ***)
 type mode = Selection | Control;;
-type toc = Page of int | Thumbnails of int * (int * Graphics.image) array
+type toc = Page of int (* | Thumbnails of int * (int * Graphics.image) array *)
 type state = {
+    device : GrDev.dvidevice;
+
     (* DVI attributes *)
     filename : string;
     mutable dvi : Dvi.t;
@@ -132,7 +138,9 @@ type state = {
     mutable button : (int * int) option;
     mutable fullscreen : (int * int * int * int * (int * int)) option;
 
+    (* the pause position where the device has already drawn *)
     mutable pause_number : int;
+
     (* Attributes for Embedded postscript *)
 
     (* true when page was not completed: may need to redraw *)
@@ -153,7 +161,9 @@ type state = {
 
 let set_page_number st n =
  Userfile.save_page_number n;
+(*
  Thumbnails.save n;
+*)
  st.page_number <- n;;
 
 (*** Setting the geometry ***)
@@ -188,8 +198,6 @@ let set_page_number st n =
 
 *****************************************************************************)
 
-
-
 (*** Setting other parameters ***)
 
 let attr =
@@ -205,7 +213,7 @@ let attr =
   };;
 
 let set_autoresize b = autoresize := b
-let set_geometry g = attr.geom <- Ageometry.parse g;;
+let set_geometry g = attr.geom <- g;;
 
 let set_crop b = attr.crop <- b;;
 
@@ -264,7 +272,7 @@ let init_geometry all st =
   st.toc <- None;
 ;;
 
-let init filename =
+let init device filename =
   let dvi =
     try Dvi.load filename
     with
@@ -281,7 +289,9 @@ let init filename =
   let npages =  Array.length dvi.Dvi.pages in
   let st =
     let npages = Array.length dvi.Dvi.pages in
-    { filename = filename;
+    { device = device;
+
+      filename = filename;
       dvi = dvi;
       cdvi = cdvi;
       num_pages =  npages;
@@ -302,6 +312,7 @@ let init filename =
       fullscreen = None;
 
       pause_number = 0;
+
       frozen = true;
       aborted = false;
       cont = None;
@@ -316,8 +327,10 @@ let init filename =
   attr.geom.Ageometry.height <- st.size_y;
   st;;
 
-let set_bbox st =
+let set_bbox st = prerr_endline "set_bbox ignored";;
+(*
   Grdev.set_bbox (Some (st.orig_x, st.orig_y, st.dvi_width, st.dvi_height));;
+*)
 
 let update_dvi_size all ?dx ?dy st =
   init_geometry all st;
@@ -325,45 +338,12 @@ let update_dvi_size all ?dx ?dy st =
   begin match dy with None -> () | Some z -> st.orig_y <- z end;
   set_bbox st;;
 
-(* incremental drawing *)
-let synchronize st =
-  if st.synchronize then Grdev.synchronize()
-
-let goto_next_pause n st =
-  let rec aux n st =
-    if n > 0 then
-      begin match st.cont with
-      | None -> ()
-      | Some f ->
-          st.cont <- None;
-          try
-            begin try
-              while f () do () done;
-              st.pause_number <- st.pause_number + 1;
-            with
-            | Driver.Wait sec ->
-                ignore (Grdev.sleep sec);
-                st.cont <- Some f;
-                aux n st
-            | Driver.Pause ->
-                st.pause_number <- st.pause_number + 1;
-                st.cont <- Some f;
-                aux (pred n) st
-            end;
-          with Grdev.Stop -> st.aborted <- true;
-      end
-  in
-  aux n st;
-  synchronize st;
-  Busy.set (if st.cont = None then Busy.Free else Busy.Pause);;
-
 let draw_bounding_box st =
-Misc.warning "Draw_bounding box";
-  Grdev.set_color 0xcccccc;
-  Grdev.fill_rect st.orig_x st.orig_y st.dvi_width 1;
-  Grdev.fill_rect st.orig_x st.orig_y 1 st.dvi_height;
-  Grdev.fill_rect st.orig_x (st.orig_y + st.dvi_height) st.dvi_width 1;
-  Grdev.fill_rect (st.orig_x + st.dvi_width) st.orig_y 1 st.dvi_height;;
+  Misc.warning "Draw_bounding box";
+  st.device#draw#set_foreground (GrMisc.Colour.gdraw_of_dvi 0xcccccc);
+  st.device#draw#rectangle ~x: st.orig_x ~y: st.orig_y 
+    ~width: st.dvi_width ~height: st.dvi_height ()
+;;
 
 (* Input : a point in window coordinates, relative to lower-left corner. *)
 (* Output : a point in document coordinates, relative to upper-right corner. *)
@@ -385,7 +365,9 @@ let position st x y =
   | None -> ();;
 
 (* User has selected a region with the mouse. We dump characters. *)
+(*
 let selection s = Grdev.cut s;;
+*)
 
 let get_size_in_pix st = function
   | Px n -> n
@@ -443,47 +425,95 @@ let move_within_margins_x st movex =
   if st.orig_x <> new_orig_x then Some new_orig_x
   else None;;
 
-let redraw ?trans ?chst st =
-  (* draws until the current pause_number or page end *)
-  (* the pauses and waits appears before are ignored *)
-  Busy.set Busy.Busy;
-  st.cont <- None;
-  st.aborted <- false;
-  begin
+(* incremental drawing *)
+let synchronize st = if st.synchronize then st.device#draw#synchronize();;
+
+let goto_next_pause n st =
+  debug "goto_next_pause";
+  let final () =
+    synchronize st;
+    st.device#cursor#set 
+      (if st.cont = None then GrCursor.Free else GrCursor.Pause)
+  in
+  let rec aux n st =
     try
-      Grdev.continue ();
-      Driver.clear_symbols ();
-      if !bounding_box then draw_bounding_box st;
-      let f =
-        Driver.render_step st.cdvi st.page_number ?trans ?chst
-          (st.base_dpi *. st.ratio) st.orig_x st.orig_y in
-      if !pauses then begin
-        let current_pause = ref 0 in
-        try
-          while
-            try f () with
+      if n <= 0 then raise Exit;
+      begin match st.cont with
+      | None -> raise Exit
+      | Some f ->
+          try
+            begin try
+              while f () do () done;
+	      (* end of the page *)
+              st.cont <- None;
+              st.pause_number <- st.pause_number + 1;
+	      raise Exit
+            with
             | Driver.Wait sec ->
-                if !current_pause = st.pause_number then
-                  ignore (Grdev.sleep sec);
-                true
+                synchronize st;
+		st.device#sleep ~breakable: true ~sec 
+		  ~cont: (fun _ -> aux n st)
             | Driver.Pause ->
-                if !current_pause = st.pause_number then raise Driver.Pause
-                else begin incr current_pause; true end
-          do () done;
-          if !current_pause < st.pause_number
-          then st.pause_number <- !current_pause
-        with
-        | Driver.Pause -> st.cont <- Some f
-      end else begin
-        Transimpl.sleep := (fun _ -> true); (* always breaks *)
-        while try f () with Driver.Wait _ | Driver.Pause -> true
-        do () done
+                st.pause_number <- st.pause_number + 1;
+                aux (pred n) st
+            end;
+          with (* Grdev.Stop -> st.aborted <- true; *)
+	    e -> raise e
       end
     with
-    | Grdev.Stop -> st.aborted <- true
+    | Exit -> final ()
+  in
+  aux n st
+;;
+
+let redraw (* ?trans ?chst *) st =
+  (* draws until the current pause_number or page end *)
+  (* the pauses and waits appears before are ignored *)
+  debug "redraw";
+(*
+  Busy.set Busy.Busy;
+*)
+  st.cont <- None;
+  st.aborted <- false;
+  begin try
+(*
+    Grdev.continue ();
+*)
+    Driver.clear_symbols ();
+    if !bounding_box then draw_bounding_box st;
+    let f =
+      Driver.render_step st.device st.cdvi st.page_number (* ?trans ?chst *)
+        (st.base_dpi *. st.ratio) st.orig_x st.orig_y 
+    in
+    if !pauses then begin
+      let current_pause = ref 0 in
+      while
+        try f () with
+        | Driver.Wait sec -> true 
+        | Driver.Pause ->
+            if !current_pause = st.pause_number then begin
+	      st.cont <- Some f;
+	      raise Driver.Pause
+	    end else begin incr current_pause; true end
+      do () done;
+      if !current_pause < st.pause_number
+      then st.pause_number <- !current_pause
+    end else begin
+(*
+      Transimpl.sleep := (fun _ -> true); (* always breaks *)
+*)
+      while try f () with Driver.Wait _ | Driver.Pause -> true
+      do () done
+    end
+  with
+(*
+  | Grdev.Stop -> st.aborted <- true
+*)
+  | Driver.Pause -> ()
   end;
   synchronize st;
-  Busy.set (if st.cont = None then Busy.Free else Busy.Pause);
+  st.device#cursor#set
+    (if st.cont = None then GrCursor.Free else GrCursor.Pause);
   Misc.debug_stop "Page has been drawn\n";
 ;;
 
@@ -547,21 +577,33 @@ let make_thumbnails st  =
     Array.map
       (fun p -> 
         (* let p' = p mod (r * r) in (* unused! *) *)
-        let chgvp s = {s with 
-		       Dvi.bkgd_prefs = {s.Dvi.bkgd_prefs with
-					 Grdev.bgviewport = Some (dx,dy,0,size_y -dy)}} in
-        without_pauses (redraw ?chst:(Some chgvp)) { ist with page_number = p};
+        let chgvp s = 
+(*
+	  {s with Dvi.bkgd_prefs = 
+	     {s.Dvi.bkgd_prefs with Grdev.bgviewport = 
+	      Some (dx,dy,0,size_y -dy)}} 
+*)
+	  s
+	in
+        without_pauses (redraw (*? chst:(Some chgvp)*)) { ist with page_number = p};
         p, Graphics.get_image 0 (size_y -dy) dx dy;
       )
-      page_nails in
+      page_nails 
+  in
+(*
   let rolls = (Array.length all + r * r - 1) / r / r in
   let split = 
     Array.init rolls
       (fun roll ->
         let first = roll * r * r in
         Thumbnails
-          (r, Array.sub all first (min (r * r) (Array.length all - first)))) in
+          (r, Array.sub all first (min (r * r) (Array.length all - first)))) 
+  in
+*)
+(*
   st.toc <- Some split;
+*)
+  ()
 ;;
 
 let make_toc st =
@@ -573,6 +615,7 @@ let make_toc st =
   with
     Not_found -> ()
 
+(*
 let show_thumbnails st r page =
   let size_x = Graphics.size_x() in
   let size_y = Graphics.size_y() in
@@ -611,6 +654,8 @@ let show_toc st =
 ;;
         
 
+*)
+
 let redisplay st =
   st.pause_number <- 0;
   redraw st;;
@@ -621,6 +666,7 @@ let goto_previous_pause n st =
     redraw st
   end;;
 
+(*
 let find_xref tag default st =
   try
     let p = int_of_string (Misc.get_suffix "/page." tag) in
@@ -663,13 +709,16 @@ let exec_xref link =
     | Link -> () else
   if Misc.has_prefix "http:" link then call (!browser ^ " " ^ link) else
   Misc.warning (Printf.sprintf "Don't know what to do with link %s" link);;
+*)
 
 let page_start default st =
+(*
   match !start_html with
   | None -> default
   | Some html ->
       Driver.scan_special_pages st.cdvi max_int;
       find_xref html default st;;
+*) default;;
 
 let rec clear_page_stack max stack =
   let pages = Array.create max false in
@@ -692,7 +741,6 @@ let reload_time st =
 
 let reload st =
   try
-    Grdev.clear_usr1(); 
     st.last_modified <- reload_time st;
     let dvi = Dvi.load st.filename in
     let cdvi = Driver.cook_dvi dvi in
@@ -721,7 +769,7 @@ let reload st =
     st.aborted <- true;
     update_dvi_size false st;
     Options.dops := !Options.pson;
-    redraw ?trans:(Some Transitions.DirTop) st
+    redraw (* ?trans:(Some Transitions.DirTop) *) st
   with x ->
     (* To be revisited (should assert Options.debug) *)
     assert (Misc.debug_endline (Printexc.to_string x); true);
@@ -736,6 +784,7 @@ let goto_page n st = (* go to the begining of the page *)
     begin
       if st.page_number <> new_page_number
       then st.exchange_page <- st.page_number;
+(*
       let trans =
         if new_page_number = succ st.page_number
            then Some Transitions.DirRight else
@@ -744,9 +793,10 @@ let goto_page n st = (* go to the begining of the page *)
         if new_page_number = st.page_number
            then Some Transitions.DirTop else
         None in
+*)
       set_page_number st new_page_number;
       st.pause_number <- 0;
-      redraw ?trans st
+      redraw (* ?trans *) st
     end;;
 
 let push_stack b n st =
@@ -764,12 +814,14 @@ let push_page b n st =
     end;;
 
 let pop_page b n st =
+(*
   assert
     (debug_pages
        (Printf.sprintf "%s\n => popping %s page %d "
           (page_stack_to_string st.page_number st.page_stack)
           (string_of_bool b)
           n));
+*)
   let rec pop n return_page return_stack stack =
     match n, stack with
     | n, _ when n <= 0 ->
@@ -807,6 +859,7 @@ let next_slice st =
   print_newline ()
 
 
+(*
 let goto_href link st = (* goto page of hyperref h *)
   let p =
     if Misc.has_prefix "#" link then
@@ -825,6 +878,7 @@ let goto_pageref n st =(* Go to hyperpage n if possible or page n otherwise *)
   let alt = if st.num > 0 then st.num - 1 else st.num_pages in
   let p = find_xref tag alt st in
   push_page true p st
+*)
 
 let goto_next_page st =
   if st.page_number <> st.num_pages - 1 then goto_page (st.page_number + 1) st;;
@@ -848,9 +902,9 @@ let scale n st =
         let scale x = int_of_float (float x *. factor) in
         attr.geom.Ageometry.width <- scale st.size_x;
         attr.geom.Ageometry.height <- scale st.size_y;
-        Grdev.close_dev ();
         let x, y = 
-          Grdev.open_dev (Printf.sprintf " " ^ Ageometry.to_string attr.geom)
+          st.device#set_geometry attr.geom;
+	  st.device#size
         in
         attr.geom.Ageometry.width <- x;
         attr.geom.Ageometry.height <- y;
@@ -867,7 +921,8 @@ let scale n st =
           end;
       end;
   update_dvi_size true st;
-  redraw st;;
+  redraw st;
+;;
 
 module B =
   struct
@@ -883,8 +938,10 @@ module B =
       goto_page (st.page_number + max 1 st.num) st
     let goto st =
       push_page true (if st.num > 0 then st.num - 1 else st.num_pages) st
+(*
     let goto_pageref st =
       goto_pageref st.num st
+*)
     let push_page st =
       push_stack true st.page_number st
     let previous_page st =
@@ -984,7 +1041,7 @@ module B =
           end
       | None -> none ()
 
-    let redraw = redraw ?trans:(Some Transitions.DirNone) ?chst:None
+    let redraw = redraw (* ?trans:(Some Transitions.DirNone) ?chst:None *)
 
     let toggle_active st =
       Driver.toggle_active(); redraw st
@@ -994,26 +1051,39 @@ module B =
 
     let fullscreen st =
       let b = (st.fullscreen = None) in
-      let (x, y), (dx, dy) =
-        match st.fullscreen with
+      let x, y, dx, dy =
+        match st.fullscreen with 
+        (* fullscreen stores the previous non full screen setting *)
         | None ->
-            let x = GraphicsY11.origin_x () in
-            let y = GraphicsY11.origin_y () in
+	    (* there is a bug... *)
+            let x,y,w,h = GrMisc.get_root_geometry st.device#misc#window in
             st.fullscreen <-
               Some (x, y, st.size_x, st.size_y, (st.orig_x, st.orig_y));
+(*
             Grdev.reposition ~x:0 ~y:0 ~w:(-1) ~h:(-1), (0, 0);
+*)
+	    x, y, w, h (* not true! *)
         | Some (x, y, w, h, dxy) ->
             st.fullscreen <- None;
-            Grdev.reposition ~x ~y ~w ~h, dxy in
+(*
+            Grdev.reposition ~x ~y ~w ~h, dxy 
+*)
+	    x, y, w, h
+   in
       resize st ~dx ~dy x y;
       if b then center st
 
     let exit st = raise Exit
+(*
     let switch_edit_mode st =
       Grdev.E.switch_edit_mode ();
       redraw st
+*)
+(*
     let clear_image_cache st = (* clear image cache *)
       Grdev.clean_ps_cache ()
+*)
+(*
     let help st =
       let pid =
         Launch.fork_process
@@ -1031,14 +1101,17 @@ module B =
       Scratch.draw ()
     let scratch_write st =
       Scratch.write ()
+*)
 
     let previous_slice  = previous_slice 
     let next_slice = next_slice 
     let mark_page  = mark_page
     let goto_mark st = goto_mark st.num st
 
+(*
     let make_thumbnails = make_thumbnails
     let show_toc = show_toc
+*)
   end;;
 
 let bindings = Array.create 256 B.nop;;
@@ -1054,9 +1127,13 @@ let bind_keys () =
 
    (* General purpose keys. *)
    'a', B.toggle_active;
+(*
    'A', B.toggle_antialiasing;
+*)
    'q', B.exit;
+(*
    '?', B.help;
+*)
 
    (* hjkl to move the page around *)
    'h', B.page_left;
@@ -1118,6 +1195,7 @@ let bind_keys () =
    (* Efficiency related keys. *)
    'f', B.unfreeze_fonts;
    'F', B.unfreeze_glyphs;
+(*
    'C', B.clear_image_cache;
 
    (* Edit mode. *)
@@ -1130,79 +1208,35 @@ let bind_keys () =
    (* Thumbnails. *)
    'T', B.make_thumbnails;
    't', B.show_toc;
+*)
   ];;
 
 bind_keys ();;
 
-let main_loop filename =
-  let st = init filename in
-  (* Check if whiterun *)
-  if Launch.whiterun () then
-    begin
-      Driver.scan_special_pages st.cdvi (st.num_pages -1);
-      Launch.dump_whiterun_commands ()
-    end
-  else
-    begin
-      Grdev.set_title ("Advi: " ^ Filename.basename filename);
-      let x, y = Grdev.open_dev (" " ^ Ageometry.to_string attr.geom) in
-      attr.geom.Ageometry.width <- x;
-      attr.geom.Ageometry.height <- y;
-      update_dvi_size true st;
-      set_bbox st;
-      if st.page_number > 0 && !Options.dops then
-        Driver.scan_special_pages st.cdvi st.page_number
-      else set_page_number st (page_start 0 st);
-      redraw st;
-      (* num is the current number entered by keyboard *)
-      try while true do
-        let ev = 
-          if changed st then Grdev.Refreshed else Grdev.wait_event () in
-        st.num <- st.next_num;
-        st.next_num <- 0;
-        match ev with
-        | Grdev.Refreshed -> reload st
-        | Grdev.Resized (x, y) -> resize st x y
-        | Grdev.Key c -> bindings.(Char.code c) st
-        | Grdev.Href h -> goto_href h st
-        | Grdev.Advi (s, a) -> a ()
-        | Grdev.Move (w, h) ->
-            st.orig_x <- st.orig_x + w;
-            st.orig_y <- st.orig_y + h;
-            set_bbox st;
-            redraw st
-        | Grdev.Edit (p, a) ->
-            print_endline (Grdev.E.tostring p a);
-            flush stdout;
-            redraw st
-        | Grdev.Region (x, y, w, h) -> ()
-        | Grdev.Selection s -> selection s
-        | Grdev.Position (x, y) ->
-            position st x y
-        | Grdev.Click (pos, but, _, _) when Grdev.E.editing () ->
-            begin match pos, but with 
-              Grdev.Top_left, Grdev.Button1 -> B.previous_slice st
-            | Grdev.Top_left, Grdev.Button2 -> B.reload st
-            | Grdev.Top_left, Grdev.Button3 -> B.next_slice st
-            | Grdev.Top_right, Grdev.Button1 -> B.previous_page st
-            | Grdev.Top_right, Grdev.Button2 -> B.last_page st
-            | Grdev.Top_right, Grdev.Button3 -> B.next_page st
-            | _, _ -> ()
-            end
-        | Grdev.Click (Grdev.Top_left, _, _, _) ->
-            if !click_turn_page then B.pop_page st
-        | Grdev.Click (_, Grdev.Button1, _, _) ->
-            if !click_turn_page then B.previous_pause st
-        | Grdev.Click (_, Grdev.Button2, _, _) ->
-            if !click_turn_page then B.pop_previous_page st
-        | Grdev.Click (_, Grdev.Button3, _, _) ->
-            if !click_turn_page then B.next_pause st
-(*
-   | Grdev.Click (Grdev.Bottom_right, _) -> B.next_pause st
-   | Grdev.Click (Grdev.Bottom_left, _) -> B.pop_previous_page st
-   | Grdev.Click (Grdev.Top_right, _) -> B.push_page st
- *)
-        | _ -> ()
-      done with Exit -> Grdev.close_dev ()
-    end;;
+let init device filename =
+  let st = init device filename in
+  st.device#win#set_title ("Advi: " ^ Filename.basename filename);
+  st.device#set_geometry attr.geom;
+  st.device#show ();
+  let x, y = st.device#size in
+  attr.geom.Ageometry.width <- x;
+  attr.geom.Ageometry.height <- y;
+  st.device#clear ();
+  update_dvi_size true st; (* calls set_bbox *)
 
+  if st.page_number > 0 && !Options.dops then
+    Driver.scan_special_pages st.cdvi st.page_number
+  else set_page_number st (page_start 0 st);
+
+  let key_cbk =
+    st.device#win#event#connect#key_press ~callback: (fun ev ->
+      let keystring = GdkEvent.Key.string ev in
+      if String.length keystring = 1 then begin
+	bindings.(Char.code keystring.[0]) st
+      end else ();
+      true)
+  in
+  st.device#register_handler `NORMAL (st.device#win :> GObj.widget) key_cbk;
+
+  redraw st
+;;

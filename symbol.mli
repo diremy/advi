@@ -15,18 +15,8 @@
 (*  Based on Mldvi by Alexandre Miquel.                                *)
 (***********************************************************************)
 
-module Make
-    (G :
-       sig
-         type t
-         val hoffset : t -> int
-         val voffset : t -> int
-         val width : t -> int
-         val height : t -> int
-       end) : 
- sig
-
-   type glyph = G.t
+module type T = sig
+   type glyph
    type fontname = string
    type fontratio = float
    type g =
@@ -86,8 +76,14 @@ module Make
    val region_to_ascii : region -> string
 
 end;;
-        
-        
-        
-        
-        
+
+module Make
+    (G :
+       sig
+         type t
+         val hoffset : t -> int
+         val voffset : t -> int
+         val width : t -> int
+         val height : t -> int
+       end) : T with type glyph = G.t
+;;

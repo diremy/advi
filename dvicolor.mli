@@ -15,6 +15,8 @@
 (*  Based on Mldvi by Alexandre Miquel.                                *)
 (***********************************************************************)
 
-type color = Graphics.color;;
-val parse_color : string -> color;;
-val parse_color_args : string list -> color;;
+exception Error of string
+type color = int;;
+val rgb : int -> int -> int -> int;;
+val parse : string -> color;;
+val parse_args : string list -> color;;

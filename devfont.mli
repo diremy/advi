@@ -17,8 +17,8 @@
 
 
 module type DEVICE = sig
-  type glyph
-  val make_glyph : Glyph.t -> glyph
+  type t
+  val make : Glyph.t -> t
 end ;;
 
 module type DEVFONT = sig
@@ -27,4 +27,4 @@ module type DEVFONT = sig
   val find_glyphs : string -> float -> glyph Table.t
 end ;;
 
-module Make (Dev : DEVICE) : DEVFONT with type glyph = Dev.glyph ;;
+module Make (Dev : DEVICE) : DEVFONT with type glyph = Dev.t ;;

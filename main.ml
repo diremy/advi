@@ -26,18 +26,19 @@ let crop_flag = ref true;;
 
 let hmargin = ref (Dimension.Cm 1.0);;
 let vmargin = ref (Dimension.Cm 1.0);;
-let geometry = ref "864x864";;
+let geometry = ref (Ageometry.parse "864x864");;
 
-let set_geom g = Dviview.set_autoresize false; geometry := g;;
+let set_geom g = 
+  Dviview.set_autoresize false; geometry := (Ageometry.parse g)
+;;
 
 let set_dim r s = r := Dimension.dimen_of_string s;;
 
 let print_advi_version () =
-  prerr_endline
-   (Printf.sprintf
+  Printf.printf
       "The Active-DVI previewer and graphics presenter, version %.2f+%i (%s)"
       Config.advi_version_number Config.advi_sub_version_number
-      Config.advi_version_date);
+      Config.advi_version_date;
   exit 0;;
 
 let version_spec nm =
@@ -99,8 +100,10 @@ let set_dvi_geometry () =
   Dviview.set_crop !crop_flag;
   Dviview.set_hmargin !hmargin;
   Dviview.set_vmargin !vmargin;
-  Dviview.set_geometry !geometry;;
+  Dviview.set_geometry !geometry
+;;
 
+(*
 let standalone_main () =
   init_arguments ();
   Rc.init ();
@@ -113,7 +116,10 @@ let standalone_main () =
 	with Sys_error s ->
 	  eprintf "%s@.Try %s -help for more information@."
             usage_msg Sys.argv.(0);
+(*
 	  Launch.exit 1
+*)
+	  ()
       end;
       name
   | Some s -> s in
@@ -137,15 +143,46 @@ let rec interactive_main () =
     printf "Please make another choice.@.";
     interactive_main ()
   end;;
+*)
 
 (* To quit nicely, killing all embedded processes. *)
+(*
 at_exit Gs.kill;;
 at_exit Embed.kill_all_embedded_apps;;
 (* Even in case of signal, we kill embedded processes. *)
 Sys.set_signal Sys.sigquit (Sys.Signal_handle (fun _ -> Launch.exit 0));;
 
 let main = if !Sys.interactive then interactive_main else standalone_main;;
+*)
 
 Unix.putenv "GHOSTVIEW" "Test";;
 
-(Misc.handle_fatal_error main () : unit);;
+let standalone_init () =
+  init_arguments ();
+  Rc.init ();
+  let filename = 
+    match !dvi_filename with
+    | None -> 
+        (* Test if file can be found, otherwise print console stuff. *)
+	let name = Config.splash_screen in
+	begin
+	  try let channel = open_in name in close_in channel
+	  with Sys_error s ->
+	    eprintf "%s@.Try %s -help for more information@."
+              usage_msg Sys.argv.(0);
+(*
+            Launch.exit 1
+*)
+	    ()
+	end;
+	name
+    | Some s -> s 
+  in
+  set_dvi_geometry ();
+  let device = GrDev.dvidevice !geometry in
+  Dviview.init device filename;
+  device#show ()
+;;
+
+standalone_init ();;
+GMain.main ();;

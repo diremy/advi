@@ -17,13 +17,13 @@
 
 open Misc;;
 
-let active =
-  Options.flag true "-passive" "Cancel all advi-effects";;
+let active = Options.flag true "-passive" "Cancel all advi-effects";;
 let toggle_active () = active := not !active
 
-
 (* number of steps before checking for user interruptions *)
+(*
 let checkpoint_frequency = 10;;
+*)
 
 (*** Some utilities for specials ***)
 
@@ -69,9 +69,8 @@ let split_record s =
     | _ -> token, "") tokens
 ;;
 
-module Dev = Grdev;;
-module Symbol = Dev.Symbol;;
-module DFont = Devfont.Make(Dev);;
+module Symbol = GrDev.Symbol;;
+module DFont = Devfont.Make(GrGlyph);;
 
 let base_dpi = 600;;
 
@@ -84,7 +83,7 @@ type cooked_font = {
     name : string;
     ratio : float;
     mtable : (int * int) Table.t;
-    mutable gtables : (int * Dev.glyph Table.t) list
+    mutable gtables : (int * GrGlyph.t Table.t) list
   };;
 
 let dummy_mtable = Table.make (fun _ -> raise Not_found);;
@@ -143,6 +142,8 @@ type reg_set = {
   };;
      
 type state = {
+    device : GrDev.dvidevice;
+
     cdvi : cooked_dvi;
     sdpi : int;
     conv : float;
@@ -151,7 +152,7 @@ type state = {
     (* Current font attributes *)
     mutable cur_font : cooked_font;
     mutable cur_mtable : (int * int) Table.t;
-    mutable cur_gtable : Dev.glyph Table.t;
+    mutable cur_gtable : GrGlyph.t Table.t;
     (* Registers *)
     mutable h : int;
     mutable v : int;
@@ -165,6 +166,7 @@ type state = {
     mutable color : Dvicolor.color;
     mutable color_stack : Dvicolor.color list;
     (* Other attributes *)
+(*
     mutable alpha : Drawimage.alpha;
     mutable alpha_stack : Drawimage.alpha list;
     mutable blend : Drawimage.blend;
@@ -174,16 +176,23 @@ type state = {
     mutable direction : Transitions.direction option;
     mutable transition : Transitions.t;
     mutable transition_stack : Transitions.t list;
+*)
+(*
     (* TPIC specials state *)
     mutable tpic_pensize : float;
     mutable tpic_path : (float * float) list;
     mutable tpic_shading : float;
+*)
     (* PS specials page state *)
+(*
     mutable status : Dvi.known_status;
     mutable headers : (bool * string) list;
+*)
+(*
     mutable html : (Dev.H.tag * int) option;
-    mutable draw_html : (int * int * Dev.glyph) list;
+    mutable draw_html : (int * int * GrGlyph.t) list;
     mutable checkpoint : int;
+*)
   };;
 
 type proc_unit = {
@@ -191,7 +200,7 @@ type proc_unit = {
     escaped_stack : reg_set list;
     escaped_cur_font : cooked_font;
     escaped_cur_mtable : (int * int) Table.t;
-    escaped_cur_gtable : Dev.glyph Table.t;
+    escaped_cur_gtable : GrGlyph.t Table.t;
     mutable escaped_commands : Dvi.command list
   };;
 
@@ -213,7 +222,7 @@ let add_char st x y code glyph =
       Symbol.fontratio = st.cur_font.ratio;
       Symbol.glyph = glyph
     } in
-  last_height := (Dev.get_glyph glyph).Glyph.voffset;
+  last_height := (GrGlyph.get glyph).Glyph.voffset;
   let s : Symbol.symbol = Symbol.Glyph g in
   Symbol.add st.color x y code s;;
 
@@ -256,17 +265,18 @@ let pop st =
 
 let color_push st col =
   st.color_stack <- st.color :: st.color_stack;
-  st.color <- col;
-  if !visible then Dev.set_color col;;
+  st.color <- col
+;;
 
 let color_pop st =
   match st.color_stack with
   | [] -> ()
   | col :: rest ->
       st.color <- col;
-      if !visible then Dev.set_color col;
-      st.color_stack <- rest;;
+      st.color_stack <- rest
+;;
 
+(*
 let alpha_push st v =
   st.alpha_stack <- st.alpha :: st.alpha_stack;
   st.alpha <- v;
@@ -309,6 +319,7 @@ let epstransparent_pop st =
 let transition_push st v =
   st.transition <- v;
   if !visible then Dev.set_transition v;;
+*)
 
 let fnt st n =
   let (mtable, gtable, cfont) =
@@ -327,12 +338,14 @@ let put st code =
     and glyph = Table.get st.cur_gtable code in
     if !visible then
       begin
+(*
         begin match st.html with
         | Some _ -> st.draw_html <- (x, y, glyph) :: st.draw_html
         | None -> ()
         end;
-        Dev.draw_glyph (glyph : Dev.glyph) x y;
-        add_char st x y code glyph
+*)
+        st.device#draw#glyph ~color: st.color (glyph : GrGlyph.t) ~x ~y;
+        add_char st x y code glyph;
       end
   with _ -> ();;
 
@@ -350,7 +363,8 @@ let put_rule st a b =
   and w = int_of_float (ceil (st.conv *. float b))
   and h = int_of_float (ceil (st.conv *. float a)) in
   add_rule st x (y-h) w h;
-  if !visible then Dev.fill_rect x (y - h) w h;;
+  if !visible then 
+    st.device#draw#rectangle ~x ~y:(y - h) ~width:w ~height:h ~filled:true ();;
 
 let set_rule st a b =
   put_rule st a b;
@@ -375,7 +389,7 @@ let line_special st s =
 let color_special st s =
   match split_string s 0 with
   | "color" :: "push" :: args ->
-      color_push st (Dvicolor.parse_color_args args)
+      color_push st (Dvicolor.parse_args args)
   | "color" :: "pop" :: [] ->
       color_pop st
   | _ -> ();;
@@ -388,6 +402,7 @@ let option_parse_float s r =
   try Some(parse_float (List.assoc s r))
   with _ -> None;;
 
+(*
 let alpha_special st s =
   match split_string s 0 with
   | ["advi:"; "alpha"; "push"; arg] ->
@@ -434,6 +449,7 @@ let epstransparent_special st s =
   | "advi:" :: "epstransparent" :: "pop" :: [] ->
       epstransparent_pop st
   | _ -> ();;
+*)
 
 let get_records s =
   List.map (fun (k, v) -> String.lowercase k, v) (split_record s);;
@@ -501,6 +517,7 @@ let int_of_signal = function
   | "" -> Sys.sigquit
   | s -> int_of_string s;;
 
+(*
 let kill_embed_special st s =
   (* advi: kill name=? signal=? *)
   let records = get_records s in
@@ -671,7 +688,9 @@ let transbox_go_special st s =
       let trans = parse_transition None mode record in
       Dev.transbox_go trans
   | _ -> raise (Failure "advi: transbox go special failed");;
+*)
 
+(*
 exception Ignore;;
 
 let edit_special st s =
@@ -732,15 +751,17 @@ let edit_special st s =
       warning (Printf.sprintf "Incorrect advi Special `%s' ignored" s)
   with Ignore -> ()
 ;;
-
+*)
 
 let forward_eval_command = ref (fun _ _ -> ());;
 
 let playing = ref 0;;
 
 (* Setting the forward function Grdev.get_playing. *)
+(*
 let play = Grdev.get_playing in
 play := (fun () -> !playing);;
+*)
 
 let visible_stack = ref [];;
 
@@ -838,9 +859,12 @@ let wait_special st s =
     with
     | Not_found | Failure _ -> raise (Failure "wait: invalid special") in
   (* Wait is treated like Pause, as an exception *)
-  if !visible then raise (Wait second);
+  if !visible then raise (Wait second);;
+(*
   st.checkpoint <- 0;;
+*)
 
+(*
 (* Background object configuration. *)
 let inherit_background_info =
   Options.flag false
@@ -926,7 +950,9 @@ let scan_bkgd_special st s =
 
 (* When not scanning, we ignore the background information *)
 let bkgd_special st s = ();;
+*)
 
+(*
 (* Support for TPIC specials. *)
 
 let milli_inch_to_sp = Units.from_to Units.IN Units.SP 1e-3;;
@@ -1044,6 +1070,9 @@ let tpic_specials st s =
       Misc.warning ("Unknown pic command: " ^ s)
   | _ -> ();;
 (* End of TPIC hacks *)
+*)
+
+(*
 
 let moveto_special st b s =
   if !Options.dops then
@@ -1136,14 +1165,17 @@ let html_special st html =
 let scan_special_html (headers, xrefs) page s =
   let name = String.sub s 14 (String.length s - 16) in
   Hashtbl.add xrefs name page;;
+*)
 
 (* This function is iterated on the current DVI page BEFORE
    rendering it, to gather the information contained in some
    "asynchronous" specials (typically, PS headers, background
    commands, html references) *)
 let scan_special status (headers, xrefs) pagenum s =
+(*
   if Launch.whiterun () &&
      has_prefix "advi: embed " s then scan_embed_special status s else
+*)
   (* Embedded Postscript, better be first for speed when scanning *)
   if has_prefix "\" " s || has_prefix "ps: " s then
     (if !Options.dops then status.Dvi.hasps <- true) else
@@ -1153,10 +1185,14 @@ let scan_special status (headers, xrefs) pagenum s =
   (* Embedded Postscript, better be first for speed when scanning *)
   if has_prefix "header=" s then
     (if !Options.dops then
-      headers := (false, get_suffix "header=" s) :: !headers) else
+      headers := (false, get_suffix "header=" s) :: !headers)
+;;
+(*
+ else
   if has_prefix "advi: setbg " s then scan_bkgd_special status s else
   if has_prefix "html:<A name=\"" s || has_prefix "html:<a name=\"" s then
     scan_special_html (headers, xrefs) pagenum s;;
+*)
 
 (* Scan a page calling function scan_special when seeing a special and
    the function otherwise for other DVI stuff. *)
@@ -1167,11 +1203,13 @@ let scan_special_page otherwise cdvi globals pagenum =
    | Dvi.Unknown ->
        let status =
          {Dvi.hasps = false;
+(*
           Dvi.bkgd_local_prefs = [];
           Dvi.bkgd_prefs =
             (if !inherit_background_info
              then Dev.copy_of_bkgd_data ()
-             else Dev.default_bkgd_data ())} in
+             else Dev.default_bkgd_data ()) *)
+	} in
        let eval = function
          | Dvi.C_xxx s -> scan_special status globals pagenum s
          | x -> otherwise x in
@@ -1181,13 +1219,16 @@ let scan_special_page otherwise cdvi globals pagenum =
    | Dvi.Known stored_status -> stored_status;;
 
 let special st s =
+(*
   if has_prefix "\" " s || has_prefix "ps: " s || has_prefix "! " s then
     ps_special st s else
   if has_prefix "advi: moveto" s then moveto_special st true s else
   if has_prefix "advi: rmoveto" s then moveto_special st false s else
 
   (* Other specials *)
+*)
   if has_prefix "color " s then color_special st s else
+(*
   if has_prefix "html:" s then html_special st (get_suffix "html:" s) else
   if has_prefix "PSfile=" s || has_prefix "psfile=" s then begin
     try
@@ -1204,18 +1245,24 @@ let special st s =
     with
     | Failure s -> Misc.warning s
     | e -> Misc.warning (Printexc.to_string e) end else
+*)
   if has_prefix "advi: " s then begin
+(*
     if has_prefix "advi: edit" s then edit_special st s else
     if has_prefix "advi: alpha" s then alpha_special st s else
     if has_prefix "advi: blend" s then blend_special st s else
     if has_prefix "advi: epstransparent" s then
        epstransparent_special st s else
+*)
     if has_prefix "advi: pause" s then raise Pause else
     if has_prefix "advi: proc" s then proc_special st s else
+(*
     if has_prefix "advi: setbg " s then bkgd_special st s else
+*)
     (* all following have effect and should be ignore if active is false *)
     if !active then begin
       if has_prefix "advi: wait " s then wait_special st s else
+(*
       if has_prefix "advi: embed " s then
          (if !visible then embed_special st s) else
       if has_prefix "advi: trans " s then transition_special st s else
@@ -1225,14 +1272,19 @@ let special st s =
          transbox_go_special st s else
       if has_prefix "advi: kill " s then
          (if !visible then kill_embed_special st s) else
+*)
       Misc.warning ("unknown special: "^ s) end
     (* else we ignore it, whether well-formed or ill-formed *)
     end else
-  if has_prefix "line: " s then line_special st s else
+  if has_prefix "line: " s then line_special st s 
+(*
+else
   if has_prefix "pn " s || has_prefix "pa " s || s = "fp" || s = "ip" ||
      has_prefix "da " s || has_prefix "dt " s || s = "sp" ||
      has_prefix "sp " s || has_prefix "ar " s || has_prefix "ia " s ||
-     has_prefix "sh " s || s = "wh" || s = "bk" then tpic_specials st s;;
+     has_prefix "sh " s || s = "wh" || s = "bk" then tpic_specials st s
+*)
+;;
 
 (*** Page rendering ***)
 let eval_dvi_command st = function
@@ -1268,9 +1320,11 @@ let eval_command st c =
 
 forward_eval_command := eval_command;;
 
+(*
 let newpage h st magdpi x y =
   try Dev.newpage h st.sdpi magdpi x y
   with Dev.GS -> st.status.Dvi.hasps <- false;;
+();;
 
 let find_prologues l =
   let l = List.rev l in
@@ -1287,14 +1341,16 @@ let find_prologues l =
       Options.dops := false;
       []
   | Not_found -> assert false;;
+*)
 
-let render_step cdvi num ?trans ?chst dpi xorig yorig =
+let render_step device cdvi num (* ?trans ?chst *) dpi xorig yorig =
   proc_clean ();
   if num < 0 || num >= Array.length cdvi.base_dvi.Dvi.pages then
     invalid_arg "Driver.render_step";
   let mag = float cdvi.base_dvi.Dvi.preamble.Dvi.pre_mag /. 1000.0
   and page = cdvi.base_dvi.Dvi.pages.(num) in
   let otherwise _ = () in
+(*
   let status =
     let headers = ref []
     and xrefs = cdvi.base_dvi.Dvi.xrefs in
@@ -1303,9 +1359,12 @@ let render_step cdvi num ?trans ?chst dpi xorig yorig =
       Dev.add_headers (find_prologues !headers);
     s in
   if not !Options.dops then status.Dvi.hasps <- false;
+*)
   let orid = function Some f -> f | None -> fun x->x in
   let st =
-    { cdvi = cdvi;
+    { device = device;
+      
+      cdvi = cdvi;
       sdpi = int_of_float (mag *. ldexp dpi 16);
       conv = mag *. dpi /. cdvi.dvi_res /. 65536.0;
       x_origin = xorig; y_origin = yorig;
@@ -1313,36 +1372,51 @@ let render_step cdvi num ?trans ?chst dpi xorig yorig =
       cur_gtable = dummy_gtable;
       cur_font = dummy_font;
       h = 0; v = 0; w = 0; x = 0; y = 0; z = 0;
-      stack = []; color = Grdev.fgcolor (); color_stack = [];
+      stack = []; color = (* Grdev.fgcolor () *) 0; color_stack = [];
+(*
       alpha = 1.0; alpha_stack = [];
       blend = Drawimage.Normal; blend_stack = [];
       epstransparent = true; epstransparent_stack = [];
+*)
+(*
       direction = trans;
       transition = Transitions.TransNone;
       transition_stack = [];
+*)
+(*
       tpic_pensize = 0.0; tpic_path = []; tpic_shading = 0.0;
       status = (orid chst) status;
       headers = [];
       html = None;
       draw_html = [];
       checkpoint = 0;
+*)
     } in
+(*
   if st.status.Dvi.hasps then newpage [] st  (mag *. dpi) xorig yorig;
   setup_bkgd st.status; (* apply the background preferences in Dev *)
-  Dev.clear_dev ();     (* and redraw the background               *)
-  Dev.set_color st.color;
+*)
+  device#clear ();     (* and redraw the background *)
+(*
   Dev.set_transition st.transition;
   st.checkpoint <- 0;
+*)
+(*
   let check () =
     begin try Dev.continue () with
     (* try with exn -> raise exn ?? What does that mean ? *)
     | Dev.Stop as exn -> raise exn
     end;
     st.checkpoint <- checkpoint_frequency in
+*)
   let eval st x =
+(*
     st.checkpoint <- st.checkpoint - 1;
+*)
     let b = eval_command st x in
+(*
     if st.checkpoint < 0 then check ();
+*)
     b in
   Dvi.page_step (eval st) page;;
 
@@ -1362,9 +1436,11 @@ let scan_special_pages cdvi lastpage =
   let otherwise _ = () in
   for n = 0 to min lastpage (Array.length cdvi.base_dvi.Dvi.pages) - 1 do
     ignore (scan_special_page otherwise cdvi (headers, xrefs) n);
-  done;
+  done;;
+(*
   if !headers <> [] then
     Dev.add_headers (find_prologues !headers);;
+*)
 
 let unfreeze_glyphs cdvi dpi =
   let mag = float cdvi.base_dvi.Dvi.preamble.Dvi.pre_mag /. 1000.0 in
@@ -1394,6 +1470,8 @@ let unfreeze_glyphs cdvi dpi =
     mtable := dummy_mtable;
     gtable := dummy_gtable;
     ignore (scan_special_page otherwise cdvi globals n);
-  done;
+  done;;
+(*
   Dev.add_headers (find_prologues !headers);;
+*)
 

@@ -31,7 +31,7 @@ val pretty : ((string * Arg.spec * string) list as 'a) -> 'a;;
    will not be aligned.
 *)
 
-val debug : string -> string -> (string -> bool);;
+val debug : ?label: string -> string -> string -> (string -> unit);;
 (*
    [make_debug option message] create an option flag that is false by
    default and that can be set with [option] with info [message]; 

@@ -16,9 +16,9 @@
 (***********************************************************************)
 
 (* The current version of Active-DVI *)
-let advi_version_number = 1.2;;
-let advi_sub_version_number = 3;;
-let advi_version_date = "2002-11-26";;
+let advi_version_number = 1.9;;
+let advi_sub_version_number = 0;;
+let advi_version_date = "2002-12-25";;
 
 let have_gs = @HAVE_GS@;;
 

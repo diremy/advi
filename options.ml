@@ -32,14 +32,17 @@ let flag initial option_name message =
   r;;
 
 (* A special case: debug options *)
-let make_debug r s =
-  if !r then prerr_endline s;
-  true;;
+let make_debug ?label r s = 
+  if !r then 
+    match label with
+    | None -> prerr_endline s
+    | Some l -> prerr_endline (l ^ ": " ^ s)
+;;
 
-let debug option_name message =
+let debug ?label option_name message =
   let r = ref false in
   add option_name (Arg.Set r) ("\t" ^ message);
-  make_debug r;;
+  make_debug ?label r;;
 
 (* To print debugging messages. *)
 let debug_endline =
@@ -48,31 +51,6 @@ let debug_endline =
 
 Misc.forward_debug_endline := debug_endline;;
 
-(* Some global options *)
-
-let pson = 
-  if Config.have_gs then
-    flag true
-      "-nogs" "Turn off display of inlined Postscript"
-  else ref false;;
-let dops = ref !pson;;
-
-let global_display_mode = ref false;;
-let set_global_display_mode b =
-  GraphicsY11.global_display_mode b;
-  global_display_mode := b;;
-
-add "-fg"
- (Arg.Unit (fun () -> set_global_display_mode true))
- "\tDraw in the foreground";;
-
-add "-w"
- (Arg.String
-    (function
-     | "a" -> Misc.set_warnings false
-     | "A" -> Misc.set_warnings true
-     | s -> raise (Arg.Bad (Printf.sprintf "-w %s is unknown" s))))
- "STRING\tA/a enable/disable all warnings";;
 
 (* Command line options *)
 
@@ -99,3 +77,29 @@ let pretty all_options =
         else hm ^ String.concat margin t in
   List.map2 (fun  (o, s, _ ) ml -> (o, s, indent o ml))
     all_options tab_options;;
+
+(* Some global options *)
+
+let pson = 
+  if Config.have_gs then
+    flag true
+      "-nogs" "Turn off display of inlined Postscript"
+  else ref false;;
+let dops = ref !pson;;
+
+let global_display_mode = ref false;;
+let set_global_display_mode b =
+  raise (Failure "set_global_display_mode")
+;;
+
+add "-fg"
+ (Arg.Unit (fun () -> set_global_display_mode true))
+ "\tDraw in the foreground";;
+
+add "-w"
+ (Arg.String
+    (function
+     | "a" -> Misc.set_warnings false
+     | "A" -> Misc.set_warnings true
+     | s -> raise (Arg.Bad (Printf.sprintf "-w %s is unknown" s))))
+ "STRING\tA/a enable/disable all warnings";;

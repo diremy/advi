@@ -29,22 +29,28 @@ OCAMLDEP  = $(CAML)dep
 
 # CAMLIMAGESDIR & CAMLIMAGESLIBS is defined in Makefile.config
 
-MLINCDIRS = $(CAMLIMAGESDIR)
+MLINCDIRS = $(CAMLIMAGESDIR) $(LABLGTKDIR)
 
 EXEC	  = advi
 
-MODULES	  = config timeout misc graphicsY11 options busy rc \
-            gterm scratch launch \
-            userfile input symbol search \
-            shot drawimage dvicolor \
-	    table pkfont ttfont jfm font glyph devfont \
-	    units dimension \
-	    gs transimpl embed grdev dvi addons driver ageometry thumbnails \
-            dviview main
-LIBRARIES = graphics unix str $(CAMLIMAGESLIBS)
-CLIBS	  = graphics unix str
+MISCMODULES = config misc options rc userfile
+TEXMODULES = input symbol search table pkfont ttfont jfm font glyph \
+		units dimension dvi devfont
+GUIMODULES = ageometry dvicolor
+GTKMODULES = grMisc grDrawable grDbuffer grCursor grSubwindow grGlyph \
+		grSleep grDvi grDev
+TEXGUIMODULES = driver dviview main
+MODULES = $(MISCMODULES) $(TEXMODULES) $(GUIMODULES) $(GTKMODULES) $(TEXGUIMODULES)
 
-COBJS     = events.o grY11.o
+# 	      scratch launch \
+# 	      shot drawimage \
+# 	      gs transimpl embed ageometry thumbnails \
+# 	      dviview main
+
+LIBRARIES = unix str $(LABLGTKLIBS) $(CAMLIMAGESLIBS) 
+CLIBS	  = unix str
+
+COBJS     = 
 
 CMO_OBJS  = $(addsuffix .cmo, $(MODULES))
 CMX_OBJS  = $(addsuffix .cmx, $(MODULES))
@@ -106,13 +112,13 @@ count:
 	wc -l *.ml *.mli | sort -n
 
 clean:
-	rm -f *.cm[oix] *.o $(EXEC) $(EXEC).opt *~ .depend *.log *.aux
+	rm -f *.cm[oix] *.o $(EXEC) $(EXEC).opt *~ *.log *.aux */*.cm[oix]
 	cd test; $(MAKE) clean
 	cd doc; $(MAKE) clean
 
 veryclean: clean
 	rm -f Makefile.config config.cache config.log \
-	config.status drawps.ml ttfont.ml config.ml ifdef.ml
+	config.status drawps.ml ttfont.ml config.ml ifdef.ml .depend
 
 veryveryclean: veryclean
 	rm -f configure
@@ -127,8 +133,7 @@ install:: $(INSTALLTARGET) doc/splash.dvi
 MLFILES = $(addsuffix .ml, $(MODULES))
 
 .depend:: *.mli $(MLFILES) Makefile
-	$(OCAMLDEP) *.mli $(MLFILES) > .depend
-	gcc -MM -I$(CAMLDIR) $(CFLAGS) $(COBJS:.o=.c) | sed -e 's|$(CAMLDIR)/[^ ]*||' >> .depend
+	$(OCAMLDEP) *.mli */*.mli $(MLFILES) > .depend
 
 # just for the authors
 ADVI=advi-$(VERSION)

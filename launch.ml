@@ -104,7 +104,16 @@ Options.add
   "\tAsk mode: ask confirmation before launching an external application\n\
    \t(the default policy mode)";;
 
-let cannot_execute_command command_invocation =
+let failed_to_execute_command command_invocation =
+    Misc.warning
+      (Printf.sprintf
+         "Attempt to launch the embedded command:\n\n\
+          \t%s\n\n\
+          The execution of the command was failed.\n\
+          Hence the presentation could be strange or incomplete."
+         command_invocation);;
+
+let rejected_to_execute_command command_invocation =
     Misc.warning
       (Printf.sprintf
          "Attempt to launch the embedded command:\n\n\
@@ -179,8 +188,12 @@ let can_execute_command command_invocation =
   can_execute command_invocation command_tokens;;
 
 let execute_command can_exec command_invocation command_tokens =
-  if can_exec then Unix.execvp command_tokens.(0) command_tokens
-  else cannot_execute_command command_invocation;;
+  if can_exec then 
+    try
+      Unix.execvp command_tokens.(0) command_tokens
+    with
+    | _ -> failed_to_execute_command command_invocation
+  else rejected_to_execute_command command_invocation;;
 
 let fork_proc command_invocation command_tokens =
   let can_exec = can_execute command_invocation command_tokens in

@@ -73,8 +73,10 @@ type command =
 (* Status for PS specials and background *)
 type known_status = {
    mutable hasps: bool;
+(*
    mutable bkgd_local_prefs: Grdev.bgoption list;
    mutable bkgd_prefs: Grdev.bkgd_prefs
+*)
 };;
 
 type status = Unknown | Known of known_status;;
