@@ -173,7 +173,7 @@ module M = struct
          String.sub file 0 (String.length prefix) = prefix &&
          String.sub file (String.length file - String.length suffix)
                          (String.length suffix) = suffix
-      then Unix.unlink file
+      then Unix.unlink (Filename.concat (Userfile.get_cache_dir ()) file)
     done with End_of_file -> Unix.closedir dh
   ;;
 

@@ -100,10 +100,14 @@ let user_dir =
 ;;
 
 let default_user_cache_dir = Filename.concat (Unix.getcwd ()) ".advi";;
-
 let cache_dir = ref default_user_cache_dir;;
-
 let set_cache_dir s = cache_dir := s;;
+
+(* User preferences. *)
+let default_option_files = 
+  [tilde_subst "~/.advirc";
+   tilde_subst (Filename.concat default_user_dir "advirc")]
+let options_files = ref default_option_files;;
 
 Options.add
  "-cache_dir"
