@@ -93,45 +93,12 @@ exception Error of string;;
 (*** View attributes ***)
 (* things we can set before initialization *)
 
-type offset =
-   | No_offset
-   | Plus of int
-   | Minus of int;;
-
-let int_of_offset = function
-  | No_offset -> 0
-  | Plus n -> n
-  | Minus n -> -n;;
-
-type geometry = {
-    mutable width : int;
-    mutable height : int;
-    mutable xoffset : offset;
-    mutable yoffset : offset
-  };;
-
 type attr = {
-    mutable geom : geometry;
+    mutable geom : Ageometry.t;
     mutable crop : bool;
     mutable hmargin : dimen;
     mutable vmargin : dimen
   };;
-
-let string_of_geometry geom =
-  let w = geom.width
-  and h = geom.height
-  and xoff = geom.xoffset
-  and yoff = geom.yoffset in
-  match (xoff, yoff) with
-  | (No_offset, No_offset) -> Printf.sprintf "%dx%d" w h
-  | (Plus x, No_offset) -> Printf.sprintf "%dx%d+%d" w h x
-  | (Minus x, No_offset) -> Printf.sprintf "%dx%d-%d" w h x
-  | (No_offset, Plus y) -> Printf.sprintf "%dx%d++%d" w h y
-  | (No_offset, Minus y) -> Printf.sprintf "%dx%d+-%d" w h y
-  | (Plus x, Plus y) -> Printf.sprintf "%dx%d+%d+%d" w h x y
-  | (Plus x, Minus y) -> Printf.sprintf "%dx%d+%d-%d" w h x y
-  | (Minus x, Plus y) -> Printf.sprintf "%dx%d-%d+%d" w h x y
-  | (Minus x, Minus y) -> Printf.sprintf "%dx%d-%d-%d" w h x y;;
 
 (*** The view state ***)
 type mode = Selection | Control;;
@@ -178,54 +145,19 @@ type state = {
 
 let set_page_number st n =
  Userfile.save_page_number n;
+ Thumbnails.save n;
  st.page_number <- n;;
 
 (*** Setting the geometry ***)
-let parse_geometry str =
-  try
-    let len = String.length str
-    and i = ref 0 in
-    let parse_int () =
-      if !i = len || not (Misc.is_digit str.[!i] || str.[!i] == '-') then
-        invalid_arg "set_geometry";
-      let start = !i in
-      if str.[!i] = '-' && !i < len+1 then incr i;
-      while !i < len && Misc.is_digit str.[!i] do incr i done;
-      let stop = !i in
-      int_of_string (String.sub str start (stop - start)) in
-    let parse_offset () =
-      if !i = len || (str.[!i] <> '+' && str.[!i] <> '-') then
-        No_offset
-      else begin
-        let sgn = str.[!i] in
-        incr i;
-        if !i = len || not (Misc.is_digit str.[!i] || str.[!i] == '-') then
-          No_offset
-        else
-          match sgn with
-          | '+' -> Plus (parse_int ())
-          | '-' -> Minus (parse_int ())
-          | _ -> assert false
-      end in
-    while !i < len && str.[!i] = ' ' do incr i done;
-    let width = parse_int () in
-    if !i = len || (str.[!i] <> 'x' && str.[!i] <> 'X') then
-      invalid_arg "set_geometry";
-    incr i;
-    let height = parse_int () in
-    let xoffset = parse_offset () in
-    let yoffset = parse_offset () in
-    { width = width; height = height; xoffset = xoffset; yoffset = yoffset }
-    with Failure _ -> invalid_arg "parse_geometry";;
 
 (*** Setting other parameters ***)
 
 let attr =
   { geom =
-    { width = 0;
-      height = 0;
-      xoffset = No_offset;
-      yoffset = No_offset;
+    { Ageometry.width = 0;
+      Ageometry.height = 0;
+      Ageometry.xoffset = Ageometry.No_offset;
+      Ageometry.yoffset = Ageometry.No_offset;
     };
     crop = false;
     hmargin = Px 0;
@@ -233,7 +165,7 @@ let attr =
   };;
 
 let set_autoresize b = autoresize := b
-let set_geometry geom = attr.geom <- parse_geometry geom;;
+let set_geometry g = attr.geom <- Ageometry.parse g;;
 
 let set_crop b = attr.crop <- b;;
 
@@ -258,13 +190,13 @@ let init filename =
   and h_in = mag *. ldexp (float h_sp /. dvi_res) (-16) in
   let wdpi =
     match attr.hmargin with
-    | Px n -> float (attr.geom.width - 2 * n) /. w_in
-    | In f -> float attr.geom.width /. (w_in +. 2.0 *. f)
+    | Px n -> float (attr.geom.Ageometry.width - 2 * n) /. w_in
+    | In f -> float attr.geom.Ageometry.width /. (w_in +. 2.0 *. f)
     | _ -> assert false
   and hdpi =
     match attr.vmargin with
-    | Px n -> float (attr.geom.height - 2 * n) /. h_in
-    | In f -> float attr.geom.height /. (h_in +. 2.0 *. f)
+    | Px n -> float (attr.geom.Ageometry.height - 2 * n) /. h_in
+    | In f -> float attr.geom.Ageometry.height /. (h_in +. 2.0 *. f)
     | _ -> assert false in
   let base_dpi = min wdpi hdpi in
   let width = int_of_float (base_dpi *. w_in)
@@ -279,11 +211,11 @@ let init filename =
       | Px n -> height + 2 * n
       | In f -> height + int_of_float (base_dpi *. 2.0 *. f)
       | _ -> assert false in
-      (min attr.geom.width sx, min attr.geom.height sy)
+      (min attr.geom.Ageometry.width sx, min attr.geom.Ageometry.height sy)
     end else
-      (attr.geom.width, attr.geom.height) in
-  attr.geom.width <- size_x;
-  attr.geom.height <- size_y;
+      (attr.geom.Ageometry.width, attr.geom.Ageometry.height) in
+  attr.geom.Ageometry.width <- size_x;
+  attr.geom.Ageometry.height <- size_y;
   let orig_x = (size_x - width)/2
   and orig_y = (size_y - height)/2 in
   let last_modified =
@@ -336,13 +268,13 @@ let update_dvi_size init st =
     begin
       let wdpi =
         match attr.hmargin with
-        | Px n -> float (attr.geom.width - 2 * n) /. w_in
-        | In f -> float attr.geom.width /. (w_in +. 2.0 *. f)
+        | Px n -> float (attr.geom.Ageometry.width - 2 * n) /. w_in
+        | In f -> float attr.geom.Ageometry.width /. (w_in +. 2.0 *. f)
         | _ -> assert false
       and hdpi =
         match attr.vmargin with
-        | Px n -> float (attr.geom.height - 2 * n) /. h_in
-        | In f -> float attr.geom.height /. (h_in +. 2.0 *. f)
+        | Px n -> float (attr.geom.Ageometry.height - 2 * n) /. h_in
+        | In f -> float attr.geom.Ageometry.height /. (h_in +. 2.0 *. f)
         | _ -> assert false in
       let base_dpi = if !fullwidth then wdpi else min wdpi hdpi in
       let width = int_of_float (base_dpi *. w_in)
@@ -359,7 +291,7 @@ let update_dvi_size init st =
           | _ -> assert false in
           (sx, sy)
         end else
-          (attr.geom.width, attr.geom.height) in
+          (attr.geom.Ageometry.width, attr.geom.Ageometry.height) in
       (*
       attr.geom.width <- size_x;
       attr.geom.height <- size_y;
@@ -447,11 +379,13 @@ let hmargin_size st = get_size_in_pix st attr.hmargin;;
    the bottom, the left and right of the page *)
 let top_of_page = vmargin_size;;
 
-let bottom_of_page st = attr.geom.height - st.dvi_height - vmargin_size st;;
+let bottom_of_page st =
+  attr.geom.Ageometry.height - st.dvi_height - vmargin_size st;;
 
 let left_of_page = hmargin_size;;
 
-let right_of_page st = attr.geom.width - st.dvi_width - hmargin_size st;;
+let right_of_page st =
+  attr.geom.Ageometry.width - st.dvi_width - hmargin_size st;;
 
 (* the two following functions move the displayed part of the page while
    staying inside the margins *)
@@ -460,8 +394,8 @@ let move_within_margins_y st movey =
   let new_orig_y =
     let vmargin_size = vmargin_size st in
     if movey < 0 then begin
-      if tmp_orig_y + st.dvi_height + vmargin_size < attr.geom.height
-      then attr.geom.height - st.dvi_height - vmargin_size
+      if tmp_orig_y + st.dvi_height + vmargin_size < attr.geom.Ageometry.height
+      then attr.geom.Ageometry.height - st.dvi_height - vmargin_size
       else tmp_orig_y
     end else begin
       if tmp_orig_y - vmargin_size > 0
@@ -477,8 +411,8 @@ let move_within_margins_x st movex =
   let new_orig_x =
     let hmargin_size = hmargin_size st in
     if movex < 0 then begin
-      if tmp_orig_x + st.dvi_width + hmargin_size < attr.geom.width
-      then attr.geom.width - st.dvi_width - hmargin_size
+      if tmp_orig_x + st.dvi_width + hmargin_size < attr.geom.Ageometry.width
+      then attr.geom.Ageometry.width - st.dvi_width - hmargin_size
       else tmp_orig_x
     end else begin
       if tmp_orig_x - hmargin_size > 0
@@ -718,10 +652,10 @@ let goto_next_page st =
 
 let resize st x y =
   attr.geom <-
-    { width = x;
-      height = y;
-      xoffset = No_offset;
-      yoffset = No_offset;
+    { Ageometry.width = x;
+      Ageometry.height = y;
+      Ageometry.xoffset = Ageometry.No_offset;
+      Ageometry.yoffset = Ageometry.No_offset;
     };
   update_dvi_size true st;
   redraw st;;
@@ -733,10 +667,10 @@ let scale n st =
   if !autoresize then
     begin
       let scale x = int_of_float (float x *. factor) in
-      attr.geom.width <- scale st.size_x;
-      attr.geom.height <- scale st.size_y;
+      attr.geom.Ageometry.width <- scale st.size_x;
+      attr.geom.Ageometry.height <- scale st.size_y;
       Grdev.close_dev();
-      Grdev.open_dev (Printf.sprintf " " ^ string_of_geometry attr.geom);
+      Grdev.open_dev (Printf.sprintf " " ^ Ageometry.to_string attr.geom);
     end
   else
     begin
@@ -805,7 +739,7 @@ module B =
       redraw st
 
     let page_left st =
-      match (move_within_margins_x st (attr.geom.width - 10)) with
+      match (move_within_margins_x st (attr.geom.Ageometry.width - 10)) with
       | Some n ->
           if n > st.orig_x  then begin
             st.orig_x <- n;
@@ -820,7 +754,7 @@ module B =
             (* the following test is necessary because of some
              * floating point rounding problem
              *)
-          if attr.geom.height <
+          if attr.geom.Ageometry.height <
             st.dvi_height + 2 * vmargin_size st then
             begin
               st.orig_y <- top_of_page st;
@@ -830,7 +764,7 @@ module B =
         end
       in
       begin
-        match (move_within_margins_y st (10 - attr.geom.height)) with
+        match (move_within_margins_y st (10 - attr.geom.Ageometry.height)) with
         | Some n ->
               (* this test is necessary because of rounding errors *)
             if n > st.orig_y then none ()
@@ -845,7 +779,7 @@ module B =
     let page_up st =
       let none () =
         if st.page_number > 0 then begin
-          if attr.geom.height <
+          if attr.geom.Ageometry.height <
             st.dvi_height + 2 * vmargin_size st then
             begin
               st.orig_y <- bottom_of_page st;
@@ -855,7 +789,7 @@ module B =
         end
       in
       begin
-        match (move_within_margins_y st (attr.geom.height - 10)) with
+        match (move_within_margins_y st (attr.geom.Ageometry.height - 10)) with
         | Some n ->
             if n < st.orig_y then none ()
             else begin
@@ -867,7 +801,7 @@ module B =
       end
 
     let page_right st =
-      match (move_within_margins_x st (10 - attr.geom.width)) with
+      match (move_within_margins_x st (10 - attr.geom.Ageometry.width)) with
       | Some n ->
           if n < st.orig_x then begin
             st.orig_x <- n;
@@ -898,16 +832,12 @@ module B =
     let clear_image_cash st = (* clear image cache *)
       Grdev.clean_ps_cache ()
     let help st =
-      let int = function
-        | No_offset -> 0
-        | Plus x -> x
-        | Minus y -> - y in
       let pid =
         Launch.fork_process
           (Printf.sprintf "%s -g %dx%d %s"
              Sys.argv.(0)
-             attr.geom.width
-             attr.geom.height
+             attr.geom.Ageometry.width
+             attr.geom.Ageometry.height
              Config.splash_screen) in
       ()
   end;;
@@ -997,7 +927,7 @@ let main_loop filename =
   else
     begin
       Grdev.set_title ("Advi: " ^ Filename.basename filename);
-      Grdev.open_dev (" " ^ string_of_geometry attr.geom);
+      Grdev.open_dev (" " ^ Ageometry.to_string attr.geom);
       set_bbox st;
       if st.page_number > 0 && !Options.dops then
 	Driver.scan_special_pages st.cdvi st.page_number
