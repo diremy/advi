@@ -24,7 +24,7 @@ Press: \underline{n}ext page \underline{p}revious page
 {\bf\Large Active dvi --- transitions}\\
 \includegraphics[width=\textwidth]{../tex/bar.jpg.eps}}
 
-\def\adviback#1{%
+\def\pstricksback#1{%
 \hspace{-\textwidth}%
 \rput(-0.7cm,-0.5cm){\psframe[framearc=.1,fillstyle=solid,linestyle=none,fillcolor=#1](1.1\textwidth,-0.85\textheight)}
 }
@@ -42,7 +42,7 @@ Press: \underline{n}ext page \underline{p}revious page
 
 \begin{document}
 
-\newpage\adviback{red}
+\newpage\pstricksback{red}
 
 \subsection*{Transitions}
 
@@ -72,7 +72,7 @@ For example, if you want to slide the page, write
   just before pauses.
 \end{itemize}
 
-\newpage\adviback{green}
+\newpage\pstricksback{green}
 
 \subsection*{Transitions parameters}
 Each transition mode has additional parameters to control its details. 
@@ -86,7 +86,7 @@ Usually the followings are available:
 For example, if you want to slide-in a page from left in 30 steps,
 write \verb+\advitransition{slide, from=left, steps=30}+.
 
-\newpage\adviback{blue}
+\newpage\pstricksback{blue}
 
 \subsection*{Slide transition}
 \advitransition{slide, from=left, steps=30}
@@ -112,7 +112,7 @@ New pages appears sliding into the screen.
 \includegraphics[width=0.25\textwidth]{../tex/advilogo.eps}
 \end{flushright}
 
-\newpage\adviback{yellow}
+\newpage\pstricksback{yellow}
 
 \advitransition{wipe, from=right, steps=30}
 
@@ -139,8 +139,8 @@ New pages appears wiping out the old graphics.
 \includegraphics[width=0.25\textwidth]{../tex/advilogo.eps}
 \end{flushleft}
 
-\newpage\adviback{magenta}
-\advitransition{block,from=topleft,steps=200}
+\newpage\pstricksback{magenta}
+\advitransition{block,from=topleft,steps=500}
 
 \subsection*{Block transition}
 New pages appears gradually into small pieces.
@@ -157,7 +157,7 @@ New pages appears gradually into small pieces.
 \subsubsection*{Examples}
 \begin{itemize}
 \item \verb+\advitransition{block}+
-\item \verb+\advitransition{block,from=topleft,steps=100}+
+\item \verb+\advitransition{block,from=topleft,steps=1000}+
 \end{itemize}
 
 \begin{flushright}
