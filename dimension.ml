@@ -44,7 +44,7 @@ let dimen_of_string str =
     (String.sub str 0 !i, String.sub str !i (len - !i)) in
   let f = float_of_string pref in
   match suff with
-  | "" -> Px (int_of_float f)
+  | "" -> Px (Misc.round (*int_of_float*) f)
   | "pt" -> Pt f
   | "pc" -> Pc f
   | "in" -> In f
@@ -53,7 +53,7 @@ let dimen_of_string str =
   | "mm" -> Mm f
   | "dd" -> Dd f
   | "cc" -> Cc f
-  | "sp" -> Sp (int_of_float f)
+  | "sp" -> Sp (Misc.round (*int_of_float*) f)
   | _ -> invalid_arg (Printf.sprintf "unknown unit `%s'" suff);;
 
 let normalize = function

@@ -264,8 +264,6 @@ let set_hmargin d = attr.hmargin <- normalize d;;
 
 let set_vmargin d = attr.vmargin <- normalize d;;
 
-let round x = int_of_float (x +. 0.5);;
-
 (*** Initialization ***)
 let init_geometry all st =
   let dvi = st.dvi in
@@ -287,29 +285,29 @@ let init_geometry all st =
     | In f -> float attr.geom.Ageometry.height /. (h_in +. 2.0 *. f)
     | _ -> assert false in
   let base_dpi = min wdpi hdpi in
-  let width = int_of_float (base_dpi *. w_in)
-  and height = int_of_float (base_dpi *. h_in)
-  and real_width = int_of_float (base_dpi *. w_in *. st.ratio)
-  and real_height = int_of_float (base_dpi *. h_in *. st.ratio) in
+  let width = Misc.round (* int_of_float *) (base_dpi *. w_in)
+  and height = Misc.round (* int_of_float *) (base_dpi *. h_in)
+  and real_width = Misc.round (* int_of_float *) (base_dpi *. w_in *. st.ratio)
+  and real_height = Misc.round (* int_of_float *) (base_dpi *. h_in *. st.ratio) in
   let fwidth = base_dpi *. w_in
   and fheight = base_dpi *. h_in in
   let (size_x, size_y) =
     if attr.crop then begin
       let sx = match attr.hmargin with
-      | Px n -> round fwidth + 2 * n
-      | In f -> round (fwidth +. 2.0 *. base_dpi *. f)
+      | Px n -> Misc.round (fwidth +. 2.0 *. float_of_int n)
+      | In f -> Misc.round (fwidth +. 2.0 *. base_dpi *. f)
       | _ -> assert false
       and sy = match attr.vmargin with
-      | Px n -> round fheight + 2 * n
-      | In f -> round (fheight +. 2.0 *. base_dpi *. f)
+      | Px n -> Misc.round (fheight +. 2.0 *. float_of_int n)
+      | In f -> Misc.round (fheight +. 2.0 *. base_dpi *. f)
       | _ -> assert false in
       (min attr.geom.Ageometry.width sx, min attr.geom.Ageometry.height sy)
     end else
       (attr.geom.Ageometry.width, attr.geom.Ageometry.height) in
   if all then
     begin
-      let orig_x = round ((float size_x -. fwidth) *. 0.5)
-      and orig_y = round ((float size_y -. fheight) *. 0.5) in
+      let orig_x = Misc.round ((float size_x -. fwidth) *. 0.5)
+      and orig_y = Misc.round ((float size_y -. fheight) *. 0.5) in
       st.base_dpi <- base_dpi;
       st.size_x <- size_x;
       st.size_y <- size_y;
@@ -447,7 +445,7 @@ let selection s = Grdev.cut s;;
 
 let get_size_in_pix st = function
   | Px n -> n
-  | In f -> int_of_float (st.base_dpi *. f)
+  | In f -> Misc.round (* int_of_float *) (st.base_dpi *. f)
   | _ -> assert false;;
 
 let vmargin_size st = get_size_in_pix st attr.vmargin;;
@@ -795,8 +793,8 @@ let reload st =
     and h_sp = dvi.Dvi.postamble.Dvicommands.post_height in
     let w_in = mag *. ldexp (float w_sp /. dvi_res) (-16)
     and h_in = mag *. ldexp (float h_sp /. dvi_res) (-16) in
-    let width = int_of_float (w_in *. st.base_dpi *. st.ratio)
-    and height = int_of_float (h_in *. st.base_dpi *. st.ratio) in
+    let width = Misc.round (* int_of_float *) (w_in *. st.base_dpi *. st.ratio)
+    and height = Misc.round (* int_of_float *) (h_in *. st.base_dpi *. st.ratio) in
     let npages =  Array.length dvi.Dvi.pages in
     st.dvi <- dvi;
     st.cdvi <- cdvi;
@@ -939,7 +937,7 @@ let scale n st =
     else  (1. /. !scale_step) ** float (0 - n) in
     if !autoresize then
       begin
-        let scale x = int_of_float (float x *. factor) in
+        let scale x = Misc.round (* int_of_float *) (float x *. factor) in
         attr.geom.Ageometry.width <- scale st.size_x;
         attr.geom.Ageometry.height <- scale st.size_y;
         Grdev.close_dev ();
@@ -956,8 +954,8 @@ let scale n st =
           begin
             st.ratio <- new_ratio;
             let (cx, cy) = (st.size_x / 2, st.size_y / 2) in
-            st.orig_x <- int_of_float (float (st.orig_x - cx) *. factor) + cx;
-            st.orig_y <- int_of_float (float (st.orig_y - cy) *. factor) + cy;
+            st.orig_x <- Misc.round (* int_of_float *) (float (st.orig_x - cx) *. factor) + cx;
+            st.orig_y <- Misc.round (* int_of_float *) (float (st.orig_y - cy) *. factor) + cy;
           end;
       end;
   update_dvi_size true st;
@@ -1170,10 +1168,12 @@ module B =
 
     let search_forward st =
       let re = ask_to_search "Search Forward (re): " in
+      prerr_endline (Printf.sprintf "Search forward %s" re);
       ()
 
     let search_backward st =
       let re = ask_to_search "Search Backward (re): " in
+      prerr_endline (Printf.sprintf "Search backward %s" re);
       ()
   end;;
 

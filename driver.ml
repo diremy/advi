@@ -234,14 +234,14 @@ let add_char st x y code glyph =
   Symbol.add st.color x y code s;;
 
 let add_line st (line, file) =
-  let x = st.x_origin + int_of_float (st.conv *. float st.h)
-  and y = st.y_origin + int_of_float (st.conv *. float st.v) in
+  let x = st.x_origin + Misc.round (*int_of_float*) (st.conv *. float st.h)
+  and y = st.y_origin + Misc.round (*int_of_float*) (st.conv *. float st.v) in
   Symbol.add st.color x y 0 (Symbol.Line (line, file));;
 
 let add_blank nn st width =
-  let x = st.x_origin + int_of_float (st.conv *. float st.h)
-  and y = st.y_origin + int_of_float (st.conv *. float st.v)
-  and w = int_of_float (st.conv *. float width) in
+  let x = st.x_origin + Misc.round (*int_of_float*) (st.conv *. float st.h)
+  and y = st.y_origin + Misc.round (*int_of_float*) (st.conv *. float st.v)
+  and w = Misc.round (*int_of_float*) (st.conv *. float width) in
   Symbol.add st.color x y nn (Symbol.Space (w, !last_height));;
 
 let add_rule st x y w h =
@@ -365,8 +365,8 @@ let fnt st n =
 
 let put st code =
   try
-    let x = st.x_origin + int_of_float (st.conv *. float st.h)
-    and y = st.y_origin + int_of_float (st.conv *. float st.v)
+    let x = st.x_origin + Misc.round (* int_of_float *) (st.conv *. float st.h)
+    and y = st.y_origin + Misc.round (* int_of_float *) (st.conv *. float st.v)
     and glyph = Table.get st.cur_gtable code in
     if !visible then
       begin
@@ -388,8 +388,8 @@ let set st code =
   with _ -> ();;
 
 let put_rule st a b =
-  let x = st.x_origin + int_of_float (st.conv *. float st.h)
-  and y = st.y_origin + int_of_float (st.conv *. float st.v)
+  let x = st.x_origin + Misc.round (* int_of_float *) (st.conv *. float st.h)
+  and y = st.y_origin + Misc.round (* int_of_float *) (st.conv *. float st.v)
   and w = int_of_float (ceil (st.conv *. float b))
   and h = int_of_float (ceil (st.conv *. float a)) in
   add_rule st x (y - h) w h;
@@ -661,8 +661,8 @@ let embed_special st s =
     let height_pixel = truncate (h *. dpi) in
   (* prerr_endline (Printf.sprintf "%d x %d pixel" width_pixel height_pixel);*)
     width_pixel, height_pixel in
-  let x = st.x_origin + int_of_float (st.conv *. float st.h)
-  and y = st.y_origin + int_of_float (st.conv *. float st.v) in
+  let x = st.x_origin + Misc.round (* int_of_float *) (st.conv *. float st.h)
+  and y = st.y_origin + Misc.round (* int_of_float *) (st.conv *. float st.v) in
   Misc.debug_endline
     (Printf.sprintf
        "Embedding %s with command %S, in special %s." app_name command s);
@@ -762,8 +762,8 @@ let transbox_save_special st s =
       let width_pixel = pixels_of_dimen width
       and height_pixel = pixels_of_dimen height
       and depth_pixel = pixels_of_dimen depth in
-      let x = st.x_origin + int_of_float (st.conv *. float st.h)
-      and y = st.y_origin + int_of_float (st.conv *. float st.v) + depth_pixel
+      let x = st.x_origin + Misc.round (* int_of_float *) (st.conv *. float st.h)
+      and y = st.y_origin + Misc.round (* int_of_float *) (st.conv *. float st.v) + depth_pixel
       in
       Dev.transbox_save x y width_pixel (height_pixel + depth_pixel)
   | _ -> raise (Failure "advi: transbox save special failed");;
@@ -811,9 +811,9 @@ let edit_special st s =
         Dev.rw = float_field "w"; Dev.rh = float_field "h";
       } in
       let rect = {
-        Dev.rx = st.x_origin + int_of_float (st.conv *. float st.h)
+        Dev.rx = st.x_origin + Misc.round (* int_of_float *) (st.conv *. float st.h)
           + float_to_pixel r.Dev.rx;
-        Dev.ry = st.y_origin + int_of_float (st.conv *. float st.v)
+        Dev.ry = st.y_origin + Misc.round (* int_of_float *) (st.conv *. float st.v)
           - float_to_pixel r.Dev.ry;
         Dev.rw = float_to_pixel r.Dev.rw;
         Dev.rh = float_to_pixel r.Dev.rh;
@@ -1065,12 +1065,12 @@ let milli_inch_to_sp = Units.from_to Units.IN Units.SP 1e-3;;
 let tpic_milli_inches s = parse_float s *. milli_inch_to_sp;;
 
 let tpic_pen st =
-  int_of_float (st.conv *. st.tpic_pensize +. 0.5);;
+  Misc.round (st.conv *. st.tpic_pensize);;
 
 let tpic_x st x =
-  st.x_origin + int_of_float (st.conv *. (float st.h +. x));;
+  st.x_origin + Misc.round (* int_of_float *) (st.conv *. (float st.h +. x));;
 let tpic_y st y =
-  st.y_origin + int_of_float (st.conv *. (float st.v +. y));;
+  st.y_origin + Misc.round (* int_of_float *) (st.conv *. (float st.v +. y));;
 
 let tpic_flush_path st cntr =
   let path = Array.of_list (List.rev st.tpic_path) in
@@ -1126,10 +1126,10 @@ let rad_to_deg = 45.0 /. atan 1.0;;
 let tpic_arc st x y rx ry s e cntr =
   let x = tpic_x st x
   and y = tpic_y st y
-  and rx = int_of_float (st.conv *. rx)
-  and ry = int_of_float (st.conv *. ry)
-  and s = int_of_float (s *. rad_to_deg)
-  and e = int_of_float (e *. rad_to_deg) in
+  and rx = Misc.round (* int_of_float *) (st.conv *. rx)
+  and ry = Misc.round (* int_of_float *) (st.conv *. ry)
+  and s = Misc.round (* int_of_float *) (s *. rad_to_deg)
+  and e = Misc.round (* int_of_float *) (e *. rad_to_deg) in
   (* If shading requested, fill the arc *)
   if st.tpic_shading >= 0.0 && !visible then
     Dev.fill_arc ~x ~y ~rx ~ry ~start:s ~stop:e ~shade:st.tpic_shading;
@@ -1181,17 +1181,17 @@ let moveto_special st b s =
   if Gs.get_do_ps () then
     let x, y = Dev.current_pos () in
     if b then begin
-       st.h <- int_of_float (float (x - st.x_origin) /. st.conv);
-       st.v <- int_of_float (float (y - st.y_origin) /. st.conv);
+       st.h <- Misc.round (* int_of_float *) (float (x - st.x_origin) /. st.conv);
+       st.v <- Misc.round (* int_of_float *) (float (y - st.y_origin) /. st.conv);
     end else begin
-       st.h <- st.h + int_of_float (float x /. st.conv);
-       st.v <- st.v + int_of_float (float y /. st.conv);
+       st.h <- st.h + Misc.round (* int_of_float *) (float x /. st.conv);
+       st.v <- st.v + Misc.round (* int_of_float *) (float y /. st.conv);
     end;;
 
 let ps_special st s =
   if Gs.get_do_ps () && st.status.Dvi.hasps then
-     let x = int_of_float (st.conv *. float st.h) in
-     let y = int_of_float (st.conv *. float st.v) in
+     let x = Misc.round (* int_of_float *) (st.conv *. float st.h) in
+     let y = Misc.round (* int_of_float *) (st.conv *. float st.v) in
      if !visible then
        begin try
          Dev.exec_ps s x y
@@ -1206,8 +1206,8 @@ let header_special st s = ();;
 
 (* Should check that a pause is not in the middle of some html code *)
 let open_html st link tag tag_string =
-  let x = st.x_origin + int_of_float (st.conv *. float st.h)
-  and y = st.y_origin + int_of_float (st.conv *. float st.v) in
+  let x = st.x_origin + Misc.round (* int_of_float *) (st.conv *. float st.h)
+  and y = st.y_origin + Misc.round (* int_of_float *) (st.conv *. float st.v) in
   begin match st.html with
   | Some (t, k) -> st.html <- Some (t, succ k)
   | None -> st.html <- Some (tag (unquote link), 0)
@@ -1337,13 +1337,13 @@ let special st s =
             file, st.epsbygs
       in
       Misc.debug_endline ("IMAGE " ^ file);
-      let x = st.x_origin + int_of_float (st.conv *. float st.h)
-      and y = st.y_origin + int_of_float (st.conv *. float st.v) in
+      let x = st.x_origin + Misc.round (* int_of_float *) (st.conv *. float st.h)
+      and y = st.y_origin + Misc.round (* int_of_float *) (st.conv *. float st.v) in
       if !visible then
         let draw =
           if drawbygs then begin
             Misc.debug_endline (Printf.sprintf "Gs draws gs file %S" file);
-            Dev.draw_ps file bbox
+            Dev.draw_ps_by_gs file
           end else begin
             Misc.debug_endline (Printf.sprintf "Camlimages draws file %S" file);
             Dev.draw_img file st.epstransparent st.alpha st.blend (Some bbox)
@@ -1476,7 +1476,7 @@ let render_step cdvi num ?trans ?chst dpi xorig yorig =
   let orid = function Some f -> f | None -> fun x->x in
   let st =
     { cdvi = cdvi;
-      sdpi = int_of_float (mag *. ldexp dpi 16);
+      sdpi = Misc.round (* int_of_float *) (mag *. ldexp dpi 16);
       conv = mag *. dpi /. cdvi.dvi_res /. 65536.0;
       x_origin = xorig; y_origin = yorig;
       cur_mtable = dummy_mtable;
@@ -1538,7 +1538,7 @@ let scan_special_pages cdvi lastpage =
 
 let unfreeze_glyphs cdvi dpi =
   let mag = float cdvi.base_dvi.Dvi.preamble.Dvicommands.pre_mag /. 1000.0 in
-  let sdpi = int_of_float (mag *. ldexp dpi 16)
+  let sdpi = Misc.round (* int_of_float *) (mag *. ldexp dpi 16)
   and mtable = ref dummy_mtable
   and gtable = ref dummy_gtable in
   let headers = ref []

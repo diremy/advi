@@ -28,7 +28,7 @@ let cmyk c m y k =
   let r = if c +. k < 1.0 then 1.0 -. (c +. k) else 0.0 in
   let g = if m +. k < 1.0 then 1.0 -. (m +. k) else 0.0 in
   let b = if y +. k < 1.0 then 1.0 -. (y +. k) else 0.0 in 
-  let f c = int_of_float (c *. 255.0 +. 0.5) in
+  let f c = Misc.round (c *. 255.0) in
   rgb (f r) (f g) (f b);;
 
 let dvips_named_colors = [
@@ -152,9 +152,9 @@ let cautious_parse_color s =
 let parse_color_args = function
   | [("rgb" as s); rs; gs; bs] ->
       (try
-         let r = int_of_float (255.0 *. float_of_string rs)
-         and g = int_of_float (255.0 *. float_of_string gs)
-         and b = int_of_float (255.0 *. float_of_string bs) in
+         let r = Misc.round (* int_of_float *) (255.0 *. float_of_string rs)
+         and g = Misc.round (* int_of_float *) (255.0 *. float_of_string gs)
+         and b = Misc.round (* int_of_float *) (255.0 *. float_of_string bs) in
          rgb r g b
        with
        | Failure _ ->
@@ -175,7 +175,7 @@ let parse_color_args = function
           default_color)
   | [("gray" | "grey" as s); gs] ->
       (try 
-         let g = int_of_float (255.0 *. float_of_string gs) in
+         let g = Misc.round (* int_of_float *) (255.0 *. float_of_string gs) in
          rgb g g g
        with
        | Failure _ ->

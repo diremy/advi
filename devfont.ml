@@ -44,8 +44,8 @@ module Make (Dev : DEVICE) = struct
 	and ratio = dpi /. float base_dpi in
 	let build code =
 	  let cdef = Font.find_char_def font code in
-	  (int_of_float (ratio *. float cdef.Font.dx),
-	   int_of_float (ratio *. float cdef.Font.dy)) in
+	  (Misc.round (* int_of_float *) (ratio *. float cdef.Font.dx),
+	   Misc.round (* int_of_float *) (ratio *. float cdef.Font.dy)) in
 	let table = Table.make build in
 	Hashtbl.add htable (fontname, sdpi) table ;
 	table
@@ -53,7 +53,7 @@ module Make (Dev : DEVICE) = struct
   let find_glyphs =
     let htable = Hashtbl.create 257 in
     fun fontname dpi ->
-      let sdpi = int_of_float (ldexp dpi 16) in
+      let sdpi = Misc.round (* int_of_float *) (ldexp dpi 16) in
       let dpi = ldexp (float sdpi) (-16) in
       try Hashtbl.find htable (fontname, sdpi)
       with Not_found ->
