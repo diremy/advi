@@ -73,11 +73,11 @@ page. Variants \verb"right", \verb"left", \verb"top", and
 The command is robust:
 
 $$
-\advitransbox{slide,from=down,steps=250}
+\advitransbox{slide,from=down}
    {it may include \verb"verbatim" material}
 $$
 
-\lastpage
+\newpage
 \section*{Setting speed of text movements}
 
 \noindent
@@ -110,6 +110,15 @@ pace.
 
 \vfill
 
-\advitransbox{slide,from=top,steps=250}{\adviquitfooter}
+\lastpage
+\section*{Other effects}
+{\Large
+\begin{itemize}
+\item Wipe: \advitransbox{wipe,steps=50,from=left}{\verb"\advitransbox{wipe}{text}"}
+\item Block: \advitransbox{block,steps=50}{\verb"\advitransbox{block}{text}"}
+\end{itemize}
+}
+~\vfill~
+\advitransbox{slide,from=top,steps=20}{\adviquitfooter}
 
 \end{document}
