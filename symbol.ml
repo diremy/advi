@@ -12,8 +12,8 @@ type symbol = { color   : int ;
 
 let dummy_symbol =
   { color = 0 ;
-    locx  = -500000 ;
-    locy  = -500000 ;
+    locx  =  0 ;
+    locy  =  0 ;
     voffset = 0 ;
     hoffset = 0 ;
     width  = 0 ;
@@ -60,7 +60,7 @@ let is_pure code =
 (* Symbols that are surrounded with big spaces. *)
 let big_space s = 
   match Char.chr s.code with
-  | '!' | '.' | ':' -> true
+  | '!' | '.' | ':' | ',' -> true
   | _ -> false
 
 (* Returns the name of the symbol. *)
@@ -97,7 +97,7 @@ let at_right s1 s2 =
 
 (* Thresholds to detect a blank, see below. *)
 let threshold1 = 25 (* For normal symbols. *)
-let threshold2 = 90 (* For certain punctuation signs. *)
+let threshold2 = 60 (* For certain punctuation signs. *)
 
 (* Says if there is a blank between s1 and s2. Here hoffset must be taken into account. *)
 let blank () =
@@ -149,6 +149,50 @@ let dump_line l =
     l2;
   !line
 
+let minmax line =
+  let min = ref max_int
+  and max = ref min_int in
+  List.iter
+    (fun s ->
+      let top = s.locy in
+      if top > !max then max := top;
+      let bottom = s.locy - s.height in
+      if bottom < !min then min := bottom;
+    )
+    line;
+  (!min, !max)
+
+(* Tells if two lines overlap. *)
+(* In principle, line min1-max1 is below min2 max2. *)
+let overlap min1 max1 min2 max2 =
+  max2 > min1 + (max1 - min1)/2
+
+let glue lines =
+  (* Lines are sorted from bottom to top. *)
+  let rmin = ref 0
+  and rmax = ref 0 in
+  List.fold_left
+    (fun res line ->
+      let lmin,lmax = minmax line in
+      match res with
+      |	[] -> rmin := lmin ; rmax := lmax ; [line]
+      |	a::b ->
+	  if overlap !rmin !rmax lmin lmax then
+	    (* Lines overlap. *)
+	    begin
+	      rmax := max lmax !rmax ;
+	      rmin := min lmin !rmin ;
+	      (Misc.reverse_concat line a)::b
+	    end
+	  else 
+	    begin
+	      rmax := lmax ;
+	      rmin := lmin ;
+	      line :: res
+	    end
+    )
+    [] lines 
+
 (* to_ascii returns a string representing the symbols that are in zone 'zone'. *)
 (* Elements are filtered according to the first argument. *)
 let to_ascii (x1,y1,x2,y2) set =
@@ -182,6 +226,9 @@ let to_ascii (x1,y1,x2,y2) set =
 	else split ((s::hd)::q2) b
   in
   let lines = split [[dummy_symbol]] sorted in
+
+  (* A line can be separated in two lines so we detect that and glue. *)
+  let lines = List.rev (glue lines) in
   let ascii = Misc.reverse_map dump_line lines in
   String.concat "\n" ascii
   
