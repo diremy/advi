@@ -63,7 +63,7 @@ Options.add
   (Arg.Int set_page_image_file_number)
   (Printf.sprintf
      "<int>  set to <int> the starting number of page \
-     \n\t image files saved by ^X-^S during the presentation,\
+     \n\t image files saved by pressing ^X-^S during the presentation,\
      \n\t (the default is %d)." (get_page_image_file_number ()));;
 
 let new_fname () =
