@@ -1,0 +1,11 @@
+\expandafter \ifx \csname Prosper@Version\endcsname \relax
+\def\printlandscape{\special{landscape}}
+\centerslidesfalse
+
+\input sem-a4.sty
+\slidewidth 235mm
+\slideheight 174mm
+
+\fi
+
+\endinput
