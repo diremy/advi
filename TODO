@@ -1,5 +1,12 @@
 KNOWN BUGS:
 
+* Advi is unsafe!
+==> Put an option -safe that will not launch any applets
+                  -safe=ask should open a dialog and allow
+
+        This one?  yes/no
+        Other applets of this file? yes/no
+
 
 LIMITATIONS:
 
@@ -15,18 +22,27 @@ CLEANING:
 
 * transbox: replace steps by a timer
 
-* transitions: remove the transition stack
-
-* alpha, blend, etc.: remove the stack?
+* alpha, blend, etc. for images: keep track within text and emit the info
+  at every image?
 
 WISH LIST: 
 
-- adapter la résolution aux vrai dpy de l'écran
+ - Some option to stop effects would also be nice
+
+    . wait are ignored
+
+    . embeded applets are not launched
+      (then, they could be launch by a key stroke, this is actually an
+       interesting mode for applets)
+
+    . reload would not kill/restart applets that are the same string command
+      after reloading (this is also an interesting feature)
+
+- Adapter la résolution aux vrai dpy de l'écran
 
 - traiter directement les images gifs avec camlimage.
 
-- fullscreen mode (en graphics?)
-==> DONE, à tester.
+==> tester fullscreen mode
 
 - fork? (i.e. lancer un dvi identique à celui qui tourne)
 
@@ -38,12 +54,14 @@ WISH LIST:
 
   * exporter \ifadvi et \Ifadvi
 
-  
-- images (background): il faut decider si on fixe a priori la couleur
-  de la partie d'ecran non recouverte par l'image ou sin on laisse a
-  LaTeX passer cela en parametre.
+  BUGS:
 
-BUGS:
+* Once, advi when looping... I could not find what was going on (I was not
+able to reproduce). It was in a phase between clicking (on an active anchor)
+reloading of the file and recording. 
 
 * embedded applications are not killed when advi is killed.
+==> Is this fixed?
+
 * we must give some unique names to persistent apps without explicit names
+==> If this done?
