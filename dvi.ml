@@ -452,7 +452,7 @@ let input_dvi ch =
             text =
               Grdev.Symbol.commands_to_ascii font_map (parse_commands commands);
           } in
-        Misc.debug_endline page.text;
+        (*Misc.debug_endline page.text;*)
 	stack := page :: !stack ;
 	lim := !pos ;
 	pos := p
