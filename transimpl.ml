@@ -159,27 +159,32 @@ let box_transition trans oldimg newimg x y width height =
   match trans with
   | TransNone -> ()
   | TransSlide (steps, from) ->
-      let steps = if steps = 0 then 1 else steps in 
-      let f = 
+      let calc_new_steps_and_speed len =
+        let steps = if steps <= 0 then 1 else steps in
+        let speed = max (len / steps) 1 in
+        let newsteps = len / speed + 1 in
+        newsteps, speed
+      in
+      let f, newsteps = 
 	match from with
 	| DirRight -> 
 	    let len = screen_w - x + width - 1 in
-	    let d = max (len / steps) 1 in
-	    fun i -> draw_sprite newimg (x+i*d) y width height
+            let newsteps, speed = calc_new_steps_and_speed len in
+	    (fun i -> draw_sprite newimg (x+i*speed) y width height), newsteps
 	| DirLeft ->
-	    let len = -x in
-	    let d = min (len / steps) (-1) in
-	    fun i -> draw_sprite newimg (x+i*d) y width height
+	    let len = x in
+            let newsteps, speed = calc_new_steps_and_speed len in
+	    (fun i -> draw_sprite newimg (x-i*speed) y width height), newsteps
 	| DirTop -> 
 	    let len = screen_h - y + height - 1 in
-	    let d = max (len / steps) 1 in
-	    fun i -> draw_sprite newimg x (y+i*d) width height
+            let newsteps, speed = calc_new_steps_and_speed len in
+	    (fun i -> draw_sprite newimg x (y+i*speed) width height), newsteps
 	| DirBottom | _ ->
-	    let len = -y in
-	    let d = min (len / steps) (-1) in
-	    fun i -> draw_sprite newimg x (y+i*d) width height
+	    let len = y in
+            let newsteps, speed = calc_new_steps_and_speed len in
+	    (fun i -> draw_sprite newimg x (y-i*speed) width height), newsteps
       in
-      for i = steps - 1 downto 1 do f i; !sleep 0.01 done
+      for i = newsteps - 1 downto 1 do f i; !sleep 0.01 done
   | _ -> assert false
 ;;
 
@@ -196,7 +201,7 @@ let transbox_go trans =
   | Some (oldimg, x, y, width, height) ->
       let newimg = Graphics.get_image x y width height in
       box_transition trans oldimg newimg x y width height 
-  | None -> (* ??? we just ignore it *) ()
+  | None -> assert false (* ??? forgot to call transbox_save before ??? *)
   end;
   saved_transbox := None;
 ;;

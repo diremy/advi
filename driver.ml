@@ -576,6 +576,7 @@ let transbox_save_special st s =
       let record = split_record (String.concat " " args) in 
       let width = Dimension.dimen_of_string (List.assoc "width" record) in
       let height = Dimension.dimen_of_string (List.assoc "height" record) in
+      let depth = Dimension.dimen_of_string (List.assoc "depth" record) in
       let pixels_of_dimen dim =
 	match Dimension.normalize dim with
 	| Dimension.Px x -> x
@@ -584,12 +585,13 @@ let transbox_save_special st s =
       in
       let width_pixel = pixels_of_dimen width
       and height_pixel = pixels_of_dimen height
+      and depth_pixel = pixels_of_dimen depth
       in
       let x = st.x_origin + int_of_float (st.conv *. float st.h)
-      and y = st.y_origin + int_of_float (st.conv *. float st.v) in
-      Dev.transbox_save x y width_pixel height_pixel
-  | _ -> raise (Failure "advi: transbox save special failed")
-;;
+      and y = st.y_origin + int_of_float (st.conv *. float st.v) + depth_pixel 
+      in
+      Dev.transbox_save x y width_pixel (height_pixel + depth_pixel)
+  | _ -> raise (Failure "advi: transbox save special failed");;
 
 let transbox_go_special st s =
   match split_string s 0 with
@@ -597,8 +599,7 @@ let transbox_go_special st s =
       let record = split_record (String.concat " " args) in 
       let trans = parse_transition mode record in
       Dev.transbox_go trans
-  | _ -> raise (Failure "advi: transbox go special failed")
-;;
+  | _ -> raise (Failure "advi: transbox go special failed");;
 
 let eval_command_ref = ref (fun _ _ -> ());;
 
