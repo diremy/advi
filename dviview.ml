@@ -30,6 +30,11 @@ let bounding_box =
   "  show the bounding box,\
   \n\t (the default is to hide the bounding box).";;
 
+let autoswitch =
+  Options.flag false "-autoswitch"
+  "  switch back to master when refreshed";;
+let toggle_autoswitch () = autoswitch := not !autoswitch;;
+
 let start_page = ref 0;;
 Options.add
   "-page"
@@ -1250,6 +1255,7 @@ module B =
       match st.duplex with
         Master st' | Client st' -> raise (Duplex (redraw, st'))
       | Alone -> ()
+    let toggle_autoswitch st = toggle_autoswitch ()
   end;;
 
 let bindings = Array.create 256 B.nop;;
@@ -1351,6 +1357,7 @@ let bind_keys () =
 
     (* Duplex *)
    '', B.duplex;
+   'W', B.toggle_autoswitch;
   ];;
 
 bind_keys ();;
@@ -1389,17 +1396,21 @@ let main_loop mastername clients =
       if st.page_number > 0 && Gs.get_do_ps () then
         Driver.scan_special_pages st.cdvi st.page_number
       else set_page_number st (page_start 0 st);
+      if changed st then reload false st; 
       idraw st;
       (* num is the current number entered by keyboard *)
       try while true do
         st.num <- st.next_num;
         st.next_num <- 0;
-        if changed st then B.reload st else
+        if changed st then reload true st else
         match Grdev.wait_event () with
         | Grdev.Refreshed ->
             begin match st.duplex with
-            | Master _ | Alone -> B.reload st
-            | Client _ -> Grdev.clear_usr1();
+            | Master _ | Alone ->
+                B.reload st
+            | Client st' ->
+                if !autoswitch then raise (Duplex (B.reload, st'))
+                else Grdev.clear_usr1();
             end
         | Grdev.Resized (x, y) -> resize st x y
         | Grdev.Key c -> bindings.(Char.code c) st
