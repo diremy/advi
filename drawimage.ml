@@ -59,13 +59,12 @@ let string_of_blend = function
   | Lighten -> "Lighten"
   | Difference -> "Difference"
   | Exclusion -> "Exclusion"
-  (* 
+  (*
   | Luminosity -> "Luminosity"
   | Color -> "Color"
   | Saturation -> "Saturation"
   | Hue -> "Hue"
   *);;
-
 
 (* look at gxblend.c of ghostscript *)
 let blend_func = function
@@ -127,11 +126,11 @@ let blend_func = function
 
 type image_size = int * int;;
 
-type ps_bbox = int * int * int * int;; 
+type ps_bbox = int * int * int * int;;
 
-open Image
-open Color
-open GraphicsY11
+open Image;;
+open Color;;
+open GraphicsY11;;
 
 let cache_prefix = "cache";;
 let cache_key = "advicache";;
@@ -141,7 +140,7 @@ let verbose_image_access =
     "--verbose-image-access"
     "\tChange the cursor while loading images";;
 
-let image_aa = 
+let image_aa =
   Options.flag true
     "-disable-image-anti-aliasing"
     "\tDisable eps inclusion anti-aliasing"
@@ -214,8 +213,8 @@ let cache_load file =
       open_in_bin, close_in
     else
       (fun file ->
-        let command = Printf.sprintf "%s -c -d %s" Config.gzip_path 
-	    (Filename.quote file) in
+        let command = Printf.sprintf "%s -c -d %s" Config.gzip_path
+            (Filename.quote file) in
         Unix.open_process_in command),
       (fun ic -> ignore (Unix.close_process_in ic))
   in
@@ -252,8 +251,8 @@ let cache_save file img =
       open_out_bin, close_out
     else
       (fun file ->
-        let command = Printf.sprintf "%s > %s" Config.gzip_path 
-	    (Filename.quote file) in
+        let command = Printf.sprintf "%s > %s" Config.gzip_path
+            (Filename.quote file) in
         Unix.open_process_out command),
       (fun oc -> Pervasives.flush oc; ignore (Unix.close_process_out oc))
   in
@@ -285,23 +284,16 @@ let image_load psbbox (w, h) file =
         let (llx, lly, urx, ury) =
         match psbbox with
         | Some bbox -> bbox
-        | None -> (0, 0, w, h)
-        in
+        | None -> (0, 0, w, h) in
         (* we need anti-aliasing *)
         let resx = float w /. (float (urx - llx) /. 72.0) *. image_aa_level
         and resy = float h /. (float (ury - lly) /. 72.0) *. image_aa_level
         in
-        (* resolution fix *)
-        (* gs dies if resolutions are too small (around 1.6 - 1.65dpi) *)
+        (* resolution fix:
+           gs dies if resolutions are too small (around 1.6 - 1.65dpi) *)
         let gs_min_res = 2.0 in
-        let resx = 
-          if resx < gs_min_res then gs_min_res
-          else resx
-        and  resy = 
-          if resy < gs_min_res then gs_min_res
-          else resy
-        in
-        
+        let resx = max resx gs_min_res
+        and  resy = max resy gs_min_res in
         Ps.load_ps file (Some (llx, lly, urx, ury))
           [Load_Resolution (resx, resy)]
     | _ -> Image.load file []
@@ -392,8 +384,8 @@ let resize_and_make_transparent image whitetransp ratiopt (ow, oh) =
           for x = 0 to width - 1 do
             let rgb = Rgb24.unsafe_get i x y in
             let a =
-              if whitetransp && Rgb.square_distance rgb white_rgb < diff 
-	      then 0 else 255 in
+              if whitetransp && Rgb.square_distance rgb white_rgb < diff
+              then 0 else 255 in
             Rgba32.unsafe_set rgba x y { color = rgb; alpha = a }
           done
         done;
