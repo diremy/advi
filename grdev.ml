@@ -641,7 +641,7 @@ let raw_embed_app command app_mode app_name width height x y =
   let command0 = string_replace "!p" wid command in
 
   (* if there is no !p, the application geometry will be treated
-     by the WM. In such cases, we try to fix the geoemtry
+     by the WM. In such cases, we try to fix the geometry
      so that it is against the root. *)
 
   let opt_geometry, opt_x, opt_y =
@@ -669,7 +669,7 @@ let raw_embed_app command app_mode app_name width height x y =
     raise (Failure (Printf.sprintf
                       "pid %d is already in the app_table!" pid));
   Hashtbl.add app_table pid (app_mode, app_name, wid);
-  ;;
+;;
 
 (* In hash table t, returns the first element that verifies p. *)
 let hashtbl_find t p =
