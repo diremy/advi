@@ -12,8 +12,6 @@
 \usepackage {advi-annot}
 \usepackage {bubble}
 
-\def \ActiveDVI {Active-DVI}
-
 \newdimen \tmpdim
 \title {\setbox0 \hbox {\bf\ActiveDVI}\global \tmpdim \wd0
 \advance \tmpdim by 4em
@@ -43,7 +41,7 @@ Reference manual
 
 \def \abstractname {}
 \begin{abstract}
-{\bf\ActiveDVI}~is a viewer for DVI files that also recognizes a new class of 
+{\bf\ActiveDVI} is a viewer for DVI files that also recognizes a new class of 
 \docdef \special's targeted to presentations via laptop computers:
 various special effects can easily be incorporated to the presentation,
 via a companion \doctt{advi} {\LaTeX} package. 
@@ -58,7 +56,7 @@ file included in the distribution.
 \vfill
  \section* {Contributors}
 
-The core of Active DVI is the plain DVI previewer, written by
+The core of {\ActiveDVI} is the plain DVI previewer, written by
 Alexandre~Miquel. The other main implementors are Jun~Furuse,
 Didier~R{\'{e}}my, and Pierre~Weis. Other contributors are Didier~Le~Botlan,  
 Roberto~Di~Cosmo, Xavier~Leroy, and Alan~Schmitt. 
@@ -84,12 +82,12 @@ This warning applies in particular if you choose {\ActiveDVI} as your default
 
 \subsection {Command line options}
 
-\ActiveDVI~is invoked with the following command syntax
+{\ActiveDVI} is invoked with the following command syntax
 \begin{verbatim}
 advi [options] dvifile
 \end{verbatim}
 
-\noindentThe \verb"advi" commands recognized the following options:
+\noindent The \verb"advi" commands recognized the following options:
 
 \medskip\noindent\begin{tabular}{ll}
 \verb"-help"               & Short command line options help
@@ -202,7 +200,7 @@ See the key bindings in the appendix.
 
 \subsection {Using and making special effects}
 
-\ActiveDVI~can be used as is, but will shine when driven by a user
+{\ActiveDVI} can be used as is, but will shine when driven by a user
 with a bias toward programming: special effects can easily 
 be realized by using the \LaTeX package provided with the distribution. 
 
@@ -223,8 +221,8 @@ to read their source code and copy the effects they provide.
 
 \section {The {\tt advi.sty} \LaTeX~package}
 
-\ActiveDVI~provides some \LaTeX~packages to facilitate animations and
-interaction with the presenter from within your \LaTeX source text.
+{\ActiveDVI} provides some {\LaTeX} packages to facilitate animations and
+interaction with the presenter from within your {\LaTeX} source text.
 
 The {\tt advi} package is the main package to include when writing
 a presentation for \ActiveDVI. It provides the main set of interactive
@@ -712,7 +710,7 @@ PS relies on {\tt ghostscript} to display Postscript inlined specials.
 However, some earlier releases of {\tt ghostscript} 
 implements Postscript {\tt flushpage} command as a {\tt XFlush} call
 which does not force the evaluation of commands, and thus makes the 
-synchronization between {\tt ghostscript} and \ActiveDVI~drawings 
+synchronization between {\tt ghostscript} and {\ActiveDVI} drawings 
 uncontrollable. In this case, the interleaving of inlined postscript 
 and other material may be inconsistent. 
 
