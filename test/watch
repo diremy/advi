@@ -2,7 +2,7 @@
 
 proc show_time {} {
     global time
-    set time [clock format [clock seconds] -format "%r"]
+    set time [exec date +%r]
     after 1000 show_time
 }
 
