@@ -123,6 +123,8 @@ let named_colors =
 
 let find_named_color n = Hashtbl.find named_colors (String.lowercase n);;
 
+let default_color = find_named_color "gray";;
+
 let parse_color s =
   (*prerr_endline ("Parsing " ^ s);*)
   (* Try known colors *)
@@ -137,27 +139,48 @@ let parse_color s =
       rgb r g b
     with _ ->
       (* Try an explicit 0xFFFFFF integer *)
-      try int_of_string s
-        (* Otherwise emit a warning and give a default gray *)
-      with Failure _ ->
-        Misc.warning (Printf.sprintf "unknown color %s." s);
-        find_named_color "gray";;
+      int_of_string s;;
+
+let cautious_parse_color s =
+  (* Try the regular way first. *)
+  try parse_color s
+  (* It it fails, emit a warning and give a default gray *)
+  with Failure _ ->
+    Misc.warning (Printf.sprintf "unknown color %s." s);
+    default_color;;
 
 let parse_color_args = function
-  | ["rgb"; rs; gs; bs] ->
-      let r = int_of_float (255.0 *. float_of_string rs)
-      and g = int_of_float (255.0 *. float_of_string gs)
-      and b = int_of_float (255.0 *. float_of_string bs) in
-      rgb r g b
-  | ["cmyk"; cs; ms; ys; ks] ->
-      let c = float_of_string cs
-      and m = float_of_string ms
-      and y = float_of_string ys
-      and k = float_of_string ks in
-      cmyk c m y k
-  | [("gray" | "grey"); gs] ->
-      let g = int_of_float (255.0 *. float_of_string gs) in
-      rgb g g g
-  | [s] -> parse_color s
-  | _ -> 0x000000;;
-
+  | [("rgb" as s); rs; gs; bs] ->
+      (try
+         let r = int_of_float (255.0 *. float_of_string rs)
+         and g = int_of_float (255.0 *. float_of_string gs)
+         and b = int_of_float (255.0 *. float_of_string bs) in
+         rgb r g b
+       with
+       | Failure _ ->
+          Misc.warning
+            (Printf.sprintf "cannot understand %s color parameters." s);
+          default_color)
+  | [("cmyk" as s); cs; ms; ys; ks] ->
+      (try
+         let c = float_of_string cs
+         and m = float_of_string ms
+         and y = float_of_string ys
+         and k = float_of_string ks in
+         cmyk c m y k
+       with
+       | Failure _ ->
+          Misc.warning
+            (Printf.sprintf "cannot understand %s color parameters." s);
+          default_color)
+  | [("gray" | "grey" as s); gs] ->
+      (try 
+         let g = int_of_float (255.0 *. float_of_string gs) in
+         rgb g g g
+       with
+       | Failure _ ->
+          Misc.warning
+            (Printf.sprintf "cannot understand %s color parameters." s);
+          default_color)
+  | [s] -> cautious_parse_color s
+  | _ -> default_color;;

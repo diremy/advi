@@ -34,7 +34,7 @@ let fake_embed_app command app_mode app_name width height x gry =
 
 (* The function that launches all embedded applications.
    When encountering an embedded application, a call to raw_embed_app
-   is stored in the list of application to launch at next pause
+   is stored in the list of applications to launch at next pause
    in the [embeds] list reference.
 
    This function allocates a (sub)window for the application and tries
@@ -185,7 +185,7 @@ let embed_app command app_mode app_name width height x gry =
       (fun () ->
         (* prerr_endline ("Moving " ^ app_name); *)
         move_or_resize_persistent_app command app_mode app_name
-        width height x gry)
+          width height x gry)
   | Persistent ->
      if not (already_launched app_name) then
      Launch.add_embed

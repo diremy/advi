@@ -1161,7 +1161,7 @@ let html_special st html =
                 Dev.H.Box
           with Not_found -> Dev.H.Box in
         let color =
-          try Some (Dvicolor.parse_color (List.assoc "color" rest))
+          try Some (Dvicolor.parse_color_args [List.assoc "color" rest])
           with Not_found -> None in
         let advi x =
           let play () = proc_special st ("advi: proc=" ^ x ^ " play") in
