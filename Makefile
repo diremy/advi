@@ -115,9 +115,9 @@ veryclean: clean
 veryveryclean: veryclean
 	rm -f configure
 
-installopt:install
-install:: opt doc/splash.dvi
-	cp advi.opt ${bindir}/advi
+installopt: install
+install:: $(INSTALLTARGET) doc/splash.dvi
+	cp $(INSTALLTARGET) ${bindir}/advi
 	- mkdir -p $(ADVI_LOC)
 	cp doc/splash.dvi tex/advilogo.eps tex/caml.eps tex/bar.jpg.eps tex/*.sty tex/advi.pro $(ADVI_LOC)
 	if [ -f conf/jpfonts.conf ]; then cp conf/jpfonts.conf $(ADVI_LOC); fi

@@ -1,15 +1,40 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(main.ml)
 
-dnl try to find your compiler package
-AC_MSG_CHECKING(your compiler package)
-
+dnl try to find ocaml
 CAML=ocaml
+AC_PATH_PROG(PATH_CAML, $CAML, "nope") 
+if test "$PATH_CAML" = "nope"; then
+  echo "***************** Error *******************"
+  echo "ocaml not found."
+  echo "Install the latest ocaml system"
+  echo "and check your PATH contains ocamlc."
+  echo "*******************************************"
+  exit -1
+fi
+
+dnl try to find your compiler package
+AC_MSG_CHECKING(your compiler version)
 
 CAMLDIR=`"$CAML"c -v | grep "^Standard" | sed "s/.*: *//"`
 CAMLVERSION=`"$CAML"c -v | grep "compiler" | sed 's/.* version //' | sed 's/ .*$//'`
 
 AC_MSG_RESULT(version $CAMLVERSION at $CAMLDIR)
+
+CAMLOPT="$CAML"opt
+AC_PATH_PROG(PATH_CAMLOPT, $CAMLOPT, "nope")
+if test "$PATH_CAMLOPT" = "nope"; then
+  echo "**************** Warning ******************"
+  echo "ocaml native code compiler is not found"
+  echo "Only the bytecode version of Advi will be"
+  echo "compiled and installed. We strongly recommend"
+  echo "to install the ocamlopt compiler if available"
+  echo "in your OS."
+  echo "*******************************************"
+  INSTALLTARGET="advi"
+else
+  INSTALLTARGET="advi.opt"
+fi
 
 dnl Checking cdk_config
 AC_PATH_PROG(PATH_CDK, cdk_config, "nope")
@@ -121,7 +146,6 @@ fi
 dnl Checking gs:
 
 PATH_GS="nope"
-AC_MSG_CHECKING(for gs)
 AC_ARG_WITH(gs, [  --with-gs=path          specify gs path],
   if test "$withval" != "no" ; then  
 	PATH_GS=$withval
@@ -135,11 +159,12 @@ fi
 
 dnl check gs really exists and its version
 if test -f "$PATH_GS" ; then
+  AC_MSG_CHECKING(for gs version) 
   HAVE_GS="true"
   GS_VERSION=`$PATH_GS -v | grep Ghostscript | sed -e 's/.*Ghostscript \([[0-9\.]]*\).*/\1/'`
   GS_VERSION_INT=`echo $GS_VERSION | sed -e 's/\.//'`
   if test `expr $GS_VERSION_INT \>= 6.52` != "1"; then
-    AC_MSG_RESULT(found, but too old)
+    AC_MSG_RESULT(too old)
     GS_UPTO_DATE="*** TOO OLD ***"
     echo "**************** Warning ********************"
     echo "Your Ghostscript $GS_VERSION may be too old  "
@@ -149,7 +174,7 @@ if test -f "$PATH_GS" ; then
     echo "*********************************************"
   else
     GS_UPTO_DATE=""	
-    AC_MSG_RESULT(found)
+    AC_MSG_RESULT(ok)
   fi
 else
   AC_MSG_RESULT(no)
@@ -184,6 +209,7 @@ AC_SUBST(PATH_GZIP)
 AC_SUBST(HAVE_CAMLTK)
 AC_SUBST(CAMLTKDIR)
 AC_SUBST(CAMLTKLIB)
+AC_SUBST(INSTALLTARGET)
 
 dnl BUILD OUR OWN LIBDIR
 myprefix=$prefix
