@@ -1123,31 +1123,26 @@ page).
 
 \subsubsection{PStricks}
 
-{\ActiveDVI} can deal with most of PStricks. 
+{\ActiveDVI} can deal with main PStricks. In particular, 
+the following work
 \begin {itemize}
 
 \item[+]
-Simple drawings work
-
-\item[+] 
-{\tt\string\SpecialCoor} works, {\em i.e.} commands of the form
-{\tt \string \rput \{A\}\{bla bla\}} works where {\tt A} is a node
+Simple drawings, such as \verb"\psframe", \verb"\ovalnode", \ldots.
 
 \item[+]
 Connections between nodes {\tt \string \ncarc}, {\tt \string \ncarc},
 also works.
-\end {itemize}
-However, some PStricks are known not to work.
-\begin{itemize}
-\item[--]
+
+\item[+]
 Labels over arrows \verb"\Aput", \verb"Bput", etc.
-(they change the Postscript coordinates...)
 
-\item[--]
-{\tt pspicture}
-(idem, but drawings that are not embedded in pspictures work).
+\item[+] 
+{\tt\string\SpecialCoor}, {\em i.e.} commands of the form
+{\tt \string \rput (A)\{bla bla\}} works where {\tt A} is a node name. 
 
 \end {itemize}
+However, some other PStricks may not to work.
 
 
 \section{Auxiliary {\LaTeX} packages}

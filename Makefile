@@ -155,7 +155,7 @@ install:: $(INSTALLTARGET) $(HELPFILES)
 	- install -d $(ADVI_LOC)
 	install -m 644 $(HELPFILES) tex/advilogo.eps tex/caml.eps \
 		tex/bar.jpg.eps \
-		tex/*.sty tex/advi.pro $(ADVI_LOC)
+		tex/*.sty $(ADVI_LOC)
 	if [ -f conf/jpfonts.conf ]; then \
 		install -m 644 conf/jpfonts.conf $(ADVI_LOC); fi
 	texhash

@@ -25,8 +25,7 @@ val add_headers : (bool * string) list -> unit;;
 val newpage : (bool * string) list -> int -> float -> int -> int -> unit;;
 val flush : unit -> unit;;
 val toggle_antialiasing : unit -> unit;;
-val current_x : int ref;;
-val current_y : int ref;;
+val current_point : unit -> int * int;;
 
 val get_do_ps : unit -> bool;;
 val set_do_ps : bool -> unit;;

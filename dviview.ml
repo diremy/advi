@@ -784,7 +784,6 @@ let reload_time st =
   with _ -> st.last_modified;;
 
 let reload st =
-  prerr_endline "reloading";
   try
     Grdev.clear_usr1();
     st.last_modified <- reload_time st;

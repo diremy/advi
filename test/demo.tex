@@ -390,26 +390,35 @@ material itself.
 \subsubsection* {Most PS-tricks do work}
 \begin {itemize}
 
-\item[+] Simple drawings work
+\item[+]
+Simple drawings, such as \verb"\psframe", \verb"\ovalnode", \ldots.
+\begin{quote}
+\ovalnode{A}{oval} \hspace {4em}
+\Rnode{R}{\psframebox{rectangle}}\pnode{right}
+\end{quote}
 
-\item[+] {\tt\string\SpecialCoor} works, {\em i.e.} commands of the form
-{\tt \string \rput \{A\}\{bla bla\}} works where {\tt A} is a node
-
-\item[+] Connections between nodes {\tt \string \ncarc}, {\tt \string \ncarc},
+\item[+]
+Connections between nodes {\tt \string \ncarc}, {\tt \string \ncarc},
 also works.
+\ncarc{->}{A}{R}
+
+\item[+]
+Labels over arrows \verb"\Aput", \verb"\Bput", etc.
+\Bput{\rnode{L}{label}}
+
+\item[+] 
+{\tt\string\SpecialCoor}, {\em i.e.} commands of the form
+{\tt \string \rput (A)\{bla bla\}} works where {\tt A} is a node name. 
+\SpecialCoor
+\rput[b](right){\rlap{\em right of rectangle}}
+(Of course rotations of text do not work.)
 \end {itemize}
 
 \subsubsection*{Limitations of Postscript specials}
 
-Unfortunately, some PS-tricks do not work, yet
-
+Unfortunately, some PS-tricks may not work. 
+Known limitations are: 
 \begin{itemize}
-\item[-] Labels over arrows \verb"\Aput", \verb"Bput", etc.
-(they change the Postscript coordinates \ldots)
-
-\item[-] {\tt pspicture} (idem, but drawings that are not embedded in
-pspictures works)
-
 \item[-] {\ActiveDVI} only recognizes binary overlays (display if 0,
 hide otherwise). This is sufficient for the prosper documentclass (see
 \hyperlink {overlays}{below}).
@@ -418,11 +427,10 @@ hide otherwise). This is sufficient for the prosper documentclass (see
 
 \subsubsection*{Known bug with PS tricks}
 
-With some versions of \verb"gv" and/or \verb"X11", the PS tricks are not
+With some old versions of \verb"gv" and/or \verb"X11", the PS tricks are not
 correctly synchronized. Some drawings may hide text, or conversely.
 
 % Examples: 
-
 % \Rnode {A}{A} \qquad \Rnode {B}{B}
 % \ncline{->}{A}{B} \Aput{L}
 

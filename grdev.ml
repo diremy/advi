@@ -104,7 +104,14 @@ let waiting = ref false;;
 let usr1 = Sys.sigusr1;;
 let usr1_status = ref false;;
 exception Watch_file
-let watch_file_interval = 1.0;;
+let watch_file_interval = ref 0;;
+Options.add
+  "-watch-file"
+  (Arg.Int (fun x -> watch_file_interval := x))
+  "<int> watch for newer file every <int> second. \
+  \n\t 0 means do not watch (default value)"
+;;
+
 let watch_file_check() = if !waiting then raise Watch_file
 
 let clear_usr1 () = usr1_status := false;;
@@ -1146,8 +1153,9 @@ let open_dev geom =
   GraphicsY11.init ();
   Timeout.init ();
   (* Fill the event queue *)
-  Timeout.repeat 0.25 GraphicsY11.retrieve_events; 
-  Timeout.repeat watch_file_interval watch_file_check; 
+  Timeout.repeat 0.25 GraphicsY11.retrieve_events;
+  if !watch_file_interval > 0 then
+    Timeout.repeat (float !watch_file_interval) watch_file_check; 
 
   update_device_geometry ();
   Graphics.remember_mode true;
@@ -1276,31 +1284,35 @@ let resized () =
   else None;;
 
 let rec wait_signal_event events =
-    match resized (), !usr1_status, event_waiting () with
-    | Some (x, y), _, _ -> Final (Resized (x, y))
-    | _, true, _ -> clear_usr1 (); Final (Refreshed)
-    | _, _, true -> Raw (pop_event ())
-    | _, _, _ ->
-       try
-         waiting := true;
-         let ev = GraphicsY11.wait_next_event events in
-         waiting := false;
-         match resized () with
-         | Some (x, y) ->
-             push_back_event ev;
-             Final (Resized (x, y))
-         | None ->
-             Raw ev
-       with
-       | Usr1 ->
-           waiting := false;
-           Final Refreshed
-       | Watch_file ->
-           waiting := false;
-           Final Nil
-       | exn ->
-           waiting := false;
-           raise exn;;
+  match resized (), !usr1_status, event_waiting () with
+  | Some (x, y), _, _ -> Final (Resized (x, y))
+  | _, true, _ -> clear_usr1 (); Final (Refreshed)
+  | _, _, true -> Raw (pop_event ())
+  | _, _, _ ->
+      let rec wait() = 
+        try
+          waiting := true;
+          let ev = GraphicsY11.wait_next_event events in
+          waiting := false;
+          match resized () with
+          | Some (x, y) ->
+              push_back_event ev;
+              Final (Resized (x, y))
+          | None ->
+              Raw ev
+        with
+        | Usr1 ->
+            waiting := false;
+            Final Refreshed
+        | Watch_file ->
+            waiting := false;
+            if List.mem GraphicsY11.Key_pressed events then Final Nil
+            else wait()
+        | exn ->
+            waiting := false;
+            raise exn in
+      wait()
+;;
 
 let wait_select_rectangle x y =
   let rec select dx dy =
@@ -1592,8 +1604,8 @@ let continue () =
 
 let current_pos () =
   if not !last_is_dvi then flush_ps ();
-  let x = !Gs.current_x and y = !Gs.current_y in
-  x, y;;
+  let x, y = Gs.current_point() in
+  x, !size_y - y;;
 
 let newpage x y z t w =
   Gs.newpage x y z t w;

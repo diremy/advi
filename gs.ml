@@ -64,14 +64,10 @@ let current_y = ref 0;;
 let parse_pos s =
   let c = String.index s ',' in
   let bc = s.[3] in
-  let b =
-    match s.[3] with
-    | 'a' -> true
-    | 'r' -> false
-    | _ -> assert false in
-  let left = String.sub s 4 (c - 4) in
-  let right = String.sub s (c + 1) (String.length s - c - 1) in
-  b, Misc.round (float_of_string left), Misc.round (float_of_string right);;
+  (* y comes first, then x *)
+  let y = String.sub s 3 (c - 3) in
+  let x = String.sub s (c + 1) (String.length s - c - 1) in
+  Misc.round (float_of_string x), Misc.round (float_of_string y);;
 
 let ack_request =
   String.concat ""
@@ -233,12 +229,7 @@ class gs () =
           if Misc.has_prefix pos_string s then
             begin
               try
-                let b, y, x = parse_pos s in
-                let x, y =
-                  if b then x, y else x + !current_x, y + !current_y in
-                if !pstricks then
-                  Printf.fprintf stderr "<-- %s %d %d\n"
-                    (if b then "-" else "+") x y;
+                let x, y = parse_pos s in
                 current_x := x; current_y := y
               with
               | Not_found | Failure _ -> Misc.warning s
@@ -262,7 +253,6 @@ class gs () =
     method line l =
       try
         showps l;
-(*prerr_endline (Printf.sprintf "Calling GS#LINE with\n\t\t %s" l);*)
         output_string leftout l;
         output_char leftout '\n';
       with exc ->
@@ -279,7 +269,6 @@ class gs () =
           Misc.warning (Printf.sprintf "%s\nContinuing without gs\n" s)
 
     method ps b =
-(*prerr_endline (Printf.sprintf "Calling GS#PS with\n\t\t %s" (String.concat " " b));*)
       List.iter self#line b;
 
     method load_header (b, h) =
@@ -288,10 +277,18 @@ class gs () =
 
   end;;
 
+let advi_pro =
+"/advi@floatstring 20 string def
+/advi@printfloat { advi@floatstring cvs print } def
+/advi@CP {
+CM [1 0 0 -1 0 0] setmatrix
+    CP (dvi) print advi@printfloat  (,) print advi@printfloat (\n) print 
+setmatrix } def";;
+
 let texbegin = "TeXDict begin";;
 let texend = "flushpage end";;
 let moveto x y =
-  current_x := x; current_y := y; 
+  (*   current_x := x; current_y := y; *)
   Printf.sprintf "%d %d moveto" x y
 ;;
 
@@ -326,10 +323,15 @@ class gv =
         process <- None;
         raise Terminated
     method moveto x y =
-      let x' = xorig + x in
+      let x' = x + xorig in
       let y' = y - yorig  in
-      if !pstricks then Printf.fprintf stderr "--> %d %d\n" x' y';
       moveto x' y'
+
+    method current_point =
+      let x' = !current_x in
+      let y' = !current_y + (self # process # gr).height in
+      x', y'
+
     method check_size =
       begin
         match process with
@@ -399,7 +401,6 @@ class gv =
     method process =
       match process with
       | None ->
-(*prerr_endline (Printf.sprintf "Launching new gs interpreter");*)
           if not (get_do_ps ()) then raise Terminated;
           let gs = new gs () in
           if headers = [] then headers <-  texc_special_pro self;
@@ -407,9 +408,7 @@ class gv =
           showps "%!PS-Adobe-2.0\n%%Creator: Active-DVI\n%!";
           gs # line "[1 0 0 -1 0 0] concat";
           List.iter (gs # load_header) headers;
-          gs # line "/floatstring 20 string def";
-          gs # line "{ floatstring cvs print } /printfloat def";
-          gs # line "{ floatstring cvs print } /printcp def";
+          gs # line advi_pro;
           gs # line "TeXDict begin @landscape end";
           gs # line "/SI save def gsave";
           process <- Some gs;
@@ -493,6 +492,9 @@ let draw s x y =
 
 let draw_file fname x y =
   draw (Printf.sprintf "psfile: (%s) run" fname) x y;;
+
+let current_point() =
+    gv#current_point;;
 
 let add_headers = gv#add_headers;;
 

@@ -151,7 +151,7 @@ type reg_set = {
     reg_w : int;
     reg_x : int;
     reg_y : int;
-    reg_z : int
+    reg_z : int;
   };;
 
 type state = {
@@ -171,6 +171,7 @@ type state = {
     mutable x : int;
     mutable y : int;
     mutable z : int;
+    mutable put : (int * int) list;
     (* Register stack *)
     mutable stack : reg_set list;
     (* Color & Color stack *)
@@ -1181,21 +1182,28 @@ let tpic_specials st s =
   | _ -> ();;
 (* End of TPIC hacks *)
 
-let moveto_special st b s =
+let put_special st s =
   if Gs.get_do_ps () then
-    let x, y = Dev.current_pos () in
-    if b then begin
-       st.h <- Misc.round (* int_of_float *) (float (x - st.x_origin) /. st.conv);
-       st.v <- Misc.round (* int_of_float *) (float (y - st.y_origin) /. st.conv);
-    end else begin
-       st.h <- st.h + Misc.round (* int_of_float *) (float x /. st.conv);
-       st.v <- st.v + Misc.round (* int_of_float *) (float y /. st.conv);
-    end;;
+    if s = "begin" then
+      let x, y = Dev.current_pos () in
+      (* we get absolute coordinates and convert them *)
+      let h' = Misc.round (float (x - st.x_origin) /. st.conv) in
+      let v' = Misc.round (float (y - st.y_origin) /. st.conv) in
+      st.put <- (st.h - h', st.v - v') :: st.put;
+      st.h <- h'; st.v <- v'
+    else if s = "end" then
+      match st.put with _ :: tail -> st.put <- tail | _ -> () 
+;;
+
+let rec put_coor x y = function
+    (dx, dy) :: tail -> put_coor (x + dx) (y + dy) tail
+  | [] -> x, y
 
 let ps_special st s =
   if Gs.get_do_ps () && st.status.Dvi.hasps then
-     let x = Misc.round (* int_of_float *) (st.conv *. float st.h) in
-     let y = Misc.round (* int_of_float *) (st.conv *. float st.v) in
+     let h', v' = put_coor st.h st.v st.put in
+     let x = Misc.round (* int_of_float *) (st.conv *. float h') in
+     let y = Misc.round (* int_of_float *) (st.conv *. float v') in
      if !visible then
        begin try
          Dev.exec_ps s x y
@@ -1318,9 +1326,9 @@ let scan_special_page otherwise cdvi globals pagenum =
 
 let special st s =
   if has_prefix "\" " s ||
-     has_prefix "ps: " s || has_prefix "! " s then ps_special st s else
-  if has_prefix "advi: moveto" s then moveto_special st true s else
-  if has_prefix "advi: rmoveto" s then moveto_special st false s else
+     has_prefix "ps: " s || has_prefix "! " s then ps_special st s  else
+  if has_prefix "advi: put" s then
+    put_special st (get_suffix "advi: put" s) else
 
   (* Other specials *)
   if has_prefix "color " s then color_special st s else
@@ -1486,7 +1494,7 @@ let render_step cdvi num ?trans ?chst dpi xorig yorig =
       cur_mtable = dummy_mtable;
       cur_gtable = dummy_gtable;
       cur_font = dummy_font;
-      h = 0; v = 0; w = 0; x = 0; y = 0; z = 0;
+      h = 0; v = 0; w = 0; x = 0; y = 0; z = 0; put = [];
       stack = []; color = Dev.get_fgcolor (); color_stack = [];
       alpha = 1.0; alpha_stack = [];
       blend = Drawimage.Normal; blend_stack = [];
