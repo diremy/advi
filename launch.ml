@@ -16,10 +16,7 @@
 (***********************************************************************)
 
 (* Unix command line parser *)
-let parse_shell_command str =
-  let p c = c = ' ' in
-  let arglist = Misc.split_string str p 0 in
-  Array.of_list arglist;;
+let pase_shell_command = Rc.argv_of_string;;
 
 (* Handling forking problems: only father process can call the at_exit
    function, sons of the main process must leave without calling it.
@@ -87,6 +84,7 @@ let cannot_execute_command command_invocation =
 
 (* Opening a terminal to ask something to the user. *)
 open Gterm;;
+
 let ask_user t s1 s2 s3 =
  vtab t 16; htab t 15; print_str t s1;
  vtab t 12; htab t 10; print_str t s2;
@@ -96,33 +94,59 @@ let ask_user t s1 s2 s3 =
  | "yes" -> true
  | _ -> false;;
 
-let ask_to_launch command =
+let ask_to_launch command command_invocation =
+ let ncol, nlines = 80, 24 in
+ let bw = 25 in
+
+ let sx, sy = Graphics.text_size "X" in
+ let wt, ht = sx * ncol, sy * nlines in
+ let xc, yc =
+  (Graphics.size_x () - wt) / 2, (Graphics.size_y () - ht) / 2 in
+
  prerr_endline "Asking before launching";
  let t =
    make_term_gen
      Graphics.green Graphics.black
-     25 Graphics.red
+     bw Graphics.red Graphics.black
      0x6FFFFF
-     50 80 24 80 in
+     xc yc nlines ncol in
+ Gterm.set_title t (Printf.sprintf "Active-DVI alert for %s" command);
  draw_term t;
  ask_user t
   "Attempt to launch the following command"
-  command
-  "Do you want to execute it ? <yes/no> " ;;
+  command_invocation
+  "Do you want to execute it ? <yes/no> ";;
 
-let can_launch command_invocation = function
+let can_launch command command_invocation =
+  match !policy with
   | Exec -> true
   | Safer -> false
-  | Ask -> ask_to_launch command_invocation;;
+  | Ask -> ask_to_launch command command_invocation;;
+
+let can_execute_table = Hashtbl.create 11;;
+
+let can_execute command_invocation command_tokens =
+  let command = command_tokens.(0) in
+prerr_endline command;
+  try Hashtbl.find can_execute_table command
+  with
+  | Not_found ->
+      let b = can_launch command command_invocation in
+prerr_endline (Printf.sprintf "can = %b" b);
+      Hashtbl.add can_execute_table command b;
+      b;;
+
+let can_execute_command command_invocation =
+  let command_tokens = parse_shell_command command_invocation in
+  can_execute command_invocation command_tokens;;
 
 let execute_command can_exec command_invocation command_tokens =
   if can_exec then Unix.execvp command_tokens.(0) command_tokens
   else cannot_execute_command command_invocation;;
 
-let fork_process command_invocation = 
-  let command_tokens = parse_shell_command command_invocation in
-  let can_exec = can_launch command_invocation !policy in
-prerr_endline (Printf.sprintf "Can_exec %b" can_exec);
+let fork_proc command_invocation command_tokens =
+  let can_exec = can_execute command_invocation command_tokens in
+  (*prerr_endline (Printf.sprintf "Can_exec %b" can_exec);*)
   let pid = Unix.fork () in
   if pid = 0 then
     begin (* child *)
@@ -130,11 +154,15 @@ prerr_endline (Printf.sprintf "Can_exec %b" can_exec);
         execute_command can_exec command_invocation command_tokens;
 	exit 0
       with
-      | Unix.Unix_error (e, _, arg) -> 
+      | Unix.Unix_error (e, _, arg) ->
 	  Misc.warning (Printf.sprintf "%s: %s" (Unix.error_message e) arg);
 	  exit 127
     end;
   pid;;
+
+let fork_process command_invocation =
+  let command_tokens = parse_shell_command command_invocation in
+  fork_proc command_invocation command_tokens;;
 
 (* Support for white run via -n option *)
 
