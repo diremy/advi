@@ -51,6 +51,26 @@ else
 	CAMLIMAGESLIBS=""
 fi
 
+dnl CamlTk
+
+CAMLTKDIR=$CAMLDIR/camltk
+
+AC_ARG_WITH(camltk, [  --with-camltk=dir      specify camltk library directory],
+  if test "$withval" != "no" ; then  
+	CAMLTKDIR=$withval
+  else
+	CAMLTKDIR=nope
+  fi)
+
+if test -f $CAMLTKDIR/camltk.cma || $HAVE_CDK; then
+	echo "CamlTk: ok"
+	HAVE_CAMLTK="true"
+else
+	HAVE_CAMLTK="false"
+fi
+
+dnl Check for libraries: END
+
 AC_PATH_XTRA
 WITH_X="$X_LIBS $X_PRE_LIBS -lX11 $X_EXTRA_LIBS"
 
@@ -99,6 +119,7 @@ echo -------------------------------------------------- Configuration finished
 echo Language:            $CAML version $CAMLVERSION
 echo cdk_config:          $HAVE_CDK
 echo Camlimages:          $HAVE_CAMLIMAGES
+echo CamlTk:              $HAVE_CAMLTK
 echo GS:		  $HAVE_GS
 echo Resources:           $ADVI_LOC/
 echo -------------------------------------------------------------------------

@@ -5,33 +5,31 @@ TEXINPUTS := ../lib/tex:$(TEXINPUTS)
 RM=/bin/rm -f
 
 LATEX=TEXINPUTS=.:/usr/share/texmf//:$$TEXINPUTS; export TEXINPUTS; latex
+PLATEX=TEXINPUTS=.:/usr/share/texmf//:$$TEXINPUTS; export TEXINPUTS; platex
 
+ifeq ($(HAVE_CAMLTK),true)
 MLPROG=taquin
+else
+MLPROG=
+endif
 
-all: demo.dvi trigo_source.dvi ./trans.dvi trans2.dvi background.dvi \
+all: demo.dvi trigo_source.dvi trans.dvi trans2.dvi background.dvi \
      $(MLPROG) 
 
 .tex.dvi: ../tex/bar.jpg.eps
-	$(LATEX) $<
-
-# but: start_embed.ml
-# ifeq ($(HAVE_CDK),true)  
-# 	  ocamlc -custom -o but `cdk_config camltk` start_embed.ml
-# else
-# 	  ocamlc -custom -o but -I +camltk camltk.cma start_embed.ml
-# endif
+	if test "$<" = "jpdemo.tex" ; then $(PLATEX) $<; \
+	else $(LATEX) $<; \
+	fi 
 
 taquin: taquin_embed.ml
 ifeq ($(HAVE_CDK),true)
 	ocamlc -custom -o taquin `cdk_config camltk` taquin_embed.ml
 else
-	ocamlc -custom -o taquin -I +camltk camltk.cma taquin_embed.ml
+	ocamlc -custom -o taquin -I $(CAMLTKDIR) camltk.cma taquin_embed.ml
 endif
 
-# We do not remove jpdemo.dvi, because only Furuse can make it at Cristal.
 clean:
-	$(RM) a.out *.aux *.log 
-	$(RM) demo.dvi trans.dvi trans2.dvi background.dvi trigo_source.dvi *~
+	$(RM) a.out *.aux *.log *.dvi *~ 
 	$(RM) $(MLPROG) *.cmi *.cmo
 	$(RM) .advi/*
 
