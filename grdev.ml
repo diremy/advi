@@ -38,6 +38,7 @@ Options.add
 ;;
 
 type color = Graphics.color;;
+
 let href_frame_color = 0x00ff00;;
 let advi_frame_color = 0xaaaaff;;
 let rect_emphasize_color = Graphics.blue;;
@@ -229,16 +230,19 @@ type viewport = {vx : x; vy : y; vw : w; vh : h};;
 (* The Background preferences                    *)
 type bkgd_prefs = {
   mutable bgcolor : color;
-  mutable bgcolorstart : color;
+  mutable bgcolorstart : color option;
+  mutable bgcolorstop : color option;
   mutable bgimg : string option;
   mutable bgratiopt : Drawimage.ratiopt;
   mutable bgwhitetransp : bool;
   mutable bgalpha : Drawimage.alpha;
   mutable bgblend : Drawimage.blend;
-  mutable bgxstart : int;
-  mutable bgystart : int;
-  mutable bgwidth : int;
-  mutable bgheight : int;
+  mutable bgxstart : x;
+  mutable bgystart : y;
+  mutable bgwidth : x;
+  mutable bgheight : y;
+  mutable bgxcenter : x option;
+  mutable bgycenter : y option;
   mutable bgviewport: viewport option;
   (* hook for sophisticated programmed graphics backgrounds *)
   mutable bgfunction: (bgfunarg -> unit) option;
@@ -246,16 +250,38 @@ type bkgd_prefs = {
 
 and bgfunarg = {
  argcolor : color;
- argcolorstart : color;
+ argcolorstart : color option;
+ argcolorstop : color option;
+ argxcenter : x option;
+ argycenter : y option;
  argfunviewport : viewport;
  argviewport : viewport;
 };;
+
+(* The type of the options that drive the background drawing. *)
+type bgoption =
+   | BgColor of color
+   | BgColorStart of color
+   | BgColorStop of color
+   | BgImg of Misc.file_name
+   | BgAlpha of Drawimage.alpha
+   | BgBlend of Drawimage.blend
+   | BgRatio of Drawimage.ratiopt
+   | BgViewport of viewport option
+   | BgXStart of float
+   | BgYStart of float
+   | BgHeight of float
+   | BgWidth of float
+   | BgXCenter of float
+   | BgYCenter of float
+   | BgFun of (bgfunarg -> unit) option;;
 
 let full_screen_view () = {vx = !xmin; vy = !ymin; vw = !size_x; vh = !size_y};;
 
 let default_bkgd_prefs c = {
     bgcolor = c;
-    bgcolorstart = Graphics.white;
+    bgcolorstart = None;
+    bgcolorstop = None;
     bgimg = None;
     bgratiopt = Drawimage.ScaleAuto;
     bgwhitetransp = false;
@@ -266,6 +292,8 @@ let default_bkgd_prefs c = {
     bgystart = 0;
     bgwidth = max_int;
     bgheight = max_int;
+    bgxcenter = None;
+    bgycenter = None;
     bgfunction = None;
 };;
 
@@ -318,6 +346,7 @@ let default_bkgd_data () = default_bkgd_prefs (get_bgcolor ());;
 let blit_bkgd_data s d =
   d.bgcolor <- s.bgcolor;
   d.bgcolorstart <- s.bgcolorstart;
+  d.bgcolorstop <- s.bgcolorstop;
   d.bgimg <- s.bgimg;
   d.bgratiopt <- s.bgratiopt;
   d.bgwhitetransp <- s.bgwhitetransp;
@@ -328,6 +357,8 @@ let blit_bkgd_data s d =
   d.bgystart <- s.bgystart;
   d.bgwidth <- s.bgwidth;
   d.bgheight <- s.bgheight;
+  d.bgxcenter <- s.bgxcenter;
+  d.bgycenter <- s.bgycenter;
   d.bgfunction <- s.bgfunction;;
 
 let copy_of_bkgd_data () =
@@ -392,10 +423,21 @@ let draw_bkgd () =
       let bgfunarg = {
         argcolor = bkgd_data.bgcolor;
         argcolorstart = bkgd_data.bgcolorstart;
+        argcolorstop = bkgd_data.bgcolorstop;
+        argxcenter = bkgd_data.bgxcenter;
+        argycenter = bkgd_data.bgycenter;
         argfunviewport = funviewport;
         argviewport = viewport;
        } in
+      let string_of_color_opt = function 
+        | None -> "None"
+        | Some c -> Printf.sprintf "Some %d" c in
+      Misc.debug_endline (Printf.sprintf
+        "colors are {argcolor = %d; argcolorstart = %s; argcolorstop = %s}."
+        bkgd_data.bgcolor (string_of_color_opt bkgd_data.bgcolorstart)
+                          (string_of_color_opt bkgd_data.bgcolorstop));
       bgfunction bgfunarg end;
+  
   (* Background: image. *)
   let draw_bg file =
     Drawimage.f file bkgd_data.bgwhitetransp bkgd_data.bgalpha
@@ -405,26 +447,13 @@ let draw_bkgd () =
       (w, h) (x, y) in
   lift draw_bg bkgd_data.bgimg;;
 
-type bgoption =
-   | BgColor of color
-   | BgColorStart of color
-   | BgImg of Misc.file_name
-   | BgAlpha of Drawimage.alpha
-   | BgBlend of Drawimage.blend
-   | BgRatio of Drawimage.ratiopt
-   | BgViewport of viewport option
-   | BgXStart of float
-   | BgYStart of float
-   | BgHeight of float
-   | BgWidth of float
-   | BgFun of (bgfunarg -> unit) option;;
-
 let round_dim_x r = int_of_float (0.5 +. r *. float !size_x);;
 let round_dim_y r = int_of_float (0.5 +. r *. float !size_y);;
 
 let set_bg_option = function
   | BgColor c -> bkgd_data.bgcolor <- c
-  | BgColorStart c -> bkgd_data.bgcolorstart <- c
+  | BgColorStart c -> bkgd_data.bgcolorstart <- Some c
+  | BgColorStop c -> bkgd_data.bgcolorstop <- Some c
   | BgImg file -> bkgd_data.bgimg <- Some file
   | BgAlpha a -> bkgd_data.bgalpha <- a
   | BgBlend b -> bkgd_data.bgblend <- b
@@ -434,6 +463,8 @@ let set_bg_option = function
   | BgYStart y -> bkgd_data.bgystart <- round_dim_y y
   | BgWidth w -> bkgd_data.bgwidth <- round_dim_x w
   | BgHeight h -> bkgd_data.bgheight <- round_dim_y h
+  | BgXCenter x -> bkgd_data.bgxcenter <- Some (round_dim_x x)
+  | BgYCenter y -> bkgd_data.bgycenter <- Some (round_dim_y y)
   | BgFun f -> bkgd_data.bgfunction <- f;;
 
 let set_bg_options l = List.iter set_bg_option l;;
@@ -542,8 +573,8 @@ let get_glyph_image g col =
       img;;
 
 (*** Device manipulation ***)
-type 'a rect = { x : 'a; y : 'a; h : 'a; w : 'a };;
-let nobbox =  { x = 0; y = 0; w = 10; h = 10 };;
+type 'a rect = { rx : 'a; ry : 'a; rh : 'a; rw : 'a };;
+let nobbox =  { rx = 0; ry = 0; rw = 10; rh = 10 };;
 let bbox = ref nobbox;;
 
 let set_bbox bb =
@@ -552,7 +583,7 @@ let set_bbox bb =
   | None ->
       bbox := nobbox;
   | Some (x0, y0, w, h) ->
-      bbox := {x = x0; y = !size_y - y0; w = w; h = -h};;
+      bbox := {rx = x0; ry = !size_y - y0; rw = w; rh = -h};;
 
 (*** Drawing ***)
 let get_color, set_color =
@@ -996,17 +1027,17 @@ module E =
          *)
 
     let add rect info =
-      let r = { rect with y = !size_y - rect.y; } in
+      let r = { rect with ry = !size_y - rect.ry; } in
       figures := { rect = r; info = info} :: !figures;
       if !editing then
         begin
           Graphics.set_color Graphics.blue;
-          draw_rectangle r.x r.y r.w r.h;
+          draw_rectangle r.rx r.ry r.rw r.rh;
           let cv z = truncate (z *. info.unit) in
-          let ox = cv info.origin.x in
-          let oy = cv info.origin.y in
-          let x0 = r.x - ox in
-          let y0 = r.y - oy in
+          let ox = cv info.origin.rx in
+          let oy = cv info.origin.ry in
+          let x0 = r.rx - ox in
+          let y0 = r.ry - oy in
           Graphics.set_color Graphics.green;
           draw_line x0 y0 ox oy;
           draw_point x0 y0;
@@ -1015,10 +1046,10 @@ module E =
 
     let inside x y p  =
       let a = p.rect in
-      (if a.w > 0 then a.x <= x && x <= a.x + a.w
-      else  a.x + a.w <= x && x <= a.x) &&
-      (if a.h > 0 then a.y <= y && y <= a.y + a.h
-      else a.y + a.h <= y && y <= a.y)
+      (if a.rw > 0 then a.rx <= x && x <= a.rx + a.rw
+      else a.rx + a.rw <= x && x <= a.rx) &&
+      (if a.rh > 0 then a.ry <= y && y <= a.ry + a.rh
+      else a.ry + a.rh <= y && y <= a.ry)
     let find x y = List.find (inside x y) !figures
 
     let tostring p a =
@@ -1030,9 +1061,9 @@ module E =
       let action, dx, dy =
         match a with
         | Move (dx, dy) ->
-            "moveto", delta origin.x dx, delta origin.y (0 - dy)
+            "moveto", delta origin.rx dx, delta origin.ry (0 - dy)
         | Resize (dx, dy) ->
-            "resizeto", delta origin.w dx, delta origin.h (0 - dy) in
+            "resizeto", delta origin.rw dx, delta origin.rh (0 - dy) in
       Printf.sprintf "<edit %s %s #%s @%s %s %s,%s>"
         p.info.comm p.info.name p.info.line p.info.file action dx dy
 
@@ -1312,12 +1343,12 @@ type rect_transformation =
   | Resize_y;;
 
 (* Their implementations. *)
-let move_rect r dx dy = { r with x = r.x + dx; y = r.y + dy };;
-let move_rect_x r dx dy = { r with x = r.x + dx };;
-let move_rect_y r dx dy = { r with y = r.y + dy };;
-let resize_rect r dx dy = { r with w = r.w + dx; h = r.h + dy };;
-let resize_rect_x r dx dy = { r with w = r.w + dx };;
-let resize_rect_y r dx dy = { r with h = r.h + dy };;
+let move_rect r dx dy = { r with rx = r.rx + dx; ry = r.ry + dy };;
+let move_rect_x r dx dy = { r with rx = r.rx + dx };;
+let move_rect_y r dx dy = { r with ry = r.ry + dy };;
+let resize_rect r dx dy = { r with rw = r.rw + dx; rh = r.rh + dy };;
+let resize_rect_x r dx dy = { r with rw = r.rw + dx };;
+let resize_rect_y r dx dy = { r with rh = r.rh + dy };;
 
 let transform_rect = function
   | Move_xy -> move_rect
@@ -1337,18 +1368,18 @@ let transform_cursor = function
 
 (* ?? *)
 let filter trans event dx dy =
-  let r = trans { x = 0; y = 0; w = 0; h = 0; } dx dy in
-  event (r.x + r.w) (r.y + r.h);;
+  let r = trans { rx = 0; ry = 0; rw = 0; rh = 0; } dx dy in
+  event (r.rx + r.rw) (r.ry + r.rh);;
 
 let wait_move_button_up rect trans_type event x y =
   let trans = transform_rect trans_type in
   let cursor = transform_cursor trans_type in
   let rec move dx dy =
     let r = trans rect dx dy in
-    let buf = save_rectangle r.x r.y r.w r.h in
-    draw_rectangle r.x r.y r.w r.h;
+    let buf = save_rectangle r.rx r.ry r.rw r.rh in
+    draw_rectangle r.rx r.ry r.rw r.rh;
     let ev = wait_signal_event button_up_motion in
-    restore_rectangle buf r.x r.y r.w r.h;
+    restore_rectangle buf r.rx r.ry r.rw r.rh;
     match ev with
     | Raw e ->
         let dx' = e.GraphicsY11.mouse_x - x in

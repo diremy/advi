@@ -17,13 +17,18 @@
 
 (* $Id$ *)
 
+type x = GraphicsY11.x
+and y = GraphicsY11.y
+and w = GraphicsY11.w
+and h = GraphicsY11.h;;
+
 (* Private glyphs *)
 
 type glyph;;
 
 val make_glyph : Glyph.t -> glyph;;
 val get_glyph  : glyph -> Glyph.t;;
-val draw_glyph : glyph -> int -> int -> unit;;
+val draw_glyph : glyph -> x -> y -> unit;;
 
 module Symbol :
     sig
@@ -40,18 +45,18 @@ module Symbol :
         | Rule of int * int
         | Line of int * string option
       type element =
-          { color   : int;
-            locx    : int;
-            locy    : int;
+          { color   : Graphics.color;
+            locx    : x;
+            locy    : y;
             code    : int;
             symbol : symbol }
       type set
-      val voffset : element -> int
-      val hoffset : element -> int
-      val height : element -> int
-      val width : element -> int
+      val voffset : element -> y
+      val hoffset : element -> x
+      val height : element -> h
+      val width : element -> w
       val clear : unit -> unit
-      val add : int -> int -> int -> int -> symbol -> unit
+      val add : x -> y -> w -> h -> symbol -> unit
       val to_ascii   : set -> string
       val to_escaped : set -> string
       val commands_to_ascii:
@@ -78,7 +83,7 @@ val embed_app :
 
 (* Drawing *)
 
-type 'a rect = { x : 'a; y : 'a; h : 'a; w : 'a };;
+type 'a rect = { rx : 'a; ry : 'a; rh : 'a; rw : 'a };;
 
 type color = int;;
 val get_fgcolor : unit -> color;;
@@ -126,7 +131,7 @@ val draw_img :
   Drawimage.ratiopt ->
   Drawimage.antialias ->
   Drawimage.image_size ->
-  int -> int -> unit;;
+  x -> y -> unit;;
 (** [draw_img fname whitetransp alpha blend
      psbbox ratiopt antialias (width, height) x y]
   draws the image contained in file [fname] at location [x, y].
@@ -137,42 +142,45 @@ val draw_img :
 
 (* Background information *)
 
-type x = GraphicsY11.x
-and y = GraphicsY11.y
-and w = GraphicsY11.w
-and h = GraphicsY11.h;;
-
 type viewport = {vx : x; vy : y; vw : w; vh : h};;
 
 (* The Background preferences *)
 type bkgd_prefs = {
   mutable bgcolor : color;
-  mutable bgcolorstart : color;
+  mutable bgcolorstart : color option;
+  mutable bgcolorstop : color option;
   mutable bgimg : string option;
   mutable bgratiopt : Drawimage.ratiopt;
   mutable bgwhitetransp : bool;
   mutable bgalpha : Drawimage.alpha;
   mutable bgblend : Drawimage.blend;
-  mutable bgxstart : int;
-  mutable bgystart : int;
-  mutable bgwidth : int;
-  mutable bgheight : int;
+  mutable bgxstart : x;
+  mutable bgystart : y;
+  mutable bgwidth : x;
+  mutable bgheight : y;
+  mutable bgxcenter : x option;
+  mutable bgycenter : y option;
   mutable bgviewport: viewport option;
   (* hook for sophisticated programmed graphics backgrounds *)
   mutable bgfunction: (bgfunarg -> unit) option;
 }
 
-(* The type of argument of a background gradient function. *)
+(* The type of the argument of a background gradient function. *)
 and bgfunarg = {
  argcolor : color;
- argcolorstart : color;
+ argcolorstart : color option;
+ argcolorstop : color option;
+ argxcenter : x option;
+ argycenter : y option;
  argfunviewport : viewport;
  argviewport : viewport;
 };;
 
+(* The type of the options that drive the background drawing. *)
 type bgoption =
    | BgColor of color
    | BgColorStart of color
+   | BgColorStop of color
    | BgImg of Misc.file_name
    | BgAlpha of Drawimage.alpha
    | BgBlend of Drawimage.blend
@@ -182,6 +190,8 @@ type bgoption =
    | BgYStart of float
    | BgHeight of float
    | BgWidth of float
+   | BgXCenter of float
+   | BgYCenter of float
    | BgFun of (bgfunarg -> unit) option;;
 
 val blit_bkgd_data : bkgd_prefs -> bkgd_prefs -> unit;;

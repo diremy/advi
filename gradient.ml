@@ -65,6 +65,7 @@ type rectangle_gradient_mode =
 
 *)
 let scale i w c c' =
+  if w = 0 then c else
   let mid = (w + 1) / 2 in
   let round_quot w x = (x + mid) / w in
   round_quot w (c' * i + c * (w - i));;
@@ -134,7 +135,7 @@ let grad_rect_v c1 c2 x y w h =
 
 (* First bissector gradient into a rectangle *)
 let grad_rect_d1 c1 c2 x y w h =
-  let sc = w - 1 + h - 1 in
+  let sc = w + h in
   let limx = x + w - 1 in
   let limy = y + h - 1 in
   let rec loop i x0 y0 x1 y1 =
@@ -155,7 +156,7 @@ let grad_rect_d1 c1 c2 x y w h =
 
 (* Second bissector gradient into a rectangle *)
 let grad_rect_d2 c1 c2 x y w h =
-  let sc = w - 1 + h - 1 in
+  let sc = w + h in
   let limx = x in
   let limy = y + h - 1 in
   let rec loop i x0 y0 x1 y1 =

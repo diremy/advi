@@ -32,55 +32,92 @@ open Graphics;;
 open Gradient;;
 open Grdev;;
 
+let start_color color = function
+  | None -> Graphics.white
+  | Some c -> c;;
+
+let stop_color color = function
+  | None -> color
+  | Some c -> c;;
+
 let hgradient {
-    argcolor = c2; argcolorstart = c1;
+    argcolor = c0; argcolorstart = c1; argcolorstop = c2;
     argfunviewport = {vx = x; vy = y; vw = w; vh = h};
+    argxcenter = xc; argycenter = yc;
     argviewport = _;
    } =
+  let c1 = start_color c0 c1
+  and c2 = stop_color c0 c2 in
   Gradient.grad_rect (Rect_Horizontal (c1, c2)) x y w h;;
 
 let vgradient {
-    argcolor = c2; argcolorstart = c1;
+    argcolor = c0; argcolorstart = c1; argcolorstop = c2;
     argfunviewport = {vx = x; vy = y; vw = w; vh = h};
+    argxcenter = xc; argycenter = yc;
     argviewport = _;
    } =
+  let c1 = start_color c0 c1
+  and c2 = stop_color c0 c2 in
   Gradient.grad_rect (Rect_Vertical (c1, c2)) x y w h;;
 
 let d1gradient {
-    argcolor = c2; argcolorstart = c1;
+    argcolor = c0; argcolorstart = c1; argcolorstop = c2;
     argfunviewport = {vx = x; vy = y; vw = w; vh = h};
+    argxcenter = xc; argycenter = yc;
     argviewport = _;
    } =
+  let c1 = start_color c0 c1
+  and c2 = stop_color c0 c2 in
   Gradient.grad_rect (Rect_Diagonal1 (c1, c2)) x y w h;;
 
 let d2gradient {
-    argcolor = c2; argcolorstart = c1;
+    argcolor = c0; argcolorstart = c1; argcolorstop = c2;
     argfunviewport = {vx = x; vy = y; vw = w; vh = h};
+    argxcenter = xc; argycenter = yc;
     argviewport = _;
    } =
+  let c1 = start_color c0 c1
+  and c2 = stop_color c0 c2 in
   Gradient.grad_rect (Rect_Diagonal2 (c1, c2)) x y w h;;
 
 (* For compatibility (already compatibility, when this feature is not
    yet available to any distribution :) *)
 let dgradient = d1gradient;;
 
-let center {vx = x; vy = y; vw = w; vh = h} =
-  let xc = x + (w + 1) / 2
-  and yc = y + (h + 1) / 2 in
-  xc, yc;;
+(* Try to figure out what can be used as a center:
+   if xc or yc is within the viewport we choose it,
+   otherwise, we choose the center of the viewport. *)
+let center xc yc {vx = x; vy = y; vw = w; vh = h} =
+  let xc = match xc with
+  | Some xc ->
+      if xc < x then x else
+      if xc < x + w then xc else x + w - 1
+  | None -> x + (w + 1) / 2 in
+  let yc = match yc with
+  | Some yc ->
+      if yc < y then y else
+      if yc < y + h then yc else y + h - 1
+  | None -> y + (h + 1) / 2 in
+      xc, yc;;
 
 let cgradient {
-    argcolor = c2; argcolorstart = c1;
+    argcolor = c0; argcolorstart = c1; argcolorstop = c2;
     argfunviewport = {vx = x; vy = y; vw = w; vh = h} as viewport;
+    argxcenter = xc; argycenter = yc;
     argviewport = _;
    } =
-  let xc, yc = center viewport in
+  let c1 = start_color c0 c1
+  and c2 = stop_color c0 c2 in
+  let xc, yc = center xc yc viewport in
   Gradient.grad_rect (Rect_Centered (c1, c2, xc, yc)) x y w h;;
 
 let circgradient {
-    argcolor = c2; argcolorstart = c1;
+    argcolor = c0; argcolorstart = c1; argcolorstop = c2;
     argfunviewport = {vx = x; vy = y; vw = w; vh = h} as viewport;
+    argxcenter = xc; argycenter = yc;
     argviewport = _;
    } =
-  let xc, yc = center viewport in
+  let c1 = start_color c0 c1
+  and c2 = stop_color c0 c2 in
+  let xc, yc = center xc yc viewport in
   Gradient.grad_rect (Rect_Circular (c1, c2, xc, yc)) x y w h;;

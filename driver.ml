@@ -806,17 +806,17 @@ let edit_special st s =
             (Printf.sprintf "Field %s=%s not a float in special %s" x fx s);
             raise Ignore in
       let float_to_pixel f = truncate (f *. unit) in
-      let  r = {
-        Dev.x = float_field "x"; Dev.y = float_field "y";
-        Dev.w = float_field "w"; Dev.h = float_field "h";
+      let r = {
+        Dev.rx = float_field "x"; Dev.ry = float_field "y";
+        Dev.rw = float_field "w"; Dev.rh = float_field "h";
       } in
       let rect = {
-        Dev.x = st.x_origin + int_of_float (st.conv *. float st.h)
-          + float_to_pixel r.Dev.x;
-        Dev.y = st.y_origin + int_of_float (st.conv *. float st.v)
-          - float_to_pixel r.Dev.y;
-        Dev.w = float_to_pixel r.Dev.w;
-        Dev.h = float_to_pixel r.Dev.h;
+        Dev.rx = st.x_origin + int_of_float (st.conv *. float st.h)
+          + float_to_pixel r.Dev.rx;
+        Dev.ry = st.y_origin + int_of_float (st.conv *. float st.v)
+          - float_to_pixel r.Dev.ry;
+        Dev.rw = float_to_pixel r.Dev.rw;
+        Dev.rh = float_to_pixel r.Dev.rh;
       } in
       let info =
         { Dev.E.comm = field "comm";
@@ -948,7 +948,7 @@ let wait_special st s =
 let inherit_background_info =
   Options.flag false
     "-inherit-background"
-    ": the background options are inherited\
+    "  the background options are inherited\
     \n\t from the previous page,\
     \n\t (the default is not to inherit background settings).";;
 
@@ -1014,6 +1014,9 @@ let bkgd_alist = [
   ("colorstart", fun s st ->
      let c = Dvicolor.parse_color_args (split_string (unquote s) 0) in
      [Dev.BgColorStart c]);
+  ("colorstop", fun s st ->
+     let c = Dvicolor.parse_color_args (split_string (unquote s) 0) in
+     [Dev.BgColorStop c]);
   ("xstart", fun s st ->
      let x = parse_float (unquote s) in
      [Dev.BgXStart x]);
@@ -1026,6 +1029,12 @@ let bkgd_alist = [
   ("height", fun s st ->
      let h = parse_float (unquote s) in
      [Dev.BgHeight h]);
+  ("xcenter", fun s st ->
+     let x = parse_float (unquote s) in
+     [Dev.BgXCenter x]);
+  ("ycenter", fun s st ->
+     let y = parse_float (unquote s) in
+     [Dev.BgYCenter y]);
   ("fun", fun s st ->
      [Dev.BgFun (find_bgfun (unquote s))]);
 ];;
