@@ -907,7 +907,8 @@ let pop_duplex st =
 
 (* Go to the begining of the page. *)
 let goto_page n st =
-  if n < 0 (* then n = -1 *) then pop_duplex st else
+  (* now controlled by pop_page *)
+  (*   if n < 0 (* then n = -1 *) then pop_duplex st else *)
   let new_page_number = max 0 (min n (st.num_pages - 1)) in
   if st.page_number <> new_page_number || st.aborted then
     begin
@@ -996,6 +997,7 @@ let pop_page b n st =
   st.page_stack <- stack;
   let new_page = if npage > 0 then npage else -2 - npage in
   if new_page = st.page_number then redraw st
+  else if new_page < 0 (* necessarily -1 *) then pop_duplex st
   else goto_page new_page st;;
 
 let mark_page st =

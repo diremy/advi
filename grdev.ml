@@ -1449,7 +1449,13 @@ let wait_move_button_up rect trans_type event x y =
         let dx' = e.GraphicsY11.mouse_x - x in
         let dy' = e.GraphicsY11.mouse_y - y in
         if e.GraphicsY11.button then move dx' dy'
-        else Final (filter trans event dx' (0 - dy'))
+        else
+          let m = GraphicsY11.get_modifiers() in
+          (* to give up some motion, should rather be ^C *)
+          if m land GraphicsY11.mod1 <> 0 then
+            Final Nil
+          else
+            Final (filter trans event dx' (0 - dy'))
     | z -> z in
   let color = get_color () in
   set_color (get_fgcolor ());

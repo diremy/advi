@@ -25,9 +25,12 @@
 %% More Declarations
 
 \def \defargv {\define@key{argv}}
+
 \def \runargv
-  {\@ifundefined{argv}{}{\def \do {\setkeys{argv}}\expandafter \do
-  \expandafter {\argv}}}
+  {\@ifundefined{argv}
+    {\@ifundefined{defaultargv}{}
+     {\def \do {\setkeys{argv}}\expandafter \do \expandafter {\defaultargv}}}
+    {\def \do {\setkeys{argv}}\expandafter \do \expandafter {\argv}}}
 
 %% Some predefine keys
 

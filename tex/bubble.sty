@@ -19,6 +19,7 @@
 \DeclareOption {pic}{\bbb@tricksfalse}
 \DeclareOption {ps}{\bbb@trickstrue}
 \DeclareOption {dvips}{\bbb@trickstrue}
+\DeclareOption {dvipdfm}{\bbb@tricksfalse}
 
 \ProcessOptions
 
@@ -41,6 +42,7 @@
 \def \bbb@id #1{#1}
 
 \newdimen \bbb@unit \bbb@unit 2em
+\let \bubbleunit \bbb@unit
 \newdimen \bbb@dima
 \newdimen \bbb@dimb
 

@@ -20,7 +20,8 @@
 exception Terminated;;
 val kill : unit -> unit;;
 val draw : string -> int -> int -> unit;;
-val draw_file : string -> int * int * int * int -> int * int -> int -> int -> unit;;
+val draw_file : string -> int * int * int * int -> int * int -> 
+  int -> int -> unit;;
 val add_headers : (bool * string) list -> unit;;
 val newpage : (bool * string) list -> int -> float -> int -> int -> unit;;
 val flush : unit -> unit;;

@@ -651,8 +651,9 @@ end
 \def \advich {\advi@edit@h}
 \def \advicd {\advi@edit@d}
 
+\advi@edit@unit 1em\relax
 \def \advi@edit@defaults{%
-  \advi@edit@unit 1em\relax
+%  \advi@edit@unit 1em\relax
   \def \advi@edit@x{0}%
   \def \advi@edit@y{0}%
   \let \advi@edit@h \relax%
@@ -690,6 +691,8 @@ end
 \define@key {advi@edit}{comm}{\def \advi@edit@comm {\string #1}}
 \define@key {advi@edit}{line}{\def \advi@edit@line {#1}}
 \define@key {advi@edit}{file}{\def \advi@edit@file {#1}}
+\define@key {advi@edit}{min}{\def \advi@edit@min {#1}}
+\def \advi@edit@min{1ex}
 
 %\advi@edit {command}{name}{keys}{precode}{keys}{code}
 \newcommand{\advi@edit}[4]{%
@@ -708,10 +711,14 @@ end
     \ifx \advi@edit@h \relax \adviseth {\ht0}\fi
     \ifx \advi@edit@d \relax \advisetd {\dp0}\fi
     \if \advi@edit@W W\relax
-      \ifdim \adviw<0.1\advi@edit@unit\def\advi@edit@w{1}\fi
+      \ifdim \adviw<\advi@edit@min
+        \ifdim \adviw<0ex\else
+          \advi@setdim {\advi@edit@w}{\advi@dim}{\advi@edit@min}%
+        \fi\fi
     \fi
     \if \advi@edit@H H\relax
-      \ifdim \advih<0.1\advi@edit@unit\def\advi@edit@h{1}\fi
+      \ifdim \advih<\advi@edit@min
+         \advi@setdim {\advi@edit@h}{\advi@dim}{\advi@edit@min}\fi
     \fi
     \ifadvi@move
        \setbox0=\hbox {\raise \adviy \hbox {\kern \advix\box0}}%
@@ -755,6 +762,7 @@ end
 
 \newcommand{\adviedit}[3][]{\advi@edit{\adviedit}{#1}{#2}{#3}}
 
+\newcommand{\setedit}[1]{\setkeys{advi@edit}{#1}}
 % \advi@edit{\advidget}{#1}{#2}{}
 %    {\setbox0=\hbox to \adviw {\hsize=\adviw\vtop to \advihd
 %         {\vsize=\advihd\vskip -\advih\relax

@@ -820,7 +820,7 @@ let edit_special st s =
       let record = split_record (String.concat " " args) in
       let first =
         try
-          let assignable (x, v) = List.mem x [ "x"; "y"; "w"; "h"; "w"; ] in
+          let assignable (x, v) = List.mem x [ "x"; "y"; "w"; "h"; "d"; ] in
           Some (List.find assignable record)
         with Not_found -> None in
       let field x =
