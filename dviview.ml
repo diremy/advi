@@ -181,29 +181,29 @@ let set_page_number st n =
 
 (*****************************************************************************
 
-  The `st' record contains the geometry for advi drawing, not the real 
-  geometry, which is stored in the attr record. 
-  Fields st.size_x st.size_y orig_x orig_y of the window are in 
-  advi coordinates, i.e. 
+  The `st' record contains the geometry for advi drawing, not the real
+  geometry, which is stored in the attr record.
+  Fields st.size_x st.size_y orig_x orig_y of the window are in
+  advi coordinates, i.e.
 
        ----->
-      | 
+      |
       |
       \/
 
-  Fields st.orig_x et st.orig_y indicates the advi "margins". 
-  Fields st.size_x et st.size_y the advi dimensions according to the 
+  Fields st.orig_x et st.orig_y indicates the advi "margins".
+  Fields st.size_x et st.size_y the advi dimensions according to the
   resolution:
 
    - these are not the dimension of the window !Graphics.size_x() and
   Graphics.size_y() unless the window is self-adjusted to the advi dimensions;
 
-   - they can be lower in one dimension when the window is forced a 
+   - they can be lower in one dimension when the window is forced a
   different shape;
 
-   - they can be both higher when the window size is fixed and when drawing at 
-  a  higher scale. 
-  
+   - they can be both higher when the window size is fixed and when drawing at
+  a  higher scale.
+
   We always have st.orig_x + st.width + st.orig_x = st.size_x
   and the same for y coordinates
 
@@ -243,7 +243,7 @@ let init_geometry all st =
   let w_in = mag *. ldexp (float w_sp /. dvi_res) (-16)
   and h_in = mag *. ldexp (float h_sp /. dvi_res) (-16) in
 
-  let wdpi = 
+  let wdpi =
     match attr.hmargin with
     | Px n -> float (attr.geom.Ageometry.width - 2 * n) /. w_in
     | In f -> float attr.geom.Ageometry.width /. (w_in +. 2.0 *. f)
@@ -255,7 +255,7 @@ let init_geometry all st =
     | _ -> assert false in
   let base_dpi = min wdpi hdpi in
   let width = int_of_float (base_dpi *. w_in)
-  and height = int_of_float (base_dpi *. h_in) 
+  and height = int_of_float (base_dpi *. h_in)
   and real_width = int_of_float (base_dpi *. w_in *. st.ratio)
   and real_height = int_of_float (base_dpi *. h_in *. st.ratio) in
   let (size_x, size_y) =
@@ -290,9 +290,10 @@ let init filename =
   let dvi =
     try Dvi.load filename
     with
-    | Sys_error _ -> raise (Error ("cannot open `" ^ filename ^ "'"))
-    | Dvi.Error s -> raise (Error (filename ^ ": " ^ s))
-    | _ -> raise (Error ("error while loading `" ^ filename ^ "'")) in
+    | Sys_error _ -> raise (Error (Printf.sprintf "cannot open `%s'" filename))
+    | Dvi.Error s -> raise (Error (Printf.sprintf "%s: %s" filename s))
+    | _ ->
+       raise (Error (Printf.sprintf "error while loading `%s'" filename)) in
   let cdvi = Driver.cook_dvi dvi in
   let int = 0 in
   let float = 0. in
@@ -387,9 +388,9 @@ let draw_bounding_box st =
   Grdev.fill_rect st.orig_x (st.orig_y + st.dvi_height) st.dvi_width 1;
   Grdev.fill_rect (st.orig_x + st.dvi_width) st.orig_y 1 st.dvi_height;;
 
-(* Input : a point in window coordinates, relative to lower-left corner. *)
-(* Output : a point in document coordinates, relative to upper-right corner. *)
-(* The output depends on the ratio st.ratio. *)
+(* Input : a point in window coordinates, relative to lower-left corner.
+   Output : a point in document coordinates, relative to upper-right corner.
+   The output depends on the ratio st.ratio. *)
 let document_xy st x y =
   (* x and y are relative to lower-left corner, *)
   let y = st.size_y - y in
@@ -418,7 +419,7 @@ let vmargin_size st = get_size_in_pix st attr.vmargin;;
 let hmargin_size st = get_size_in_pix st attr.hmargin;;
 
 (* The next four functions returns the position that correspond to the top,
-   the bottom, the left and right of the page *)
+   the bottom, the left, and right of the page. *)
 let top_of_page = vmargin_size;;
 
 let bottom_of_page st =
@@ -429,8 +430,8 @@ let left_of_page = hmargin_size;;
 let right_of_page st =
   attr.geom.Ageometry.width - st.dvi_width - hmargin_size st;;
 
-(* the two following functions move the displayed part of the page while
-   staying inside the margins *)
+(* The two following functions move the displayed part of the page while
+   staying inside the margins. *)
 let move_within_margins_y st movey =
   let tmp_orig_y = st.orig_y + movey in
   let new_orig_y =
@@ -532,27 +533,26 @@ let make_thumbnails st =
       (xrefs st)
       [] in
   let page_nails =
-    if xnails = [] then Array.init st.num_pages (fun p -> p)
-    else
-      let ucons x l =
-        match l with
-        | y :: _ when x = y -> l
-        | _ -> x :: l in
-      let rec unique = function
-        | [] -> []
-        | x :: l -> ucons x (unique l) in 
-      Array.of_list (unique (List.sort compare xnails)) in
+    if xnails = [] then Array.init st.num_pages (fun p -> p) else
+    let ucons x l =
+      match l with
+      | y :: _ when x = y -> l
+      | _ -> x :: l in
+    let rec unique = function
+      | [] -> []
+      | x :: l -> ucons x (unique l) in
+    Array.of_list (unique (List.sort compare xnails)) in
   let num_nails = Array.length page_nails in
   let r_fit = int_of_float (ceil (sqrt (float_of_int num_nails))) in
   let r = min r_fit !thumbnail_limit in
-  let pages = num_nails -1 / r / r in
+  let pages = num_nails - 1 / r / r in
   let ist =
     { st with
       size_x = st.size_x / r;
-      size_y = st.size_y / r; 
+      size_y = st.size_y / r;
       synchronize = false;
-      orig_x = st.orig_x / r; 
-      orig_y = st.orig_y / r; 
+      orig_x = st.orig_x / r;
+      orig_y = st.orig_y / r;
       dvi_width = st.dvi_width / r;
       base_dpi = st.base_dpi /. float r;
       dvi_height = st.dvi_height / r;
@@ -564,27 +564,33 @@ let make_thumbnails st =
   let all =
     Driver.with_active false
       (Array.map
-         (fun p -> 
-           (* let p' = p mod (r * r) in (* unused! *) *)
-           let chgvp s = 
-             {s with 
-	      Dvi.bkgd_prefs = 
-              {s.Dvi.bkgd_prefs with
-	       Grdev.bgviewport = Some (dx, dy, 0, size_y - dy)}} in
+         (fun p ->
+           let chgvp s =
+             {s with
+	      Dvi.bkgd_prefs =
+               {s.Dvi.bkgd_prefs with
+	        Grdev.bgviewport =
+                  Some {
+                   Grdev.v_size_x = dx;
+                   Grdev.v_size_y = dy;
+                   Grdev.v_off_x = 0;
+                   Grdev.v_off_y = size_y - dy;
+                  }
+               }
+             } in
 	   let without_pauses f x =
-	      let p = !pauses in
-	      try pauses := false; let v = f x in pauses := p; v
-	      with x -> pauses := p; raise x
-	   in
+	     let p = !pauses in
+	     try pauses := false; let v = f x in pauses := p; v
+	     with x -> pauses := p; raise x in
 	   without_pauses(redraw ?chst:(Some chgvp))
              {ist with page_number = p};
            (* interrupt thumbnail computation if user interacts *)
            begin try Grdev.continue() with
-             Grdev.Stop -> 
+           | Grdev.Stop ->
                let gray = Graphics.rgb 200 200 200 in
                Grdev.with_color gray
-                 (Graphics.fill_rect 0 (size_y - dy) (dx - 1)) (dy - 1) 
-           end; 
+                 (Graphics.fill_rect 0 (size_y - dy) (dx - 1)) (dy - 1)
+           end;
            p, Graphics.get_image 0 (size_y - dy) dx dy;
          ))
          page_nails in
@@ -633,7 +639,7 @@ let show_toc st =
   Driver.clear_symbols();
   match st.toc with
   | None -> ()
-  | Some rolls -> 
+  | Some rolls ->
       let n = Array.length rolls in
       if st.num = n then redraw st
       else
@@ -645,7 +651,7 @@ let show_toc st =
         end;
         synchronize st;
         st.aborted <- true
-;;        
+;;
 
 let redisplay st =
   st.pause_number <- 0;
@@ -737,7 +743,7 @@ let reload_time st =
 
 let reload st =
   try
-    Grdev.clear_usr1(); 
+    Grdev.clear_usr1();
     st.last_modified <- reload_time st;
     let dvi = Dvi.load st.filename in
     let cdvi = Driver.cook_dvi dvi in
@@ -772,7 +778,7 @@ let reload st =
     assert (Misc.debug_endline (Printexc.to_string x); true);
     st.cont <- None;;
 
-let changed st = 
+let changed st =
   reload_time st > st.last_modified;;
 
 let goto_page n st = (* go to the begining of the page *)
@@ -832,7 +838,7 @@ let pop_page b n st =
   else goto_page new_page st;;
 
 let mark_page st =
-  let marks = 
+  let marks =
     if List.length st.page_marks > 9
     then List.rev (List.tl (List.rev  st.page_marks))
     else st.page_marks in
@@ -842,12 +848,12 @@ let goto_mark n st =
   try goto_page (List.nth st.page_marks n) st
   with Failure _ | Invalid_argument _ -> ()
 
-let previous_slice st = 
-  print_string "#line 0, 0 <<<<>><<>>Next-Slice>> "; 
+let previous_slice st =
+  print_string "#line 0, 0 <<<<>><<>>Next-Slice>> ";
   print_newline ()
 
-let next_slice st = 
-  print_string "#line 0, 0 <<Previous-Slice<<>><<>>>> "; 
+let next_slice st =
+  print_string "#line 0, 0 <<Previous-Slice<<>><<>>>> ";
   print_newline ()
 
 (* goto page of hyperref h *)
@@ -894,7 +900,7 @@ let scale n st =
         attr.geom.Ageometry.width <- scale st.size_x;
         attr.geom.Ageometry.height <- scale st.size_y;
         Grdev.close_dev ();
-        let x, y = 
+        let x, y =
           Grdev.open_dev (Printf.sprintf " " ^ Ageometry.to_string attr.geom)
         in
         attr.geom.Ageometry.width <- x;
@@ -991,8 +997,7 @@ module B =
       let none () =
         if st.page_number < st.num_pages - 1 then begin
           (* the following test is necessary because of some
-           * floating point rounding problem
-           *)
+           * floating point rounding problem *)
           if attr.geom.Ageometry.height <
             st.dvi_height + 2 * vmargin_size st then begin
               st.orig_y <- top_of_page st;
@@ -1069,7 +1074,7 @@ module B =
              Config.splash_screen) in
       ()
 
-    let toggle_antialiasing st = 
+    let toggle_antialiasing st =
       Gs.toggle_antialiasing ()
 
     let scratch st =
@@ -1077,8 +1082,8 @@ module B =
     let scratch_write st =
       Scratch.write ()
 
-    let previous_slice  = previous_slice 
-    let next_slice = next_slice 
+    let previous_slice  = previous_slice
+    let next_slice = next_slice
     let mark_page  = mark_page
     let goto_mark st = goto_mark st.num st
 
@@ -1090,15 +1095,15 @@ module B =
             Busy.stop ();
             if not st.aborted then show_toc st)
          ()
-        
+
     let show_toc st =
        Launch.without_launching show_toc st
 
     let search_forward st =
-      ()
+       ()
 
     let search_backward st =
-      ()
+       ()
   end;;
 
 let bindings = Array.create 256 B.nop;;
@@ -1223,7 +1228,7 @@ let main_loop filename =
       redraw st;
       (* num is the current number entered by keyboard *)
       try while true do
-        let ev = 
+        let ev =
           if changed st then Grdev.Refreshed else Grdev.wait_event () in
         st.num <- st.next_num;
         st.next_num <- 0;
@@ -1247,8 +1252,8 @@ let main_loop filename =
         | Grdev.Position (x, y) ->
             position st x y
         | Grdev.Click (pos, but, _, _) when Grdev.E.editing () ->
-            begin match pos, but with 
-              Grdev.Top_left, Grdev.Button1 -> B.previous_slice st
+            begin match pos, but with
+            | Grdev.Top_left, Grdev.Button1 -> B.previous_slice st
             | Grdev.Top_left, Grdev.Button2 -> B.reload st
             | Grdev.Top_left, Grdev.Button3 -> B.next_slice st
             | Grdev.Top_right, Grdev.Button1 -> B.previous_page st
