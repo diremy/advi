@@ -80,7 +80,7 @@ $(EXEC): $(COBJS) $(CMO_OBJS)
 $(EXEC).opt: $(COBJS) $(CMX_OBJS)
 	$(OCAMLOPT) $(INCLUDES) $(OPT_OBJS) $(LINK_OPTS) -o $(EXEC).opt
 
-config.ml: config.ml.in
+config.ml: config.ml.in configure
 	./configure
 
 dvicolor.ml: Makefile.config dvicolor.mlp ifdef.cmo

@@ -18,7 +18,7 @@ quality slides presentation experience to LaTeX users.
 %setup
 
 %build
-./configure
+./configure --prefix=/usr
 make all
 
 %install
@@ -28,20 +28,20 @@ make install
 make clean
 
 %files
-%dir /usr/local/lib/advi
-/usr/local/bin/advi
-/usr/local/lib/advi/splash.dvi
-/usr/local/lib/advi/advilogo.eps
-/usr/local/lib/advi/caml.eps
-/usr/local/lib/advi/bar.jpg.eps
-/usr/local/lib/advi/advi.sty
-/usr/local/lib/advi/advi-annot.sty
-/usr/local/lib/advi/advi-graphicx.sty
-/usr/local/lib/advi/argv.sty
-/usr/local/lib/advi/bubble.sty
-/usr/local/lib/advi/superpose.sty
-/usr/local/lib/advi/advi.pro
-/usr/local/lib/advi/jpfonts.conf
+%dir /usr/lib/advi
+/usr/bin/advi
+/usr/lib/advi/splash.dvi
+/usr/lib/advi/advilogo.eps
+/usr/lib/advi/caml.eps
+/usr/lib/advi/bar.jpg.eps
+/usr/lib/advi/advi.sty
+/usr/lib/advi/advi-annot.sty
+/usr/lib/advi/advi-graphicx.sty
+/usr/lib/advi/argv.sty
+/usr/lib/advi/bubble.sty
+/usr/lib/advi/superpose.sty
+/usr/lib/advi/advi.pro
+/usr/lib/advi/jpfonts.conf
 
 %changelog
 

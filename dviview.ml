@@ -375,24 +375,33 @@ let update_dvi_size init st =
   st.dvi_height <- int_of_float (st.base_dpi *. h_in *. st.ratio);
   set_bbox st;;
 
-let rec goto_next_pause n st =
-  if n > 0 then
-    begin match st.cont with
-    | None -> ()
-    | Some f ->
-        st.cont <- None;
-        try
-          let () =
-            try
-              while f () do () done;
-              st.pause_number <- st.pause_number + 1;
-            with Driver.Pause ->
-              st.pause_number <- st.pause_number + 1;
-              st.cont <- Some f in
-          goto_next_pause (pred n) st
-        with Grdev.Stop -> st.aborted <- true;
-    end;
-  Grdev.synchronize();
+(* incremental drawing *)
+let goto_next_pause n st =
+  let rec aux n st =
+    if n > 0 then
+      begin match st.cont with
+      | None -> ()
+      | Some f ->
+          st.cont <- None;
+          try
+	    begin try
+	      while f () do () done;
+	      st.pause_number <- st.pause_number + 1;
+            with 
+	    | Driver.Wait sec -> 
+		ignore (Grdev.sleep sec); 
+		st.cont <- Some f;
+		aux n st
+	    | Driver.Pause ->
+		st.pause_number <- st.pause_number + 1;
+		st.cont <- Some f;
+		aux (pred n) st
+	    end;
+          with Grdev.Stop -> st.aborted <- true;
+      end
+  in
+  aux n st;
+  Grdev.synchronize(); 
   Grdev.set_busy (if st.cont = None then Grdev.Free else Grdev.Pause);;
 
 let draw_bounding_box st =
@@ -482,35 +491,37 @@ let move_within_margins_x st movex =
 
 let redraw ?trans st =
   (* draws until the current pause_number or page end *)
+  (* the pauses and waits appears before are ignored *)
   Grdev.set_busy Grdev.Busy;
   st.cont <- None;
   st.aborted <- false;
   begin
     try
-     Grdev.continue ();
-     Driver.clear_symbols ();
-     if !bounding_box then draw_bounding_box st;
-     if !pauses then
-       let f =
-         Driver.render_step st.cdvi st.page_number ?trans
-           (st.base_dpi *. st.ratio) st.orig_x st.orig_y in
-       let current_pause = ref 0 in
-       try
-         while
-           try f () with
-             | Driver.Pause ->
-                 if !current_pause = st.pause_number then raise Driver.Pause
-                 else begin incr current_pause; true end
-         do () done;
-         if !current_pause < st.pause_number
-         then st.pause_number <- !current_pause
-       with
-       | Driver.Pause -> st.cont <- Some f
-     else
-       Driver.render_page st.cdvi st.page_number
-         (st.base_dpi *. st.ratio) st.orig_x st.orig_y
-    with
-    | Grdev.Stop -> st.aborted <- true
+      Grdev.continue ();
+      Driver.clear_symbols ();
+      if !bounding_box then draw_bounding_box st;
+      if !pauses then
+        let f = Driver.render_step st.cdvi st.page_number ?trans
+            (st.base_dpi *. st.ratio) st.orig_x st.orig_y in
+        let current_pause = ref 0 in
+        try
+          while
+            try f () with
+	    | Driver.Wait _ -> true	
+            | Driver.Pause ->
+                if !current_pause = st.pause_number then raise Driver.Pause
+                else begin incr current_pause; true end
+          do () done;
+          if !current_pause < st.pause_number then
+            st.pause_number <- !current_pause
+        with
+        | Driver.Pause ->
+            st.cont <- Some f;
+      else
+        Driver.render_page  st.cdvi st.page_number 
+          (st.base_dpi *. st.ratio) st.orig_x st.orig_y;
+    with Grdev.Stop ->
+      st.aborted <- true 
   end;
   Grdev.synchronize ();
   Grdev.set_busy (if st.cont = None then Grdev.Free else Grdev.Pause);;

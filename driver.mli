@@ -15,8 +15,8 @@
 (*  Based on Mldvi by Alexandre Miquel.                                *)
 (***********************************************************************)
 
-
 exception Pause;;
+exception Wait of float
 type cooked_dvi;;
 val cook_dvi : Dvi.t -> cooked_dvi;;
 val render_page : cooked_dvi -> int -> float -> int -> int -> unit;;

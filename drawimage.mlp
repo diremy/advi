@@ -126,8 +126,8 @@ module M = struct
     let ic = opener file in
     after (fun () ->
       let rgba, width, height, data = load ic in
-      if rgba then Rgba32 (Rgba32.create_with width height data)
-      else Rgb24 (Rgb24.create_with width height data))
+      if rgba then Rgba32 (Rgba32.create_with width height [] data)
+      else Rgb24 (Rgb24.create_with width height [] data))
       (fun () -> try closer ic with _ -> ())
   ;;
 
@@ -142,13 +142,13 @@ module M = struct
           output_value oc image.Rgba32.height;
           debugs (Printf.sprintf "(%dx%d) %d bytes written"
                     image.Rgba32.width image.Rgba32.height
-                    (String.length (Bitmap.dump image.Rgba32.data)));
-          output_value oc (Bitmap.dump image.Rgba32.data);
+                    (String.length (Rgba32.dump image)));
+          output_value oc (Rgba32.dump image);
       | Rgb24 image ->
           output_value oc false;
           output_value oc image.Rgb24.width;
           output_value oc image.Rgb24.height;
-          output_value oc (Bitmap.dump image.Rgb24.data);
+          output_value oc (Rgb24.dump image);
       | _ -> assert false
     in
     let opener, closer =
@@ -193,6 +193,18 @@ module M = struct
           let resx = float w /. (float (urx - llx) /. 72.0) *. 2.0
           and resy = float h /. (float (ury - lly) /. 72.0) *. 2.0
           in
+
+	  (* resolution fix *)
+	  (* gs dies if resolutions are too small (around 1.6 - 1.65dpi) *)
+	  let gs_min_res = 2.0 in
+	  let resx = 
+	    if resx < gs_min_res then gs_min_res
+	    else resx
+	  and  resy = 
+	    if resy < gs_min_res then gs_min_res
+	    else resy
+	  in
+	  
           Ps.load_ps file (Some (llx, lly, urx, ury))
             [Load_Resolution (resx, resy)]
       | _ -> Image.load file []

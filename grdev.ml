@@ -687,12 +687,13 @@ module H =
 
     let frame_rect e x y w h =
       if e > 0 && w > e && h > e then
-        begin
+	let draw_rect_with_line_width e x y w h =
           Graphics.fill_rect x y e h;
           Graphics.fill_rect x y w e;
           Graphics.fill_rect (x + w - e) y e h;
-          Graphics.fill_rect x (y + h - e) w e;
-        end
+          Graphics.fill_rect x (y + h - e) w e
+	in
+	draw_rect_with_line_width e x y w h 
       else Graphics.draw_rect x y w h
 
     let draw_anchor c e a =

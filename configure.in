@@ -62,20 +62,34 @@ AC_ARG_WITH(camlimages, [  --with-camlimages=dir      specify camlimages library
 	CAMLIMAGESDIR=nope
   fi)
 
+dnl Camlimages version
+
 if test -f $CAMLIMAGESDIR/ci_ps.cma || $HAVE_CDK; then
 	AC_MSG_RESULT(found)
-	HAVE_CAMLIMAGES="true"
-        if $HAVE_CDK; then
-	        CAMLIMAGESLIBS="camlimages"
-        else
-		CAMLIMAGESCONFIGINCLUDE="include $CAMLIMAGESDIR/Makefile.config"
-                CAMLIMAGESLIBS='$(WITH_CAMLIMAGES:.cma=)'
-        fi
+	CAMLIMAGES_VERSION=`grep VERSION $CAMLIMAGESDIR/Makefile.config | sed -e 's/VERSION=//'`
+	echo camlimages-version $CAMLIMAGES_VERSION
+	if test `expr $CAMLIMAGES_VERSION \>= 2.10` = "1"; then
+		HAVE_CAMLIMAGES="true"
+	        if $HAVE_CDK; then
+		        CAMLIMAGESLIBS="camlimages"
+	        else
+			CAMLIMAGESCONFIGINCLUDE="include $CAMLIMAGESDIR/Makefile.config"
+	                CAMLIMAGESLIBS='$(WITH_CAMLIMAGES:.cma=)'
+	        fi
+	else
+		AC_MSG_RESULT(found, but bit too old)
+		echo "**************** Warning ******************"
+		echo "camlimages is found in the directory \"$CAMLIMAGESDIR\"",
+		echo "but bit too old. (make sure install the latest version 2.10)"
+		echo "*******************************************"
+		HAVE_CAMLIMAGES="false"
+		CAMLIMAGESLIBS=""
+	fi
 else
-	AC_MSG_RESULT(found, but too old)
+	AC_MSG_RESULT(not found, or too old)
 	echo "**************** Warning ******************"
 	echo "camlimages is not found or incomplete in the directory \"$CAMLIMAGESDIR\""
-	echo "(make sure install the latest version 2.00)"
+	echo "(make sure install the latest version 2.10)"
 	echo "*******************************************"
 	HAVE_CAMLIMAGES="false"
 	CAMLIMAGESLIBS=""

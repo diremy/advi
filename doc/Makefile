@@ -31,6 +31,6 @@ splash.ps: splash.tex
 	$(DVIPS) -o $@ $*.dvi
 
 clean: 
-	rm -f *.aux *.log *.html *.dvi *.pdf *.pdfm *.ps *.ima *.out *.toc
+	rm -f *.aux *.log manual.html *.dvi *.pdf *.pdfm *.ps *.ima *.out *.toc
 
 .SUFFIXES: .tex .dvi .ps .pdf .pdfm .tex .html .out .ima

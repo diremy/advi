@@ -74,6 +74,7 @@ let base_dpi = 600;;
 (*** Cooked fonts ***)
 
 exception Pause;;
+exception Wait of float
 
 type cooked_font = {
     name : string;
@@ -788,7 +789,8 @@ let wait_special st s =
     try parse_float (List.assoc "sec" records) 
     with
     | Not_found | Failure _ -> raise (Failure "wait: invalid special") in
-  if !visible then ignore (Dev.sleep second);
+  (* Wait is treated like Pause, as an exception *)
+  if !visible then raise (Wait second);
   st.checkpoint <- 0;;
 
 (* Background object configuration. RDC *)
@@ -1117,17 +1119,21 @@ let special st s =
   if has_prefix "html:" s then html_special st (get_suffix "html:" s) else
   if has_prefix "PSfile=" s || has_prefix "psfile=" s then
     begin
-      let file, bbox, size = psfile_special st s in
-      let x = st.x_origin + int_of_float (st.conv *. float st.h)
-      and y = st.y_origin + int_of_float (st.conv *. float st.v) in
-      if !visible then 
-        let draw = 
-          if has_prefix "`" file then
-           Dev.draw_img (zap_to_char ' ' file)
-             Drawimage.ScaleAuto false 1.0 None (Some bbox)
-          else Dev.draw_ps file bbox in
-        draw size x y
-    end else
+      try
+  	let file, bbox, size = psfile_special st s in
+  	let x = st.x_origin + int_of_float (st.conv *. float st.h)
+  	and y = st.y_origin + int_of_float (st.conv *. float st.v) in
+  	if !visible then 
+  	  let draw = 
+  	    if has_prefix "`" file then
+  	     Dev.draw_img (zap_to_char ' ' file)
+  	       Drawimage.ScaleAuto false 1.0 None (Some bbox)
+  	    else Dev.draw_ps file bbox in
+  	  draw size x y
+      with
+      |	Failure s -> Misc.warning s
+      |	e -> Misc.warning (Printexc.to_string e)
+  end else
   if has_prefix "advi: " s then begin
     if has_prefix "advi: alpha" s then alpha_special st s else
     if has_prefix "advi: blend" s then blend_special st s else
