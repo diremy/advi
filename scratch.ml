@@ -69,7 +69,7 @@ let incr_scratch_line_g_color () =
 let incr_scratch_line_b_color () =
  set_scratch_line_color (get_scratch_line_color () + !color_incr);;
 
-let default_scratch_line_width = 2;;
+let default_scratch_line_width = 4;;
 let set_scratch_line_width, get_scratch_line_width =
   let scratch_line_width = ref default_scratch_line_width in
   (fun i ->
