@@ -16,4 +16,5 @@
 (***********************************************************************)
 
 type color = Graphics.color;;
+val parse_color : string -> color;;
 val parse_color_args : string list -> color;;
