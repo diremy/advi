@@ -5,14 +5,19 @@
 
 <BODY BGCOLOR="white">
 
+
 <H1>Active-DVI</H1>
 
-<CENTER><IMG SRC="advilogo.gif"><BR>
+<P ALIGN=LEFT><IMG SRC="bar.gif"></P>
+
+<P><A HREF="index-fr.html">Version française</A>.
+
+<P ALIGN=CENTER><IMG SRC="advilogo.gif"><BR>
 <A HREF="advi.jpg">screen shot</A>
-</CENTER>
+</P>
 
 <P>Active-DVI is a DVI previewer and a programmable presenter for slides
-written in <SUP>L</SUP><SUB>A</SUB><SUP>T</SUP><SUB>E</SUB><SUP>X</SUP>.
+written in LaTeX.
 
 <HR>
 <CENTER>
@@ -20,7 +25,7 @@ written in <SUP>L</SUP><SUB>A</SUB><SUP>T</SUP><SUB>E</SUB><SUP>X</SUP>.
 <A HREF="#FAQ">Frequently asked qestions</A> |
 <A HREF="#requirements">Requirements for installation</A> |
 <A HREF="#download">Download</A> |
-<A HREF="#lists">Bug reports and mailing list</A>
+<A HREF="#lists">Bug reports and mailing list</A> |
 <A HREF="#authors">Authors and Copyright</A> |
 </CENTER>
 <HR>
@@ -61,7 +66,7 @@ LaTeX package provided by the distribution.
 <P>In addition, Caml hackers can program new and fancy Active-DVI effects in the
 source code of the presenter.
 
-<H2 ALIGN=LEFT><A name="FAQ">Frequently asked questions</H2>
+<H2 ALIGN=LEFT><A name="FAQ">Frequently asked questions</A></H2>
 
 <DL>
 
@@ -104,7 +109,7 @@ sub-directories to build the corresponding DVI presentations.</I>
 within a type-writter font setting. For instance:</I>
 <PRE>
 \begin{alltt}
-{\it{(* Remark that double semi-colon is mandatory *)}}
+{\it{(* Remark that double semi-colon is mandatory here. *)}}
 let x = 1\textcolor{red}{;;}
 let r = \{foo = 1; bar = "toto"\};;
 \textcolor[named]{Red}{let} z = r.foo;;
@@ -128,9 +133,9 @@ parens <CODE>\(</CODE> and <CODE>\)</CODE>.</I>
 <P>You also need the `kpsewhich' utility of the `kpathsea' library
 provided by the TeX distributions.
 
-<H3 ALIGN=LEFT><A name="download">Download</A></H3>
+<H2 ALIGN=LEFT><A name="download">Download</A></H2>
 
-<H4>Source distribution</H4>
+<H4 ALIGN=LEFT>Source distribution</H4>
 
 <UL>
 
@@ -145,7 +150,7 @@ provided by the TeX distributions.
   of Active-DVI's source files and Caml libraries that it uses (camltk
   et camlimages).
 
-</DL>
+ </DL>
 
 <LI>Advanced installation
 
@@ -159,11 +164,13 @@ provided by the TeX distributions.
   download the ADK (it is a big tar ball of Active-DVI, camltk and
   camlimages, with a fully-automated-with-luck installation Makefile).
 
-  <DT><STRONG>For hackers only</STRONG> the Active-DVI <A
+  <DT><STRONG>For hackers only</STRONG></DT>
+  <DD>the Active-DVI <A
   HREF="ftp://ftp.inria.fr/INRIA/Projects/cristal/advi/advi-1.0.0.tar.gz">source
-  version only</a> (You should already have camltk and camlimages installed!)
+  version only</A> (You should already have camltk and camlimages installed!)
 
-  <DT><STRONG>For impatient hackers only</STRONG>
+  <DT><STRONG>For impatient hackers only</STRONG></DT>
+  <DD>
   <A HREF="http://camlcvs.inria.fr/cgi-bin/cvsweb.cgi/bazar-ocaml/advi/">
   The current CVS version of Active-DVI </A> is available at the
   <A HREF="http://camlcvs.inria.fr/">Caml Anonymous CVS repository</A>.
@@ -172,7 +179,7 @@ provided by the TeX distributions.
 
 </UL>
 
-<H4>Binary distributiuon: RPMS</H4>
+<H4 ALIGN=LEFT>Binary distribution: RPMS</H4>
 
 <UL>
    <LI><A HREF="ftp://ftp.inria.fr/INRIA/Projects/cristal/advi/advi-1.0.0-1.src.rpm">SRPM</A>
@@ -204,8 +211,9 @@ Roberto Di Cosmo,
 
 <P>Active-DVI's graphical engine to display DVI files is based on
 Mldvi version 1.0, written by <A
-HREF="http://pauillac.inria.fr/~miquel/">Alexandre Miquel</A>. As
-Mldvi, <P>Active-DVI is entirely written in <A
+HREF="http://pauillac.inria.fr/~miquel/">Alexandre Miquel</A>.
+
+<P>Active-DVI is entirely written in <A
 HREF="http://caml.inria.fr/ocaml/">Objective Caml</A>.
 
 <H2 ALIGN=LEFT><A NAME="copyright">COPYRIGHT</A></H2>
@@ -213,7 +221,18 @@ HREF="http://caml.inria.fr/ocaml/">Objective Caml</A>.
 This program is distributed under the GNU LGPL. See the enclosed file COPYING.
 
 <HR>
-<!-- hhmts start -->
-Last modified: Tue Feb  5 15:37:06 CET 2002
-<!-- hhmts end -->
-</body> </html>
+<!--#config timefmt="%A, %B %e, %Y" -->
+   <EM>Last modified: </EM>
+<!--#echo var="LAST_MODIFIED" -->
+
+<P><A
+HREF="http://pauillac.inria.fr/~weis/copyright-eng.html">Copyright</A>
+&#169; 2001, 2002 INRIA all rights reserved.
+
+<P>
+<ADDRESS>Contact the author <A HREF="mailto:Pierre.Weis@inria.fr">Pierre.Weis@inria.fr</A></ADDRESS>
+
+<P ALIGN=LEFT><IMG SRC="bar.gif"></P>
+
+</BODY>
+</HTML>

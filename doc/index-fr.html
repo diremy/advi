@@ -7,9 +7,14 @@
 
 <H1>Active-DVI</H1>
 
-<CENTER><IMG SRC="advilogo.gif"><BR>
+<P ALIGN=LEFT><IMG SRC="bar.gif"></P>
+
+<P><A HREF="index-en.html">English version</A>.
+
+<P ALIGN=CENTER><IMG SRC="advilogo.gif"><BR>
 <A HREF="advi.jpg">copie d'écran</A>
-</CENTER>
+</P>
+
 
 <P>Active-DVI est un afficheur de fichiers DVI et un présenteur
 programmable d'exposés écrits en LaTeX.
@@ -20,8 +25,8 @@ programmable d'exposés écrits en LaTeX.
 <A HREF="#FAQ">Foire aux Qestions</A> |
 <A HREF="#requirements">Prérequis pour l'installation</A> |
 <A HREF="#download">Obtention du logiciel</A> |
-<A HREF="#lists">Rapports d'erreurs et tribune de discussion</A>
-<A HREF="#authors">Auteurs et Copyright</A>
+<A HREF="#lists">Rapports d'erreurs et tribune de discussion</A> |
+<A HREF="#authors">Auteurs et Copyright</A> |
 </CENTER>
 <HR>
 
@@ -78,7 +83,7 @@ pour vous fariquer votre style d'exposé personnel.
 <P>En outre, les programmeurs Caml peuvent programmer des effets
 Active-DVI nouveaux directement dans le source du présentateur.
 
-<H2 ALIGN=LEFT><A name="FAQ">Foire aux questions</H2>
+<H2 ALIGN=LEFT><A name="FAQ">Foire aux questions</A></H2>
 
 <DL>
 
@@ -94,7 +99,7 @@ fenêtre d'Active-DVI!</I>
  <DD>Réponse: <I>Utilisez la souris pour déplacer la boîte (bounding
 box) qui contient le transparent: en appuyant sur la touche contrôle
 et le boutton gauche de la souris le contour de la boîte apparaît; il
-avous suffit de maintenir touche et souris pour déplacer la boîte où
+vous suffit de maintenir touche et souris pour déplacer la boîte où
 vous le voulez.</I>
 
 <DT><STRONG>Comment savoir quelles sont les clefs Active-DVI
@@ -124,7 +129,7 @@ couleurs (et autres indications typographiques) sont alors disponibles avec
 une fonte machine à écrire. Par exemple:</I>
 <PRE>
 \begin{alltt}
-{\it{(* Remark that double semi-colon is mandatory *)}}
+{\it{(* Remark that double semi-colon is mandatory here. *)}}
 let x = 1\textcolor{red}{;;}
 let r = \{foo = 1; bar = "toto"\};;
 \textcolor[named]{Red}{let} z = r.foo;;
@@ -132,7 +137,7 @@ let r = \{foo = 1; bar = "toto"\};;
 </PRE>
 
 <DT><STRONG>Comment écrire des programmes avec des formules
-mathématiques dedans dans ma présentation ?</STRONG>
+mathématiques dans ma présentation ?</STRONG>
  <DD>Réponse: <I>Utilisez l'environnement <CODE>alltt</CODE>; les
 formules de mathématiques dans cet environnement ne posent pas de
 problèmes pourvu que vous les entouriez des parenthèses spéciales
@@ -151,9 +156,9 @@ fournis par les distribution TeX modernes.
 <P>Si vous désirez compiler les sources d'Active-DVI, vous devez
 disposer d'une version récente du compilateur Objective Caml.
 
-<H3 ALIGN=LEFT><A name="download">Download</A></H3>
+<H2 ALIGN=LEFT><A name="download">Chargement</A></H2>
 
-<H4>Distribution d'Active-DVI</H4>
+<H4 ALIGN=LEFT>Distribution source d'Active-DVI</H4>
 
 <UL>
 
@@ -164,11 +169,11 @@ disposer d'une version récente du compilateur Objective Caml.
   HREF="ftp://ftp.inria.fr/INRIA/Projects/cristal/advi/adk-1.0.0.tar.gz">ADK</A>
   </STRONG>
 
-  <DD>le Kit de développement d'Active-DVI</A>. C'est l'ensemble
+  <DD>le Kit de développement d'Active-DVI. C'est l'ensemble
   complet et fonctionnel des sources d'Active-DVI et des bibliothèques
   Caml qu'il utilise (camltk et camlimages).
 
- <DL>
+ </DL>
 
 <LI>Advanced installation
 
@@ -183,13 +188,14 @@ disposer d'une version récente du compilateur Objective Caml.
   format tar qui contient Active-DVI, camltk et
   camlimages, avec un fichier Makefile d'installation).
 
-  <DT><STRONG>Pour les programmeurs seulement</STRONG> la version <A
+  <DT><STRONG>Pour les programmeurs seulement</STRONG></DT>
+  <DD>la version <A
   HREF="ftp://ftp.inria.fr/INRIA/Projects/cristal/advi/advi-1.0.0.tar.gz">
   sources seules d'Active-DVI</A> (Vous devez déjà avoir installé
   camltk et camlimages!)
 
-  <DT><STRONG>Pour les programmeurs impatients seulement</STRONG>
-  <A HREF="http://camlcvs.inria.fr/cgi-bin/cvsweb.cgi/bazar-ocaml/advi/">
+  <DT><STRONG>Pour les programmeurs impatients seulement</STRONG></DT>
+  <DD><A HREF="http://camlcvs.inria.fr/cgi-bin/cvsweb.cgi/bazar-ocaml/advi/">
   La version CVS d'Active-DVI en temps réel</A> est disponible sur le
   <A HREF="http://camlcvs.inria.fr/">Reposoir CVS anonyme de Caml</A>.
 
@@ -197,7 +203,7 @@ disposer d'une version récente du compilateur Objective Caml.
 
 </UL>
 
-<H4>RPMS</H4>
+<H4 ALIGN=LEFT>Distribution binaire: RPMS</H4>
 
 <UL>
    <LI><A HREF="ftp://ftp.inria.fr/INRIA/Projects/cristal/advi/advi-1.0.0-1.src.rpm">SRPM</A>
@@ -232,8 +238,9 @@ Roberto Di Cosmo,
 
 <P>Le moteur graphique d'Active-Dvi pour l'affichage des fichier DVI
 est basé sur Mldvi version 1.0 écrit par <A
-HREF="http://pauillac.inria.fr/~miquel/">Alexandre Miquel</A>. Tout
-comme Mldvi, <P>Active-DVI est écrit entièrement en <A
+HREF="http://pauillac.inria.fr/~miquel/">Alexandre Miquel</A>.
+
+<P>Active-DVI est écrit entièrement en <A
 HREF="http://caml.inria.fr/ocaml/">Objective Caml</A>.
 
 <H2 ALIGN=LEFT><A NAME="copyright">COPYRIGHT</A></H2>
@@ -241,8 +248,19 @@ HREF="http://caml.inria.fr/ocaml/">Objective Caml</A>.
 Ce programme est distribué sous licence GNU LGPL. Voir le fichier
 COPYING de la distribution.
 
+
 <HR>
-<!-- hhmts start -->
-Last modified: Tue Feb  5 15:37:06 CET 2002
-<!-- hhmts end -->
-</body> </html>
+<!--#config timefmt="%A, %B %e, %Y" -->
+   <EM>Last modified: </EM>
+<!--#echo var="LAST_MODIFIED" -->
+
+<P><A HREF="http://pauillac.inria.fr/~weis/copyright-fra.html">Copyright</A>
+&#169; 2001, 2002 INRIA tous droits réservés.
+
+<P>
+<ADDRESS>Contacter l'auteur <A HREF="mailto:Pierre.Weis@inria.fr">Pierre.Weis@inria.fr</A></ADDRESS>
+
+<P ALIGN=LEFT><IMG SRC="bar.gif"></P>
+
+</BODY>
+</HTML>
