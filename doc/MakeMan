@@ -1,0 +1,44 @@
+#*********************************************************************#
+#                                                                     #
+#                                Advi
+##
+#                                                                     #
+#            Pierre Weis, projet Cristal, INRIA Rocquencourt
+##
+#                                                                     #
+#  Copyright 2003 Institut National de Recherche en Informatique et
+##
+#  en Automatique.  Distributed only by permission.
+##
+#                                                                     #
+#*********************************************************************#
+
+# $Id$
+
+# Makefile for and man files generation.
+
+include ../Makefile.config
+
+# Sources files directory
+SRC=../doc_src
+
+# Prefix before regular names
+PACKAGE=advi
+
+# The list of files for this part of the Web site
+FILES=$(PACKAGE).$(MANEXT)
+
+all: expand manpages
+	
+expand:
+	cd $(SRC) && $(MAKE)
+
+clean:
+	cd $(SRC) && $(MAKE) clean
+	$(RM) $(FILES)
+
+manpages:
+        for i in $(SRC)/*.m; do \
+	    cp $$i ./`basename $$i .m`.$(MANEXT); \
+	done
+
