@@ -279,13 +279,13 @@ module M = struct
     | Rgb24 i -> let i=Rgb24.resize None i w h in 
                  Rgb24(match blitinfo with
 		         None -> i
-		       | Some(sx,sy,dx,dy,w,h) -> let i'=Rgb24.create ow oh
+		       | Some(sx,sy,dx,dy,w,h) -> let i'=Rgb24.make ow oh {Color.r=255;Color.g=255;Color.b=255}
                                       in  Rgb24.blit i sx sy i' dx dy w h;i'
 		       )
     | Rgba32 i -> let i=Rgba32.resize None i w h in
                  Rgba32(match blitinfo with
 		          None -> i
-		        | Some(sx,sy,dx,dy,w,h) -> let i'=Rgba32.create ow oh
+		        | Some(sx,sy,dx,dy,w,h) -> let i'=Rgba32.make ow oh {Color.color={Color.r=255;Color.g=255;Color.b=255};Color.alpha=1}
                                        in Rgba32.blit i sx sy i' dx dy w h;i'
 		        )
     | _ -> assert false
