@@ -199,19 +199,7 @@ type bkgd_prefs = {
 };;
 
 
-let set_default_color r s =
-   r :=
-     match String.lowercase s with
-     | "black" -> Graphics.black
-     | "white" -> Graphics.white
-     | "red" -> Graphics.red
-     | "green" -> Graphics.green
-     | "blue" -> Graphics.blue
-     | "yellow" -> Graphics.yellow
-     | "cyan" -> Graphics.cyan
-     | "magenta" -> Graphics.magenta
-     | s -> int_of_string s;;
-
+let set_default_color r s = r := Dvicolor.parse_color (String.lowercase s);;
 let default_bgcolor = ref Graphics.white;;
 let default_fgcolor = ref Graphics.black;;
 let fgcolor () = !default_fgcolor;;
