@@ -104,6 +104,8 @@ the execution of embedded applications. This warning applies in
 particular if you choose {\ActiveDVI} as your default {\tt meta-mail}
 previewer for the {\tt application/x-dvi} mime-type.
 
+\bigskip
+
 The default safety option is the \doctt{-ask} option: it
 tells {\ActiveDVI} to ask the user each time it must launch an
 application. (Note that in such a case {\ActiveDVI} asks only once to
@@ -111,24 +113,28 @@ launch a given application: it remembers your previous decisions
 concerning the command and acts accordingly for the rest of the
 presentation.)
 
+The second safety option is the above mentioned \doctt{-safer} option:
+it completely inhibits the execution of embedded applications.
+
 The last safety option is \doctt{-exec}: if you call \doctt{advi}
 \doctt{-exec}, \doctt{advi} automatically and silently launches all
 embedded applications (this is useful to play your own presentations without
 the burden of answering yes to {\ActiveDVI}'s questions).
 
-As mentioned, the safe \doctt{-ask} option is the default, if nothing
-is explicitly specified by the user. If desired, the default safety
-option can be set via {\em initialisation files} on a system large
-scale by the machine administrator (in file \doctt{/etc/advirc}), or
-on a local scale by individual users (setting the default policy for
-that user), or even on a per directory basis (setting the default
-policy to show DVI files in this directory)! (This last option is
-convenient to gracefully run your own talks, while still being
-cautious when running talks from others.)
+As mentioned, the safe \doctt{-ask} option is the default,
+automatically set when nothing has been explicitly specified by the
+user. If desired, the default safety option can be set via {\em
+initialisation files}, either on a system large scale by the machine
+administrator (in the file \doctt{/etc/advirc}), on a local scale by
+individual users (setting the default policy for that user), or even
+on a per directory basis (setting the default policy to show DVI files
+in this directory)! (This last option is convenient to gracefully run
+your own talks, while still being cautious when running talks from
+others.)
 
 \section{Initialisation files for {\ActiveDVI}}
 
-\subsection{Syntax of an initialisation file}
+\subsection{Syntax of initialisation files}
 
 An initialisation file for {\ActiveDVI} is simply a text file that
 contains options exactly similar to those you can give on the command
@@ -141,9 +147,9 @@ of line). For instance:
 -bgcolor grey16
 -fgcolor grey95
 \end{verbatim}
-is a valid initialisation file that sets the policy to \doctt{-exec},
-then sets background and foreground colors to obtain a nice inverse
-video effect.
+is a valid initialisation file that sets the safety policy to
+\doctt{-exec}, then sets the background and foreground colors to
+obtain a nice reverse video effect.
 
 \subsection{Loading initialisation files}
 
@@ -224,6 +230,14 @@ original TeX source.
 \medskip\noindent\begin{tabular}{ll}
 \verb"-crop"               & Crop the window to the best size (default) \\
 \verb"-nocrop"             & Disable cropping
+\end{tabular}
+
+\subsubsection*{Color specifications}
+\medskip\noindent\begin{tabular}{ll}
+\verb"-fgcolor <color>" & Specify the color of the foreground color \\
+\verb"-bgcolor <color>" & Specify the color of the background color \\
+\verb"-rv" & Specify that reverse video should be simulated by
+exchanging the backgound and foreground colors \\
 \end{tabular}
 
 \subsubsection*{Helpers specification}
@@ -784,6 +798,8 @@ By default, the transition affects only the current page.
 {\ActiveDVI} can launch arbitrary applications you need to animate your
 show.
 
+\subsubsection{Launching embedded applications}
+
 The {\LaTeX} command to launch an application during the presentation is 
 
 \medskip\noindent
@@ -801,24 +817,39 @@ Anonymous applications have actually the default name \doctt{anonymous}.
 \dockey{ephemeral}{name}
 
 \begin{quote}
-This is the default case: the embedded application is killed when the page
-is turned.
+This is the default case: the application is specific to a
+given page. Launched whenever the page is displayed, the application is
+killed when the page is turned.
 \end{quote}
 
 \dockey{persistent}{name}
 
 \begin{quote}
-The application keeps running in the background, but will only be visible in
-the page where it has been launched.
+Launched only once, the application keeps running in the background,
+but is only visible on the page where it has been launched.
 \end{quote}
 
 \dockey{sticky}{name}
 \begin{quote}
-The application keeps running and remains visible when turning pages.
+Launched only once, the application keeps running and remains visible
+when turning pages. It is also resized and moved as necessary to fit
+the page size.
+\end{quote}
+
+\dockey{raw}{name}
+\begin{quote}
+The application is launched each time its embedding command is
+encountered. A \doctt{raw} application is not managed by {\ActiveDVI},
+except for the initial launching and the final clean-up that occurs
+when {\ActiveDVI} exits. You can monitor \doctt{raw} applications with
+\doctt{advikillembed} and the associated window mapping facilities
+for \doctt{raw} applications (see below).
 \end{quote}
 
 \dockey{width}{dim}\\
 \dockey{height}{dim}
+
+
 \begin{quote}
 The application takes \docid{dim} width (respectively height) space in 
 {\LaTeX}. Both values default to 0pt.
@@ -829,10 +860,22 @@ the command string.
 
 \end{quote}
 
+\subsubsection{Monitoring embedded applications}
+
+To monitor embedded applications, {\ActiveDVI} provides the
+\doctt{advikillembed} primitive to send a signal to any named embedded
+application. For \doctt{raw} applications, there are additional
+functions to map or unmap the window allocated to a named \doctt{raw}
+application. Mapping or unmapping windows of non-\doctt{raw}
+applications is unspecified, since it may interfere in a non trivial
+way with {\ActiveDVI}'s automatic treatment of those applications.
+
+\subsubsection*{Monitoring a single application}
+
 \medskip\noindent
 \docdef \advikillembed \docarg{name}
 \begin{quote}
-Kill all embedded applications named \docid{name}.
+Kill the embedded application named \docid{name}.
 An optional signal value or symbolic name can be given to send to the
 designed process: for instance, {\tt {\char92}advikillembed[SIGUSR1]\{clock\}}
 will send the {\tt SIGUSR1} signal to the embedded application named
@@ -841,11 +884,48 @@ will send the {\tt SIGUSR1} signal to the embedded application named
 Signal value defaults to -9.
 \end{quote}
 
+\medskip\noindent
+\docdef \advimapembed \docarg{name}
+\begin{quote}
+Map the window of the embedded applications named \docid{name}.
+\end{quote}
+
+\medskip\noindent
+\docdef \adviunmapembed \docarg{name}
+\begin{quote}
+Unmap the window of the embedded applications named \docid{name}.
+\end{quote}
+
+\subsubsection*{Monitoring a group of embedded applications}
+
+The primitives \doctt{advikillallembed}, \doctt{advimapallembed}, and
+\doctt{adviunmapallembed} behave the same as their non-{\tt all}
+counterparts, except that they operate on all the applications that
+have been launched with the given name.
+
+\medskip\noindent
+\docdef \advikillallembed \docarg{name}
+\begin{quote}
+Similar to \doctt{advikillembed}
+but kill all the embedded applications named \docid{name}.
+\end{quote}
+
+\medskip\noindent
+\docdef \advimapallembed \docarg{name}
+\begin{quote}
+Map the windows of all the embedded applications named \docid{name}.
+\end{quote}
+
+\medskip\noindent
+\docdef \adviunmapallembed \docarg{name}
+\begin{quote}
+Unmap the windows of all the embedded applications named \docid{name}.
+\end{quote}
 
 \subsection{Active anchors}
 
-Active anchors are annotated pieces of text that gets associated
-activation records.  To define an active anchor, the command is
+Active anchors are annotated pieces of text that get associated
+activation records. To define an active anchor, the command is
 
 \medskip\noindent
 \docdef \advianchor \docopt{decl}\docarg{tag}\docarg {text}
@@ -853,10 +933,10 @@ activation records.  To define an active anchor, the command is
 \docdef \begin\doctt{\{advianchor\}}\docopt{decl}\docarg{tag}%
 \docid {text}\docdef \end\doctt{\{advianchor\}}
 \begin{quote}
-The text is first display as usual, then the anchor is drawn
+The text is first displayed as usual, then the anchor is drawn
 according to the style given by \docid{decl}, and made active. 
 Its activation, which depends on the mode given by \docid{decl}, 
-will play record \docid{tag}. 
+will play the record named \docid{tag}. 
 
 The declarations \docid{decl} are of the following form:
 \begin{description}
@@ -865,7 +945,7 @@ this defines the mode of  activation, which is either by
 moving mouse  over  or clicking on the anchor. 
 The default mode is \doctt{over}.
 \item [\doctt{box}, \doctt{invisible}, or \doctt{underline}]\indent\par
-the defines the style in which the anchor should be drawn.
+this defines the style in which the anchor should be drawn.
 The default style is \doctt{boxed}.
 \end{description}
 In the environment form, \docid{text} may contain fragile commands. 
