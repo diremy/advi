@@ -67,7 +67,7 @@ let rec scratch_write_char =
   fun c x y ->
    G.moveto x y;
    if c = '' then begin
-     prerr_endline "backspace";
+     (* prerr_endline "backspace"; *)
      let px =
       match !prev_xs with
       | [] -> 0

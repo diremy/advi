@@ -198,7 +198,9 @@ let print_chr t c =
  | _ -> print_str t (String.make 1 c);;
 
 let make_term_gen fg bg bw bwc tc cc x y h w =
- let font_size_x, font_size_y = Graphics.text_size "Ly" in
+ let font_size_x, font_size_y =
+   let sx, sy = Graphics.text_size "Ly" in
+   (sx + 1) / 2, sy in
  let t = {
    lines = Array.init h (fun i -> String.make w ' ');
    height = h;
