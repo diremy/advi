@@ -68,8 +68,8 @@ $(EXEC): $(COBJS) $(CMO_OBJS)
 $(EXEC).opt: $(COBJS) $(CMX_OBJS)
 	$(OCAMLOPT) $(INCLUDES) $(OPT_OBJS) $(LINK_OPTS) -o $(EXEC).opt
 
-config.ml:
-	configure
+# config.ml:
+# 	configure
  
 drawps.ml: Makefile.config drawps_with_ps.ml drawps_without_ps.ml
 	rm -f drawps.ml
@@ -106,7 +106,10 @@ veryclean:
 	rm -f Makefile.config config.cache config.log \
 	config.status drawps.ml config.ml
 
-install:: advi.opt
+splash.dvi: splash.tex
+	latex $*
+
+install:: advi.opt splash.dvi
 	cp advi.opt ${bindir}/advi
 	- mkdir -p $(ADVI_LOC)
 	cp splash.dvi caml.eps advi.sty advi.pro $(ADVI_LOC)

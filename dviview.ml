@@ -16,7 +16,7 @@
  *)
 
 
-let pauses = Misc.option_flag true "-nopauses" "Swictch pauses off";;
+let pauses = Misc.option_flag true "-nopauses" "Switch pauses off";;
 let fullwidth = Misc.option_flag false "-fullwidth" "Adjust size to width";;
 
 let start_page = ref 0
@@ -38,6 +38,19 @@ let page_stack_to_string page stack =
     page
     stack
 
+let scale_step = ref (sqrt (sqrt 2.));;
+let set_scale x =
+  if x > 1.0 && x <= 2. then scale_step := x
+  else
+    Misc.warning
+      (Printf.sprintf "out of bounds scale_step %f ignored" x);;
+let _ = 
+  Misc.set_option
+    "-scalestep"
+    (Arg.Float set_scale)
+    "REAL\tScale step for '<' and '>' (default sqrt(sqrt(2.0)))"
+;;
+    
 
 (****************)
 (*  Signatures  *)
@@ -751,8 +764,8 @@ module Make(Dev : DEVICE) = struct
       | Dev.Key 'r' -> cont := redraw st
       | Dev.Key 'R' -> cont := reload st
       | Dev.Key 'c' -> cont := center st
-      | Dev.Key '<' -> cont := scale_by st (1.0/.sqrt(2.0))
-      | Dev.Key '>' -> cont := scale_by st (sqrt(2.0))
+      | Dev.Key '<' -> cont := scale_by st (1.0 /. !scale_step)
+      | Dev.Key '>' -> cont := scale_by st !scale_step
       | Dev.Key 'g' ->
           num := 0;
           cont :=
