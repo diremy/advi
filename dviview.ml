@@ -15,41 +15,44 @@
  * details (enclosed in the file LGPL).
  *)
 
-type select_mode = Interval | Rectangle
+type select_mode = Interval | Rectangle;;
 
 let pauses = Misc.option_flag true "-nopauses" "Switch pauses off";;
 let fullwidth = Misc.option_flag false "-fullwidth" "Adjust size to width";;
 let bounding_box = Misc.option_flag false "-bbox" "Show the bounding box";;
 
-let start_page = ref 0
-let _ = Misc.set_option
-    "-page"
-    (Arg.Int (fun i -> start_page := i))
-    "INT\tMake advi start at page INT";;
-let start_html = ref None
-let _ = Misc.set_option
-    "-html"
-    (Arg.String (fun s -> start_html := Some s))
-    "STRING\tMake advi start at html reference of name STRING";;
-let debug_pages = Misc.debug_option
+let start_page = ref 0;;
+Misc.set_option
+  "-page"
+  (Arg.Int (fun i -> start_page := i))
+  "INT\tMake advi start at page INT";;
+
+let start_html = ref None;;
+Misc.set_option
+  "-html"
+  (Arg.String (fun s -> start_html := Some s))
+  "STRING\tMake advi start at html reference of name STRING";;
+let debug_pages =
+  Misc.debug_option
     "--debug_pages"
-    "Debug page motion"
-let browser = ref "netscape-communicator"
-let _ = Misc.set_option
-    "-browser"
-    (Arg.String (fun s -> browser := s))
-    "STRING\tCommand to call the browser";;
+    "Debug page motion";;
+
+let browser = ref "netscape-communicator";;
+Misc.set_option
+  "-browser"
+  (Arg.String (fun s -> browser := s))
+  "STRING\tCommand to call the browser";;
 
 let click_turn_page =
   Misc.option_flag false
     "-click_turn"
-    "Turn pages with mouse clicks (see the doc)"
+    "Turn pages with mouse clicks (see the doc)";;
 
 let page_stack_to_string page stack =
   let stack = String.concat " " (List.map string_of_int stack) in
   Printf.sprintf "Page no: %d Page_stack: %s"
     page
-    stack
+    stack;;
 
 let scale_step = ref (sqrt (sqrt 2.));;
 let set_scale x =
@@ -57,27 +60,26 @@ let set_scale x =
   else
     Misc.warning
       (Printf.sprintf "out of bounds scale_step %f ignored" x);;
-let _ = 
-  Misc.set_option
-    "-scalestep"
-    (Arg.Float set_scale)
-    "REAL\tScale step for '<' and '>' (default sqrt(sqrt(2.0)))"
+Misc.set_option
+  "-scalestep"
+  (Arg.Float set_scale)
+  "REAL\tScale step for '<' and '>' (default sqrt(sqrt(2.0)))"
 ;;
 
 let autoresize = ref true;;
-let _ = Misc.set_option
-    "-noautoresize"
-    (Arg.Clear autoresize)
-    "\tPrevents scaling from resizing the window (done if geometry is provided)"
+Misc.set_option
+  "-noautoresize"
+  (Arg.Clear autoresize)
+  "\tPrevents scaling from resizing the window (done if geometry is provided)"
 ;;
 
-module Drv = Driver
-module Dev = Grdev
-module Symbol = Dev.Symbol
-    
-open Dimension
+module Drv = Driver;;
+module Dev = Grdev;;
+module Symbol = Dev.Symbol;;
+
+open Dimension;;
   
-exception Error of string
+exception Error of string;;
     
   (*** View attributes ***)
     
@@ -168,8 +170,8 @@ type state = {
       
   (*** Setting the geometry ***)
       
-let is_digit c = (c >= '0' && c <= '9')
-    
+let is_digit c = c >= '0' && c <= '9'
+
 let parse_geometry str =
   try
     let len = String.length str
@@ -207,8 +209,7 @@ let parse_geometry str =
     { width = width; height = height; xoffset = xoffset; yoffset = yoffset }
     with Failure _ -> invalid_arg "parse_geometry"
         
-  (*** Setting other parameters ***)
-        
+(*** Setting other parameters ***)        
 let attr =
   { geom = 
     { width = 0;
@@ -222,23 +223,15 @@ let attr =
   }
     
 let set_autoresize b = autoresize := b
-let set_geometry geom =
-  attr.geom <- parse_geometry geom
+let set_geometry geom = attr.geom <- parse_geometry geom
+
+let set_crop b = attr.crop <- b
+
+let set_hmargin d = attr.hmargin <- normalize d
       
-let set_crop b =
-  attr.crop <- b
+let set_vmargin d = attr.vmargin <- normalize d
       
-let set_hmargin d =
-  attr.hmargin <- normalize d
-      
-let set_vmargin d =
-  attr.vmargin <- normalize d
-      
-      
-      
-      
-  (*** Initialization ***)
-      
+(*** Initialization ***)      
 let init filename =
   let dvi =
     try Dvi.load filename
@@ -340,7 +333,7 @@ let update_dvi_size init st =
         | Px n -> float (attr.geom.height - 2 * n) /. h_in
         | In f -> float attr.geom.height /. (h_in +. 2.0 *. f)
         | _ -> assert false in
-      let base_dpi = (if !fullwidth then wdpi else min wdpi hdpi) in
+      let base_dpi = if !fullwidth then wdpi else min wdpi hdpi in
       let width = int_of_float (base_dpi *. w_in)
       and height = int_of_float (base_dpi *. h_in) in
       let (size_x, size_y) =
@@ -421,9 +414,7 @@ let position st x y =
   | None -> ()
         
   (* User has selected a region with the mouse. We dump characters. *)
-let selection s =
-  Grdev.cut s;
-  ()
+let selection s = Grdev.cut s;;
     
 let get_size_in_pix st = function
   | Px n -> n
@@ -500,7 +491,7 @@ let redraw st =
    and blank_h = 20 in
 *)
       Drv.clear_symbols ();
-      if (!bounding_box) then draw_bounding_box st;
+      if !bounding_box then draw_bounding_box st;
       if !pauses then
         let f = Drv.render_step st.cdvi st.page_no
 	    (st.base_dpi *. st.ratio) st.orig_x st.orig_y in
@@ -550,7 +541,8 @@ let find_xref tag default st =
       end
     else default
         
-exception Link
+exception Link;;
+
 let exec_xref link = 
   let call command =
     let pid = Misc.fork_process command in
@@ -571,13 +563,13 @@ let exec_xref link =
         if Sys.file_exists filename then
           begin
             if Misc.has_suffix ".dvi"  filename then
-              call  (String.concat " " ("advi" :: arguments @ [ filename ]))
-            else if (Misc.has_suffix ".txt"  filename
-                   || Misc.has_suffix ".tex"  filename) then
-              call ("xterm -e less "^ filename)
-            else if (Misc.has_suffix ".html"  filename
-                   || Misc.has_suffix ".htm"  filename) then
-              call (!browser ^" "^ link)
+              call (String.concat " " ("advi" :: arguments @ [ filename ]))
+            else if Misc.has_suffix ".txt"  filename ||
+                    Misc.has_suffix ".tex"  filename then
+              call ("xterm -e less " ^ filename)
+            else if Misc.has_suffix ".html"  filename ||
+                    Misc.has_suffix ".htm"  filename then
+              call (!browser ^ " " ^ link)
             else
               Misc.warning 
                 (Printf.sprintf
@@ -589,7 +581,7 @@ let exec_xref link =
             (Printf.sprintf "File %s non-existent or not readable"
                filename)
       with
-        Misc.Match -> assert false
+      | Misc.Match -> assert false
       | Link -> ()
     end
   else if Misc.has_prefix "http:" link then
@@ -600,11 +592,11 @@ let page_start default st =
   | Some html ->
       Drv.scan_specials st.cdvi max_int;
       find_xref html default st
-        
+
 let rec clear_page_stack max stack =
   let pages = Array.create max false in
   let rec clear = function
-      p::stack ->
+    | p :: stack ->
         let s = clear stack in
         let pa = if p < 0 then -1 - p else p in
         if pa < max && not pages.(pa) then
@@ -666,7 +658,7 @@ let goto_page n st = (* go to the begining of the page *)
       
 let push_stack b n st =
   match st.page_stack with
-  | p :: rest when p = n -> if b then st.page_stack <- ( -1 - n )::rest
+  | p :: rest when p = n -> if b then st.page_stack <- ( -1 - n ) :: rest
   | p :: rest when p = -1 - n -> ()
   | all -> st.page_stack <- (if b then -1 - n else n) :: all
                                                           
@@ -818,11 +810,12 @@ module B =
               (* the following test is necessary because of some
                  * floating point rounding problem
               *)
-          if attr.geom.height < st.dvi_height + 2 * (get_size_in_pix st
-                                                       attr.vmargin) then begin
-                                                         st.orig_y <- top_of_page st;
-                                                         set_bbox st;
-                                                       end;
+          if attr.geom.height <
+             st.dvi_height + 2 * (get_size_in_pix st attr.vmargin) then
+            begin
+              st.orig_y <- top_of_page st;
+              set_bbox st;
+            end;
           goto_page (st.page_no + 1) st
         end
       in
@@ -842,11 +835,12 @@ module B =
     let page_up st =
       let none () =
         if st.page_no > 0 then begin
-          if attr.geom.height < st.dvi_height + 2 * (get_size_in_pix st
-                                                       attr.vmargin) then begin
-                                                         st.orig_y <- bottom_of_page st;
-                                                         set_bbox st;
-                                                       end;
+          if attr.geom.height <
+             st.dvi_height + 2 * (get_size_in_pix st attr.vmargin) then
+            begin
+              st.orig_y <- bottom_of_page st;
+              set_bbox st;
+            end;
           goto_page (st.page_no -1) st
         end
       in
@@ -936,9 +930,9 @@ let _ =
 let main_loop filename =
   let st = init filename in
   let cont = ref None in (* drawing continuation *)
+  Dev.set_title ("Advi: " ^ Filename.basename filename);
   Dev.open_dev (Printf.sprintf " " ^ string_of_geometry attr.geom) ;
   set_bbox st;
-  Dev.set_title ("Advi: " ^ Filename.basename filename);
   if st.page_no > 0 && !Misc.dops then
     Drv.scan_specials st.cdvi st.page_no
   else

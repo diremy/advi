@@ -16,7 +16,7 @@
 
 type window_id = string
 
-val window_id : unit -> window_id
+val get_window_id : unit -> window_id
         (* Return the unique identifier of the Caml graphics window.
            The returned string is an unsigned 32 bits integer 
            in decimal form. *)
@@ -34,7 +34,7 @@ val unmap_subwindow : window_id -> unit
 
 val move_subwindow : window_id -> int -> int -> unit
          (* [move_subwindow wid x y] moves the sub-window having the
-            given identifier to [x, y]. *)
+            given identifier to point [x, y]. *)
 val resize_subwindow : window_id -> int -> int -> unit
          (* [resize_subwindow wid w h] resizes the sub-window having
             the given identifier to height [h] and width [w]. *)

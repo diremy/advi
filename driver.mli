@@ -25,4 +25,3 @@ val unfreeze_fonts : cooked_dvi -> unit
 val unfreeze_glyphs : cooked_dvi -> float -> unit
 val scan_specials : cooked_dvi -> int -> unit
 val clear_symbols : unit -> unit
-

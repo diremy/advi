@@ -15,9 +15,11 @@
 
 (* Re-imported from graphicsX11 *)
 
-(* Module [GraphicsX11]: additional graphics primitives for the X Windows system *)
+(* Module [GraphicsY11]: additional graphics primitives for the X Windows system *)
 
 type window_id = string
+
+let null_window = "-1";;
 
 external flush : unit -> unit = "gr_flush"
         (* flush pending events *)
@@ -32,7 +34,7 @@ let draw_area ~ima ~srcx ~srcy ~width ~height ~destx ~desty =
   if srcx < 0 || srcy < 0 then raise (Invalid_argument "draw_area")
   else raw_draw_area ima (srcx, srcy, width, height) destx desty;;
 
-external window_id : unit -> window_id = "gr_window_id";;
+external get_window_id : unit -> window_id = "gr_window_id";;
 
 let subwindows = Hashtbl.create 13;;
 
@@ -42,6 +44,7 @@ external raw_close_subwindow : window_id -> unit
     = "gr_close_subwindow";;
 
 let open_subwindow ~x ~y ~width ~height =
+  if width = 0 && height = 0 then null_window else
   let wid = raw_open_subwindow x y width height in
   Hashtbl.add subwindows wid ();
   wid;;
@@ -53,21 +56,24 @@ let check_window fname wid =
   if not (Hashtbl.mem subwindows wid) then no_such_window fname wid;;
 
 let close_subwindow wid =
+  if wid != null_window then begin
   check_window "close_subwindow" wid;
   raw_close_subwindow wid;
-  Hashtbl.remove subwindows wid;;
+  Hashtbl.remove subwindows wid end;;
 
 external raw_map_window : window_id  -> unit = "gr_map_window";;
 external raw_unmap_window : window_id -> unit = "gr_unmap_window";;
 
 let map_subwindow wid =
-prerr_endline (Printf.sprintf "mapping subwindow %s" wid);
+  (*prerr_endline (Printf.sprintf "mapping subwindow %s" wid);*)
+  if wid != null_window then begin
   check_window "map_subwindow" wid;
-  raw_map_window wid;;
+  raw_map_window wid end;;
   
 let unmap_subwindow wid =
+  if wid != null_window then begin
   check_window "unmap_subwindow" wid;
-  raw_unmap_window wid;;
+  raw_unmap_window wid end;;
 
 external raw_move_window : window_id -> int -> int -> unit
     = "gr_move_window";;
@@ -75,13 +81,15 @@ external raw_move_window : window_id -> int -> int -> unit
 external raw_resize_window : window_id -> int -> int -> unit
     = "gr_resize_window";;
 
-let resize_subwindow wid =
+let resize_subwindow wid h w =
+  if wid != null_window then begin 
   check_window "resize_subwindow" wid;
-  raw_resize_window wid;;
+  raw_resize_window wid h w end;;
 
-let move_subwindow wid =
+let move_subwindow wid x y =
+  if wid != null_window then begin
   check_window "move_subwindow" wid;
-  raw_move_window wid;;
+  raw_move_window wid x y end;;
 
 external flush : unit -> unit = "gr_flush"
         (* flush the content of the backing store *)

@@ -15,7 +15,7 @@
  * details (enclosed in the file LGPL).
  *)
 
-module GY = GraphicsY11
+module GY = GraphicsY11;;
 
 let ignore_background = Misc.option_flag false
     "--ignore_background"
@@ -25,59 +25,59 @@ let show_busy = Misc.option_flag true
     "-nowatch"
     "\tDon't display a watch when busy";;
 
-let busy_delay = ref 0.2
-let _ = Misc.set_option
-    "-watch"
-    (Arg.Float (fun x -> busy_delay := x))
-    "FLOAT\tDelay before the watch cursor appears (default 0.2s)";;
+let busy_delay = ref 0.2;;
 
-type color = int ;;
-let href_frame = 0x00ff00
-let advi_frame = 0xaaaaff
-let href_emphasize = 0xffff00
-let name_emphasize = 0xffaaaa
-let cut_emphasize = Graphics.cyan
+Misc.set_option
+   "-watch"
+   (Arg.Float (fun x -> busy_delay := x))
+   "FLOAT\tDelay before the watch cursor appears (default 0.2s)";;
+
+type color = int;;
+let href_frame = 0x00ff00;;
+let advi_frame = 0xaaaaff;;
+let href_emphasize = 0xffff00;;
+let name_emphasize = 0xffaaaa;;
+let cut_emphasize = Graphics.cyan;;
 
 (*** Device configuration ***)
 
-let opened = ref false ;;
+let opened = ref false;;
 let display_mode = Misc.option_flag false "-bg" "Draw in the background"
 let set_mode b =  display_mode := b;;
 
 
-let size_x = ref 0 ;;
-let size_y = ref 0 ;;
-let color = ref 0x000000 ;;
+let size_x = ref 0;;
+let size_y = ref 0;;
+let color = ref 0x000000;;
 
-let xmin = ref 0 ;;
-let xmax = ref 0 ;;
-let ymin = ref 0 ;;
-let ymax = ref 0 ;;
+let xmin = ref 0;;
+let xmax = ref 0;;
+let ymin = ref 0;;
+let ymax = ref 0;;
 
 (* Communication with GS *)
-exception Stop
+exception Stop;;
 
 let dvi = true;;
 let ps = false;;
 let psused = ref false;;
-let last_is_dvi = ref true
+let last_is_dvi = ref true;;
 
-let flush_ps() = if not !psused then psused := true;  Gs.flush();;
-let flush_dvi() = GY.flush();;
-let flush_last() = if !last_is_dvi then flush_dvi() else flush_ps();;
+let flush_ps() = if not !psused then psused := true;  Gs.flush ();;
+let flush_dvi() = GY.flush ();;
+let flush_last() = if !last_is_dvi then flush_dvi () else flush_ps ();;
 
 let sync b =
-  if !last_is_dvi = b then ()
-  else begin flush_last(); last_is_dvi := b end;;
+  if !last_is_dvi <> b then begin flush_last (); last_is_dvi := b end;;
 
-let control_cursor = GY.Cursor_left_ptr
-let move_cursor = GY.Cursor_fleur
-let select_cursor = GY.Cursor_xterm
-let free_cursor = ref control_cursor
+let control_cursor = GY.Cursor_left_ptr;;
+let move_cursor = GY.Cursor_fleur;;
+let select_cursor = GY.Cursor_xterm;;
+let free_cursor = ref control_cursor;;
 
-type busy = Free | Busy | Pause | Disk
-let busy_timeout = ref 0.
-let last_cursor = ref control_cursor
+type busy = Free | Busy | Pause | Disk;;
+let busy_timeout = ref 0.;;
+let last_cursor = ref control_cursor;;
 let busy_set_cursor cursor =
   busy_timeout := 0.;
   last_cursor := cursor;
@@ -89,7 +89,7 @@ let busy_check_timer() =
       busy_set_cursor GY.Cursor_watch;;
 let busy_start() =
   if !busy_timeout > 0. then busy_check_timer()
-  else busy_timeout := Unix.gettimeofday() +. !busy_delay
+  else busy_timeout := Unix.gettimeofday() +. !busy_delay;;
 
 (* To be called before system calls that make take a long time *)
 let busy_now() =
@@ -105,13 +105,13 @@ let set_busy sw =
     | Busy ->
         busy_start()
     | Free ->
-        busy_set_cursor !free_cursor
-  else ();;
+        busy_set_cursor !free_cursor;;
 
-let set_title s = Graphics.set_window_title s ;;
+let title = ref "Advi";;
+let set_title s = title := s;;
 
 (* for refreshed signal on usr1 *)
-exception Usr1
+exception Usr1;;
 let usr1_status = ref false;;
 let clear_usr1() = usr1_status :=  false;;
 let waiting = ref false;;
@@ -131,10 +131,10 @@ let set_usr1() =
 set_usr1();;
 
 let sleep_watch b n =
-  let start = Unix.gettimeofday() in
+  let start = Unix.gettimeofday () in
   let rec delay t =
     try
-      if b && (!usr1_status || Graphics.key_pressed()) then ()
+      if b && (!usr1_status || Graphics.key_pressed ()) then ()
       else ignore (Unix.select [] [] [] t)
     with Unix.Unix_error(Unix.EINTR, _, _) ->
       let now = Unix.gettimeofday() in
@@ -152,9 +152,9 @@ let persists = ref [];;
 let unmap_embeds = ref [];;
 
 let synchronize () =
-  Gs.flush();
+  Gs.flush ();
   Transimpl.synchronize_transition ();
-  Graphics.synchronize();
+  Graphics.synchronize ();
   List.iter (fun f -> f ()) (List.rev !embeds);
   embeds := [];
   List.iter (fun f -> f ()) (List.rev !persists);
@@ -164,7 +164,7 @@ let synchronize () =
 
 type cache =
   | No_cache
-  | Cached of (color * color) * Graphics.image ;;
+  | Cached of (color * color) * Graphics.image;;
             
 module Glyph =
   struct 
@@ -179,14 +179,15 @@ module Glyph =
     let hoffset g = g.glyph.Glyph.hoffset 
     let voffset g = g.glyph.Glyph.voffset 
     let graymap g = g.glyph.Glyph.graymap 
-  end ;;
-type glyph = Glyph.t
-open Glyph
+  end;;
+
+type glyph = Glyph.t;;
+open Glyph;;
     
 let make_glyph g =
   { glyph = g ;
     cache = No_cache ;
-    img_list = [] } ;;
+    img_list = [] };;
     
 let get_glyph g = g.glyph;;
 
@@ -195,26 +196,24 @@ let default_bg_color = Graphics.white;;
 let bg_color = ref  default_bg_color;;
 let bg_colors = ref [];;
 let push_bg_color c =
-  bg_colors := !bg_color ::!bg_colors;
+  bg_colors := !bg_color :: !bg_colors;
   bg_color := c;;
-let pop_bg_color() = 
+let pop_bg_color() =
   match !bg_colors with
-  | h::t -> bg_color := h; bg_colors := t
-  | [] -> bg_color := default_bg_color
-;;
+  | h :: t -> bg_color := h; bg_colors := t
+  | [] -> bg_color := default_bg_color;;
 
 let background_colors = ref [];;
 let add_background_color x y w h c =
   background_colors := (x, y, w, h, c) :: !background_colors;;
 
-let find_bg_color x y w h=
+let find_bg_color x y w h =
   let rec find_color = function
     (x0, y0, w0, h0, c) :: t ->
       if x0 <= x && y0 <= y && x + w <= x0 + w0 && y + h <= y0 + h0 then c
       else find_color t
     | [] -> !bg_color in
   find_color !background_colors;;
-
 
 let get_bg_color x y w h =
   if !ignore_background then Graphics.white
@@ -227,7 +226,6 @@ let get_bg_color x y w h =
         else Graphics.white
       else
         find_bg_color x y w h
-      
     end;;
 
 let get_color_table =
@@ -244,9 +242,9 @@ let get_color_table =
       and b1 = fg land 0xff in
       for i = 1 to 255 do
 	let k = (255 - i) in
-	let r = (k*r0 + i*r1)/255
-	and g = (k*g0 + i*g1)/255
-	and b = (k*b0 + i*b1)/255 in
+	let r = (k*r0 + i * r1) / 255
+	and g = (k*g0 + i * g1) / 255
+	and b = (k*b0 + i * b1) / 255 in
 	table.(i) <- (r lsl 16) + (g lsl 8) + b
       done ;
       Hashtbl.add htable col table ;
@@ -291,7 +289,7 @@ let set_bbox bb =
       bbox := nobbox; 
   | Some(x0, y0, w, h) ->
       bbox := { x = x0; y = !size_y - y0; w = w; h = -h}
- ;;
+;;
 
 (*** Drawing ***)
 
@@ -299,7 +297,7 @@ let set_color col =
   if not !opened then
     failwith "Grdev.set_color: no window" ;
   color := col ;
-  Graphics.set_color col ;;
+  Graphics.set_color col;;
   
 let draw_glyph g x0 y0 =
   if not !opened then
@@ -313,7 +311,7 @@ let draw_glyph g x0 y0 =
     let bg = get_bg_color x y w h in
     let img = get_image g (bg, !color) in
     Graphics.draw_image img x y ;
-  end ;; 
+  end;;
 
 let fill_rect x0 y0 w h =
   if not !opened then
@@ -344,7 +342,7 @@ let adjust_path path =
     let (x,y) = path.(i) in
     newpath.(i) <- (x, !size_y - y)
   done;
-  newpath
+  newpath;;
 
 let draw_path path ~pensize =
   if not !opened then
@@ -352,7 +350,7 @@ let draw_path path ~pensize =
   let path = adjust_path path in
   Graphics.set_line_width pensize;
   Graphics.draw_poly_line path;
-  Graphics.set_line_width 1
+  Graphics.set_line_width 1;;
 
 let set_shade shade =
   let r = 0xFF - (!color lsr 16) land 0xFF
@@ -361,7 +359,7 @@ let set_shade shade =
   let r = 0xFF - int_of_float (shade *. float r)
   and g = 0xFF - int_of_float (shade *. float g)
   and b = 0xFF - int_of_float (shade *. float b) in
-  Graphics.set_color (Graphics.rgb r g b)
+  Graphics.set_color (Graphics.rgb r g b);;
 
 let fill_path path ~shade =
   if not !opened then
@@ -369,21 +367,21 @@ let fill_path path ~shade =
   let path = adjust_path path in
   set_shade shade;
   Graphics.fill_poly path;
-  Graphics.set_color !color
+  Graphics.set_color !color;;
 
 let draw_arc ~x ~y ~rx ~ry ~start:s ~stop:e ~pensize =
   if not !opened then
     failwith "Grdev.draw_arc: no window" ;
   Graphics.set_line_width pensize;
   Graphics.draw_arc x (!size_y - y) rx ry (- s) (- e);
-  Graphics.set_line_width 1
+  Graphics.set_line_width 1;;
 
 let fill_arc ~x ~y ~rx ~ry ~start:s ~stop:e ~shade =
   if not !opened then
     failwith "Grdev.fill_arc: no window" ;
   set_shade shade;
   Graphics.fill_arc x (!size_y - y) rx ry (- s) (- e);
-  Graphics.set_color !color
+  Graphics.set_color !color;;
 
 let epstransparent = ref false;;
 let set_epstransparent s = epstransparent := s;;
@@ -456,7 +454,7 @@ let blend_func = function
 	let t = (0xff - dst) * src + dst * (0xff - src) in
       	let t = t + 0x80 in
       	let t = t + t lsr 8 in
-      	t lsr 8
+      	t lsr 8;;
           
 let draw_ps file bbox (w,h) x0 y0 = 
   if not !opened then
@@ -468,14 +466,15 @@ let draw_ps file bbox (w,h) x0 y0 =
       bbox (w,h) x y 
   with 
   | Not_found -> Misc.warning ("ps file " ^ file ^ " not found")
-  | _ -> Misc.warning ("error happened while drawing ps file " ^ file)
+  | _ -> Misc.warning ("error happened while drawing ps file " ^ file);;
           
-let clean_ps_cache () = Drawps.clean_cache ()
-    
+let clean_ps_cache () = Drawps.clean_cache ();;
+
 (* Embedded (tcl/tk) applications *)
 
-type app_type = Sticky | Persistent | Embedded
-let app_table = Hashtbl.create 17
+type app_type = Sticky | Persistent | Ephemeral;;
+
+let app_table = Hashtbl.create 17;;
 
 let raw_embed_app command app_type app_name width height x y =
   let string_replace pat templ str =
@@ -484,12 +483,8 @@ let raw_embed_app command app_type app_name width height x y =
     let find pat str at =
       let rec find_aux pos =
 	if String.sub str pos patlen = pat then pos
-	else find_aux (pos + 1)
-      in
-      try
-	find_aux at
-      with
-	_ -> raise Not_found
+	else find_aux (pos + 1) in
+      try find_aux at with _ -> raise Not_found
     in
     let rec replace pos =
       try
@@ -523,10 +518,7 @@ let raw_embed_app command app_type app_name width height x y =
     Why "!"?  '\' is for TeX. "%" is for TeX. "$" is for TeX...
   ***)
 
-  let opt_parent = 
-    Printf.sprintf "%s" wid
-  in
-  let command0 = string_replace "!p" opt_parent command in
+  let command0 = string_replace "!p" wid command in
   
   (* if there is no !p, the application geometry will be treated 
      by the WM. In such cases, we try to fix the geoemtry
@@ -537,10 +529,10 @@ let raw_embed_app command app_type app_name width height x y =
       let against_root = (command0 = command) in
       if against_root then begin
         (* fix the geometry *)
-	let (ww,wh,wx,wy) = GY.get_geometry () in
-	x+wx, y - height + wy
+	let (ww, wh, wx, wy) = GY.get_geometry () in
+	x + wx, y - height + wy
       end else begin
-	0,0
+	0, 0
       end
     in
     Printf.sprintf "%dx%d+%d+%d" width height px py,
@@ -561,7 +553,7 @@ let raw_embed_app command app_type app_name width height x y =
   if Hashtbl.mem app_table pid then 
     raise (Failure (Printf.sprintf 
 		      "pid %d is already in the app_table!" pid));
-  Hashtbl.add app_table pid (app_type, app_name, wid)
+  Hashtbl.add app_table pid (app_type, app_name, wid);;
 
 (* In hash table t, returns the first element that verifies p. *)
 let hashtbl_find t p =
@@ -586,6 +578,11 @@ let unmap_embed_app command app_type app_name width height x y =
   hashtbl_find app_table (fun (_, name, _) -> name = app_name) in
  GraphicsY11.unmap_subwindow wid;;
 
+let move_or_resize_persistent_app command app_type app_name width height x y =
+ let _, (app_type, app_name, wid) = find_embedded_app app_name in
+ (* To be refined *)
+ ();;
+
 (* In hash table t, verifies that at least one element verifies p. *)
 let hashtbl_exists t f =
  try
@@ -602,7 +599,11 @@ let embed_app command app_type app_name width height x y =
      if not (already_launched app_name) then
      embeds :=
       (fun () -> raw_embed_app command app_type app_name width height x y) ::
-      !embeds
+      !embeds else
+     persists :=
+      (fun () -> move_or_resize_persistent_app command
+         app_type app_name width height x y) ::
+      !persists
   | Persistent ->
      if not (already_launched app_name) then
      embeds :=
@@ -620,15 +621,13 @@ let embed_app command app_type app_name width height x y =
          (* prerr_endline ("Unmapping " ^ app_name);*)
          unmap_embed_app command app_type app_name width height x y) ::
       !unmap_embeds;
-  | Embedded ->
+  | Ephemeral ->
      embeds :=
       (fun () -> raw_embed_app command app_type app_name width height x y) ::
       !embeds;;
 
 let kill_app pid wid =
-(*
-  prerr_endline (Printf.sprintf "Killing %d in window %s " pid wid);
-*)
+  (* prerr_endline (Printf.sprintf "Killing %d in window %s " pid wid);*)
   Hashtbl.remove app_table pid;
   (try Unix.kill pid 9 with _ -> ());
   while
@@ -640,28 +639,25 @@ let kill_app pid wid =
   do () done;
   GraphicsY11.close_subwindow wid;;
 
+let kill_apps app_type = 
+  (* begin match app_type with
+  | Persistent -> prerr_endline "Killing persistent apps"
+  | Sticky -> prerr_endline "Killing sticky apps"
+  | Ephemeral -> prerr_endline "Killing ephemeral apps"
+  end; *)  
+  Hashtbl.iter
+   (fun pid (apt, app_name, wid) -> 
+      if app_type = apt then kill_app pid wid) app_table;;
+
 let kill_embedded_app app_name =
   let pid, (app_type, app_name, wid) = find_embedded_app app_name in
   kill_app pid wid;;
-
-let kill_apps app_type =
-(*  
-  begin match app_type with
-  | Persistent -> prerr_endline "Killing persistent apps"
-  | Sticky -> prerr_endline "Killing sticky apps"
-  | Embedded -> prerr_endline "Killing embedded apps"
-  end;  
-*)
-  Hashtbl.iter (fun pid (apt, app_name, wid) -> 
-    if app_type = apt then kill_app pid wid) app_table;;
 
 let unmap_persistent_apps () =
   List.iter (fun f -> f ()) (List.rev !unmap_embeds);
   unmap_embeds := [];;
 
-let kill_embedded_apps () = 
-  kill_apps Embedded;
-  unmap_persistent_apps ();;
+let kill_ephemeral_apps () = kill_apps Ephemeral;;
 
 let kill_persistent_apps () =
   kill_apps Sticky;
@@ -914,20 +910,21 @@ let open_dev geom =
   ymin := 0 ; ymax := !size_y ;
   Graphics.remember_mode true ;
   Graphics.display_mode !display_mode ;
-  opened := true ;;
+  Graphics.set_window_title !title ;
+  opened := true;;
 
 let close_dev () =
   if !opened then begin
-    kill_embedded_apps ();
+    kill_ephemeral_apps ();
     kill_persistent_apps ();
     Graphics.close_graph ();
   end;
-  opened := false ;;
+  opened := false;;
 
 let clear_dev () =
   if not !opened then
     failwith "Grdev.clear_dev: no window" ;
-  kill_embedded_apps ();
+  kill_ephemeral_apps ();
   unmap_persistent_apps ();
   Graphics.display_mode !display_mode ;
   Graphics.clear_graph ();
@@ -950,7 +947,7 @@ type status = Graphics.status = {
     button : bool ;
     keypressed : bool ;
     key : char
-  } ;;
+  };;
 
 type area = Bottom_right | Bottom_left | Top_right | Top_left | Middle
 type button = Button1 | Button2 | Button3

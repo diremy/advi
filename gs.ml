@@ -4,9 +4,9 @@ let antialias =
     "Set Postscript antialias";;
 
 let showps = ref false;;
-let _ = Misc.set_option 
-    "--showps" (Arg.Set showps)
-    "\tPrint a copy of Postscript sent to gs to stdout";;
+Misc.set_option
+  "--showps" (Arg.Set showps)
+  "\tPrint a copy of Postscript sent to gs to stdout";;
 let pspage = ref 0;;
 
 (* constants *)
@@ -27,7 +27,7 @@ let ack_request =
     [ "flushpage ("; ack_string; ") print flush"; ];;
 
 
-let timeout = 3.;
+let timeout = 3.;;
 
 exception Timeout;;
 exception Error;;
@@ -35,13 +35,13 @@ exception Error;;
 exception Terminated;;
 exception Retry;;
 
-let x11alpha = "x11alpha"
-let x11 = "x11"
+let x11alpha = "x11alpha";;
+let x11 = "x11";;
 type graphical = 
     { display : int; 
-      window  : string ; (* Window identifier. *)
+      window  : GraphicsY11.window_id ; (* Window identifier. *)
       pixmap  : string ; (* Pixmap identifier. *)
-      width  : int ; (* geometry of the windown. *)
+      width  : int ; (* geometry of the window. *)
       height : int ;
       bwidth  : int ; (* geometry of the backing store. *)
       bheight : int ;
@@ -50,7 +50,7 @@ type graphical =
       x    : int   ; (* x offset in pixels 
                           (coordinates of the upper left corner) *)
       y    : int   ; (* y offset *)
-    } 
+    };;
 
 exception Killed of string;;
 
@@ -70,7 +70,7 @@ let rec select fd_in fd_out fd_exn timeout =
 class gs() =
   let gr = 
     { display = 0;
-      window = GraphicsX11.window_id();
+      window = GraphicsY11.get_window_id();
       pixmap = GraphicsY11.bstore_id(); 
       width = Graphics.size_x();
       height = Graphics.size_y();
@@ -187,8 +187,7 @@ class gs() =
                 let y = gr.height + y in
                 current_x := x; current_y := y
               with
-                Not_found | Failure _ -> 
-                  prerr_endline s;
+              | Not_found | Failure _ -> prerr_endline s
             end
           else if Misc.has_prefix err_string s then
             begin
@@ -381,7 +380,7 @@ class gv =
           gs # kill;
           process <- None
   end
-    ;; 
+;; 
     
     
 let gv = new gv;;
@@ -403,8 +402,7 @@ let flush() =
     try  gv#sync
     with Terminated ->
       Misc.warning "Continuing without Postscript";
-      Misc.dops := false;
-      ();;
+      Misc.dops := false;;
 
 let toggle_antialias() =
   antialias := not !antialias;

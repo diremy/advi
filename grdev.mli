@@ -107,14 +107,13 @@ type app_type =
          and only once and keeps running throughout the show.
          A [Persistent] application must be embeddable, since its
          window must be mapped and unmapped. *)
-   | Embedded
-      (* An [Embedded] is an application that is launched when the
+   | Ephemeral
+      (* An [Ephemeral] is an application that is launched when the
          page it appears in is visualised. It is killed when going
          to another slide. If the page is visible again, the
          application will be launched again as well. *)
 
 val embed_app : string -> app_type -> string -> int -> int -> int -> int -> unit
-val kill_embedded_apps : unit -> unit 
 val kill_embedded_app : string -> unit 
 
 (* Events *)

@@ -15,10 +15,10 @@
  * details (enclosed in the file LGPL).
  *)
 
-open Misc
+open Misc;;
 
 (* number of steps before checking for user interrutions *)
-let checkpoint_frequency = 10
+let checkpoint_frequency = 10;;
 
 (*** Some utilities for specials ***)
 
@@ -115,7 +115,7 @@ let parse_color_args = function
   | _ -> 0x000000 ;;
 
 
-module Dev= Grdev
+module Dev = Grdev
 module Symbol = Dev.Symbol
 module DFont = Devfont.Make(Dev)
 let base_dpi = 600
@@ -506,7 +506,8 @@ let set_rule st a b =
   	  and urx = int_of_string (List.assoc "urx" records) 
   	  and ury = int_of_string (List.assoc "ury" records) 
   	  in
-  	  (* prerr_endline ("BBOX=" ^ Printf.sprintf "%d %d %d %d" llx lly urx ury); *)
+  	  (* prerr_endline
+              ("BBOX=" ^ Printf.sprintf "%d %d %d %d" llx lly urx ury); *)
   	  llx, lly, urx, ury
       with
       |	_ -> raise (Failure "psfile: no bbox")
@@ -530,7 +531,7 @@ let set_rule st a b =
     let dpi = ldexp (float st.sdpi) (-16) in
     let width_pixel = truncate (width /. 72.0 *. dpi) in
     let height_pixel = truncate (height /. 72.0 *. dpi) in
-    (* prerr_endline (Printf.sprintf "%d x %d pixel" width_pixel height_pixel); *)
+    (* prerr_endline (Printf.sprintf "%dx%d pixel" width_pixel height_pixel);*)
     file, (llx, lly, urx, ury), (width_pixel, height_pixel)
 
   let kill_embed_special st s =
@@ -549,7 +550,7 @@ let set_rule st a b =
   let app_type_of_string = function
     | "sticky" -> Dev.Sticky
     | "persistent" -> Dev.Persistent
-    | "embedded" -> Dev.Embedded
+    | "ephemeral" -> Dev.Ephemeral
     | s -> raise (Failure ("Unknown embedding type " ^ s))
 
   let embed_special st s =
@@ -602,9 +603,7 @@ let set_rule st a b =
       let dpi = ldexp (float st.sdpi) (-16) in
       let width_pixel = truncate (w *. dpi) in
       let height_pixel = truncate (h *. dpi) in
-(*
-      prerr_endline (Printf.sprintf "%d x %d pixel" width_pixel height_pixel);
-*)
+   (* prerr_endline (Printf.sprintf "%d x %d pixel" width_pixel height_pixel);*)
       width_pixel, height_pixel
     in
     let x = st.x_origin + int_of_float (st.conv *. float st.h)
