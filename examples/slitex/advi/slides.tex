@@ -19,18 +19,14 @@ Paris -- December $16$ 2002
 \advitransition{slide}
 
 \def\tpause{\advitransition{none}\pause}
-\pause Xdvi ?%
-\tpause{\advitransbox{slide,from=right}{\textcolor{red}{No}}}%
-\tpause~Ghostview ?%
-\tpause{\advitransbox{slide,from=right}{\textcolor{red}{No}}}%
-\tpause~Acroread ?%
-\tpause{\advitransbox{slide,from=right}{\textcolor{red}{No}}}%
-\tpause~Powerpoint ?%
-\tpause{\advitransbox{slide,from=right}{\textcolor{red}{No}}}
+\def\pauseandno{\pause{\advitransbox{slide,from=right}{\textcolor{red}{No}}}}
 
-\tpause Its \textcolor{blue}{\bf Active-DVI !}
-\tpause Entirely written in Caml, \textcolor{red}{\bf hence~}\tpause reliable and easy to extend.
-\tpause Entirely programmable, this is:\tpause
+\tpause Xdvi ?{\pauseandno} \pause Ghostview ?{\pauseandno} \pause
+Acroread ?{\pauseandno} \pause Powerpoint ?{\pauseandno}%
+
+\pause It's \textcolor{blue}{\bf Active-DVI !}
+\pause Entirely written in Caml, \textcolor{red}{\bf hence~}\pause reliable and easy to extend.
+\pause Entirely programmable, this is:\pause
 
 \bigskip
 \begin{center}
@@ -54,7 +50,9 @@ Paris -- December $16$ 2002
 
 \adviembed[width=0.15\textwidth,height=0.04\textheight]{xterm -geometry !g -e ocaml}
 
-\newslide{The code of previous slide}
+\newslide{Simple {\LaTeX} code}
+
+Source for the previous slide is:
 
 \begin{verbatim}
 \newslide{Interaction}
