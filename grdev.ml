@@ -141,7 +141,7 @@ let waiting = ref false;;
 let usr1 = 10;;
 let usr1_status = ref false;;
 
-let clear_usr1 () = usr1_status :=  false;;
+let clear_usr1 () = usr1_status := false;;
 
 let set_usr1 () =
   Sys.set_signal usr1
@@ -1533,7 +1533,7 @@ let resized () =
   Graphics.size_x () <> !size_x || Graphics.size_y () <> !size_y;;
 
 let continue () =
-  if resized() || GY.key_pressed() (*  || !usr1_status *) then
+  if resized () || GY.key_pressed () (*  || !usr1_status *) then
     begin
       Gs.flush ();
       raise Stop

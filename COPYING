@@ -1,6 +1,14 @@
-advi - A DVI previewer
-Copyright (C) 2000 Alexandre Miquel
-Copyright (C) 2001 Alexandre Miquel, Jun Furuse, Xavier Leroy, Didier Rémy
+Active-DVI - A DVI presenter
+
+Copyright (C) 2001, 2002 INRIA
+
+Active-DVI has been developed by Jun Furuse, Didier Rémy and
+Pierre Weis with also contributions by Didier Le Botlan, Roberto Di Cosmo,
+Xavier Leroy, and Alan Schmitt.
+
+Active-DVI is based on Mldvi, written by Alexandre Miquel, which
+constitutes its core. Mldvi alone is distributed under LGPL license
+and is available at http://pauillac.inria.fr/~miquel/. 
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
