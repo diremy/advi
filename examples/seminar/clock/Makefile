@@ -40,17 +40,9 @@ tools.pdf: $(EPS) tools.tex
 	rm $*.dvi 
 
 $(EPS):$(EPS.eps=.eps.gz)
-	gunzip *.eps.gz
+	gunzip -c $*.eps.gz > $@
 
 clean::
-	for i in $(EPS); do \
-	  if test -f $$i; \
-	then \
-	 gzip $$i; \
-	else \
-	 echo $$i; \
-	fi; \
-	done
-	rm -f *.dvi *.pdf *.aux *.log *.ps *~
+	rm -f *.dvi *.pdf *.aux *.log *.ps *~ $(EPS)
 
 .phony: show
