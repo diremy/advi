@@ -131,7 +131,7 @@ let rec next_char i lim s =
   if i >= lim then raise End_of_file else
   match s.[i] with
   | ' ' | '\t' | '\n' | '\r' -> next_char (i + 1) lim s
-  | '#' -> skip_comment (i + 1) lim s
+  | '#' -> next_char (skip_comment (i + 1) lim s) lim s
   | c -> i
 
 and skip_comment i lim s =

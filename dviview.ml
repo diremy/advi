@@ -16,8 +16,10 @@
 (***********************************************************************)
 
 let pauses = Options.flag true "-nopauses" "Switch pauses off";;
-let fullwidth = Options.flag false "-fullwidth" "Adjust size to width";;
-let bounding_box = Options.flag false "-bbox" "Show the bounding box";;
+let fullwidth =
+  Options.flag false "-fullwidth" "Adjust size to width";;
+let bounding_box =
+  Options.flag false "-bbox" "Show the bounding box";;
 
 let start_page = ref 0;;
 Options.add
@@ -339,6 +341,7 @@ let goto_next_pause n st =
   Grdev.set_busy (if st.cont = None then Grdev.Free else Grdev.Pause);;
 
 let draw_bounding_box st =
+Misc.warning "Draw_bounding box";
   Grdev.set_color 0xcccccc;
   Grdev.fill_rect st.orig_x st.orig_y st.dvi_width 1;
   Grdev.fill_rect st.orig_x st.orig_y 1 st.dvi_height;
@@ -883,10 +886,10 @@ let bind_keys () =
    (* r, Control-l, R, to redraw or reload. *)
    'r', B.redraw;
    'R', B.reload;
-   '' (* CONTROL-l *), B.redisplay;
+   '', B.redisplay;
 
    (* Control-f, c, To handle the advi window. *)
-   '' (* CONTROL-f *) , B.fullscreen;
+   '', B.fullscreen;
 
    (* Scaling the page. *)
    '<', B.scale_down;

@@ -74,7 +74,7 @@ let base_dpi = 600;;
 (*** Cooked fonts ***)
 
 exception Pause;;
-exception Wait of float
+exception Wait of float;;
 
 type cooked_font = {
     name : string;
