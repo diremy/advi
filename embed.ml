@@ -41,26 +41,7 @@ let app_table = Hashtbl.create 17;;
 *)
 let raw_embed_app command app_mode app_name width height x gry =
 
-  let string_replace pat templ str =
-    let result = Buffer.create (String.length str * 2) in
-    let patlen = String.length pat in
-    let find pat str at =
-      let rec find_aux pos =
-        if String.sub str pos patlen = pat then pos
-        else find_aux (pos + 1) in
-      try find_aux at with _ -> raise Not_found in
-    let rec replace pos =
-      try
-        let fpos = find pat str pos in
-        Buffer.add_string result (String.sub str pos (fpos - pos));
-        Buffer.add_string result templ;
-        replace (fpos + patlen)
-      with
-      | Not_found ->
-          Buffer.add_string result
-            (String.sub str pos (String.length str - pos));
-          Buffer.contents result in
-    replace 0 in
+ if Launch.can_execute_command command then begin
 
   let wid = GraphicsY11.open_subwindow ~x ~y:gry ~width ~height in
 
@@ -79,9 +60,9 @@ let raw_embed_app command app_mode app_name width height x gry =
     Why "!"?  '\' is for TeX. "%" is for TeX. "$" is for TeX...
   ***)
 
-  let command0 = string_replace "!p" wid command in
+  let command0 = Misc.string_replace "!p" wid command in
 
-  (* if there is no !p, the application geometry will be treated
+  (* If there is no !p, the application geometry will be treated
      by the WM. In such cases, we try to fix the geometry
      so that it is against the root. *)
 
@@ -98,18 +79,20 @@ let raw_embed_app command app_mode app_name width height x gry =
     string_of_int py in
 
   let command =
-    string_replace "!g" opt_geometry
-        (string_replace "!w" (string_of_int width)
-            (string_replace "!h" (string_of_int height)
-               (string_replace "!x" opt_x
-                  (string_replace "!y" opt_y
+    Misc.string_replace "!g" opt_geometry
+        (Misc.string_replace "!w" (string_of_int width)
+            (Misc.string_replace "!h" (string_of_int height)
+               (Misc.string_replace "!x" opt_x
+                  (Misc.string_replace "!y" opt_y
                      command0)))) in
   (* prerr_endline command; *)
   let pid = Launch.fork_process command in
   if Hashtbl.mem app_table pid then
-    raise (Failure (Printf.sprintf
-                      "pid %d is already in the app_table!" pid));
-  Hashtbl.add app_table pid (app_mode, app_name, wid);;
+    raise (Failure
+             (Printf.sprintf
+               "pid %d is already in the app_table!" pid));
+  Hashtbl.add app_table pid (app_mode, app_name, wid)
+ end;;
 
 (* In hash table t, returns the first element that verifies p. *)
 let hashtbl_find t p =
@@ -126,19 +109,25 @@ let find_embedded_app app_name =
   hashtbl_find app_table (fun (_, name, _) -> name = app_name);;
 
 let map_embed_app command app_mode app_name width height x y =
-  let _, (app_mode, app_name, wid) = find_embedded_app app_name in
-  GraphicsY11.map_subwindow wid;;
+  try
+    let _, (app_mode, app_name, wid) = find_embedded_app app_name in
+    GraphicsY11.map_subwindow wid
+  with Not_found -> ();;
 
 let unmap_embed_app command app_mode app_name width height x gry =
- let _, (app_mode, app_name, wid) = find_embedded_app app_name in
- GraphicsY11.unmap_subwindow wid;;
+  try
+    let _, (app_mode, app_name, wid) = find_embedded_app app_name in
+    GraphicsY11.unmap_subwindow wid
+  with Not_found -> ();;
 
 let move_or_resize_persistent_app
     command app_mode app_name width height x gry =
-  let _, (app_mode, app_name, wid) = find_embedded_app app_name in
-  GraphicsY11.resize_subwindow wid width height;
-  let gry = gry + height - width in
-  GraphicsY11.move_subwindow wid x gry;;
+  try
+    let _, (app_mode, app_name, wid) = find_embedded_app app_name in
+    GraphicsY11.resize_subwindow wid width height;
+    let gry = gry + height - width in
+    GraphicsY11.move_subwindow wid x gry
+  with Not_found -> ();;
 
 (* In hash table t, verifies that at least one element verifies p. *)
 let hashtbl_exists t f =
