@@ -409,19 +409,21 @@ let ill_formed_special s =
   Misc.warning (Printf.sprintf "Ill formed special <<%s>>" s);;
 
 exception Ill_formed_special of string
-let line_of_special s =
-  match split_string s 0 with
-  | key :: line :: rest ->
+let line_of_special s k =
+  match split_string s k with
+  | line :: rest ->
+      Printf.eprintf "%s @ %s\n%!" line (match rest with h::_ -> h | _ -> ""); 
       begin try
         let l = int_of_string line in
         let f = match rest with | file :: _ -> Some file | _ -> None in
         (l, f)
       with Failure _ -> raise (Ill_formed_special s)
       end
-  | _ -> raise (Ill_formed_special s);;
+  | _ -> raise (Ill_formed_special s)
+;;
 
-let line_special st s =
-  try add_line st (line_of_special s)
+let line_special st s k =
+  try add_line st (line_of_special s k)
   with Ill_formed_special s -> ill_formed_special s;;
 
 let color_special st s =
@@ -1324,8 +1326,8 @@ let scan_special_html (_, xrefs, _) page s =
   let name = String.sub s 14 (String.length s - 16) in
   Hashtbl.add xrefs name page;;
 
-let scan_special_line (_, _, lastline) s =
-  try lastline := Some (line_of_special s)
+let scan_special_line (_, _, lastline) s k =
+  try lastline := Some (line_of_special s k)
   with Ill_formed_special s -> ill_formed_special s
 ;;
 
@@ -1347,7 +1349,10 @@ let scan_special status (headers, xrefs, lastline as args) pagenum s =
   if has_prefix "header=" s then
     (if do_ps then headers := (false, get_suffix "header=" s) :: !headers) else
   if has_prefix "advi: setbg " s then scan_bkgd_special status s else
-  if has_prefix "line: " s then scan_special_line args s else
+  if has_prefix "line: " s then scan_special_line args s 6 else
+(*
+  if has_prefix "src:" s then scan_special_line args s 4 else
+*)
   if has_prefix "html:<A name=\"" s || has_prefix "html:<a name=\"" s then
     scan_special_html args pagenum s;;
 
@@ -1426,7 +1431,10 @@ let special st s =
             Misc.warning ("unknown special: " ^ s) end
         (* else we ignore it, whether well-formed or ill-formed *)
   end
-  else if has_prefix "line: " s then line_special st s
+  else if has_prefix "line: " s then line_special st s 6
+(*
+  else if has_prefix "src:" s then line_special st s 4
+*)
   else if
     has_prefix "pn " s || has_prefix "pa " s || s = "fp" || s = "ip" ||
     has_prefix "da " s || has_prefix "dt " s || s = "sp" ||

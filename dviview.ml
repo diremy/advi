@@ -417,12 +417,13 @@ let update_dvi_size all ?dx ?dy st =
   begin match dx with None -> () | Some z -> st.orig_x <- z end;
   begin match dy with None -> () | Some z -> st.orig_y <- z end;
   set_bbox st;
+  (*
   match st.duplex with
     Master st' | Client st' ->
       st'.orig_x <- st.orig_x;
       st'.orig_y <- st.orig_y;
       set_bbox st';
-  | Alone -> ()
+  | Alone -> *) ()
 
 (* Reloading *)
 
@@ -1123,9 +1124,9 @@ module B =
       Driver.unfreeze_glyphs st.cdvi (st.base_dpi *. st.ratio)
     let center st =
       st.ratio <- 1.0;
+      update_dvi_size false st;
       st.orig_x <- (st.size_x - st.dvi_width) / 2;
       st.orig_y <- (st.size_y - st.dvi_height) / 2;
-      update_dvi_size false st;
       redraw st
 
     let scale_up st = scale (max 1 st.num) st

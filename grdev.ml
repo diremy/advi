@@ -1528,7 +1528,7 @@ let wait_button_up m x y =
     with
     | Not_found ->
         if pressed m G.control then
-          let event dx dy = Move (dx, dy) in
+          let event dx dy = Move (dx, 0-dy) in
           let move =
             { rx = true; ry = true; rw = false; rh = false; rd = false } in
           wait_move_button_up !bbox move event x y

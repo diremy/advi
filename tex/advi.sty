@@ -625,6 +625,7 @@ end
 \newcount \advi@count
 \newdimen \advi@dim
 \let \advidim \advi@dim
+\let \advicount \advi@count
 \newdimen \advi@edit@unit
 \let \adviunit \advi@edit@unit
 \newif \ifadvi@move
@@ -742,6 +743,12 @@ end
   \egroup
 }
 
+\def \advi@round #1#2{%
+  \divide #2 by \advi@edit@unit
+  \edef #1{\the #2}\relax
+  \multiply #2 by \advi@edit@unit
+}
+  
 \def \advi@E{\advi@count\advi@dim \divide \advi@count by \advi@edit@unit
         \advance \advi@dim by -\advi@count\advi@edit@unit
         \edef \advi@tmp {\advi@tmp \the \advi@count}}
@@ -758,6 +765,13 @@ end
 \def \advisetw {\advi@setdim {\advi@edit@w}{\adviw}}
 \def \adviseth {\advi@setdim {\advi@edit@h}{\advih}}
 \def \advisetd {\advi@setdim {\advi@edit@d}{\advid}}
+
+\def \advirndx {\advi@round {\advi@edit@x}{\advix}}
+\def \advirndy {\advi@round {\advi@edit@y}{\adviy}}
+\def \advirndw {\advi@round {\advi@edit@w}{\adviw}}
+\def \advirndh {\advi@round {\advi@edit@h}{\advih}}
+\def \advirndd {\advi@round {\advi@edit@d}{\advid}}
+
 \def \adviratio#1#2{\advi@dim #2\relax #1\advi@dim}
 
 \newcommand{\adviedit}[3][]{\advi@edit{\adviedit}{#1}{#2}{#3}}
