@@ -31,7 +31,7 @@ open Graphics;;
 open GraphicsY11;;
 open_graph "";;
 
-let wait s = prerr_endline ("Next is " ^ s); ignore (input_line stdin);;
+let wait s = prerr_endline ("Cursor is " ^ s); ignore (input_line stdin);;
 
 let known_cursors = [
  Cursor_X_cursor;
@@ -197,7 +197,7 @@ let string_of_cursor = function
 
 let main () =
   List.iter
-    (fun c ->  wait (string_of_cursor c); set_cursor c) known_cursors;;
+    (fun c -> set_cursor c; wait (string_of_cursor c)) known_cursors;;
 
 main ();;
 
