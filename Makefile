@@ -31,7 +31,7 @@ MLINCDIRS = $(CAMLIMAGESDIR)
 
 EXEC	  = advi
 
-MODULES	  = config graphicsY11 misc userfile input symbol search \
+MODULES	  = config timeout graphicsY11 misc userfile input symbol search \
 	    drawimage dvicolor \
 	    table pkfont ttfont jfm font glyph devfont \
 	    units dimension \
@@ -124,15 +124,6 @@ veryclean: clean
 veryveryclean: veryclean
 	rm -f configure
 
-tex/splash.dvi: tex/splash.tex
-	cd tex; latex splash.tex
-
-test/demo.dvi: test/demo.tex
-	cd test; $(MAKE) demo.dvi
-
-test/trans.dvi: test/trans.tex
-	cd test; $(MAKE) trans.dvi
-
 installopt:install
 install:: advi.opt tex/splash.dvi
 	cp advi.opt ${bindir}/advi
@@ -151,10 +142,13 @@ ADVI=advi-$(VERSION)
 WEBSITEDIR=/net/pauillac/infosystems/www/advi
 
 # make splash builds splash.dvi
-splash:
+tex/splash.dvi:
 	cd tex; latex splash.tex
 
-distribute: tex/splash.dvi test/demo.dvi test/trans.dvi	
+test/jpdemo.dvi:
+	cd test; $(MAKE) jpdemo.dvi
+
+distribute: tex/splash.dvi test/demo.dvi test/trans.dvi	test/jpdemo.dvi
 	rm -rf release
 	rm -rf $(WEBSITEDIR)/*
 	- mkdir $(WEBSITEDIR)
