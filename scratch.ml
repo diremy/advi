@@ -274,8 +274,8 @@ let rec scratch_write_char =
 
 (* Main scratch write loop:
    - each button press changes the place where scratching occurs,
-   - Esc ends scratching.
-   - ^Q or ^Z enters scratch write settings mode.
+   - ^G ends scratching.
+   - Esc enters scratch write settings mode.
    - each key press is written at current scratching position using
      scratch_write_char that tail calls back scratch_write
      at the new scratching position. *)
@@ -285,8 +285,8 @@ and scratch_write x y =
       keypressed = kp; key = c} ->
        if kp then
         begin match c with
-        | '' -> end_write ()
-        | '' | '' ->
+        | '' -> end_write ()
+        | '' ->
           set_cursor cursor_settings;
           scratch_write_settings ()
         | c -> scratch_write_char c x y
@@ -308,10 +308,10 @@ and scratch_write_settings () =
       keypressed = kp; key = c} ->
        if kp then
         begin match c with
-        | '' | '' | '' | 'q' ->
-        (* Esc, ^Q, ^Z, or q means quit the scratch write settings mode
-           and reenter scratch writing.
-           Hence, two successive ^Z just do nothing (except changing
+        | '' ->
+        (* Esc means quit the scratch write settings mode
+           and reenter the scratch writing mode.
+           Hence, two successive Esc just do nothing (except changing
            the cursor chape for a while). *)
            set_cursor cursor_write;
            enter_scratch_write ()
@@ -320,13 +320,12 @@ and scratch_write_settings () =
            and go on write settings. *)
            scratch_write_settings_handle_char c;
            scratch_write_settings ()
-        end
-;;
+        end;;
 
 (* Handling key presses while waiting for a mouse click
    that designates the place where write scratching should begin:
-   - Esc, q, or s means quit write,
-   - ^Q or ^Z means toggle the scratch write settings mode,
+   - ^G means quit write,
+   - Esc means toggle the scratch write settings mode,
    - any other character when scratch write settings mode is on
      means a setting (to handle with scratch_write_settings_handle_char),
    - any other character when not in scratch write settings mode,
@@ -334,35 +333,28 @@ and scratch_write_settings () =
 let waiting_to_enter_scratch_write =
   let scratch_write_settings_mode = ref false in
   (function c ->
-   if !scratch_write_settings_mode then begin
      match c with
-     (* Esc, q, or s means quit scratch write. *)
-     | '' | 'q' | 's' ->
+     (* ^G always means quit scratch write. *)
+     | '' ->
        (* Quit preserving invariant. *)
-       scratch_write_settings_mode:= false;
-       set_cursor cursor_write
-     | '' | '' ->
-       (* Quit scratch write settings mode. *)
-       set_cursor cursor_write;
-       (* Toggle scratch write settings mode. *)
-       scratch_write_settings_mode := false
-     | c ->
-       scratch_write_settings_handle_char c
-   end else begin
-     match c with
-     (* Esc, q, or s means quit scratch write. *)
-     | '' | 'q' | 's' ->
-       (* Quit preserving invariant. *)
-       scratch_write_settings_mode:= false;
+       scratch_write_settings_mode := false;
        end_write ()
-     | '' | '' ->
-       (* Enter scratch write settings mode. *)
-       set_cursor cursor_settings;
-       scratch_write_settings_mode := true
+     | '' ->
+       (* If scratch write settings mode is already on,
+          Esc means quit scratch write settings mode. *)
+       if !scratch_write_settings_mode then begin
+         (* Quit preserving invariant. *)
+         scratch_write_settings_mode := false;
+         set_cursor cursor_write
+       end else begin
+       (* Esc now means enter scratch write settings mode. *)
+         set_cursor cursor_settings;
+         scratch_write_settings_mode := true
+       end
+     | c when !scratch_write_settings_mode ->
+       scratch_write_settings_handle_char c
      | '?' -> Grdev.help_screen Config.scratch_write_splash_screen
-     | c -> Misc.warning "Click to start scratch writing"
-   end)
-;;
+     | c -> Misc.warning "Click to start scratch writing");;
 
 (* The main routine to begin write scratching:
    - wait for a click then enter scratching. *)
@@ -544,7 +536,7 @@ and enter_draw () =
    scratch_draw00 ()
 
 and scratch_char_from scratch c =
-  if c = '' then end_draw () else begin
+  if c = '' then end_draw () else begin
   scratch_draw_settings_handle_char c;
   handle_figure scratch end
 
