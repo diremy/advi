@@ -39,10 +39,10 @@ all: manual.dvi manual.ps manual.pdf manual.html \
 
 clean::
 	$(RM) manual.advi manual.html
-        $(RM) *~ *.out
-        $(RM) *.aux *.log *.dvi *.toc *.ps
+	$(RM) *~ *.out
+	$(RM) *.aux *.log *.dvi *.toc *.ps
 	$(RM) *.pdf *.pdfm
-        $(RM) *.haux *.htoc *.ima
+	$(RM) *.haux *.htoc *.ima
 	$(MAKE) -f MakeHTML clean
 
 distribute: clean all web
@@ -67,8 +67,8 @@ endif
 .SUFFIXES: .tex .dvi .advi .ps .pdf .pdfm .html .ima
 
 .tex.dvi:
-        # To avoid default hypertex.cfg if it exists.
-        # Active-DVI really needs the hypertex driver...
+	# To avoid default hypertex.cfg if it exists.
+	# Active-DVI really needs the hypertex driver...
 	$(LATEX) '\def\driver{hypertex}\input' $<
 	$(LATEX) '\def\driver{hypertex}\input' $<
 	$(LATEX) '\def\driver{hypertex}\input' $<
@@ -76,22 +76,22 @@ endif
 .tex.ps:
 	if [ -e $*.dvi ]; then \
 	  $(MV) $*.dvi $*.advi; \
-        fi
+	fi
 	$(LATEX) '\def\driver{dvips}\input' $<
 	$(DVIPS) -o $@ $*.dvi
 	if [ -e $*.advi ]; then \
 	  $(MV) $*.advi $*.dvi; \
-        fi
+	fi
 
 .tex.pdf:
 	if [ -e $*.dvi ]; then \
 	  $(MV) $*.dvi $*.advi; \
-        fi
+	fi
 	$(LATEX) '\def\driver{dvipdfm}\input' $<
 	- $(DVIPDFM) -o $@ $*.dvi
 	if [ -e $*.advi ]; then \
 	  $(MV) $*.advi $*.dvi; \
-        fi
+	fi
 
 .advi.dvi:
 	cp -p $< $*.dvi
