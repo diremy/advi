@@ -219,4 +219,4 @@ val transbox_go : Transitions.t -> unit;;
 val set_title : string -> unit;;
 val cut : string -> unit;;
 
-val wait_button_down : unit -> unit;;
+val wait_button_up : unit -> unit;;
