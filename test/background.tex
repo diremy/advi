@@ -1,19 +1,20 @@
 \documentclass[12pt]{article}
 
 % You need graphics package
+\usepackage{manual}
 \usepackage{color}
 \usepackage{graphicx}
+\usepackage{alltt}
 
 \usepackage{pst-all}
 
+%% advi must occur after packages using PStricks macros 
+%% (it redefines some of them) 
 \usepackage{advi}
 \usepackage{advi-annot}
 
 \usepackage{hyperref}
 
-%% \usepackage[annot]{advi} 
-%% must occur after packages using PStricks macros 
-%% (it redefines some of them) 
 
 \def\mathsym#1{\ifmmode{#1}\else$#1$\fi}
 
@@ -57,24 +58,19 @@ Press: \keymenu{n}ext page \keymenu{p}revious page
 \begin{document}
 
 % We use the default mode of advi that considers white as transparent
-% as if \epstransparent as been evaluated.
+% as if \epstransparent has been evaluated.
 
 \newpage
 
 \subsection* {Modifying the page backround}
 
 It is now possible to modify the background of your presentations, and
-this file is a simple showcase for the current background effects:
+this file is a simple showcase for the current background effects.
 
-  \begin{itemize}
-    \item changing the color background,
-    \item defining a background image,
-    \item inheriting background settings,
-    \item resetting background settings
-  \end{itemize}
+\tableofcontents
 \newpage
 
-\subsection* {Setting the background color}
+\section{Setting the background color}
 
 This page has a yellow background because we included
 in the LaTeX source of the page the following command:
@@ -88,7 +84,7 @@ in the LaTeX source of the page the following command:
 
 \newpage
 
-\subsection* {Setting the background image}
+\section{Setting the background image}
 
 \advibg{image="world.jpg"} 
 
@@ -108,46 +104,207 @@ CAMLIMAGESLIBS
 in Advi's Makefile.config 
 \newpage
 
-\subsection* {Inheriting page backgrounds}
+\section{Positioning the background image}
 
-By default, Advi will propagate to a page the background information
-of the previous page (Warning: previous page means the page
-\emph{previously displayed}, which is not necessarily the previous
-page in the dvi file, as happens when you use \emph{jump} commands).
+As documented in the manual, the LaTeX macro for backgrounds has a wealth of options.\\
+For example, there are several different ways to adapt an image to the size of the
+background to fill, and they are declared with the \dockey{fit}{} parameter to \verb|\advibg|:
 
-For example, this page has still the background image, even if no
-command is included, because it inherits the background of the
-previous page.
+\dockey[auto]{fit}{fit style}
+\begin{quote}
+Fit the background image according to \docid{style}, which may only be 
+{\tt auto} or one of the following keywords:
+\begin{center}
+\tt
+auto \hfill {\rm or} \hfill
+\begin{tabular}{l@{\qquad}c@{\qquad}r}
+topleft&   top& topright\\
+left&  center&  right \\
+bottomleft& bottom & bottomright\\
+\end{tabular}
+\end{center}
+The {\tt auto} fit mode means scale the image as desired in both directions
+so that it fits the page. The other styles only allows the same scaling
+factor in both directions:
+\begin {itemize}
+
+\item
+Corner-styles mean adjust the image in the corner
+and scale so that all the page is covered. 
+
+\item
+{\tt center} means scale the
+image so that all the page is covered and center it on the page. 
+
+\item
+Segment-styles mean adjust the image and the page on the segment (in which
+case, the image may not totally cover the page on the opposite side). 
+
+\end {itemize}
+\end{quote}
+
+\framebox{Here come several slides meant to show the effect of these settings}
+
+\newpage
+\vfill
+{\Huge Automatic fit (default)}
+\vfill
+This is obtained by not setting the \dockey{fit}{} parameter:\\
+\advibg{image=world.jpg}
+\begin{center}
+	\begin{verbatim}
+	\advibg{image=world.jpg}
+	\end{verbatim}
+\end{center}
+\vfill
+Resize the display window to see how this positioning option works.
+\vfill
+\advifooter
 
 \newpage
 
-\subsection* {Resetting page backgrounds}
+\newcommand{\ttadvibg}{$\backslash$advibg}
+\newcommand{\docfit}[1]{\vfill%
+This is obtained by:\\%
+\begin{center}
+{#1}
+\end{center}
+\vfill%
+Resize the display window to see how this positioning option works.%
+\vfill%
+}
 
-If you do not like the implicit inheritance of the background
-configuration, and you want to see obeyed only the background
-directives explicitly declared in a page, you have two options:
+\vfill
+{\Huge Top}
+\advibg{image=world.jpg,fit=top}
+\docfit{\tt \ttadvibg\{image=world.jpg,fit=top\}}
+\newpage
 
-  \begin{itemize}
-    \item run advi with the \verb|--reset_bkgd| option: this way,
-     background inheritance is disabled in all the file, or
-    \item you can locally issue a \verb|\advibg{none}| command, that resets
-     the background eliminating everything which is inherited. This is how
-     we got rid of the background image in this page, that only sports a
-     nice Cyan background color.
-  \end{itemize}
 
-\advibg{none}
+\vfill
+{\Huge Bottom}
+\advibg{image=world.jpg,fit=bottom}
+\docfit{\tt \ttadvibg\{image=world.jpg,fit=bottom\}}
+\advifooter
 
-\advibg{color=Cyan} 
+\newpage
 
-Of course, you can use the usual LaTeX colors (or define new ones the usual way) for backgrounds.
+\vfill
+{\Huge Left}
+\advibg{image=world.jpg,fit=left}
+\docfit{\tt \ttadvibg\{image=world.jpg,fit=left\}}
+\advifooter
 
-\Newpage
+\newpage
+
+
+\vfill
+{\Huge Right}
+\advibg{image=world.jpg,fit=right}
+\docfit{\tt \ttadvibg\{image=world.jpg,fit=right\}}
+\advifooter
+
+\newpage
+
+
+\vfill
+{\Huge Center}
+\advibg{image=world.jpg,fit=center}
+\docfit{\tt \ttadvibg\{image=world.jpg,fit=center\}}
+\advifooter
+
+\newpage
+
+
+\vfill
+{\Huge TopLeft}
+\advibg{image=world.jpg,fit=topleft}
+\docfit{\tt \ttadvibg\{image=world.jpg,fit=topleft\}}
+\advifooter
+
+\newpage
+
+
+\vfill
+{\Huge TopRight}
+\advibg{image=world.jpg,fit=topright}
+\docfit{\tt \ttadvibg\{image=world.jpg,fit=topright\}}
+\advifooter
+
+\newpage
+
+
+\vfill
+{\Huge BottomLeft}
+\advibg{image=world.jpg,fit=bottomleft}
+\docfit{\tt \ttadvibg\{image=world.jpg,fit=bottomleft\}}
+\advifooter
+
+\newpage
+
+
+\vfill
+{\Huge BottomRight}
+\advibg{image=world.jpg,fit=bottomright}
+\docfit{\tt \ttadvibg\{image=world.jpg,fit=bottomright\}}
+\advifooter
+
+\newpage
+
+\section{Alpha and blending}
+\dockey[none]{alpha}{float}
+\begin{quote}
+Set the alpha factor for the background image to \docid{float}
+(\doctt{none} means unset).
+\end{quote}
+
+\section{Blending}
+\dockey[none]{blend}{blend mode}
+\begin{quote}
+Set the blend mode to \docid{blend mode}, which should be one of the
+following (unchecked): {\tt difference}, XXX?
+(\doctt{none} means unset).
+\end{quote}
+
+\framebox{Here are a few example slides}
+\newpage
+
+\vfill
+{\Huge Alpha channel}
+\vfill
+In this page, the background is filled with an image for which we specify an alpha
+value of less than 1.\\
+Notice that this effect is nice, but expensive to realise.
+
+Here is the command used to obtain this effect:
+
+\begin{center}
+{\tt \ttadvibg\{alpha=0.25,image="dojoji.gif"\}}
+\end{center}
+\advibg{alpha=0.25,image="dojoji.gif"}
+\vfill
+\newpage
+
+\vfill
+{\Huge Blending with a color background}
+\vfill
+In this page, the background is first set to light blue, then blended
+in {\tt difference} mode with the image which is scaled to fit the available area.\\
+
+Here is the command used to obtain this effect:
+
+\begin{center}
+{\tt \ttadvibg\{color=LightBlue,alpha=0.1,blend=difference,image="dojoji.gif"\}}
+\end{center}
+\advibg{color=LightBlue,alpha=0.1,blend=difference,image="dojoji.gif"}
+\vfill
+\newpage
+
+\subsection{Reverse video effect}
+
 \special{color push white}
 \advibg{color=black}
  \advifooter\adviheader
-
-\subsection* {Reverse video effect}
 
 If you want a reverse video effect, you just have to set the background
 of the page to black and the text color to white, as follows:
@@ -192,16 +349,11 @@ beginning of next slide, if you also want to revert to normal background.)
 \subsection* {TODO:}
 
   \begin{itemize}
-    \item implement command options to \verb|\advibg{image=???}| to allow
-various scaling preferences,
     \item anybody willing to add support for color gradients?
-%   \item implement command options to \verb|\advibg{alpha=???}| to support
-% partially transparent background.
   \end{itemize}
 
 \newpage
 
-\advibg{color=LightBlue,alpha=0.1,blend=difference,image="dojoji.gif"}
 
 \subsection* {Design considerations:}
 
@@ -219,9 +371,6 @@ background color after a pause. But at what price ?
   \end{itemize}
 
 \lastpage
-
-\advibg{alpha=0.25}
-\advibg{image="dojoji.gif"}
 
 ~\vfill
 \begin{center}
