@@ -1,9 +1,10 @@
-Advi recognizes the keystrokes listed below when typed in its window.
+{\ActiveDVI} recognizes the keystrokes listed below when typed in its window.
 Some keystrokes may optionally be preceded by a number, called \arg
 below, whose interpretation is keystroke dependant. If \arg is unset,
 its value is 1, unless specified otherwise.
 
-Advi maintains an history of previously visited pages organized as a stack. 
+{\ActiveDVI} maintains an history of previously visited pages
+organized as a stack.
 Additionnally, the history contains marked pages which are stronger than
 unmarked pages. 
 
@@ -43,31 +44,6 @@ unmarked pages.
 \end{tabularx}
 
 \vspace{\stretch{1}}
-\subsection*{Switching views}
-
-\noindent
-\begin{tabularx}{\linewidth}{clcX}
-\ikey{w}{switch}{Switch view between master and client (if any)}
-\ikey{W}{sync}{Goto page of client view corresponding to page of master view}
-\ikey{\char94W}{autoswitch}{Toggle autoswitch flag}
-\end{tabularx}
-
-\vspace{\stretch{1}}
-
-\subsection*{Table of contents}
-
-\noindent
-\begin{tabularx}{\linewidth}{clcX}
-\ikey{T}{Thumbnails}{Process thumbnails.}
-\ikey{t}{toc}{Display thumbnails if processed, or floating table of contents
- if available, or do nothing.}
-\end{tabularx}
-
-\vspace{\stretch{1}}
-
-\vspace{\stretch{1}}
-
-\newpage
 
 \subsection*{Moving to pauses}
 
@@ -76,6 +52,10 @@ unmarked pages.
 \ikey{N}{next pause}{Move \arg pauses forward (equivalent to continue).}
 \ikey{P}{previous pause}{Move \arg pauses backward.}
 \end{tabularx}
+
+\vspace{\stretch{1}}
+
+\newpage
 
 \vspace{\stretch{1}}
 
@@ -97,27 +77,13 @@ resolution.}
 
 \vspace{\stretch{1}}
 
-\subsection*{Redisplay commands}
-
-\noindent
-\begin{tabularx}{\linewidth}{clcX}
-\ikey{r}{redraw}{Redraw the current page to the current pause.}
-\ikey{R}{reload}{Reload the file and redraw the current page.}
-\ikey{\char94L}{redisplay}{Redisplay the current page to the first
-pause of the page.}
-\ikey{a}{active/passive}{toggle advi effects (so that reloading is silent).}
-\end{tabularx}
-
-\vspace{\stretch{1}}
-
-\newpage
-
-\vspace{\stretch{1}}
-
 \subsection*{Moving the page in the window}
 
 \noindent
 \begin{tabularx}{\linewidth}{clcX}
+\ikey{\char94 left button}{move page}
+{A black line draws the page borders; moving the mouse then moves the
+page in the window.}
 \ikey{h}{page left}
 {Moves one screen width toward the left of the page. Does nothing if the
   left part of the page is already displayed}
@@ -132,14 +98,35 @@ pause of the page.}
 {Moves one screen height toward the top of the page. Jumps to the bottom
  previous page, if there is one, and if the top of the page is already
  displayed.}
-\ikey{\char94 left button}{move page}
-{A black line draws the page borders; moving the mouse then moves the
-page in the window.}
 \end{tabularx}
 
 \vspace{\stretch{1}}
 
 \newpage
+
+\vspace{\stretch{1}}
+
+\subsection*{Switching views}
+
+\noindent
+\begin{tabularx}{\linewidth}{clcX}
+\ikey{w}{switch}{Switch view between master and client (if any).}
+\ikey{W}{sync}{Goto page of client view corresponding to page of master view.}
+\ikey{\char94W}{autoswitch}{Toggle autoswitch flag.}
+\end{tabularx}
+
+\vspace{\stretch{1}}
+
+\subsection*{Redisplay commands}
+
+\noindent
+\begin{tabularx}{\linewidth}{clcX}
+\ikey{r}{redraw}{Redraw the current page to the current pause.}
+\ikey{R}{reload}{Reload the file and redraw the current page.}
+\ikey{\char94L}{redisplay}{Redisplay the current page to the first
+pause of the page.}
+\ikey{a}{active/passive}{toggle advi effects (so that reloading is silent).}
+\end{tabularx}
 
 \vspace{\stretch{1}}
 
@@ -162,12 +149,47 @@ is poped, accordingly.}
 
 \vspace{\stretch{1}}
 
-\subsection*{Writing and drawing on the slide}
+\newpage
+
+\vspace{\stretch{1}}
+
+\subsection*{Table of contents}
 
 \noindent
 \begin{tabularx}{\linewidth}{clcX}
-\ikey{s}{scratch}{Give a pencil to type characters on the page.}
-\ikey{S}{scratch}{Give a spray can to draw on the page.}
+\ikey{T}{Thumbnails}{Process thumbnails.}
+\ikey{t}{toc}{Display thumbnails if processed, or floating table of contents
+if available, or else do nothing.}
+\end{tabularx}
+
+\vspace{\stretch{1}}
+
+\subsection*{Writing and drawing on the page}
+
+\noindent
+\begin{tabularx}{\linewidth}{clcX}
+\ikey{s}{write}{Give a pencil to scratch, typing characters on the page.}
+\ikey{S}{draw}{Give a spray can to scratch, drawing on the page.}
+\ikey{?}{info}{While in scratch mode, press \key{?} for more info.}
+\end{tabularx}
+
+\vspace{\stretch{1}}
+
+\subsection*{Using the laser pointer}
+
+\noindent
+\begin{tabularx}{\linewidth}{clcX}
+\ikey{\char94 x-l}{toggle laser}{Toggle the laser beam to point on the page.}
+\ikey{\char94 g}{laser off}{When laser is on turn it off.}
+\end{tabularx}
+
+\vspace{\stretch{1}}
+
+\subsection*{Saving the page}
+
+\noindent
+\begin{tabularx}{\linewidth}{clcX}
+\ikey{\char94 x-\char94s}{save page}{Save the current page as an image file.}
 \end{tabularx}
 
 \subsection*{Dealing with caches}
@@ -184,8 +206,3 @@ This takes more time than loading the fonts, but the pages are drawn faster.}
 \end{tabularx}
 
 \vspace{\stretch{1}}
-
-
-
-
-
