@@ -1,3 +1,9 @@
+Version 1.5
+2003/09/30:
+        Introducing page timing dump to designated files for
+        synchronisation purposes.
+
+Version 1.4
 2003/09/12:
 	Extensively modified gr_reposition in grY11.c to
 	correctly handle full screen operation.
