@@ -54,8 +54,9 @@ EXEC	  = advi
 MISC	  = config misc graphicsY11 timeout ageometry 
 OPTIONS	  = options global_options rc userfile
 GRAPHICS  = busy gradient gterm launch
-SYMBOL	  = symbol search
-DVI	  = input dvicolor table pkfont ttfont jfm font glyph devfont \
+SYMBOL	  = symbol
+DVI	  = input dvicolor table pkfont ttfont jfm search \
+	    font glyph devfont \
 	    units dimension
 EFFECTS	  = drawimage gs transimpl embed
 GUI	  = scratch driver thumbnails dviview
