@@ -505,7 +505,7 @@ Maybe you mean \@currenvir ing}}
 % \box\pst@hbox
 % \pst@Verb{\tx@PutEnd}}}
 
-\def\ncput@iii{%
+\def\advi@ncput@iii{%
 \leavevmode
 \hbox{%
 \pst@Verb{%
@@ -520,11 +520,12 @@ end
 \def \advi@pstricks@patch
   {\@ifundefined {psput@special}{}
     {\let \psput@special \advi@psput@special
-     %\@ifundefined {ncput@iii}{}{\let \ncput@iii \advi@ncput@iii}%
+     \@ifundefined {ncput@iii}{}{\let \ncput@iii \advi@ncput@iii}%
      %\pstheader {advi.pro}
      }}
 \ifadvi@ignore \else
-\AtBeginDocument {\advi@pstricks@patch}
+\AtBeginDocument 
+  {\message {Patching PStricks commands...}\advi@pstricks@patch}
 \fi
 
 %%% Anchors
