@@ -758,12 +758,10 @@ let wait_special st s =
   st.checkpoint <- 0;;
 
 (* Background object configuration. RDC *)
-
 let inherit_background_info =
   Options.flag false
     "-inherit_background"
-    "\tBackground options are inherited from previous page\n\t\t\
-     \t(default is to reset background options at each new page)";;
+    "\tBackground options are inherited from previous page";;
 
 let setup_bkgd status =
   (* propagate bkgd preferences to graphics device *)
