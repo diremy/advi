@@ -39,8 +39,12 @@
 \def\advi@record #1#2{\advi@@start{#1}#2\advi@@end{#1}}
 \def\advi@recplay #1#2{\advi@@startplay{#1}#2\advi@@end{#1}}
 
-\def\advi@embed#1#2#3{\mbox{\advi@special
-  {advi: embed type=embedded width=#1 height=#2 command="#3"}{\vbox to #2{\hbox to #1{}}}}}
+\newcommand{\advi@embed}[4][anonymous]{\mbox{\advi@special
+  {advi: embed name="#1" type=ephemeral width=#2 height=#3 command="#4"}{\vbox to
+#3{\hbox to #2{}}}}}
+
+\def\advi@embedephemeral#1#2#3#4{\mbox{\advi@special
+  {advi: embed name="#1" type=ephemeral width=#2 height=#3 command="#4"}{\vbox to #3{\hbox to #2{}}}}}
 
 \def\advi@embedsticky#1#2#3#4{\mbox{\advi@special
   {advi: embed name="#1" type=sticky width=#2 height=#3 command="#4"}{\vbox to #3{\hbox to #2{}}}}}
@@ -189,6 +193,7 @@ end
 \advi@export \recplay \advi@recplay
 \advi@export \play \advi@play
 \advi@export \embed \advi@embed
+\advi@export \embedephemeral \advi@embedephemeral
 \advi@export \embedsticky \advi@embedsticky
 \advi@export \embedpersistent \advi@embedpersistent
 \advi@export \killembed \advi@killembed
