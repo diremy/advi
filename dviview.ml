@@ -1478,8 +1478,8 @@ let bind_control_x_keys () =
     'l', B.laser_beam;
     '', B.save_page_image;
     '', B.abort_key;
-]
-;;
+    '', B.exit;
+  ];;
 
 let bind_keys () =
   bind_default_keys ();
