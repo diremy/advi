@@ -170,9 +170,11 @@ vscale=100.0 hoffset=-228.0 voffset=-368.0 hscale=100.0
 
  -PW Animated backgrounds ?
 
+General multimedia support
+--------------------------
  -PW Engine for animated stuff from the W3C (SVG standard) ?
-
  -PW Engine for PDF rendering ?
+ -PW Engine for SMIL rendering ??
 
  -PW add a new -n flag to advi, that would list the commands that could
 possibly be launched from a dvi file.
