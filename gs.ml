@@ -522,6 +522,7 @@ let ps_forms =
     "ps::[begin]", Begin;
     "ps::[end]", End;
     "ps::", Continue;
+    "ps:", Unprotected;
    ];;
 
 let draw s x y =
