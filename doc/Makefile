@@ -10,6 +10,10 @@ all: manual.ps manual.pdf splash.dvi splash.ps mathmode.dvi
 clean: 
 	rm -f *.aux *.log manual.html *.dvi *.pdf *.pdfm *.ps *.ima *.out *.toc
 
+splash.dvi manual.dvi: splash_contents.tex
+
+manual.dvi: manual.sty
+
 .SUFFIXES: .tex .dvi .advi .ps .pdf .pdfm .html .ima
 
 .tex.dvi:
