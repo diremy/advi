@@ -88,22 +88,20 @@ let busy_set_cursor cursor =
 let reset_cursor () = GY.set_cursor !last_cursor;;
 
 (* To be called before system calls that make take a long time *)
-let busy_timeout = ref None
+let busy_timeout = ref None;;
 let busy_start () =
   try
     busy_timeout := 
       Some (Timeout.add !busy_delay 
 	      (fun () -> busy_set_cursor GY.Cursor_watch))
   with
-  | _ -> ()
-;;
+  | _ -> ();;
 
 let busy_end () =
   match !busy_timeout with
   | Some timeout -> 
       begin try Timeout.remove timeout with Not_found -> () end
-  | None -> ()
-;;
+  | None -> ();;
   
 let set_busy sw =
   if !show_busy then
@@ -117,8 +115,7 @@ let set_busy sw =
     | Disk ->
         busy_set_cursor GY.Cursor_exchange
     | Busy ->
-        busy_start ()
-  ;;
+        busy_start ();;
 
 let title = ref "Advi";;
 let set_title s = title := s;;
@@ -129,23 +126,22 @@ let persists = ref [];;
 let unmap_embeds = ref [];;
 
 let launch_embedded_apps() = 
-  List.iter (fun f -> f ()) (List.rev !embeds);  embeds := [];
-  List.iter (fun f -> f ()) (List.rev !persists);  persists := [];
-;;
+  List.iter (fun f -> f ()) (List.rev !embeds); embeds := [];
+  List.iter (fun f -> f ()) (List.rev !persists); persists := [];;
+
 let synchronize () =
   Gs.flush ();
   Transimpl.synchronize_transition ();
   GY.synchronize ();
-  launch_embedded_apps();
-;;
+  launch_embedded_apps();;
 
 (* for refreshed signal on usr1 *)
 exception Usr1;;
-let usr1_status = ref false;;
-let clear_usr1 () = usr1_status :=  false;;
 let waiting = ref false;;
-
 let usr1 = 10;;
+let usr1_status = ref false;;
+
+let clear_usr1 () = usr1_status :=  false;;
 
 let set_usr1 () =
   Sys.set_signal usr1
@@ -154,14 +150,15 @@ let set_usr1 () =
 
 set_usr1 ();;
 
-let sleep_broken = ref false
-let clear_sleep () = sleep_broken := false
+let sleep_broken = ref false;;
+let clear_sleep () = sleep_broken := false;;
 
 (* returns false if sleep is fully performed. returns true if interrupted *)
 let sleep_watch breakable sync n =
   let start = Unix.gettimeofday () in
   let interrupted () = 
-    if breakable && (!usr1_status || !sleep_broken || GY.key_pressed ()) then begin
+    if breakable && (!usr1_status || !sleep_broken || GY.key_pressed ())
+    then begin
       if GY.key_pressed () then ignore (GY.read_key ());
       sleep_broken := true;
       true
@@ -178,8 +175,8 @@ let sleep_watch breakable sync n =
     if remaining > 0.0 then delay remaining
     else false
   in
-  if interrupted () then true (* if it is interrupted, synchronization is not done *)
-  else begin
+  interrupted () || (* if it is interrupted, synchronization is not done *)
+  begin
     if sync then synchronize ();
     try delay n with Exit -> true
   end;;
@@ -978,7 +975,7 @@ module H =
           anchors := all_anchors;
           Gs.flush ();
           (* long delay to be safe *)
-          sleep_watch false false 0.1;
+          ignore (sleep_watch false false 0.1);
           Graphics.draw_image ima 0 0;
           GY.set_cursor !free_cursor;
           GY.flush ();
@@ -1014,7 +1011,7 @@ module H =
       a ();
       flush_last ();
       GY.synchronize ();
-      launch_embedded_apps();
+      launch_embedded_apps ();
       Screen (ima, act, all_anchors)
 
     let light t =
@@ -1176,8 +1173,7 @@ let reposition ~x ~y ~w ~h =
   size_x := x;
   size_y := y;
   Gs.kill ();
-  x, y
-;;
+  x, y;;
 
 let resized () =
   let x = Graphics.size_x () and y = Graphics.size_y () in
@@ -1230,7 +1226,7 @@ let rec draw_rectangle x y dx dy =
 
 let wait_button_down () = 
   if GY.button_down () then
-    ignore (GY.wait_next_event [ GY.Button_up ])
+    ignore (GY.wait_next_event [ GY.Button_up ]);;
 
 
 let rec wait_signal_event events =
@@ -1522,4 +1518,4 @@ let add_headers l =
 let exec_ps s x0 y0 =
   sync ps;
   if not !opened then failwith "Grdev.exec_ps: no window";
-  Gs.draw s x0 y0
+  Gs.draw s x0 y0;;

@@ -222,23 +222,24 @@ let box_transition trans oldimg newimg x y width height =
       with
       |	Exit -> ()
       end
-  | TransBlock (step,from) ->
+  | TransBlock (step, from) ->
       let step = get_steps 50 step in
       Graphics.remember_mode false;
       GraphicsY11.display_mode true;
       block 0.01 step from (width,height) (x,y);
       Graphics.remember_mode true;
       GraphicsY11.display_mode false
-  | TransWipe (step,from) ->
+  | TransWipe (step, from) ->
       let step = get_steps 50 step in
       Graphics.remember_mode false;
       GraphicsY11.display_mode true;
       wipe 0.01 step from (width,height) (x,y);
       Graphics.remember_mode true;
       GraphicsY11.display_mode false
-  | _ -> (* JPF: Yes, I know this case is unused, but please keep it for future. *)
+  (*| _ ->
+      (* JPF: Yes, I know this case is unused, but please keep it for future. *)
       Misc.warning (Printf.sprintf "transbox mode %s is not supported" 
-		      (string_of_transmode trans))
+		      (string_of_transmode trans))*)
 ;;
 
 let saved_transbox = ref None

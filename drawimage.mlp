@@ -333,5 +333,6 @@ module M = struct
 end
 ;;
 
-let f = M.f
-let clean_cache = M.clean_cache
+let f = M.f;;
+
+let clean_cache = M.clean_cache;;
