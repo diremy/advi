@@ -222,7 +222,7 @@ value gr_origin_y(void)
   return Val_int(y);
 }
 
-/* Should be gr_window_id and gr_window_id should desapear. */
+/* Should be gr_window_id and gr_window_id should disapear. */
 value gr_window(void)
 { unsigned int w; value res;
   gr_check_open();
