@@ -54,12 +54,14 @@
 \let \bbb@bubble \bbb@id
 \def \bbb@shapebox {\bbb@ovalbox}
 \def \bbb@boxsep {0pt}
+\def \bbb@stretch{1}
 
 \define@key {bubble} {x}  {\def \bbb@x {#1}}
 \define@key {bubble} {y}  {\def \bbb@y {#1}}
 \define@key {bubble} {boxsep}  {\def \bbb@boxsep {#1}}
 \define@key {bubble} {anchor}  {\def \bbb@anchor {#1}}
 \define@key {bubble} {bubble}  {\def \bbb@bubble {#1}}
+\define@key {bubble} {stretch}[\arraystretch]{\edef \bbb@stretch {#1}}
 \ifbbb@tricks
 \define@key {bubble} {shape}   {\def \bbb@shapenode {#1}}
 \define@key {bubble} {oval}[]{\def \bbb@shapenode {\bbb@ovalnode}}
@@ -115,7 +117,9 @@
   {\bbb@set{#1}\@ifnextchar({\bbb@ii}{\bbb@ii(\bbb@x,\bbb@y)}}
 
 \def \bbb@ii(#1)#2{%
-  \bbb@bubble {\bbb@put (#1){\begin{tabular}{a}#2\end{tabular}}}\egroup
+  \bbb@bubble {\bbb@put (#1){%
+     \def\arraystretch{\bbb@stretch}%
+     \begin{tabular}{a}#2\end{tabular}}}\egroup 
 }
 
 
