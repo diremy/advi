@@ -114,7 +114,7 @@ i_want_opt:
 	@echo "  If there is no ocamlopt compiler version for your platform,"
 	@echo "  you can still get a slow but fully functional version of"
 	@echo "  Active-DVI, by typing \"make allbyte\" that would build a byte"
-	@echo "  code version."
+	@echo "  code version (\"make installbyte\" for install.)"
 	@echo "**************************************************************"
 	@exit 1        
 
@@ -165,6 +165,8 @@ veryveryclean: veryclean
 	rm -f configure
 
 installopt: install
+installbyte: 
+	$(MAKE) install INSTALLTARGET=advi
 install:: $(INSTALLTARGET) $(HELPFILES)
 	- install -d ${bindir}
 	install -m 755 $(INSTALLTARGET) ${bindir}/advi
