@@ -125,6 +125,7 @@ type state = {
     mutable ratio : float;
     mutable page_number : int;
     mutable page_stack : int list;
+    mutable page_marks : int list;
     mutable exchange_page : int;
     mutable last_modified : float;
     mutable button : (int * int) option;
@@ -241,6 +242,7 @@ let init filename =
       orig_y = orig_y;
       ratio = 1.0;
       page_stack = [];
+      page_marks = [];
       exchange_page = 0;
       page_number = starting_page npages;
       last_modified = last_modified;
@@ -569,7 +571,11 @@ let reload st =
     st.num_pages <- npages;
     st.page_stack <- clear_page_stack npages st.page_stack;
     let npage = page_start (min st.page_number (st.num_pages - 1)) st in
-    if npage <> st.page_number then st.pause_number <- 0;
+    if npage <> st.page_number then
+      begin
+        st.pause_number <- 0;
+        st.exchange_page <- st.page_number;
+      end;
     set_page_number st npage;
     st.frozen <- true;
     st.aborted <- true;
@@ -637,6 +643,28 @@ let pop_page b n st =
   st.page_stack <- stack;
   goto_page (if npage > 0 then npage else -1 - npage) st;;
 
+let mark_page st =
+  let marks = 
+    if List.length st.page_marks > 9
+    then List.rev (List.tl (List.rev  st.page_marks))
+    else st.page_marks in
+  st.page_marks <- st.page_number :: marks
+
+let goto_mark n st =
+  try
+    goto_page (List.nth st.page_marks n) st
+  with
+    Failure _ -> ()
+
+let previous_slice st = 
+  print_string "#line 0, 0 <<<<>><<>>Next-Slice>> "; 
+  print_newline ()
+
+let next_slice st = 
+  print_string "#line 0, 0 <<Previous-Slice<<>><<>>>> "; 
+  print_newline ()
+
+
 let goto_href link st = (* goto page of hyperref h *)
   let npage =
     if Misc.has_prefix "#" link then
@@ -649,6 +677,12 @@ let goto_href link st = (* goto page of hyperref h *)
       end in
   push_page true npage st;
   Grdev.H.flashlight (Grdev.H.Name link);;
+
+let goto_pageref n st =(* Go to hyperpage n if possible or page n otherwise *)
+  let tag = Printf.sprintf "#page.%d" n in
+  let alt = if st.num > 0 then st.num - 1 else st.num_pages in
+  let p = find_xref tag alt st in
+  push_page true p st
 
 let goto_next_page st =
   if st.page_number <> st.num_pages - 1 then goto_page (st.page_number + 1) st;;
@@ -699,7 +733,8 @@ module B =
       goto_page (st.page_number + max 1 st.num) st
     let goto st =
       push_page true (if st.num > 0 then st.num - 1 else st.num_pages) st
-
+    let goto_pageref st =
+      goto_pageref st.num st
     let push_page st =
       push_stack true st.page_number st
     let previous_page st =
@@ -837,6 +872,12 @@ module B =
        Scratch.draw ()
      let scratch_write st =
        Scratch.write ()
+
+     let previous_slice  = previous_slice 
+     let next_slice = next_slice 
+     let mark_page  = mark_page 
+     let goto_mark st =
+       goto_mark (st.page_number - max 1 st.num) st
   end;;
 
 let bindings = Array.create 256 B.nop;;
@@ -882,6 +923,10 @@ let bind_keys () =
    'p', B.previous_page;
    'P', B.previous_pause;
    'N', B.next_pause;
+
+   (* ^P, ^N in edit mode means previous- or next-slice *)
+   '', B.next_slice;
+   '', B.previous_slice;
 
    (* comma, ., g, to go to a page. *)
    ',', B.first_page;
@@ -961,6 +1006,16 @@ let main_loop filename =
         | Grdev.Selection s -> selection s
         | Grdev.Position (x, y) ->
             position st x y
+        | Grdev.Click (pos, but, _, _) when Grdev.E.editing () ->
+            begin match pos, but with 
+              Grdev.Top_left, Grdev.Button1 -> B.previous_slice st
+            | Grdev.Top_left, Grdev.Button2 -> B.reload st
+            | Grdev.Top_left, Grdev.Button3 -> B.next_slice st
+            | Grdev.Top_right, Grdev.Button1 -> B.previous_page st
+            | Grdev.Top_right, Grdev.Button2 -> B.last_page st
+            | Grdev.Top_right, Grdev.Button3 -> B.next_page st
+            | _, _ -> ()
+            end
         | Grdev.Click (Grdev.Top_left, _, _, _) ->
             if !click_turn_page then B.pop_page st
         | Grdev.Click (_, Grdev.Button1, _, _) ->

@@ -172,6 +172,7 @@ module E :
 
       val clear : unit -> unit
       val switch_edit_mode : unit -> unit
+      val editing : unit -> bool
       val add : int rect -> info -> unit
       val inside : int -> int -> figure -> bool
       val find : int -> int -> figure

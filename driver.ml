@@ -349,7 +349,7 @@ let set st code =
     let (dx, dy) = Table.get st.cur_mtable code in
     st.h <- st.h + dx;
     st.v <- st.v + dy
-  with _ -> ();;
+  with _ -> ();; 
 
 let put_rule st a b =
   let x = st.x_origin + int_of_float (st.conv *. float st.h)

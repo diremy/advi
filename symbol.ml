@@ -207,6 +207,11 @@ let cmr_encoding font code =
   | 124 -> "---"
   | 126 -> "~"
   | _ -> default_encoding font code
+let ecmr_encoding font code =
+  match code with
+  | 027 -> "ff"
+  | 028 -> "fi"
+  | x -> cmr_encoding font code;;
 
 let accents encoding font code =
   if code > 128 then String.make 1 (Char.chr code)
@@ -241,20 +246,25 @@ let cmex_encoding font code =
   | 113 -> "[SQRT]"
   | _ -> default_encoding font code
 
+(* tt font. *)
+let cmtt_encoding font code =
+  if is_pure code then String.make 1 (Char.chr code)
+  else cmr_encoding font code;;
+
 (* List of recognized fonts (regexp) * handler *)
 (* Don't optimize the regexps, it is readable that way. *)
 let encodings = [
   "cm[rs][0-9]+" , cmr_encoding ;
-  "cmt[ti][0-9]+", cmr_encoding ;
-  "cmsl[0-9]+"   , cmr_encoding ;
-  "cmbx[0-9]+"   , cmr_encoding ;
+  "cmt[ti][0-9]+", cmtt_encoding ; 
+  "cms[lxs][0-9]+"   , cmr_encoding ;
   "cmmi[0-9]+"   , cmmi_encoding ;
   "cmex[0-9]+"   , cmex_encoding ;
   "cmsy[0-9]+"   , cmex_encoding ;
-(* does not seem correct. eg. ff is \027 instead of \011? *)
-  "ecrm[0-9]+",    accents cmr_encoding ;
-  "ecti[0-9]+",    accents cmr_encoding ;
-  "ecbx[0-9]+",    accents cmr_encoding ;
+(* does not seem correct. eg. ff is \027 instead of \011? what else? *)
+  "ecrm[0-9]+",    accents ecmr_encoding ;
+  "ecti[0-9]+",    accents ecmr_encoding ;
+  "ecbx[0-9]+",    accents ecmr_encoding ;
+  "ectt[0-9]+",    accents cmtt_encoding ;
 ]
 
 let compile_regexp source =

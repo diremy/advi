@@ -181,14 +181,17 @@ let arch32_read_int32 buf =
   if pos + 4 > buf.len then
     raise End_of_buffer ;
   let n0 = Char.code str.[pos] in
+  let n1 = Char.code str.[pos + 1] in
+  let n2 = Char.code str.[pos + 2] in
+  let n3 = Char.code str.[pos + 3] in
+  buf.pos <- pos + 4 ;
+  let n123 = (n1 lsl 16) + (n2 lsl 8) + n3 in
   match n0 lsr 6 with
-  | 0|3 ->
-      let n1 = Char.code str.[pos + 1] in
-      let n2 = Char.code str.[pos + 2] in
-      let n3 = Char.code str.[pos + 3] in
-      buf.pos <- pos + 4 ;
-      (n0 lsl 24) + (n1 lsl 16) + (n2 lsl 8) + n3
-  | 1|2 -> raise (Error "too large 32-bit integer")
+  | 0|3 -> (n0 lsl 24) + n123
+  | 1|2 ->
+      if n0 = 0x80 && n123 = 0 then min_int
+      else if n0 = 0x7f && n123 = 0xffffff then max_int
+      else raise (Error "too large 32-bit integer") 
   | _ -> assert false ;;
 
 let arch64_read_int32 buf =

@@ -33,6 +33,7 @@ let is_digit c = c >= '0' && c <= '9';;
 let dimen_of_string str =
   let len = String.length str in
   let i = ref 0 in
+  if !i < len && str.[!i] = '-' then incr i;
   while !i < len && is_digit str.[!i] do incr i done ;
   if !i < len && str.[!i] = '.' then begin
     incr i ;

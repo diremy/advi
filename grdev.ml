@@ -591,7 +591,8 @@ module A : ACTIVE =
   end;;
 
 (* *)
-let editing = ref false;;
+let editing =
+  Options.flag false "-edit" "Start in edit mode";;
 
 module H =
   struct
@@ -794,7 +795,7 @@ module E =
       editing := not !editing;
       Busy.set
        (if !editing then Busy.Selection else Busy.Free)
-          
+
     let clear () = figures := []; screen := None
         (*
            let save_screen cont =
@@ -844,6 +845,9 @@ module E =
             "resizeto", delta origin.w dx, delta origin.h (0-dy) in
       Printf.sprintf "<edit %s %s #%s @%s %s %s,%s>"
         p.info.comm p.info.name p.info.line p.info.file action dx dy
+
+    let editing() = !editing
+
   end;;
 
 (*** Clearing device ***)
@@ -1181,8 +1185,9 @@ let wait_move_button_up rect trans_type event x y =
   with exn -> restore (); raise exn;;
 
 let near x x' = abs (x - x') < !size_x / 4;;
+let close x x' = abs (x - x') < !size_x / 10;;
 
-let click_area x y =
+let click_area near x y =
   if near x 0 then
     if near y 0 then Bottom_left else
     if near y !size_y then Top_left
@@ -1207,8 +1212,12 @@ let wait_button_up m x y =
     match wait_signal_event button_up with
     | Raw e ->
         if !editing || pressed m G.shift
-        then Final (Position (x, !size_y - y))
-        else Final (Click (click_area x y, button m, x, !size_y - y))
+        then
+          begin match click_area close x y with
+            Middle -> Final (Position (x, !size_y - y))
+          | c -> Final (Click (c, button m, x, !size_y - y))
+          end
+        else Final (Click (click_area near x y, button m, x, !size_y - y))
     | x -> x
     in
   if !editing && pressed m G.button1 then
@@ -1232,8 +1241,11 @@ let wait_button_up m x y =
         else Final Nil
       with
         Not_found ->
+        (*
             let event dx dy = Move (dx, dy) in
             wait_move_button_up !bbox Move_xy event x y 
+        *)
+        wait_position()
     end
   else if pressed m G.shift && released m G.button1 then
     wait_select_button_up m x y
