@@ -2,10 +2,10 @@
 FTPSITEDIR=/net/pauillac/infosystems/ftp/cristal
 
 distribute: clean
-	(cd adk-1.0.0; \
+	(cd adk; \
 	   tar zxvf $(FTPSITEDIR)/caml-light/bazar-ocaml/camlimages-2.10.tgz; \
 	   tar zxvf $(FTPSITEDIR)/advi/advi-1.2.0.tar.gz)
-	tar zcvf adk-1.2.0.tar.gz --exclude .cvsignore --exclude CVS adk
+	tar zcvf adk-1.2.0.tar.gz --exclude '*~' --exclude .cvsignore --exclude CVS adk
 	cp adk-1.2.0.tar.gz $(FTPSITEDIR)/advi
 
 clean:

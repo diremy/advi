@@ -1,14 +1,14 @@
-ADK 1.0.0
+ADK 1.2.0
 
-This is the adk, Advi Development Kit version 1.0.0.
-It contains the source code of the Active-DVI version 1.0.0 and
+This is the adk, Advi Development Kit version 1.2.0.
+It contains the source code of the Active-DVI version 1.2.0 and
 the required libraries (camltk and camlimages).
 
 * Manual installation
 
 To compile Advi, you must make and install the libraries (camltk and 
 camlimages) first, including their native code versions. After the
-successful installation of the libraries, move to the directory advi-1.0.0 
+successful installation of the libraries, move to the directory advi-1.2.0 
 and compile Advi itself.
 
 * Automatic "brain-dead" installation
