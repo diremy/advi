@@ -19,7 +19,7 @@
 
 include Makefile.config
 
-VERSION=1.2
+VERSION=1.4
 
 COPTIONS = -warn-error A -g
 COPTOPTIONS = -warn-error A -unsafe -inline 9
@@ -202,8 +202,7 @@ web: tex/splash.dvi
 	- chmod -R g+w $(WEBSITEDIR)
 	rm -rf release
 
-
-rpm:
+rpm: tex/splash.dvi
 	if test -d /usr/src/redhat; then rpmdir=/usr/src/redhat; \
 	else if test -d /usr/src/RPM; then rpmdir=/usr/src/RPM; fi; fi; \
 	if test "X$$rpmdir" = "X"; then \
