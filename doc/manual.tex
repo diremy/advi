@@ -675,19 +675,20 @@ user requests to continue (hitting a key to move to next pause or to
 change page).
 \end{quote}
 
-\subsection{{\ActiveDVI}-records}
+\subsection{{\ActiveDVI} records}
 
-{\ActiveDVI} allows (almost) any {\LaTeX} piece of code to be
-recorded, and have the corresponding DVI code to be rendered later
-upon request. This ability to "render later" requires the {\LaTeX}
-code recorded to be tagged: this defines the notion of an {\em
-{\ActiveDVI}-record}.
+{\ActiveDVI} allows (almost) any piece of {\LaTeX} code to be
+recorded, and the corresponding DVI code to be rendered later upon
+request. To be able to render the code in any order we choose, we must
+bind the recorded {\LaTeX} code to a name (called a {\em tag}): this
+{\LaTeX} code together with its tag defines the notion of an {\em
+{\ActiveDVI} record}.
 
-\paragraph{Warning!} The entire DVI image of an {\ActiveDVI}-record
+\paragraph{Warning!} The entire DVI image of an {\ActiveDVI} record
 {\em must} fit on a single DVI page. The corresponding check is left
 to the writer of the document.
 
-The command defining an {\ActiveDVI}-record is as follows:
+The command defining an {\ActiveDVI} record is as follows:
 
 \medskip\noindent
 \docdef \advirecord \doctt{[play]}\docarg{tag}\docarg{latex code}
@@ -695,42 +696,57 @@ The command defining an {\ActiveDVI}-record is as follows:
 \docdef \begin\doctt{\{advirecording\}}%
 \doctt{[play]}\docarg{tag}\docarg{latex code}%
 \docid {text}\docdef \end\doctt{\{advirecording\}}
+
 \begin{quote}
-Processes \docid{latex code} and records the corresponding DVI output,
-then binds it to the tag \docid{tag}. While recording, the DVI output is
-not displayed unless the option \doctt{play} is set.
+This command processes \docid{latex code} and records the
+corresponding DVI output, then binds it to the tag \docid{tag}. While
+recording, the DVI output is not displayed, unless the option
+\doctt{play} is set.
 
-{\ActiveDVI}-records can be nested. If so, the inner record is bound
-to its own tag as usual; if the inner record is defined with the
-\doctt{play} option, it is also recorded as a part of the outer tag
-record.
+{\ActiveDVI} records may be nested. In this case, the inner record is
+bound to its own tag as usual; in addition, if the inner record is
+defined with the \doctt{play} option, it is also recorded as a part of
+the outer tag record.
 
-If the environment syntax form of {\ActiveDVI}-record definition is
+If the environment syntax form of {\ActiveDVI} record definition is
 used, the \docid{latex code} may contain fragile commands.
 \end{quote}
 
-To play an {\ActiveDVI}-record, the corresponding DVI must have been
+To play an {\ActiveDVI} record, the corresponding DVI must have been
 recorded on the current DVI page and before issuing the play command.
 With the proviso that these requirements are satisfied, the syntax of
-the command to display an {\ActiveDVI}-record is as follows:
+the command to display an {\ActiveDVI} record is as follows:
 
 \medskip\noindent
 \docdef \adviplay\docopt{color}\docarg{tag}
 \begin{quote}
-Replays the previously recorded and bound to \docid{tag} DVI code.
+This command plays the DVI code previously recorded and bound to \docid{tag}.
 
 The optional argument changes the text color to \docid{color} during replay. 
 \end{quote}
 
-\subsection{{\ActiveDVI}-anchors}
+\subsection{{\ActiveDVI} anchors}
 
-An {\em {\ActiveDVI}-anchor} is a specific area in the page that can
-be {\em activated} when some specified mouse events occur.  The anchor
-is associated to an {\ActiveDVI}-record that is automatically rendered
-each time the anchor is activated. The anchor is {\em de-activated}
-when the event that triggered the activation does not hold any
-more. The page is reset to its original appearance when the anchor is
-de-activated.
+{\ActiveDVI} gives the ability to define {\em {\ActiveDVI}
+anchors}: an anchor is specified by (1) an {\ActiveDVI} record, (2) a {\LaTeX}
+piece of code that defines the area of the page where the anchor is
+active, and (3) an activation method.
+
+The anchor is {\em activated} when some mouse events specified by the
+activation method occur in the area. The anchor is {\em de-activated}
+when the event that triggered the activation does not hold any more.
+
+The {\ActiveDVI} record associated with the anchor is automatically
+rendered \emph{anew} each time the anchor is activated.  The page is
+reset to its original appearance when the anchor is de-activated.
+
+The activation method of an anchor may be either \doctt{over} or
+\doctt{click}. If the activation method is \doctt{over}, the anchor is
+activated whenever the mouse pointer is inside the anchor area;
+conversely, the anchor is de-activated when the mouse leaves the
+anchor area. If the activation method is \doctt{click}, the anchor is
+activated whenever the button is pressed inside the anchor area;
+conversely, the anchor is de-activated when the button is released.
 
 \medskip\noindent
 \docdef \advianchor\docopt{activation}\docarg{tag}\docarg{text}
@@ -739,18 +755,12 @@ de-activated.
 \docid {text}\docdef \end\doctt{\{advianchoring\}}
 
 \begin{quote}
-Defines the DVI rendering of \docarg{text} as an {\ActiveDVI}-anchor
-that plays the {\ActiveDVI}-record bound to \docid{tag} when the anchor is
-activated.
+This command defines the DVI rendering of \docarg{text} as an
+{\ActiveDVI} anchor area that plays the {\ActiveDVI} record bound to
+\docid{tag} when the anchor is activated.
 
 The argument \docid{activation} specifies the activation method of the
-anchor: it may either be \doctt{over} or \doctt{click}. If the
-activation method is \doctt{over}, the anchor is activated whenever the
-mouse pointer is inside the anchor area; the anchor is de-activated when
-the mouse leaves the anchor area. If the activation method is
-\doctt{click}, the anchor is activated whenever the button is pressed inside
-the anchor area; the anchor is de-activated when the button is
-released.
+anchor.
 
 If the environment syntax form is used, \docid{text} may contain
 fragile commands.
