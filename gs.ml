@@ -39,7 +39,9 @@ let pstricks =
 
 let showps_ref = ref false;;
 let showps s =
-  if !showps_ref then (prerr_endline (Printf.sprintf "SHOWPS: %s" s));;
+  if !showps_ref then (prerr_endline  (Printf.sprintf "%s" s));;
+
+(* (Printf.sprintf "SHOWPS: %s" s));;*)
 
 Options.add
   "--showps" (Arg.Set showps_ref)
@@ -429,25 +431,31 @@ class gv =
       self # send [ b ]
 
     method file b x y =
-      (* does not draw---no flushpage *)
       self # send [ "grestore"; self#moveto x y; b; "gsave" ]
 
     method ps b (x : int) (y : int) =
 (*prerr_endline (Printf.sprintf "Calling gv#PS with\n\t\t %s" b);*)
-      (* insert non postscript, typically with ``ps:''
-         may change graphic parameters *)
-      self # send [ texbegin; self # moveto x y; b; texend ];
+      (* insert non protected postscript, typically with ``ps:''
+         may (not ?) change graphic parameters *)
+      self # send [ texbegin; (*self # moveto x y;*) b; texend ];
       sync <- false
 
     method special b (x : int) (y : int) =
       (* insert protected postscript, typically with '"'
-         does not change graphic parameters *)
-      self # send [ texbegin; self # moveto x y;
+         does (?) change graphic parameters *)
+      self # send [ texbegin;
+                    self # moveto x y;
                     "@beginspecial @setspecial";
                     b;
                     "@endspecial"; texend;
                   ] ;
       sync <- false
+
+    method file b (x : int) (y : int) =
+      (* insert into postscript into user dictionnary, typically with '!'
+         should not change graphic parameters *)
+      (* does not draw---no flushpage *)
+      self # send [ self # moveto x y; b ]
 
     method kill =
       showps "showpage";
@@ -469,16 +477,16 @@ let draw s x y =
   if get_do_ps () then
     try
 (* prerr_endline (Printf.sprintf "Calling gv#ps with\n\t\t %s" s);*)
- gv#ps (Misc.get_suffix  "ps: " s) x y with
+      gv#ps (Misc.get_suffix  "ps: " s) x y with
     | Misc.Match ->
         try gv#special (Misc.get_suffix  "\" " s) x y with
         | Misc.Match ->
             try gv#def (Misc.get_suffix  "! " s) with
             | Misc.Match ->
-               try gv#file (Misc.get_suffix  "psfile: " s) x y with
-               | Misc.Match ->
-                   Misc.warning
-                    (Printf.sprintf "Unknown ps commands\n\t\t %s" s)
+              try gv#file (Misc.get_suffix  "psfile: " s) x y with
+              | Misc.Match ->
+                  Misc.warning
+                    (Printf.sprintf "Unknown PostScript commands\n\t\t %s" s)
 ;;
 
 let draw_file fname x y =
