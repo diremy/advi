@@ -24,6 +24,9 @@ OLDVERSION=1.5
 PACKAGEVERSIONFILE=config.ml
 DOCVERSIONFILES=tex/advi.sty doc_src/Includes/advi-version.html doc/advi.1
 
+HELPFILES=doc/splash.dvi \
+doc/scratch_write_splash.dvi doc/scratch_draw_splash.dvi
+
 COPTIONS = -warn-error A -g
 COPTOPTIONS = -warn-error A -unsafe -inline 9
 
@@ -146,11 +149,11 @@ veryveryclean: veryclean
 	rm -f configure
 
 installopt: install
-install:: $(INSTALLTARGET) doc/splash.dvi
+install:: $(INSTALLTARGET) $(HELPFILES)
 	- install -d ${bindir}
 	install -m 755 $(INSTALLTARGET) ${bindir}/advi
 	- install -d $(ADVI_LOC)
-	install -m 644 doc/splash.dvi tex/advilogo.eps tex/caml.eps \
+	install -m 644 $(HELPFILES) tex/advilogo.eps tex/caml.eps \
 		tex/bar.jpg.eps \
 		tex/*.sty tex/advi.pro $(ADVI_LOC)
 	if [ -f conf/jpfonts.conf ]; then \
@@ -180,12 +183,18 @@ FTPSITEDIR=/net/pauillac/infosystems/ftp/cristal/advi
 doc/splash.dvi:
 	(cd doc; $(MAKE) splash.dvi)
 
+doc/scratch_draw_splash.dvi:
+	(cd doc; $(MAKE) scratch_draw_splash.dvi)
+
+doc/scratch_write_splash.dvi:
+	(cd doc; $(MAKE) scratch_write_splash.dvi)
+
 documentation:
 	(cd doc; $(MAKE) all)
 
 distribute: tar_and_web
 
-tar_and_web: tex/splash.dvi
+tar_and_web:
 	(cd test; $(MAKE) all jpdemo.dvi)
 	rm -rf release
 	rm -rf $(WEBSITEDIR)/*
@@ -216,7 +225,7 @@ tar_and_web: tex/splash.dvi
 	rm -rf release
 	cd advi-development-kit; $(MAKE) distribute
 
-web: tex/splash.dvi
+web:
 	(cd test; $(MAKE) all jpdemo.dvi)
 	rm -rf release
 	rm -rf $(WEBSITEDIR)/*
@@ -228,6 +237,8 @@ web: tex/splash.dvi
 	cp -p ../doc/manual.ps bazar-ocaml/advi/doc/; \
 	cp -p ../doc/manual.pdf bazar-ocaml/advi/doc/; \
 	cp -p ../doc/splash.dvi bazar-ocaml/advi/doc/; \
+	cp -p ../doc/scratch_write_splash.dvi bazar-ocaml/advi/doc/; \
+	cp -p ../doc/scratch_draw_splash.dvi bazar-ocaml/advi/doc/; \
 	cp -p ../tex/advi.pro bazar-ocaml/advi/test/; \
 	find . -name '.cvsignore' -print | xargs rm; \
 	find . -name 'CVS' -print | xargs rm -rf; \
@@ -239,7 +250,7 @@ web: tex/splash.dvi
 	- chmod -R g+w $(WEBSITEDIR)
 	rm -rf release
 
-rpm: tex/splash.dvi
+rpm:
 	if test -d /usr/src/redhat; then rpmdir=/usr/src/redhat; \
 	else if test -d /usr/src/RPM; then rpmdir=/usr/src/RPM; \
 	else if test -d /usr/src/rpm; then rpmdir=/usr/src/rpm; fi fi; fi; \
