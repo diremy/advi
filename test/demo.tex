@@ -15,7 +15,7 @@
 \subsection* {{\ActiveDVI} has two components}
 
 \begin{itemize}
-\item {\tt mldvi}: {\bf a dvi} previewer (by Alexandre Miquel)
+\item {\bf a DVI} previewer based on \verb"mldvi" (by Alexandre Miquel)
 \begin {itemize}
 \item[+] dvips
   \textcolor{c1}{c}%
@@ -35,21 +35,25 @@
 \end {itemize}
 \end{itemize}
 
-\begin{itemize}
-\item 
-A set of macros to animate your presentation 
-(by Jun~Furuse, Didier~R{\'{e}}my, Pierre Weis, and Roberto Di Cosmo).
- 
-\item 
-A simple way to launch arbitrary demonstration and/or animation
-programs from inside your slides
-\hbox {(by Jun Furuse and Pierre Weis)}.
+\begin{itemize} \item A set of macros to animate your presentation (by
+Jun~Furuse, Didier~R{\'{e}}my, Pierre~Weis, and Roberto Di~Cosmo): the
+{\LaTeX} package style \verb"advi.sty".
 
-\item 
-A package to annotate text (using active anchors)
+\item A simple way to launch arbitrary demonstration and/or animation
+programs from inside your slides \hbox {(by Jun~Furuse and
+Pierre~Weis)}.
 
-\item
-Support for \verb+\includegraphics+ with native image formats
+\item A set of built-in functions to animate transitions from slides
+to slides \hbox {(by Jun~Furuse, Didier R{\'{e}}my, and Pierre Weis)}.
+
+\item Some facilities to resize and move texts within the slides
+(by Jun~Furuse, Roberto Di~Cosmo, and Pierre~Weis).
+
+\item Hyperref anchors in the presentation to switch by clicking to
+another slide of the show, or even to view other files (either DVI,
+text or HTML files).
+
+\item A package to annotate texts (using active anchors).
 
 \end{itemize}
 
@@ -61,7 +65,11 @@ Support for \verb+\includegraphics+ with native image formats
 
 \def\goon{\hbox{{\Large $\Rightarrow$}~Type~space~to~go~on}}
 
-\subsection* {EPS (and other!) graphics including using Camlimages}
+\subsection* {Images in presentations}
+
+{\ActiveDVI} supports \verb+\includegraphics+ with native image formats.
+
+\subsection* {EPS (and other!) graphics inclusion using Camlimages}
 \begin{quote}
 \verb+\includegraphics[width=0.1\textwidth]{caml.eps}+\\
 \verb+\includegraphics[width=0.2\textwidth]{caml.eps}+\\
@@ -176,7 +184,7 @@ Including some strange flashing effect!
 
 \newpage
 
-\subsection* {Embedded applications are easy to launch}
+\subsection* {Embedded applications}
 
 Any Unix command that obeys to the X geometry specifications may be
 used to draw material in the {\ActiveDVI} window.
@@ -185,9 +193,9 @@ This is convenient to add a demo into your presentation.
 \bigskip
 
 \noindent
-You launch a command use
+To launch the program {\verb"command"} use in your {\LaTeX} source file\\
 
-\verb+\adviembed[width=w,height=h]{command -geometry !g -use !p}+
+\verb+\adviembed[width=w,height=h]{command -geometry !g -use !p}+\\
 
 \noindent
 where \verb"!g" specifies the required geometry, \verb"!p" the
@@ -204,7 +212,7 @@ presentation using:\\
 \verb|          {display -geometry !g! -window !p logo.gif}|\\
 \adviembed[width=3cm, height=3.3260869cm]{display -geometry !g! -window !p advilogo.gif}
 
-\item Similarly, \verb|animate| can display animations:\\
+\item Similarly, \verb|animate| can display animations with:\\
         \verb|\adviembed[width=2cm,height=2cm]|\\
         \verb|          {animate -geometry !g! -window !p anim.gif}|\\
         \adviembed[width=2cm,height=2cm]{animate -geometry !g! -window !p mmm.anim.gif}
@@ -223,14 +231,14 @@ presentation using:\\
 \subsection* {Embedded applications (cont.)}
 
 \begin{itemize}
-  \item Any application which has enbedding options like\\
+  \item Any application which has embedding options can be launched, as\\
    \verb+\adviembed[width=w,height=h]{prog -geometry !g -use !p}+\\
-   For instance (using wish)\\
+   For instance, using wish:\\
    \verb|\adviembed[persistent,width=5cm,height=1cm]|\\
    \verb|          {wish ./watch -geometry !g -use !p}|\\
    \adviembed[persistent,width=5cm,height=0.71cm]{wish ./watch -geometry !g -use !p}
 \adviwait
-  \item Possibly interactive ! (using CamlTk)\\
+  \item Possibly interactive ! (we use CamlTk here)\\
    \verb|\adviembed[persistent,width=6.5cm,height=9.5cm]|\\
    \verb|          {./taquin -geometry !g -use !p dojoji.gif}|\\
   \adviembed[persistent=taquin,width=8.5cm,height=10cm]{./taquin.sh -geometry !g -use !p dojoji.gif}
@@ -241,11 +249,11 @@ presentation using:\\
 
 \subsection* {Embedded applications (cont.)}
 
-If we cannot specify the parent window of X applications,
-they will be handled by the window manager.
-Depending the WM, 
-their placements may not obey your geometry specifications.
-(Think about disabling ``remember window positions'' option of your WM.)
+If an X application does not support the specification of its parent
+window, it will be automatically handled by the window manager.  Then,
+depending on the WM at hand, the placements may or may not obey your
+geometry specifications. (In some cases, disabling the ``remember window
+positions'' option of your WM may help.)
 
 \begin{itemize}
  \item Xeyes using the macro command \verb|embed|:\\
@@ -259,8 +267,10 @@ their placements may not obey your geometry specifications.
    \adviembed[width=10cm,height=4cm]{xterm -geometry 50x7+!x+!y -e ocaml}
 \end{itemize}
 
-The \verb|embed| macro can launch any executable system command during
-the presentation. 
+\newpage
+
+\subsection* {Embedded applications (cont.)}
+
 \begin{itemize}
  \item You can add music to your presentation, if you have a music
   player available:\\
@@ -275,6 +285,18 @@ the presentation.
 \advianchor[click]{play}{Play}
 \advianchor[click]{stop}{Stop}
 
+\medskip
+\noindent
+Here, we added active buttons to start and stop the music (don't forget
+to add that kind of gadgets in your shows: it can be very frustrating to have
+music automatically launched when you are still speaking! :)
+
+\bigskip
+
+\noindent
+In conclusion, the \verb|embed| macro can launch any executable
+command during the presentation.
+
 \newpage
 
 \subsection* {Limitations of Postscript specials}
@@ -282,40 +304,34 @@ the presentation.
 {\ActiveDVI} recognizes and renders Postscript Specials by calling and telling
 \verb"ghostview" to display Postscript on the \verb"advi" window. 
 Hence, images drawn using PS tricks will be displayed by \verb"advi". 
-
-However, PS tricks make the assumptions that everything is displayed by
-Postscript, which is still \verb"advi" displaying most of the material
-itself. 
+However, PS tricks make the assumptions that everything is displayed
+by Postscript, which is wrong since \verb"advi" displays most of the
+material itself.
 
 \subsubsection* {Most PS-tricks do work}
 \begin {itemize}
 
-\item[+]
-Simple drawings work
+\item[+] Simple drawings work
 
-\item[+] 
-{\tt\string\SpecialCoor} works, {\em i.e.} commands of the form
+\item[+] {\tt\string\SpecialCoor} works, {\em i.e.} commands of the form
 {\tt \string \rput \{A\}\{bla bla\}} works where {\tt A} is a node
 
-\item[+]
-Connections between nodes {\tt \string \ncarc}, {\tt \string \ncarc},
+\item[+] Connections between nodes {\tt \string \ncarc}, {\tt \string \ncarc},
 also works.
 \end {itemize}
 
 \subsubsection* {Unfortunately, some PS-tricks do not work, yet}
+
 \begin{itemize}
-\item[-]
-Labels over arrows \verb"\Aput", \verb"Bput", etc.
-(they change the Postscript coordinates...)
+\item[-] Labels over arrows \verb"\Aput", \verb"Bput", etc.
+(they change the Postscript coordinates \ldots)
 
-\item[-]
-{\tt pspicture}
-(idem, but drawings that are not embedded in pspictures works)
+\item[-] {\tt pspicture} (idem, but drawings that are not embedded in
+pspictures works)
 
-\item[-]
-Advi only recognizes binary overlays (display if 0, hide otherwise). 
-This is sufficient for the proper documentclass
-(see \hyperlink {overlays}{below}).
+\item[-] {\ActiveDVI} only recognizes binary overlays (display if 0,
+hide otherwise). This is sufficient for the prosper documentclass (see
+\hyperlink {overlays}{below}).
 
 \end {itemize}
 
@@ -325,7 +341,6 @@ This is sufficient for the proper documentclass
 
 With some versions of \verb"gv" and/or \verb"X11", the PS tricks are not
 correctly synchronized. Some drawings may hide text, or conversely.
-
 
 % Examples: 
 
@@ -341,7 +356,6 @@ Overlays of the \verb"seminar" mode uses PS tricks, but in a manner that
 requires characters to be also printed as Postscript. The \verb"advi" package 
 redefines \verb"\overlay" so that it draws only the first overlay (and
 ignore others).
-
 Hence, \verb"advi" cannot be used to preview slides using \verb"seminar"
 overlays. However, a better package for overlays (build on top of seminar)
 is \verb"prosper", which only uses the ability to show or hide some
@@ -453,8 +467,10 @@ Active anchors are much alike HTML anchors, except that instead of
 jumping to a reference anchors (usually another page), they 
 replay a recorded piece of DVI when the mouse is over the
 anchor area. The page is saved and reset to its normal shape when the mouse
-leaves the anchor region. For instance, scratch those stamps with the
-mouse to see how much you win \verb":)"
+leaves the anchor region.
+
+\noindent
+Scratch those stamps with the mouse to see how much you win \verb":)"
 
 $$
 \ovalnode [linestyle=none,fillstyle=solid,fillcolor=yellow]{A}
@@ -466,7 +482,7 @@ $$
   {\advirecord {B}{\i\textbf{Lost}!\i}}
 \advianchor{B}{\adviplay[green]{B}}
 $$
-For instance, the left game was typeset as
+The left game was typeset as
 {\small
 \begin{verbatim}
 \ovalnode [linestyle=none,fillstyle=solid,fillcolor=yellow]{A}
@@ -482,7 +498,7 @@ The effect of active anchors can also be
 \SpecialCoor
 \advirecord {C}
   {\ncarc[linecolor=red,arcangleA=50,arcangleB=50,linewidth=3pt]
-         {<->}{A}{B}%\Aput{Fire!}
+         {<->}{A}{B}\Aput{Fire!}
 }
 
 
@@ -515,7 +531,7 @@ inner tabulars\\ should be between\\ parentheses\end{tabular}}}\\
 \adviannot[p=9em]{Active anchors}(1,1.5)
 {\centering Active anchors are even greater!}
 can also annotate text as \adviannot[C,bg=green]{here}{here=h+e+r+e},
-\adviannot{for instance}[linecolor=red](-1.5,1){for example}. 
+\adviannot{for instance}[linecolor=red](-1.5,1){for example ?}.
 
 \medskip
 
@@ -530,7 +546,7 @@ These annotations have been typeset respectively as:
 
 \adviannot[C,bg=green]{here}{here=h+e+r+e}
 
-\adviannot[C]{for instance}[linecolor=red](-1.5,1){for example?}
+\adviannot[C]{for instance}[linecolor=red](-1.5,1){for example ?}
 \end{verbatim}
 \end{small}
 
@@ -562,18 +578,35 @@ Kind of {\ActiveDVI} movie
 {\begin{superpose}
 \advirecord{1}{\textcolor{c2}{can be played}}\\
 \advirecord{15}{\textcolor{c1}{changing text at each space}}\\
-\advirecord{2}{\textcolor{c3}{you can use graphics}}\\
-\advirecord{3}{{\includegraphics[width=0.02\textwidth]{../tex/caml.eps}}}\\
-\advirecord{31}{{\includegraphics[width=0.03\textwidth]{../tex/caml.eps}}}\\
-\advirecord{32}{{\includegraphics[width=0.04\textwidth]{../tex/caml.eps}}}\\
-\advirecord{33}{{\includegraphics[width=0.08\textwidth]{../tex/caml.eps}}}\\
-\advirecord{34}{{\includegraphics[width=0.1\textwidth]{../tex/caml.eps}}}\\
-\advirecord{35}{{\includegraphics[width=0.02\textwidth]{../tex/caml.eps}\
-\includegraphics[width=0.03\textwidth]{../tex/caml.eps}\
-\includegraphics[width=0.04\textwidth]{../tex/caml.eps}\
-\includegraphics[width=0.08\textwidth]{../tex/caml.eps}\
-\includegraphics[width=0.1\textwidth]{../tex/caml.eps}}}\\
-\advirecord{36}{{\includegraphics[width=0.1\textwidth]{world}}}\\
+\advirecord{2}{\textcolor{c3}{you can also use graphics}}\\
+\advirecord{31}{\
+{\includegraphics[width=0.02\textwidth]{../tex/caml.eps}}}\\
+\advirecord{32}{\
+{\includegraphics[width=0.02\textwidth]{../tex/caml.eps}}\
+{\includegraphics[width=0.03\textwidth]{../tex/caml.eps}}}\\
+\advirecord{33}{\
+{\includegraphics[width=0.02\textwidth]{../tex/caml.eps}}\
+{\includegraphics[width=0.03\textwidth]{../tex/caml.eps}}\
+{\includegraphics[width=0.04\textwidth]{../tex/caml.eps}}}\\
+\advirecord{34}{\
+{\includegraphics[width=0.02\textwidth]{../tex/caml.eps}}\
+{\includegraphics[width=0.03\textwidth]{../tex/caml.eps}}\
+{\includegraphics[width=0.04\textwidth]{../tex/caml.eps}}\
+{\includegraphics[width=0.06\textwidth]{../tex/caml.eps}}}\\
+\advirecord{35}{\
+{\includegraphics[width=0.02\textwidth]{../tex/caml.eps}}\
+{\includegraphics[width=0.03\textwidth]{../tex/caml.eps}}\
+{\includegraphics[width=0.04\textwidth]{../tex/caml.eps}}\
+{\includegraphics[width=0.06\textwidth]{../tex/caml.eps}}\
+{\includegraphics[width=0.08\textwidth]{../tex/caml.eps}}}\\
+\advirecord{36}{\
+{\includegraphics[width=0.02\textwidth]{../tex/caml.eps}}\
+{\includegraphics[width=0.03\textwidth]{../tex/caml.eps}}\
+{\includegraphics[width=0.04\textwidth]{../tex/caml.eps}}\
+{\includegraphics[width=0.06\textwidth]{../tex/caml.eps}}\
+{\includegraphics[width=0.08\textwidth]{../tex/caml.eps}}\
+{\includegraphics[width=0.1\textwidth]{../tex/caml.eps}}}\\
+\advirecord{37}{{\includegraphics[width=0.1\textwidth]{world}}}\\
 \advirecord{4}{{\begin{tabular}{@{}l@{}}
 Note that inner tabular\\ should be between\\ parentheses\end{tabular}}}\\
 \advirecord{5}{\textcolor{c4}{The End}}
@@ -582,13 +615,13 @@ here.
 \adviplay{1}
 \adviwait\adviplay{0}\adviplay{15}
 \adviwait\adviplay{0}\adviplay{2}
-\adviwait\adviplay{0}\adviplay{3}
 \adviwait\adviplay{0}\adviplay{31}
 \adviwait\adviplay{0}\adviplay{32}
 \adviwait\adviplay{0}\adviplay{33}
 \adviwait\adviplay{0}\adviplay{34}
 \adviwait\adviplay{0}\adviplay{35}
 \adviwait\adviplay{0}\adviplay{36}
+\adviwait\adviplay{0}\adviplay{37}
 \adviwait\adviplay{0}\adviplay{4}
 \adviwait\adviplay{0}\adviplay{5}
 

@@ -251,7 +251,7 @@ Set the alpha factor for the background image to \docid{float}
 (\doctt{none} means unset).
 \end{quote}
 
-\section{Blending}
+\section*{Blending}
 \dockey[none]{blend}{blend mode}
 \begin{quote}
 Set the blend mode to \docid{blend mode}, which should be one of the
@@ -300,7 +300,7 @@ Here is the command used to obtain this effect:
 {\color{white}
 \advifooter\adviheader
 
-\subsection{Reverse video effect}
+\section{Reverse video effect}
 
 If you want a reverse video effect, you just have to set the background
 of the page to black and the text color to white, as follows:
@@ -315,26 +315,20 @@ of the page to black and the text color to white, as follows:
     \end{verbatim}
   \end{quote}
 
-\item set the text color to white using
+\item set the text color of the entire page to white, by putting the
+text of the page between in the scope of a \verb"\color" macro call:
   \begin{quote}
     \begin{verbatim}
-        \color{white}
+        {\color{white}
+          Text of the page
+        }
     \end{verbatim}
   \end{quote}
-at the beginning of the slide.
 
 \end{itemize}
 
-To revert to normal text color, use
-
-  \begin{quote}
-    \begin{verbatim}
-        \special{color pop}
-    \end{verbatim}
-  \end{quote}
-
-at the end of the slide. (Write \verb"\advibg{none}" at the
-beginning of next slide, if you also want to revert to normal background.)
+Write \verb"\advibg{none}" at the beginning of the next slide, if you
+want to revert to normal background.
 
 }
 
@@ -342,16 +336,9 @@ beginning of next slide, if you also want to revert to normal background.)
 
 \advibg{none}
 
-\subsection* {TODO:}
+\section{Future work}
 
-  \begin{itemize}
-    \item anybody willing to add support for color gradients?
-  \end{itemize}
-
-\newpage
-
-
-\subsection* {Design considerations:}
+\subsection* {Design considerations}
 
   \begin{itemize}
     \item background preferences are ``asynchronous'', in the sense
@@ -359,11 +346,14 @@ that they can imply rendering modifications in a part of the page that
 has already been displayed; this is why we first scan a page, looking
 for background specials (example, a red background), and only after we
 render it (setting the background to red before everything else). By
-the way, this mechanism was already in place for handling PostScript
+the way, this mechanism was already in place to handle PostScript
 headers, that also appear asynchronously.
+
     \item is it worthwhile to consider the possibility of making a
 ``synchronous'' variant? This would allow for example to change the
 background color after a pause. But at what price ?
+
+    \item anybody willing to add support for color gradients?
   \end{itemize}
 
 \lastpage
