@@ -38,25 +38,23 @@ type t = Timeout.t;;
 let set = ref TimeoutSet.empty;;
 let stamp = ref 0;;
 
-let rec callback () =
-  try while
+let callback () =
+  let rec callback() = 
     let min = TimeoutSet.min_elt !set in
     let now = Unix.gettimeofday () in
     let wait = min.at -. now in
     (* Be careful: if wait < 1e-7, timer will never be raised... *)
-    if wait < 0.001 then begin
-      set := TimeoutSet.remove min !set;
-      min.callback ();
-      true
-    end else begin
+    if wait < 0.001 then
+      begin
+        set := TimeoutSet.remove min !set;
+        min.callback ();
+        callback()
+      end
+    else 
       ignore
         (Unix.setitimer Unix.ITIMER_REAL
-           {Unix.it_interval = 0.0; Unix.it_value = wait});
-      false
-    end
-  do () done
-  with
-  | Not_found -> ()
+           {Unix.it_interval = 0.0; Unix.it_value = wait}) in
+  try callback() with Not_found -> ()
 ;;
 
 let init () =

@@ -1237,7 +1237,7 @@ let tpic_specials st s =
 (* End of TPIC hacks *)
 
 let put_special st s =
-  if Gs.get_do_ps () then
+  if Gs.get_do_ps () && st.status.Cdvi.hasps then
     if s = "begin" then
       let x, y = Dev.current_pos () in
       (* we get absolute coordinates and convert them *)
@@ -1579,7 +1579,9 @@ let render_step cdvi num ?trans ?chst dpi xorig yorig =
     s in
  (* Didier: should it be ``Gs.get_do_ps ()'' instead of ``false''? 
     and why has Dvi been chaned to Cdvi *)
+  (* --Why should we forget about the status? 
   status.Cdvi.hasps <- Gs.get_do_ps ();
+  *)
   let orid = function Some f -> f | None -> fun x->x in
   let st =
     { cdvi = cdvi;
