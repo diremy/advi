@@ -1150,7 +1150,7 @@ let tpic_specials st s =
 (* End of TPIC hacks *)
 
 let moveto_special st b s =
-  if !Options.dops then
+  if Gs.get_do_ps () then
     let x, y = Dev.current_pos () in
     if b then begin
        st.h <- int_of_float (float (x - st.x_origin) /. st.conv);
@@ -1161,7 +1161,7 @@ let moveto_special st b s =
     end;;
 
 let ps_special st s =
-  if !Options.dops && st.status.Dvi.hasps then
+  if Gs.get_do_ps () && st.status.Dvi.hasps then
      let x = int_of_float (st.conv *. float st.h) in
      let y = int_of_float (st.conv *. float st.v) in
      if !visible then
@@ -1249,15 +1249,15 @@ let scan_special status (headers, xrefs) pagenum s =
   if Launch.whiterun () &&
      has_prefix "advi: embed " s then scan_embed_special status s else
   (* Embedded Postscript, better be first for speed when scanning *)
+  let do_ps = Gs.get_do_ps () in
   if has_prefix "\" " s || has_prefix "ps: " s then
-    (if !Options.dops then status.Dvi.hasps <- true) else
+    (status.Dvi.hasps <- do_ps) else
   if has_prefix "!" s then
-    (if !Options.dops then
+    (if do_ps then
       headers := (true, get_suffix "!" s) :: !headers) else
   (* Embedded Postscript, better be first for speed when scanning *)
   if has_prefix "header=" s then
-    (if !Options.dops then
-      headers := (false, get_suffix "header=" s) :: !headers) else
+    (if do_ps then headers := (false, get_suffix "header=" s) :: !headers) else
   if has_prefix "advi: setbg " s then scan_bkgd_special status s else
   if has_prefix "html:<A name=\"" s || has_prefix "html:<a name=\"" s then
     scan_special_html (headers, xrefs) pagenum s;;
@@ -1425,7 +1425,7 @@ let find_prologues l =
   | Invalid_argument _ | Not_found ->
       Misc.warning
         "Cannot find postscript prologue. Continuing without Postscript";
-      Options.dops := false;
+      Gs.set_do_ps false;
       []
 ;;
 
@@ -1444,7 +1444,7 @@ let render_step cdvi num ?trans ?chst dpi xorig yorig =
     if !headers <> [] then
       Dev.add_headers (find_prologues !headers);
     s in
-  if not !Options.dops then status.Dvi.hasps <- false;
+  status.Dvi.hasps <- Gs.get_do_ps ();
   let orid = function Some f -> f | None -> fun x->x in
   let st =
     { cdvi = cdvi;

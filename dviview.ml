@@ -335,7 +335,7 @@ let init filename =
   let last_modified =
     try (Unix.stat filename).Unix.st_mtime
     with _ -> 0.0 in
-  Options.dops := !Options.pson;
+  Gs.set_do_ps (!Global_options.pson);
   let npages =  Array.length dvi.Dvi.pages in
   let st =
     let npages = Array.length dvi.Dvi.pages in
@@ -813,7 +813,7 @@ let reload st =
     st.frozen <- true;
     st.aborted <- true;
     update_dvi_size false st;
-    Options.dops := !Options.pson;
+    Gs.set_do_ps !Global_options.pson;
     redraw ?trans:(Some Transitions.DirTop) st
   with x ->
     (* To be revisited (should assert Options.debug) *)
@@ -862,7 +862,8 @@ let pop_page b n st =
        (Printf.sprintf "%s\n => popping %s page %d "
           (page_stack_to_string st.page_number st.page_stack)
           (string_of_bool b)
-          n));
+          n);
+     true);
   let rec pop n return_page return_stack stack =
     match n, stack with
     | n, _ when n <= 0 ->
@@ -1288,7 +1289,7 @@ let main_loop filename =
     attr.geom.Ageometry.height <- y;
     update_dvi_size true st;
     set_bbox st;
-    if st.page_number > 0 && !Options.dops then
+    if st.page_number > 0 && Gs.get_do_ps () then
       Driver.scan_special_pages st.cdvi st.page_number
     else set_page_number st (page_start 0 st);
     redraw st;
