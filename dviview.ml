@@ -491,8 +491,12 @@ let redraw ?trans ?chst st =
 
 let without_pauses f x =
   let p = !pauses in
-  try pauses := false; let v = f x in pauses := p; v
-  with x -> pauses := p; raise x
+  try
+    pauses := false;
+    let v = f x in
+    pauses := p;
+    v
+  with x -> pauses := p; raise x;;
 
 let thumbnail_limit = ref 5;;
 let _ =
@@ -509,7 +513,7 @@ let xrefs st =
     end;
   st.dvi.Dvi.xrefs;;
 
-let make_thumbnails st  =
+let make_thumbnails st =
   let xnails =
     Hashtbl.fold
       (fun x p all -> if Misc.has_prefix "/page." x then p :: all else all)
@@ -520,14 +524,14 @@ let make_thumbnails st  =
     else
       let ucons x l =
         match l with
-          y :: _ when x = y -> l
+        | y :: _ when x = y -> l
         | _ -> x :: l in
       let rec unique = function
-          [] -> []
+        | [] -> []
         | x :: l -> ucons x (unique l) in 
       Array.of_list (unique (List.sort compare xnails)) in
   let num_nails = Array.length page_nails in
-  let r_fit = int_of_float (ceil (sqrt (float num_nails))) in
+  let r_fit = int_of_float (ceil (sqrt (float_of_int num_nails))) in
   let r = min r_fit !thumbnail_limit in
   let pages = num_nails -1 / r / r in
   let ist =
@@ -541,29 +545,31 @@ let make_thumbnails st  =
       base_dpi = st.base_dpi /. float r;
       dvi_height = st.dvi_height / r;
     } in
-  let size_x = Graphics.size_x() in
-  let size_y = Graphics.size_y() in
+  let size_x = Graphics.size_x () in
+  let size_y = Graphics.size_y () in
   let dx = size_x / r
   and dy = size_y / r in
   let all =
-    Array.map
-      (fun p -> 
-        (* let p' = p mod (r * r) in (* unused! *) *)
-        let chgvp s = {s with 
-		       Dvi.bkgd_prefs = {s.Dvi.bkgd_prefs with
-					 Grdev.bgviewport = Some (dx,dy,0,size_y -dy)}} in
-        without_pauses (redraw ?chst:(Some chgvp)) { ist with page_number = p};
-        p, Graphics.get_image 0 (size_y -dy) dx dy;
-      )
+    without_pauses (
+      Array.map
+        (fun p ->
+          (* let p' = p mod (r * r) in (* unused! *) *)
+          let chgvp s =
+            {s with
+             Dvi.bkgd_prefs =
+               {s.Dvi.bkgd_prefs with
+                Grdev.bgviewport = Some (dx,dy,0,size_y - dy)}} in
+          redraw ?chst:(Some chgvp) {ist with page_number = p};
+          p, Graphics.get_image 0 (size_y - dy) dx dy))
       page_nails in
   let rolls = (Array.length all + r * r - 1) / r / r in
-  let split = 
+  let split =
     Array.init rolls
       (fun roll ->
         let first = roll * r * r in
         Thumbnails
           (r, Array.sub all first (min (r * r) (Array.length all - first)))) in
-  st.toc <- Some split;
+  st.toc <- Some split
 ;;
 
 let make_toc st =
@@ -573,7 +579,8 @@ let make_toc st =
     let last = Hashtbl.find refs "/toc.last" in
     st.toc <- Some (Array.init (last - first + 1) (fun p -> Page (p+first)))
   with
-    Not_found -> ()
+  | Not_found -> ()
+;;
 
 let show_thumbnails st r page =
   let size_x = Graphics.size_x() in
@@ -581,15 +588,17 @@ let show_thumbnails st r page =
   let dx = size_x / r
   and dy = size_y / r in
   let pages = Array.length page / r / r in
-  Array.iteri (fun p' (p, img) -> 
-    let x = size_x * (p' mod r) / r in
-    let y = size_y * (p' / r) / r in
-    Graphics.draw_image img x (size_y - y -dy);
-    Grdev.H.area
-      (Grdev.H.Href ("#/page." ^ string_of_int (p+1))) x
-      (size_y - y - dy) dx dy) page;
+  Array.iteri
+    (fun p' (p, img) ->
+       let x = size_x * (p' mod r) / r in
+       let y = size_y * (p' / r) / r in
+       Graphics.draw_image img x (size_y - y -dy);
+       Grdev.H.area
+         (Grdev.H.Href ("#/page." ^ string_of_int (p + 1))) x
+         (size_y - y - dy) dx dy)
+    page;
   (* to force the page under thumbnails to be redrawn *)
-  st.aborted <- true;
+  st.aborted <- true
 ;;
 
 let show_toc st =
@@ -597,7 +606,7 @@ let show_toc st =
   Grdev.clear_dev();
   Driver.clear_symbols();
   match st.toc with
-    None -> ()
+  | None -> ()
   | Some rolls -> 
       let n = Array.length rolls in
       if st.num = n then redraw st
@@ -605,13 +614,12 @@ let show_toc st =
         let roll = st.num mod n in
         st.next_num <- succ st.num;
         begin match rolls.(roll) with
-          Page p -> redraw { st with page_number = p }
+        | Page p -> redraw { st with page_number = p }
         | Thumbnails (r, page) -> show_thumbnails st r page
         end;
         synchronize st;
-        st.aborted <- true;
-;;
-        
+        st.aborted <- true
+;;        
 
 let redisplay st =
   st.pause_number <- 0;
@@ -795,7 +803,6 @@ let mark_page st =
     else st.page_marks in
   st.page_marks <- st.page_number :: marks
 
-
 let goto_mark n st =
   try goto_page (List.nth st.page_marks n) st
   with Failure _ | Invalid_argument _ -> ()
@@ -807,7 +814,6 @@ let previous_slice st =
 let next_slice st = 
   print_string "#line 0, 0 <<Previous-Slice<<>><<>>>> "; 
   print_newline ()
-
 
 let goto_href link st = (* goto page of hyperref h *)
   let p =
@@ -1039,8 +1045,19 @@ module B =
     let mark_page  = mark_page
     let goto_mark st = goto_mark st.num st
 
-    let make_thumbnails = make_thumbnails
-    let show_toc = show_toc
+    let make_thumbnails st =
+       Launch.without_launching
+         (fun () ->
+            Busy.set Busy.Busy;
+            make_thumbnails st;
+            Busy.stop ();
+            if not st.aborted then show_toc st)
+         ()
+        
+    let show_toc st =
+       Busy.set Busy.Busy;
+       Launch.without_launching show_toc st;
+       Busy.stop ()
   end;;
 
 let bindings = Array.create 256 B.nop;;
@@ -1141,7 +1158,7 @@ let main_loop filename =
   (* Check if whiterun *)
   if Launch.whiterun () then
     begin
-      Driver.scan_special_pages st.cdvi (st.num_pages -1);
+      Driver.scan_special_pages st.cdvi (st.num_pages - 1);
       Launch.dump_whiterun_commands ()
     end
   else

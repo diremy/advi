@@ -153,28 +153,27 @@ let ask_to_launch command command_invocation =
     command_invocation
     "Do you want to execute it ? <yes>[no] ") ();;
 
-let can_launch command command_invocation =
-  match !policy with
-  | Exec -> true
-  | Safer -> false
-  | Ask ->
-     let cursor = GraphicsY11.get_cursor () in
-     GraphicsY11.set_cursor GraphicsY11.Cursor_question_arrow;
-     let res = ask_to_launch command command_invocation in
-     GraphicsY11.set_cursor cursor;
-     !Misc.forward_push_back_key_event '' GraphicsY11.control;
-     res;;
+let ask_before_launching command command_invocation =
+  let cursor = GraphicsY11.get_cursor () in
+  GraphicsY11.set_cursor GraphicsY11.Cursor_question_arrow;
+  let res = ask_to_launch command command_invocation in
+  GraphicsY11.set_cursor cursor;
+  !Misc.forward_push_back_key_event '' GraphicsY11.control;
+  res;;
 
 let can_execute_table = Hashtbl.create 11;;
 
 let can_execute command_invocation command_tokens =
-  let command = command_tokens.(0) in
-  try Hashtbl.find can_execute_table command
-  with
-  | Not_found ->
-      let b = can_launch command command_invocation in
-      Hashtbl.add can_execute_table command b;
-      b;;
+  match !policy with
+  | Exec -> true
+  | Safer -> false
+  | Ask ->
+     let command = command_tokens.(0) in
+     try Hashtbl.find can_execute_table command with
+     | Not_found ->
+         let b = ask_before_launching command command_invocation in
+         Hashtbl.add can_execute_table command b;
+         b;;
 
 let can_execute_command command_invocation =
   let command_tokens = parse_shell_command command_invocation in
@@ -203,6 +202,13 @@ let fork_process command_invocation =
   let command_tokens = parse_shell_command command_invocation in
   fork_proc command_invocation command_tokens;;
 
+(* Support for no launching at all during an arbitrary function call. *)
+let without_launching f x =
+  let p = !policy in
+  let restore () = set_policy p in
+  try set_policy Safer; let r = f x in restore (); r
+  with x -> restore (); raise x;;
+
 (* Support for white run via -n option *)
 
 let whiterun_commands = ref []
@@ -223,7 +229,7 @@ let dump_whiterun_commands () =
   let comms = unique !whiterun_commands in
   List.iter (fun c -> prerr_endline c) comms;;
 
-Options.add 
+Options.add
   "-n"
   (Arg.Unit (fun () -> whiterun_flag := true))
   "\tEchoes commands, but does not execute them.";;

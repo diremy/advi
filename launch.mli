@@ -33,6 +33,10 @@ val whiterun : unit -> bool
 val add_whiterun_command : string -> unit
 val dump_whiterun_commands : unit -> unit
 
+val without_launching : ('a -> 'b) -> 'a -> 'b;;
+(** [without_launching f x] evaluates [f x] without launching any
+    embedded application. *)
+
 val exit : int -> unit 
 (* Same as [Pervasives.exit], but does not execute the functions
    registered by [at_exit] when the exiting process is forked one. 

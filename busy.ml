@@ -72,7 +72,7 @@ let stop_busy () =
   | None -> ();;
 
 let non_busy cursor =
-  stop_busy (); 
+  stop_busy ();
   set_cursor cursor;;
 
 (* Set the cursor when we want to reflect the state as a cursor modification. *)

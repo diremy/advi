@@ -604,7 +604,7 @@ let scan_embed_special st s =
     try unquote (List.assoc "command" records)
     with Not_found ->
         raise (Failure ("embed: no command to embed in special " ^ s)) in
-  Launch.add_whiterun_command command ;;
+  Launch.add_whiterun_command command;;
 
 let parse_transition dir mode record =
   let default_dir =
