@@ -443,7 +443,7 @@ let move_within_margins_x st movex =
   if st.orig_x <> new_orig_x then Some new_orig_x
   else None;;
 
-let redraw ?trans st =
+let redraw ?trans ?chst st =
   (* draws until the current pause_number or page end *)
   (* the pauses and waits appears before are ignored *)
   Busy.set Busy.Busy;
@@ -455,7 +455,7 @@ let redraw ?trans st =
       Driver.clear_symbols ();
       if !bounding_box then draw_bounding_box st;
       let f =
-        Driver.render_step st.cdvi st.page_number ?trans
+        Driver.render_step st.cdvi st.page_number ?trans ?chst
           (st.base_dpi *. st.ratio) st.orig_x st.orig_y in
       if !pauses then begin
         let current_pause = ref 0 in
@@ -545,10 +545,13 @@ let make_thumbnails st  =
   and dy = size_y / r in
   let all =
     Array.map
-      (fun p ->
-        let p' = p mod (r * r) in
-        without_pauses redraw { ist with page_number = p};
-        p, Graphics.get_image 0 (size_y -dy) dx dy
+      (fun p -> 
+        (* let p' = p mod (r * r) in (* unused! *) *)
+        let chgvp s = {s with 
+		       Dvi.bkgd_prefs = {s.Dvi.bkgd_prefs with
+					 Grdev.bgviewport = Some (dx,dy,0,size_y -dy)}} in
+        without_pauses (redraw ?chst:(Some chgvp)) { ist with page_number = p};
+        p, Graphics.get_image 0 (size_y -dy) dx dy;
       )
       page_nails in
   let rolls = (Array.length all + r * r - 1) / r / r in
@@ -978,7 +981,7 @@ module B =
           end
       | None -> none ()
 
-    let redraw = redraw ?trans:(Some Transitions.DirNone)
+    let redraw = redraw ?trans:(Some Transitions.DirNone) ?chst:None
     let reload = reload
     let redisplay = redisplay
 

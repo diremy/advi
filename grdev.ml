@@ -178,7 +178,15 @@ type blend =
 let blend = ref Drawimage.Normal;;
 let set_blend b = blend := b;;
 
+(* Viewport type definition *)
+
+type viewport = int*int*int*int;; 
+
 (* Background implementation *)
+
+(* The Background preferences                    *)
+(* to be extended, should contain gradients etc. *)
+
 type bkgd_prefs = {
   mutable bgcolor : color;
   mutable bgimg : string option;
@@ -186,10 +194,11 @@ type bkgd_prefs = {
   mutable bgwhitetrans : bool;
   mutable bgalpha : Drawimage.alpha;
   mutable bgblend : Drawimage.blend;
+  mutable bgviewport: viewport option; 
+  (* hook for sophisticated programmed graphics backgrounds *)
+  mutable bgfunction: (viewport -> unit) option; 
 };;
 
-(* The Background preferences                    *)
-(* to be extended, should contain gradients etc. *)
 
 let set_default_color r s =
    r :=
@@ -221,7 +230,9 @@ let default_bkgd_data () =
     bgratio = Drawimage.ScaleAuto;
     bgwhitetrans = false;
     bgalpha = 1.0;
-    bgblend = Drawimage.Normal };;
+    bgblend = Drawimage.Normal;
+    bgviewport = None;
+    bgfunction = None};;
 
 let blit_bkgd_data s d =
   d.bgcolor <- s.bgcolor;
@@ -229,7 +240,9 @@ let blit_bkgd_data s d =
   d.bgratio <- s.bgratio;
   d.bgwhitetrans <- s.bgwhitetrans;
   d.bgalpha <- s.bgalpha;
-  d.bgblend <- s.bgblend;;
+  d.bgblend <- s.bgblend;
+  d.bgviewport <- s.bgviewport;
+  d.bgfunction <- s.bgfunction;;
 
 let bkgd_data = default_bkgd_data ();;
 
@@ -237,6 +250,9 @@ let copy_of_bkgd_data () =
   let c = default_bkgd_data () in
   blit_bkgd_data bkgd_data c;
   c;;
+
+let bg_color = ref bkgd_data.bgcolor;;
+let bg_colors = ref [];;
 
 let draw_img file ratio whitetrans alpha blend psbbox (w, h) x0 y0 =
   if not !opened then failwith "Grdev.draw_img: no window";
@@ -249,36 +265,54 @@ let draw_img file ratio whitetrans alpha blend psbbox (w, h) x0 y0 =
     blend
     psbbox ratio (w, h) (x, y);;
 
-let draw_bkgd_img (w, h) x0 y0 =
-  match bkgd_data.bgimg with
-  | None -> ()
-  | Some file ->
+let draw_bkgd () = 
+  (* find the viewport *)
+  let (w,h,xoff,yoff) as viewport =
+    match bkgd_data.bgviewport with
+      None -> (!size_x,!size_y,!xmin,!ymin)
+    | Some v -> v
+  in 	  
+  (* Background: color. *)
+  bg_color := bkgd_data.bgcolor;
+  Graphics.set_color !bg_color;
+  if !bg_color <> Graphics.white
+  then Graphics.fill_rect xoff yoff w h;
+  (* Background: image. *)
+  lift (fun file ->
      draw_img
       file
       bkgd_data.bgratio
       bkgd_data.bgwhitetrans
       bkgd_data.bgalpha
       bkgd_data.bgblend
-      None (w, h) x0 (!size_y - y0);;
+      None (w, h) xoff (!size_y - yoff)
+  ) bkgd_data.bgimg;
+  (* Background: function. *)
+  lift (fun draw -> draw  viewport) bkgd_data.bgfunction;
+  synchronize()
+;;
 
 type bgoption =
    | BgColor of color
    | BgImg of Misc.file_name
    | BgAlpha of Drawimage.alpha
    | BgBlend of Drawimage.blend
-   | BgRatio of Drawimage.ratiopts;;
+   | BgRatio of Drawimage.ratiopts
+   | BgViewport of viewport option
+   | BgFun of (viewport -> unit) option
+;;
 
 let set_bg_option = function
   | BgColor c -> bkgd_data.bgcolor <- c
   | BgImg file -> bkgd_data.bgimg <- Some file
   | BgAlpha a -> bkgd_data.bgalpha <- a
   | BgBlend b -> bkgd_data.bgblend <- b
-  | BgRatio f -> bkgd_data.bgratio <- f;;
+  | BgRatio f -> bkgd_data.bgratio <- f
+  | BgViewport v -> bkgd_data.bgviewport <- v
+  | BgFun f -> bkgd_data.bgfunction <- f
+;;
 
 let set_bg_options l = List.iter set_bg_option l;;
-
-let bg_color = ref bkgd_data.bgcolor;;
-let bg_colors = ref [];;
 
 let push_bg_color c =
   bg_colors := !bg_color :: !bg_colors;
@@ -318,7 +352,7 @@ let mean_color c c' =
 let get_bg_color x y w h =
   if !ignore_background then Graphics.white else begin
     sync dvi;
-    if !psused || bkgd_data.bgimg <> None then
+    if !psused || bkgd_data.bgimg <> None || bkgd_data.bgfunction <> None || bkgd_data.bgviewport <> None then
       let point_color x y =
         let x' = min (!size_x-1) x and y' = min (!size_y-1) y in
         GraphicsY11.point_color x' y' in
@@ -916,21 +950,16 @@ let clear_dev () =
   Misc.debug_stop "graphics cleared";
   H.clear ();
   E.clear ();
-  bg_color := bkgd_data.bgcolor;
   bg_colors := [];
   background_colors := [];
   Symbol.clear ();
+  (* update graphics size information *)
   size_x := Graphics.size_x ();
   size_y := Graphics.size_y ();
   xmin := 0; xmax := !size_x;
   ymin := 0; ymax := !size_y;
-  (* Here we add the background setting. *)
-  Graphics.set_color !bg_color;
-  if !bg_color <> Graphics.white
-  then Graphics.fill_rect !xmin !ymin !xmax !ymax;
-  (* Now try to handle background images. *)
-  draw_bkgd_img (!xmax, !ymax) 0 0;;
-
+  (* draw background *)
+  draw_bkgd ();;
 
 (*** Events ***)
 

@@ -854,7 +854,7 @@ let wait_special st s =
   if !visible then raise (Wait second);
   st.checkpoint <- 0;;
 
-(* Background object configuration. RDC *)
+(* Background object configuration. *)
 let inherit_background_info =
   Options.flag false
     "-inherit-background"
@@ -862,13 +862,12 @@ let inherit_background_info =
 
 let setup_bkgd status =
   (* propagate bkgd preferences to graphics device *)
+  (* storing the default/inherited prefs into Dev  *)
   Dev.blit_bkgd_data status.Dvi.bkgd_prefs Dev.bkgd_data;
-  (* store the default/inherited prefs into Dev *)
-  Dev.set_bg_options status.Dvi.bkgd_local_prefs;
   (* apply local modifications                  *)
-  Dev.blit_bkgd_data Dev.bkgd_data status.Dvi.bkgd_prefs
-  (* recover modified preferences               *);;
-
+  Dev.set_bg_options status.Dvi.bkgd_local_prefs;
+  (* recover modified preferences               *)
+  Dev.blit_bkgd_data Dev.bkgd_data status.Dvi.bkgd_prefs;;
 
 let ratios_alist = [
   ("auto", Drawimage.ScaleAuto);
@@ -882,6 +881,19 @@ let ratios_alist = [
   ("topright", Drawimage.ScaleTopRight);
   ("bottomleft", Drawimage.ScaleBottomLeft);
 ] ;;
+
+(* The find_bgfuns should eventually handle dynamically
+   loaded plugins *)
+
+let bgfuns_alist = [
+  ("hgradient", Addons.hgradient);
+  ("vgradient", Addons.vgradient);
+  ("dgradient", Addons.dgradient);
+] ;;
+
+let find_bgfun s =
+   try Some (List.assoc (unquote s) bgfuns_alist)
+   with _ -> None;;
 
 let bkgd_alist = [
   ("color", fun s -> fun st ->
@@ -905,6 +917,8 @@ let bkgd_alist = [
      let f =
        try List.assoc (unquote s) ratios_alist with _ -> Drawimage.ScaleAuto in
      [Dev.BgRatio f]);
+  ("fun", fun s -> fun st ->
+     [Dev.BgFun (find_bgfun (unquote s))]);
 ];;
 
 let filter_alist alist falist =
@@ -1288,7 +1302,7 @@ let find_prologues l =
 let render_page cdvi num dpi xorig yorig =
   failwith "Render_page is deprecated.";;
 
-let render_step cdvi num ?trans dpi xorig yorig =
+let render_step cdvi num ?trans ?chst dpi xorig yorig =
   proc_clean ();
   if num < 0 || num >= Array.length cdvi.base_dvi.Dvi.pages then
     invalid_arg "Driver.render_step";
@@ -1303,7 +1317,8 @@ let render_step cdvi num ?trans dpi xorig yorig =
       Dev.add_headers (find_prologues !headers);
     s in
   if not !Options.dops then status.Dvi.hasps <- false;
-  let st =
+  let orid = function Some f -> f | None -> fun x->x in
+  let st = 
     { cdvi = cdvi;
       sdpi = int_of_float (mag *. ldexp dpi 16);
       conv = mag *. dpi /. cdvi.dvi_res /. 65536.0;
@@ -1320,7 +1335,7 @@ let render_step cdvi num ?trans dpi xorig yorig =
       transition = Transitions.TransNone;
       transition_stack = [];
       tpic_pensize = 0.0; tpic_path = []; tpic_shading = 0.0;
-      status = status;
+      status = (orid chst) status;
       headers = [];
       html = None;
       draw_html = [];

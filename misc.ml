@@ -119,6 +119,10 @@ let string_replace pat templ str =
         Buffer.contents result in
   replace 0;;
 
+(* lift a function to an option type *)
+
+let lift f a = match a with None -> () | Some v -> f v;;
+
 (* Fatal error in advi's code. *)
 exception Fatal_error of string;;
 let fatal_error x = raise (Fatal_error x);;

@@ -35,6 +35,10 @@ val int_or_float_of_string : string -> int;;
 val is_digit : char -> bool;;
 val string_replace : string -> string -> string -> string;;
 
+(* Lifting *)
+
+val lift : ('a -> unit) -> 'a option -> unit
+
 (* Handlers and raisers. *)
 val fatal_error : string -> 'a;;
 val handle_fatal_error : (unit -> unit) -> unit -> unit;;

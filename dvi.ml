@@ -70,7 +70,7 @@ type command =
   | C_post_post of int ;;
 
 
-(* Status for PS specials *)
+(* Status for PS specials and background *)
 type known_status = {
    mutable hasps: bool;
    mutable bkgd_local_prefs: Grdev.bgoption list;

@@ -66,8 +66,17 @@ Press: \keymenu{n}ext page \keymenu{p}revious page
 
 \subsection* {Modifying the page backround}
 
-You can modify the background of your presentations, and
-this file is a simple showcase for the current background effects.
+You can modify the background of your presentations:
+  \begin{itemize}
+    \item define the background color
+    \item add a background image (which can be alpha-blended on top of the background color)
+    \item define a function to be run on the background (this is limited to a few color gradients, but it can
+          be expanded to more sophisticated effects)
+  \end{itemize}
+If these options are used \emph{together}, they are currently applied in the abovementioned order
+(i.e.\ color, then image, then function).\\
+
+This file is a simple showcase for the current background effects.
 
 \tableofcontents
 \newpage
@@ -85,6 +94,45 @@ in the LaTeX source of the page the following command:
 \advibg{color=yellow} 
 
 \newpage
+
+\section{Setting the background color: gradients}
+
+By choosing one of the \verb|hgradient|, \verb|vgradient| or \verb|dgradient| predefined functions,
+we can convert the background color into a color gradient from the chosen color to white.
+
+For example, here is the effect produced by insering in the LaTeX source of the page the following command:
+
+\begin{quote}
+  \begin{verbatim}
+      \advibg{color=yellow,fun="hgradient"} 
+   \end{verbatim}
+\end{quote}
+\advibg{color=yellow,fun="hgradient"} 
+
+\newpage
+
+Here is the effect produced by the following command:
+
+\begin{quote}
+  \begin{verbatim}
+      \advibg{color=blue,fun="vgradient"} 
+   \end{verbatim}
+\end{quote}
+\advibg{color=blue,fun="vgradient"} 
+
+\newpage
+
+Here is the effect produced by the following command:
+
+\begin{quote}
+  \begin{verbatim}
+      \advibg{color=blue,fun="vgradient"} 
+   \end{verbatim}
+\end{quote}
+\advibg{color=green,fun="dgradient"} 
+
+\newpage
+
 
 \section{Setting the background image}
 
@@ -427,7 +475,7 @@ headers, that also appear asynchronously.
 ``synchronous'' variant? This would allow for example to change the
 background color after a pause. But at what price ?
 
-    \item anybody willing to add support for color gradients?
+    \item anybody willing to add support for color gradients?\\Done.
   \end{itemize}
 
 \lastpage

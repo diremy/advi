@@ -124,6 +124,12 @@ val draw_img :
 
 (* Background information *)
 
+(* Viewport:                *)
+(* xsize,ysize,xoff,yoff    *)
+(* in advi coordinates      *)
+
+type viewport = (int*int*int*int);;
+
 type bkgd_prefs = {
   mutable bgcolor : int;
   mutable bgimg : string option;
@@ -131,6 +137,8 @@ type bkgd_prefs = {
   mutable bgwhitetrans : bool;
   mutable bgalpha : float;
   mutable bgblend : Drawimage.blend;
+  mutable bgviewport : viewport option;
+  mutable bgfunction : (viewport -> unit) option;
 };;
 
 val blit_bkgd_data : bkgd_prefs -> bkgd_prefs -> unit;;
@@ -145,6 +153,8 @@ type bgoption =
    | BgAlpha of Drawimage.alpha
    | BgBlend of Drawimage.blend
    | BgRatio of Drawimage.ratiopts
+   | BgViewport of viewport option
+   | BgFun of (viewport -> unit) option
 ;;
 
 val set_bg_options : bgoption list -> unit;;
