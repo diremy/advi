@@ -262,9 +262,11 @@ positions'' option of your WM may help.)
    \adviembed[width=2cm,height=2cm]{xeyes -bw 0 -shape -geometry !g}
 
  \item An Xterm running an interesting application:\\
-   \verb|\adviembed[width=10cm,height=5cm]|\\
+   \verb|\adviembed[width=10cm,height=4cm]|\\
    \verb|    {xterm -geometry 50x7+!x+!y -e ocaml}|\\
-   \adviembed[width=10cm,height=4cm]{xterm -geometry 50x7+!x+!y -e ocaml}
+% Ne marche pas car la géometrie de xterm est en caractères non en points
+%   \adviembed[width=10cm,height=4cm]{xterm -geometry !g -e ocaml}
+   \adviembed[width=0.1\textwidth,height=0.02\textheight]{xterm -geometry !g -e ocaml}
 \end{itemize}
 
 \newpage
