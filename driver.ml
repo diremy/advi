@@ -396,6 +396,7 @@ let alpha_special st s =
 
 let parse_blend s =
   match String.lowercase s with
+  | "none" -> Dev.Normal
   | "normal" -> Dev.Normal
   | "multiply" -> Dev.Multiply
   | "screen" -> Dev.Screen

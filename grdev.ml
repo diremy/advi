@@ -229,7 +229,7 @@ let set_blend b = blend := b;;
 
 (* look at gxblend.c of ghostscript *)
 let blend_func = function
-  | Normal -> fun dst src -> src
+  | Normal -> raise Exit (* this case is optimized *)
   | Multiply ->
       fun dst src ->
         let t = dst * src + 0x80 in
@@ -289,7 +289,7 @@ let blend_func = function
 type bkgd_prefs = {
   mutable bgcolor : int;
   mutable bgimg : string option;
-  mutable bgratio : Draw_image.ratiopts;
+  mutable bgratio : Drawimage.ratiopts;
   mutable bgwhitetrans : bool;
   mutable bgalpha : float;
   mutable bgblend : blend;
@@ -325,7 +325,7 @@ Misc.set_option
 let default_bkgd_data () =
   { bgcolor = !default_bgcolor;
     bgimg = None;
-    bgratio = Draw_image.ScaleY;
+    bgratio = Drawimage.ScaleY;
     bgwhitetrans = false;
     bgalpha = 1.0;
     bgblend = Normal };;
@@ -350,12 +350,12 @@ let draw_bkgd_img (w, h) x0 y0 =
   | None -> ()
   | Some file ->
      set_busy Busy;
-     Draw_image.f
+     Drawimage.f
       file
       bkgd_data.bgwhitetrans
       bkgd_data.bgalpha
-      (Some (blend_func bkgd_data.bgblend))
-      bkgd_data.bgratio (w, h) x0 y0;;
+      (try Some (blend_func bkgd_data.bgblend) with _ -> None)
+      None bkgd_data.bgratio (w, h) (x0,y0);;
 
 type bgoption =
    | BgColor of color
@@ -572,15 +572,15 @@ let draw_ps file bbox (w, h) x0 y0 =
   let x = x0
   and y = !size_y - y0 + h in
   set_busy Busy;
-  try Drawps.f file !epstransparent !alpha
-      (if !blend = Normal then None else Some (blend_func !blend))
-      bbox (w, h) x y
+  try Drawimage.f file !epstransparent !alpha
+      (try Some (blend_func !blend) with _ -> None)
+      (Some bbox) Drawimage.FreeScale (w, h) (x, y - h)
   with
   | Not_found -> Misc.warning ("ps file " ^ file ^ " not found")
   | _ ->
       Misc.warning ("error happened while drawing ps file " ^ file);;
 
-let clean_ps_cache () = Drawps.clean_cache ();;
+let clean_ps_cache () = Drawimage.clean_cache ();;
 
 (* Embedded (tcl/tk) applications *)
 

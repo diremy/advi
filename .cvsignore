@@ -1,7 +1,7 @@
 ttfont.ml
 advi
 advi.opt
-drawps.ml
+drawimage.ml
 config.log
 config.cache
 config.status

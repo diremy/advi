@@ -32,7 +32,7 @@ MLINCDIRS = $(CAMLIMAGESDIR)
 EXEC	  = advi
 
 MODULES	  = config graphicsY11 misc userfile input symbol search \
-	    drawps draw_image dvicolor \
+	    drawimage dvicolor \
 	    table pkfont ttfont jfm font glyph devfont \
 	    units dimension \
 	    gs transimpl grdev dvi driver dviview main
@@ -84,8 +84,8 @@ config.ml: config.ml.in
 dvicolor.ml: Makefile.config dvicolor.mlp ifdef.cmo
 	camlp4o pa_ifdef.cmo ./ifdef.cmo -impl dvicolor.mlp > $@
 
-drawps.ml: Makefile.config drawps.mlp ifdef.cmo
-	camlp4o pa_ifdef.cmo ./ifdef.cmo -impl drawps.mlp > $@
+drawimage.ml: Makefile.config drawimage.mlp ifdef.cmo
+	camlp4o pa_ifdef.cmo ./ifdef.cmo -impl drawimage.mlp > $@
 
 ttfont.ml: Makefile.config ttfont.mlp ifdef.cmo
 	camlp4o pa_ifdef.cmo ./ifdef.cmo -impl ttfont.mlp > $@

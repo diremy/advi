@@ -106,7 +106,7 @@ val sleep : float -> unit;;
 type bkgd_prefs = {
   mutable bgcolor : int;
   mutable bgimg : string option;
-  mutable bgratio : Draw_image.ratiopts;
+  mutable bgratio : Drawimage.ratiopts;
   mutable bgwhitetrans : bool;
   mutable bgalpha : float;
   mutable bgblend : blend;

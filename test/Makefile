@@ -11,7 +11,7 @@ MLPROG=taquin
 all: demo.dvi trigo_source.dvi ./trans.dvi trans2.dvi background.dvi \
      $(MLPROG) 
 
-.tex.dvi:
+.tex.dvi: ../tex/bar.jpg.eps
 	$(LATEX) $<
 
 # but: start_embed.ml
