@@ -402,7 +402,7 @@ let region_to_ascii r =
   let pos = min r.first r.last in
   let length = 1 + abs (r.first - r.last) in
   to_ascii (Array.to_list (Array.sub r.history pos length))
-
+    
 let distance x y s =
   let dist z h dh =
     if z < h then h - z else if h + dh < z then z - h - dh else 0 in
@@ -454,18 +454,20 @@ let position x y =
     let time = closest history x y in
     { history = history; first = time; last = time;  }
   else raise Not_found
-
+      
+let valid position i = i >= 0 && i < Array.length position.history;;
 let around b x y =
   try 
     let position = position x y in
     let space_ref = position.history.(position.first) in
+    let valid = valid position in
     let rec skip_spaces move i =
-      try
+      if valid i then
         let h = position.history.(i) in
         if space h then skip_spaces move (move i) else i
-      with Invalid_argument _ -> i in
+      else i in
     let rec word move p w i =
-      try 
+      if valid i then
         let h = position.history.(i) in
         let next = move i in
         let pre = if p < 0 then dummy_symbol else position.history.(p) in
@@ -483,9 +485,9 @@ let around b x y =
               let c = symbol_name pre h in
               let add x y = if move 0 > 0 then x ^ y else y ^ x in
               word move i (add (true_symbol_name h) w) next
-      with Invalid_argument _ -> -1,  w in
+      else -1,  w in
     let rec prefix move i =
-      try
+      if valid i then
         let h = position.history.(i) in
         let pre = position.history.(0 - (move (0 - i))) in
         if space h then
@@ -493,13 +495,14 @@ let around b x y =
           if c = " " then word move i c (skip_spaces move (move i))
           else prefix move (move i)
         else word move i "" i
-      with Invalid_argument _ -> -1, "" in
+      else -1, "" in
     let point = position.first in 
     let iw1 = prefix succ (succ point) in
     let iw2 = prefix pred (point) in
     Some (position, iw1, iw2)
-  with Not_found ->
-    None 
+  with
+  | Not_found -> None
+  | Invalid_argument _ -> assert false
       ;;
 
 let lines x y =
@@ -507,12 +510,12 @@ let lines x y =
   | None -> None
   | Some (region, (i1, w1), (i2, w2)) ->
       let rec find_line move i =
-        try
+        if valid region i then
           let h = region.history.(i) in
           match h.symbol with
           | Line(n,_) when n >= 0 -> n
           | _ ->  find_line move (move i)
-        with Invalid_argument _ -> -1 in
+        else -1 in
       let space_ref = region.history.(region.first) in
       let l1 = find_line succ (succ i1) in
       let l2 = find_line pred (pred i2) in
