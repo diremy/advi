@@ -677,6 +677,9 @@ let draw_glyph g x0 y0 =
     Graphics.draw_image img x y;
   end;;
 
+let old_fill_rect x y dx dy =
+  Graphics.fill_rect x y (dx-1) (dy-1)
+
 let fill_rect x0 y0 w h =
   if not !opened then failwith "Grdev.fill_rect: no window";
   let x = x0
@@ -692,7 +695,7 @@ let fill_rect x0 y0 w h =
   and h = y' - y in
   if w > 0 && h > 0 then begin
     sync dvi;
-    Graphics.fill_rect x y w h;
+    old_fill_rect x y w h;
     add_background_color x y w h (get_color ());
   end;;
 (* TODO: implement clipping in the following primitives ? *)
@@ -895,13 +898,12 @@ module H =
 
     (* Draws a rectangle with border width bw if possible. *)
     let frame_rect bw x y w h =
-      let bw = bw - 1 in
       if bw > 0 && w > bw && h > bw then
         let draw_rect_with_line_width bw x y w h =
-          Graphics.fill_rect x y bw h;
-          Graphics.fill_rect x y w bw;
-          Graphics.fill_rect (x + w - bw) y bw h;
-          Graphics.fill_rect x (y + h - bw) w bw in
+          old_fill_rect x y bw h;
+          old_fill_rect x y w bw;
+          old_fill_rect (x + w - bw) y bw h;
+          old_fill_rect x (y + h - bw) w bw in
         draw_rect_with_line_width bw x y w h else
       Graphics.draw_rect x y w h
 
@@ -1015,8 +1017,8 @@ module H =
       Graphics.set_color c;
       GraphicsY11.display_mode true;
       begin match fill with
-      | Fill -> Graphics.fill_rect act.A.x act.A.y act.A.w act.A.h
-      | Draw -> Graphics.draw_rect (act.A.x + 1) (act.A.y + 1)
+      | Fill -> old_fill_rect act.A.x act.A.y act.A.w act.A.h
+      | Draw -> old_draw_rect (act.A.x + 1) (act.A.y + 1)
                   (act.A.w - 2) (act.A.h - 2)
       end;
       Graphics.set_color (get_color ());
