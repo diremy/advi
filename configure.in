@@ -223,7 +223,12 @@ test "x$myprefix" = xNONE && myprefix=$ac_default_prefix
 test "x$myexec_prefix" = xNONE && myexec_prefix=${myprefix}
 mylibdir=$libdir
 test "x$libdir" = 'x${exec_prefix}/lib' && mylibdir="$myexec_prefix/lib"
-ADVI_LOC=$mylibdir/advi
+
+if test -d $TEXMFMAIN/tex/latex; then
+  ADVI_LOC=$TEXMFMAIN/tex/latex/advi
+else 
+  ADVI_LOC=$mylibdir/advi
+fi
 
 AC_SUBST(ADVI_LOC)
 AC_SUBST(WITH_X)

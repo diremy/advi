@@ -122,10 +122,17 @@ veryveryclean: veryclean
 installopt: install
 install:: $(INSTALLTARGET) doc/splash.dvi
 	cp $(INSTALLTARGET) ${bindir}/advi
-	- mkdir -p $(ADVI_LOC)
+	if test ! -d $(ADVI_LOC); then mkdir -p $(ADVI_LOC); fi
 	cp doc/splash.dvi tex/advilogo.eps tex/caml.eps tex/bar.jpg.eps \
 		tex/*.sty tex/advi.pro $(ADVI_LOC)
 	if [ -f conf/jpfonts.conf ]; then cp conf/jpfonts.conf $(ADVI_LOC); fi
+	texhash
+	@ if test "x`kpsewhich advi.sty`" = "x"; then \
+	  echo '*** NOTE BEFORE USE ***' ;\
+	  echo Please add $(ADVI_LOC); \
+	  echo to your TEXINPUTS environment variable\!; \
+	  echo '***********************' ;\
+	fi
 
 MLFILES = $(addsuffix .ml, $(MODULES))
 

@@ -830,7 +830,7 @@ fi
 if test -f $CAMLIMAGESDIR/ci_ps.cma || $HAVE_CDK; then
 	echo "$ac_t""found" 1>&6
 	CAMLIMAGES_VERSION=`grep VERSION $CAMLIMAGESDIR/Makefile.config | sed -e 's/VERSION=//'`
-	if test `expr $CAMLIMAGES_VERSION \>= 2.10` = "1"; then
+	if test `expr $CAMLIMAGES_VERSION \>= 2.11` = "1"; then
 		HAVE_CAMLIMAGES="true"
 	        if $HAVE_CDK; then
 		        CAMLIMAGESLIBS="camlimages"
@@ -1912,7 +1912,12 @@ test "x$myprefix" = xNONE && myprefix=$ac_default_prefix
 test "x$myexec_prefix" = xNONE && myexec_prefix=${myprefix}
 mylibdir=$libdir
 test "x$libdir" = 'x${exec_prefix}/lib' && mylibdir="$myexec_prefix/lib"
-ADVI_LOC=$mylibdir/advi
+
+if test -d $TEXMFMAIN/tex/latex; then
+  ADVI_LOC=$TEXMFMAIN/tex/latex/advi
+else 
+  ADVI_LOC=$mylibdir/advi
+fi
 
 
 
