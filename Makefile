@@ -38,7 +38,8 @@ MLINCDIRS = $(CAMLIMAGESDIR)
 
 EXEC	  = advi
 
-MODULES	  = config misc graphicsY11 timeout options busy rc \
+MODULES	  = config misc graphicsY11 timeout \
+            options global_options busy rc \
             gterm launch \
             userfile input symbol search \
             shot drawimage dvicolor \
