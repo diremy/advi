@@ -1376,10 +1376,24 @@ let push_events_special st s =
   match split_string_quoted s 0 with
   | ["advi:"; "pushevents"; keys] ->
      let push_events keys =
-       for i = String.length keys - 1 downto 0
-       do Misc.push_char_event keys.[i] done in
+       let push pc =
+         if pc >= 0
+         then Misc.push_key_event (char_of_int pc) GraphicsY11.nomod in
+       let push_control pc =
+         if pc >= 0
+         then Misc.push_key_event (char_of_int pc) GraphicsY11.control in
+       let rec loop pc i =
+         if i >= 0 then
+           let k = keys.[i] in
+           match k with
+           | '^' when pc >= 0 -> push_control pc; loop (-1) (i - 1)
+           | '^' -> loop (int_of_char k) (i - 1)
+           | k when pc >= 0 -> push pc; loop (int_of_char k) (i - 1)
+           | k -> loop (int_of_char k) (i - 1)
+         else push pc in
+       loop (-1) (String.length keys - 1) in
      (* We scan the string as a Caml token to handle properly \ddd
-        chars. In case of error (i.e. when keys is not properly
+        chars if any. In case of error (i.e. when keys is not properly
         enclosed between double quotes), we simply push back the
         characters verbatim. *)
      Misc.debug_endline (Printf.sprintf "advi_push_events %S" keys);
@@ -1387,8 +1401,6 @@ let push_events_special st s =
        (Scanf.Scanning.from_string keys)
        (fun _ _ ->
           let keys = unquote keys in
-          Misc.debug_endline
-            (Printf.sprintf "advi_push_events non regular keys %S" keys);
           push_events keys)
        "%S" push_events
   | _ ->

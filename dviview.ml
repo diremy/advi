@@ -211,7 +211,8 @@ and state = {
     mutable exchange_page : int;
     mutable last_modified : float;
     mutable button : (int * int) option;
-    mutable fullscreen : (int * int * int * int * (int * int)) option;
+    mutable full_screen : (int * int * int * int * (int * int)) option;
+    mutable in_full_screen : bool;
 
     mutable pause_number : int;
     mutable last_pause_number : int;
@@ -392,7 +393,8 @@ let init master filename =
       page_number = starting_page npages;
       last_modified = last_modified;
       button = None;
-      fullscreen = None;
+      full_screen = None;
+      in_full_screen = false;
 
       pause_number = 0;
       last_pause_number = 0;
@@ -1257,25 +1259,34 @@ module B =
     let reload = reload true
     let redisplay = redisplay
 
-    let fullscreen st =
-      let b = (st.fullscreen = None) in
+    let toggle_full_screen st =
+      let b = (st.full_screen = None) in
       let (size_x, size_y), (dx, dy) =
-        match st.fullscreen with
+        match st.full_screen with
         | None ->
             let x = GraphicsY11.origin_x () in
             let y = GraphicsY11.origin_y () in
-            st.fullscreen <-
+            st.full_screen <-
               Some (x, y, st.size_x, st.size_y, (st.orig_x, st.orig_y));
-            (* negative width and height mean fullscreen,
+            (* negative width and height mean full_screen,
                last parameter is screen number *)
+            st.in_full_screen <- true;
             Grdev.reposition ~x:0 ~y:0 ~w:(-1) ~h:(-1) ~screen:st.num,
-            (0, 0);
+            (0, 0)
         | Some (x, y, w, h, dxy) ->
-            st.fullscreen <- None;
+            st.full_screen <- None;
+            st.in_full_screen <- false;
             Grdev.reposition ~x ~y ~w ~h ~screen:0,
             dxy in
       resize st ~dx ~dy size_x size_y;
       if b then center st
+
+    let full_screen st =
+      set_keymap Default_keymap;
+      if not st.in_full_screen then begin
+        toggle_full_screen st;
+        st.in_full_screen <- true;
+      end
 
     let exit st = raise Exit
     let switch_edit_mode st =
@@ -1437,7 +1448,7 @@ let bind_default_keys () =
    '', B.redisplay;
 
    (* Control-f, c, to handle the advi window. *)
-   '', B.fullscreen;
+   '', B.toggle_full_screen;
    'c', B.center;
 
    (* Searching: Control-s search forward, Control-r search backward. *)
@@ -1488,9 +1499,10 @@ let bind_control_x_key = bind_key control_x_keymap;;
 let bind_control_x_keys () =
   List.iter bind_control_x_key [
     'l', B.laser_beam;
-    '', B.save_page_image;
-    '', B.abort_key;
     '', B.exit;
+    '', B.full_screen;
+    '', B.abort_key;
+    '', B.save_page_image;
   ];;
 
 let bind_keys () =
@@ -1533,10 +1545,11 @@ let main_loop mastername clients =
       if changed st then reload false st;
       idraw st;
       (* num is the current number entered by keyboard *)
-      (*
-      Printf.eprintf "%s\n%!"
-        (match st.duplex with  Client _ -> "Client" | Master _ -> "Master "
-      | Alone -> "Alone"); *)
+      (* Printf.eprintf "%s\n%!"
+        (match st.duplex with
+         | Client _ -> "Client"
+         | Master _ -> "Master "
+         | Alone -> "Alone"); *)
       try while true do
         st.num <- st.next_num;
         st.next_num <- 0;

@@ -38,7 +38,7 @@ all: manual.dvi manual.ps manual.pdf manual.html \
     advi_remote.dvi advi_remote.html
 
 clean::
-	$(RM) $*.dvi *~ *.aux *.log manual.html *.dvi *.pdf *.pdfm *.ps \
+	$(RM) *.dvi *.advi *~ *.aux *.log manual.html *.dvi *.pdf *.pdfm *.ps \
 		*.ima *.out *.toc *.haux *.htoc
 	$(MAKE) -f MakeHTML clean
 
@@ -71,14 +71,24 @@ endif
 	$(LATEX) '\def\driver{hypertex}\input' $<
 
 .tex.ps:
+	if [ -e $*.dvi ]; then \
+	  $(MV) $*.dvi $*.advi; \
+        fi
 	$(LATEX) '\def\driver{dvips}\input' $<
 	$(DVIPS) -o $@ $*.dvi
-	$(RM) $*.dvi
+	if [ -e $*.advi ]; then \
+	  $(MV) $*.advi $*.dvi; \
+        fi
 
 .tex.pdf:
+	if [ -e $*.dvi ]; then \
+	  $(MV) $*.dvi $*.advi; \
+        fi
 	$(LATEX) '\def\driver{dvipdfm}\input' $<
 	- $(DVIPDFM) -o $@ $*.dvi
-	$(RM) $*.dvi
+	if [ -e $*.advi ]; then \
+	  $(MV) $*.advi $*.dvi; \
+        fi
 
 .advi.dvi:
 	cp -p $< $*.dvi

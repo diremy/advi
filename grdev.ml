@@ -1288,11 +1288,11 @@ let push_key_event c m =
     key = c;
     modifiers = m;
   } in
-  Misc.debug_endline (Printf.sprintf "Pushing the key %c" c);
+  Misc.debug_endline (Printf.sprintf "Pushing the key %C" c);
   push_event status;;
 
 let push_char_event c =
-  Misc.debug_endline (Printf.sprintf "Pushing the key %c" c);
+  Misc.debug_endline (Printf.sprintf "Pushing the key %C" c);
   match c with
   | '' .. '' as c -> push_key_event c GraphicsY11.control
   | c -> push_key_event c GraphicsY11.nomod;;
@@ -1583,6 +1583,15 @@ let wait_button_up m x y =
     then wait_select_button_up m x y
     else wait_position ();;
 
+(* Should map events of keypresses using control to control characters. *)
+let find_key ev =
+  let c = ev.GraphicsY11.key in
+  let k =
+    if ev.GraphicsY11.modifiers != GraphicsY11.control then c else
+    let cc = 1 + int_of_char c - int_of_char 'A' in
+    if cc >= 1 then char_of_int cc else c in
+  Key k;;
+
 let wait_event () =
   (* We reached a pause. Now we can reset the sleep break *)
   clear_sleep ();
@@ -1592,7 +1601,7 @@ let wait_event () =
     match wait_signal_event all_events with
     | Final e -> send e
     | Raw ev ->
-        if ev.GraphicsY11.keypressed then send (Key ev.GraphicsY11.key) else
+        if ev.GraphicsY11.keypressed then send (find_key ev) else
         try match H.find ev.mouse_x ev.mouse_y with
         | {A.action = {H.tag = H.Href h; H.draw = d}} as act ->
             if ev.button then

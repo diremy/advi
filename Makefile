@@ -100,7 +100,7 @@ X11_INCLUDES=-I/usr/X11R6/include
 BYTECCCOMPOPTS=-fno-defer-pop -Wall -Wno-unused
 CFLAGS= $(EXTRA_X11) $(X11_INCLUDES) -O $(BYTECCCOMPOPTS)
 
-default: $(INSTALLTARGET) $(HELPFILES)
+default: Makefile.config $(INSTALLTARGET) $(HELPFILES)
 
 all: $(INSTALLTARGET) documentation
 allopt: opt documentation
@@ -189,6 +189,9 @@ install:: $(INSTALLTARGET) $(HELPFILES)
 	fi
 
 MLFILES = $(addsuffix .ml, $(MODULES))
+
+Makefile.config: Makefile.config.in
+	./configure_FreeBSD
 
 .depend:: Makefile
 	$(OCAMLDEP) *.mli $(MLFILES) > .depend
