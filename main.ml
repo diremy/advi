@@ -57,9 +57,10 @@ let usage_msg =
   Printf.sprintf "usage: %s [OPTIONS] DVIFILE" Sys.argv.(0);;
 
 let set_dvi_filename s =
-  match !dvi_filename with
+  dvi_filename := Some s
+  (*match !dvi_filename with
   | None -> dvi_filename := Some s
-  | Some _ -> ();;
+  | Some _ -> ()*);;
 
 let init_arguments () =
  let options = advi_options () in

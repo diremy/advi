@@ -40,10 +40,9 @@ let usage = Arg.usage;;
 type spec = Arg.spec;;
 
 let parse_argv argv speclist anonfun errmsg =
-  let initpos = !current in
+  let l = Array.length argv in
+  let progname = if !current < l then argv.(!current) else "(?)" in
   let stop error =
-    let progname =
-      if initpos < Array.length argv then argv.(initpos) else "(?)" in
     begin match error with
       | Unknown "-help" -> ()
       | Unknown "--help" -> ()
@@ -62,7 +61,6 @@ let parse_argv argv speclist anonfun errmsg =
     then exit 0
     else exit 2
   in
-  let l = Array.length argv in
   incr current;
   while !current < l do
     let s = argv.(!current) in
@@ -77,24 +75,24 @@ let parse_argv argv speclist anonfun errmsg =
         | Set r -> r := true;
         | Clear r -> r := false;
         | String f when !current + 1 < l ->
-            let arg = argv.(!current+1) in
+            let arg = argv.(!current + 1) in
             f arg;
             incr current;
         | Int f when !current + 1 < l ->
-            let arg = argv.(!current+1) in
+            let arg = argv.(!current + 1) in
             begin try f (int_of_string arg)
             with Failure "int_of_string" -> stop (Wrong (s, arg, "an integer"))
             end;
             incr current;
         | Float f when !current + 1 < l ->
-            let arg = argv.(!current+1) in
+            let arg = argv.(!current + 1) in
             begin try f (float_of_string arg);
             with Failure "float_of_string" -> stop (Wrong (s, arg, "a float"))
             end;
             incr current;
         | Rest f ->
-            while !current < l-1 do
-              f argv.(!current+1);
+            while !current < l - 1 do
+              f argv.(!current + 1);
               incr current;
             done;
         | _ -> stop (Missing s)
@@ -182,9 +180,15 @@ let argv_of_string s = Array.of_list (lex s);;
 
 let argv_of_file fname = argv_of_string (string_of_file fname);;
 
-let parse_string s = parse_argv (argv_of_string s);;
+let parse_string s =
+ current := 0;
+ parse_argv (argv_of_string s);;
 
-let parse_file fname = parse_argv (argv_of_file fname);;
+let parse_file fname =
+ current := 0;
+ parse_argv (argv_of_file fname);;
+
+let parse_args x = current := 0; Arg.parse x;;
 
 (*
 Example:

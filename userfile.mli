@@ -42,7 +42,7 @@ val prepare_file : string -> unit;;
 (* [prepare_file file] prepares the directory for [file]: if
    necessary, sub-directories are created as required to create [file]. *)
 
-val save_page_no : int -> unit;;
- (* [save_page_no no] saves the page number [no] to file
-    [cache_dir ^ "/advi_page_no". *)
+val save_page_number : int -> unit;;
+ (* [save_page_number n] saves the page number [n] to file
+    [cache_dir ^ "/advi_page_number". *)
 

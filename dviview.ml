@@ -152,14 +152,14 @@ type state = {
     mutable orig_x : int;
     mutable orig_y : int;
     mutable ratio : float;
-    mutable page_no : int;
+    mutable page_number : int;
     mutable page_stack : int list;
     mutable exchange_page : int;
     mutable last_modified : float;
     mutable button : (int * int) option;
     mutable fullscreen : (int * int * int * int) option;
 
-    mutable pause_no : int;
+    mutable pause_number : int;
       (* Attributes for Embedded postscript *)
 
       (* true when page was not completed: may need to redraw *)
@@ -176,9 +176,9 @@ type state = {
     mutable cont : (unit -> bool) option;
   };;
 
-let set_page_no st n =
- Userfile.save_page_no n;
- st.page_no <- n;;
+let set_page_number st n =
+ Userfile.save_page_number n;
+ st.page_number <- n;;
 
 (*** Setting the geometry ***)
 let parse_geometry str =
@@ -306,12 +306,12 @@ let init filename =
       ratio = 1.0;
       page_stack = [];
       exchange_page = 0;
-      page_no = if !start_page > 0 then min !start_page pages - 1 else 0;
+      page_number = if !start_page > 0 then min !start_page pages - 1 else 0;
       last_modified = last_modified;
       button = None;
       fullscreen = None;
 
-      pause_no = 0;
+      pause_number = 0;
       frozen = true;
       aborted = false;
       cont = None;
@@ -385,9 +385,9 @@ let rec goto_next_pause n st =
           let () =
             try
               while f () do () done;
-              st.pause_no <- st.pause_no + 1;
+              st.pause_number <- st.pause_number + 1;
             with Driver.Pause ->
-              st.pause_no <- st.pause_no + 1;
+              st.pause_number <- st.pause_number + 1;
               st.cont <- Some f in
           goto_next_pause (pred n) st
         with Grdev.Stop -> st.aborted <- true;
@@ -481,7 +481,7 @@ let move_within_margins_x st movex =
   else None;;
 
 let redraw ?trans st =
-  (* draws until the current pause_no or page end *)
+  (* draws until the current pause_number or page end *)
   Grdev.set_busy Grdev.Busy;
   st.cont <- None;
   st.aborted <- false;
@@ -492,21 +492,22 @@ let redraw ?trans st =
      if !bounding_box then draw_bounding_box st;
      if !pauses then
        let f =
-         Driver.render_step st.cdvi st.page_no ?trans
+         Driver.render_step st.cdvi st.page_number ?trans
            (st.base_dpi *. st.ratio) st.orig_x st.orig_y in
        let current_pause = ref 0 in
        try
          while
            try f () with
              | Driver.Pause ->
-                 if !current_pause = st.pause_no then raise Driver.Pause
+                 if !current_pause = st.pause_number then raise Driver.Pause
                  else begin incr current_pause; true end
          do () done;
-         if !current_pause < st.pause_no then st.pause_no <- !current_pause
+         if !current_pause < st.pause_number
+         then st.pause_number <- !current_pause
        with
        | Driver.Pause -> st.cont <- Some f
      else
-       Driver.render_page st.cdvi st.page_no
+       Driver.render_page st.cdvi st.page_number
          (st.base_dpi *. st.ratio) st.orig_x st.orig_y
     with
     | Grdev.Stop -> st.aborted <- true
@@ -515,12 +516,12 @@ let redraw ?trans st =
   Grdev.set_busy (if st.cont = None then Grdev.Free else Grdev.Pause);;
 
 let redisplay st =
-  st.pause_no <- 0;
+  st.pause_number <- 0;
   redraw st;;
 
 let goto_previous_pause n st =
   if n > 0 then begin
-    st.pause_no <- max 0 (st.pause_no - n);
+    st.pause_number <- max 0 (st.pause_number - n);
     redraw st
   end;;
 
@@ -619,9 +620,9 @@ let reload st =
     st.cdvi <- cdvi;
     st.num_pages <- pages;
     st.page_stack <- clear_page_stack pages st.page_stack;
-    let page = page_start (min st.page_no (st.num_pages - 1)) st in
-    if page <> st.page_no then st.pause_no <- 0;
-    set_page_no st page;
+    let page = page_start (min st.page_number (st.num_pages - 1)) st in
+    if page <> st.page_number then st.pause_number <- 0;
+    set_page_number st page;
     st.frozen <- true;
     st.aborted <- true;
     update_dvi_size false st;
@@ -635,17 +636,21 @@ let reload st =
 let changed st = reload_time st > st.last_modified;;
 
 let goto_page n st = (* go to the begining of the page *)
-  let new_page_no = max 0 (min n (st.num_pages - 1)) in
-  if st.page_no <> new_page_no || st.aborted then
+  let new_page_number = max 0 (min n (st.num_pages - 1)) in
+  if st.page_number <> new_page_number || st.aborted then
     begin
-      if st.page_no <> new_page_no then st.exchange_page <- st.page_no;
+      if st.page_number <> new_page_number
+      then st.exchange_page <- st.page_number;
       let t =
-        if new_page_no = succ st.page_no then Some Transitions.DirRight
-        else if new_page_no = pred st.page_no then Some Transitions.DirLeft
-        else if new_page_no = st.page_no then Some Transitions.DirTop
-        else None in
-      set_page_no st new_page_no;
-      st.pause_no <- 0;
+        if new_page_number = succ st.page_number
+           then Some Transitions.DirRight else
+        if new_page_number = pred st.page_number
+           then Some Transitions.DirLeft else
+        if new_page_number = st.page_number
+           then Some Transitions.DirTop else
+        None in
+      set_page_number st new_page_number;
+      st.pause_number <- 0;
       redraw ?trans:(t) st
     end;;
 
@@ -656,10 +661,10 @@ let push_stack b n st =
   | all -> st.page_stack <- (if b then -1 - n else n) :: all;;
 
 let push_page b n st =
-  let new_page_no = max 0 (min n (st.num_pages - 1)) in
-  if st.page_no <> new_page_no || st.aborted then
+  let new_page_number = max 0 (min n (st.num_pages - 1)) in
+  if st.page_number <> new_page_number || st.aborted then
     begin
-      push_stack b st.page_no st;
+      push_stack b st.page_number st;
       goto_page n st
     end;;
 
@@ -667,7 +672,7 @@ let pop_page b n st =
   assert
     (debug_pages
        (Printf.sprintf "%s\n => popping %s page %d "
-          (page_stack_to_string st.page_no st.page_stack)
+          (page_stack_to_string st.page_number st.page_stack)
           (string_of_bool b)
           n));
   let rec pop n return_page return_stack stack =
@@ -680,7 +685,7 @@ let pop_page b n st =
         if b && h >= 0
         then pop n return_page return_stack t
         else pop (pred n) h t t in
-  let page, stack = pop n st.page_no st.page_stack st.page_stack in
+  let page, stack = pop n st.page_number st.page_stack st.page_stack in
   st.page_stack <- stack;
   goto_page (if page > 0 then page else -1 - page) st;;
 
@@ -688,17 +693,17 @@ let goto_href link st = (* goto page of hyperref h *)
   let page =
     if Misc.has_prefix "#" link then
       let tag = Misc.get_suffix "#" link in
-      find_xref tag st.page_no st
+      find_xref tag st.page_number st
     else
       begin
         exec_xref link;
-        st.page_no
+        st.page_number
       end in
   push_page true page st;
   Grdev.H.flashlight (Grdev.H.Name link);;
 
 let goto_next_page st =
-  if st.page_no <> st.num_pages - 1 then goto_page (st.page_no + 1) st;;
+  if st.page_number <> st.num_pages - 1 then goto_page (st.page_number + 1) st;;
 
 let resize st x y =
   attr.geom <-
@@ -740,25 +745,25 @@ module B =
   struct
     let nop st = ()
     let push_next_page st =
-      push_page false (st.page_no + max 1 st.num) st
+      push_page false (st.page_number + max 1 st.num) st
     let next_pause st =
       if st.cont = None then push_next_page st
       else goto_next_pause (max 1 st.num) st
     let digit k st =
       st.next_num <- st.num * 10 + k
     let next_page st =
-      goto_page (st.page_no + max 1 st.num) st
+      goto_page (st.page_number + max 1 st.num) st
     let goto st =
       push_page true (if st.num > 0 then st.num - 1 else st.num_pages) st
 
     let push_page st =
-      push_stack true st.page_no st
+      push_stack true st.page_number st
     let previous_page st =
-      goto_page (st.page_no - max 1 st.num) st
+      goto_page (st.page_number - max 1 st.num) st
     let pop_previous_page st =
       pop_page false (max 1 st.num) st
     let previous_pause st =
-      if st.pause_no > 0
+      if st.pause_number > 0
       then goto_previous_pause (max 1 st.num) st
       else pop_previous_page st
     let pop_page st =
@@ -800,7 +805,7 @@ module B =
 
     let page_down st =
       let none () =
-        if st.page_no < st.num_pages - 1 then begin
+        if st.page_number < st.num_pages - 1 then begin
             (* the following test is necessary because of some
              * floating point rounding problem
              *)
@@ -810,7 +815,7 @@ module B =
               st.orig_y <- top_of_page st;
               set_bbox st;
             end;
-          goto_page (st.page_no + 1) st
+          goto_page (st.page_number + 1) st
         end
       in
       begin
@@ -828,14 +833,14 @@ module B =
 
     let page_up st =
       let none () =
-        if st.page_no > 0 then begin
+        if st.page_number > 0 then begin
           if attr.geom.height <
             st.dvi_height + 2 * vmargin_size st then
             begin
               st.orig_y <- bottom_of_page st;
               set_bbox st;
             end;
-          goto_page (st.page_no - 1) st
+          goto_page (st.page_number - 1) st
         end
       in
       begin
@@ -984,10 +989,10 @@ let main_loop filename =
       Grdev.set_title ("Advi: " ^ Filename.basename filename);
       Grdev.open_dev (" " ^ string_of_geometry attr.geom);
       set_bbox st;
-      if st.page_no > 0 && !Options.dops then
-	Driver.scan_special_pages st.cdvi st.page_no
+      if st.page_number > 0 && !Options.dops then
+	Driver.scan_special_pages st.cdvi st.page_number
       else
-	set_page_no st (page_start 0 st);
+	set_page_number st (page_start 0 st);
       redraw st;
   (* num is the current number entered by keyboard *)
       try while true do

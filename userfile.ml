@@ -92,19 +92,7 @@ let prepare_file file =
   end
 ;;
 
-(* User preferences and cache handling *)
-
-let options_files = ref [];;
-
-let add_options_file s = options_files := s :: !options_files;;
-
-Options.add "-options-file STRING"
- (Arg.String add_options_file)
- "\tLoad this file when starting advi, to set up user's options";;
-
-let options_files () = !options_files;;
-
-let default_option_file = tilde_subst "~/.advirc";;
+(* Cache directory *)
 
 let default_user_dir = "~/.advi";;
 
@@ -123,33 +111,48 @@ let cache_dir =
     Filename.concat user_dir "cache"
 ;;
 
-(* Writing page current number to the file advi_page_no_file. *)
-let write_page_no =
- Options.flag false "-page-no"
+(* User preferences. *)
+let default_option_file = tilde_subst "~/.advirc";;
+
+let options_files = ref [default_option_file];;
+
+let add_options_file s = options_files := s :: !options_files;;
+
+Options.add "-options_file"
+ (Arg.String add_options_file)
+ "STRING\tLoad this file when starting advi, to set up user's options";;
+
+let options_files () = !options_files;;
+
+(* Writing page current number to the file advi_page_number_file. *)
+let write_page_number =
+ Options.flag false "-page_number"
   "Ask advi to write the current page number in a file (default is no)";;
 
-let advi_page_no_file = ref (Filename.concat cache_dir "advi_page_no");;
+let advi_page_number_file = ref (Filename.concat cache_dir "advi_page_number");;
 
-let set_page_no_file s = advi_page_no_file := s;;
+let set_page_number_file s = advi_page_number_file := s;;
 
-Options.add "-page-no-file"
- (Arg.String set_page_no_file)
- "\tSet the name of the file where advi could write the current page number
-  (default is file \"advi_page_no\" in directory \".advi\"";;
+Options.add "-page_number_file"
+ (Arg.String set_page_number_file)
+ "STRING\tSet the name of the file where \
+  advi could write the current page number\n\
+  \t(default is file \"advi_page_number\" in directory \".advi\"";;
 
-let save_page_no n =
- if !write_page_no then
+let save_page_number n =
+ if !write_page_number then
  try
-   let oc = open_out !advi_page_no_file in
+   let oc = open_out !advi_page_number_file in
    output_string oc (string_of_int n);
    output_char oc '\n';
    close_out oc
  with _ ->
    Misc.warning 
      (Printf.sprintf
-        "Cannot write file %s to record page number." !advi_page_no_file);;
+        "Cannot write file %s to record page number." !advi_page_number_file);;
 
-let init_advi_page_no_file () =
- if !write_page_no then prepare_file !advi_page_no_file;;
+(* Initialization of advi_page_number_file. *)
+let init_advi_page_number_file () =
+ if !write_page_number then prepare_file !advi_page_number_file;;
 
-Rc.at_init init_advi_page_no_file;;
+Rc.at_init init_advi_page_number_file;;
