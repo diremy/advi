@@ -28,6 +28,8 @@ and h = int
 and width = int
 and height = int;;
 
+type modifiers = int;;
+
 type rectangle = {x : x; y : y; w : w; h : h};;
 
 (* Introducing get_ variants of regular set_ functions from Graphics. *)
@@ -445,6 +447,11 @@ let set_backing_store_only_mode () =
   (* Don't draw on the screen display window. *)
   set_display_mode false;;
 
+(* Draw on both. *)
+let set_both_mode () =
+  set_remember_mode true;
+  set_display_mode true;;
+
 (* Set the drawing modes to the given arguments. *)
 let restore_modes dm rm = set_remember_mode rm; set_display_mode dm;;
 
@@ -469,6 +476,8 @@ let only_on_screen f = only_on set_screen_only_mode f;;
 
 (* Similar to [only_on_screen] for the backing store. *)
 let only_on_backing_store f = only_on set_backing_store_only_mode f;;
+
+let drawing_on_both f = only_on set_both_mode f;;
 
 (* Graphics.sigio_signal is not exported. We declare it here again. *)
 external sigio_signal: unit -> int = "gr_sigio_signal";;

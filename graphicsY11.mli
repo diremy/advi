@@ -26,6 +26,9 @@ and h = int
 and width = int
 and height = int;;
 
+type modifiers = int;;
+ (** A list of modifiers for a key press, encoded in an integer. *)
+
 type rectangle = {x : x; y : y; w : w; h : h};;
 
 val set_font : string -> unit;;
@@ -185,10 +188,10 @@ val unset_cursor : unit -> unit;;
     Also syncs the on-screen window. *)
 
 external get_geometry : unit -> int * int * int * int = "gr_get_geometry";;
-        (* returns width, height, x, y of the graphics window *)
+        (* returns width, height, x, y of the graphics window. *)
 
-external get_modifiers : unit -> int = "gr_get_modifiers";;
-        (* returns the list of modifiers as an integer *)
+external get_modifiers : unit -> modifiers = "gr_get_modifiers";;
+        (* returns the list of modifiers as an integer. *)
 
 val button1 : int;;
 val button2 : int;;
@@ -220,12 +223,12 @@ val draw_image_area :
 (*** Mouse and keyboard events *)
 
 type status =
-  { mouse_x : int;              (* X coordinate of the mouse *)
-    mouse_y : int;              (* Y coordinate of the mouse *)
+  { mouse_x : x;                (* X coordinate of the mouse *)
+    mouse_y : y;                (* Y coordinate of the mouse *)
     button : bool;              (* true if a mouse button is pressed *)
     keypressed : bool;          (* true if a key has been pressed *)
     key : char ;                (* the character for the key pressed *)
-    modifiers : int;
+    modifiers : modifiers;
   };;
 (* To report events. *)
 
@@ -297,17 +300,29 @@ val point_color : int -> int -> color;;
   the limit. *)
 
 val only_on_screen : ('a -> 'b) -> 'a -> 'b;;
-(** [only_on_screen f arg] performs [f arg] on the screen window only,
-   not affecting the backing store.
-   Current [display_mode] and [remember_mode] are preserved. *)
+(** [only_on_screen f arg] performs [f arg], while drawing on the
+   screen window only, not affecting the backing store.
+   [only_on_screen] preserves the values of [display_mode] and
+   [remember_mode]: their respective settings before and after a call
+   to [only_on_screen] are identical. *)
 
 val only_on_backing_store : ('a -> 'b) -> 'a -> 'b;;
-(** [only_on_screen f arg] performs [f arg] on the backing store canvas only,
-   not affecting the screen window.
-   Current [display_mode] and [remember_mode] are preserved. *)
+(** [only_on_backing_store f arg] performs [f arg], while drawing on the
+   backing store canvas only, not affecting the screen window.
+   [only_on_backing_store] preserves the values of [display_mode] and
+   [remember_mode]: their respective settings before and after a call
+   to [only_on_backing_store] are identical. *)
+
+val drawing_on_both : ('a -> 'b) -> 'a -> 'b;;
+(** [drawing_on_both f arg] performs [f arg], while drawing on both
+   the screen and the backing store canvas.
+   [drawing_on_both] preserves the values of [display_mode] and
+   [remember_mode]: their respective settings before and after a call
+   to [drawing_on_both] are identical. *)
 
 val set_remember_mode : bool -> unit;;
-(*val set_display_mode : bool -> unit;;*)
+(*val set_display_mode : bool -> unit;;
+  Unused in Active-DVI. *)
 
 val init : unit -> unit;;
 (** We have to call this function to disable the original Graphics
