@@ -23,9 +23,6 @@
 \usepackage {fullpage}
 \usepackage {makeidx}
 
-\expandafter \ifx \csname driver\endcsname\relax \def \driver{}\fi 
-\usepackage [\driver]{hyperref}
-
 \usepackage {graphicx}
 \usepackage {advi}
 \usepackage {advi-annot}
@@ -39,6 +36,9 @@
 \usepackage{xcolor}
 \usepackage{hyperref}
 % End of splash specific stuf
+
+%\expandafter \ifx \csname driver\endcsname\relax \def \driver{}\fi 
+%\usepackage [\driver]{hyperref}
 
 \newdimen \tmpdim
 \title {\setbox0 \hbox {\bf\ActiveDVI}\global \tmpdim \wd0
@@ -66,7 +66,7 @@ various special effects can easily be incorporated to the presentation,
 via a companion \doctt{advi} {\LaTeX} package. 
 
 \bigskip
-{\ActiveDVI} is copyright \copyright\space 2001, 2003 INRIA
+{\ActiveDVI} is copyright \copyright\space 2001, {\adviyear} INRIA
 and distributed under the Gnu Library General Public License ---see the LGPL
 file included in the distribution.
 \end{abstract}

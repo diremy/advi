@@ -13,26 +13,87 @@ unmarked pages.
 
 \vspace{\stretch{1}}
 
+\subsection*{Survival command kit}
+
 \noindent
 \begin{tabularx}{\linewidth}{clcX}
-\ikey{?}{info}{Quick info and key bindings help.}
+\ikey{?}{info}{This quick info and key bindings help.}
 \ikey{q}{quit}{End of show.}
 \ikey{space}{continue}
-{Move \arg pauses forward if any, or do as \key{return} otherwise.}
+{Move forward (\arg pauses forward if any, or do as \key{return} otherwise).}
+\end{tabularx}
+
+\vspace{\stretch{1}}
+
+\subsection*{Moving to pages}
+
+\noindent
+\begin{tabularx}{\linewidth}{clcX}
 \ikey{n}{next}
 {Move \arg physical pages forward, leaving the history unchanged.}
 \ikey{p}{previous}
 {Move \arg physical pages backward, leaving the history unchanged.}
+\ikey{,}{begin}{Move to the first page.}
+\ikey{.}{end}{Move to the last page.}
 \ikey{g}{go}
 {If \arg is unset move to the last page.
  If \arg is the current page do nothing.
  Otherwise, push the current page on the history as marked, and move
- to the physical pages \arg.}
-\ikey{,}{begin}{Move to the first page.}
-\ikey{.}{end}{Move to the last page.}
+ to physical page \arg.}
+\end{tabularx}
+
+\vspace{\stretch{1}}
+
+\subsection*{Table of contents}
+
+\noindent
+\begin{tabularx}{\linewidth}{clcX}
 \ikey{T}{Thumbnails}{Process thumbnails.}
 \ikey{t}{toc}{Display thumbnails if processed, or floating table of contents
  if available, or do nothing.}
+\end{tabularx}
+
+\vspace{\stretch{1}}
+
+\vspace{\stretch{1}}
+
+\newpage
+
+\subsection*{Moving to pauses}
+
+\noindent
+\begin{tabularx}{\linewidth}{clcX}
+\ikey{N}{next pause}{Move \arg pauses forward (equivalent to continue).}
+\ikey{P}{previous pause}{Move \arg pauses backward.}
+\end{tabularx}
+
+\vspace{\stretch{1}}
+
+\subsection*{Adjusting the page size}
+
+\noindent
+\begin{tabularx}{\linewidth}{clcX}
+\ikey{\char94f}{fullscreen}{Adjust the size of the page to fit the
+entire screen or reset the page to the default size (this is a toggle).}
+\ikey{$<$}{smaller}{Scale down the resolution by scalestep (default
+\tiny{$\sqrt{\sqrt{\sqrt 2}}$}).}
+\ikey{$>$}{bigger}{Scale up the resolution by scalestep (default
+\tiny{$\sqrt{\sqrt{\sqrt 2}}$}).}
+\ikey{\char35}{fullpage}{Remove margins around the page and change
+the resolution accordingly.}
+\ikey{c}{center}{Center the page in the window, and resets the default resolution.}
+\end{tabularx}
+
+\vspace{\stretch{1}}
+
+\subsection*{Redisplay commands}
+
+\noindent
+\begin{tabularx}{\linewidth}{clcX}
+\ikey{r}{redraw}{Redraw the current page to the current pause.}
+\ikey{R}{reload}{Reload the file and redraw the current page.}
+\ikey{\char94L}{redisplay}{Redisplay the current page to the first
+pause of the page.}
 \ikey{a}{active/passive}{toggle advi effects (so that reloading is silent).}
 \end{tabularx}
 
@@ -42,32 +103,7 @@ unmarked pages.
 
 \vspace{\stretch{1}}
 
-\noindent
-\begin{tabularx}{\linewidth}{clcX}
-\ikey{N}{next pause}{Move \arg pauses forward (equivalent to continue).}
-\ikey{P}{previous pause}{Move \arg pauses backward.}
-\ikey{\char94f}{fullscreen}{Adjust the size of the page to fit the
-entire screen or reset the page to the default size (toggle).}
-\ikey{$<$}{smaller}{Scale down the resolution by scalestep (default
-\tiny{$\sqrt{\sqrt{\sqrt 2}}$}).}
-\ikey{$>$}{bigger}{Scale up the resolution by scalestep (default
-\tiny{$\sqrt{\sqrt{\sqrt 2}}$}).}
-\ikey{c}{center}{Center the page in the window, and resets the default resolution.}
-\end{tabularx}
-
-\vspace{\stretch{1}}
-
-\noindent
-\begin{tabularx}{\linewidth}{clcX}
-\ikey{\char35}{fullpage}{Remove margins around the page and change
-the resolution accordingly.}
-\ikey{\char94L}{redisplay}{Redisplay the current page to the first
-pause of the page.}
-\ikey{r}{redraw}{Redraw the current page to the current pause.}
-\ikey{R}{reload}{Reload the file and redraw the current page.}
-\end{tabularx}
-
-\vspace{\stretch{1}}
+\subsection*{Moving the page in the window}
 
 \noindent
 \begin{tabularx}{\linewidth}{clcX}
@@ -85,6 +121,9 @@ pause of the page.}
 {Moves one screen height toward the top of the page. Jumps to the bottom
  previous page, if there is one, and if the top of the page is already
  displayed.}
+\ikey{\char94 left button}{move page}
+{A black line draws the page borders; moving the mouse then moves the
+page in the window.}
 \end{tabularx}
 
 \vspace{\stretch{1}}
@@ -92,6 +131,8 @@ pause of the page.}
 \newpage
 
 \vspace{\stretch{1}}
+
+\subsection*{Using the navigation history stack}
 
 \noindent
 \begin{tabularx}{\linewidth}{clcX}
@@ -104,15 +145,31 @@ pause of the page.}
 \ikey{escape}{find mark}
 {Move \arg marked pages backward according to the history.
  Do nothing if the history does no contain any marked page.}
+\end{tabularx}
+
+\vspace{\stretch{1}}
+
+\subsection*{Writing and drawing on the slide}
+
+\noindent
+\begin{tabularx}{\linewidth}{clcX}
+\ikey{s}{scratch}{Give a pencil to type characters on the page.}
+\ikey{S}{scratch}{Give a spray can to draw on the page.}
+\end{tabularx}
+
+\subsection*{Dealing with caches}
+
+\noindent
+\begin{tabularx}{\linewidth}{clcX}
 \ikey{f}{load fonts}{Load all the fonts used in the documents.  By default, fonts are loaded only when needed.}
 \ikey{F}{make fonts}
 {Does the same as \key{f}, and precomputes the glyphs of all characters used in the document.
 This takes more time than loading the fonts, but the pages are drawn faster.}
 \ikey{C}{clear}{Erase the image cache.}
-\ikey{s}{scratch}{Give a pencil to type characters on the page.}
-\ikey{S}{scratch}{Give a pencil to draw lines on the page.}
-
 \end{tabularx}
+
+\vspace{\stretch{1}}
+
 
 
 
