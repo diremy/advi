@@ -150,16 +150,15 @@ case, the image may not totally cover the page on the opposite side).
 {\Huge Automatic fit (default)}
 \vfill
 This is obtained by not setting the \dockey{fit}{} parameter:\\
-\advibg{image=world.jpg}
+\advibg{image="world.jpg"}
 \begin{center}
 	\begin{verbatim}
-	\advibg{image=world.jpg}
+	\advibg{image="world.jpg"}
 	\end{verbatim}
 \end{center}
 \vfill
 Resize the display window to see how this positioning option works.
 \vfill
-\advifooter
 
 \newpage
 
@@ -176,78 +175,70 @@ Resize the display window to see how this positioning option works.%
 
 \vfill
 {\Huge Top}
-\advibg{image=world.jpg,fit=top}
-\docfit{\tt \ttadvibg\{image=world.jpg,fit=top\}}
+\advibg{image="world.jpg",fit=top}
+\docfit{\tt \ttadvibg\{image="world.jpg",fit=top\}}
 \newpage
 
 
 \vfill
 {\Huge Bottom}
-\advibg{image=world.jpg,fit=bottom}
-\docfit{\tt \ttadvibg\{image=world.jpg,fit=bottom\}}
-\advifooter
+\advibg{image="world.jpg",fit=bottom}
+\docfit{\tt \ttadvibg\{image="world.jpg",fit=bottom\}}
 
 \newpage
 
 \vfill
 {\Huge Left}
-\advibg{image=world.jpg,fit=left}
-\docfit{\tt \ttadvibg\{image=world.jpg,fit=left\}}
-\advifooter
+\advibg{image="world.jpg",fit=left}
+\docfit{\tt \ttadvibg\{image="world.jpg",fit=left\}}
 
 \newpage
 
 
 \vfill
 {\Huge Right}
-\advibg{image=world.jpg,fit=right}
-\docfit{\tt \ttadvibg\{image=world.jpg,fit=right\}}
-\advifooter
+\advibg{image="world.jpg",fit=right}
+\docfit{\tt \ttadvibg\{image="world.jpg",fit=right\}}
 
 \newpage
 
 
 \vfill
 {\Huge Center}
-\advibg{image=world.jpg,fit=center}
-\docfit{\tt \ttadvibg\{image=world.jpg,fit=center\}}
-\advifooter
+\advibg{image="world.jpg",fit=center}
+\docfit{\tt \ttadvibg\{image="world.jpg",fit=center\}}
 
 \newpage
 
 
 \vfill
 {\Huge TopLeft}
-\advibg{image=world.jpg,fit=topleft}
-\docfit{\tt \ttadvibg\{image=world.jpg,fit=topleft\}}
-\advifooter
+\advibg{image="world.jpg",fit=topleft}
+\docfit{\tt \ttadvibg\{image="world.jpg",fit=topleft\}}
 
 \newpage
 
 
 \vfill
 {\Huge TopRight}
-\advibg{image=world.jpg,fit=topright}
-\docfit{\tt \ttadvibg\{image=world.jpg,fit=topright\}}
-\advifooter
+\advibg{image="world.jpg",fit=topright}
+\docfit{\tt \ttadvibg\{image="world.jpg",fit=topright\}}
 
 \newpage
 
 
 \vfill
 {\Huge BottomLeft}
-\advibg{image=world.jpg,fit=bottomleft}
-\docfit{\tt \ttadvibg\{image=world.jpg,fit=bottomleft\}}
-\advifooter
+\advibg{image="world.jpg",fit=bottomleft}
+\docfit{\tt \ttadvibg\{image="world.jpg",fit=bottomleft\}}
 
 \newpage
 
 
 \vfill
 {\Huge BottomRight}
-\advibg{image=world.jpg,fit=bottomright}
-\docfit{\tt \ttadvibg\{image=world.jpg,fit=bottomright\}}
-\advifooter
+\advibg{image="world.jpg",fit=bottomright}
+\docfit{\tt \ttadvibg\{image="world.jpg",fit=bottomright\}}
 
 \newpage
 
@@ -298,13 +289,14 @@ Here is the command used to obtain this effect:
 \end{center}
 \advibg{color=LightBlue,alpha=0.1,blend=difference,image="dojoji.gif"}
 \vfill
-\newpage
 
-\subsection{Reverse video effect}
+\Newpage
 
 \special{color push white}
 \advibg{color=black}
- \advifooter\adviheader
+\advifooter\adviheader
+
+\subsection{Reverse video effect}
 
 If you want a reverse video effect, you just have to set the background
 of the page to black and the text color to white, as follows:
