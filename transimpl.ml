@@ -1,8 +1,10 @@
 open Graphics
 open Transitions
 
-let current_transition = ref TransNone;;
+let sleep = ref (fun _ -> ())
 
+let current_transition = ref TransNone;;
+ 
 let slide steps from =
   let w = Graphics.size_x () and h = Graphics.size_y () in
   let img = Graphics.get_image 0 0 w h in
@@ -123,4 +125,78 @@ let synchronize_transition () =
   end
 ;;
 
+let prev_geom = ref None
 
+let init_sprite () = prev_geom := None;;
+
+let draw_sprite newimg x y width height =
+  let orgimg = Graphics.get_image x y width height in
+  let (wx,wy,wwidth,wheight) =
+    match !prev_geom with
+    | None -> x,y,width,height 
+    | Some (x',y',width',height') ->
+	let x'' = min x x'
+	and y'' = min y y' in
+	let width''  = max (x+width -1) (x'+width' -1) - x'' + 1
+	and height'' = max (y+height-1) (y'+height'-1) - y'' + 1 in
+	x'',y'',width'',height''
+  in
+  Graphics.draw_image newimg x y;
+  let workimg = Graphics.get_image wx wy wwidth wheight in
+  Graphics.draw_image orgimg x y;
+
+  Graphics.remember_mode false;
+  Graphics.display_mode true;
+  Graphics.draw_image workimg wx wy;
+  Graphics.remember_mode true;
+  Graphics.display_mode false;
+  prev_geom := Some (x,y,width,height)
+;;
+
+let box_transition trans oldimg newimg x y width height =
+  let screen_w = Graphics.size_x () and screen_h = Graphics.size_y () in
+  init_sprite ();
+  match trans with
+  | TransNone -> ()
+  | TransSlide (steps, from) ->
+      let steps = if steps = 0 then 1 else steps in 
+      let f = 
+	match from with
+	| DirRight -> 
+	    let len = screen_w - x + width - 1 in
+	    let d = max (len / steps) 1 in
+	    fun i -> draw_sprite newimg (x+i*d) y width height
+	| DirLeft ->
+	    let len = -x in
+	    let d = min (len / steps) (-1) in
+	    fun i -> draw_sprite newimg (x+i*d) y width height
+	| DirTop -> 
+	    let len = screen_h - y + height - 1 in
+	    let d = max (len / steps) 1 in
+	    fun i -> draw_sprite newimg x (y+i*d) width height
+	| DirBottom | _ ->
+	    let len = -y in
+	    let d = min (len / steps) (-1) in
+	    fun i -> draw_sprite newimg x (y+i*d) width height
+      in
+      for i = steps - 1 downto 1 do f i; !sleep 0.01 done
+  | _ -> assert false
+;;
+
+let saved_transbox = ref None
+
+let transbox_save x y width height =
+  let x = x and y = y - 1 and width = width + 1 and height = height + 2 in
+  let img = Graphics.get_image x y width height in
+  saved_transbox := Some (img, x, y, width, height)
+;;
+
+let transbox_go trans = 
+  begin match !saved_transbox with
+  | Some (oldimg, x, y, width, height) ->
+      let newimg = Graphics.get_image x y width height in
+      box_transition trans oldimg newimg x y width height 
+  | None -> (* ??? we just ignore it *) ()
+  end;
+  saved_transbox := None;
+;;

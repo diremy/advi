@@ -8,7 +8,6 @@ module Make
          val height : t -> int
        end) =
   struct
-;;
 
 type glyph = G.t
 type fontname = string

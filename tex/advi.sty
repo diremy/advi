@@ -89,6 +89,14 @@
 \def\advi@settransition#1{\advi@special{advi: trans push #1}}
 \def\advi@resettransition{\advi@special{advi: trans pop}}
 
+\def\advi@transbox@save#1#2{\special{advi: transbox save width=#1 height=#2}}
+\def\advi@transbox@go#1{\special{advi: transbox go #1}}
+\def\advi@transbox#1#2{%
+  \setbox0\hbox{#2}%
+  \advi@transbox@save{\the\wd0 }{\the\ht0}%
+  \hbox{#2}%
+  \advi@transbox@go{#1}}
+
 %%% For PS Tricks
 
 \def \advi@moveto {\advi@special {advi: moveto}}
@@ -228,6 +236,8 @@ end
 
 \advi@export \settransition \advi@settransition
 \advi@export \resettransition \advi@resettransition
+
+\advi@export \transbox \advi@transbox
 
 %% Conditional exports 
 

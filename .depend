@@ -48,14 +48,17 @@ grdev.cmx: draw_image.cmx drawps.cmx glyph.cmx graphicsY11.cmx gs.cmx \
     misc.cmx symbol.cmx transimpl.cmx grdev.cmi 
 dvi.cmo: grdev.cmi dvi.cmi 
 dvi.cmx: grdev.cmx dvi.cmi 
-driver.cmo: devfont.cmi dimension.cmi dvi.cmi glyph.cmi grdev.cmi misc.cmi \
-    search.cmi table.cmi transitions.cmi units.cmi driver.cmi 
-driver.cmx: devfont.cmx dimension.cmx dvi.cmx glyph.cmx grdev.cmx misc.cmx \
-    search.cmx table.cmx transitions.cmi units.cmx driver.cmi 
+driver.cmo: devfont.cmi dimension.cmi dvi.cmi dvicolor.cmo glyph.cmi \
+    grdev.cmi misc.cmi search.cmi table.cmi transitions.cmi units.cmi \
+    driver.cmi 
+driver.cmx: devfont.cmx dimension.cmx dvi.cmx dvicolor.cmx glyph.cmx \
+    grdev.cmx misc.cmx search.cmx table.cmx transitions.cmi units.cmx \
+    driver.cmi 
 dviview.cmo: config.cmo dimension.cmi driver.cmi dvi.cmi grdev.cmi misc.cmi \
     dviview.cmi 
 dviview.cmx: config.cmx dimension.cmx driver.cmx dvi.cmx grdev.cmx misc.cmx \
     dviview.cmi 
 main.cmo: config.cmo dimension.cmi dviview.cmi grdev.cmi gs.cmi misc.cmi 
 main.cmx: config.cmx dimension.cmx dviview.cmx grdev.cmx gs.cmx misc.cmx 
-grY11.o: grY11.c libgraph.h image.h
+grY11.o: grY11.c  \
+   libgraph.h image.h

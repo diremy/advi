@@ -61,60 +61,8 @@ let split_record s =
       String.sub token 0 i,
       String.sub token (i+1) (String.length token - i - 1)
     with
-    | _ -> token, "") tokens;;
-
-let named_colors = [
-  "black", 0x000000;
-  "white", 0xffffff;
-  "red", 0xff0000;
-  "green", 0x00ff00;
-  "blue", 0x0000ff;
-  "yellow", 0xffff00;
-  "cyan", 0x00ffff;
-  "magenta", 0xff00ff;
-  "Black", 0x000000;
-  "White", 0xffffff;
-  "Red", 0xff0000;
-  "Green", 0x00ff00;
-  "Blue", 0x0000ff;
-  "Yellow", 0xffff00;
-  "Cyan", 0x00ffff;
-  "Magenta", 0xff00ff;
-];;
-
-let rgb r g b =
-  (r lsl 16) + (g lsl 8) + b;;
-
-let cmyk c m y k =
-  let r = 255 - c
-  and g = 255 - m
-  and b = 255 - y in
-  (* k is ignored *)
-  rgb r g b;;
-
-let parse_color_args = function
-  | ["rgb"; rs; gs; bs] ->
-      let r = int_of_float (255.0 *. float_of_string rs)
-      and g = int_of_float (255.0 *. float_of_string gs)
-      and b = int_of_float (255.0 *. float_of_string bs) in
-      rgb r g b
-  | ["cmyk"; cs; ms; ys; ks] ->
-      let c = int_of_float (255.0 *. float_of_string cs)
-      and m = int_of_float (255.0 *. float_of_string ms)
-      and y = int_of_float (255.0 *. float_of_string ys)
-      and k = int_of_float (255.0 *. float_of_string ks) in
-      cmyk c m y k
-  | ["gray"; gs] ->
-      let g = int_of_float (255.0 *. float_of_string gs) in
-      rgb g g g
-  | [s] ->
-      begin
-        try List.assoc s named_colors
-        with Not_found ->
-          Format.eprintf "unknown color %s@." s;
-          0x000000
-      end
-  | _ -> 0x000000;;
+      _ -> token, "") tokens
+;;
 
 module Dev = Grdev;;
 module Symbol = Dev.Symbol;;
@@ -186,9 +134,7 @@ type reg_set = {
     reg_y : int;
     reg_z : int
   };;
-
-type color = int;;
-
+      
 type state = {
     cdvi : cooked_dvi;
     sdpi : int;
@@ -209,8 +155,8 @@ type state = {
       (* Register stack *)
     mutable stack : reg_set list;
       (* Color & Color stack *)
-    mutable color : color;
-    mutable color_stack : color list;
+    mutable color : Dvicolor.color;
+    mutable color_stack : Dvicolor.color list;
       (* Other attributes *)
     mutable alpha : float;
     mutable alpha_stack : float list;
@@ -387,7 +333,7 @@ let put st code =
         | None -> ()
         end;
         Dev.draw_glyph (glyph : Dev.glyph) x y;
-        add_char st x y code glyph;
+	add_char st x y code glyph
       end
   with _ -> ();;
 
@@ -429,7 +375,7 @@ let line_special st s =
 let color_special st s =
   match split_string s 0 with
   | "color" :: "push" :: args ->
-      color_push st (parse_color_args args)
+      color_push st (Dvicolor.parse_color_args args)
   | "color" :: "pop" :: [] ->
       color_pop st
   | _ -> ();;
@@ -624,6 +570,37 @@ let transition_special st s =
       transition_pop st
   | _ -> ();;
 
+let transbox_save_special st s =
+  match split_string s 0 with
+  | "advi:" :: "transbox" :: "save" :: args ->
+      let dpi = ldexp (float st.sdpi) (-16) in
+      let record = split_record (String.concat " " args) in 
+      let width = Dimension.dimen_of_string (List.assoc "width" record) in
+      let height = Dimension.dimen_of_string (List.assoc "height" record) in
+      let pixels_of_dimen dim =
+	match Dimension.normalize dim with
+	| Dimension.Px x -> x
+	| Dimension.In x -> truncate (x *. dpi)
+        | _ -> assert false
+      in
+      let width_pixel = pixels_of_dimen width
+      and height_pixel = pixels_of_dimen height
+      in
+      let x = st.x_origin + int_of_float (st.conv *. float st.h)
+      and y = st.y_origin + int_of_float (st.conv *. float st.v) in
+      Dev.transbox_save x y width_pixel height_pixel
+  | _ -> raise (Failure "advi: transbox save special failed")
+;;
+
+let transbox_go_special st s =
+  match split_string s 0 with
+  | "advi:" :: "transbox" :: "go" :: mode :: args ->
+      let record = split_record (String.concat " " args) in 
+      let trans = parse_transition mode record in
+      Dev.transbox_go trans
+  | _ -> raise (Failure "advi: transbox go special failed")
+;;
+
 let eval_command_ref = ref (fun _ _ -> ());;
 
 let proc_clean () =
@@ -726,8 +703,8 @@ let setup_bkgd status =
 
 let bkgd_alist = [
   ("col", fun s -> fun st ->
-     let c = parse_color_args (split_string (unquote s) 0) in
-     [Dev.BgColor c]);
+     let c = Dvicolor.parse_color_args (split_string (unquote s) 0)
+     in [Dev.BgColor c]);
   ("img", fun s -> fun st ->
      [Dev.BgImg s]);
   ("reset", fun s -> fun st ->
@@ -951,6 +928,7 @@ let reset_bkgd_info =
     "--reset_bkgd"
     "\tReset background options at each new page";;
 
+
 let scan_special_page cdvi globals pagenum =
    let page = cdvi.base_dvi.Dvi.pages.(pagenum) in
        match page.Dvi.status with
@@ -992,6 +970,8 @@ let special st s =
     if has_prefix "advi: wait " s then wait_special st s else
     if has_prefix "advi: embed " s then embed_special st s else
     if has_prefix "advi: trans " s then transition_special st s else
+    if has_prefix "advi: transbox save " s then transbox_save_special st s else
+    if has_prefix "advi: transbox go " s then transbox_go_special st s else
     if has_prefix "advi: kill " s then kill_embed_special st s else
     if has_prefix "advi: setbg " s then bkgd_special st s else
     if has_prefix "advi:" s then raise (Failure ("unknown special: "^ s))

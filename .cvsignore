@@ -7,3 +7,4 @@ config.cache
 config.status
 Makefile.config
 config.ml
+dvicolor.ml

@@ -33,13 +33,14 @@ AC_ARG_WITH(camlimages, [  --with-camlimages=dir      specify camlimages library
 	CAMLIMAGESDIR=nope
   fi)
 
-if test -f $CAMLIMAGESDIR/ps_img.cma || $HAVE_CDK; then
+if test -f $CAMLIMAGESDIR/ci_ps.cma || $HAVE_CDK; then
 	echo "Camlimages: ok"
 	HAVE_CAMLIMAGES="true"
         if $HAVE_CDK; then
 	        CAMLIMAGESLIBS="camlimages"
         else
-                CAMLIMAGESLIBS="img ppm_img ps_img graphic_image freetype"
+		CAMLIMAGESCONFIGINCLUDE="include $CAMLIMAGESDIR/Makefile.config"
+                CAMLIMAGESLIBS='$(WITH_CAMLIMAGES:.cma=)'
         fi
 else
 	echo "**************** Warning ******************"
@@ -72,6 +73,7 @@ AC_SUBST(CAMLVERSION)
 AC_SUBST(HAVE_CDK)
 
 AC_SUBST(CAMLIMAGESDIR)
+AC_SUBST(CAMLIMAGESCONFIGINCLUDE)
 AC_SUBST(HAVE_CAMLIMAGES)
 AC_SUBST(CAMLIMAGESLIBS)
 AC_SUBST(HAVE_GS)
@@ -89,7 +91,7 @@ ADVI_LOC=$mylibdir/advi
 AC_SUBST(ADVI_LOC)
 AC_SUBST(WITH_X)
 AC_SUBST(HAVE_GS)
-AC_OUTPUT(Makefile.config config.ml)
+AC_OUTPUT(Makefile.config config.ml ifdef.ml)
 
 echo -------------------------------------------------- Configuration finished
 echo Language:            $CAML version $CAMLVERSION

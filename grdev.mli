@@ -189,6 +189,10 @@ type busy = Free | Busy | Pause | Disk
 val set_busy : busy -> unit;;
 
 val set_transition : Transitions.t -> unit
+
+val transbox_save : int -> int -> int -> int -> unit
+val transbox_go : Transitions.t -> unit 
+
 val set_title : string -> unit;;
 val cut : string -> unit;;
 

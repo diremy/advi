@@ -152,6 +152,8 @@ let sleep_watch b n =
 
 let sleep = sleep_watch true;;
 
+let _ = Transimpl.sleep := sleep;;
+
 let set_transition trans = Transimpl.current_transition := trans;;
 
 let embeds = ref [];;
@@ -166,6 +168,19 @@ let synchronize () =
   embeds := [];
   List.iter (fun f -> f ()) (List.rev !persists);
   persists := [];;
+
+let transbox_save x y width height = 
+  synchronize ();
+  let x' = x and y' = !size_y - y in
+  Transimpl.transbox_save x' y' width height;
+;;
+  
+  
+let transbox_go trans = 
+  Gs.flush ();
+  Transimpl.transbox_go trans;
+  synchronize ()
+;;
 
 (*** Private glyphs ***)
 
@@ -607,9 +622,8 @@ let map_embed_app command app_type app_name width height x y =
   GraphicsY11.map_subwindow wid;;
 
 let unmap_embed_app command app_type app_name width height x y =
-  let _, (app_type, app_name, wid) =
-   hashtbl_find app_table (fun (_, name, _) -> name = app_name) in
-  GraphicsY11.unmap_subwindow wid;;
+ let _, (app_type, app_name, wid) = find_embedded_app app_name in
+ GraphicsY11.unmap_subwindow wid;;
 
 let move_or_resize_persistent_app command app_type app_name width height x y =
   let _, (app_type, app_name, wid) = find_embedded_app app_name in
@@ -668,7 +682,8 @@ let kill_app pid wid =
     with
       Unix.Unix_error(Unix.ECHILD,_,_) -> false
   do () done;
-  GraphicsY11.close_subwindow wid;;
+  GraphicsY11.close_subwindow wid
+;;
 
 let kill_apps app_type =
   (* begin match app_type with
@@ -681,8 +696,12 @@ let kill_apps app_type =
       if app_type = apt then kill_app pid wid) app_table;;
 
 let kill_embedded_app app_name =
-  let pid, (app_type, app_name, wid) = find_embedded_app app_name in
-  kill_app pid wid;;
+  try
+    let pid, (app_type, app_name, wid) = find_embedded_app app_name in
+    kill_app pid wid
+  with
+  | Not_found -> 
+      Misc.warning (Printf.sprintf "application %s is not running" app_name);;
 
 let unmap_persistent_apps () =
   List.iter (fun f -> f ()) (List.rev !unmap_embeds);

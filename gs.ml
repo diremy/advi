@@ -10,7 +10,7 @@ Misc.set_option
 let pspage = ref 0;;
 
 (* constants *)
-let ack_string = "\347\310\376\n";; 
+let ack_string = "\231\200\254\n";; 
 let pos_string = "dvi";;
 let err_string = "Error:";;
 let current_x = ref 0;;
