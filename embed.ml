@@ -44,8 +44,7 @@ let add_app app_name app_mode pid wid =
    app_mode = app_mode;
    app_pid = pid;
    app_wid = wid;
-  }
-;;
+  };;
 
 let pid_in_app_table pid =
  hashtbl_find_all app_table (fun app -> app.app_pid == pid) <> [];;
@@ -56,62 +55,73 @@ let pid_in_app_table pid =
    allocates the ressources to launch it afterwards. *)
 let fake_embed_app command app_mode app_name width height x gry =
  let wid = GraphicsY11.open_subwindow ~x ~y:gry ~width ~height in
- add_app app_name app_mode max_int wid
-;;
+ add_app app_name app_mode max_int wid;;
 
 (* The function that launches all embedded applications.
+
    When encountering an embedded application, a call to raw_embed_app
-   is stored in the list of applications to launch at next pause
-   in the [embeds] list reference.
+   is stored in the list of applications to be launched at the next
+   pause (in the [embeds] list reference).
 
    This function allocates a (sub)window for the application and tries
    to launch the application into this window. *)
 let raw_embed_app command app_mode app_name width height x gry =
-
+ (*Misc.debug (Printf.sprintf "Launching command %s" command);*)
  if Launch.can_execute_command command then begin
 
   let wid = GraphicsY11.open_subwindow ~x ~y:gry ~width ~height in
 
-  (*** !x commands
-    !p : embedding target window id (in digit)
+  (***
+    The following ``@'' macros are recognized in embedded commands:
 
-      If !p is not specified, the applications will be treated by WM.
+    @p : designates the embedding target window id (an X window identifier)
+         in this case the geometry x and y specification should be 0.
+
+      If @p is not specified, the applications will be treated by the WM.
       (If they are X apps, of course...)
 
-    !g : geometry like 100x100+20+30
-    !w : width of the target window in pixel
-    !h : height of the target window in pixel
-    !x : x of the application against the root
-    !y : y of the application against the root
+    @g : designates the geometry like 100x100+20+30
+    @w : designates the width of the target window in pixel
+    @h : designates the height of the target window in pixel
+    @x : designates the abscissa of the application against the root
+    @y : designates the ordiante of the application against the root
 
-    Why "!"?  '\' is for TeX. "%" is for TeX. "$" is for TeX...
+    Why using "@" ?
+    Just because '\' is for TeX. "%" is for TeX. "$" is for TeX...
+
+    For some time, we also accept ``!'' as a synonymous for ``@''.
   ***)
 
-  let command0 = Misc.string_replace "!p" wid command in
-
-  (* If there is no !p, the application geometry will be treated
+  (* If there is no @p, the application geometry will be treated
      by the WM. In such cases, we try to fix the geometry
-     so that it is against the root. *)
+     so that it is against the root window. *)
 
-  let opt_geometry, opt_x, opt_y =
-    let px, py =
-      let against_root = command0 = command in
-      if against_root then
-        (* fix the geometry *)
-        let (ww, wh, wx, wy) = GraphicsY11.get_geometry () in
-        wx + x, wy + (wh - gry) - height
-      else 0, 0 in
-    Printf.sprintf "%dx%d+%d+%d" width height px py,
-    string_of_int px,
-    string_of_int py in
+  let against_wid =
+     Misc.contains_string command "@p" ||
+     Misc.contains_string command "!p" in
 
-  let command =
-    Misc.string_replace "!g" opt_geometry
-        (Misc.string_replace "!w" (string_of_int width)
-            (Misc.string_replace "!h" (string_of_int height)
-               (Misc.string_replace "!x" opt_x
-                  (Misc.string_replace "!y" opt_y
-                     command0)))) in
+  let geom_x, geom_y =
+    if against_wid then "0", "0" else
+    (* fix the geometry *)
+    let (ww, wh, wx, wy) = GraphicsY11.get_geometry () in
+    string_of_int (wx + x),
+    string_of_int (wy + (wh - gry) - height) in
+
+  let geom_w = string_of_int width
+  and geom_h = string_of_int height in
+
+  let geom = Printf.sprintf "%sx%s+%s+%s" geom_w geom_h geom_x geom_y in
+
+  let env = function
+    | 'p' -> wid
+    | 'g' -> geom
+    | 'w' -> geom_w
+    | 'h' -> geom_h
+    | 'x' -> geom_x
+    | 'y' -> geom_y
+    | _ -> raise Not_found in
+
+  let command = Misc.string_substitute_var env command in
   let pid = Launch.fork_process command in
   if pid_in_app_table pid then
     raise (Failure
@@ -208,11 +218,13 @@ let embed_app command app_mode app_name width height x gry =
 
 (* Kill the process and close the associated window. *)
 let unembed_app app =
-    (* prerr_endline (Printf.sprintf "kill_app (pid=%d, window=%s)" pid wid); *)
-  begin try Hashtbl.remove app_table app.app_name with _ ->
-     Misc.warning
-      (Printf.sprintf "kill_app failed to remove application %s..."
-         app.app_name)
+  (* prerr_endline (Printf.sprintf "kill_app (pid=%d, window=%s)" pid wid); *)
+  begin
+    try Hashtbl.remove app_table app.app_name with
+    | _ ->
+       Misc.warning
+         (Printf.sprintf "kill_app failed to remove application %s..."
+            app.app_name)
   end;
   (* Fake apps cannot be killed! *)
   if app.app_mode <> Fake then begin
@@ -233,8 +245,7 @@ let unembed_app app =
   end;
   (* if this is the forked process, do not close the window!!! *)
   if Unix.getpid () = Launch.advi_process
-  then GraphicsY11.close_subwindow app.app_wid
-;;
+  then GraphicsY11.close_subwindow app.app_wid;;
 
 let unembed_apps_with_mode mode =
   (* begin match mode with
@@ -254,13 +265,13 @@ let signal_app signal app =
       "signal_app (pid=%d, window=%s) signal=%i killing=%b kill is %i"
       app.app_pid app.app_wid sig_val (sig_val = Sys.sigquit) Sys.sigquit); *)
   if signal = Sys.sigquit then unembed_app app else
-  try Unix.kill app.app_pid signal with _ ->
+  try Unix.kill app.app_pid signal
+  with _ ->
     (* prerr_endline
         (Printf.sprintf
           "signal_app (pid=%d, window=%s) signal=%i: cannot signal process"
           pid wid signal); *)
-    ()
-;;
+    ();;
 
 let kill_embedded_app signal app_name =
   (* prerr_endline
@@ -271,8 +282,7 @@ let kill_embedded_app signal app_name =
     let app = find_embedded_app app_name in
     signal_app signal app with
   | Not_found ->
-      Misc.warning (Printf.sprintf "application %s is not running" app_name)
-;;
+      Misc.warning (Printf.sprintf "application %s is not running" app_name);;
 
 let kill_all_embedded_app signal app_name =
   (* prerr_endline
@@ -280,8 +290,7 @@ let kill_all_embedded_app signal app_name =
      "kill_all_embedded_app (signal=%i app_name=%s)"
      signal app_name); *)
   let apps = find_all_embedded_app app_name in
-  List.iter (signal_app signal) apps
-;;
+  List.iter (signal_app signal) apps;;
 
 let kill_ephemeral_apps () =
   unembed_apps_with_mode Ephemeral;;
