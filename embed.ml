@@ -19,25 +19,11 @@
 
 (* Embedding applications (in particular tcl/tk) applications. *)
 
-(* In hash table t, returns the first element that verifies predicate p. *)
-(* No more used in advi.
-let hashtbl_find t p =
-  let res = ref None in
-  try
-   Hashtbl.iter (fun k x -> if p x then (res := Some (k, x); raise Exit)) t;
-   raise Exit
-  with Exit ->
-   match !res with
-   | None -> raise Not_found
-   | Some k_x -> k_x;; *)
-
 (* In hash table t, returns all elements (vals) that verify predicate p. *)
 let hashtbl_find_all t p =
   let res = ref [] in
-  try
-   Hashtbl.iter (fun k x -> if p x then res := x :: !res) t;
-   raise Exit
-  with Exit -> !res;;
+  Hashtbl.iter (fun k x -> if p x then res := x :: !res) t;
+  !res;;
 
 type app_mode = | Fake | Raw | Sticky | Persistent | Ephemeral;;
 
