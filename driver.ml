@@ -413,10 +413,8 @@ exception Ill_formed_special of string;;
 let line_of_special s k =
   match split_string s k with
   | line :: rest ->
-(*
-      Printf.eprintf "%s @ %s\n%!" line
-       (match rest with h :: _ -> h | _ -> ""); 
-*)
+      (* Printf.eprintf "%s @ %s\n%!" line
+         (match rest with h :: _ -> h | _ -> ""); *)
       begin try
         let l = int_of_string line in
         let f = match rest with | file :: _ -> Some file | _ -> None in
@@ -1273,7 +1271,7 @@ let header_special st s = ();;
 (* For html specials *)
 
 (* Should check that a pause is not in the middle of some html code *)
-let open_html st link tag tag_string =
+let open_html st link tag =
   let x = st.x_origin + Misc.round (st.conv *. float st.h)
   and y = st.y_origin + Misc.round (st.conv *. float st.v) in
   begin match st.html with
@@ -1284,7 +1282,7 @@ let open_html st link tag tag_string =
 let close_html st =
   match st.html with
   | Some (tag, k) when k > 0 ->
-      st.html <- Some (tag, k-1)
+      st.html <- Some (tag, k - 1)
   | Some (tag, 0) ->
       Dev.H.add {Dev.H.tag = tag; Dev.H.draw = List.rev st.draw_html};
       st.html <- None;
@@ -1297,11 +1295,11 @@ let html_special st html =
     let stripped = String.sub html 3 (String.length html - 4) in
     let fields = split_record stripped in
     begin match fields with
-    | ("name", link) :: _ ->
-        open_html st link (fun x -> Dev.H.Name x) "Name"
-    | ("href", link) :: _ ->
-        open_html st link (fun x -> Dev.H.Href x) "Href"
-    | (("advi" | "hdvi" as kind), link) :: rest ->
+    | (("name" | "NAME"), link) :: _ ->
+        open_html st link (fun x -> Dev.H.Name x)
+    | (("href" | "HREF"), link) :: _ ->
+        open_html st link (fun x -> Dev.H.Href x)
+    | (("advi" | "hdvi" | "ADVI" | "HDVI" as kind), link) :: rest ->
         let mode =
           if kind = "advi" then Dev.H.Over else Dev.H.Click_down in
         let style =
@@ -1326,12 +1324,11 @@ let html_special st html =
              Dev.H.style = style;
              Dev.H.color = color;
              Dev.H.area = None} in
-        open_html st link advi "Advi"
-    | _ ->
-        warning ("Incorrect html suffix" ^ html)
+        open_html st link advi
+    | _ -> warning ("Incorrect html suffix" ^ html)
     end else
   if has_prefix "</A>" html || has_prefix "</a>" html then close_html st else
-  warning ("Unknown html suffix" ^ html);;
+  warning ("Unknown html suffix " ^ html);;
 
 let scan_special_html (_, xrefs, _) page s =
   let name = String.sub s 14 (String.length s - 16) in
