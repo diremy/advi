@@ -99,6 +99,8 @@ module type DEVICE = sig
   val clean_ps_cache : unit -> unit
   val sleep : float -> unit
 
+  val set_transition : Transitions.t -> unit
+
   type app_type = Sticky | Persistent | Embedded
   val embed_app : string -> app_type -> int -> int -> int -> int -> unit
   val kill_embedded_apps : unit -> unit 
@@ -471,8 +473,8 @@ module Make(Dev : DEVICE) = struct
 	  st.pause_no <- st.pause_no + 1; 
 	  st.cont <- Some f 
       in
-      Dev.set_busy (if st.cont = None then Dev.Free else Dev.Pause);
-      Dev.synchronize()
+      Dev.synchronize();
+      Dev.set_busy (if st.cont = None then Dev.Free else Dev.Pause)
     with Dev.Stop ->
       st.aborted <- true
           
@@ -618,9 +620,8 @@ module Make(Dev : DEVICE) = struct
         st.aborted <- true
     end;
     if (!bounding_box) then draw_bounding_box st;
-    Dev.set_busy (if st.cont = None then Dev.Free else Dev.Pause);
-    Dev.synchronize()
-      
+    Dev.synchronize();
+    Dev.set_busy (if st.cont = None then Dev.Free else Dev.Pause)
       
   let find_xref tag default st =
     try Hashtbl.find st.dvi.Dvi.xrefs tag
