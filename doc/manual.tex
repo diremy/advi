@@ -99,8 +99,6 @@ license at URL\\ {\url{http://pauillac.inria.fr/~miquel/}}.
 Pierre~Weis, with contributions by Roberto~Di~Cosmo, Didier~Le~Botlan,
 Xavier~Leroy, and Alan~Schmitt.
 
-\advipushevents{^X^F}
-
 \clearpage
 %\advitoc
 \hypertarget{/toc.first}{}
@@ -565,16 +563,16 @@ directly from within the {\LaTeX} source file with commands
 
 \subsection{Creating events from the {\LaTeX} source file}
 
-{\ActiveDVI} provides the command \verb"\advipushevents" that provides
+{\ActiveDVI} provides the command \verb"\advipushkeys" that provides
 key presses to the presenter as if you had pressed it when viewing the
 presentation. For instance:
 \begin{verbatim}
-\advipushevents{"q"}
+\advipushkeys{"q"}
 \end{verbatim}
 ends the talk immediately. Similarly, the command
 
 \begin{verbatim}
-\advipushevents{"^F"}
+\advipushkeys{^X^F}
 \end{verbatim}
 
 will switch to full screen mode.

@@ -606,8 +606,13 @@ let around b x y =
     Some (position, left, iw1, iw2, right)
   with
   | Not_found -> None
-  | Invalid_argument _ -> assert false
-;;
+  | Invalid_argument _ ->
+      None (* Was assert false. *)
+      (* Unfortunately, this assertion failed each time
+         we try to select out of the text area.
+         It's extremely bad style to replace the assertion by None,
+         but how to debug something that raise Invalid_argument in a normal
+         situation :( *);;
 
 let rec least l min =
   match l with

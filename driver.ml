@@ -473,7 +473,7 @@ let parse_blend s =
   | "difference" -> Drawimage.Difference
   | "exclusion" -> Drawimage.Exclusion
   | _ ->
-      Misc.warning ("blend: invalid blend mode " ^ s);
+      Misc.warning (Printf.sprintf "blend: invalid blend mode %s" s);
       Drawimage.Normal;;
 
 let blend_special st s =
@@ -718,7 +718,7 @@ let scan_embed_special st s =
   let command =
     try unquote (List.assoc "command" records) with
     | Not_found ->
-        raise (Failure ("embed: no command to embed in special " ^ s)) in
+        raise (Failure ("advi embed: no command to embed in special " ^ s)) in
   Launch.add_white_run_command command;;
 
 let parse_transition dir mode record =
@@ -727,7 +727,8 @@ let parse_transition dir mode record =
   let parse_genpath record =
     try List.assoc "genpath" record with
     | Not_found ->
-        warning "special: trans push: genpath function not found";
+        Misc.warning
+          (Printf.sprintf "advi trans push: genpath function not found");
         "spiral" in
   let parse_pathelem s =
       (parse_float_option (s ^ "x") record,
@@ -739,8 +740,8 @@ let parse_transition dir mode record =
       let stepsstr = List.assoc "steps" record in
       try Some (int_of_string stepsstr) with
       | _ ->
-         warning
-           ("special: trans push: steps parse failed: \"" ^ stepsstr ^ "\"");
+         Misc.warning
+           (Printf.sprintf "advi trans push: steps parsing failed %S" stepsstr);
          None with
     | Not_found -> None
   in
@@ -757,7 +758,8 @@ let parse_transition dir mode record =
       | "bottomright" | "downright" -> Transitions.DirBottomRight
       | "center" -> Transitions.DirCenter
       | s ->
-         warning ("special: trans push: direction parse failed: \""^ s ^"\"");
+         Misc.warning
+           (Printf.sprintf "advi trans push: direction parsing failed %S" s);
          raise Exit
     with _ -> default (* Transitions.DirNone *)
   in
@@ -778,7 +780,8 @@ let parse_transition dir mode record =
   | "none" ->
       Transitions.TransNone
   | _ ->
-     warning ("special: trans push: mode parse failed \"" ^ mode ^ "\"");
+     Misc.warning
+      (Printf.sprintf "advi trans push: mode parsing failed %S" mode);
      Transitions.TransNone;;
 
 let transition_special st s =
@@ -834,7 +837,7 @@ let edit_special st s =
       let field x =
         try List.assoc x record
         with Not_found -> 
-            warning (Printf.sprintf "Field %s missing in special %s" x s);
+            Misc.warning (Printf.sprintf "Field %s missing in special %s" x s);
           raise Ignore in
       let dpi = ldexp (float st.sdpi) (-16) in
       let pixels dim =
@@ -849,7 +852,7 @@ let edit_special st s =
           with Not_found -> false, field x' in
         try b, float_of_string fx
         with _  ->
-          warning
+          Misc.warning
             (Printf.sprintf "Field %s=%s not a float in special %s" x fx s);
             raise Ignore in
       let float_to_pixel f = truncate (f *. unit) in
@@ -1234,7 +1237,7 @@ let tpic_specials st s =
   | "bk" :: _ ->
       st.tpic_shading <- 1.0
   | s :: _ ->
-      Misc.warning ("Unknown pic command: " ^ s)
+      Misc.warning (Printf.sprintf "Unknown pic command: %s" s)
   | _ -> ();;
 (* End of TPIC hacks *)
 
@@ -1246,14 +1249,15 @@ let put_special st s =
       let h' = Misc.round (float (x - st.x_origin) /. st.conv) in
       let v' = Misc.round (float (y - st.y_origin) /. st.conv) in
       st.put <- (st.h - h', st.v - v') :: st.put;
-      st.h <- h'; st.v <- v'
-    else if s = "end" then
-      match st.put with _ :: tail -> st.put <- tail | _ -> () 
-;;
+      st.h <- h'; st.v <- v' else
+    if s = "end" then
+      match st.put with
+      |  _ :: tail -> st.put <- tail
+      | _ -> ();;
 
 let rec put_coor x y = function
-    (dx, dy) :: tail -> put_coor (x + dx) (y + dy) tail
-  | [] -> x, y
+  | (dx, dy) :: tail -> put_coor (x + dx) (y + dy) tail
+  | [] -> x, y;;
 
 let ps_special st s =
   if Gs.get_do_ps () && st.status.Cdvi.hasps then
@@ -1287,7 +1291,7 @@ let close_html st =
       st.html <- None;
       st.draw_html <- []
   | Some (_, k) -> assert false
-  | None -> warning ("Closing html tag that was not open");;
+  | None -> Misc.warning ("Closing html tag that was not open");;
 
 let html_special st html =
   if has_prefix "<A " html || has_prefix "<a " html then
@@ -1308,7 +1312,8 @@ let html_special st html =
             | "underline" -> Dev.H.Underline
             | "box" -> Dev.H.Box
             | _ ->
-                warning ("Incorrect style in html suffix " ^ html);
+                Misc.warning
+                  (Printf.sprintf "Incorrect style in html suffix %s" html);
                 Dev.H.Box
           with Not_found -> Dev.H.Box in
         let color =
@@ -1324,10 +1329,10 @@ let html_special st html =
              Dev.H.color = color;
              Dev.H.area = None} in
         open_html st link advi
-    | _ -> warning ("Unknown html suffix " ^ html)
+    | _ -> Misc.warning (Printf.sprintf "Unknown html suffix %s" html)
     end else
   if has_prefix "</A>" html || has_prefix "</a>" html then close_html st else
-  warning ("Unknown html suffix " ^ html);;
+  Misc.warning (Printf.sprintf "Unknown html suffix %s" html);;
 
 let scan_special_html (_, xrefs, _) page s =
   let name = String.sub s 14 (String.length s - 16) in
@@ -1371,11 +1376,11 @@ let save_page_area_image_file_special st s =
   | Not_found | Failure _ ->
      failwith (Printf.sprintf "advi_save_page_area: invalid special %s" s);;
 
-let push_events_special st s =
-  Misc.debug_endline (Printf.sprintf "push_events_special %S" s);
+let push_keys_special st s =
+  Misc.debug_endline (Printf.sprintf "push_keys_special %S" s);
   match split_string_quoted s 0 with
-  | ["advi:"; "pushevents"; keys] ->
-     let push_events keys =
+  | ["advi:"; "pushkeys"; keys] ->
+     let push_keys keys =
        let push pc =
          if pc >= 0
          then Misc.push_key_event (char_of_int pc) GraphicsY11.nomod in
@@ -1396,15 +1401,15 @@ let push_events_special st s =
         chars if any. In case of error (i.e. when keys is not properly
         enclosed between double quotes), we simply push back the
         characters verbatim. *)
-     Misc.debug_endline (Printf.sprintf "advi_push_events %S" keys);
+     Misc.debug_endline (Printf.sprintf "advi_push_keys %S" keys);
      Scanf.kscanf
        (Scanf.Scanning.from_string keys)
        (fun _ _ ->
           let keys = unquote keys in
-          push_events keys)
-       "%S" push_events
+          push_keys keys)
+       "%S" push_keys
   | _ ->
-     failwith (Printf.sprintf "advi_push_events: invalid special ``%s''" s);;
+     failwith (Printf.sprintf "advi_push_keys: invalid special ``%s''" s);;
 
 (* This function is iterated on the current DVI page BEFORE
    rendering it, to gather the information contained in some
@@ -1514,9 +1519,9 @@ let special st s =
         (if !visible then save_page_area_image_special st s) else
       if has_prefix "advi: savepageareaimagefile " s then
         (if !visible then save_page_area_image_file_special st s) else
-      if has_prefix "advi: pushevents " s then
-        (if !visible then push_events_special st s) else
-      Misc.warning ("unknown special: " ^ s) end
+      if has_prefix "advi: pushkeys " s then
+        (if !visible then push_keys_special st s) else
+      Misc.warning (Printf.sprintf "unknown special: %s" s) end
     (* else we ignore it, whether well-formed or ill-formed *)
   end else
   if has_prefix "line: " s then line_special st s 6 else
