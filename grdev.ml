@@ -420,19 +420,21 @@ let make_center xcr ycr
   let xc = match xcr with
   | Some xcr ->
       (* Get the center coordinates integer values in the funviewport. *)
-      let xc = round_dim xcr fw in
+      let fxc = fx + round_dim xcr fw in
       (* Check the center coordinates wrt the background viewport. *)
-      if xc < x then x else
-      if xc < x + w then xc else x + w - 1
+      if fxc < x then x else
+      if fxc < x + w then fxc else x + w - 1
   | None -> x + (w + 1) / 2 in
   let yc = match ycr with
   | Some ycr ->
       (* Get the center coordinates integer values in the funviewport. *)
-      let yc = round_dim ycr fh in
+      let fyc = fy + round_dim ycr fh in
       (* Check the center coordinates wrt the background viewport. *)
-      if yc < y then y else
-      if yc < y + h then yc else y + h - 1
+      if fyc < y then y else
+      if fyc < y + h then fyc else y + h - 1
   | None -> y + (h + 1) / 2 in
+  Misc.debug_endline (Printf.sprintf
+    "The gradient center is xc = %d; yc = %d." xc yc);
   xc, yc;;
 
 let make_funarg bkgd_data bgviewport funviewport =
