@@ -16,6 +16,9 @@
 
 type window_id = string
 
+val map_subwindow : window_id -> unit
+val unmap_subwindow : window_id -> unit
+
 external bstore_id : unit -> window_id = "gr_bstore"
         (* return the X pixmap of the bstore window as an integer *)
 

@@ -1,10 +1,11 @@
 /***********************************************************************/
 /*                                                                     */
-/*                           Objective Caml                            */
+/*                           Active dvi                                */
 /*                                                                     */
-/*            Xavier Leroy, projet Cristal, INRIA Rocquencourt         */
+/*            Jun Furuse, Pierre Weis, Didier Rémy                     */
+/*            projet Cristal, INRIA Rocquencourt                       */
 /*                                                                     */
-/*  Copyright 1996 Institut National de Recherche en Informatique et   */
+/*  Copyright 2001 Institut National de Recherche en Informatique et   */
 /*  en Automatique.  All rights reserved.  This file is distributed    */
 /*  under the terms of the GNU Library General Public License.         */
 /*                                                                     */
@@ -158,4 +159,54 @@ value gr_get_modifiers(void)
     button = -1;
   }
   return Val_int(button);
+}
+
+/* Sub windows */
+/*** Still in the graphics library
+value gr_open_subwindow(value x, value y, value width, value height)
+{
+  Window win;
+
+  gr_check_open();
+  win = XCreateSimpleWindow(grdisplay, grwindow.win,
+                            Int_val(x), Int_val(y), 
+                            Int_val(width), Int_val(height),
+                            0, grblack, grbackground);
+  XMapWindow(grdisplay, win);
+  XFlush(grdisplay);
+  return (id_of_window ( win ));
+}
+
+value gr_close_subwindow(value wid)
+{
+  Window win;
+
+  gr_check_open();
+  sscanf( String_val(wid), "%lu", (unsigned long *)(&win) );
+  XDestroyWindow(grdisplay, win);
+  XFlush(grdisplay);
+  return Val_unit;
+}
+***/
+
+value gr_map_subwindow(value wid)
+{
+  Window win;
+
+  gr_check_open();
+  sscanf( String_val(wid), "%lu", (unsigned long *)(&win) );
+  XMapWindow(grdisplay, win);
+  XFlush(grdisplay);
+  return Val_unit;
+}
+
+value gr_unmap_subwindow(value wid)
+{
+  Window win;
+
+  gr_check_open();
+  sscanf( String_val(wid), "%lu", (unsigned long *)(&win) );
+  XUnmapWindow(grdisplay, win);
+  XFlush(grdisplay);
+  return Val_unit;
 }

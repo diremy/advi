@@ -662,7 +662,9 @@ module Make(Dev : DEVICE) = struct
 	| "start" ->
 	    if !current_recording_proc_name <> None ||
 	    !current_recording_proc_unit <> None then begin
-	      prerr_endline (Printf.sprintf "proc=%s record=start: cannot be recorded" procname)
+	      prerr_endline
+               (Printf.sprintf "proc=%s record=start: cannot be recorded"
+                 procname)
             end else begin
 	      hidden := 
 		(try ignore (List.assoc "play" records); false with _ -> true);
@@ -677,7 +679,8 @@ module Make(Dev : DEVICE) = struct
 	| "end" ->
 	    if !current_recording_proc_name <> Some (procname) ||
 	    !current_recording_proc_unit = None then begin
-	      prerr_endline (Printf.sprintf "proc=%s record=end: not recorded" procname)
+	      prerr_endline
+               (Printf.sprintf "proc=%s record=end: not recorded" procname)
             end else begin
 	      let v = 
 		try 
@@ -718,7 +721,8 @@ module Make(Dev : DEVICE) = struct
 	    st.cur_font <- escaped_cur_font;
 	  with
 	  | Not_found -> 
-	      prerr_endline (Printf.sprintf "proc=%s play: not recorded" procname)
+	      prerr_endline
+                (Printf.sprintf "proc=%s play: not recorded" procname)
 
     let wait_special st s =
       let records = List.map (fun (k,v) -> 
@@ -733,7 +737,6 @@ module Make(Dev : DEVICE) = struct
       Dev.synchronize();
       if not (is_hidden()) then Dev.sleep second;
       st.checkpoint <- 0
-      
     ;;
 
     (* Support for TPIC specials.  XL. *)

@@ -1019,7 +1019,7 @@ module Make(Dev : DEVICE) = struct
       st.page_no <- page_start 0 st;
     redraw st;
     
-    (* num is the the current number entered by keyboard *)
+    (* num is the current number entered by keyboard *)
     let selection_mode = ref false in
     
     try while true do
