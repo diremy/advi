@@ -5,17 +5,19 @@
 \usepackage{advi}
 \usepackage{alltt}
 
-\pagestyle{empty}
+% Pour avoir des numéros de page
+\pagestyle{plain}
 
 \def\advifooter{\vbox to 0em{\vbox to \vsize {\vfill
-INRIA-Rocquencourt %
+\tiny{My organisation %
 \hfill \today
-\hfill My.Name@inria.fr}
+\hfill My.Name@organisation.org}}
 \vss}}
 
-\def\adviheader{\noindent
-{\bf\Large My talk title is written on each page}\\
-\includegraphics[width=\textwidth]{../../tex/bar.jpg.eps}\par}
+% Just at the beginning of page, not too large
+\def\adviheader{\vspace*{-0.1\textheight}\noindent{\tiny{%
+My talk title is written on each page}\\
+\includegraphics[width=\textwidth,height=0.8EM]{../../tex/bar.jpg.eps}}}
 
 \let \Newpage \newpage
 \def \newpage {\Newpage \advifooter\adviheader}
@@ -58,11 +60,37 @@ Using the macro \verb"textcolor" you can write text in the color you
 want. For instance, \verb"\textcolor{red}{important}" is rendered as
 \textcolor{red}{important}!
 
+\adviwait
+
+\subsection* {Color specification}
+
+Following the conventions of the \verb"color.sty" {\LaTeX} package,
+you can use predefined (or \verb"named") colors. Syntax is
+\verb"\textcolor[named]{Color}{text}", as in
+
+\def\bs#1{#1}
+
+\tt{\bs{textcolor}[named]\{Green\}\{}%
+\textcolor[named]{Green}{\tt{this example}}%
+\tt{\}}%
+
+%\textcolor[named]{Green}{{\tt \\textcolor[named]\{Green\}\{this example\}}}.
+
 \begin{alltt}
 {\it{(* Remark that double semi-colon is mandatory *)}}
 let x = 1\textcolor{red}{;;}
 \{foo = 1; bar = "toto"\};;
 \end{alltt}
+
+\textcolor[named]{Red}{let} x = 1;;
+
+%\textcolor[rgb]{0.4,0.3,0.8}{let} x = 1;;
+
+\begin{alltt}
+(* Colors with rgb specification are still available. *)
+\end{alltt}
+
+\textcolor[rgb]{0.4,0.3,0.8}{let} x = 1;;
 
 \adviwait
 
