@@ -319,11 +319,10 @@ let get_cursor, set_cursor =
  let cursor = ref Cursor_left_ptr in
  (fun () -> !cursor),
  (fun c ->
-   if !cursor <> c then
-     begin
-       cursor := c;
-       set_cursor (glyph_of_cursor c)
-     end);;
+   if !cursor <> c then begin
+     cursor := c;
+     set_cursor (glyph_of_cursor c);
+   end);;
 
 external get_geometry : unit -> int * int * int * int = "gr_get_geometry";;
         (* returns width, height, x, y of the graphics window *)
@@ -349,23 +348,21 @@ external cut : string -> unit = "gr_cut";;
 
 (* Redefinition of the events loop *)
 
-type status =
-    { mouse_x : int;
+type status = {
+      mouse_x : int;
       mouse_y : int;
       button : bool;
       keypressed : bool;
       key : char; 
       modifiers : int;
-    }
-;;
+};;
 
 type event =
-    Button_down
+  | Button_down
   | Button_up
   | Key_pressed
   | Mouse_motion
-  | Poll
-;;
+  | Poll;;
 
 external wait_next_event : event list -> status = "gry_wait_event";;
 external retrieve_events : unit -> unit = "gry_retrieve_events";;
@@ -396,15 +393,13 @@ external anti_synchronize : unit -> unit = "gr_anti_synchronize";;
 let get_display_mode, set_display_mode =
   let display_mode_ref = ref false in
   (fun () -> !display_mode_ref),
-  (fun b -> Graphics.display_mode b; display_mode_ref := b)
-;;
+  (fun b -> Graphics.display_mode b; display_mode_ref := b);;
 
 (* This should be defined in regular Graphics. *)
 let get_remember_mode, set_remember_mode =
   let remember_mode_ref = ref false in
   (fun () -> !remember_mode_ref),
-  (fun b -> Graphics.remember_mode b; remember_mode_ref := b)
-;;
+  (fun b -> Graphics.remember_mode b; remember_mode_ref := b);;
 
 (** Enable_display flag allows to inhibit display_mode commands. *)
 let get_enable_display_mode, set_enable_display_mode =
@@ -428,7 +423,7 @@ let display_mode b =
   Misc.debug_endline ("GraphicsY11.display_mode " ^ string_of_bool b);
   let enable = get_enable_display_mode () in
   if enable then
-   (Misc.debug_endline ("Graphics.display_mode " ^ string_of_bool b);
+   (Misc.debug_endline ("GraphicsY11.set_display_mode " ^ string_of_bool b);
     set_display_mode b);;
 
 (** [point_color] according to [enable_display_mode]. *)
@@ -436,44 +431,44 @@ let point_color x y =
   let enable = get_enable_display_mode () in
   if enable then Graphics.point_color x y else window_point_color x y;;
 
+(* Draw on the screen only. *)
 let set_screen_only_mode () =
   (* Don't draw on the backing store canvas. *)
   set_remember_mode false;
   (* Draw on the screen display window. *)
-  display_mode true;;
+  set_display_mode true;;
 
+(* Draw in the memory only. *)
 let set_backing_store_only_mode () =
   (* Draw on the backing store canvas. *)
   set_remember_mode true;
   (* Don't draw on the screen display window. *)
-  display_mode false;;
+  set_display_mode false;;
 
 (* Set the drawing modes to the given arguments. *)
-let restore_modes dm rm =
-  set_remember_mode rm;
-  display_mode dm;;
+let restore_modes dm rm = set_remember_mode rm; set_display_mode dm;;
 
-(* This function performs f on the screen display only,
+(* This functional computes the call [f x], after having remembered
+   the inititial drawing modes (before calling [f x]) and, presumably
+   set them by calling the function [set_mode].
+   After the call [f x], the original drawing modes are left unaffected,
+   even in case the computation of [f x] raises an exception. *)
+let only_on set_mode f x =
+  let dm, rm = get_display_mode (), get_remember_mode () in
+  set_mode ();
+  try
+    let res = f x in
+    restore_modes dm rm;
+    res with
+  | exn -> restore_modes dm rm; raise exn;;
+
+(* This function performs [f x] on the screen display only,
    not affecting the backing store canvas.
    After the call, the drawing modes are left unaffected. *)
-let only_on_screen f x =
-  let dm, rm = get_display_mode (), get_remember_mode () in
-  set_screen_only_mode ();
-  try
-    let res = f x in
-    restore_modes dm rm;
-    res with
-  | exn -> restore_modes dm rm; raise exn;;
+let only_on_screen f = only_on set_screen_only_mode f;;
 
 (* Similar to [only_on_screen] for the backing store. *)
-let only_on_backing_store f x =
-  let dm, rm = get_display_mode (), get_remember_mode () in
-  set_backing_store_only_mode ();
-  try
-    let res = f x in
-    restore_modes dm rm;
-    res with
-  | exn -> restore_modes dm rm; raise exn;;
+let only_on_backing_store f = only_on set_backing_store_only_mode f;;
 
 (* Graphics.sigio_signal is not exported. We declare it here again. *)
 external sigio_signal: unit -> int = "gr_sigio_signal";;

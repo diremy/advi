@@ -269,6 +269,7 @@ val key_pressed : unit -> bool;;
         (* Return [true] if a keypress is available; that is, if [read_key]
            would not block. *)
 
+(** Useless in Active-DVI.
 val get_enable_display_mode : unit -> bool;;
 (** [get_enable_display_mode] returns the value of the
   [enable_display_mode] flag. This flags enables/disables the command
@@ -278,6 +279,7 @@ val get_enable_display_mode : unit -> bool;;
   [synchronize] performs the inverse operation as the regular
   [Graphics.synchronize] function since it copies the screen window
   into the backing store. *)
+***)
 
 val set_enable_display_mode : bool -> unit;;
 (** [set_enable_display_mode] sets the [enable_display_mode] flags. *)
@@ -296,11 +298,16 @@ val point_color : int -> int -> color;;
 
 val only_on_screen : ('a -> 'b) -> 'a -> 'b;;
 (** [only_on_screen f arg] performs [f arg] on the screen window only,
-   not affecting the backing store. *)
+   not affecting the backing store.
+   Current [display_mode] and [remember_mode] are preserved. *)
 
 val only_on_backing_store : ('a -> 'b) -> 'a -> 'b;;
 (** [only_on_screen f arg] performs [f arg] on the backing store canvas only,
-   not affecting the screen window. *)
+   not affecting the screen window.
+   Current [display_mode] and [remember_mode] are preserved. *)
+
+val set_remember_mode : bool -> unit;;
+(*val set_display_mode : bool -> unit;;*)
 
 val init : unit -> unit;;
 (** We have to call this function to disable the original Graphics
