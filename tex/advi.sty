@@ -22,6 +22,7 @@
 \DeclareOption {ignore}{\advi@ignoretrue}
 
 \ProcessOptions
+% \@ifundefined {AdviOptions}{}{\ExecuteOptions {\AdviOptions}}
 
 %% More declarations
 
@@ -47,6 +48,8 @@ Maybe you mean \@currenvir ing}}
         \csname end#2\endcsname}}
 
 \def \advi@ignore #1{}
+\def \advi@id #1{#1}
+
 \def \advi@ifadvi {\ifadvi@ignore
   \expandafter \@secondoftwo \else \expandafter \@firstoftwo \fi}
 \advi@export \advignore \advi@ignoretrue
@@ -67,8 +70,8 @@ Maybe you mean \@currenvir ing}}
 
 \newenvironment{advi@recording}[2][]%
   {\begingroup
-        \let \advi@do \advi@start \setkeys{advi@record}{#1}%
-        \advi@special {proc=#2 record=\advi@do}%
+     \let \advi@do \advi@start \setkeys{advi@record}{#1}%
+     \advi@special {proc=#2 record=\advi@do}%
    \endgroup}
   {\advi@special {proc record=end}}
 \newcommand {\advi@record}[3][]{\advi@recording[#1]{#2}#3\endadvi@recording}
@@ -255,15 +258,42 @@ Maybe you mean \@currenvir ing}}
 
 \def \advi@setpagestyle {\advi@bgpage \advi@transpage}
 
-\let \latex@begindvi \@begindvi
 \def \endpage@hook {}
 \def \AtEndPage {\g@addto@macro \endpage@hook}
-\AtEndPage {\advi@setpagestyle}
-\def \@begindvi
-  {\latex@begindvi \global \let \@begindvi \endpage@hook \@begindvi}
 
-% not used anymore
-% \def\advi@resettransition{\advi@special{trans pop}}
+\def \g@addto@macro@end
+
+\AtEndPage {\advi@setpagestyle}
+
+% We musch pact \@begindvi to put out hook. 
+% However, hyperref may patch it as well. So we should do it at begin
+% document to have the control (no one after us). 
+% Howver, one must be careful, because \@begindvi redefines itself at the
+% first call to its prerecorded final value. 
+% So our first patch will be overridden with the value that it was
+% meant to have after the first page.
+% Hence, we patch it a second time to put our hook to this final value. 
+
+% we can use \g@addto@macro which redefines #1 to so that it procedes as 
+% before and then execute #2 at the end. 
+
+\def \advi@begindvi@patch
+  {\g@addto@macro \@begindvi      
+      {\endpage@hook 
+       \g@addto@macro \@begindvi {\endpage@hook}}}
+
+%  {\let \advi@begindvi@save \@begindvi   %% value at begindocument
+%   \def \@begindvi                       %% our new value
+%     {\advi@begindvi@save                %% may redefine \@begindvi
+%      \global\let \advi@begindvi@save    %% so we this new value
+%         \@begindvi                      
+%      \gdef \@begindvi                   %% now and forever
+%         {\advi@begindvi@save \endpage@hook}%
+%      \endpage@hook                      %% our hook for the
+%     }}
+
+
+%% Transitions
 
 \def\advi@transbox@save#1#2#3{\advi@special
   {transbox save width=#1 height=#2 depth=#3}}
@@ -321,7 +351,7 @@ end
 
 \def \advi@over@ {over}
 \def \advi@click@ {click}
-\def \advi@anchorenv {advianchor}
+\def \advi@null {\hbox {}}
 
 \newenvironment {advi@anchoring}[2][over]{%
    \begingroup
@@ -340,10 +370,6 @@ end
 \let \endadvianchor \advi@undefinedenv
 
 %%% Partial patch for overlays -- 0 will be shown > 0 will not be shown
-
-\let \latex@overlay \overlay
-\let \latex@end@slide \end@slide
-\let \latex@overlay@loop
 
 \def \advi@max {0}
 \newcommand {\advi@overlay}[1]%
@@ -368,13 +394,17 @@ end
 \def \advi@end@slide 
   {\advi@ifadvi {\overlay@loop}{}\latex@end@slide}
 
-\def \advi@overlay@hook
-  {\let \overlay \advi@overlay
+\def \advi@overlay@patch {%
+   \let \latex@overlay \overlay
+   \let \latex@end@slide \end@slide
+   \let \latex@overlay@loop \overlay@loop
+   \let \overlay \advi@overlay
    \let \overlay@loop \advi@overlay@loop
    \let \end@slide \advi@end@slide
   }
+
 \@ifundefined {overlay}{}
-   {\AtBeginDocument {\advi@overlay@hook}}
+   {\AtBeginDocument {\advi@overlay@patch}}
 
 
 \endinput

@@ -1,18 +1,8 @@
-TEXINPUTS := .:../lib:../../tex:
-ADVI=TEXPSHEADERS=../../tex: ../../advi.opt
-LATEX=TEXINPUTS=$(TEXINPUTS) latex 
-DEP=$(addprefix ../../tex/, advi.sty advi-annot.sty bubble.sty)
+TOPDIR=../..
+FILES=join.tex 
+include ../lib/Makefile
 
-show: join.dvi  
-	$(ADVI) join.dvi
-
-join.dvi: join.tex $(DEP)
-	$(LATEX) join.tex
-
-
-clean:
-	rm -f join.{aux,log,dvi}
-
+join.advi: join.dvi
 
 .phony: show
 

@@ -6,9 +6,10 @@
 
 \expandafter \ifx \csname driver\endcsname\relax \def \driver{}\fi 
 \usepackage [\driver]{hyperref}
+
 \usepackage {advi}
 \usepackage {advi-annot}
-
+\usepackage {bubble}
 
 \title {{\ActiveDVI} manual}
 \author {Didier R{\'{e}}my and ???}
@@ -40,11 +41,12 @@ with {\tt dvips}. Of course, this will disable most effects, although some
 of them will be approximated.
 
 If the global option is not {\tt ignore} is not set, it is possible to set
-it locally with the commands {\docdef \adviignore}.
-The package also defines the conditional
-{\docdef \ifadvi} which
-evaluate its first  argument if advi is not ignore and its second argument
-otherwise. 
+it locally with the commands {\docdef \adviignore}. However, this will not
+ignore all actions, since some decisions are taken when the package is
+loaded.
+
+The package also defines the conditional {\docdef \ifadvi} which evaluate
+its first argument if advi is not ignore and its second argument otherwise.
 
 \subsection {Pause, Record and Play}
 

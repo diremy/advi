@@ -13,18 +13,20 @@
 
 
 %\usepackage[psbubble]{xprosper}
-\usepackage{xprosper}
-\usepackage {pst-node}
-\usepackage {hyperref}
 
-%%% advi must follow hyperref
-\usepackage{advi}
+\usepackage{xprosper}
+\usepackage{advi}  % Must be after xprosper
 
 %%% colors
 \usepackage {color}
+
 \definecolor{lightblue}{rgb}{0.7,0.7,1}
 \definecolor{lightred}{rgb}{1,0.8,0.8}
 \definecolor{lightgreen}{rgb}{0.6,1,0.6}
+
+\usepackage{pst-node}
+
+%%% hyperref must come last
 
 
 %%% both prosper and advi define the same macro pause, to be fixed
@@ -43,7 +45,6 @@
 \def \mathprefix #1{\mathopen{}\mathrel{\tt {#1}}}
 
 \begin{document}
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \overlays*{\begin{slide}
