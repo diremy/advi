@@ -151,7 +151,7 @@ type state = {
     mutable exchange_page : int;
     mutable last_modified : float;
     mutable button : (int * int) option;
-    mutable fullscreen : (int * int * int * int) option; 
+    mutable fullscreen : (int * int * int * int) option;
 
     mutable pause_no : int;
       (* Attributes for Embedded postscript *)
@@ -384,7 +384,7 @@ let rec goto_next_pause n st =
           goto_next_pause (pred n) st
         with Grdev.Stop -> st.aborted <- true;
     end;
-  Grdev.synchronize(); 
+  Grdev.synchronize();
   Grdev.set_busy (if st.cont = None then Grdev.Free else Grdev.Pause);;
 
 let draw_bounding_box st =
@@ -503,13 +503,17 @@ let redraw ?trans st =
        with
        | Driver.Pause -> st.cont <- Some f
      else
-       Driver.render_page st.cdvi st.page_no 
+       Driver.render_page st.cdvi st.page_no
          (st.base_dpi *. st.ratio) st.orig_x st.orig_y
     with
     | Grdev.Stop -> st.aborted <- true
   end;
   Grdev.synchronize();
   Grdev.set_busy (if st.cont = None then Grdev.Free else Grdev.Pause);;
+
+let redisplay st =
+  st.pause_no <- 0;
+  redraw st;;
 
 let goto_previous_pause n st =
   if n > 0 then begin
@@ -534,7 +538,7 @@ exception Link;;
 let exec_xref link =
   let call command =
     let pid = Misc.fork_process command in
-    (* I don't understand this change -Didier: it was 
+    (* I don't understand this change -Didier: it was
     Grdev.wait_button_down() in *)
     (* only to launch embeded apps *)
     if Graphics.button_down () then
@@ -542,7 +546,7 @@ let exec_xref link =
   if Misc.has_prefix "file:" link then
     try
       let filename, arguments =
-        match Misc.split_string (Misc.get_suffix "file:" link) 
+        match Misc.split_string (Misc.get_suffix "file:" link)
                (function '#' -> true | _ -> false) 0 with
         | [ filename; tag ] -> filename, ["-html"; tag ]
         | [ filename ] -> filename, []
@@ -630,8 +634,7 @@ let goto_page n st = (* go to the begining of the page *)
   let new_page_no = max 0 (min n (st.num_pages - 1)) in
   if st.page_no <> new_page_no || st.aborted then
     begin
-      if st.page_no <> new_page_no then
-        st.exchange_page <- st.page_no;
+      if st.page_no <> new_page_no then st.exchange_page <- st.page_no;
       let t =
         if new_page_no = succ st.page_no then Some Transitions.DirRight
         else if new_page_no = pred st.page_no then Some Transitions.DirLeft
@@ -729,163 +732,164 @@ let scale n st =
   update_dvi_size true st;
   redraw st;;
 
-  module B =
-    struct
-      let nop st = ()
-      let push_next_page st =
-        push_page false (st.page_no + max 1 st.num) st
-      let next_pause st =
-        if st.cont = None then push_next_page st
-        else goto_next_pause (max 1 st.num) st
-      let digit k st =
-        st.next_num <- st.num * 10 + k
-      let next_page st =
-        goto_page (st.page_no + max 1 st.num) st
-      let goto st =
-        push_page true (if st.num > 0 then st.num - 1 else st.num_pages) st
+module B =
+  struct
+    let nop st = ()
+    let push_next_page st =
+      push_page false (st.page_no + max 1 st.num) st
+    let next_pause st =
+      if st.cont = None then push_next_page st
+      else goto_next_pause (max 1 st.num) st
+    let digit k st =
+      st.next_num <- st.num * 10 + k
+    let next_page st =
+      goto_page (st.page_no + max 1 st.num) st
+    let goto st =
+      push_page true (if st.num > 0 then st.num - 1 else st.num_pages) st
 
-      let push_page st =
-        push_stack true st.page_no st
-      let previous_page st =
-        goto_page (st.page_no - max 1 st.num) st
-      let pop_previous_page st =
-        pop_page false (max 1 st.num) st
-      let previous_pause st =
-        if st.pause_no > 0
-        then goto_previous_pause (max 1 st.num) st
-        else pop_previous_page st
-      let pop_page st =
-        pop_page true 1 st
-      let first_page st =
-        goto_page 0 st
-      let last_page st =
-        goto_page max_int st
-      let exchange_page st =
-        goto_page st.exchange_page st
-      let unfreeze_fonts st =
-        Driver.unfreeze_fonts st.cdvi
-      let unfreeze_glyphs st =
-        Driver.unfreeze_glyphs st.cdvi (st.base_dpi *. st.ratio)
-      let center st =
-        st.ratio <- 1.0;
-        st.orig_x <- (st.size_x - st.dvi_width) / 2;
-        st.orig_y <- (st.size_y - st.dvi_height) / 2;
-        update_dvi_size false st;
-        redraw st
+    let push_page st =
+      push_stack true st.page_no st
+    let previous_page st =
+      goto_page (st.page_no - max 1 st.num) st
+    let pop_previous_page st =
+      pop_page false (max 1 st.num) st
+    let previous_pause st =
+      if st.pause_no > 0
+      then goto_previous_pause (max 1 st.num) st
+      else pop_previous_page st
+    let pop_page st =
+      pop_page true 1 st
+    let first_page st =
+      goto_page 0 st
+    let last_page st =
+      goto_page max_int st
+    let exchange_page st =
+      goto_page st.exchange_page st
+    let unfreeze_fonts st =
+      Driver.unfreeze_fonts st.cdvi
+    let unfreeze_glyphs st =
+      Driver.unfreeze_glyphs st.cdvi (st.base_dpi *. st.ratio)
+    let center st =
+      st.ratio <- 1.0;
+      st.orig_x <- (st.size_x - st.dvi_width) / 2;
+      st.orig_y <- (st.size_y - st.dvi_height) / 2;
+      update_dvi_size false st;
+      redraw st
 
-      let scale_up st = scale (max 1 st.num) st
-      let scale_down st = scale (0 - max 1 st.num) st
+    let scale_up st = scale (max 1 st.num) st
+    let scale_down st = scale (0 - max 1 st.num) st
 
-      let nomargin st =
-        attr.hmargin <- Px 0; attr.vmargin <- Px 0;
-        update_dvi_size true st;
-        redraw st
+    let nomargin st =
+      attr.hmargin <- Px 0; attr.vmargin <- Px 0;
+      update_dvi_size true st;
+      redraw st
 
-      let page_left st =
-        match (move_within_margins_x st (attr.geom.width - 10)) with
+    let page_left st =
+      match (move_within_margins_x st (attr.geom.width - 10)) with
+      | Some n ->
+          if n > st.orig_x  then begin
+            st.orig_x <- n;
+            set_bbox st;
+            redraw st
+          end
+      | None -> ()
+
+    let page_down st =
+      let none () =
+        if st.page_no < st.num_pages - 1 then begin
+            (* the following test is necessary because of some
+             * floating point rounding problem
+             *)
+          if attr.geom.height <
+            st.dvi_height + 2 * (get_size_in_pix st attr.vmargin) then
+            begin
+              st.orig_y <- top_of_page st;
+              set_bbox st;
+            end;
+          goto_page (st.page_no + 1) st
+        end
+      in
+      begin
+        match (move_within_margins_y st (10 - attr.geom.height)) with
         | Some n ->
-            if n > st.orig_x  then begin
-              st.orig_x <- n;
+              (* this test is necessary because of rounding errors *)
+            if n > st.orig_y then none ()
+            else begin
+              st.orig_y <- n;
               set_bbox st;
               redraw st
             end
-        | None -> ()
+        | None -> none ()
+      end
 
-      let page_down st =
-        let none () =
-          if st.page_no < st.num_pages - 1 then begin
-              (* the following test is necessary because of some
-               * floating point rounding problem
-               *)
-            if attr.geom.height <
-              st.dvi_height + 2 * (get_size_in_pix st attr.vmargin) then
-              begin
-                st.orig_y <- top_of_page st;
-                set_bbox st;
-              end;
-            goto_page (st.page_no + 1) st
-          end
-        in
-        begin
-          match (move_within_margins_y st (10 - attr.geom.height)) with
-          | Some n ->
-                (* this test is necessary because of rounding errors *)
-              if n > st.orig_y then none ()
-              else begin
-                st.orig_y <- n;
-                set_bbox st;
-                redraw st
-              end
-          | None -> none ()
+    let page_up st =
+      let none () =
+        if st.page_no > 0 then begin
+          if attr.geom.height <
+            st.dvi_height + 2 * (get_size_in_pix st attr.vmargin) then
+            begin
+              st.orig_y <- bottom_of_page st;
+              set_bbox st;
+            end;
+          goto_page (st.page_no -1) st
         end
-
-      let page_up st =
-        let none () =
-          if st.page_no > 0 then begin
-            if attr.geom.height <
-              st.dvi_height + 2 * (get_size_in_pix st attr.vmargin) then
-              begin
-                st.orig_y <- bottom_of_page st;
-                set_bbox st;
-              end;
-            goto_page (st.page_no -1) st
-          end
-        in
-        begin
-          match (move_within_margins_y st (attr.geom.height - 10)) with
-          | Some n ->
-              if n < st.orig_y then none ()
-              else begin
-                st.orig_y <- n;
-                set_bbox st;
-                redraw st
-              end
-          | None -> none ()
-        end
-
-      let page_right st =
-        match (move_within_margins_x st (10 - attr.geom.width)) with
+      in
+      begin
+        match (move_within_margins_y st (attr.geom.height - 10)) with
         | Some n ->
-            if n < st.orig_x then begin
-              st.orig_x <- n;
+            if n < st.orig_y then none ()
+            else begin
+              st.orig_y <- n;
               set_bbox st;
               redraw st
             end
-        | None -> ()
+        | None -> none ()
+      end
+
+    let page_right st =
+      match (move_within_margins_x st (10 - attr.geom.width)) with
+      | Some n ->
+          if n < st.orig_x then begin
+            st.orig_x <- n;
+            set_bbox st;
+            redraw st
+          end
+      | None -> ()
 
 
-      let redraw = redraw ?trans:(Some Transitions.DirNone)
-      let reload = reload 
+    let redraw = redraw ?trans:(Some Transitions.DirNone)
+    let reload = reload
+    let redisplay = redisplay
 
-      let fullscreen st =
-        let x, y = 
-          match st.fullscreen with
-            None ->
-              let x = GraphicsY11.origin_x() in
-              let y = GraphicsY11.origin_y() in
-              st.fullscreen <- Some (x, y, st.size_x, st.size_y);
-              Grdev.reposition ~x:0 ~y:0 ~w:(-1) ~h:(-1);
-          | Some (x, y, w, h) -> 
-              st.fullscreen <- None;
-              Grdev.reposition ~x ~y ~w ~h in
-        resize st x y
-        
-      let exit st = raise Exit
-      let clear_image_cash st = (* clear image cache *)
-        Grdev.clean_ps_cache ()
-      let help st =
-        let int = function
-          | No_offset -> 0
-          | Plus x -> x
-          | Minus y -> - y in
-        let pid = Misc.fork_process
-            (Printf.sprintf "%s -g %dx%d %s"
-	       Sys.argv.(0)
-               attr.geom.width
-               attr.geom.height
-               Config.splash_screen) in
-        ()
-    end;;
+    let fullscreen st =
+      let x, y =
+        match st.fullscreen with
+          None ->
+            let x = GraphicsY11.origin_x() in
+            let y = GraphicsY11.origin_y() in
+            st.fullscreen <- Some (x, y, st.size_x, st.size_y);
+            Grdev.reposition ~x:0 ~y:0 ~w:(-1) ~h:(-1);
+        | Some (x, y, w, h) ->
+            st.fullscreen <- None;
+            Grdev.reposition ~x ~y ~w ~h in
+      resize st x y
+
+    let exit st = raise Exit
+    let clear_image_cash st = (* clear image cache *)
+      Grdev.clean_ps_cache ()
+    let help st =
+      let int = function
+        | No_offset -> 0
+        | Plus x -> x
+        | Minus y -> - y in
+      let pid = Misc.fork_process
+          (Printf.sprintf "%s -g %dx%d %s"
+      Sys.argv.(0)
+             attr.geom.width
+             attr.geom.height
+             Config.splash_screen) in
+      ()
+  end;;
 
 let bindings = Array.create 256 B.nop;;
 for i = 0 to 9 do
@@ -893,41 +897,43 @@ for i = 0 to 9 do
 done;
 let bind (key, action) = bindings.(Char.code key) <- action  in
 List.iter bind [
-    (* For instance *)
-    (* Alan: I modified the bindings for hjkl to move the page around *)
-  'h'   , B.page_left;
-  'i' 	, B.pop_page;
-  'j' 	, B.page_down;
-  'k' 	, B.page_up;
-  'l' 	, B.page_right;
-  'm' 	, B.push_page;
-  
-  ' ' 	, B.next_pause;
-  'n' 	, B.next_page;
-  '\r'	, B.push_next_page;
-  '\t'	, B.push_page;
-  'p' 	, B.previous_page;
-  'P' 	, B.previous_pause;
-  '\b'	, B.pop_previous_page;
-  '\027'	, B.pop_page; 
-  ',' 	, B.first_page; 
-  '.' 	, B.last_page; 
-  'f' 	, B.unfreeze_fonts; 
-  'F' 	, B.unfreeze_glyphs; 
-  ''   , B.fullscreen;
-  'r' 	, B.redraw; 
-  'R' 	, B.reload; 
-  'c' 	, B.center; 
-  '<' 	, B.scale_down; 
-  '>' 	, B.scale_up; 
-  'g' 	, B.goto; 
-  'x' 	, B.exchange_page; 
-  '#' 	, B.nomargin; 
-  'q' 	, B.exit; 
-  'C' 	, B.clear_image_cash; 
-  '?' 	, B.help; 
-];; 
-    
+  (* For instance *)
+  (* Alan: I modified the bindings for hjkl to move the page around *)
+  'h', B.page_left;
+  'i', B.pop_page;
+  'j', B.page_down;
+  'k', B.page_up;
+  'l', B.page_right;
+  'm', B.push_page;
+
+  ' ', B.next_pause;
+  'n', B.next_page;
+  '\r', B.push_next_page;
+  '\t', B.push_page;
+  'p', B.previous_page;
+  'P', B.previous_pause;
+  'N', B.next_pause;
+  '\b', B.pop_previous_page;
+  '\027', B.pop_page;
+  ',', B.first_page;
+  '.', B.last_page;
+  'f', B.unfreeze_fonts;
+  'F', B.unfreeze_glyphs;
+  '', B.fullscreen;
+  'r', B.redraw;
+  '', B.redisplay;
+  'R', B.reload;
+  'c', B.center;
+  '<', B.scale_down;
+  '>', B.scale_up;
+  'g', B.goto;
+  'x', B.exchange_page;
+  '#', B.nomargin;
+  'q', B.exit;
+  'C', B.clear_image_cash;
+  '?', B.help;
+];;
+
 let main_loop filename =
   let st = init filename in
   let cont = ref None in (* drawing continuation *)
@@ -959,7 +965,7 @@ let main_loop filename =
     | Grdev.Selection s -> selection s
     | Grdev.Position (x, y) ->
         position st x y
-    | Grdev.Click (Grdev.Top_left, _,_,_) ->
+    | Grdev.Click (Grdev.Top_left, _, _, _) ->
         if !click_turn_page then B.pop_page st
     | Grdev.Click (_, Grdev.Button1, _, _) ->
         if !click_turn_page then B.previous_pause st

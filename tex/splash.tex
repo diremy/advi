@@ -36,7 +36,7 @@
 \def \newpage {\Newpage \advifooter\adviheader}
 
 \def\adviemptyfooter{\vbox to 0em{\vbox to \vsize {\vfill
-~~} \vss}}
+\hfill Press \key{q} to quit \hfill~} \vss}}
 
 \def\lastpage{\Newpage\adviemptyfooter\adviheader}
 
@@ -59,7 +59,7 @@ See \texttt{http://pauillac.inria.fr/advi/}
 \texttt{advi [OPTIONS] DVIFILE}\\
 Try \texttt{advi -help} for more information.
 
-\subsection*{Key Bindings}
+\subsection*{Key bindings}
 
 Advi recognizes the keystrokes listed below when typed in its window.
 Some keystrokes may optionally be preceded by a number, called \arg below, whose
@@ -71,34 +71,64 @@ Additionnally, the history contains marked pages which are stronger than
 unmarked pages. 
 
 \vspace{\stretch{1}}
+
 \noindent
 \begin{tabularx}{\linewidth}{clcX}
 \ikey{?}{info}{Quick info and key bindings help.}
 \ikey{q}{quit}{End of show.}
+\ikey{space}{continue}
+{Move \arg pauses forward if any, or do as \key{return} otherwise.}
 \ikey{n}{next}
 {Move \arg physical pages forward, leaving the history unchanged.}
 \ikey{p}{previous}
 {Move \arg physical pages backward, leaving the history unchanged.}
+\ikey{g}{go}
+{If \arg is unset move to the last page.
+ If \arg is the current page do nothing.
+ Otherwise, push the current page on the history as marked, and move
+ to the physical pages \arg.}
 \ikey{,}{begin}{Move to the first page.}
 \ikey{.}{end}{Move to the last page.}
-\ikey{c}{center}{Center the page in the window, and resets the default resolution.}
-\ikey{$<$}{smaller}{Scale down the resolution by scalestep (default $\sqrt{\sqrt 2}$)}
-\ikey{$>$}{bigger}{Scale up the resolution by scalestep (default $\sqrt{\sqrt 2}$)}
 \end{tabularx}
 
 \vspace{\stretch{1}}
 
-%\begin{center}
-%Press \key{n} for next page.
-%\end{center}
-
 \newpage
 
-%\Large
-%\begin{center}
-%\textbf{Key bindings}
-%\end{center}
-%\normalsize
+\vspace{\stretch{1}}
+
+\noindent
+\begin{tabularx}{\linewidth}{clcX}
+\ikey{N}{next pause}{Move \arg pauses forward (equivalent to continue).}
+\ikey{P}{previous pause}{Move \arg pauses backward.}
+\ikey{$<$}{smaller}{Scale down the resolution by scalestep (default $\sqrt{\sqrt 2}$).}
+\ikey{$>$}{bigger}{Scale up the resolution by scalestep (default $\sqrt{\sqrt 2}$).}
+\ikey{c}{center}{Center the page in the window, and resets the default resolution.}
+\ikey{\char35}{fullpage}{Remove margins around the page and change
+the resolution accordingly.}
+\ikey{\verb"^"L}{redisplay}{Redisplay the current page to the first
+pause of the page.}
+\ikey{r}{redraw}{Redraw the current page to the current pause.}
+\ikey{R}{reload}{Reload the file and redraw the current page.}
+\ikey{h}{page left}
+{Moves one screen width toward the left of the page. Does nothing if the
+  left part of the page is already displayed}
+\ikey{l}{page right}
+{Moves one screen width toward the right of the page. Does nothing if the
+  right part of the page is already displayed}
+\ikey{j}{page down}
+{Moves one screen height toward the bottom of the page. Jumps to the top of
+  next page, if there is one, and if the bottom of the page is already
+  displayed.}
+\ikey{k}{page up}
+{Moves one screen height toward the top of the page. Jumps to the bottom
+ previous page, if there is one, and if the top of the page is already
+ displayed.}
+\end{tabularx}
+
+\vspace{\stretch{1}}
+
+\newpage
 
 \vspace{\stretch{1}}
 
@@ -108,49 +138,16 @@ unmarked pages.
 {Push the current page on the history stack, and move forward n physical pages.}
 \ikey{tab}{mark and next}
 {Push the current page on the history as marked, and move forward n physical pages.}
-\ikey{space}{continue}
-{Move to the next pause if any, or do as \key{return} otherwise.}
 \ikey{backspace}{back}
 {Move \arg pages backward according to the history. The history stack is poped, accordingly.}
 \ikey{escape}{find mark}
 {Move \arg marked pages backward according to the history.
  Do nothing if the history does no contain any marked page.}
-\ikey{g}{go}
-{If \arg is unset move to the last page.
- If \arg is the current page do nothing.
- Otherwise, push the current page on the history as marked, and move
- to the physical pages \arg.}
 \ikey{f}{load fonts}{Load all the fonts used in the documents.  By default, fonts are loaded only when needed.}
-\ikey{r}{redraw}{Redraw the current page.}
-\ikey{R}{reload}{Reload the file and redraw the current page.}
 \ikey{F}{make fonts}
 {Does the same as \key{f}, and precomputes the glyphs of all characters used in the document.
 This takes more time than loading the fonts, but the pages are drawn faster.}
-\ikey{C}{clear}{Erase the image cache (buggy).}
-\end{tabularx}
-
-\vspace{\stretch{1}}
-
-\newpage
-
-\vspace{\stretch{1}}
-
-\noindent
-\begin{tabularx}{\linewidth}{clcX}
-\ikey{h}{page left.}
-{Moves one screen width toward the left of the page. Does nothing if the
-  left part of the page is already displayed}
-\ikey{l}{page right.}
-{Moves one screen width toward the right of the page. Does nothing if the
-  right part of the page is already displayed}
-\ikey{j}{page down.}
-{Moves one screen height toward the bottom of the page. Jumps to the top of
-  next page, if there is one, and if the bottom of the page is already
-  displayed.}
-\ikey{k}{page up}
-{Moves one screen height toward the top of the page. Jumps to the bottom
- previous page, if there is one, and if the top of the page is already
- displayed.}
+\ikey{C}{clear}{Erase the image cache.}
 \end{tabularx}
 
 \vspace{\stretch{1}}
@@ -169,6 +166,7 @@ Authors and contributors are :
 \item Pierre Weis \email{Pierre.Weis@inria.fr}
 \item Didier Le Botlan \email{Didier.Le\_Botlan@inria.fr}
 \item Alan Schmitt \email{Alan.Schmitt@inria.fr}
+\item Roberto Dicosmo \email{Roberto.Dicosmo@inria.fr}
 \end{itemize}
 
 \vspace{\stretch{1}}
