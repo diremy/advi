@@ -33,7 +33,7 @@ let set_pointer_color_string s =
 
 Options.add
   "-laser-pointer-color"
-  (Arg.Int set_pointer_color)
+  (Arg.String set_pointer_color_string)
   (Printf.sprintf
      "<color>: set the color of the ``laser'' pointer,\
      \n\t (the default color is red).");;
@@ -111,7 +111,8 @@ let create_pointer x y w =
   draw_image bkg_img x y;
   { bkg_img = bkg_img;
     ptr_img = pointer_image;
-    x = x; y = y; half_size = w / 2;
+    x = x; y = y;
+    half_size = w / 2;
   };;
 
 (* Clear the actual pointer. *)
@@ -136,26 +137,27 @@ let show_pointer ptr x y =
 
 let null_key = '\000';;
 
-let rec treat_laser_event laser_pointer q =
+let rec treat_laser_event ptr q =
    match wait_next_event
            [Mouse_motion; Button_down; Button_up; Key_pressed;] with
    | { mouse_x = x; mouse_y = y;
        button = btn;
        keypressed = kp;
        key = c; } ->
-       show_pointer laser_pointer x y;
+       show_pointer ptr x y;
        if kp then begin
          match c with
          | '' | '' -> raise Exit
          | '' when q = '' ->
-	    Shot.save_page_image ();
-            clear_pointer laser_pointer;
-            treat_laser_event laser_pointer null_key
+            Shot.save_page_image ();
+            clear_pointer ptr;
+            GraphicsY11.anti_synchronize ();
+            show_pointer ptr x y
          | '' when q = '' ->
             Misc.push_key_event '' GraphicsY11.control;
             Misc.push_key_event '' GraphicsY11.control;
             raise Exit
-         | '' -> treat_laser_event laser_pointer c
+         | '' -> treat_laser_event ptr c
          | 'l' when q = '' -> raise Exit
          | c ->
             Misc.push_key_event 'l' GraphicsY11.nomod;
