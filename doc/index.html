@@ -15,21 +15,18 @@
 HREF="http://caml.inria.fr/ocaml/">Objective Caml</A> with some eye
 candy effects for presentation.
 
-<P>Active-Dvi is largely based on Mldvi version 1.0 written by <A
-HREF="http://pauillac.inria.fr/~miquel/">Alexandre Miquel</A>.
-
 <HR>
 <CENTER>
-<A HREF="#features">Features</A> |
-<A HREF="#requirements">Requirements</A> |
+<A HREF="#features">Description</A> |
+<A HREF="#FAQ">Frequently asked qestions</A> |
+<A HREF="#requirements">Requirements for installation</A> |
 <A HREF="#download">Download</A> |
-<A HREF="#copyright">Copyright</A> |
-<A HREF="#authors">Authors</A>
 <A HREF="#lists">Bug reports and mailing list</A>
+<A HREF="#authors">Authors and Copyright</A> |
 </CENTER>
 <HR>
 
-<H2><A name="features">Currently supported features</A></H2>
+<H2 ALIGN=LEFT><A name="features">Currently supported features</A></H2>
 
 <P>To preview DVI files, Active-DVI features:
 
@@ -47,13 +44,15 @@ HREF="http://pauillac.inria.fr/~miquel/">Alexandre Miquel</A>.
 <P>To present your DVI files, Active-DVI features:
 
 <UL>
- <LI> Basic effects for presentation (pause, delay, text color change)
+ <LI> Basic effects for presentation (pause, delay, dynamic text color change)
  <LI> Annotations displayed on demand (similar to pop-up balloons)
  <LI> Hyper links from slide to slide or to other files (including DVI files)
  <LI> Replay of previously recorded parts of the display
  <LI> Text movements
  <LI> Page transitions
- <LI> Embedded applications (launched and killed on demand)
+ <LI> Embedded applications (launched and killed on demand from within
+      the presentation text source)
+ <LI> Scratching on slide to interactively modify the text on screen
 </UL>
 
 <P>Active-DVI special effects are set and launched from within your
@@ -63,56 +62,125 @@ LaTeX package provided by the distribution.
 <P>In addition, Caml hackers can program new and fancy Active-DVI effects in the
 source code of the presenter.
 
-<H2>Installation of Active-DVI</H2>
+<H2 ALIGN=LEFT><A name="FAQ">Frequently asked questions</H2>
 
-<H3><A name="requirements">Requirements</A></H3>
+<DL>
+
+<DT><STRONG>How to get a full-screen presentation ?</STRONG>
+ <DD>Answer: <I>Just launch Active-DVI and type <CODE>^F</CODE>
+(control-F) in the Active-DVI window.</I>
+
+<DT><STRONG>How to revert from full-screen to normal size ?</STRONG>
+ <DD>Answer: <I>Just type <CODE>^F</CODE> (control-F) again in the
+Active-DVI window!</I>
+
+<DT><STRONG>How to center the slide when full-screen mode is active ?</STRONG>
+ <DD>Answer: <I>Just use the mouse to move the bounding box of the
+slide: pressing control key and the left button draws the bounding box, then
+if you continue pressing the key and button you can drag the bounding
+box where you want to.</I>
+
+<DT><STRONG>How to get online help for Active-DVI keys ?</STRONG>
+ <DD>Answer: <I>Just press <CODE>?</CODE> in the Active-DVI window.</I>
+
+<DT><STRONG>How to get examples of talks ?</STRONG>
+ <DD>Answer: <I>Look in the distribution, sub-directory
+<CODE>examples</CODE>. The sub-directories are
+<CODE>basics</CODE> (from simple to moderately advanced)
+<CODE>prosper</CODE> (two presentations in directories <CODE>LL</CODE>
+and <CODE>Join</CODE>)
+<CODE>seminar</CODE> (one example).
+You may also consider the sub-directory
+<CODE>test</CODE> of the source main directory and look at the
+various <CODE>*.tex</CODE> files. Just type<CODE>make</CODE> in any of those
+sub-directories to build the corresponding DVI presentations.</I>
+
+<DT><STRONG>How do I write on my slide during the presentation ?</STRONG>
+ <DD>Answer: <I>Just type <CODE>s</CODE> to write text and
+<CODE>S</CODE> to draw lines.</I>
+
+<DT><STRONG>How to write on my slides programs with colored parts ?</STRONG>
+ <DD>Answer: <I>Just use the environment <CODE>alltt</CODE>; then colors
+(and other text annotations and typographic indications) are available
+within a type-writter font setting. For instance:</I>
+<PRE>
+\begin{alltt}
+{\it{(* Remark that double semi-colon is mandatory *)}}
+let x = 1\textcolor{red}{;;}
+let r = \{foo = 1; bar = "toto"\};;
+\textcolor[named]{Red}{let} z = r.foo;;
+\end{alltt}
+</PRE>
+
+<DT><STRONG>How to write on my slides programs with mathematical
+formulas in them ?</STRONG>
+ <DD>Answer: <I>If you need mathematical formulas into your programs,
+use the environment \verb"alltt" and insert the formulas into fancy
+parens <CODE>\(</CODE> and <CODE>\)</CODE>.</I>
+
+</DL>
+
+<H2 ALIGN=LEFT>Installation of Active-DVI</H2>
+
+<H3 ALIGN=LEFT><A name="requirements">Requirements</A></H3>
 
 <P>You need Objective Caml 3.04 or higher to compile the sources.
 
 <P>You also need the `kpsewhich' utility of the `kpathsea' library
 provided by the TeX distributions.
 
-<P>For encapsulated postscript file inclusions, you need the
-<A HREF="http://pauillac.inria.fr/camlimages/">camlimages library</A>.
-
-<H3><A name="download">Download</A></H3>
+<H3 ALIGN=LEFT><A name="download">Download</A></H3>
 
 <H4>Source distribution</H4>
 
-<DL>
-  <DT><A
-HREF="ftp://ftp.inria.fr/INRIA/Projects/cristal/advi/adk-1.0.0.tar.gz">ADK</A>,
-the Active-DVI Development Kit version 1.0.0 tar ball (Active-DVI +
-camltk + camlimages).
-  <DD> For the maximum performance, Active-DVI requires the
-	<A HREF="http://pauillac.inria.fr/camltk/">camltk</A>
-	and
-	<A HREF="http://pauillac.inria.fr/camlimages/">camlimages</A>
-	libraries.
-	If you have not yet installed these libraries, 
-	we recommend to download the ADK (it is a big tar ball of
-        Active-DVI, camltk and camlimages, with a
-        fully-automated-with-luck installation Makefile).
-  <DT><A
-HREF="ftp://ftp.inria.fr/INRIA/Projects/cristal/advi/advi-1.0.0.tar.gz">Version
-1.0.0 only</a> (You optionally need camltk and camlimages!)
-  <DT><A HREF="http://camlcvs.inria.fr/cgi-bin/cvsweb.cgi/bazar-ocaml/advi/">
-      The current CVS version</A> is available at the
-      <A HREF="http://camlcvs.inria.fr/">Caml Anonymous CVS repository</A>.
+<UL>
+
+<LI>Simple installation.
+
+ <DL>
+  <DT><STRONG><A
+  HREF="ftp://ftp.inria.fr/INRIA/Projects/cristal/advi/adk-1.0.0.tar.gz">ADK</A>
+  </STRONG>
+
+  <DD>the Active-DVI Development Kit. The complete and functionnal set
+  of Active-DVI's source files and Caml libraries that it uses (camltk
+  et camlimages).
+
 </DL>
 
-<H4>RPMS</H4>
+<LI>Advanced installation
+
+ <DL>
+  <DT><STRONG>Note:</STRONG>
+
+  <DD> For the maximum performance, Active-DVI requires the
+  <A HREF="http://pauillac.inria.fr/camltk/">camltk</A> and
+  <A HREF="http://pauillac.inria.fr/camlimages/">camlimages</A> libraries.
+  If you have not yet installed these libraries, we recommend to
+  download the ADK (it is a big tar ball of Active-DVI, camltk and
+  camlimages, with a fully-automated-with-luck installation Makefile).
+
+  <DT><STRONG>For hackers only</STRONG> the Active-DVI <A
+  HREF="ftp://ftp.inria.fr/INRIA/Projects/cristal/advi/advi-1.0.0.tar.gz">source
+  version only</a> (You should already have camltk and camlimages installed!)
+
+  <DT><STRONG>For impatient hackers only</STRONG>
+  <A HREF="http://camlcvs.inria.fr/cgi-bin/cvsweb.cgi/bazar-ocaml/advi/">
+  The current CVS version of Active-DVI </A> is available at the
+  <A HREF="http://camlcvs.inria.fr/">Caml Anonymous CVS repository</A>.
+
+ </DL>
+
+</UL>
+
+<H4>Binary distributiuon: RPMS</H4>
 
 <UL>
    <LI><A HREF="ftp://ftp.inria.fr/INRIA/Projects/cristal/advi/advi-1.0.0-1.src.rpm">SRPM</A>
    <LI>RedHat7 <A HREF="ftp://ftp.inria.fr/INRIA/Projects/cristal/advi/advi-1.0.0-1.i386.rpm">RPM</A>
 </UL>
       
-<H2><A NAME="copyright">COPYRIGHT</A></H2>
-
-This program is distributed under the GNU LGPL. See the enclosed file COPYING.
-
-<H2><A NAME="lists">Bug reports and mailing list</A></H2>
+<H2 ALIGN=LEFT><A NAME="lists">Bug reports and mailing list</A></H2>
 
 <P>If you find a bug drop a message to <CODE>advi-bugs@pauillac.inria.fr</CODE>.
 
@@ -122,7 +190,7 @@ some new ideas or lines of code) write to <CODE>advi@pauillac.inria.fr</CODE>.
 <P>If you want to subscribe to the Active-DVI mailing list, write to
 <CODE>advi-list-request@pauillac.inria.fr</CODE>.
 
-<H2><A NAME="authors">AUTHORS</A></H2>
+<H2 ALIGN=LEFT><A NAME="authors">AUTHORS</A></H2>
 
 <A HREF="http://pauillac.inria.fr/~furuse/">Jun Furuse</A>,
 <A HREF="http://pauillac.inria.fr/~weis/">Pierre Weis</A>,
@@ -132,6 +200,18 @@ some new ideas or lines of code) write to <CODE>advi@pauillac.inria.fr</CODE>.
 <A HREF="http://pauillac.inria.fr/~aschmitt/">Alan Schmitt</A>,
 Roberto Di Cosmo,
 <A HREF="http://pauillac.inria.fr/~miquel/">Alexandre Miquel</A>
+
+<H2 ALIGN=LEFT>Acknowledgement</H2>
+
+<P>Active-DVI's graphical engine to display DVI files is based on
+Mldvi version 1.0, written by <A
+HREF="http://pauillac.inria.fr/~miquel/">Alexandre Miquel</A>. As
+Mldvi, <P>Active-DVI is entirely written in <A
+HREF="http://caml.inria.fr/ocaml/">Objective Caml</A>.
+
+<H2 ALIGN=LEFT><A NAME="copyright">COPYRIGHT</A></H2>
+
+This program is distributed under the GNU LGPL. See the enclosed file COPYING.
 
 <HR>
 <!-- hhmts start -->
