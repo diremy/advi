@@ -17,6 +17,9 @@
 
 (* $Id$ *)
 
+(* A proper rounding function for positive floats. *)
+val round : float -> int;;
+
 type file_name = string;;
 type dir_name = string;;
 
