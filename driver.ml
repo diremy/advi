@@ -193,8 +193,7 @@ let procs = Hashtbl.create 107;;
 type recording = { tag : string; unit : proc_unit}
 let current_recording_proc = ref [];;
 
-let hidden = ref false;;
-let is_hidden () = !hidden;;
+let visible = ref true;;
 let is_recording () = !current_recording_proc <> [];;
 
 (*** Rendering primitives ***)
@@ -252,53 +251,53 @@ let pop st =
 let color_push st col =
   st.color_stack <- st.color :: st.color_stack;
   st.color <- col;
-  if not (is_hidden ()) then Dev.set_color col;;
+  if !visible then Dev.set_color col;;
 
 let color_pop st =
   match st.color_stack with
   | [] -> ()
   | col :: rest ->
       st.color <- col;
-      if not (is_hidden ()) then Dev.set_color col;
+      if !visible then Dev.set_color col;
       st.color_stack <- rest;;
 
 let alpha_push st v =
   st.alpha_stack <- st.alpha :: st.alpha_stack;
   st.alpha <- v;
-  if not (is_hidden ()) then Dev.set_alpha v;;
+  if !visible then Dev.set_alpha v;;
 
 let alpha_pop st =
   match st.alpha_stack with
   | [] -> ()
   | v :: rest ->
       st.alpha <- v;
-      if not (is_hidden ()) then Dev.set_alpha v;
+      if !visible then Dev.set_alpha v;
       st.alpha_stack <- rest;;
 
 let blend_push st v =
   st.blend_stack <- st.blend :: st.blend_stack;
   st.blend <- v;
-  if not (is_hidden ()) then Dev.set_blend v;;
+  if !visible then Dev.set_blend v;;
 
 let blend_pop st =
   match st.blend_stack with
   | [] -> ()
   | v :: rest ->
       st.blend <- v;
-      if not (is_hidden ()) then Dev.set_blend v;
+      if !visible then Dev.set_blend v;
       st.blend_stack <- rest;;
 
 let epstransparent_push st v =
   st.epstransparent_stack <- st.epstransparent :: st.epstransparent_stack;
   st.epstransparent <- v;
-  if not (is_hidden ()) then Dev.set_epstransparent v;;
+  if !visible then Dev.set_epstransparent v;;
 
 let epstransparent_pop st =
   match st.epstransparent_stack with
   | [] -> ()
   | v :: rest ->
       st.epstransparent <- v;
-      if not (is_hidden ()) then Dev.set_epstransparent v;
+      if !visible then Dev.set_epstransparent v;
       st.epstransparent_stack <- rest;;
 
 let transition_push st v =
@@ -306,7 +305,7 @@ let transition_push st v =
   st.transition_stack <- st.transition :: st.transition_stack;
 *)
   st.transition <- v;
-  if not (is_hidden ()) then Dev.set_transition v;;
+  if !visible then Dev.set_transition v;;
 
 (*
 let transition_pop st =
@@ -314,7 +313,7 @@ let transition_pop st =
   | [] -> ()
   | v :: rest ->
       st.transition <- v;
-      if not (is_hidden ()) then Dev.set_transition v; 
+      if !visible then Dev.set_transition v; 
      st.transition_stack <- rest;;
 *)
 
@@ -333,7 +332,7 @@ let put st code =
     let x = st.x_origin + int_of_float (st.conv *. float st.h)
     and y = st.y_origin + int_of_float (st.conv *. float st.v)
     and glyph = Table.get st.cur_gtable code in
-    if not (is_hidden ()) then
+    if !visible then
       begin
         begin match st.html with
         | Some _ ->
@@ -359,7 +358,7 @@ let put_rule st a b =
   and w = int_of_float (ceil (st.conv *. float b))
   and h = int_of_float (ceil (st.conv *. float a)) in
   add_rule st x (y-h) w h;
-  if not (is_hidden ()) then Dev.fill_rect x (y - h) w h;;
+  if !visible then Dev.fill_rect x (y - h) w h;;
 
 let set_rule st a b =
   put_rule st a b;
@@ -562,7 +561,7 @@ let embed_special st s =
     width_pixel, height_pixel in
   let x = st.x_origin + int_of_float (st.conv *. float st.h)
   and y = st.y_origin + int_of_float (st.conv *. float st.v) in
-  if not (is_hidden ()) then
+  if !visible then
     Dev.embed_app command app_mode app_name width_pixel height_pixel x y;;
 
 let parse_transition dir mode record =
@@ -655,12 +654,13 @@ let playing = ref 0;;
 let play = Grdev.get_playing in
 play := (fun () -> !playing);;
 
-let hidden_stack = ref [];;
+let visible_stack = ref [];;
 
 let proc_clean () =
   current_recording_proc := [];
   playing := 0;
-  hidden_stack := [];
+  visible_stack := [];
+  visible := true;
   Hashtbl.clear procs;;
 
 let proc_special st s =
@@ -672,9 +672,9 @@ let proc_special st s =
         let procname =
           try unquote (List.assoc "proc" records)
           with Not_found -> raise (Failure "proc: invalid special") in
-        hidden_stack := !hidden :: !hidden_stack;
-        hidden := 
-          (try ignore (List.assoc "play" records); false with _ -> true);
+        visible_stack := !visible :: !visible_stack;
+        visible := 
+          (try ignore (List.assoc "play" records); true with _ -> false);
         if !playing = 0 then
           begin
             let recording =
@@ -706,9 +706,9 @@ let proc_special st s =
               | h::rest -> u.escaped_commands <- List.rev rest
               | [] -> assert false
           end;
-        begin match !hidden_stack with
+        begin match !visible_stack with
           h :: rest ->
-            hidden := h; hidden_stack := rest;
+            visible := h; visible_stack := rest;
         | [] -> assert false; 
         end;
 
@@ -755,7 +755,7 @@ let wait_special st s =
     try parse_float (List.assoc "sec" records) 
     with
     | Not_found | Failure _ -> raise (Failure "wait: invalid special") in
-  if not (is_hidden()) then ignore (Dev.sleep second);
+  if !visible then ignore (Dev.sleep second);
   st.checkpoint <- 0;;
 
 (* Background object configuration. RDC *)
@@ -855,10 +855,10 @@ let tpic_flush_path st cntr =
      Array.length path >= 2 &&
      path.(0) = path.(Array.length path - 1)
   then
-    if not !hidden then Dev.fill_path pixpath ~shade:st.tpic_shading;
+    if !visible then Dev.fill_path pixpath ~shade:st.tpic_shading;
   (* If requested, draw outline of path *)
   if cntr then
-    if not !hidden then Dev.draw_path pixpath ~pensize:(tpic_pen st);
+    if !visible then Dev.draw_path pixpath ~pensize:(tpic_pen st);
   (* Reset path *)
   st.tpic_path <- [];
   st.tpic_shading <- 0.0;;
@@ -891,7 +891,7 @@ let tpic_spline_path st =
       r := (xp, yp) :: !r
     done
   done;
-  if not !hidden then
+  if !visible then
       Dev.draw_path (Array.of_list (List.rev !r)) ~pensize:(tpic_pen st);
   st.tpic_path <- [];
   st.tpic_shading <- 0.0;;
@@ -907,11 +907,11 @@ let tpic_arc st x y rx ry s e cntr =
   and e = int_of_float (e *. rad_to_deg) in
   (* If shading requested, fill the arc *)
   if st.tpic_shading > 0.0 then
-    if not !hidden then
+    if !visible then
       Dev.fill_arc ~x ~y ~rx ~ry ~start:s ~stop:e ~shade:st.tpic_shading;
   (* If requested, draw outline of arc *)
   if cntr then
-    if not !hidden then
+    if !visible then
       Dev.draw_arc ~x ~y ~rx ~ry ~start:s ~stop:e ~pensize:(tpic_pen st);
   (* Reset shading *)
   st.tpic_shading <- 0.0;;
@@ -971,7 +971,7 @@ let ps_special st s =
   if !Misc.dops && st.status.Dvi.hasps then
       let x = int_of_float (st.conv *. float st.h) in
       let y = int_of_float (st.conv *. float st.v) in
-      if not (is_hidden ()) then
+      if !visible then
         begin try
           Dev.exec_ps s x y
         with Dev.GS ->
@@ -1076,7 +1076,7 @@ let special st s =
       let file, bbox, size = psfile_special st s in
       let x = st.x_origin + int_of_float (st.conv *. float st.h)
       and y = st.y_origin + int_of_float (st.conv *. float st.v) in
-      if not (is_hidden ()) then 
+      if !visible then 
         (if (has_prefix "`" file)
         then Dev.draw_img (zap_to_char ' ' file) Drawimage.ScaleAuto false 1.0 None (Some bbox)
         else Dev.draw_ps file bbox)
@@ -1090,12 +1090,12 @@ let special st s =
     if has_prefix "advi: proc" s then proc_special st s else
     if has_prefix "advi: wait " s then wait_special st s else
     if has_prefix "advi: embed " s then
-      (if not !hidden then embed_special st s) else
+      (if !visible then embed_special st s) else
     if has_prefix "advi: trans " s then transition_special st s else
     if has_prefix "advi: transbox save " s then transbox_save_special st s else
     if has_prefix "advi: transbox go " s then transbox_go_special st s else
     if has_prefix "advi: kill " s then
-      (if not !hidden then kill_embed_special st s) else
+      (if !visible then kill_embed_special st s) else
     if has_prefix "advi: setbg " s then bkgd_special st s else
     if has_prefix "advi:" s then Misc.warning ("unknown special: "^ s)
    end else
