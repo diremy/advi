@@ -92,6 +92,69 @@ HREF="manual.dvi">en DVI</A>, <A HREF="manual.ps">en PS</A> et <A
 HREF="manual.pdf">en PDF</A> (il est en anglais uniquement, on attend
 des volontaires pour se charger de la traduction).
 
+<H2 ALIGN=LEFT><A name="FAQ"></A>
+<A HREF="faq-fra.htm">Questions fréquemment posées</A></H2>
+
+<H2 ALIGN=LEFT>Installation d'Active-DVI</H2>
+
+<H3 ALIGN=LEFT><A name="requirements">Prérequis pour l'installation</A></H3>
+
+<P>Active-DVI ne tourne que sur plateforme Unix avec un serveur de
+fenêtres X11.
+
+<P>Pour utiliser Active-DVI, il vous faut de plus impérativement les
+utilitaires <CODE>kpsewhich</CODE> et <CODE>kpathsea</CODE> qui sont
+fournis par les distributions modernes de TeX.
+
+<P>Si vous désirez compiler les sources d'Active-DVI, vous devez
+disposer d'une version récente du compilateur Objective Caml.
+
+<H2 ALIGN=LEFT><A name="download">Chargement</A></H2>
+
+<H4 ALIGN=LEFT>Distribution source d'Active-DVI</H4>
+
+<UL>
+
+<LI>Installation simple.
+
+ <DL>
+  <DT><STRONG><A
+  HREF="ftp://ftp.inria.fr/INRIA/Projects/cristal/advi/adk-$VERSION.tar.gz">ADK</A>
+  </STRONG>
+
+  <DD>le Kit de développement d'Active-DVI. C'est l'ensemble
+  complet et fonctionnel des sources d'Active-DVI et des bibliothèques
+  Caml qu'il utilise (camlimages).
+
+ </DL>
+
+<LI>Installation advancée
+
+ <DL>
+  <DT><STRONG>Note:</STRONG>
+
+  <DD> Pour un utilisabilité maximale, Active-DVI nécessite la librairie
+  <A HREF="http://pauillac.inria.fr/camlimages/">camlimages</A>.
+  Si vous n'avez pas déjà installé ces bibliothèques, nous vous
+  recommandons de charger le fichier ADK (c'est une grosse archive au
+  format tar qui contient Active-DVI et
+  camlimages, avec un fichier Makefile d'installation).
+
+  <DT><STRONG>Pour les programmeurs seulement</STRONG></DT>
+  <DD>la version <A
+  HREF="ftp://ftp.inria.fr/INRIA/Projects/cristal/advi/advi-$VERSION.tar.gz">
+  sources seules d'Active-DVI</A> (Vous devez déjà avoir installé
+  camlimages!)
+
+  <DT><STRONG>Pour les programmeurs impatients seulement</STRONG></DT>
+  <DD><A HREF="http://camlcvs.inria.fr/cgi-bin/cvsweb.cgi/bazar-ocaml/advi/">
+  La version CVS d'Active-DVI en temps réel</A> est disponible sur le
+  <A HREF="http://camlcvs.inria.fr/">Reposoir CVS anonyme de Caml</A>.
+
+ </DL>
+
+</UL>
+
 <!--
 <H4 ALIGN=LEFT>Distribution binaire: RPMS</H4>
 
