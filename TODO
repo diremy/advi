@@ -1,8 +1,14 @@
+2005-01-17
+
+- Add a word about epsbygs in the FAQ.
+- verify -fg toto error message.
+- implement cmyk color parsing on the command line.
+- add compression (or decompression) to images and ps files.
+- add a lib to implement a vector graphic language.
+
  - new engine
  - input foo.ps in gs
  - draw gpic in gs
-
-
 
 BEFORE RELEASE:
 ===============

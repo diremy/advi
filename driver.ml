@@ -54,7 +54,8 @@ let rec split_string_quoted s start =
       if s.[!i] = '"' (* '"' *) then begin
         incr i;
         while !i < len && s.[!i] <> '"' do incr i done;
-        if s.[!i] <> '"' then failwith "parse error (split_string_quoted)";
+        if !i >= len || s.[!i] <> '"' then
+          failwith "parse error (split_string_quoted)";
         incr i
       end else incr i
     done;
@@ -1417,28 +1418,33 @@ let push_keys_special st s =
    commands, html references) *)
 
 let scan_special status (headers, xrefs, lastline as args) pagenum s =
-  if Launch.white_run () &&
-     has_prefix "advi: embed " s then scan_embed_special status s else
-  (* Embedded Postscript, better be first for speed when scanning *)
-  let do_ps = Gs.get_do_ps () in
-  if has_prefix "\" " s || has_prefix "ps:" s 
-  || has_prefix "psfile=" s || has_prefix "PSfile=" s then
-    status.Cdvi.hasps <- do_ps else
-  if has_prefix "!" s then
-    (if do_ps then headers := (true, get_suffix "!" s) :: !headers) else
-  if has_prefix "header=" s then
-    (if do_ps then headers := (false, get_suffix "header=" s) :: !headers) else
-  if has_prefix "advi: setbg " s then scan_bkgd_special status s else
-  if has_prefix "line: " s then scan_special_line args s 6 else
-(*
-  if has_prefix "src:" s then scan_special_line args s 4 else
-*)
-  (* We must test both case <A and <a, since some latex packages
-     output the upper case variant of the anchor indication,
-     as opposed to package hyperref, and all the Active-DVI
-     defined anchor generating macros. *)
-  if has_prefix "html:<A name=\"" s || has_prefix "html:<a name=\"" s
-  then scan_special_html args pagenum s;;
+  try
+    if Launch.white_run () &&
+       has_prefix "advi: embed " s then scan_embed_special status s else
+    (* Embedded Postscript, better be first for speed when scanning *)
+    let do_ps = Gs.get_do_ps () in
+    if has_prefix "\" " s || has_prefix "ps:" s 
+    || has_prefix "psfile=" s || has_prefix "PSfile=" s then
+      status.Cdvi.hasps <- do_ps else
+    if has_prefix "!" s then
+      (if do_ps then headers := (true, get_suffix "!" s) :: !headers) else
+    if has_prefix "header=" s then
+      (if do_ps
+       then headers := (false, get_suffix "header=" s) :: !headers) else
+    if has_prefix "advi: setbg " s then scan_bkgd_special status s else
+    if has_prefix "line: " s then scan_special_line args s 6 else
+  (*
+    if has_prefix "src:" s then scan_special_line args s 4 else
+  *)
+    (* We must test both case <A and <a, since some latex packages
+       output the upper case variant of the anchor indication,
+       as opposed to package hyperref, and all the Active-DVI
+       defined anchor generating macros. *)
+    if has_prefix "html:<A name=\"" s || has_prefix "html:<a name=\"" s
+    then scan_special_html args pagenum s
+  with
+  | Failure s -> ill_formed_special s
+  | Ill_formed_special s -> ill_formed_special s;;
 
 (* Scan a page calling function scan_special when seeing a special and
   the function otherwise for other DVI stuff. *)
