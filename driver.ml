@@ -1490,9 +1490,10 @@ let scan_find_location cdvi page (line, filename) =
   match List.sort (fun l1 l2 -> compare (line - l1) (line - l2)) !intervals
   with
   | l :: _ -> l
-  | [] -> 0
+  | [] -> 0;;
 
-exception Found of (int * string option) option
+exception Found of (int * string option) option;;
+
 let scan_find_anchor_location cdvi page anchor =
    let last = ref None in
    let eval = function
@@ -1504,9 +1505,10 @@ let scan_find_anchor_location cdvi page anchor =
             raise (Found !last)
     | _ -> () in
   try Cdvi.page_iter eval cdvi.base_dvi.Cdvi.pages.(page); raise Not_found
-  with Found l -> l
+  with Found l -> l;;
 
 let special st s =
+ try
   if has_prefix "\" " s || has_prefix "ps:" s
   || has_prefix "! " s then ps_special st s else
   if has_prefix "advi: put" s then
@@ -1573,7 +1575,10 @@ let special st s =
   || has_prefix "da " s || has_prefix "dt " s || s = "sp"
   || has_prefix "sp " s || has_prefix "ar " s || has_prefix "ia " s
   || has_prefix "sh " s || s = "wh" || s = "bk"
-  then tpic_specials st s;;
+  then tpic_specials st s
+ with
+ | _ ->
+   Misc.warning (Printf.sprintf "Unknown or ill formed special <<%s>>" s);;
 
 (*** Page rendering ***)
 let eval_dvi_command st = function
