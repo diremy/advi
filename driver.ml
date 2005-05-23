@@ -1577,6 +1577,7 @@ let special st s =
   || has_prefix "sh " s || s = "wh" || s = "bk"
   then tpic_specials st s
  with
+   Pause -> raise Pause
  | _ ->
    Misc.warning (Printf.sprintf "Unknown or ill formed special <<%s>>" s);;
 
