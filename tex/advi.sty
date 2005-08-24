@@ -554,10 +554,47 @@ end
 \hbox {\advi@putbegin \box\pst@hbox\advi@putend}%
 \pst@Verb{\tx@PutEnd}}}
 
+%%% Similar patch
+\def\advi@psput@tput#1#2{%
+\begingroup
+\use@par
+\pst@tputmakesmall
+\leavevmode
+\hbox{%
+\pst@Verb{%
+\pst@nodedict
+/t \psk@tpos \pst@tposflip def
+tx@NodeDict /HPutPos known
+{ #1PutPos }
+{ CP /Y ED /X ED /NAngle 0 def /NCLW 0 def }
+ifelse
+/Sin NAngle sin def
+/Cos NAngle cos def
+/s \pst@number\pslabelsep NCLW add def
+/l \pst@number\pst@dima def
+/r \pst@number\pst@dimb def
+/h \pst@number\pst@dimc def
+/d \pst@number\pst@dimd def
+% DG/SR modification begin - Sep. 26, 1997 - Patch 4
+%\ifnum1=0#2\else
+\ifnum1=0#2 \else
+% DG/SR modification end
+/flag #2 def
+\csname tx@#1PutAdjust\endcsname
+\fi
+\tx@LPutCoor
+end
+\tx@PutBegin \advi@CP}%
+\hbox {\advi@putbegin \box\pst@hbox\advi@putend}%
+\pst@Verb{\tx@PutEnd}}%
+\endgroup
+\pst@shortput}
+
 \def \advi@pstricks@patch
   {\@ifundefined {psput@special}{}
     {\let \psput@special \advi@psput@special
      \@ifundefined {ncput@iii}{}{\let \ncput@iii \advi@ncput@iii}%
+     \@ifundefined {psput@tput}{}{\let \psput@tput \advi@psput@tput}%
      }}
 \ifadvi@ignore \else
 \AtBeginDocument 
@@ -746,7 +783,8 @@ end
 
 \let \advi@edit@setlinehook \relax
 
-%\advi@edit {command}{name}{keys}{precode}{keys}{code}
+%%\advi@edit {command}{name}{keys}{precode}{keys}{code}
+%\advi@edit {command}{name}{keys}{code}
 \newcommand{\advi@edit}[4]{%
   \hbox \bgroup
     \def \advi@edit@comm {\string#1}%

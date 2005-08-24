@@ -46,14 +46,16 @@
 \def \advi@skipparen #1(#2){#1}
 \newcommand{\advi@slashslash}[1][]{}
 \newcommand {\advi@annot@footi}[2][]{\footnote {\let \\\advi@slashslash#2}}
+\newcommand {\advi@annot@nofooti}[2][]{}
 
 \newcommand {\advi@annot@foot}[2][]%
     {{#2}\@ifnextchar({\advi@skipparen{\advi@annot@footi}}%
       {\advi@annot@footi}}
 
 \newcommand {\advi@annot@nofoot}[2][]%
-    {{#2}\@ifnextchar({\advi@skipparen{}}%
-      {}}
+    {{#2}\@ifnextchar({\advi@skipparen{\advi@annot@nofooti}}%
+      {\advi@annot@nofooti}}
+
 \newif \ifAdviFootnote
 \AdviFootnotetrue
 
