@@ -88,6 +88,7 @@ val open_dev :
  GraphicsY11.window_geometry -> GraphicsY11.width * GraphicsY11.height;;
 val close_dev : unit -> unit;;
 val clear_dev : unit -> unit;;
+val resize_dev : w -> h -> unit;;
 val clear_usr1 : unit -> unit;;
 val set_bbox : (int * int * int * int) option -> unit;;
 

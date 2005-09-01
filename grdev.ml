@@ -1229,6 +1229,11 @@ let clear_dev () =
   (* draw background *)
   draw_bkgd ();;
 
+let resize_dev w h =
+  if not !opened then failwith "Grdev.resize_dev: no window";
+  Embed.kill_all_embedded_apps ();
+  Graphics.resize_window w h;;
+
 (*** Events ***)
 
 type status = GraphicsY11.status = {

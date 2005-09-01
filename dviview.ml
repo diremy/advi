@@ -1102,11 +1102,7 @@ let scale n st =
     let scale x = Misc.round (float x *. factor) in
     attr.geom.Ageometry.width <- scale st.size_x;
     attr.geom.Ageometry.height <- scale st.size_y;
-    Grdev.close_dev ();
-    let x, y =
-      Grdev.open_dev (Printf.sprintf " " ^ Ageometry.to_string attr.geom) in
-    attr.geom.Ageometry.width <- x;
-    attr.geom.Ageometry.height <- y;
+    Grdev.resize_dev attr.geom.Ageometry.width attr.geom.Ageometry.height;
   end else begin
     let new_ratio = factor *. st.ratio in
     if new_ratio >= 0.02 && new_ratio < 50.0 then begin

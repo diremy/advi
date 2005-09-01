@@ -109,7 +109,7 @@ external raw_move_window : window_id -> int -> int -> int -> unit
     = "caml_gr_move_window";;
 
 external raw_resize_window : window_id -> int -> int -> unit
-    = "caml_gr_resize_window";;
+    = "caml_gr_resize_subwindow";;
 
 let resize_subwindow wid height width =
   if wid != null_window then begin 

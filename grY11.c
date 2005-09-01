@@ -473,7 +473,7 @@ value caml_gr_move_window (value wid, value caml_gr_x, value caml_gr_y, value he
   return Val_unit;
 }
 
-value caml_gr_resize_window (value wid, value w, value h)
+value caml_gr_resize_subwindow (value wid, value w, value h)
 {
   Window win;
 
