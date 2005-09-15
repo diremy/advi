@@ -51,7 +51,7 @@ let print_advi_full_version () =
 let version_spec = function
   | "-v" as opt ->
        opt, Arg.Unit print_advi_version,
-       "  print Active-DVI version."
+       "  print the Active-DVI version."
   | opt ->
        opt, Arg.Unit print_advi_full_version,
        "  print the full Active-DVI version, sub-version and release date.";;

@@ -61,15 +61,13 @@ type pointer = {
 
 (* Creating the pointer image. *)
 
-(*
-In the backing store (not to disturb the screen).
+(* In the backing store (not to disturb the screen).
 
    0 - Save some background image somewhere (for instance where is the mouse)
    1 - Clear this area
    2 - Draw the pointer
    3 - Save this image
-   4 - Restore the background image
-*)
+   4 - Restore the background image *)
 
 let make_white_image h w =
   let pixmap = Array.make_matrix h w not_the_pointer_color in
@@ -127,7 +125,7 @@ let show_pointer ptr x y =
   clear_pointer ptr;
   let r = ptr.half_size in
   (* Compute the actual lower left corner of the pointer. *)
-  let x = (x - r + xptr_x)
+  let x = x - r + xptr_x
   and y = y - r + xptr_y in
   (* Save the actual background. *)
   blit_image ptr.bkg_img x y;
