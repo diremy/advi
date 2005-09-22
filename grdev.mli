@@ -240,7 +240,7 @@ module E :
           comm : string; name : string;
           first : (string * string) option; 
           line : string; file : string;
-          origin : float rect; action : bool rect; unit : float;
+          origin : float rect; action : bool rect; xunit : float; yunit : float;
         }
       type figure = { rect : int rect; info : info; }
       type action = Move of int * int | Resize of bool * int * int

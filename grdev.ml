@@ -1093,7 +1093,8 @@ module E =
         comm : string; name : string;
         first : (string * string) option; 
         line : string; file : string;
-        origin : float rect; action : bool rect; unit : float;
+        origin : float rect; action : bool rect;
+        xunit : float; yunit : float;
       }
     type figure = { rect : int rect; info : info; }
     type action = Move of int * int | Resize of bool * int * int
@@ -1120,9 +1121,10 @@ module E =
           Graphics.set_color Graphics.blue;
           draw_rectangle r.rx (r.ry - r.rd) r.rw (r.rh + r.rd);
           draw_line r.rx r.ry r.rw 0; 
-          let cv z = truncate (z *. info.unit) in
-          let ox = cv info.origin.rx in
-          let oy = cv info.origin.ry in
+          let cvx z = truncate (z *. info.xunit) in
+          let cvy z = truncate (z *. info.yunit) in
+          let ox = cvx info.origin.rx in
+          let oy = cvy info.origin.ry in
           let x0 = r.rx - ox in
           let y0 = r.ry - oy in
           Graphics.set_color Graphics.green;
@@ -1145,9 +1147,12 @@ module E =
 
     let tostring p a =
       (* should memorize the origin *)
-      let delta z dz =
+      let deltax z dz =
         if dz = 0 then "*"
-        else Printf.sprintf "%.4f" (z +. (float dz  /. p.info.unit)) in
+        else Printf.sprintf "%.4f" (z +. (float dz  /. p.info.xunit)) in
+      let deltay z dz =
+        if dz = 0 then "*"
+        else Printf.sprintf "%.4f" (z +. (float dz  /. p.info.yunit)) in
       let origin = p.info.origin in
       let first =
         match p.info.first with
@@ -1157,11 +1162,11 @@ module E =
       let action, dx, dy =
         match a with
         | Move (dx, dy) ->
-            "moveto", delta origin.rx dx, delta origin.ry dy
+            "moveto", deltax origin.rx dx, deltay origin.ry dy
         | Resize (true, dx, dy) ->
-            "resizetop", delta origin.rw dx, delta origin.rh dy
+            "resizetop", deltax origin.rw dx, deltay origin.rh dy
         | Resize (false, dx, dy) ->
-            "resizebot", delta origin.rw dx, delta origin.rd dy
+            "resizebot", deltax origin.rw dx, deltay origin.rd dy
       in
       Printf.sprintf "<edit %s %s[%s] #%s @%s %s %s,%s>"
         p.info.comm p.info.name first p.info.line p.info.file action dx dy

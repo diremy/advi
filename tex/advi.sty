@@ -712,8 +712,11 @@ end
 \newdimen \advi@dim
 \let \advidim \advi@dim
 \let \advicount \advi@count
-\newdimen \advi@edit@unit
-\let \adviunit \advi@edit@unit
+\newdimen \advi@edit@xunit
+\newdimen \advi@edit@yunit
+\let \advixunit \advi@edit@xunit
+\let \adviyunit \advi@edit@yunit
+\let \adviunit \advi@edit@xunit
 \newif \ifadvi@move
 \newdimen \advix
 \newdimen \adviy
@@ -721,11 +724,11 @@ end
 \newdimen \advih
 \newdimen \advid
 \def \advi@dimset {%
-\ifx \advi@edit@x \relax\else \advix \advi@edit@x \advi@edit@unit\fi
-\ifx \advi@edit@y \relax\else \adviy \advi@edit@y \advi@edit@unit\fi
-\ifx \advi@edit@w \relax\else \adviw \advi@edit@w \advi@edit@unit\fi
-\ifx \advi@edit@h \relax\else \advih \advi@edit@h \advi@edit@unit\fi
-\ifx \advi@edit@d \relax\else \advid \advi@edit@d \advi@edit@unit\fi
+\ifx \advi@edit@x \relax\else \advix \advi@edit@x \advi@edit@xunit\fi
+\ifx \advi@edit@y \relax\else \adviy \advi@edit@y \advi@edit@yunit\fi
+\ifx \advi@edit@w \relax\else \adviw \advi@edit@w \advi@edit@xunit\fi
+\ifx \advi@edit@h \relax\else \advih \advi@edit@h \advi@edit@yunit\fi
+\ifx \advi@edit@d \relax\else \advid \advi@edit@d \advi@edit@yunit\fi
 }
 % \def \advix {\advi@edit@x \advi@edit@unit}
 % \def \adviy {\advi@edit@y \advi@edit@unit}
@@ -738,7 +741,8 @@ end
 \def \advich {\advi@edit@h}
 \def \advicd {\advi@edit@d}
 
-\advi@edit@unit 1em\relax
+\advi@edit@xunit 1em\relax
+\advi@edit@yunit 1em\relax
 \def \advi@edit@defaults{%
 %  \advi@edit@unit 1em\relax
   \def \advi@edit@x{0}%
@@ -756,7 +760,9 @@ end
 \define@key {advi@embed}{width}%
    {\@tempdima#1\relax \edef \advi@embed@width {\the\@tempdima}}
 
-\define@key {advi@edit}{unit}{\advi@edit@unit #1}
+\define@key {advi@edit}{xunit}{\advi@edit@xunit #1}
+\define@key {advi@edit}{yunit}{\advi@edit@yunit #1}
+\define@key {advi@edit}{unit}{\advi@edit@xunit #1\advi@edit@yunit #1}
 \define@key {advi@edit}{X}{\def \advi@edit@x{#1}\advi@movetrue}
 \define@key {advi@edit}{Y}{\def \advi@edit@y{#1}\advi@movetrue}
 \define@key {advi@edit}{W}{\def \advi@edit@w{#1}}
@@ -820,7 +826,8 @@ end
        name="\advi@edit@name"\space
        line=\advi@edit@line\space
        file=\advi@edit@file\space
-       unit=\the\advi@edit@unit\space
+       xunit=\the\advi@edit@xunit\space
+       yunit=\the\advi@edit@yunit\space
        \advi@edit@X=\advi@edit@x\space
        \advi@edit@Y=\advi@edit@y\space
        \advi@edit@W=\advi@edit@w\space
@@ -832,13 +839,13 @@ end
 }
 
 \def \advi@round #1#2{%
-  \divide #2 by \advi@edit@unit
+  \divide #2 by \advi@edit@xunit
   \edef #1{\the #2}\relax
-  \multiply #2 by \advi@edit@unit
+  \multiply #2 by \advi@edit@xunit
 }
   
-\def \advi@E{\advi@count\advi@dim \divide \advi@count by \advi@edit@unit
-        \advance \advi@dim by -\advi@count\advi@edit@unit
+\def \advi@E{\advi@count\advi@dim \divide \advi@count by \advi@edit@xunit
+        \advance \advi@dim by -\advi@count\advi@edit@xunit
         \edef \advi@tmp {\advi@tmp \the \advi@count}}
 \def \advi@D{\advi@dim 10\advi@dim \advi@E}
 

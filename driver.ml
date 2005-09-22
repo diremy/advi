@@ -844,7 +844,9 @@ let edit_special st s =
         | Dimension.Px x -> float x
         | Dimension.In x -> x *. dpi
         | _ -> assert false in
-      let unit = pixels (field "unit") in
+      let xunit,yunit = 
+        try pixels (field "xunit"), pixels (field "yunit") 
+        with Not_found -> let u = pixels (field "unit") in u, u in
       let float_field x x' =
         let b, fx =
           try true, List.assoc x record
@@ -854,7 +856,7 @@ let edit_special st s =
           Misc.warning
             (Printf.sprintf "Field %s=%s not a float in special %s" x fx s);
             raise Ignore in
-      let float_to_pixel f = truncate (f *. unit) in
+      let float_to_pixel f unit = truncate (f *. unit) in
       let raw_fields = {
         Dev.rx = float_field "x" "X"; Dev.ry = float_field "y" "Y";
         Dev.rw = float_field "w" "W"; Dev.rh = float_field "h" "H";
@@ -871,12 +873,12 @@ let edit_special st s =
       let m = rmap fst raw_fields in
       let rect = {
         Dev.rx = st.x_origin + Misc.round (st.conv *. float st.h)
-          + float_to_pixel r.Dev.rx;
+          + float_to_pixel r.Dev.rx xunit;
         Dev.ry = st.y_origin + Misc.round (st.conv *. float st.v)
-          - float_to_pixel r.Dev.ry;
-        Dev.rw = float_to_pixel r.Dev.rw;
-        Dev.rh = float_to_pixel r.Dev.rh;
-        Dev.rd = float_to_pixel r.Dev.rd;
+          - float_to_pixel r.Dev.ry yunit;
+        Dev.rw = float_to_pixel r.Dev.rw xunit;
+        Dev.rh = float_to_pixel r.Dev.rh yunit;
+        Dev.rd = float_to_pixel r.Dev.rd yunit;
       } in
       let info =
         { Dev.E.comm = field "comm";
@@ -884,7 +886,8 @@ let edit_special st s =
           Dev.E.line = field "line";
           Dev.E.file = field "file";
           Dev.E.first = first;
-          Dev.E.unit = unit;
+          Dev.E.xunit = xunit;
+          Dev.E.yunit = yunit;
           Dev.E.origin = r;
           Dev.E.action = m;
         } in
