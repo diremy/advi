@@ -181,7 +181,7 @@ installopt:: $(INSTALLTARGET) $(HELPFILES)
 	fi
 
 installman:
-	install -m 644 $(MANFILES) $(MANDIR)/man$(MANEXT)
+	install -m 644 $(MANFILES) $(MANDIR)/man$(MANEXT) || exit 0
 
 MLFILES = $(addsuffix .ml, $(MODULES))
 

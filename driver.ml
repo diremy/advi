@@ -55,7 +55,7 @@ let rec split_string_quoted s start =
         incr i;
         while !i < len && s.[!i] <> '"' do incr i done;
         if !i >= len || s.[!i] <> '"' then
-          failwith "parse error (split_string_quoted)";
+          failwith ("parse error (split_string_quoted): " ^ s);
         incr i
       end else incr i
     done;
@@ -1580,7 +1580,7 @@ let special st s =
   || has_prefix "sh " s || s = "wh" || s = "bk"
   then tpic_specials st s
  with
-   Pause -> raise Pause
+   Pause | Wait _ as exn -> raise exn
  | _ ->
    Misc.warning (Printf.sprintf "Unknown or ill formed special <<%s>>" s);;
 
