@@ -1,4 +1,6 @@
 Version 1.7
+2005/09/02
+        Having Active-DVI compatible with the new Graphics library.
 2004/12/07
         Getting rid of the new warnings of the Caml compiler.
 Version 1.6

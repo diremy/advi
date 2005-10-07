@@ -18,9 +18,9 @@
 (* $Id$ *)
 
 (* The current version of Active-DVI *)
-let advi_version_number = 1.6;;
+let advi_version_number = 1.7;;
 let advi_sub_version_number = 0;;
-let advi_version_date = "2004-07-14";;
+let advi_version_date = "2005-10-07";;
 
 let advi_full_version =
   Printf.sprintf "%.2f+%i (%s)"
