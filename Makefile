@@ -56,7 +56,7 @@ STYFILES= $(addprefix tex/, $(TEXSTYFILES))
 EPSFILES= $(addprefix tex/, $(TEXEPSFILES))
 
 COPTIONS = -warn-error A -g
-COPTOPTIONS = -warn-error A -inline 9
+COPTOPTIONS = -warn-error A -inline 10000
 
 OCAMLC	  = $(CAML)c $(COPTIONS)
 OCAMLOPT  = $(CAML)opt.opt $(COPTOPTIONS)
@@ -115,8 +115,8 @@ CFLAGS=$(EXTRA_X11) $(X11_INCLUDES) -O $(BYTCCCOMPOPTS)
 
 default: Makefile.config $(INSTALLTARGET) $(HELPFILES)
 
-all: byt opt doc
-allopt: opt doc
+all: byt bin doc
+allbin: bin doc
 allbyt: byt doc
 
 i_want_opt:
@@ -138,10 +138,10 @@ byt: $(EXEC).byt
 $(EXEC).byt: $(COBJS) $(CMO_OBJS)
 	$(OCAMLC) -custom $(INCLUDES) $(BYT_OBJS) $(LINK_OPTS) -o $(EXEC).byt
 
-opt: $(EXEC).opt
+bin: $(EXEC).bin
 
-$(EXEC).opt: $(COBJS) $(CMX_OBJS)
-	$(OCAMLOPT) $(INCLUDES) $(OPT_OBJS) $(LINK_OPTS) -o $(EXEC).opt
+$(EXEC).bin: $(COBJS) $(CMX_OBJS)
+	$(OCAMLOPT) $(INCLUDES) $(OPT_OBJS) $(LINK_OPTS) -o $(EXEC).bin
 
 documentation: $(MANFILES)
 	cd doc; $(MAKE) all
@@ -159,12 +159,12 @@ veryclean: clean
 veryveryclean: veryclean
 	rm -f configure
 
-install: installopt installman
+install: installbin installman
 
 installbyt:
 	$(MAKE) install INSTALLTARGET=advi.byt
 
-installopt:: $(INSTALLTARGET) $(HELPFILES)
+installbin:: $(INSTALLTARGET) $(HELPFILES)
 	- install -d ${bindir}
 	install -m 755 $(INSTALLTARGET) ${bindir}/advi
 	- install -d $(ADVI_LOC)
@@ -189,7 +189,7 @@ Makefile.config: Makefile.config.in
 	./configure
 
 clean::
-	$(RM) $(EXEC).opt $(EXEC).byt
+	$(RM) $(EXEC).bin $(EXEC).byt
 	cd test && $(MAKE) clean
 	cd doc && $(MAKE) clean
 	cd examples && $(MAKE) clean
