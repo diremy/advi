@@ -1,6 +1,5 @@
-advi
-advi.opt
-advi.byt
+*.byt
+*.bin
 config.log
 config.cache
 config.status

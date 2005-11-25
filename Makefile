@@ -55,12 +55,12 @@ TEXEPSFILES= \
 STYFILES= $(addprefix tex/, $(TEXSTYFILES))
 EPSFILES= $(addprefix tex/, $(TEXEPSFILES))
 
-COPTIONS = -warn-error A -g
-COPTOPTIONS = -warn-error A -inline 10000
+BYTOPTIONS = -warn-error A -g
+BINOPTIONS = -warn-error A -inline 10000
 
-OCAMLC	  = $(CAML)c $(COPTIONS)
-OCAMLOPT  = $(CAML)opt.opt $(COPTOPTIONS)
-OCAMLDEP  = $(CAML)dep
+CAMLBYT  = $(CAML)c $(BYTOPTIONS)
+CAMLBIN  = $(CAML)opt.opt $(BINOPTIONS)
+CAMLDEP  = $(CAML)dep
 
 # CAMLIMAGESDIR & CAMLIMAGESLIBS is defined in Makefile.config
 
@@ -102,9 +102,9 @@ CAMLP4_FLAG = -I +camlp4
 endif
 
 BYT_OBJS = $(COBJS) $(CMA_OBJS) $(CMO_OBJS)
-OPT_OBJS = $(COBJS) $(CMXA_OBJS) $(CMX_OBJS)
+BIN_OBJS = $(COBJS) $(CMXA_OBJS) $(CMX_OBJS)
 
-INCLUDES  = $(addprefix -I , $(MLINCDIRS))
+CAMLINCLUDES  = $(addprefix -I , $(MLINCDIRS))
 LINK_OPTS = $(addprefix -ccopt -L, $(CLIBDIRS)) \
 	    $(addprefix -cclib -l, $(CLIBS)) \
 	    $(addprefix -cclib , $(WITH_X))
@@ -116,8 +116,6 @@ CFLAGS=$(EXTRA_X11) $(X11_INCLUDES) -O $(BYTCCCOMPOPTS)
 default: Makefile.config $(INSTALLTARGET) $(HELPFILES)
 
 all: byt bin doc
-allbin: bin doc
-allbyt: byt doc
 
 i_want_opt:
 	@echo "************************** Warning ***************************"
@@ -136,12 +134,14 @@ i_want_opt:
 byt: $(EXEC).byt
 
 $(EXEC).byt: $(COBJS) $(CMO_OBJS)
-	$(OCAMLC) -custom $(INCLUDES) $(BYT_OBJS) $(LINK_OPTS) -o $(EXEC).byt
+	$(CAMLBYT) -custom $(CAMLINCLUDES) $(BYT_OBJS) \
+		$(LINK_OPTS) -o $(EXEC).byt
 
 bin: $(EXEC).bin
 
 $(EXEC).bin: $(COBJS) $(CMX_OBJS)
-	$(OCAMLOPT) $(INCLUDES) $(OPT_OBJS) $(LINK_OPTS) -o $(EXEC).bin
+	$(CAMLBIN) $(CAMLINCLUDES) $(BIN_OBJS) \
+		$(LINK_OPTS) -o $(EXEC).bin
 
 documentation: $(MANFILES)
 	cd doc; $(MAKE) all
@@ -195,7 +195,7 @@ clean::
 	cd examples && $(MAKE) clean
 
 .depend:: Makefile
-	$(OCAMLDEP) *.mli $(MLFILES) > .depend
+	$(CAMLDEP) *.mli $(MLFILES) > .depend
 	gcc -MM -I$(CAMLDIR) $(CFLAGS) $(COBJS:.o=.c) \
 		| sed -e 's|$(CAMLDIR)/[^ ]*||' >> .depend
 	chmod a+w .depend
