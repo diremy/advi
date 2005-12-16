@@ -20,68 +20,68 @@
 
 include Makefile.config
 
-YEAR=2005
-OLDYEAR=2004
-PACKAGE=advi
-MAINVERSION=1
-SUBVERSION=7
-PATCHLEVEL=0
-VERSION=$(MAINVERSION).$(SUBVERSION)
-FULLVERSION=$(VERSION).$(PATCHLEVEL)
-OLDVERSION=1.6
+YEAR = 2005
+OLDYEAR = 2004
+PACKAGE = advi
+MAINVERSION = 1
+SUBVERSION = 7
+PATCHLEVEL = 0
+VERSION = $(MAINVERSION).$(SUBVERSION)
+FULLVERSION = $(VERSION).$(PATCHLEVEL)
+OLDVERSION = 1.6
 
-PACKAGEFULLNAME=$(PACKAGE)-$(FULLVERSION)
+PACKAGEFULLNAME = $(PACKAGE)-$(FULLVERSION)
 
-CVSRELEASETAG=$(PACKAGE)-$(MAINVERSION)_$(SUBVERSION)_$(PATCHLEVEL)
-ANNOUNCEFILE=Announce-$(FULLVERSION)
+CVSRELEASETAG = $(PACKAGE)-$(MAINVERSION)_$(SUBVERSION)_$(PATCHLEVEL)
+ANNOUNCEFILE = Announce-$(FULLVERSION)
 
-PACKAGEVERSIONFILES=config.ml
-DOCVERSIONFILES=tex/advi.sty tex/advi.hva \
+PACKAGEVERSIONFILES = config.ml
+DOCVERSIONFILES = tex/advi.sty tex/advi.hva \
 doc_src/Includes/advi-version.html doc_src/Includes/env \
 doc_src/advi.man
 
-MANFILES=doc/advi.1
+MANFILES = doc/advi.1
 
-HELPFILES=doc/splash.dvi \
+HELPFILES = doc/splash.dvi \
     doc/scratch_write_splash.dvi doc/scratch_draw_splash.dvi
 
-TEXSTYFILES= \
+TEXSTYFILES = \
     advi-annot.sty advi-slides.sty argv.sty superpose.sty \
     advi-graphicx.sty advi.sty bubble.sty xwindows-colors.sty
 
-TEXEPSFILES= \
+TEXEPSFILES = \
     advilogo.eps bar.eps caml.eps
 
-STYFILES= $(addprefix tex/, $(TEXSTYFILES))
-EPSFILES= $(addprefix tex/, $(TEXEPSFILES))
+STYFILES = $(addprefix tex/, $(TEXSTYFILES))
+EPSFILES = $(addprefix tex/, $(TEXEPSFILES))
 
 BYTOPTIONS = -warn-error A -g
 BINOPTIONS = -warn-error A -inline 10000
 
-CAMLBYT  = $(CAML)c $(BYTOPTIONS)
-CAMLBIN  = $(CAML)opt.opt $(BINOPTIONS)
-CAMLDEP  = $(CAML)dep
+CAMLBYT = $(CAML)c $(BYTOPTIONS)
+CAMLBIN = $(CAML)opt.opt $(BINOPTIONS)
+CAMLDEP = $(CAML)dep
 
 # CAMLIMAGESDIR & CAMLIMAGESLIBS is defined in Makefile.config
 
 MLINCDIRS = $(CAMLIMAGESDIR)
 
-EXEC	  = advi
+EXEC	 = advi
 
-MISC	  = config misc timeout ageometry
-OPTIONS	  = options rc userfile
-GRAPHICS  = graphicsY11 global_options busy gradient gterm launch \
-	    dvicolor shot laser_pointer
-SYMBOL	  = symbol
-DVI	  = input table pkfont ttfont jfm search \
-	    font glyph devfont units dimension dvi
-EFFECTS	  = drawimage gs transimpl embed
-GUI	  = scratch cdvi driver thumbnails dviview
+MISC	 = config misc timeout ageometry
+OPTIONS	 = options rc userfile
+GRAPHICS = graphicsY11 global_options busy gradient gterm launch \
+	   dvicolor shot laser_pointer
+SYMBOL	 = symbol
+DVI	 = input table pkfont ttfont jfm search \
+	   font glyph devfont units dimension dvi
+EFFECTS	 = drawimage gs transimpl embed
+GUI	 = scratch cdvi driver thumbnails dviview
 
-MODULES	  = $(MISC) $(OPTIONS) $(GRAPHICS) \
-            $(SYMBOL) $(DVI) \
-            $(EFFECTS) grdev addons \
-	    $(GUI) main
+MODULES	 = $(MISC) $(OPTIONS) $(GRAPHICS) \
+           $(SYMBOL) $(DVI) \
+           $(EFFECTS) grdev addons \
+	   $(GUI) main
 
 LIBRARIES = graphics unix str $(CAMLIMAGESLIBS)
 CLIBS	  = graphics unix str

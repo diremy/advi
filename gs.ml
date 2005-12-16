@@ -137,7 +137,7 @@ class gs () =
     (if !antialias then x11alpha_device else x11_device);
     [|
       "-q";
-      "-dSAFER";
+      "-dDELAYSAFER";
       "-";
     |]] in
 
@@ -430,6 +430,7 @@ class gv =
           gs # line advi_pro;
           gs # line "TeXDict begin @landscape end";
           gs # line "/SI save def gsave";
+          gs # line ".setsafe";
           process <- Some gs;
           gs
       | Some gs ->
