@@ -117,8 +117,6 @@ CAMLBYT = $(CAML)c $(BYTOPTIONS)
 CAMLBIN = $(CAML)opt.opt $(BINOPTIONS)
 CAMLDEP = $(CAML)dep
 
-# CAMLIMAGESDIR & CAMLIMAGESLIBS is defined in Makefile.config
-
 MLINCDIRS = $(CAMLIMAGESDIR)
 
 EXEC	 = advi
@@ -213,7 +211,7 @@ doc: $(HELPFILES)
 	if test $(HAVE_HEVEA) = "true"; then ($(MAKE) documentation); fi
 
 veryclean: clean
-	rm -f Makefile.config config.cache config.log \
+	rm -f config.cache config.log \
 	config.status config.ml
 
 veryveryclean: veryclean
@@ -244,9 +242,6 @@ installman:
 	install -m 644 $(MANFILES) $(MANDIR)/man$(MANEXT) || exit 0
 
 MLFILES = $(addsuffix .ml, $(MODULES))
-
-Makefile.config: Makefile.config.in
-	./configure
 
 clean::
 	$(RM) $(EXEC).bin $(EXEC).byt
