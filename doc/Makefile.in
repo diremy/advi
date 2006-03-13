@@ -17,7 +17,8 @@
 
 # $Id$
 
-include ../Makefile.config
+PATH_HEVEA	= @PATH_HEVEA@
+HAVE_HEVEA	= @HAVE_HEVEA@
 
 # See also file MakeHTML to recompile HTML files for the Web site.
 
