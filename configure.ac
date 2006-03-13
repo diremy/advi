@@ -7,12 +7,12 @@ dnl try to find ocaml
 CAML=ocaml
 AC_PATH_PROG(PATH_CAML, $CAML, "nope") 
 if test "$PATH_CAML" = "nope"; then
-  echo "***************** Error *******************"
-  echo "ocaml not found."
-  echo "Install the latest ocaml system"
-  echo "and check your PATH contains ocamlc."
-  echo "*******************************************"
-  exit -1
+    echo "***************** Error *******************"
+    echo "ocaml not found."
+    echo "Install the latest ocaml system"
+    echo "and check your PATH contains ocamlc."
+    echo "*******************************************"
+    exit -1
 fi
 
 dnl try to find your compiler package
@@ -29,36 +29,36 @@ dnl TeX
 
 AC_PATH_PROG(PATH_KPSEXPAND, kpsexpand, "nope") 
 if test "$PATH_KPSEXPAND" = "nope"; then
-  echo "**************** Warning ******************"
-  echo "kpsexpand command not found." 
-  echo "We use /usr/share/texmf as the root directory"
-  echo "of TeX system"
-  echo "*******************************************"
-  TEXMFMAIN="/usr/share/texmf"
+    echo "**************** Warning ******************"
+    echo "kpsexpand command not found." 
+    echo "We use /usr/share/texmf as the root directory"
+    echo "of TeX system"
+    echo "*******************************************"
+    TEXMFMAIN="/usr/share/texmf"
 else
-  AC_MSG_CHECKING(TeX root path)
-  TEXMFMAIN=`kpsexpand '$TEXMFMAIN'`
-  AC_MSG_RESULT($TEXMFMAIN)
+    AC_MSG_CHECKING(TeX root path)
+    TEXMFMAIN=`kpsexpand '$TEXMFMAIN'`
+    AC_MSG_RESULT($TEXMFMAIN)
 fi
 
 AC_PATH_PROG(PATH_KPSEWHICH, kpsewhich, "nope") 
 if test "$PATH_KPSEWHICH" = "nope"; then
-  echo "**************** Warning ******************"
-  echo "kpsewhich command not found." 
-  echo "We use a $PATH dependant kpsewhich command"
-  echo "*******************************************"
-  PATH_KPSEWHICH="kpsewhich"
+    echo "**************** Warning ******************"
+    echo "kpsewhich command not found." 
+    echo "We use a $PATH dependant kpsewhich command"
+    echo "*******************************************"
+    PATH_KPSEWHICH="kpsewhich"
 fi
 
 dnl Gzip
 
 AC_PATH_PROG(PATH_GZIP, gzip, "nope") 
 if test "$PATH_GZIP" = "nope"; then
-  echo "**************** Warning ******************"
-  echo "gzip command not found." 
-  echo "We use a $PATH dependant gzip command"
-  echo "*******************************************"
-  PATH_GZIP=""
+    echo "**************** Warning ******************"
+    echo "gzip command not found." 
+    echo "We use a $PATH dependant gzip command"
+    echo "*******************************************"
+    PATH_GZIP=""
 fi
 
 dnl Checks for libraries.
@@ -69,41 +69,42 @@ CAMLIMAGESDIR=$CAMLDIR/camlimages
 
 AC_MSG_CHECKING(for camlimages)
 AC_ARG_WITH(camlimages, [  --with-camlimages=dir      specify camlimages library directory],
-  if test "$withval" != "no" ; then  
+    if test "$withval" != "no" ; then  
 	CAMLIMAGESDIR=$withval
-  else
+    else
 	AC_MSG_RESULT(no)
 	CAMLIMAGESDIR=nope
-  fi)
+    fi
+)
 
 dnl Camlimages version
 
 if test -f $CAMLIMAGESDIR/ci_ps.cma; then
-	AC_MSG_RESULT(found)
-	CAMLIMAGES_VERSION=`grep VERSION $CAMLIMAGESDIR/Makefile.config | sed -e 's/VERSION=//'`
-	if test `expr $CAMLIMAGES_VERSION \>= 2.11` = "1"; then
-		HAVE_CAMLIMAGES="true"
-		CAMLIMAGESCONFIGINCLUDE="include $CAMLIMAGESDIR/Makefile.config"
-                CAMLIMAGESLIBS='$(WITH_CAMLIMAGES:.cma=)'
-	else
-		AC_MSG_RESULT(found, but bit too old)
-		echo "***************** Error *******************"
-		echo "camlimages is found in the directory \"$CAMLIMAGESDIR\"",
-		echo "but bit too old. (make sure install the latest version 2.10)"
-		echo "*******************************************"
-		HAVE_CAMLIMAGES="false"
-		CAMLIMAGESLIBS=""
-		exit 1
-	fi
-else
-	AC_MSG_RESULT(not found, or too old)
+    AC_MSG_RESULT(found)
+    CAMLIMAGES_VERSION=`grep VERSION $CAMLIMAGESDIR/Makefile.config | sed -e 's/VERSION=//'`
+    if test `expr $CAMLIMAGES_VERSION \>= 2.11` = "1"; then
+	HAVE_CAMLIMAGES="true"
+	CAMLIMAGESCONFIGINCLUDE="include $CAMLIMAGESDIR/Makefile.config"
+	CAMLIMAGESLIBS='$(WITH_CAMLIMAGES:.cma=)'
+    else
+	AC_MSG_RESULT(found, but bit too old)
 	echo "***************** Error *******************"
-	echo "camlimages is not found or incomplete in the directory \"$CAMLIMAGESDIR\""
-	echo "(make sure install the latest version 2.10)"
+	echo "camlimages is found in the directory \"$CAMLIMAGESDIR\"",
+	echo "but bit too old. (make sure install the latest version 2.10)"
 	echo "*******************************************"
 	HAVE_CAMLIMAGES="false"
 	CAMLIMAGESLIBS=""
 	exit 1
+    fi
+else
+    AC_MSG_RESULT(not found, or too old)
+    echo "***************** Error *******************"
+    echo "camlimages is not found or incomplete in the directory \"$CAMLIMAGESDIR\""
+    echo "(make sure install the latest version 2.10)"
+    echo "*******************************************"
+    HAVE_CAMLIMAGES="false"
+    CAMLIMAGESLIBS=""
+    exit 1
 fi
 
 dnl LablTk
@@ -113,80 +114,81 @@ LABLTKDIR=$CAMLDIR/labltk
 AC_MSG_CHECKING(for labltk)
 
 if test -f $LABLTKDIR/cTk.cmi; then
-	AC_MSG_RESULT(found)
-	HAVE_LABLTK="true"
-	LABLTKLIB=$LABLTKDIR/labltk.cma
+    AC_MSG_RESULT(found)
+    HAVE_LABLTK="true"
+    LABLTKLIB=$LABLTKDIR/labltk.cma
 else
-	AC_MSG_RESULT(no)
-	HAVE_LABLTK="false"
-	echo "***************** Warning *******************"
-	echo "Your labltk library is too old. Use the latest one,"
-	echo "found in the O'Caml CVS tree"
-	echo "*******************************************"
+    AC_MSG_RESULT(no)
+    HAVE_LABLTK="false"
+    echo "***************** Warning *******************"
+    echo "Your labltk library is too old. Use the latest one,"
+    echo "found in the O'Caml CVS tree"
+    echo "*******************************************"
 fi
 
 dnl Checking gs:
 
 PATH_GS="nope"
 AC_ARG_WITH(gs, [  --with-gs=path          specify gs path],
-  if test "$withval" != "no" ; then  
+    if test "$withval" != "no" ; then  
 	PATH_GS=$withval
-  else
+    else
 	PATH_GS="nope"
-  fi)
+    fi
+)
 
 if test "X$PATH_GS" = "Xnope"; then
-  AC_PATH_PROG(PATH_GS, gs, "nope") 
+    AC_PATH_PROG(PATH_GS, gs, "nope") 
 fi
 
 dnl check gs really exists and its version
 if test -f "$PATH_GS" ; then
-  AC_MSG_CHECKING(for gs version) 
-  HAVE_GS="true"
-  GS_VERSION=`$PATH_GS -v | grep Ghostscript | sed -e 's/.*Ghostscript \([[0-9\.]]*\).*/\1/'`
-  GS_VERSION_INT=`echo $GS_VERSION | sed -e 's/\.//'`
-  if test `expr $GS_VERSION_INT \>= 6.52` != "1"; then
-    AC_MSG_RESULT(too old)
-    GS_UPTO_DATE="*** TOO OLD ***"
-    echo "**************** Warning ********************"
-    echo "Your Ghostscript $GS_VERSION may be too old  "
-    echo "You may need Ghostscript version 6.52 or higher"
-    echo "for the correct synchronization of postscript"
-    echo "and TeX graphics                             "
-    echo "*********************************************"
-  else
-    GS_UPTO_DATE=""	
-    AC_MSG_RESULT(ok)
-  fi
+    AC_MSG_CHECKING(for gs version) 
+    HAVE_GS="true"
+    GS_VERSION=`$PATH_GS -v | grep Ghostscript | sed -e 's/.*Ghostscript \([[0-9\.]]*\).*/\1/'`
+    GS_VERSION_INT=`echo $GS_VERSION | sed -e 's/\.//'`
+    if test `expr $GS_VERSION_INT \>= 6.52` != "1"; then
+	AC_MSG_RESULT(too old)
+	GS_UPTO_DATE="*** TOO OLD ***"
+	echo "**************** Warning ********************"
+	echo "Your Ghostscript $GS_VERSION may be too old  "
+	echo "You may need Ghostscript version 6.52 or higher"
+	echo "for the correct synchronization of postscript"
+	echo "and TeX graphics                             "
+	echo "*********************************************"
+    else
+	GS_UPTO_DATE=""	
+	AC_MSG_RESULT(ok)
+    fi
 else
-  AC_MSG_RESULT(no)
-  HAVE_GS="false"
+    AC_MSG_RESULT(no)
+    HAVE_GS="false"
 fi
 
 dnl Check for libraries: END
 
 AC_PATH_PROG(PATH_CAMLOPT, $CAMLOPT, "nope")
 if test "$PATH_CAMLOPT" = "nope"; then
-  echo "**************** Warning ******************"
-  echo "The ocaml native code compiler is not found"
-  echo "Only the bytecode version of Advi will be"
-  echo "compiled and installed. We strongly recommend"
-  echo "to install the ocamlopt compiler if available"
-  echo "in your OS."
-  echo "*******************************************"
-  INSTALLTARGET="i_want_opt"
-else
-  if test -f "$CAMLIMAGESDIR/ci_ps.cmxa"; then
-    INSTALLTARGET="advi.bin"
-  else
     echo "**************** Warning ******************"
-    echo "You have the ocamlopt compiler, but you have no"
-    echo "native-code version of camlimages library installed."
-    echo "Without it, we cannot compile the native-code"
-    echo "version of advi, which we strongly recommend."
+    echo "The ocaml native code compiler is not found"
+    echo "Only the bytecode version of Advi will be"
+    echo "compiled and installed. We strongly recommend"
+    echo "to install the ocamlopt compiler if available"
+    echo "in your OS."
     echo "*******************************************"
     INSTALLTARGET="i_want_opt"
-  fi
+else
+    if test -f "$CAMLIMAGESDIR/ci_ps.cmxa"; then
+	INSTALLTARGET="advi.bin"
+    else
+	echo "**************** Warning ******************"
+	echo "You have the ocamlopt compiler, but you have no"
+	echo "native-code version of camlimages library installed."
+	echo "Without it, we cannot compile the native-code"
+	echo "version of advi, which we strongly recommend."
+	echo "*******************************************"
+	INSTALLTARGET="i_want_opt"
+    fi
 fi
 
 AC_PATH_XTRA
@@ -205,20 +207,21 @@ dnl Checking hevea:
 
 PATH_HEVEA="nope"
 AC_ARG_WITH(hevea, [  --with-hevea=path          specify hevea path],
-  if test "$withval" != "no" ; then  
+    if test "$withval" != "no" ; then  
 	PATH_HEVEA=$withval
-  else
+    else
 	PATH_HEVEA="nope"
-  fi)
+    fi
+)
 
 if test "X$PATH_HEVEA" = "Xnope"; then
-  AC_PATH_PROG(PATH_HEVEA, hevea, "nope") 
+    AC_PATH_PROG(PATH_HEVEA, hevea, "nope") 
 fi
 
 if test "$PATH_HEVEA" = "nope"; then
-  HAVE_HEVEA=false
+    HAVE_HEVEA=false
 else
-  HAVE_HEVEA=true
+    HAVE_HEVEA=true
 fi
 
 dnl Resources location
@@ -235,9 +238,9 @@ mylibdir=$libdir
 test "x$libdir" = 'x${exec_prefix}/lib' && mylibdir="$myexec_prefix/lib"
 
 if test -d $TEXMFMAIN/tex/latex; then
-  ADVI_LOC=$TEXMFMAIN/tex/latex/advi
+    ADVI_LOC=$TEXMFMAIN/tex/latex/advi
 else 
-  ADVI_LOC=$mylibdir/advi
+    ADVI_LOC=$mylibdir/advi
 fi
 
 dnl Substitute variables
