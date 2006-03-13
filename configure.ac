@@ -1,9 +1,9 @@
-dnl Process this file with autoconf to produce a configure script.
+# Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.59)
 AC_INIT(advi, 1.7.0, Pierre.Weis@inria.fr)
 PACKAGE_DATE=`date +%Y-%m-%d`
 
-dnl try to find ocaml
+# Checking ocaml
 CAML=ocaml
 AC_PATH_PROG(PATH_CAML, $CAML, "nope") 
 if test "$PATH_CAML" = "nope"; then
@@ -15,7 +15,6 @@ if test "$PATH_CAML" = "nope"; then
     exit -1
 fi
 
-dnl try to find your compiler package
 AC_MSG_CHECKING(your compiler version)
 
 CAMLDIR=`"$CAML"c -v | grep "^Standard" | sed "s/.*: *//"`
@@ -25,8 +24,7 @@ AC_MSG_RESULT(version $CAMLVERSION at $CAMLDIR)
 
 CAMLOPT="$CAML"opt
   
-dnl TeX 
-
+# Checking TeX 
 AC_PATH_PROG(PATH_KPSEXPAND, kpsexpand, "nope") 
 if test "$PATH_KPSEXPAND" = "nope"; then
     echo "**************** Warning ******************"
@@ -50,8 +48,7 @@ if test "$PATH_KPSEWHICH" = "nope"; then
     PATH_KPSEWHICH="kpsewhich"
 fi
 
-dnl Gzip
-
+# Checking Gzip
 AC_PATH_PROG(PATH_GZIP, gzip, "nope") 
 if test "$PATH_GZIP" = "nope"; then
     echo "**************** Warning ******************"
@@ -61,10 +58,7 @@ if test "$PATH_GZIP" = "nope"; then
     PATH_GZIP=""
 fi
 
-dnl Checks for libraries.
-
-dnl CamlImages
-
+# Checking CamlImages
 CAMLIMAGESDIR=$CAMLDIR/camlimages
 
 AC_MSG_CHECKING(for camlimages)
@@ -76,8 +70,6 @@ AC_ARG_WITH(camlimages, [  --with-camlimages=dir      specify camlimages library
 	CAMLIMAGESDIR=nope
     fi
 )
-
-dnl Camlimages version
 
 if test -f $CAMLIMAGESDIR/ci_ps.cma; then
     AC_MSG_RESULT(found)
@@ -107,8 +99,7 @@ else
     exit 1
 fi
 
-dnl LablTk
-
+# Checking LablTk
 LABLTKDIR=$CAMLDIR/labltk
 
 AC_MSG_CHECKING(for labltk)
@@ -126,8 +117,7 @@ else
     echo "*******************************************"
 fi
 
-dnl Checking gs:
-
+# Checking gs
 PATH_GS="nope"
 AC_ARG_WITH(gs, [  --with-gs=path          specify gs path],
     if test "$withval" != "no" ; then  
@@ -141,7 +131,6 @@ if test "X$PATH_GS" = "Xnope"; then
     AC_PATH_PROG(PATH_GS, gs, "nope") 
 fi
 
-dnl check gs really exists and its version
 if test -f "$PATH_GS" ; then
     AC_MSG_CHECKING(for gs version) 
     HAVE_GS="true"
@@ -165,8 +154,7 @@ else
     HAVE_GS="false"
 fi
 
-dnl Check for libraries: END
-
+# Check for libraries
 AC_PATH_PROG(PATH_CAMLOPT, $CAMLOPT, "nope")
 if test "$PATH_CAMLOPT" = "nope"; then
     echo "**************** Warning ******************"
@@ -193,8 +181,7 @@ fi
 
 AC_PATH_XTRA
 
-dnl Check for xinerama support
-
+# Checking for xinerama support
 HAVE_XINERAMA="false"
 AC_CHECK_HEADER(X11/extensions/Xinerama.h,
 HAVE_XINERAMA="true";
@@ -203,8 +190,7 @@ XINERAMA_LIBS="-lXinerama -lXext")
 
 WITH_X="$X_LIBS $X_PRE_LIBS $XINERAMA_LIBS -lX11 $X_EXTRA_LIBS"
 
-dnl Checking hevea:
-
+# Checking hevea
 PATH_HEVEA="nope"
 AC_ARG_WITH(hevea, [  --with-hevea=path          specify hevea path],
     if test "$withval" != "no" ; then  
@@ -224,10 +210,8 @@ else
     HAVE_HEVEA=true
 fi
 
-dnl Resources location
+# Resources location
 ADVI_LOC=`pwd`
-
-dnl BUILD OUR OWN LIBDIR
 myprefix=$prefix
 myexec_prefix=$exec_prefix
 mylibdir=$libdir
@@ -243,7 +227,7 @@ else
     ADVI_LOC=$mylibdir/advi
 fi
 
-dnl Substitute variables
+# Substitute variables
 AC_SUBST(CAML)
 AC_SUBST(CAMLDIR)
 AC_SUBST(CAMLVERSION)
