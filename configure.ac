@@ -62,7 +62,12 @@ fi
 CAMLIMAGESDIR=$CAMLDIR/camlimages
 
 AC_MSG_CHECKING(for camlimages)
-AC_ARG_WITH(camlimages, [  --with-camlimages=dir      specify camlimages library directory],
+AC_ARG_WITH(
+    camlimages,
+    AC_HELP_STRING(
+	[--with-camlimages=dir],
+	[specify camlimages library directory]
+    ),
     if test "$withval" != "no" ; then  
 	CAMLIMAGESDIR=$withval
     else
@@ -119,7 +124,12 @@ fi
 
 # Checking gs
 PATH_GS="nope"
-AC_ARG_WITH(gs, [  --with-gs=path          specify gs path],
+AC_ARG_WITH(
+    gs,
+    AC_HELP_STRING(
+	[--with-gs=path],
+	[specify gs path]
+    ),
     if test "$withval" != "no" ; then  
 	PATH_GS=$withval
     else
@@ -192,7 +202,12 @@ WITH_X="$X_LIBS $X_PRE_LIBS $XINERAMA_LIBS -lX11 $X_EXTRA_LIBS"
 
 # Checking hevea
 PATH_HEVEA="nope"
-AC_ARG_WITH(hevea, [  --with-hevea=path          specify hevea path],
+AC_ARG_WITH(
+    hevea,
+    AC_HELP_STRING(
+	[--with-hevea=path],
+	[specify hevea path]
+    ),
     if test "$withval" != "no" ; then  
 	PATH_HEVEA=$withval
     else
