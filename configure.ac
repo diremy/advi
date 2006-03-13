@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.59)
-AC_INIT(main.ml)
+AC_INIT(advi, 1.7, Pierre.Weis@inria.fr)
 
 dnl try to find ocaml
 CAML=ocaml
