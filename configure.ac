@@ -266,7 +266,7 @@ fi
 AC_SUBST(ADVI_LOC)
 AC_SUBST(WITH_X)
 AC_SUBST(HAVE_GS)
-AC_OUTPUT(Makefile.config config.ml)
+AC_OUTPUT(Makefile config.ml)
 
 echo "------------------------------------------------- Configuration finished"
 echo
