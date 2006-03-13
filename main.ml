@@ -37,7 +37,7 @@ let set_dimen r s = r := Dimension.dimen_of_string s;;
 let print_advi_version () =
   prerr_endline
    (Printf.sprintf
-      "The Active-DVI previewer and graphics presenter, version %.2f"
+      "The Active-DVI previewer and graphics presenter, version %s"
       Config.advi_version_number);
   exit 0;;
 

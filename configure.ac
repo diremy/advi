@@ -1,6 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.59)
-AC_INIT(advi, 1.7, Pierre.Weis@inria.fr)
+AC_INIT(advi, 1.7.0, Pierre.Weis@inria.fr)
+PACKAGE_DATE=`date +%Y-%m-%d`
 
 dnl try to find ocaml
 CAML=ocaml
@@ -263,10 +264,12 @@ else
   ADVI_LOC=$mylibdir/advi
 fi
 
+AC_SUBST(PACKAGE_VERSION)
+AC_SUBST(PACKAGE_DATE)
 AC_SUBST(ADVI_LOC)
 AC_SUBST(WITH_X)
 AC_SUBST(HAVE_GS)
-AC_OUTPUT(Makefile config.ml)
+AC_OUTPUT(Makefile)
 
 echo "------------------------------------------------- Configuration finished"
 echo
