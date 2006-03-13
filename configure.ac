@@ -224,12 +224,26 @@ fi
 dnl Resources location
 ADVI_LOC=`pwd`
 
-dnl Substitute variables
+dnl BUILD OUR OWN LIBDIR
+myprefix=$prefix
+myexec_prefix=$exec_prefix
+mylibdir=$libdir
 
+test "x$myprefix" = xNONE && myprefix=$ac_default_prefix
+test "x$myexec_prefix" = xNONE && myexec_prefix=${myprefix}
+mylibdir=$libdir
+test "x$libdir" = 'x${exec_prefix}/lib' && mylibdir="$myexec_prefix/lib"
+
+if test -d $TEXMFMAIN/tex/latex; then
+  ADVI_LOC=$TEXMFMAIN/tex/latex/advi
+else 
+  ADVI_LOC=$mylibdir/advi
+fi
+
+dnl Substitute variables
 AC_SUBST(CAML)
 AC_SUBST(CAMLDIR)
 AC_SUBST(CAMLVERSION)
-
 AC_SUBST(CAMLIMAGESDIR)
 AC_SUBST(CAMLIMAGESCONFIGINCLUDE)
 AC_SUBST(HAVE_CAMLIMAGES)
@@ -247,28 +261,12 @@ AC_SUBST(HAVE_XINERAMA)
 AC_SUBST(XINERAMA_FLAG)
 AC_SUBST(PATH_HEVEA)
 AC_SUBST(HAVE_HEVEA)
-
-dnl BUILD OUR OWN LIBDIR
-myprefix=$prefix
-myexec_prefix=$exec_prefix
-mylibdir=$libdir
-
-test "x$myprefix" = xNONE && myprefix=$ac_default_prefix
-test "x$myexec_prefix" = xNONE && myexec_prefix=${myprefix}
-mylibdir=$libdir
-test "x$libdir" = 'x${exec_prefix}/lib' && mylibdir="$myexec_prefix/lib"
-
-if test -d $TEXMFMAIN/tex/latex; then
-  ADVI_LOC=$TEXMFMAIN/tex/latex/advi
-else 
-  ADVI_LOC=$mylibdir/advi
-fi
-
 AC_SUBST(PACKAGE_VERSION)
 AC_SUBST(PACKAGE_DATE)
 AC_SUBST(ADVI_LOC)
 AC_SUBST(WITH_X)
 AC_SUBST(HAVE_GS)
+
 AC_OUTPUT(Makefile)
 
 echo "------------------------------------------------- Configuration finished"
