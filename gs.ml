@@ -18,6 +18,7 @@
 (* $Id$ *)
 
 let debugs = Misc.debug_endline;;
+let delaysafer = ref true;;
 
 let get_do_ps, set_do_ps, init_do_ps =
  let has_to_do_ps = ref !Global_options.pson in
@@ -137,7 +138,7 @@ class gs () =
     (if !antialias then x11alpha_device else x11_device);
     [|
       "-q";
-      "-dDELAYSAFER";
+      if !delaysafer then "-dDELAYSAFER" else "-dSAFER";
       "-";
     |]] in
 

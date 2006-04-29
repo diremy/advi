@@ -480,9 +480,13 @@ let only_on_backing_store f = only_on set_backing_store_only_mode f;;
 
 let drawing_on_both f = only_on set_both_mode f;;
 
+(* Binding the page-up and page-down keys *)
+external rebind_keysyms: unit -> unit = "caml_gr_rebind_keysyms";;
+
 (* Graphics.sigio_signal is not exported. We declare it here again. *)
 external sigio_signal: unit -> int = "caml_gr_sigio_signal";;
 
 let init () =
+  rebind_keysyms();
   (* we disable the original Graphics event retrieveing system *)
   Sys.set_signal (sigio_signal ()) Sys.Signal_ignore;;

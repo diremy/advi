@@ -17,6 +17,8 @@
 #include <caml/alloc.h>
 #include <X11/Xatom.h>
 #include <X11/cursorfont.h>
+#define XK_MISCELLANY
+#include <X11/keysymdef.h>
 #include <caml/fail.h>
 #include "libgraph.h"
 #include "image.h"
@@ -582,3 +584,12 @@ value caml_gr_reposition (value x, value y, value w, value h, value scr)
   XFlush(caml_gr_display);
   return Val_unit;
 }
+
+value caml_gr_rebind_keysyms(value unit)
+{
+  KeySym modifiers[1] = { 0 };
+  XRebindKeysym(caml_gr_display, XK_Next, modifiers, 0, "N", 1);
+  XRebindKeysym(caml_gr_display, XK_Prior, modifiers, 0, "P", 1);
+  return Val_unit;
+}
+

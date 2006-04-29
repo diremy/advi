@@ -1130,6 +1130,8 @@ let milli_inch_to_sp = Units.from_to Units.IN Units.SP 1e-3;;
 
 let tpic_milli_inches s = parse_float s *. milli_inch_to_sp;;
 
+let no_shading = -1.0
+
 let tpic_pen st =
   Misc.round (st.conv *. st.tpic_pensize);;
 
@@ -1152,7 +1154,7 @@ let tpic_flush_path st cntr =
   if cntr && !visible then Dev.draw_path pixpath ~pensize:(tpic_pen st);
   (* Reset path *)
   st.tpic_path <- [];
-  st.tpic_shading <- 0.0;;
+  st.tpic_shading <- no_shading;;
 
 let dist (x0, y0) (x1, y1) = abs (x0 - x1) + abs (y0 - y1);;
 
@@ -1185,7 +1187,7 @@ let tpic_spline_path st =
   if !visible then
     Dev.draw_path (Array.of_list (List.rev !r)) ~pensize:(tpic_pen st);
   st.tpic_path <- [];
-  st.tpic_shading <- 0.0;;
+  st.tpic_shading <- no_shading;;
 
 let rad_to_deg = 45.0 /. atan 1.0;;
 
@@ -1203,7 +1205,7 @@ let tpic_arc st x y rx ry s e cntr =
   if cntr && !visible then
     Dev.draw_arc ~x ~y ~rx ~ry ~start:s ~stop:e ~pensize:(tpic_pen st);
   (* Reset shading *)
-  st.tpic_shading <- 0.0;;
+  st.tpic_shading <- no_shading;;
 
 let tpic_specials st s =
   match split_string s 0 with
@@ -1687,7 +1689,7 @@ let render_step cdvi num ?trans ?chst dpi xorig yorig =
       direction = trans;
       transition = Transitions.TransNone;
       transition_stack = [];
-      tpic_pensize = 0.0; tpic_path = []; tpic_shading = 0.0;
+      tpic_pensize = 0.0; tpic_path = []; tpic_shading = no_shading;
       status = (orid chst) status;
       headers = [];
       html = None;

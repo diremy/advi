@@ -76,7 +76,7 @@ Maybe you mean \@currenvir ing}}
 
 \def \advi@ifadvi {\ifadvi@ignore
   \expandafter \@secondoftwo \else \expandafter \@firstoftwo \fi}
-\advi@export \ifadviignore \ifadvi@ignore
+\def \ifadviignore {\ifadvi@ignore}
 \advi@export \adviignore \advi@ignoretrue
 \advi@export \ifadvi \advi@ifadvi
 
