@@ -183,6 +183,7 @@ type mode =
 type toc =
    | Page of int
    | Thumbnails of int * (int * Graphics.image) array;;
+type command = Position | Other;;
 type duplex = Alone | Master of state | Client of state
 and state = {
     (* DVI attributes *)
@@ -209,6 +210,7 @@ and state = {
     mutable page_stack : int list;
     mutable page_marks : int list;
     mutable exchange_page : int;
+    mutable last_command : command;
     mutable last_modified : float;
     mutable button : (int * int) option;
     mutable full_screen : (int * int * int * int * (int * int)) option;
@@ -389,6 +391,7 @@ let init master filename =
       exchange_page = 0;
       page_number = starting_page npages;
       last_modified = last_modified;
+      last_command = Other;
       button = None;
       full_screen = None;
       in_full_screen = false;
@@ -784,6 +787,12 @@ let rec reload foreground st =
              st.filename st'.filename);
         st'.duplex <- Alone;
         raise (if foreground then Duplex (redraw, st') else Not_found)
+(*
+    | Master st' when st'.last_command = Position ->
+        update_dvi_size false st;
+        Gs.init_do_ps ();
+        raise (Duplex (redraw, st'))
+*)
     | _ ->
         update_dvi_size false st;
         Gs.init_do_ps ();
@@ -1559,6 +1568,8 @@ let main_loop mastername clients =
       try while true do
         st.num <- st.next_num;
         st.next_num <- 0;
+        let last_command = st.last_command in
+        st.last_command <- Other;
         if changed st then reload true st else
         match Grdev.wait_event () with
         | Grdev.Refreshed ->
@@ -1566,7 +1577,8 @@ let main_loop mastername clients =
             | Master _ | Alone ->
                 B.reload st
             | Client st' ->
-                if !autoswitch then raise (Duplex (B.reload, st'))
+                if !autoswitch || last_command = Position
+                then raise (Duplex (B.reload, st'))
                 else Grdev.clear_usr1 ();
             end
         | Grdev.Resized (x, y) -> resize st x y
@@ -1590,6 +1602,7 @@ let main_loop mastername clients =
         | Grdev.Region (x, y, w, h) -> ()
         | Grdev.Selection s -> selection s
         | Grdev.Position (x, y) ->
+            st.last_command <- Position;
             position st x y
         | Grdev.Click (pos, but, _, _) when Grdev.E.editing () ->
             begin match pos, but with
