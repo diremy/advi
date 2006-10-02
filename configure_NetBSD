@@ -1,7 +1,0 @@
-#!/bin/sh
-rm -f config.cache config.log
-CFLAGS="-I/usr/pkg/include -I/usr/X11R6/include" \
-LDFLAGS="-L/usr/pkg/lib -L/usr/X11R6/lib" \
-./configure  \
---includedir=/usr/pkg/include \
---includedir=/usr/X11R6/include --includedir=/usr/X11R6/include/X11 "$@"
