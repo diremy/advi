@@ -269,7 +269,7 @@ AC_SUBST(ADVI_LOC)
 AC_SUBST(WITH_X)
 AC_SUBST(HAVE_GS)
 
-AC_OUTPUT(Makefile doc/Makefile)
+AC_OUTPUT(Makefile Makefile.config doc/Makefile)
 
 echo "------------------------------------------------- Configuration finished"
 echo
