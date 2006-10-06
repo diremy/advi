@@ -71,9 +71,6 @@ includedir=@includedir@
 
 ADVI_LOC=@ADVI_LOC@
 
-HAVE_HEVEA=@HAVE_HEVEA@
-PATH_HEVEA=@PATH_HEVEA@
-
 YEAR = 2005
 OLDYEAR = 2004
 OLDVERSION = 1.6
@@ -197,11 +194,8 @@ $(EXEC).bin: $(COBJS) $(CMX_OBJS)
 	$(CAMLBIN) $(CAMLINCLUDES) $(BIN_OBJS) \
 		$(LINK_OPTS) -o $(EXEC).bin
 
-documentation: $(MANFILES)
+doc:
 	cd doc; $(MAKE) all
-
-doc: $(HELPFILES)
-	if test $(HAVE_HEVEA) = "true"; then ($(MAKE) documentation); fi
 
 veryclean: clean
 	rm -f config.cache config.log \
