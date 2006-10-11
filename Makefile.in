@@ -191,13 +191,13 @@ installbyt:
 	$(MAKE) install INSTALLTARGET=advi.byt
 
 installbin:: $(INSTALLTARGET) $(HELPFILES)
-	- install -d ${bindir}
-	install -m 755 $(INSTALLTARGET) ${bindir}/advi
-	- install -d $(ADVI_LOC)
-	install -m 644 $(HELPFILES) $(EPSFILES)	$(STYFILES) $(ADVI_LOC)
-	- install -d $(MANDIR)/man$(MANEXT)
+	- install -d $(DESTDIR)${bindir}
+	install -m 755 $(INSTALLTARGET) $(DESTDIR)${bindir}/advi
+	- install -d $(DESTDIR)$(ADVI_LOC)
+	install -m 644 $(HELPFILES) $(EPSFILES)	$(STYFILES) $(DESTDIR)$(ADVI_LOC)
+	- install -d $(DESTDIR)$(MANDIR)/man$(MANEXT)
 	if [ -f conf/jpfonts.conf ]; then \
-		install -m 644 conf/jpfonts.conf $(ADVI_LOC); fi
+		install -m 644 conf/jpfonts.conf $(DESTDIR)$(ADVI_LOC); fi
 	texhash
 	@ if test "x`kpsewhich advi.sty`" = "x"; then \
 	  echo '*** NOTE BEFORE USE ***' ;\
@@ -207,7 +207,7 @@ installbin:: $(INSTALLTARGET) $(HELPFILES)
 	fi
 
 installman:
-	install -m 644 $(MANFILES) $(MANDIR)/man$(MANEXT) || exit 0
+	install -m 644 $(MANFILES) $(DESTDIR)$(MANDIR)/man$(MANEXT) || exit 0
 
 MLFILES = $(addsuffix .ml, $(MODULES))
 
