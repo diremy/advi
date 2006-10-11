@@ -10,12 +10,23 @@ AC_PROG_OCAML()
 # Checking TeX 
 AC_PATH_PROG(KPSEXPAND, kpsexpand)
 if test -z "$KPSEXPAND"; then
-    AC_MSG_WARN([using /usr/share/texmf as the root directory of TeX system])
-    TEXMFMAIN="/usr/share/texmf"
-else
-    AC_MSG_CHECKING(TeX root path)
-    TEXMFMAIN=`$KPSEXPAND '$TEXMFMAIN'`
-    AC_MSG_RESULT($TEXMFMAIN)
+    AC_MSG_ERROR([kpsexpand not found, check your PATH])
+fi
+
+AC_MSG_CHECKING([TeX root path])
+TEXMFMAIN=`$KPSEXPAND '$TEXMFMAIN'`
+AC_MSG_RESULT([$TEXMFMAIN])
+if test -z "$TEXMFMAIN"; then
+    AC_MSG_ERROR([no TeX root path found, check your setup])
+fi
+
+AC_MSG_CHECKING([LaTeX root path])
+if test -d "$TEXMFMAIN/tex/latex"; then
+    AC_MSG_RESULT([$TEXMFMAIN/tex/latex])
+    ADVI_LOC="$TEXMFMAIN/tex/latex/advi"
+else 
+    AC_MSG_RESULT([not found])
+    AC_MSG_ERROR([no LaTeX root path found, check your setup])
 fi
 
 # Checking CamlImages
@@ -139,22 +150,6 @@ WITH_X="$X_LIBS $X_PRE_LIBS $XINERAMA_LIBS -lX11 $X_EXTRA_LIBS"
 # Checking hevea
 AC_PATH_PROG([HEVEA], [hevea])
 
-# Resources location
-ADVI_LOC=`pwd`
-myprefix=$prefix
-myexec_prefix=$exec_prefix
-mylibdir=$libdir
-
-test "x$myprefix" = xNONE && myprefix=$ac_default_prefix
-test "x$myexec_prefix" = xNONE && myexec_prefix=${myprefix}
-mylibdir=$libdir
-test "x$libdir" = 'x${exec_prefix}/lib' && mylibdir="$myexec_prefix/lib"
-
-if test -d $TEXMFMAIN/tex/latex; then
-    ADVI_LOC=$TEXMFMAIN/tex/latex/advi
-else 
-    ADVI_LOC=$mylibdir/advi
-fi
 
 # conditional targets
 ALL_DOC_FILES="\$(OTHER_FILES)"

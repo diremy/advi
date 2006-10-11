@@ -9,6 +9,7 @@ exec_prefix	= @exec_prefix@
 bindir		= @bindir@
 mandir		= @mandir@
 ADVI_LOC	= @ADVI_LOC@
+TEXMFMAIN	= @TEXMFMAIN@
 
 # binaries
 HEVEA		= @HEVEA@
