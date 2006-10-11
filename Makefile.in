@@ -45,11 +45,6 @@ YEAR = 2005
 OLDYEAR = 2004
 OLDVERSION = 1.6
 
-PACKAGEFULLNAME = $(PACKAGE_NAME)-$(PACKAGE_VERSION)
-
-CVSRELEASETAG = $(PACKAGE)-$(MAINVERSION)_$(SUBVERSION)_$(PATCHLEVEL)
-ANNOUNCEFILE = Announce-$(FULLVERSION)
-
 PACKAGEVERSIONFILES = config.ml
 DOCVERSIONFILES = tex/advi.sty tex/advi.hva \
 doc_src/Includes/advi-version.html doc_src/Includes/env \
@@ -180,25 +175,6 @@ version:
 	sed -e '/ersion/s/$(OLDVERSION)/$(VERSION)/' $$i~ | \
 	sed -e '/year/s/$(OLDYEAR)/$(YEAR)/' > $$i; \
 	done
-
-distribution: all documentation
-	$(MAKE) -f Makefile.distrib distribute
-
-release:
-	cvs rtag -R $(CVSRELEASETAG) bazar-ocaml/$(PACKAGE)
-
-unrelease:
-	$(RM) ./release
-	cvs rtag -R -d $(CVSRELEASETAG) bazar-ocaml/$(PACKAGE)
-
-announce:
-	mail -n -s "New release of $(PACKAGE)" \
-		caml-announce@inria.fr < $(ANNOUNCEFILE)
-
-package_distribution: release distribution announce	
-
-count:
-	wc -l *.ml *.mli | sort -n
 
 config.ml: config.ml.in Makefile.config
 	rm -f $@ $@.tmp

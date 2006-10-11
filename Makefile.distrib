@@ -18,7 +18,7 @@
 
 # $Id$
 
-include Makefile
+include Makefile.config
 
 # Just for $(PACKAGE) maintainers, distribution of the software.
 # Usage:
@@ -36,12 +36,25 @@ include Makefile
 # A tar ball file with the source files is also constructed and moved
 # into the $(FTPDIR) directory.
 
+CVSRELEASETAG = Release-$(subst .,_,$(PACKAGE_VERSION)
+ANNOUNCEFILE  = Announce-$(PACKAGE_VERSION)
+
 WEBSITEDIR=/net/pauillac/infosystems/www/$(PACKAGE)
 FTPSITEDIR=/net/pauillac/infosystems/ftp/cristal/$(PACKAGE)
 
 fake:
 	echo '\n\nThis Makefile is used to distribute the software,\n\
 Read it to understand how to use it!'
+
+tag:
+	cvs tag -c $(CVSRELEASETAG)
+
+untag:
+	cvs tag -d $(CVSRELEASETAG)
+
+announce:
+	mail -n -s "New release of $(PACKAGE_NAME)" \
+		caml-announce@inria.fr < $(ANNOUNCEFILE)
 
 distribute: advi adk
 
