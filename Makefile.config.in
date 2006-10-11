@@ -5,6 +5,10 @@ BUILD_DATE	= @BUILD_DATE@
 
 # binaries
 HEVEA		= @HEVEA@
+OCAMLC		= @OCAMLC@
+OCAMLOPT	= @OCAMLOPT@
+OCAMLDEP	= @OCAMLDEP@
+OCAMLLIB	= @OCAMLLIB@
 
 # flags
 HEVEA_FLAGS	= -entities -I ../tex

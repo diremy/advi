@@ -27,9 +27,6 @@ CP=cp -pfR
 
 MANEXT=1
 MANDIR=@mandir@
-CAML=@CAML@
-CAMLDIR=@CAMLDIR@
-CAMLVERSION=@CAMLVERSION@
 INSTALLTARGET=@INSTALLTARGET@
 
 WITH_X=@WITH_X@
@@ -100,10 +97,6 @@ EPSFILES = $(addprefix tex/, $(TEXEPSFILES))
 BYTOPTIONS = -warn-error A -g
 BINOPTIONS = -warn-error A -inline 10000
 
-CAMLBYT = $(CAML)c $(BYTOPTIONS)
-CAMLBIN = $(CAML)opt.opt $(BINOPTIONS)
-CAMLDEP = $(CAML)dep
-
 MLINCDIRS = $(CAMLIMAGESDIR)
 
 EXEC	 = advi
@@ -173,13 +166,13 @@ i_want_opt:
 byt: $(EXEC).byt
 
 $(EXEC).byt: $(COBJS) $(CMO_OBJS)
-	$(CAMLBYT) -custom $(CAMLINCLUDES) $(BYT_OBJS) \
+	$(OCAMLC) $(BYTOPTIONS) -custom $(CAMLINCLUDES) $(BYT_OBJS) \
 		$(LINK_OPTS) -o $(EXEC).byt
 
 bin: $(EXEC).bin
 
 $(EXEC).bin: $(COBJS) $(CMX_OBJS)
-	$(CAMLBIN) $(CAMLINCLUDES) $(BIN_OBJS) \
+	$(OCAMLOPT) $(BINOPTIONS) $(CAMLINCLUDES) $(BIN_OBJS) \
 		$(LINK_OPTS) -o $(EXEC).bin
 
 doc:
@@ -225,9 +218,9 @@ clean::
 	cd examples && $(MAKE) clean
 
 .depend:: Makefile
-	$(CAMLDEP) *.mli $(MLFILES) > .depend
-	gcc -MM -I$(CAMLDIR) $(CFLAGS) $(COBJS:.o=.c) \
-		| sed -e 's|$(CAMLDIR)/[^ ]*||' >> .depend
+	$(OCAMLDEP) *.mli $(MLFILES) > .depend
+	gcc -MM -I$(OCAMLLIB) $(CFLAGS) $(COBJS:.o=.c) \
+		| sed -e 's|$(OCAMLLIB)/[^ ]*||' >> .depend
 	chmod a+w .depend
 
 doc/splash.dvi: doc/splash.tex

@@ -4,25 +4,8 @@ AC_INIT(advi, 1.7.0, Pierre.Weis@inria.fr)
 BUILD_DATE=`date +%Y-%m-%d`
 
 # Checking ocaml
-CAML=ocaml
-AC_PATH_PROG(PATH_CAML, $CAML, "nope") 
-if test "$PATH_CAML" = "nope"; then
-    echo "***************** Error *******************"
-    echo "ocaml not found."
-    echo "Install the latest ocaml system"
-    echo "and check your PATH contains ocamlc."
-    echo "*******************************************"
-    exit -1
-fi
+AC_PROG_OCAML()
 
-AC_MSG_CHECKING(your compiler version)
-
-CAMLDIR=`"$CAML"c -v | grep "^Standard" | sed "s/.*: *//"`
-CAMLVERSION=`"$CAML"c -v | grep "compiler" | sed 's/.* version //' | sed 's/ .*$//'`
-
-AC_MSG_RESULT(version $CAMLVERSION at $CAMLDIR)
-
-CAMLOPT="$CAML"opt
   
 # Checking TeX 
 AC_PATH_PROG(KPSEXPAND, kpsexpand)
@@ -36,7 +19,7 @@ else
 fi
 
 # Checking CamlImages
-CAMLIMAGESDIR=$CAMLDIR/camlimages
+CAMLIMAGESDIR=$OCAMLLIB/camlimages
 
 AC_MSG_CHECKING(for camlimages)
 AC_ARG_WITH(
@@ -81,8 +64,24 @@ else
     exit 1
 fi
 
+if test -n "$OCAMLOPT"; then
+    if test -f "$CAMLIMAGESDIR/ci_ps.cmxa"; then
+	INSTALLTARGET="advi.bin"
+    else
+	echo "**************** Warning ******************"
+	echo "You have the ocamlopt compiler, but you have no"
+	echo "native-code version of camlimages library installed."
+	echo "Without it, we cannot compile the native-code"
+	echo "version of advi, which we strongly recommend."
+	echo "*******************************************"
+	INSTALLTARGET="i_want_opt"
+    fi
+else
+    INSTALLTARGET="i_want_opt"
+fi
+
 # Checking LablTk
-LABLTKDIR=$CAMLDIR/labltk
+LABLTKDIR=$OCAMLLIB/labltk
 
 AC_MSG_CHECKING(for labltk)
 
@@ -125,30 +124,6 @@ if test -n "$GS" ; then
     fi
 fi
 
-# Check for libraries
-AC_PATH_PROG(PATH_CAMLOPT, $CAMLOPT, "nope")
-if test "$PATH_CAMLOPT" = "nope"; then
-    echo "**************** Warning ******************"
-    echo "The ocaml native code compiler is not found"
-    echo "Only the bytecode version of Advi will be"
-    echo "compiled and installed. We strongly recommend"
-    echo "to install the ocamlopt compiler if available"
-    echo "in your OS."
-    echo "*******************************************"
-    INSTALLTARGET="i_want_opt"
-else
-    if test -f "$CAMLIMAGESDIR/ci_ps.cmxa"; then
-	INSTALLTARGET="advi.bin"
-    else
-	echo "**************** Warning ******************"
-	echo "You have the ocamlopt compiler, but you have no"
-	echo "native-code version of camlimages library installed."
-	echo "Without it, we cannot compile the native-code"
-	echo "version of advi, which we strongly recommend."
-	echo "*******************************************"
-	INSTALLTARGET="i_want_opt"
-    fi
-fi
 
 AC_PATH_XTRA
 
@@ -188,9 +163,7 @@ if test -n "$HEVEA"; then
 fi
 
 # Substitute variables
-AC_SUBST(CAML)
-AC_SUBST(CAMLDIR)
-AC_SUBST(CAMLVERSION)
+AC_SUBST(OCAMLLIB)
 AC_SUBST(CAMLIMAGESDIR)
 AC_SUBST(CAMLIMAGESCONFIGINCLUDE)
 AC_SUBST(HAVE_CAMLIMAGES)
@@ -213,7 +186,7 @@ AC_OUTPUT(Makefile Makefile.config doc/Makefile)
 cat <<EOF
 Configuration summary
 
-Language:    $CAML version $CAMLVERSION
+Language:    $OCAMLC version $OCAMLVERSION
 Camlimages:  $HAVE_CAMLIMAGES
 LablTk:      $HAVE_LABLTK
 GS:          $HAVE_GS

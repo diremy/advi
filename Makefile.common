@@ -19,18 +19,18 @@
 # $Id$
 
 .c.o:
-	$(CAMLBYT) -ccopt "$(CFLAGS)" -c $<
+	$(OCAMLC) -ccopt "$(CFLAGS)" -c $<
 
 .SUFFIXES: .ml .mli .cmo .cmi .cmx
 
 .mli.cmi:
-	$(CAMLBYT) $(CAMLINCLUDES) -c $<
+	$(OCAMLC) $(BYTOPTIONS) $(CAMLINCLUDES) -c $<
 
 .ml.cmo:
-	$(CAMLBYT) $(CAMLINCLUDES) -c $<
+	$(OCAMLC) $(BYTOPTIONS) $(CAMLINCLUDES) -c $<
 
 .ml.cmx:
-	$(CAMLBIN) $(CAMLINCLUDES) -c $<
+	$(OCAMLOPT) $(BINOPTIONS) $(CAMLINCLUDES) -c $<
 
 clean::
 	$(RM) *.cm[oix] *.o *~ .depend *.log *.aux
