@@ -157,8 +157,9 @@ installbin: $(EXEC).bin
 
 MLFILES = $(addsuffix .ml, $(MODULES))
 
-clean::
+clean:
 	$(RM) $(EXEC).bin $(EXEC).byt
+	$(RM) *.cm[oix] *.o *~ .depend *.log *.aux
 	cd test && $(MAKE) clean
 	cd doc && $(MAKE) clean
 	cd examples && $(MAKE) clean
@@ -210,5 +211,18 @@ config.ml: config.ml.in Makefile.config
 		$< > $@.tmp
 	mv $@.tmp $@
 
-include Makefile.common
+.c.o:
+	$(OCAMLC) -ccopt "$(CFLAGS)" -c $<
+
+.SUFFIXES: .ml .mli .cmo .cmi .cmx .c .o
+
+.mli.cmi:
+	$(OCAMLC) $(BYTOPTIONS) $(CAMLINCLUDES) -c $<
+
+.ml.cmo:
+	$(OCAMLC) $(BYTOPTIONS) $(CAMLINCLUDES) -c $<
+
+.ml.cmx:
+	$(OCAMLOPT) $(BINOPTIONS) $(CAMLINCLUDES) -c $<
+
 include .depend
