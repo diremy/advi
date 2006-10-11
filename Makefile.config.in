@@ -10,6 +10,7 @@ bindir		= @bindir@
 mandir		= @mandir@
 ADVI_LOC	= @ADVI_LOC@
 TEXMFMAIN	= @TEXMFMAIN@
+MANEXT		= 1
 
 # binaries
 HEVEA		= @HEVEA@

@@ -32,7 +32,9 @@ DVIPS=TEXPSHEADERS=.:../tex: dvips
 IMAGEN=$(SETTEXINPUTS) imagen
 PDFIMAGEN=pdfimagen
 DVIPDFM=dvipdfm
-
+  
+MAN_FILES	= advi.1
+HELP_FILES	= splash.dvi scratch_write_splash.dvi scratch_draw_splash.dvi
 HEVEA_FILES	= manual.dvi manual.ps manual.pdf manual.html
 OTHER_FILES	= splash.dvi splash.ps \
 		  scratch_write_splash.dvi scratch_write_splash.ps \
@@ -43,6 +45,11 @@ OTHER_FILES	= splash.dvi splash.ps \
 ALL_DOC_FILES	= @ALL_DOC_FILES@
 
 all: $(ALL_DOC_FILES)
+
+install: $(HELP_FILES) $(MAN_FILES)
+	install -m 644 $(HELP_FILES) $(DESTDIR)$(ADVI_LOC)
+	- install -d $(DESTDIR)$(mandir)/man$(MANEXT)
+	install -m 644 $(MAN_FILES) $(DESTDIR)$(mandir)/man$(MANEXT)
 
 clean::
 	$(RM) manual.advi manual.html

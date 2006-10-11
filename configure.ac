@@ -176,7 +176,11 @@ AC_SUBST(WITH_X)
 AC_SUBST(HAVE_GS)
 AC_SUBST(ALL_DOC_FILES)
 
-AC_OUTPUT(Makefile Makefile.config doc/Makefile)
+AC_OUTPUT(Makefile
+	  Makefile.config
+	  doc/Makefile
+	  tex/Makefile
+	  conf/Makefile)
 
 cat <<EOF
 Configuration summary

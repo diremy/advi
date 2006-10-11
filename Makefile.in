@@ -23,8 +23,6 @@ RM=rm -fR
 MV=mv -f
 CP=cp -pfR
 
-MANEXT=1
-MANDIR=@mandir@
 INSTALLTARGET=@INSTALLTARGET@
 
 WITH_X=@WITH_X@
@@ -56,21 +54,6 @@ PACKAGEVERSIONFILES = config.ml
 DOCVERSIONFILES = tex/advi.sty tex/advi.hva \
 doc_src/Includes/advi-version.html doc_src/Includes/env \
 doc_src/advi.man
-
-MANFILES = doc/advi.1
-
-HELPFILES = doc/splash.dvi \
-    doc/scratch_write_splash.dvi doc/scratch_draw_splash.dvi
-
-TEXSTYFILES = \
-    advi-annot.sty advi-slides.sty argv.sty superpose.sty \
-    advi-graphicx.sty advi.sty bubble.sty xwindows-colors.sty
-
-TEXEPSFILES = \
-    advilogo.eps bar.eps caml.eps
-
-STYFILES = $(addprefix tex/, $(TEXSTYFILES))
-EPSFILES = $(addprefix tex/, $(TEXEPSFILES))
 
 BYTOPTIONS = -warn-error A -g
 BINOPTIONS = -warn-error A -inline 10000
@@ -163,17 +146,7 @@ veryclean: clean
 veryveryclean: veryclean
 	rm -f configure
 
-install: installbin installman
-
-installbyt:
-	$(MAKE) install INSTALLTARGET=advi.byt
-
-installbin:: $(INSTALLTARGET) $(HELPFILES)
-	- install -d $(DESTDIR)${bindir}
-	install -m 755 $(INSTALLTARGET) $(DESTDIR)${bindir}/advi
-	- install -d $(DESTDIR)$(ADVI_LOC)
-	install -m 644 conf/jpfonts.conf $(DESTDIR)$(ADVI_LOC)
-	install -m 644 $(HELPFILES) $(EPSFILES)	$(STYFILES) $(DESTDIR)$(ADVI_LOC)
+install: installbin installdata
 	- texhash
 	@ if test -z "`kpsewhich advi.sty`"; then \
 	  echo '*** NOTE BEFORE USE ***' ;\
@@ -182,9 +155,18 @@ installbin:: $(INSTALLTARGET) $(HELPFILES)
 	  echo '***********************' ;\
 	fi
 
-installman:
-	- install -d $(DESTDIR)$(MANDIR)/man$(MANEXT)
-	install -m 644 $(MANFILES) $(DESTDIR)$(MANDIR)/man$(MANEXT) || exit 0
+installdata:
+	- install -d $(DESTDIR)$(ADVI_LOC)
+	cd doc; $(MAKE) install
+	cd tex; $(MAKE) install
+	cd conf; $(MAKE) install
+
+installbyt:
+	$(MAKE) install INSTALLTARGET=advi.byt
+
+installbin:: $(INSTALLTARGET)
+	- install -d $(DESTDIR)$(bindir)
+	install -m 755 $(INSTALLTARGET) $(DESTDIR)$(bindir)/advi
 
 MLFILES = $(addsuffix .ml, $(MODULES))
 
@@ -199,16 +181,6 @@ clean::
 	gcc -MM -I$(OCAMLLIB) $(CFLAGS) $(COBJS:.o=.c) \
 		| sed -e 's|$(OCAMLLIB)/[^ ]*||' >> .depend
 	chmod a+w .depend
-
-doc/splash.dvi: doc/splash.tex
-	cd doc; $(MAKE) `basename $@`
-doc/scratch_write_splash.dvi: doc/scratch_write_splash.tex
-	cd doc; $(MAKE) `basename $@`
-doc/scratch_draw_splash.dvi: doc/scratch_draw_splash.tex
-	cd doc; $(MAKE) `basename $@`
-
-doc/advi.1: doc_src/advi.man
-	cd doc; $(MAKE) `basename $@`
 
 # Just for the authors
 
