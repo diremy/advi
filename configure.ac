@@ -253,15 +253,14 @@ AC_SUBST(ALL_DOC_FILES)
 
 AC_OUTPUT(Makefile Makefile.config doc/Makefile)
 
-echo "------------------------------------------------- Configuration finished"
-echo
-echo "             Configuration summary"
-echo
-echo "Language:    $CAML version $CAMLVERSION"
-echo "Camlimages:  $HAVE_CAMLIMAGES"
-echo "LablTk:      $HAVE_LABLTK"
-echo "GS:          $GS_UPTO_DATE version $GS_VERSION at $PATH_GS"
-echo "Resources:   $ADVI_LOC/"
-echo "Hevea:       $HEVEA"
-echo "Xinerama:    $HAVE_XINERAMA"		
-echo "------------------------------------------------------------------------"
+cat <<EOF
+Configuration summary
+
+Language:    $CAML version $CAMLVERSION
+Camlimages:  $HAVE_CAMLIMAGES
+LablTk:      $HAVE_LABLTK
+GS:          $GS_UPTO_DATE version $GS_VERSION at $PATH_GS
+Resources:   $ADVI_LOC/
+Hevea:       $HEVEA
+Xinerama:    $HAVE_XINERAMA
+EOF
