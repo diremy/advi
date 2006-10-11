@@ -41,15 +41,6 @@ HAVE_CDK=@HAVE_CDK@
 HAVE_GS=@HAVE_GS@
 EXTRA_X11=@XINERAMA_FLAG@
 
-YEAR = 2005
-OLDYEAR = 2004
-OLDVERSION = 1.6
-
-PACKAGEVERSIONFILES = config.ml
-DOCVERSIONFILES = tex/advi.sty tex/advi.hva \
-doc_src/Includes/advi-version.html doc_src/Includes/env \
-doc_src/advi.man
-
 BYTOPTIONS = -warn-error A -g
 BINOPTIONS = -warn-error A -inline 10000
 
@@ -164,17 +155,6 @@ clean:
 	$(CC) -MM -I$(OCAMLLIB) $(CFLAGS) $(COBJS:.o=.c) \
 		| sed -e 's|$(OCAMLLIB)/[^ ]*||' >> .depend
 	chmod a+w .depend
-
-# Just for the authors
-
-# Automatic handling of versionning
-version:
-	for i in $(PACKAGEVERSIONFILES) $(DOCVERSIONFILES); do \
-	echo $$i; \
-	$(MV) $$i $$i~; \
-	sed -e '/ersion/s/$(OLDVERSION)/$(VERSION)/' $$i~ | \
-	sed -e '/year/s/$(OLDYEAR)/$(YEAR)/' > $$i; \
-	done
 
 config.ml: config.ml.in Makefile.config
 	rm -f $@ $@.tmp
