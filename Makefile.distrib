@@ -50,8 +50,8 @@ CVSPKGDIR  = bazar-ocaml/$(PACKAGE_NAME)
 CVSEXCLUDE = (.cvsignore|Announce.*|Makefile.distrib)
 
 fake:
-	echo '\n\nThis Makefile is used to distribute the software,\n\
-Read it to understand how to use it!'
+	@echo 'This Makefile is used to distribute the software'
+	@echo 'Read it to understand how to use it!'
 
 tag:
 	cvs tag -c $(CVSRELEASETAG)
