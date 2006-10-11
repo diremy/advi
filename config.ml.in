@@ -19,11 +19,11 @@
 
 (* The current version of Active-DVI *)
 let advi_version_number = "@PACKAGE_VERSION@";;
-let advi_version_date = "@PACKAGE_DATE@";;
+let advi_build_date = "@BUILD_DATE@";;
 
 let advi_full_version =
-  Printf.sprintf "%s (%s)"
-    advi_version_number advi_version_date;;
+  Printf.sprintf "%s (build %s)"
+    advi_version_number advi_build_date;;
 
 (* Can we use gs ? *)
 let have_gs = @HAVE_GS@;;

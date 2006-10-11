@@ -1,7 +1,7 @@
 # Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.59)
 AC_INIT(advi, 1.7.0, Pierre.Weis@inria.fr)
-PACKAGE_DATE=`date +%Y-%m-%d`
+BUILD_DATE=`date +%Y-%m-%d`
 
 # Checking ocaml
 CAML=ocaml
@@ -202,7 +202,7 @@ AC_SUBST(LABLTKLIB)
 AC_SUBST(INSTALLTARGET)
 AC_SUBST(HAVE_XINERAMA)
 AC_SUBST(XINERAMA_FLAG)
-AC_SUBST(PACKAGE_DATE)
+AC_SUBST(BUILD_DATE)
 AC_SUBST(ADVI_LOC)
 AC_SUBST(WITH_X)
 AC_SUBST(HAVE_GS)
