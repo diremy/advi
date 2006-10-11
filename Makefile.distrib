@@ -36,11 +36,18 @@ include Makefile.config
 # A tar ball file with the source files is also constructed and moved
 # into the $(FTPDIR) directory.
 
+DISTDIR  = $(PACKAGE_NAME)-$(PACKAGE_VERSION)
+DISTFILE = $(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz
+
 CVSRELEASETAG = Release-$(subst .,_,$(PACKAGE_VERSION)
 ANNOUNCEFILE  = Announce-$(PACKAGE_VERSION)
 
 WEBSITEDIR=/net/pauillac/infosystems/www/$(PACKAGE)
 FTPSITEDIR=/net/pauillac/infosystems/ftp/cristal/$(PACKAGE)
+
+CVSROOTDIR = /net/yquem/devel/caml/repository/
+CVSPKGDIR  = bazar-ocaml/$(PACKAGE_NAME)
+CVSEXCLUDE = (.cvsignore|Announce.*|Makefile.distrib)
 
 fake:
 	echo '\n\nThis Makefile is used to distribute the software,\n\
@@ -55,10 +62,6 @@ untag:
 announce:
 	mail -n -s "New release of $(PACKAGE_NAME)" \
 		caml-announce@inria.fr < $(ANNOUNCEFILE)
-
-distribute: advi adk
-
-advi: documentation website ftp
 
 documentation:
 	# Make documentation and test before release
@@ -124,6 +127,25 @@ ftp:
 	$(MV) $(PACKAGEFULLNAME).tgz $(FTPSITEDIR)
 	$(RM) release
 
-adk:
-	cd advi-development-kit; \
-	$(MAKE) distribute
+filelist: Makefile.distrib
+	cvs -d $(CVSROOTDIR) co -Pp  $(CVSPKGDIR) 2>&1 >/dev/null \
+		| awk '/^Checking/ {print $$3}' \
+		| sed -e 's|$(CVSPKGDIR)/||' \
+		| egrep -v '$(CVSEXCLUDE)' \
+		> filelist
+	echo "configure" >> filelist
+	echo "install-sh" >> filelist
+
+distdir: filelist
+	rm -rf $(DISTDIR)
+	mkdir $(DISTDIR)
+	for file in `cat filelist`; do \
+		dirname=`dirname $$file`; \
+		if [ ! -d $(DISTDIR)/$$dirname ]; then \
+			mkdir -p $(DISTDIR)/$$dirname; \
+		fi; \
+		cp $$file $(DISTDIR)/$$dirname; \
+	done
+
+dist: distdir
+	tar cvzf $(DISTFILE) $(DISTDIR)
