@@ -19,7 +19,6 @@
 # $Id$
 include Makefile.config
 
-PATH_GS		= @PATH_GS@
 PATH_KPSEWHICH	= @PATH_KPSEWHICH@
 PATH_GZIP	= @PATH_GZIP@
 TEXMFMAIN	= @TEXMFMAIN@
@@ -162,7 +161,7 @@ edit = sed \
     -e 's,@HAVE_GS\@,$(HAVE_GS),g' \
     -e 's,@PATH_KPSEWHICH\@,$(PATH_KPSEWHICH),g' \
     -e 's,@PATH_GZIP\@,$(PATH_GZIP),g' \
-    -e 's,@PATH_GS\@,$(PATH_GS),g' \
+    -e 's,@GS\@,$(GS),g' \
     -e 's,@TEXMFMAIN\@,$(TEXMFMAIN),g' \
     -e 's,@ADVI_LOC\@,$(ADVI_LOC),g'
 

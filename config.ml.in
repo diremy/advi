@@ -30,7 +30,7 @@ let have_gs = @HAVE_GS@;;
 
 (* Various commands paths. *)
 let kpsewhich_path = "@PATH_KPSEWHICH@";;
-let gs_path = "@PATH_GS@";;
+let gs_path = "@GS@";;
 let gzip_path = "@PATH_GZIP@";;
 
 (* Various configurations for PS and TeX *)

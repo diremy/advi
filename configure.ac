@@ -123,45 +123,29 @@ else
 fi
 
 # Checking gs
-PATH_GS="nope"
-AC_ARG_WITH(
-    gs,
-    AC_HELP_STRING(
-	[--with-gs=path],
-	[specify gs path]
-    ),
-    if test "$withval" != "no" ; then  
-	PATH_GS=$withval
-    else
-	PATH_GS="nope"
-    fi
-)
+HAVE_GS="false"
+AC_PATH_PROG(GS, gs) 
 
-if test "X$PATH_GS" = "Xnope"; then
-    AC_PATH_PROG(PATH_GS, gs, "nope") 
-fi
+if test -n "$GS" ; then
+    AC_MSG_CHECKING([if gs version >= 6.52]) 
+    gs_version=`$GS -v | awk '/Ghostscript/ {print $3}'`
+    gs_major_version=`echo $gs_version | cut -d. -f1`
+    gs_minor_version=`echo $gs_version | cut -d. -f2`
 
-if test -f "$PATH_GS" ; then
-    AC_MSG_CHECKING(for gs version) 
-    HAVE_GS="true"
-    GS_VERSION=`$PATH_GS -v | grep Ghostscript | sed -e 's/.*Ghostscript \([[0-9\.]]*\).*/\1/'`
-    GS_VERSION_INT=`echo $GS_VERSION | sed -e 's/\.//'`
-    if test `expr $GS_VERSION_INT \>= 6.52` != "1"; then
-	AC_MSG_RESULT(too old)
-	GS_UPTO_DATE="*** TOO OLD ***"
-	echo "**************** Warning ********************"
-	echo "Your Ghostscript $GS_VERSION may be too old  "
-	echo "You may need Ghostscript version 6.52 or higher"
-	echo "for the correct synchronization of postscript"
-	echo "and TeX graphics                             "
-	echo "*********************************************"
+    if expr                                \
+	\( $gs_major_version \> 6 \)       \
+	\|                                 \
+	\(                                 \
+	    \( $gs_major_version \= 6 \)   \
+	    \&                             \
+	    \( $gs_minor_version \>= 52 \) \
+	\) > /dev/null; then
+	AC_MSG_RESULT([yes])
+	HAVE_GS="true"
     else
-	GS_UPTO_DATE=""	
-	AC_MSG_RESULT(ok)
+	AC_MSG_RESULT([no])
+	GS=""
     fi
-else
-    AC_MSG_RESULT(no)
-    HAVE_GS="false"
 fi
 
 # Check for libraries
@@ -234,8 +218,6 @@ AC_SUBST(CAMLIMAGESDIR)
 AC_SUBST(CAMLIMAGESCONFIGINCLUDE)
 AC_SUBST(HAVE_CAMLIMAGES)
 AC_SUBST(CAMLIMAGESLIBS)
-AC_SUBST(HAVE_GS)
-AC_SUBST(PATH_GS)
 AC_SUBST(TEXMFMAIN)
 AC_SUBST(PATH_KPSEWHICH)
 AC_SUBST(PATH_GZIP)
@@ -259,7 +241,7 @@ Configuration summary
 Language:    $CAML version $CAMLVERSION
 Camlimages:  $HAVE_CAMLIMAGES
 LablTk:      $HAVE_LABLTK
-GS:          $GS_UPTO_DATE version $GS_VERSION at $PATH_GS
+GS:          $GS
 Resources:   $ADVI_LOC/
 Hevea:       $HEVEA
 Xinerama:    $HAVE_XINERAMA
