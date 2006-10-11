@@ -156,7 +156,7 @@ install: installbin installdata
 	fi
 
 installdata:
-	- install -d $(DESTDIR)$(ADVI_LOC)
+	- $(INSTALL) -d $(DESTDIR)$(ADVI_LOC)
 	cd doc; $(MAKE) install
 	cd tex; $(MAKE) install
 	cd conf; $(MAKE) install
@@ -164,9 +164,9 @@ installdata:
 installbyt:
 	$(MAKE) install INSTALLTARGET=advi.byt
 
-installbin:: $(INSTALLTARGET)
-	- install -d $(DESTDIR)$(bindir)
-	install -m 755 $(INSTALLTARGET) $(DESTDIR)$(bindir)/advi
+installbin: $(INSTALLTARGET)
+	- $(INSTALL) -d $(DESTDIR)$(bindir)
+	$(INSTALL) -m 755 $(INSTALLTARGET) $(DESTDIR)$(bindir)/advi
 
 MLFILES = $(addsuffix .ml, $(MODULES))
 
@@ -178,7 +178,7 @@ clean::
 
 .depend:: Makefile
 	$(OCAMLDEP) *.mli $(MLFILES) > .depend
-	gcc -MM -I$(OCAMLLIB) $(CFLAGS) $(COBJS:.o=.c) \
+	$(CC) -MM -I$(OCAMLLIB) $(CFLAGS) $(COBJS:.o=.c) \
 		| sed -e 's|$(OCAMLLIB)/[^ ]*||' >> .depend
 	chmod a+w .depend
 

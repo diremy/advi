@@ -25,5 +25,5 @@ STYFILES = advi-annot.sty advi-slides.sty argv.sty superpose.sty \
 EPSFILES = advilogo.eps bar.eps caml.eps
 
 install:
-	install -m 644 $(EPSFILES) $(STYFILES) $(DESTDIR)$(ADVI_LOC)
+	$(INSTALL) -m 644 $(EPSFILES) $(STYFILES) $(DESTDIR)$(ADVI_LOC)
 

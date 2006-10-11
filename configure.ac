@@ -6,7 +6,11 @@ BUILD_DATE=`date +%Y-%m-%d`
 # Checking ocaml
 AC_PROG_OCAML()
 
-  
+# Checks other programs
+AC_PROG_CC
+AC_PROG_MAKE_SET
+AC_PROG_INSTALL
+
 # Checking TeX 
 AC_PATH_PROG(KPSEXPAND, kpsexpand)
 if test -z "$KPSEXPAND"; then

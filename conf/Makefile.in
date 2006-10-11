@@ -22,5 +22,5 @@ include ../Makefile.config
 CONFFILES = jpfonts.conf
 
 install: $(CONFFILES)
-	install -m 644 $(CONFFILES) $(DESTDIR)$(ADVI_LOC)
+	$(INSTALL) -m 644 $(CONFFILES) $(DESTDIR)$(ADVI_LOC)
 

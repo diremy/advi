@@ -47,9 +47,9 @@ ALL_DOC_FILES	= @ALL_DOC_FILES@
 all: $(ALL_DOC_FILES)
 
 install: $(HELP_FILES) $(MAN_FILES)
-	install -m 644 $(HELP_FILES) $(DESTDIR)$(ADVI_LOC)
-	- install -d $(DESTDIR)$(mandir)/man$(MANEXT)
-	install -m 644 $(MAN_FILES) $(DESTDIR)$(mandir)/man$(MANEXT)
+	$(INSTALL) -m 644 $(HELP_FILES) $(DESTDIR)$(ADVI_LOC)
+	- $(INSTALL) -d $(DESTDIR)$(mandir)/man$(MANEXT)
+	$(INSTALL) -m 644 $(MAN_FILES) $(DESTDIR)$(mandir)/man$(MANEXT)
 
 clean::
 	$(RM) manual.advi manual.html
