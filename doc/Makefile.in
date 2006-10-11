@@ -17,8 +17,8 @@
 
 # $Id$
 
-PATH_HEVEA	= @PATH_HEVEA@
-HAVE_HEVEA	= @HAVE_HEVEA@
+include ../Makefile.config
+
 RM		= rm -fR
 MV		= mv -f
 CP		= cp -pfR
@@ -29,18 +29,20 @@ SETTEXINPUTS=TEXINPUTS=.:../tex:/usr/lib/hevea/:/usr/local/lib/hevea/:/usr/local
 
 LATEX=$(SETTEXINPUTS) latex
 DVIPS=TEXPSHEADERS=.:../tex: dvips
-HEVEA=$(PATH_HEVEA) -entities -I ../tex
 IMAGEN=$(SETTEXINPUTS) imagen
 PDFIMAGEN=pdfimagen
 DVIPDFM=dvipdfm
 
-all: manual.dvi manual.ps manual.pdf manual.html \
-    splash.dvi splash.ps \
-    scratch_write_splash.dvi scratch_write_splash.ps \
-    scratch_draw_splash.dvi scratch_draw_splash.ps \
-    mathmode.dvi \
-    advi_remote.dvi advi_remote.html \
-    advi.1
+HEVEA_FILES	= manual.dvi manual.ps manual.pdf manual.html
+OTHER_FILES	= splash.dvi splash.ps \
+		  scratch_write_splash.dvi scratch_write_splash.ps \
+		  scratch_draw_splash.dvi scratch_draw_splash.ps \
+		  mathmode.dvi \
+		  advi_remote.dvi advi_remote.html \
+		  advi.1
+ALL_DOC_FILES	= @ALL_DOC_FILES@
+
+all: $(ALL_DOC_FILES)
 
 clean::
 	$(RM) manual.advi manual.html
@@ -67,13 +69,8 @@ splash.dvi: splash_contents.tex
 scratch_write_splash.dvi: scratch_write_splash_contents.tex
 scratch_draw_splash.dvi: scratch_draw_splash_contents.tex
 
-ifeq ($(HAVE_HEVEA),true)
 manual.html: manual.tex manual.sty macros.hva 
 advi_remote.html: advi_remote.tex manual.sty macros.hva 
-else
-manual.html:
-advi_remote.html:
-endif
 
 .SUFFIXES: .tex .dvi .advi .ps .pdf .pdfm .html .ima
 
@@ -113,4 +110,4 @@ endif
 	touch $*.ima
 
 .tex.html:
-	$(HEVEA) -fix macros.hva -o $*.html $*.tex
+	$(HEVEA) $(HEVEA_FLAGS) -fix macros.hva -o $*.html $*.tex

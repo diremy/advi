@@ -201,29 +201,7 @@ XINERAMA_LIBS="-lXinerama -lXext")
 WITH_X="$X_LIBS $X_PRE_LIBS $XINERAMA_LIBS -lX11 $X_EXTRA_LIBS"
 
 # Checking hevea
-PATH_HEVEA="nope"
-AC_ARG_WITH(
-    hevea,
-    AC_HELP_STRING(
-	[--with-hevea=path],
-	[specify hevea path]
-    ),
-    if test "$withval" != "no" ; then  
-	PATH_HEVEA=$withval
-    else
-	PATH_HEVEA="nope"
-    fi
-)
-
-if test "X$PATH_HEVEA" = "Xnope"; then
-    AC_PATH_PROG(PATH_HEVEA, hevea, "nope") 
-fi
-
-if test "$PATH_HEVEA" = "nope"; then
-    HAVE_HEVEA=false
-else
-    HAVE_HEVEA=true
-fi
+AC_PATH_PROG([HEVEA], [hevea])
 
 # Resources location
 ADVI_LOC=`pwd`
@@ -240,6 +218,12 @@ if test -d $TEXMFMAIN/tex/latex; then
     ADVI_LOC=$TEXMFMAIN/tex/latex/advi
 else 
     ADVI_LOC=$mylibdir/advi
+fi
+
+# conditional targets
+ALL_DOC_FILES="\$(OTHER_FILES)"
+if test -n "$HEVEA"; then
+    ALL_DOC_FILES="$ALL_DOC_FILES \$(HEVEA_FILES)"
 fi
 
 # Substitute variables
@@ -261,12 +245,11 @@ AC_SUBST(LABLTKLIB)
 AC_SUBST(INSTALLTARGET)
 AC_SUBST(HAVE_XINERAMA)
 AC_SUBST(XINERAMA_FLAG)
-AC_SUBST(PATH_HEVEA)
-AC_SUBST(HAVE_HEVEA)
 AC_SUBST(PACKAGE_DATE)
 AC_SUBST(ADVI_LOC)
 AC_SUBST(WITH_X)
 AC_SUBST(HAVE_GS)
+AC_SUBST(ALL_DOC_FILES)
 
 AC_OUTPUT(Makefile Makefile.config doc/Makefile)
 
@@ -279,6 +262,6 @@ echo "Camlimages:  $HAVE_CAMLIMAGES"
 echo "LablTk:      $HAVE_LABLTK"
 echo "GS:          $GS_UPTO_DATE version $GS_VERSION at $PATH_GS"
 echo "Resources:   $ADVI_LOC/"
-echo "Hevea:       $PATH_HEVEA"
+echo "Hevea:       $HEVEA"
 echo "Xinerama:    $HAVE_XINERAMA"		
 echo "------------------------------------------------------------------------"
