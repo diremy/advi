@@ -94,13 +94,20 @@ documentation:
 #	$(CP) ../doc/pngs bazar-ocaml/$(PACKAGE)/doc/
 
 website:
-	# Build the Web site
-	$(RM) $(WEBSITEDIR)/*
-	- mkdirhier $(WEBSITEDIR)
-	$(CP) release/bazar-ocaml/$(PACKAGE)/doc/* $(WEBSITEDIR)/;
-	- chgrp -R caml $(WEBSITEDIR)
-	- chmod -R ug+w $(WEBSITEDIR)
-	ln -sf $(WEBSITEDIR)/eng.htm $(WEBSITEDIR)/index.html
+	if [ -d $(WEBSITEDIR) ]; then     \
+		$(RM) -f $(WEBSITEDIR) *; \
+	else                              \
+		$(INSTALL) -d -g caml -m g+w $(WEBSITEDIR);
+	done
+	$(INSTALL) -g caml -m g+w doc/*.htm $(WEBSITEDIR)
+	$(INSTALL) -g caml -m g+w doc/*.css $(WEBSITEDIR)
+	$(INSTALL) -g caml -m g+w doc/*.dvi $(WEBSITEDIR)
+	$(INSTALL) -g caml -m g+w doc/*.ps $(WEBSITEDIR)
+	$(INSTALL) -g caml -m g+w doc/*.pdf $(WEBSITEDIR)
+	$(INSTALL) -g caml -m g+w doc/*.gif $(WEBSITEDIR)
+	$(INSTALL) -g caml -m g+w doc/*.jpg $(WEBSITEDIR)
+	$(INSTALL) -g caml -m g+w doc/*.$(MANEXT) $(WEBSITEDIR)
+	cd $(WEBSITEDIR) && ln -sf eng.htm index.html
 
 ftp:
 	# Build the FTP site
