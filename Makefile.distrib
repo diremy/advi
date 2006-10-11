@@ -112,7 +112,7 @@ website:
 	$(INSTALL) -g caml -m g+w doc/*.$(MANEXT) $(WEBSITEDIR)
 	cd $(WEBSITEDIR) && ln -sf eng.htm index.html
 
-ftpsite:
+ftpsite: dist
 	if [ ! -d $(FTPSITEDIR) ]; then     \
 		$(INSTALL) -d -g caml -m g+w $(FTPSITEDIR);
 	done
