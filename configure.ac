@@ -81,7 +81,7 @@ fi
 
 if test -n "$OCAMLOPT"; then
     if test -f "$CAMLIMAGESDIR/ci_ps.cmxa"; then
-	INSTALLTARGET="advi.bin"
+	INSTALLEXEC="installbin"
     else
 	echo "**************** Warning ******************"
 	echo "You have the ocamlopt compiler, but you have no"
@@ -89,10 +89,10 @@ if test -n "$OCAMLOPT"; then
 	echo "Without it, we cannot compile the native-code"
 	echo "version of advi, which we strongly recommend."
 	echo "*******************************************"
-	INSTALLTARGET="i_want_opt"
+	INSTALLEXEC="installbyte"
     fi
 else
-    INSTALLTARGET="i_want_opt"
+    INSTALLEXEC="installbyte"
 fi
 
 # Checking LablTk
@@ -171,7 +171,7 @@ AC_SUBST(TEXMFMAIN)
 AC_SUBST(HAVE_LABLTK)
 AC_SUBST(LABLTKDIR)
 AC_SUBST(LABLTKLIB)
-AC_SUBST(INSTALLTARGET)
+AC_SUBST(INSTALLEXEC)
 AC_SUBST(HAVE_XINERAMA)
 AC_SUBST(XINERAMA_FLAG)
 AC_SUBST(BUILD_DATE)

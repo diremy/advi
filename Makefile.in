@@ -23,7 +23,7 @@ RM=rm -fR
 MV=mv -f
 CP=cp -pfR
 
-INSTALLTARGET=@INSTALLTARGET@
+INSTALLEXEC	= @INSTALLEXEC@
 
 WITH_X=@WITH_X@
 
@@ -110,20 +110,6 @@ CFLAGS=$(EXTRA_X11) $(X11_INCLUDES) -O $(BYTCCCOMPOPTS)
 
 all: byt bin doc
 
-i_want_opt:
-	@echo "************************** Warning ***************************"
-	@echo "  You have no native code version of the O'Caml compiler."
-	@echo "  For the best exprerience, we strongly recommend to use "
-	@echo "  Active-DVI compiled with the native code compiler (ocamlopt)."
-	@echo "  For further information about ocamlopt, look at:"
-	@echo "    http://caml.inria.fr/"
-	@echo "  If there is no ocamlopt compiler version for your platform,"
-	@echo "  you can still get a slow but fully functional version of"
-	@echo "  Active-DVI, by typing \"make allbyt\" that would build a byte"
-	@echo "  code version (\"make installbyt\" for install.)"
-	@echo "**************************************************************"
-	@exit 1
-
 byt: $(EXEC).byt
 
 $(EXEC).byt: $(COBJS) $(CMO_OBJS)
@@ -146,7 +132,7 @@ veryclean: clean
 veryveryclean: veryclean
 	rm -f configure
 
-install: installbin installdata
+install: $(INSTALLEXEC) installdata
 	- texhash
 	@ if test -z "`kpsewhich advi.sty`"; then \
 	  echo '*** NOTE BEFORE USE ***' ;\
@@ -161,12 +147,13 @@ installdata:
 	cd tex; $(MAKE) install
 	cd conf; $(MAKE) install
 
-installbyt:
-	$(MAKE) install INSTALLTARGET=advi.byt
-
-installbin: $(INSTALLTARGET)
+installbyt: $(EXEC).byte
 	- $(INSTALL) -d $(DESTDIR)$(bindir)
-	$(INSTALL) -m 755 $(INSTALLTARGET) $(DESTDIR)$(bindir)/advi
+	$(INSTALL) -m 755 $(EXEC).byte $(DESTDIR)$(bindir)/$(EXEC)
+
+installbin: $(EXEC).bin
+	- $(INSTALL) -d $(DESTDIR)$(bindir)
+	$(INSTALL) -m 755 $(EXEC).bin $(DESTDIR)$(bindir)/$(EXEC)
 
 MLFILES = $(addsuffix .ml, $(MODULES))
 
