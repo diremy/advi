@@ -42,8 +42,8 @@ DISTFILE = $(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz
 CVSRELEASETAG = Release-$(subst .,_,$(PACKAGE_VERSION)
 ANNOUNCEFILE  = Announce-$(PACKAGE_VERSION)
 
-WEBSITEDIR=/net/pauillac/infosystems/www/$(PACKAGE)
-FTPSITEDIR=/net/pauillac/infosystems/ftp/cristal/$(PACKAGE)
+WEBSITEDIR=/net/pauillac/infosystems/www/$(PACKAGE_NAME)
+FTPSITEDIR=/net/pauillac/infosystems/ftp/cristal/$(PACKAGE_NAME)
 
 CVSROOTDIR = /net/yquem/devel/caml/repository/
 CVSPKGDIR  = bazar-ocaml/$(PACKAGE_NAME)
@@ -112,20 +112,11 @@ website:
 	$(INSTALL) -g caml -m g+w doc/*.$(MANEXT) $(WEBSITEDIR)
 	cd $(WEBSITEDIR) && ln -sf eng.htm index.html
 
-ftp:
-	# Build the FTP site
-	# Copy the legalease to $(FTPSITEDIR)
-	mkdirhier $(FTPSITEDIR)
-	$(CP) release/bazar-ocaml/$(PACKAGE)/LGPL \
-		release/bazar-ocaml/$(PACKAGE)/README \
-		release/bazar-ocaml/$(PACKAGE)/INDEX $(FTPSITEDIR)
-	# Give the release its versioning name
-	cd release; mv bazar-ocaml/$(PACKAGE) bazar-ocaml/$(PACKAGEFULLNAME); \
-	# Build the archive and move it in the proper ftp site
-	cd release/bazar-ocaml; \
-	tar zcvf $(PACKAGEFULLNAME).tgz $(PACKAGEFULLNAME); \
-	$(MV) $(PACKAGEFULLNAME).tgz $(FTPSITEDIR)
-	$(RM) release
+ftpsite:
+	if [ ! -d $(FTPSITEDIR) ]; then     \
+		$(INSTALL) -d -g caml -m g+w $(FTPSITEDIR);
+	done
+	$(INSTALL) -g caml -m g+w $(DISTFILE) $(FTPSITEDIR)
 
 filelist: Makefile.distrib
 	cvs -d $(CVSROOTDIR) co -Pp  $(CVSPKGDIR) 2>&1 >/dev/null \
