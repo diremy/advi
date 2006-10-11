@@ -5,7 +5,6 @@ PACKAGE_DATE	= @PACKAGE_DATE@
 
 # binaries
 HEVEA		= @HEVEA@
-GS		= @GS@
 
 # flags
 HEVEA_FLAGS	= -entities -I ../tex

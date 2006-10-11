@@ -29,9 +29,9 @@ let advi_full_version =
 let have_gs = @HAVE_GS@;;
 
 (* Various commands paths. *)
-let kpsewhich_path = "@PATH_KPSEWHICH@";;
-let gs_path = "@GS@";;
-let gzip_path = "@PATH_GZIP@";;
+let kpsewhich_path = "kpsewich";;
+let gs_path = "gs";;
+let gzip_path = "gzip";;
 
 (* Various configurations for PS and TeX *)
 let texpicts_kind = "graphic/figure";;

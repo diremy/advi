@@ -19,8 +19,6 @@
 # $Id$
 include Makefile.config
 
-PATH_KPSEWHICH	= @PATH_KPSEWHICH@
-PATH_GZIP	= @PATH_GZIP@
 TEXMFMAIN	= @TEXMFMAIN@
 
 RM=rm -fR
@@ -155,15 +153,6 @@ X11_INCLUDES=-I/usr/X11R6/include
 BYTCCCOMPOPTS=-fno-defer-pop -Wall -Wno-unused
 CFLAGS=$(EXTRA_X11) $(X11_INCLUDES) -O $(BYTCCCOMPOPTS)
 
-edit = sed \
-    -e 's,@PACKAGE_VERSION\@,$(PACKAGE_VERSION),g' \
-    -e 's,@PACKAGE_DATE\@,$(PACKAGE_DATE),g' \
-    -e 's,@HAVE_GS\@,$(HAVE_GS),g' \
-    -e 's,@PATH_KPSEWHICH\@,$(PATH_KPSEWHICH),g' \
-    -e 's,@PATH_GZIP\@,$(PATH_GZIP),g' \
-    -e 's,@GS\@,$(GS),g' \
-    -e 's,@TEXMFMAIN\@,$(TEXMFMAIN),g' \
-    -e 's,@ADVI_LOC\@,$(ADVI_LOC),g'
 
 all: byt bin doc
 
@@ -281,9 +270,15 @@ package_distribution: release distribution announce
 count:
 	wc -l *.ml *.mli | sort -n
 
-config.ml: config.ml.in Makefile
+config.ml: config.ml.in Makefile.config
 	rm -f $@ $@.tmp
-	$(edit) $< > $@.tmp
+	sed \
+		-e 's,@PACKAGE_VERSION\@,$(PACKAGE_VERSION),g' \
+		-e 's,@PACKAGE_DATE\@,$(PACKAGE_DATE),g' \
+		-e 's,@HAVE_GS\@,$(HAVE_GS),g' \
+		-e 's,@TEXMFMAIN\@,$(TEXMFMAIN),g' \
+		-e 's,@ADVI_LOC\@,$(ADVI_LOC),g' \
+		$< > $@.tmp
 	mv $@.tmp $@
 
 include Makefile.common

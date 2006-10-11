@@ -25,37 +25,14 @@ AC_MSG_RESULT(version $CAMLVERSION at $CAMLDIR)
 CAMLOPT="$CAML"opt
   
 # Checking TeX 
-AC_PATH_PROG(PATH_KPSEXPAND, kpsexpand, "nope") 
-if test "$PATH_KPSEXPAND" = "nope"; then
-    echo "**************** Warning ******************"
-    echo "kpsexpand command not found." 
-    echo "We use /usr/share/texmf as the root directory"
-    echo "of TeX system"
-    echo "*******************************************"
+AC_PATH_PROG(KPSEXPAND, kpsexpand)
+if test -z "$KPSEXPAND"; then
+    AC_MSG_WARN([using /usr/share/texmf as the root directory of TeX system])
     TEXMFMAIN="/usr/share/texmf"
 else
     AC_MSG_CHECKING(TeX root path)
-    TEXMFMAIN=`kpsexpand '$TEXMFMAIN'`
+    TEXMFMAIN=`$KPSEXPAND '$TEXMFMAIN'`
     AC_MSG_RESULT($TEXMFMAIN)
-fi
-
-AC_PATH_PROG(PATH_KPSEWHICH, kpsewhich, "nope") 
-if test "$PATH_KPSEWHICH" = "nope"; then
-    echo "**************** Warning ******************"
-    echo "kpsewhich command not found." 
-    echo "We use a $PATH dependant kpsewhich command"
-    echo "*******************************************"
-    PATH_KPSEWHICH="kpsewhich"
-fi
-
-# Checking Gzip
-AC_PATH_PROG(PATH_GZIP, gzip, "nope") 
-if test "$PATH_GZIP" = "nope"; then
-    echo "**************** Warning ******************"
-    echo "gzip command not found." 
-    echo "We use a $PATH dependant gzip command"
-    echo "*******************************************"
-    PATH_GZIP=""
 fi
 
 # Checking CamlImages
@@ -219,8 +196,6 @@ AC_SUBST(CAMLIMAGESCONFIGINCLUDE)
 AC_SUBST(HAVE_CAMLIMAGES)
 AC_SUBST(CAMLIMAGESLIBS)
 AC_SUBST(TEXMFMAIN)
-AC_SUBST(PATH_KPSEWHICH)
-AC_SUBST(PATH_GZIP)
 AC_SUBST(HAVE_LABLTK)
 AC_SUBST(LABLTKDIR)
 AC_SUBST(LABLTKLIB)
@@ -241,7 +216,7 @@ Configuration summary
 Language:    $CAML version $CAMLVERSION
 Camlimages:  $HAVE_CAMLIMAGES
 LablTk:      $HAVE_LABLTK
-GS:          $GS
+GS:          $HAVE_GS
 Resources:   $ADVI_LOC/
 Hevea:       $HEVEA
 Xinerama:    $HAVE_XINERAMA
