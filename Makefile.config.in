@@ -3,6 +3,13 @@ PACKAGE_NAME	= @PACKAGE_NAME@
 PACKAGE_VERSION	= @PACKAGE_VERSION@
 BUILD_DATE	= @BUILD_DATE@
 
+# directories
+prefix		= @prefix@
+exec_prefix	= @exec_prefix@
+bindir		= @bindir@
+mandir		= @mandir@
+ADVI_LOC	= @ADVI_LOC@
+
 # binaries
 HEVEA		= @HEVEA@
 OCAMLC		= @OCAMLC@
