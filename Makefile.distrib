@@ -20,22 +20,6 @@
 
 include Makefile.config
 
-# Just for $(PACKAGE) maintainers, distribution of the software.
-# Usage:
-# make -f Makefile.distrib distribute
-
-# Need an INSTALL and README file in the main directory.
-
-# Need a doc directory where the documentation has been written,
-# presumably in HTML with an index.html file. This directory is copied
-# onto the WEB site directory of the package, as mentioned in
-# $(WEBSITEDIR). Presumably the doc directory contains 2 files named
-# eng.htm and fra.htm that respectively contain the English and French
-# documentation.
-
-# A tar ball file with the source files is also constructed and moved
-# into the $(FTPDIR) directory.
-
 DISTDIR  = $(PACKAGE_NAME)-$(PACKAGE_VERSION)
 DISTFILE = $(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz
 
@@ -49,9 +33,16 @@ CVSROOTDIR = /net/yquem/devel/caml/repository/
 CVSPKGDIR  = bazar-ocaml/$(PACKAGE_NAME)
 CVSEXCLUDE = (.cvsignore|Announce.*|Makefile.distrib)
 
-fake:
-	@echo 'This Makefile is used to distribute the software'
-	@echo 'Read it to understand how to use it!'
+help:
+	@echo 'This Makefile is intended for maintainers only'
+	@echo 'It offers the following targets:'
+	@echo '- help: this message'
+	@echo '- tag: tag current CVS directory'
+	@echo '- untag: untag current CVS directory'
+	@echo '- announce: announce new release on mailing list'
+	@echo '- website: update package web site'
+	@echo '- ftpsite: put new package archive on ftp site'
+	@echo '- dist: create package archive'
 
 tag:
 	cvs tag -c $(CVSRELEASETAG)
@@ -80,8 +71,8 @@ website:
 	cd $(WEBSITEDIR) && ln -sf eng.htm index.html
 
 ftpsite: dist
-	if [ ! -d $(FTPSITEDIR) ]; then     \
-		$(INSTALL) -d -g caml -m g+w $(FTPSITEDIR);
+	if [ ! -d $(FTPSITEDIR) ]; then                     \
+		$(INSTALL) -d -g caml -m g+w $(FTPSITEDIR); \
 	done
 	$(INSTALL) -g caml -m g+w $(DISTFILE) $(FTPSITEDIR)
 
