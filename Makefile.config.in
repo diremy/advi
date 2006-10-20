@@ -4,6 +4,7 @@
 PACKAGE_NAME	= @PACKAGE_NAME@
 PACKAGE_VERSION	= @PACKAGE_VERSION@
 BUILD_DATE	= @BUILD_DATE@
+OCAMLVERSION	= @OCAMLVERSION@
 
 # directories
 prefix		= @prefix@
@@ -12,16 +13,20 @@ bindir		= @bindir@
 mandir		= @mandir@
 ADVI_LOC	= @ADVI_LOC@
 TEXMFMAIN	= @TEXMFMAIN@
+OCAMLLIB	= @OCAMLLIB@
 MANEXT		= 1
 
 # binaries
 HEVEA		= @HEVEA@
+HTMLC		= @HTMLC@
 OCAMLC		= @OCAMLC@
 OCAMLOPT	= @OCAMLOPT@
 OCAMLDEP	= @OCAMLDEP@
-OCAMLLIB	= @OCAMLLIB@
 INSTALL		= @INSTALL@
 CC		= @CC@
 
 # flags
 HEVEA_FLAGS	= -entities -I ../tex
+HTMLC_FLAGS	= -I includes \
+		  -D CamlVersion $(OCAMLVERSION) \
+		  -D version $(PACKAGE_VERSION)
