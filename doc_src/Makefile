@@ -20,41 +20,32 @@
 # make (or make all) will rebuild the whole thing
 # make clean will remove all the generated files
 
-# The Htmlc compiler with its include path options
-HTMLC=htmlc -I Includes -env Includes/env
-
-# The list of HTML source files
-HFILES=advi-index.html advi-fra.html advi-eng.html \
-advi-faq-eng.html advi-faq-fra.html \
-advi-screen-shots-fra.html advi-screen-shots-eng.html
-
-# The list of MAN source files
-MFILES=advi.man
-
 include ../Makefile.config
 
-######## This part should automatically handle the generation of
-######## object files
+# The list of HTML source files
+HTML_SRC_FILES	= advi-index.html advi-fra.html advi-eng.html \
+		  advi-faq-eng.html advi-faq-fra.html \
+		  advi-screen-shots-fra.html advi-screen-shots-eng.html
 
-# The complete list of object files
-HOBJS=$(HFILES:.html=.htm)
-MOBJS=$(MFILES:.man=.m)
-OBJS=$(HOBJS) $(MOBJS)
+# The list of MAN source files
+MAN_SRC_FILES	= advi.man
 
-all: $(OBJS)
+# The list of build HTML files
+HTML_FILES	= $(HTML_SRC_FILES:.html=.htm)
 
-$(OBJS): Includes/env Includes/advi-version.html
+# The list of build MAN files
+MAN_FILES	= $(MAN_FILES:.man=.1)
+
+all: $(HTML_FILES) $(MAN_FILES) ../Makefile.config
 
 clean:
-	$(RM) $(OBJS)
-	cd Includes; $(RM) *~
+	$(RM) $(HTML_FILES) $(MAN_FILES)
 
 .SUFFIXES:
 .SUFFIXES: .htm .html .man .m
 
 .html.htm:
-	$(HTMLC) -f $< -t $@
+	$(HTMLC) $(HTMLC_FLAGS) -f $< -t $@
 
-.man.m:
-	$(HTMLC) -f $< -t $@
-
+.man.1:
+	$(HTMLC) $(HTMLC_FLAGS) -f $< -t $@

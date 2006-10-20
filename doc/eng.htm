@@ -1,0 +1,202 @@
+<!--#include virtual="beforetitle-eng.htm"-->
+Active-DVI
+<!--#include virtual="aftertitle-eng.htm"-->
+
+<!-- \$Id$ -->
+
+<TABLE WIDTH="100%">
+<TR>
+ <TD ALIGN=CENTER><IMG SRC="advilogo.gif"></TD>
+ <TD ALIGN=RIGHT>
+ <TABLE>
+   <TR><TD><A HREF="fra.htm">Version française</A></TD></TR>
+   <TR><TD><A HREF="screen-shots-eng.htm">Screen shots</A></TD></TR>
+   <TR><TD><A HREF="#features">Description</A></TD></TR>
+   <TR><TD><A HREF="#manual">Manual</A></TD></TR>
+   <TR><TD><A HREF="faq-eng.htm">Frequently asked questions</A></TD></TR>
+   <TR><TD><A HREF="#requirements">Requirements for installation</A></TD></TR>
+   <TR><TD><A HREF="#download">Download</A></TD></TR>
+   <TR><TD><A HREF="#lists">Bug reports</A></TD></TR>
+   <TR><TD><A HREF="#lists">Mailing list</A></TD></TR>
+   <TR><TD><A HREF="#authors">Authors and Copyright</A></TD></TR>
+   <TR>
+     <TD><H1 ALIGN=CENTER><IMG SRC="advilogo.anim.gif">ctive-DVI</H1></TD></TR>
+   <TR>
+     <TD>
+<!--#include virtual="advi-version.htm"-->
+    </TD></TR>
+ </TABLE>
+ </TD>
+</TR>
+</TABLE>
+
+<P ALIGN=LEFT><IMG SRC="bar.gif"></P>
+
+<H2 ALIGN=LEFT><A name="features">Description of Active-DVI</A></H2>
+
+<P>Active-DVI is a Unix-platform <STRONG>DVI previewer</STRONG> and a
+<STRONG>programmable presenter for slides</STRONG> written in LaTeX.</P>
+
+<P>To preview DVI files, Active-DVI features:
+
+<UL>
+ <LI>Color anti-aliasing.
+ <LI>Inclusion of images (via the Camlimages package) with alpha
+     channel and blending.
+ <LI>Encapsulated Postscript File inclusion (using graphics macros package).
+ <LI>Gpic specials to display pictures.
+ <LI>Correct treatment of many (but not all) in-lined-Postscript specials.
+ <LI>Page background settings.
+ <LI>Japanese pTeX DVI extension support (<A HREF="pngs/japanese/advi-j.png">screen shot</A>).
+</UL>
+
+<P>To present your DVI files, Active-DVI features:
+
+<UL>
+ <LI>Basic effects for presentation (pause, delay, dynamic text color change).
+ <LI>Annotations displayed on demand (similar to pop-up balloons).
+ <LI>Hyper links from slide to slide or to other files (including DVI files).
+ <LI>Replay of previously recorded parts of the display.
+ <LI>Text movements.
+ <LI>Page transitions.
+ <LI>Embedded applications (launched and killed on demand from within.
+     the presentation text source), with precise security policy.
+ <LI>Scratching on slide to interactively modify the text on screen.
+ <LI>Synchronization indications of each slide timing during the
+     presentation, to connect the talk with a recording/playing facility
+     and/or to automate the show.
+</UL>
+
+<P>Active-DVI special effects are set and launched from within your
+LaTeX source file via the macros of the <CODE>advi.sty</CODE>
+LaTeX package provided by the distribution.
+
+<P>In addition, Caml hackers can program new and fancy Active-DVI effects in the
+source code of the presenter.
+
+<H2 ALIGN=LEFT><A name="screenshots">Screen shots</A></H2>
+
+<P>Click on the image to have a look on the screen shots of Active-DVI
+presentations.
+
+<P ALIGN=CENTER><A HREF="screen-shots-eng.htm"><IMG SRC="pngs/f.png"></A>
+
+<H2 ALIGN=LEFT><A name="manual">User's manual</A></H2>
+
+<P>The Active-DVI user's manual is available in format <A
+HREF="manual.dvi">DVI</A>, <A HREF="manual.ps">PS</A>, and <A
+HREF="manual.pdf">PDF</A>. (The manual only exists in English version:
+volunteers to translate it are warmly welcomed...)
+
+<H2 ALIGN=LEFT><A name="FAQ"></A>
+<A HREF="faq-eng.htm">Frequently asked questions</A></H2>
+
+<H2 ALIGN=LEFT>Installation of Active-DVI</H2>
+
+<H3 ALIGN=LEFT><A name="requirements">Requirements</A></H3>
+
+<P>You need a Unix platform running the X11 window system.
+
+<P>You need the Objective Caml version $CamlVersion to compile the sources.
+
+<P>You also need the `kpsewhich' utility of the `kpathsea' library
+provided by the TeX distributions.
+
+<H2 ALIGN=LEFT><A name="download">Download</A></H2>
+
+<H4 ALIGN=LEFT>Source distribution</H4>
+
+<UL>
+
+<LI>Simple installation.
+
+ <DL>
+  <DT><STRONG><A HREF=
+  "ftp://ftp.inria.fr/INRIA/Projects/cristal/advi/adk-$version.tar.gz">ADK</A>
+  </STRONG>
+
+  <DD>the Active-DVI Development Kit. The complete and functional set
+  of Active-DVI's source files and Caml libraries that it uses (in
+  particular Camlimages).
+
+ </DL>
+
+<LI>Advanced installation
+
+ <DL>
+  <DT><STRONG>Note:</STRONG>
+
+  <DD>Active-DVI requires the latest version of the <A
+  HREF="http://pauillac.inria.fr/camlimages/">Camlimages</A> library.
+  If you have not yet installed this library, we recommend to
+  download the ADK (it is a big tar ball of Active-DVI and
+  Camlimages, with a fully-automated-with-luck installation Makefile).
+
+  <DT><STRONG>For hackers only</STRONG></DT>
+  <DD>the Active-DVI <A
+  HREF="ftp://ftp.inria.fr/INRIA/Projects/cristal/advi/advi-$version.tar.gz">
+  source version only</A> (You should already have Camlimages installed!)
+
+  <DT><STRONG>For impatient hackers only</STRONG></DT>
+  <DD><A HREF="http://camlcvs.inria.fr/cgi-bin/cvsweb.cgi/bazar-ocaml/advi/">
+  The current CVS version of Active-DVI </A> is available at the
+  <A HREF="http://camlcvs.inria.fr/">Caml Anonymous CVS repository</A>.
+
+ </DL>
+
+</UL>
+
+<!--
+<H4 ALIGN=LEFT>Binary distribution: RPMS</H4>
+
+<UL>
+   <LI><A HREF=
+   "ftp://ftp.inria.fr/INRIA/Projects/cristal/advi/advi-$version-1.src.rpm">
+   SRPM</A>
+   <LI>RedHat7 <A HREF=
+   "ftp://ftp.inria.fr/INRIA/Projects/cristal/advi/advi-$version-1.i386.rpm">
+   RPM</A>
+</UL>
+-->
+      
+<H2 ALIGN=LEFT><A NAME="lists">Bug reports and mailing list</A></H2>
+
+<P>If you find a bug drop a message to <CODE>advi-bugs@pauillac.inria.fr</CODE>.
+
+<P>If you want to get in touch with the implementors (to contribute
+some new ideas or lines of code) write to <CODE>advi@pauillac.inria.fr</CODE>.
+
+<P>If you want to subscribe to the Active-DVI mailing list, write to
+<CODE>advi-list-request@pauillac.inria.fr</CODE>.
+
+<H2 ALIGN=LEFT><A NAME="authors">Authors</A></H2>
+
+<A HREF="http://pauillac.inria.fr/~furuse/">Jun Furuse</A>,
+<A HREF="http://pauillac.inria.fr/~weis/">Pierre Weis</A>,
+<A HREF="http://pauillac.inria.fr/~remy/">Didier Rémy</A>,
+<A HREF="http://pauillac.inria.fr/~xleroy/">Xavier Leroy</A>,
+<A HREF="http://pauillac.inria.fr/~lebotlan/">Didier Le Botlan</A>,
+<A HREF="http://pauillac.inria.fr/~aschmitt/">Alan Schmitt</A>,
+<A HREF="http://pauillac.inria.fr/~dicosmo/">Roberto Di Cosmo</A>,
+<A HREF="http://pauillac.inria.fr/~miquel/">Alexandre Miquel</A>
+
+<H2 ALIGN=LEFT>Acknowledgments</H2>
+
+<P>Active-DVI's graphical engine to display DVI files is based on
+Mldvi version 1.0, written by <A
+HREF="http://pauillac.inria.fr/~miquel/">Alexandre Miquel</A>.
+
+<P>Active-DVI is entirely written in <A
+HREF="http://caml.inria.fr/ocaml/">Objective Caml</A>.
+
+<H2 ALIGN=LEFT><A NAME="copyright">COPYRIGHT</A></H2>
+
+This program is distributed under the GNU LGPL. See the enclosed file COPYING.
+
+<!--#include virtual="copyright-eng.htm"-->
+
+<P ALIGN=LEFT><IMG SRC="bar.gif"></P>
+<ADDRESS>Contact <A
+ HREF="mailto:Pierre.Weis@inria.fr">Pierre.Weis@inria.fr</A></ADDRESS>
+
+<!--#include virtual="endofpage-eng.htm"-->
