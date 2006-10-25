@@ -31,7 +31,6 @@ HAVE_LABLTK=@HAVE_LABLTK@
 LABLTKDIR=@LABLTKDIR@
 LABLTKLIB=@LABLTKLIB@
 
-HAVE_CDK=@HAVE_CDK@
 HAVE_GS=@HAVE_GS@
 
 XINERAMA_CFLAGS	= @XINERAMA_CFLAGS@
@@ -74,15 +73,9 @@ COBJS     = events.o grwm.o grY11.o
 CMO_OBJS  = $(addsuffix .cmo, $(MODULES))
 CMX_OBJS  = $(addsuffix .cmx, $(MODULES))
 
-ifeq ($(HAVE_CDK),true)
-CMA_OBJS  = `cdk_config $(LIBRARIES)`
-CMXA_OBJS = `cdk_config -opt $(LIBRARIES)`
-CAMLP4_FLAG = `cdk_config -c camlp4`
-else
 CMA_OBJS  = $(addsuffix .cma, $(LIBRARIES))
 CMXA_OBJS = $(addsuffix .cmxa, $(LIBRARIES))
 CAMLP4_FLAG = -I +camlp4
-endif
 
 BYT_OBJS = $(COBJS) $(CMA_OBJS) $(CMO_OBJS)
 BIN_OBJS = $(COBJS) $(CMXA_OBJS) $(CMX_OBJS)
