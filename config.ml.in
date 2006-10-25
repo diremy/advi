@@ -29,7 +29,7 @@ let advi_full_version =
 let have_gs = @HAVE_GS@;;
 
 (* Various commands paths. *)
-let kpsewhich_path = "kpsewich";;
+let kpsewhich_path = "kpsewhich";;
 let gs_path = "gs";;
 let gzip_path = "gzip";;
 
