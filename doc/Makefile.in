@@ -20,7 +20,7 @@
 include ../Makefile.config
 
 # various flags
-TEX_ENV		= TEXINPUTS=.:../tex:$$TEXINPUTS
+TEX_ENV		= TEXINPUTS=.:../tex:$(TEXINPUTS)
 DVIPS_ENV	= TEXPSHEADERS=.:../tex:
 HEVEA_FLAGS	= -entities -I ../tex
 HTMLC_FLAGS	= -I includes \

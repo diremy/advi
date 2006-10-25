@@ -24,7 +24,6 @@ include ../../Makefile.config
 
 MKTHUMBNAIL=TOOLS/mkthumbnail
 MKFRISE=TOOLS/mkfrise
-RM=/bin/rm -f
 
 DIRS=basics basics/cash \
 prosper/Join prosper/LL \

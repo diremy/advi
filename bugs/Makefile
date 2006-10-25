@@ -19,12 +19,16 @@
 
 include ../Makefile.config
 
-LATEX=TEXINPUTS=.:../tex:$(TEXINPUTS): latex
-PLATEX=TEXINPUTS=.:../tex:$(TEXINPUTS): platex
+# binaries
+ADVI	=../advi
 
-TEXFILES=Zeitoun.tex
+# flags
+TEX_ENV	= TEXINPUTS=.:../tex:$$TEXINPUTS
+ADVI_ENV= TEXPSHEADERS=../tex:
+
+# sources
+TEXFILES= Zeitoun.tex
 DVIFILES= $(TEXFILES:%.tex=%.dvi)
-ADVI=TEXPSHEADERS=../tex: ../advi
 
 all: $(DVIFILES)
 
@@ -33,10 +37,10 @@ $(DVIFILES): bar.eps ../tex/advi.sty ../tex/advi-annot.sty
 .SUFFIXES: .tex .sty .dvi .ps .eps .advi
 
 .dvi.advi:
-	$(ADVI) $<
+	$(ADVI_ENV) $(ADVI) $<
 
 .tex.dvi:
-	$(LATEX) $<
+	$(TEX_ENV) $(LATEX) $<
 
 bar.eps: ../tex/bar.eps
 	cp -p ../tex/bar.eps .
@@ -44,5 +48,3 @@ bar.eps: ../tex/bar.eps
 clean::
 	$(RM) a.out *.toc *.aux *.log *.dvi *~ 
 	$(RM) .advi/*
-
-

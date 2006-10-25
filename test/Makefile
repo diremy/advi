@@ -20,16 +20,18 @@
 # To view the demo, use ../advi demo.dvi
 include ../Makefile.config
 
-#LATEX=TEXINPUTS=.:../tex:$(TEXINPUTS): latex '\def\driver{hypertex}\input'
-LATEX=TEXINPUTS=.:../tex:$(TEXINPUTS): latex
-PLATEX=TEXINPUTS=.:../tex:$(TEXINPUTS): platex
+# binaries
+ADVI	= ../advi
 
+# flags
+TEX_ENV	= TEXINPUTS=.:../tex:$$TEXINPUTS
+ADVI_ENV= TEXPSHEADERS=../tex:
+
+# sources
 TEXFILES= demo.tex demo2.tex trigo_source.tex \
-trans.tex trans2.tex trans3.tex background.tex \
-color.tex demo_raw.tex macros.tex test_events.tex
-#thumbnails.tex
+	  trans.tex trans2.tex trans3.tex background.tex \
+	  color.tex demo_raw.tex macros.tex test_events.tex
 DVIFILES= $(TEXFILES:%.tex=%.dvi)
-ADVI=TEXPSHEADERS=../tex: ../advi
 
 ifeq ($(HAVE_LABLTK),true)
 MLPROG=taquin adviclock
@@ -42,15 +44,17 @@ all: $(DVIFILES) $(MLPROG)
 $(DVIFILES): bar.eps demo.sty ../tex/advi.sty ../tex/advi-annot.sty
 
 .dvi.advi:
-	$(ADVI) $<
+	$(ADVI_ENV) $(ADVI) $<
 
 .tex.dvi:
-	if test "$<" = "jpdemo.tex" ; then $(PLATEX) $<; \
-	else $(LATEX) $<; \
-	fi
+	$(TEX_ENV) $(LATEX) $<
+
+jpdemo.dvi: jpdemo.tex
+	$(TEX_ENV) $(PLATEX) $<
 
 background.dvi: background.tex
-	$(LATEX) $<; $(LATEX) $<;
+	$(TEX_ENV) $(LATEX) $<
+	$(TEX_ENV) $(LATEX) $<
 
 taquin: taquin_embed.ml
 	ocamlc -o taquin -I $(LABLTKDIR) $(LABLTKLIB) taquin_embed.ml
@@ -65,12 +69,14 @@ clean::
 	$(RM) a.out *.toc *.aux *.log *.dvi *~ 
 	$(RM) $(MLPROG) *.cmi *.cmo
 	$(RM) .advi/*
+	$(RM) test_gpic.tex
 
 test_subwindow: test_subwindow.ml
 	ocamlc -custom -I .. unix.cma graphics.cma -ccopt -L.. ../grY11.o ../events.o ../graphicsY11.cmo test_subwindow.ml 
 
 clean::
 	$(RM) test_cursors
+
 test_cursors: test_cursors.ml
 	ocamlc -custom -I .. unix.cma graphics.cma -ccopt \
 	-L.. ../grY11.o ../events.o ../misc.cmo ../grwm.o \
@@ -82,9 +88,5 @@ trigo.tex: trigo.pic
 
 test_gpic.tex: test_gpic.pic
 	gpic -t test_gpic.pic > test_gpic.tex
-clean::
-	$(RM) test_gpic.tex
 
 .SUFFIXES: .tex .sty .dvi .ps .eps .advi
-
-include ../Makefile.config
