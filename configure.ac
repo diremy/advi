@@ -209,11 +209,7 @@ if test -n "$GS" ; then
 fi
 AC_SUBST(HAVE_GS)
 
-AC_OUTPUT(Makefile
-	  Makefile.config
-	  doc/Makefile
-	  tex/Makefile
-	  conf/Makefile)
+AC_OUTPUT(Makefile.config)
 
 cat <<EOF
 Configuration summary
