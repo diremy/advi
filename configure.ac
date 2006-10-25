@@ -2,36 +2,18 @@
 AC_PREREQ(2.59)
 AC_INIT(advi, 1.7.0, Pierre.Weis@inria.fr)
 BUILD_DATE=`date +%Y-%m-%d`
+AC_SUBST(BUILD_DATE)
 
 # Checking ocaml
 AC_PROG_OCAML()
+AC_SUBST(OCAMLLIB)
+AC_SUBST(OCAMLVERSION)
 
 # Checks other programs
 AC_PROG_CC
 AC_PROG_MAKE_SET
 AC_PROG_INSTALL
 
-# Checking TeX 
-AC_PATH_PROG(KPSEXPAND, kpsexpand)
-if test -z "$KPSEXPAND"; then
-    AC_MSG_ERROR([kpsexpand not found, check your PATH])
-fi
-
-AC_MSG_CHECKING([TeX root path])
-TEXMFMAIN=`$KPSEXPAND '$TEXMFMAIN'`
-AC_MSG_RESULT([$TEXMFMAIN])
-if test -z "$TEXMFMAIN"; then
-    AC_MSG_ERROR([no TeX root path found, check your setup])
-fi
-
-AC_MSG_CHECKING([LaTeX root path])
-if test -d "$TEXMFMAIN/tex/latex"; then
-    AC_MSG_RESULT([$TEXMFMAIN/tex/latex])
-    ADVI_LOC="$TEXMFMAIN/tex/latex/advi"
-else 
-    AC_MSG_RESULT([not found])
-    AC_MSG_ERROR([no LaTeX root path found, check your setup])
-fi
 
 # Checking CamlImages
 CAMLIMAGESDIR=$OCAMLLIB/camlimages
@@ -78,7 +60,12 @@ else
     CAMLIMAGESLIBS=""
     exit 1
 fi
+AC_SUBST(CAMLIMAGESDIR)
+AC_SUBST(CAMLIMAGESCONFIGINCLUDE)
+AC_SUBST(HAVE_CAMLIMAGES)
+AC_SUBST(CAMLIMAGESLIBS)
 
+# conditional install target
 if test -n "$OCAMLOPT"; then
     if test -f "$CAMLIMAGESDIR/ci_ps.cmxa"; then
 	INSTALLEXEC="installbin"
@@ -94,6 +81,7 @@ if test -n "$OCAMLOPT"; then
 else
     INSTALLEXEC="installbyte"
 fi
+AC_SUBST(INSTALLEXEC)
 
 # Checking LablTk
 LABLTKDIR=$OCAMLLIB/labltk
@@ -112,6 +100,87 @@ else
     echo "found in the O'Caml CVS tree"
     echo "*******************************************"
 fi
+AC_SUBST(HAVE_LABLTK)
+AC_SUBST(LABLTKDIR)
+AC_SUBST(LABLTKLIB)
+
+# checking for X
+AC_PATH_XTRA
+AC_SUBST(X_LIBS)
+AC_SUBST(X_PRE_LIBS)
+AC_SUBST(X_EXTRA_LIBS)
+AC_SUBST(X_CFLAGS)
+
+# Checking for xinerama support
+have_xinerama="false"
+AC_CHECK_HEADER(
+    [X11/extensions/Xinerama.h],
+    [AC_CHECK_LIB(
+	[Xinerama],
+	[XineramaQueryScreens],
+	[have_xinerama="true"
+	 XINERAMA_CFLAGS="-DHAVE_XINERAMA"
+	 XINERAMA_LIBS="-lXinerama"]
+    )]
+)
+AC_SUBST(XINERAMA_CFLAGS)
+AC_SUBST(XINERAMA_LIBS)
+
+# Checking TeX 
+AC_PATH_PROG(KPSEXPAND, kpsexpand)
+if test -z "$KPSEXPAND"; then
+    AC_MSG_ERROR([kpsexpand not found, check your PATH])
+fi
+
+AC_MSG_CHECKING([TeX root path])
+TEXMFMAIN=`$KPSEXPAND '$TEXMFMAIN'`
+AC_MSG_RESULT([$TEXMFMAIN])
+if test -z "$TEXMFMAIN"; then
+    AC_MSG_ERROR([no TeX root path found, check your setup])
+fi
+
+AC_MSG_CHECKING([LaTeX root path])
+if test -d "$TEXMFMAIN/tex/latex"; then
+    AC_MSG_RESULT([$TEXMFMAIN/tex/latex])
+    ADVI_LOC="$TEXMFMAIN/tex/latex/advi"
+else 
+    AC_MSG_RESULT([not found])
+    AC_MSG_ERROR([no LaTeX root path found, check your setup])
+fi
+AC_SUBST(TEXMFMAIN)
+AC_SUBST(ADVI_LOC)
+
+# Checking LaTeX
+AC_PATH_PROG([LATEX], [latex])
+if test -z "$LATEX"; then
+    AC_MSG_ERROR([latex not found, check your PATH])
+fi
+# TODO: check LaTeX environment
+
+# Checking dvips
+AC_PATH_PROG([DVIPS], [dvips])
+if test -z "$DVIPS"; then
+    AC_MSG_ERROR([dvips not found, check your PATH])
+fi
+AC_PATH_PROG([DVIPDFM], [dvipdfm])
+
+# Checking hevea
+AC_PATH_PROG([HEVEA], [hevea])
+AC_PATH_PROG([PDFIMAGEN], [pdfimagen])
+
+# Checking htmlc
+AC_PATH_PROG([HTMLC], [htmlc])
+
+# conditional documentation targets
+ALL_DOC_FILES="\$(LATEX_FILES)"
+if test -n "$HEVEA"; then
+    ALL_DOC_FILES="$ALL_DOC_FILES \$(HEVEA_FILES)"
+fi
+
+if test -n "$HTMLC"; then
+    ALL_DOC_FILES="$ALL_DOC_FILES \$(HTMLC_FILES)"
+fi
+AC_SUBST(ALL_DOC_FILES)
 
 # Checking gs
 HAVE_GS="false"
@@ -138,76 +207,7 @@ if test -n "$GS" ; then
 	GS=""
     fi
 fi
-
-
-AC_PATH_XTRA
-
-# Checking for xinerama support
-have_xinerama="false"
-AC_CHECK_HEADER(
-    [X11/extensions/Xinerama.h],
-    [AC_CHECK_LIB(
-	[Xinerama],
-	[XineramaQueryScreens],
-	[have_xinerama="true"
-	 XINERAMA_CFLAGS="-DHAVE_XINERAMA"
-	 XINERAMA_LIBS="-lXinerama"]
-    )]
-)
-
-# Checking LaTeX
-AC_PATH_PROG([LATEX], [latex])
-if test -z "$LATEX"; then
-    AC_MSG_ERROR([latex not found, check your PATH])
-fi
-# TODO: check LaTeX environment
-
-# Checking dvips
-AC_PATH_PROG([DVIPS], [dvips])
-if test -z "$DVIPS"; then
-    AC_MSG_ERROR([dvips not found, check your PATH])
-fi
-AC_PATH_PROG([DVIPDFM], [dvipdfm])
-
-# Checking hevea
-AC_PATH_PROG([HEVEA], [hevea])
-AC_PATH_PROG([PDFIMAGEN], [pdfimagen])
-
-# Checking htmlc
-AC_PATH_PROG([HTMLC], [htmlc])
-
-# conditional targets
-ALL_DOC_FILES="\$(LATEX_FILES)"
-if test -n "$HEVEA"; then
-    ALL_DOC_FILES="$ALL_DOC_FILES \$(HEVEA_FILES)"
-fi
-
-if test -n "$HTMLC"; then
-    ALL_DOC_FILES="$ALL_DOC_FILES \$(HTMLC_FILES)"
-fi
-
-# Substitute variables
-AC_SUBST(OCAMLLIB)
-AC_SUBST(OCAMLVERSION)
-AC_SUBST(CAMLIMAGESDIR)
-AC_SUBST(CAMLIMAGESCONFIGINCLUDE)
-AC_SUBST(HAVE_CAMLIMAGES)
-AC_SUBST(CAMLIMAGESLIBS)
-AC_SUBST(TEXMFMAIN)
-AC_SUBST(HAVE_LABLTK)
-AC_SUBST(LABLTKDIR)
-AC_SUBST(LABLTKLIB)
-AC_SUBST(INSTALLEXEC)
-AC_SUBST(XINERAMA_CFLAGS)
-AC_SUBST(XINERAMA_LIBS)
-AC_SUBST(X_LIBS)
-AC_SUBST(X_PRE_LIBS)
-AC_SUBST(X_EXTRA_LIBS)
-AC_SUBST(X_CFLAGS)
-AC_SUBST(BUILD_DATE)
-AC_SUBST(ADVI_LOC)
 AC_SUBST(HAVE_GS)
-AC_SUBST(ALL_DOC_FILES)
 
 AC_OUTPUT(Makefile
 	  Makefile.config
