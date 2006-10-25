@@ -19,10 +19,6 @@
 # $Id$
 include Makefile.config
 
-RM=rm -fR
-MV=mv -f
-CP=cp -pfR
-
 INSTALLEXEC	= @INSTALLEXEC@
 
 WITH_X=@WITH_X@

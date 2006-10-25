@@ -24,6 +24,8 @@ OCAMLOPT	= @OCAMLOPT@
 OCAMLDEP	= @OCAMLDEP@
 INSTALL		= @INSTALL@
 CC		= @CC@
+RM		= rm -fR
+MV		= mv -f
 
 # flags
 HEVEA_FLAGS	= -entities -I ../tex

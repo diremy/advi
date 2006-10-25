@@ -19,10 +19,6 @@
 
 include ../Makefile.config
 
-RM		= rm -fR
-MV		= mv -f
-CP		= cp -pfR
-
 # See also file MakeHTML to recompile HTML files for the Web site.
 
 SETTEXINPUTS=TEXINPUTS=.:../tex:/usr/lib/hevea/:/usr/local/lib/hevea/:/usr/local/share/texmf/tex//:$$TEXINPUTS
