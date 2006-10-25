@@ -19,8 +19,13 @@
 
 include ../Makefile.config
 
+# various flags
 TEX_ENV		= TEXINPUTS=.:../tex:$$TEXINPUTS
 DVIPS_ENV	= TEXPSHEADERS=.:../tex:
+HEVEA_FLAGS	= -entities -I ../tex
+HTMLC_FLAGS	= -I includes \
+		  -D CamlVersion $(OCAMLVERSION) \
+		  -D version $(PACKAGE_VERSION)
 
 # The list of HTMLC dependant files
 HTML_SRC_FILES	= index.htm fra.htm eng.htm \
