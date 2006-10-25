@@ -151,10 +151,25 @@ XINERAMA_LIBS="-lXinerama -lXext")
 
 WITH_X="$X_LIBS $X_PRE_LIBS $XINERAMA_LIBS -lX11 $X_EXTRA_LIBS"
 
-# Checking hevea
-AC_PATH_PROG([HEVEA], [hevea])
+# Checking LaTeX
+AC_PATH_PROG([LATEX], [latex])
+if test -z "$LATEX"; then
+    AC_MSG_ERROR([latex not found, check your PATH])
+fi
+# TODO: check LaTeX environment
+
+# Checking dvips
+AC_PATH_PROG([DVIPS], [dvips])
+if test -z "$DVIPS"; then
+    AC_MSG_ERROR([dvips not found, check your PATH])
+fi
+AC_PATH_PROG([DVIPDFM], [dvipdfm])
 
 # Checking hevea
+AC_PATH_PROG([HEVEA], [hevea])
+AC_PATH_PROG([PDFIMAGEN], [pdfimagen])
+
+# Checking htmlc
 AC_PATH_PROG([HTMLC], [htmlc])
 
 # conditional targets
