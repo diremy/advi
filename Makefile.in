@@ -21,7 +21,6 @@ include Makefile.config
 
 INSTALLEXEC	= @INSTALLEXEC@
 
-WITH_X=@WITH_X@
 
 HAVE_CAMLIMAGES=@HAVE_CAMLIMAGES@
 @CAMLIMAGESCONFIGINCLUDE@
@@ -33,9 +32,17 @@ LABLTKDIR=@LABLTKDIR@
 LABLTKLIB=@LABLTKLIB@
 
 HAVE_CDK=@HAVE_CDK@
-
 HAVE_GS=@HAVE_GS@
-EXTRA_X11=@XINERAMA_FLAG@
+
+XINERAMA_CFLAGS	= @XINERAMA_CFLAGS@
+XINERAMA_LIBS	= @XINERAMA_LIBS@
+X_CFLAGS	= @X_CFLAGS@
+X_LIBS		= @X_LIBS@
+X_PRE_LIBS	= @X_PRE_LIBS@
+X_EXTRA_LIBS	= @X_EXTRA_LIBS@
+BYTCCCOMPOPTS	= -fno-defer-pop -Wall -Wno-unused
+LOCAL_CFLAGS	= $(XINERAMA_CFLAGS) $(X_CFLAGS) -O $(BYTCCCOMPOPTS)
+LOCAL_LIBS	= $(X_LIBS) $(X_PRE_LIBS) $(XINERAMA_LIBS) -lX11 $(X_EXTRA_LIBS)
 
 BYTOPTIONS = -warn-error A -g
 BINOPTIONS = -warn-error A -inline 10000
@@ -83,11 +90,8 @@ BIN_OBJS = $(COBJS) $(CMXA_OBJS) $(CMX_OBJS)
 CAMLINCLUDES  = $(addprefix -I , $(MLINCDIRS))
 LINK_OPTS = $(addprefix -ccopt -L, $(CLIBDIRS)) \
 	    $(addprefix -cclib -l, $(CLIBS)) \
-	    $(addprefix -cclib , $(WITH_X))
+	    $(addprefix -cclib , $(LOCAL_LIBS))
 
-X11_INCLUDES=-I/usr/X11R6/include
-BYTCCCOMPOPTS=-fno-defer-pop -Wall -Wno-unused
-CFLAGS=$(EXTRA_X11) $(X11_INCLUDES) -O $(BYTCCCOMPOPTS)
 
 
 all: byt bin doc
@@ -148,7 +152,7 @@ clean:
 
 .depend:: Makefile
 	$(OCAMLDEP) *.mli $(MLFILES) > .depend
-	$(CC) -MM -I$(OCAMLLIB) $(CFLAGS) $(COBJS:.o=.c) \
+	$(CC) -MM -I$(OCAMLLIB) $(LOCAL_CFLAGS) $(COBJS:.o=.c) \
 		| sed -e 's|$(OCAMLLIB)/[^ ]*||' >> .depend
 	chmod a+w .depend
 
@@ -164,7 +168,7 @@ config.ml: config.ml.in Makefile.config
 	mv $@.tmp $@
 
 .c.o:
-	$(OCAMLC) -ccopt "$(CFLAGS)" -c $<
+	$(OCAMLC) -ccopt "$(LOCAL_CFLAGS)" -c $<
 
 .SUFFIXES: .ml .mli .cmo .cmi .cmx .c .o
 

@@ -143,13 +143,17 @@ fi
 AC_PATH_XTRA
 
 # Checking for xinerama support
-HAVE_XINERAMA="false"
-AC_CHECK_HEADER(X11/extensions/Xinerama.h,
-HAVE_XINERAMA="true";
-XINERAMA_FLAG="-DHAVE_XINERAMA";
-XINERAMA_LIBS="-lXinerama -lXext")
-
-WITH_X="$X_LIBS $X_PRE_LIBS $XINERAMA_LIBS -lX11 $X_EXTRA_LIBS"
+have_xinerama="false"
+AC_CHECK_HEADER(
+    [X11/extensions/Xinerama.h],
+    [AC_CHECK_LIB(
+	[Xinerama],
+	[XineramaQueryScreens],
+	[have_xinerama="true"
+	 XINERAMA_CFLAGS="-DHAVE_XINERAMA"
+	 XINERAMA_LIBS="-lXinerama"]
+    )]
+)
 
 # Checking LaTeX
 AC_PATH_PROG([LATEX], [latex])
@@ -194,11 +198,14 @@ AC_SUBST(HAVE_LABLTK)
 AC_SUBST(LABLTKDIR)
 AC_SUBST(LABLTKLIB)
 AC_SUBST(INSTALLEXEC)
-AC_SUBST(HAVE_XINERAMA)
-AC_SUBST(XINERAMA_FLAG)
+AC_SUBST(XINERAMA_CFLAGS)
+AC_SUBST(XINERAMA_LIBS)
+AC_SUBST(X_LIBS)
+AC_SUBST(X_PRE_LIBS)
+AC_SUBST(X_EXTRA_LIBS)
+AC_SUBST(X_CFLAGS)
 AC_SUBST(BUILD_DATE)
 AC_SUBST(ADVI_LOC)
-AC_SUBST(WITH_X)
 AC_SUBST(HAVE_GS)
 AC_SUBST(ALL_DOC_FILES)
 
@@ -217,5 +224,5 @@ LablTk:      $HAVE_LABLTK
 GS:          $HAVE_GS
 Resources:   $ADVI_LOC/
 Hevea:       $HEVEA
-Xinerama:    $HAVE_XINERAMA
+Xinerama:    $have_xinerama
 EOF
