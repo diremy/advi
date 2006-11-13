@@ -534,6 +534,10 @@ let ps_forms =
     "ps:", Unprotected;
    ];;
 
+let setrgbcolor r g b = 
+  if get_do_ps () then
+    gv#ps Continue (Printf.sprintf "%d %d %d setrgbcolor" r g b) 0 0;;
+
 let draw s x y =
   if get_do_ps () then
     let pred (prefix, action) =
