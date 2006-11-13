@@ -34,6 +34,10 @@
 
 %% Some predefine keys
 
+\defargv {set}[]{\csname #1true\endcsname}
+\defargv {unset}[]{\csname #1false\endcsname}
+\defargv {eval}[]{#1}
+
 \defargv {ignoreadvi}[]{\PassOptionsToPackage{ignore}{advi}}
 \defargv {use}{\AtEndOfPackage{\RequirePackage{#1}}}
 \defargv {driver}{\rundriver {#1}}

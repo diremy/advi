@@ -77,6 +77,8 @@ Maybe you mean \@currenvir ing}}
 \def \advi@ifadvi {\ifadvi@ignore
   \expandafter \@secondoftwo \else \expandafter \@firstoftwo \fi}
 \def \ifadviignore {\ifadvi@ignore}
+\def \adviignoretrue {\advi@ignoretrue}
+\def \adviignorefalse {\advi@ignorefalse}
 \advi@export \adviignore \advi@ignoretrue
 \advi@export \ifadvi \advi@ifadvi
 
@@ -601,6 +603,46 @@ end
   {\message {Patching PStricks commands...}\advi@pstricks@patch}
 \fi
 
+%%% Patch for pgf
+
+%% \def \advi@pgfsys@hbox #1{%
+%%   \pgfsys@invoke{pgfs}%
+%%     \special{ps::[end]}%
+%%       \wd#1=0pt%
+%%       \ht#1=0pt%
+%%       \dp#1=0pt%
+%% %%    \box#1
+%%       \rlap {\hskip \pgf@x\raise \pgf@y \box#1}
+%%     \special{ps::[begin]}%
+%%   \pgfsys@invoke{pgfr}%
+%% }
+\def \advi@pgfsys@hbox #1{%
+  \pgfsys@invoke{pgfs}
+  \pgfsys@outerinvoke{advi@pgfpoint}%
+    \special{ps::[end]}%
+      \wd#1=0pt%
+      \ht#1=0pt%
+      \dp#1=0pt%
+      \hbox {\advi@putbegin \box#1\advi@putend}
+    \special{ps::[begin]}%
+  \pgfsys@invoke{pgfr}%
+}
+\def \advi@pgfqboxsynced #1{\pgfsys@beginscope \pgflowlevelsyncm \pgfqbox
+  #1\pgfsys@endscope} 
+\def \advi@pgf@patch{\@ifundefined {pgfsys@hbox}{}
+ {\let \latex@pgfsys@hbox  \pgfsys@hbox
+  \let \pgfsys@hbox \advi@pgfsys@hbox
+%%   \let \pgfqbox \latex@pgfsys@hbox
+%%   \let \pgfqboxsynced \advi@pgfsysqboxsynced
+}}
+
+\ifadvi@ignore \else
+\AtBeginDocument 
+  {\message {Patching PGF commands...}\advi@pgf@patch}
+\fi
+
+
+
 %%% Anchors
 
 \def \advi@style {box}
@@ -710,6 +752,7 @@ end
 
 \newcount \advi@count
 \newdimen \advi@dim
+\newif \ifadvi@edit@ignore
 \let \advidim \advi@dim
 \let \advicount \advi@count
 \newdimen \advi@edit@xunit
@@ -760,6 +803,9 @@ end
 \define@key {advi@embed}{width}%
    {\@tempdima#1\relax \edef \advi@embed@width {\the\@tempdima}}
 
+\define@key {advi@edit}{ignore}[1]{\advi@edit@ignoretrue}
+\define@key {advi@edit}{E}[1]{\advi@edit@ignoretrue}
+\define@key {advi@edit}{e}[1]{\advi@edit@ignorefalse}
 \define@key {advi@edit}{xunit}{\advi@edit@xunit #1}
 \define@key {advi@edit}{yunit}{\advi@edit@yunit #1}
 \define@key {advi@edit}{unit}{\advi@edit@xunit #1\advi@edit@yunit #1}
@@ -820,20 +866,22 @@ end
        \setbox0=\hbox {\raise \adviy \hbox {\kern \advix\box0}}%
        \dp0=0pt\wd0=0pt\ht0=0pt
     \fi
-    \advi@special
-      {edit\space
-       comm="\advi@edit@comm"\space
-       name="\advi@edit@name"\space
-       line=\advi@edit@line\space
-       file=\advi@edit@file\space
-       xunit=\the\advi@edit@xunit\space
-       yunit=\the\advi@edit@yunit\space
-       \advi@edit@X=\advi@edit@x\space
-       \advi@edit@Y=\advi@edit@y\space
-       \advi@edit@W=\advi@edit@w\space
-       \advi@edit@H=\advi@edit@h\space
-       \advi@edit@D=\advi@edit@d\space
-       }%
+    \ifadvi@edit@ignore\else
+      \advi@special
+        {edit\space
+         comm="\advi@edit@comm"\space
+         name="\advi@edit@name"\space
+         line=\advi@edit@line\space
+         file=\advi@edit@file\space
+         xunit=\the\advi@edit@xunit\space
+         yunit=\the\advi@edit@yunit\space
+         \advi@edit@X=\advi@edit@x\space
+         \advi@edit@Y=\advi@edit@y\space
+         \advi@edit@W=\advi@edit@w\space
+         \advi@edit@H=\advi@edit@h\space
+         \advi@edit@D=\advi@edit@d\space
+         }%
+    \fi
     \box0%
   \egroup
 }
@@ -883,3 +931,6 @@ end
 %%% End
 
 \endinput
+
+
+

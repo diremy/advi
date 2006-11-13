@@ -388,6 +388,7 @@ value caml_gr_get_modifiers(void)
                     &root_x, &root_y, &win_x, &win_y,
                     &modifiers)) {
     button = 0;
+/*     fprintf(stderr,"C modifiers = %u\n", modifiers); */
     if (modifiers & Button1Mask) button = button | 0x1;
     if (modifiers & Button2Mask) button = button | 0x2;
     if (modifiers & Button3Mask) button = button | 0x4;

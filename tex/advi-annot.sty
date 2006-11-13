@@ -52,16 +52,29 @@
     {{#2}\@ifnextchar({\advi@skipparen{\advi@annot@footi}}%
       {\advi@annot@footi}}
 
+
 \newcommand {\advi@annot@nofoot}[2][]%
     {{#2}\@ifnextchar({\advi@skipparen{\advi@annot@nofooti}}%
       {\advi@annot@nofooti}}
+
+\newcommand {\advi@annot@pause}[2][]%
+    {\@ifnextchar({\advi@annot@pausei{#2}}
+                  {\advi@annot@pausei{#2}(1,1)}}
+
+\def \advi@annot@pausei#1(#2,#3)#4{\ifpause
+        {\bbb@{#1}(#2,#3){#4}}{\leavevmode\hbox{#1}}\pause} 
+
 \newif \ifAdviFootnote
 \AdviFootnotetrue
+\newif \ifAdviAnnotPause
+\AdviAnnotPausetrue
 
 %% So...
 
-\def \advi@annot {\advi@ifadvi {\advi@annot@text}{\ifAdviFootnote
-\let \@do \advi@annot@foot  \else \let \@do \advi@annot@nofoot\fi \@do}}
+\def \advi@annot {\advi@ifadvi {\advi@annot@text}{\ifAdviAnnotPause
+        \let \@do \advi@annot@pause\else \ifAdviFootnote
+        \let \@do \advi@annot@foot  \else \let \@do \advi@annot@nofoot
+        \fi \fi \@do}}
 
 %% exports
 

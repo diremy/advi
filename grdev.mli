@@ -270,6 +270,7 @@ module H :
          | Name of string
          | Href of string
          | Advi of link
+         | Item of string
 
       type anchor = {
           tag : tag;
@@ -284,11 +285,12 @@ module H :
     end;;
 
 type area = Bottom_right | Bottom_left | Top_right | Top_left | Middle;;
-type button = Button1 | Button2 | Button3;;
+type button = Button1 | Button2 | Button3 | Button4 | Button5;;
 type event =
    | Resized of int * int
    | Refreshed
    | Key of char
+   | Stdin of char
    | Move of int * int
    | Edit of E.figure * E.action
    | Region of int * int * int * int

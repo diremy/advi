@@ -90,7 +90,7 @@
 \define@key {bubble} {to}[bbb@to]{\edef \bbb@to {#1}}
 
 \newcommand {\BubblePsArc}[2]%
-  {{\psset{linestyle=solid,linewidth=2pt}%
+  {{\psset{linestyle=solid,linewidth=2pt,arrows={<-}}%
    \ncarc [arcangleA=-0,arcangleB=-3]{#1}{#2}%
    \ncarc [arcangleA=-0,arcangleB=-2]{#1}{#2}%
    \ncarc [arcangleA=-0,arcangleB=-1]{#1}{#2}%
@@ -128,9 +128,10 @@
 \let \bbb@set \psset
 \def \bbb@node {\Rnode {\bbb@from}}
 \def \bbb@shapenode {\bbb@ovalnode}
-\def \bbb@ovalnode {\ovalnode[framesep=0pt]}
+\def \bbb@ovalnode {\ovalnode[framesep=\bbb@boxsep]}
 \def \bbb@rectnode #1#2{\Rnode{#1}{\psframebox{#2}}}
-\def \bbb@roundnode #1#2{\Rnode{#1}{\psframebox[framearc=.8]{#2}}}
+\def \bbb@roundnode #1#2{\Rnode{#1}{\psframebox
+        [framearc=.8,framesep=\bbb@boxsep]{#2}}}
 \def \bbb@put (#1,#2)#3{%
    \bbb@iftricks{\NormalCoor \psset{unit=\bbb@unit}}{}%
    \bbb@dima #2\bbb@unit \ifdim \bbb@dima<0em \@tempdimb -1\@tempdimc\fi

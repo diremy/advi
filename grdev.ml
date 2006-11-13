@@ -99,11 +99,18 @@ let synchronize () =
 
 (* For refreshed signal on usr1 *)
 exception Usr1;;
+exception Usr2;;
 
 let waiting = ref false;;
 let usr1 = Sys.sigusr1;;
+let usr2 = Sys.sigusr2;;
 let usr1_status = ref false;;
+let usr2_status = ref false;;
+let clear_usr1 () = usr1_status := false;;
+let clear_usr2 () = usr2_status := false;;
+
 exception Watch_file;;
+exception Input;;
 let watch_file_interval = ref 0;;
 Options.add
   "-watch-file"
@@ -111,14 +118,35 @@ Options.add
   "<int> watch for newer file every <int> second. \
   \n\t 0 means do not watch (default value)";;
 
-let watch_file_check () = if !waiting then raise Watch_file;;
+let inputp fdins = 
+  match Unix.select fdins [] [] 0.0 with
+  | [], _, _ -> false
+  | _, _, _ -> true
 
-let clear_usr1 () = usr1_status := false;;
+let get_input () =
+  let buf = String.create 1 in
+  if inputp [ Unix.stdin ] then
+    let _ = Unix.read Unix.stdin buf 0 1 in 
+    if inputp [ Unix.stdin ] then () 
+    else clear_usr2();
+    buf.[0]
+  else assert false;;
+
+let watch_file_check () = 
+  if !waiting then raise Watch_file;;
+
 let set_usr1 () =
   Sys.set_signal usr1
     (Sys.Signal_handle
-       (fun _ -> usr1_status := true; if !waiting then raise Usr1));;
+       (fun _ -> usr1_status := true; if !waiting then raise Watch_file
+       ));;
 set_usr1 ();;
+let set_usr2 () =
+  Sys.set_signal usr2
+    (Sys.Signal_handle
+       (fun _ -> usr2_status := true; if !waiting then raise Usr2
+       ));;
+set_usr2 ();;
 
 let sleep_broken = ref false;;
 let clear_sleep () = sleep_broken := GraphicsY11.key_pressed ();;
@@ -880,6 +908,7 @@ module H =
        | Name of string
        | Href of string
        | Advi of link
+       | Item of string
 
     type anchor = {
       tag : tag;
@@ -887,7 +916,26 @@ module H =
     }
 
     let anchors = ref A.empty
-    let clear () = anchors := A.empty
+
+    let add_corner x y w h s =
+      let anchor = { tag = Item s; draw = []; } in
+      let a =
+        { A.x = x; A.y = y; A.w = w; A.h = h;
+          A.action = anchor;
+        } in
+      anchors := A.add a !anchors
+
+    let add_corners() =
+      let w = !size_x / 10 in
+      add_corner 0 0 w w "Bottom_left";
+      add_corner 0 (!size_y - w) w w "Top_left";
+      add_corner (!size_x - w) (!size_y - w) w w "Top_right";
+      add_corner (!size_x - w) 0 w w "Bottom_right";
+      ()
+
+   let clear () = 
+      anchors := A.empty;
+      add_corners()
 
     let string_of_link {link = s} = s
 
@@ -895,6 +943,7 @@ module H =
       | Name s -> Printf.sprintf "Name %s" s
       | Href s -> Printf.sprintf "Href %s" s
       | Advi l -> Printf.sprintf "Advi %s" (string_of_link l)
+      | Item s -> assert false
 
     (* Draws a rectangle with border width bw if possible. *)
     let frame_rect bw x y w h =
@@ -923,6 +972,7 @@ module H =
           match tag with
           | Href _ -> 0
           | Advi _ -> 0
+          | Item _ -> 0
           | Name _ -> 0 in
         let y' = y - voff - 1 in
         let h' = h + 2 in
@@ -936,6 +986,7 @@ module H =
           } in
         anchors := A.add a !anchors;
         match tag with
+        | Item _ -> draw_anchor Box href_frame_color 1 a
         | Href _ -> draw_anchor Box href_frame_color 1 a
         | Advi link ->
             draw_anchor
@@ -1253,11 +1304,12 @@ type status = GraphicsY11.status = {
 type area =
    | Bottom_right | Bottom_left | Top_right | Top_left | Middle;;
 type button =
-   | Button1 | Button2 | Button3;;
+   | Button1 | Button2 | Button3 | Button4 | Button5;;
 type event =
    | Resized of int * int
    | Refreshed
    | Key of char
+   | Stdin of char
    | Move of int * int
    | Edit of E.figure * E.action
    | Region of int * int * int * int
@@ -1363,35 +1415,37 @@ let resized () =
     end
   else None;;
 
+
 let rec wait_signal_event events =
-  match resized (), !usr1_status, event_waiting () with
-  | Some (x, y), _, _ -> Final (Resized (x, y))
-  | _, true, _ -> clear_usr1 (); Final (Refreshed)
-  | _, _, true -> Raw (pop_event ())
-  | _, _, _ ->
-     let rec wait () =
-       try
-         waiting := true;
-         let ev = GraphicsY11.wait_next_event events in
-         waiting := false;
-         match resized () with
-         | Some (x, y) ->
-             push_back_event ev;
-             Final (Resized (x, y))
-         | None ->
-             Raw ev
-       with
-       | Usr1 ->
-           waiting := false;
-           Final Refreshed
-       | Watch_file ->
-           waiting := false;
-           if List.mem GraphicsY11.Key_pressed events then Final Nil
-           else wait ()
-       | exn ->
-           waiting := false;
-           raise exn in
-     wait ();;
+  match resized (), !usr1_status,  event_waiting (), !usr2_status with
+  | Some (x, y), _, _, _ -> Final (Resized (x, y))
+  | _, true, _, _ -> clear_usr1 (); Final (Refreshed)
+  | _, _, true, _ -> Raw (pop_event ())
+  | _, _, _, true -> Final (Stdin (get_input()))
+  | _, _, _, _ -> 
+      let rec wait () =
+        try
+          waiting := true;
+          let ev = GraphicsY11.wait_next_event events in
+          waiting := false;
+          match resized () with
+          | Some (x, y) ->
+              push_back_event ev;
+              Final (Resized (x, y))
+          | None ->
+              Raw ev
+        with
+        | Usr2 ->
+            waiting := false;
+            Final (Stdin (get_input()))
+        | Watch_file ->
+            waiting := false;
+            if List.mem GraphicsY11.Key_pressed events then Final Nil
+            else wait ()
+        | exn ->
+            waiting := false;
+            raise exn in
+      wait ();;
 
 let wait_select_rectangle x y =
   let rec select dx dy =
@@ -1536,7 +1590,7 @@ let wait_move_button_up rect trans_type event x y =
 let near x x' = abs (x - x') < !size_x / 4;;
 let close x x' = abs (x - x') < !size_x / 10;;
 
-let click_area near x y =
+let mouse_area near x y =
   if near x 0 then
     if near y 0 then Bottom_left else
     if near y !size_y then Top_left
@@ -1555,18 +1609,21 @@ module G = GraphicsY11;;
 let button m =
   if pressed m G.button1 then Button1 else
   if pressed m G.button3 then Button3 else
+  if pressed m G.button4 then Button4 else
+  if pressed m G.button5 then Button5 else
   Button2;;
 
 let wait_button_up m x y =
+  Printf.printf  "Button %d\n%!" (Obj.magic (Obj.repr (button m)));
   let wait_position () =
     match wait_signal_event button_up with
     | Raw e ->
         if !editing || pressed m G.shift then begin
-          match click_area close x y with
+          match mouse_area close x y with
           | Middle -> Final (Position (x, !size_y - y))
           | c -> Final (Click (c, button m, x, !size_y - y))
         end
-        else Final (Click (click_area near x y, button m, x, !size_y - y))
+        else Final (Click (mouse_area near x y, button m, x, !size_y - y))
     | x -> x in
   if !editing && pressed m G.button1 then wait_position () else
   if !editing || pressed m G.control then begin
@@ -1627,9 +1684,28 @@ let wait_event () =
             if ev.button then
               let _ev' = GraphicsY11.wait_next_event button_up in
               send (Href h) else
-            if H.up_to_date act emph then event emph b else begin
-              H.deemphasize true emph;
-              event (H.emphasize_and_flash href_emphasize_color act) b end
+              if H.up_to_date act emph then event emph b else begin
+                H.deemphasize true emph;
+                event (H.emphasize_and_flash href_emphasize_color act) b end
+        | {A.action = {H.tag = H.Item s; H.draw = d}} as act ->
+            if ev.button then
+              let _ev' = GraphicsY11.wait_next_event button_up in
+              let area = 
+                match s with 
+                | "Bottom_left" -> Bottom_left
+                | "Bottom_right" -> Bottom_right
+                | "Top_left" -> Top_left
+                | "Top_right" -> Top_right 
+                | _ -> Middle
+              in
+              send (Click (area, 
+                           button (GraphicsY11.get_modifiers()), 
+                           _ev'.mouse_x, 
+                           _ev'.mouse_y))
+            else
+              if H.up_to_date act emph then event emph b else begin
+                H.deemphasize true emph;
+                event (H.emphasize_and_flash href_emphasize_color act) b end
         | {A.action =
            {H.tag = H.Advi {H.link = s; H.action = a; H.mode = H.Over};
             H.draw = d}} as act ->
@@ -1642,44 +1718,44 @@ let wait_event () =
               if ev.button && not b then begin
                 H.deemphasize true emph;
                 event (H.save_screen_exec act a) true end else
-              if ev.button then event emph b else
-              if H.up_to_date act emph then event emph b else begin
-                H.deemphasize true emph;
-                event (H.emphasize_and_flash href_emphasize_color act) b end
+                if ev.button then event emph b else
+                if H.up_to_date act emph then event emph b else begin
+                  H.deemphasize true emph;
+                  event (H.emphasize_and_flash href_emphasize_color act) b end
         | {A.action =
            {H.tag = H.Advi {H.link = s; H.action = a; H.mode = H.Stick};
             H.draw = d}} as act ->
               if ev.button && not b then begin
                 H.deemphasize true emph;
                 event (H.nosave_screen_exec act a) true end else
-              if ev.button then event emph b else
-              if H.up_to_date act emph then event emph b else begin
-                H.deemphasize true emph;
-                event (H.emphasize_and_flash href_emphasize_color act) b end
+                if ev.button then event emph b else
+                if H.up_to_date act emph then event emph b else begin
+                  H.deemphasize true emph;
+                  event (H.emphasize_and_flash href_emphasize_color act) b end
         | _ -> rescan ()
-        with Not_found ->
-          if ev.button then
-            let m = GraphicsY11.get_modifiers () in
-            match wait_button_up m ev.mouse_x ev.mouse_y with
-            | Final (Region (x, y, dx, dy) as e) -> send e
-            | Final (Selection s as e) -> send e
-            | Final (Position (x, y) as e) -> send e
-            | Final (Move (dx, dy) as e) -> send e
-            | Final (Click (_, _, _, _) as e) -> send e
-            | Final (Edit (_, _) as e) -> send e
-            | Final Nil -> send Nil
-            | Final
-                (Resized (_, _) | Refreshed |
-                 Key _ | Href _ | Advi (_, _) as e) ->
-                push_back_event ev;
-                send e
-            | Raw _ -> rescan ()
-          else
-            let m = GraphicsY11.get_modifiers () in
-            if m land GraphicsY11.shift <> 0
-            then Busy.temp_set Busy.Selection
-            else Busy.restore_cursor ();
-            rescan () in
+                   with Not_found ->
+                     if ev.button then
+                       let m = GraphicsY11.get_modifiers () in
+                       match wait_button_up m ev.mouse_x ev.mouse_y with
+                       | Final (Region (x, y, dx, dy) as e) -> send e
+                       | Final (Selection s as e) -> send e
+                       | Final (Position (x, y) as e) -> send e
+                       | Final (Move (dx, dy) as e) -> send e
+                       | Final (Click (_, _, _, _) as e) -> send e
+                       | Final (Edit (_, _) as e) -> send e
+                       | Final Nil -> send Nil
+                       | Final
+                           (Resized (_, _) | Refreshed |
+                           Key _ | Stdin _ | Href _ | Advi (_, _) as e) ->
+                             push_back_event ev;
+                             send e
+                       | Raw _ -> rescan ()
+                     else
+                       let m = GraphicsY11.get_modifiers () in
+                       if m land GraphicsY11.shift <> 0
+                       then Busy.temp_set Busy.Selection
+                       else Busy.restore_cursor ();
+                       rescan () in
   event H.Nil false;;
 
 (* To be changed *)
@@ -1689,7 +1765,10 @@ let resized () =
   Graphics.size_x () <> !size_x || Graphics.size_y () <> !size_y;;
 
 let continue () =
-  if resized () || GraphicsY11.key_pressed () (*  || !usr1_status *)
+  if
+    resized () || 
+    GraphicsY11.key_pressed () (*  || !usr1_status *) ||
+    !usr2_status (* input from stdin *)
   then begin Gs.flush (); raise Stop end;;
 
 (* Calling GS *)

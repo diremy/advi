@@ -1561,7 +1561,7 @@ let main_loop mastername clients =
       idraw st;
       (* num is the current number entered by keyboard *)
       (* Printf.eprintf "%s\n%!"
-        (match st.duplex with
+         (match st.duplex with
          | Client _ -> "Client"
          | Master _ -> "Master "
          | Alone -> "Alone"); *)
@@ -1582,7 +1582,7 @@ let main_loop mastername clients =
                 else Grdev.clear_usr1 ();
             end
         | Grdev.Resized (x, y) -> resize st x y
-        | Grdev.Key c ->
+        | Grdev.Key c | Grdev.Stdin c ->
             let keymap =
               match get_keymap () with
               | Default_keymap -> default_keymap
@@ -1604,6 +1604,8 @@ let main_loop mastername clients =
         | Grdev.Position (x, y) ->
             st.last_command <- Position;
             position st x y
+        | Grdev.Click (pos, Grdev.Button4, _, _)  -> B.previous_page st
+        | Grdev.Click (pos, Grdev.Button5, _, _)  -> B.next_page st
         | Grdev.Click (pos, but, _, _) when Grdev.E.editing () ->
             begin match pos, but with
             | Grdev.Top_left, Grdev.Button1 -> B.previous_slice st
@@ -1623,7 +1625,7 @@ let main_loop mastername clients =
         | Grdev.Click (_, Grdev.Button3, _, _) ->
             if !click_turn_page then B.next_pause st
         | Grdev.Nil -> ()
-        done with
+      done with
       | Exit -> Grdev.close_dev ()
       | Duplex (action, st') -> duplex action st' in
     duplex redraw st

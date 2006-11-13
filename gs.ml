@@ -283,8 +283,12 @@ let advi_pro =
 /advi@printfloat { advi@floatstring cvs print } def
 /advi@CP {
 CM [1 0 0 -1 0 0] setmatrix
-    CP (dvi) print advi@printfloat  (,) print advi@printfloat (\n) print 
-setmatrix } def";;
+    CP (dvi) print advi@printfloat  (,) print advi@printfloat (\n) print
+setmatrix } def
+/advi@pgfpoint {
+ [1 0 0 -1 0 0] setmatrix currentpoint 
+(dvi) print advi@printfloat  (,) print advi@printfloat (\n) print
+ } def";;
 let advi_noshowpage = " /showpage { } /def"
 let advi_resetmatrix = "[1 0 0 -1 0 0] concat"
 
@@ -431,7 +435,7 @@ class gv =
           gs # line advi_pro;
           gs # line "TeXDict begin @landscape end";
           gs # line "/SI save def gsave";
-          gs # line ".setsafe";
+          if !delaysafer then gs # line ".setsafe";
           process <- Some gs;
           gs
       | Some gs ->
