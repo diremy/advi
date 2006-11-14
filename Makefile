@@ -35,21 +35,23 @@ GRAPHICS = graphicsY11 global_options busy gradient gterm launch \
 SYMBOL	 = symbol
 DVI	 = input table pkfont ttfont jfm search \
 	   font glyph devfont units dimension dvi
-EFFECTS	 = drawimage gs transimpl embed
-GUI	 = scratch cdvi driver thumbnails dviview
+EFFECTS	 = drawimage gs transimpl embed grdev addons
+GUI	 = scratch cdvi driver thumbnails dviview main
 
-MODULES	 = $(MISC) $(OPTIONS) $(GRAPHICS) \
-           $(SYMBOL) $(DVI) \
-           $(EFFECTS) grdev addons \
-	   $(GUI) main
+MLMODULES	= $(MISC) $(OPTIONS) $(GRAPHICS) \
+		  $(SYMBOL) $(DVI) \
+		  $(EFFECTS) \
+		  $(GUI)
+
+CMODULES  = events grwm grY11
 
 LIBRARIES = graphics unix str $(CAMLIMAGESLIBS)
 CLIBS	  = graphics unix str
 
-COBJS     = events.o grwm.o grY11.o
+COBJS     = $(addsuffix .o, $(CMODULES))
 
-CMO_OBJS  = $(addsuffix .cmo, $(MODULES))
-CMX_OBJS  = $(addsuffix .cmx, $(MODULES))
+CMO_OBJS  = $(addsuffix .cmo, $(MLMODULES))
+CMX_OBJS  = $(addsuffix .cmx, $(MLMODULES))
 
 CMA_OBJS  = $(addsuffix .cma, $(LIBRARIES))
 CMXA_OBJS = $(addsuffix .cmxa, $(LIBRARIES))
