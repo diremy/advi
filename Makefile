@@ -45,6 +45,8 @@ MLMODULES	= $(MISC) $(OPTIONS) $(GRAPHICS) \
 
 CMODULES  = events grwm grY11
 
+MLFILES = $(addsuffix .ml, $(MLMODULES))
+
 LIBRARIES = graphics unix str $(CAMLIMAGESLIBS)
 CLIBS	  = graphics unix str
 
@@ -113,7 +115,6 @@ installbin: $(EXEC).bin
 	- $(INSTALL) -d $(DESTDIR)$(bindir)
 	$(INSTALL) -m 755 $(EXEC).bin $(DESTDIR)$(bindir)/$(EXEC)
 
-MLFILES = $(addsuffix .ml, $(MODULES))
 
 clean:
 	$(RM) $(EXEC).bin $(EXEC).byt
