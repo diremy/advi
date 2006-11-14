@@ -19,10 +19,6 @@
 # $Id$
 include Makefile.config
 
-BYTCCCOMPOPTS	= -fno-defer-pop -Wall -Wno-unused
-LOCAL_CFLAGS	= $(XINERAMA_CFLAGS) $(X_CFLAGS) -O $(BYTCCCOMPOPTS)
-LOCAL_LIBS	= $(X_LIBS) $(X_PRE_LIBS) $(XINERAMA_LIBS) -lX11 $(X_EXTRA_LIBS)
-
 MISC	 = config misc timeout ageometry
 OPTIONS	 = options rc userfile
 GRAPHICS = graphicsY11 global_options busy gradient gterm launch \
@@ -56,11 +52,14 @@ CMXA_OBJS = $(addsuffix .cmxa, $(LIBRARIES))
 BYT_OBJS = $(COBJS) $(CMA_OBJS) $(CMO_OBJS)
 BIN_OBJS = $(COBJS) $(CMXA_OBJS) $(CMX_OBJS)
 
-CAMLINCLUDES  = $(addprefix -I , $(CAMLIMAGESDIR))
-LINK_OPTS = $(addprefix -ccopt -L, $(CLIBDIRS)) \
-	    $(addprefix -cclib -l, $(CLIBS)) \
-	    $(addprefix -cclib , $(LOCAL_LIBS))
+BYTCCCOMPOPTS	= -fno-defer-pop -Wall -Wno-unused
+LOCAL_CFLAGS	= $(XINERAMA_CFLAGS) $(X_CFLAGS) -O $(BYTCCCOMPOPTS)
+LOCAL_LIBS	= $(X_LIBS) $(X_PRE_LIBS) $(XINERAMA_LIBS) -lX11 $(X_EXTRA_LIBS)
 
+CAMLINCLUDES  = $(addprefix -I , $(CAMLIMAGESDIR))
+LOCAL_LINKFLAGS	= $(addprefix -ccopt -L, $(CLIBDIRS)) \
+		  $(addprefix -cclib -l, $(CLIBS)) \
+		  $(addprefix -cclib , $(LOCAL_LIBS))
 
 
 all: byt bin doc
@@ -69,13 +68,13 @@ byt: $(EXEC).byt
 
 $(EXEC).byt: $(COBJS) $(CMO_OBJS)
 	$(OCAMLC) $(BYT_COMPFLAGS) -custom $(CAMLINCLUDES) $(BYT_OBJS) \
-		$(LINK_OPTS) -o $(EXEC).byt
+		$(LOCAL_LINKFLAGS) -o $(EXEC).byt
 
 bin: $(EXEC).bin
 
 $(EXEC).bin: $(COBJS) $(CMX_OBJS)
 	$(OCAMLOPT) $(BIN_COMPFLAGS) $(CAMLINCLUDES) $(BIN_OBJS) \
-		$(LINK_OPTS) -o $(EXEC).bin
+		$(LOCAL_LINKFLAGS) -o $(EXEC).bin
 
 doc:
 	cd doc; $(MAKE) all
