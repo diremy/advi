@@ -23,9 +23,6 @@ BYTCCCOMPOPTS	= -fno-defer-pop -Wall -Wno-unused
 LOCAL_CFLAGS	= $(XINERAMA_CFLAGS) $(X_CFLAGS) -O $(BYTCCCOMPOPTS)
 LOCAL_LIBS	= $(X_LIBS) $(X_PRE_LIBS) $(XINERAMA_LIBS) -lX11 $(X_EXTRA_LIBS)
 
-BYTOPTIONS = -warn-error A -g
-BINOPTIONS = -warn-error A -inline 10000
-
 MLINCDIRS = $(CAMLIMAGESDIR)
 
 MISC	 = config misc timeout ageometry
@@ -73,13 +70,13 @@ all: byt bin doc
 byt: $(EXEC).byt
 
 $(EXEC).byt: $(COBJS) $(CMO_OBJS)
-	$(OCAMLC) $(BYTOPTIONS) -custom $(CAMLINCLUDES) $(BYT_OBJS) \
+	$(OCAMLC) $(BYT_COMPFLAGS) -custom $(CAMLINCLUDES) $(BYT_OBJS) \
 		$(LINK_OPTS) -o $(EXEC).byt
 
 bin: $(EXEC).bin
 
 $(EXEC).bin: $(COBJS) $(CMX_OBJS)
-	$(OCAMLOPT) $(BINOPTIONS) $(CAMLINCLUDES) $(BIN_OBJS) \
+	$(OCAMLOPT) $(BIN_COMPFLAGS) $(CAMLINCLUDES) $(BIN_OBJS) \
 		$(LINK_OPTS) -o $(EXEC).bin
 
 doc:
@@ -115,7 +112,6 @@ installbin: $(EXEC).bin
 	- $(INSTALL) -d $(DESTDIR)$(bindir)
 	$(INSTALL) -m 755 $(EXEC).bin $(DESTDIR)$(bindir)/$(EXEC)
 
-
 clean:
 	$(RM) $(EXEC).bin $(EXEC).byt
 	$(RM) *.cm[oix] *.o *~ .depend *.log *.aux
@@ -146,12 +142,12 @@ config.ml: config.ml.in Makefile.config
 .SUFFIXES: .ml .mli .cmo .cmi .cmx .c .o
 
 .mli.cmi:
-	$(OCAMLC) $(BYTOPTIONS) $(CAMLINCLUDES) -c $<
+	$(OCAMLC) $(BYT_COMPFLAGS) $(CAMLINCLUDES) -c $<
 
 .ml.cmo:
-	$(OCAMLC) $(BYTOPTIONS) $(CAMLINCLUDES) -c $<
+	$(OCAMLC) $(BYT_COMPFLAGS) $(CAMLINCLUDES) -c $<
 
 .ml.cmx:
-	$(OCAMLOPT) $(BINOPTIONS) $(CAMLINCLUDES) -c $<
+	$(OCAMLOPT) $(BIN_COMPFLAGS) $(CAMLINCLUDES) -c $<
 
 include .depend
