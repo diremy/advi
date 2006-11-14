@@ -55,7 +55,6 @@ CMX_OBJS  = $(addsuffix .cmx, $(MLMODULES))
 
 CMA_OBJS  = $(addsuffix .cma, $(LIBRARIES))
 CMXA_OBJS = $(addsuffix .cmxa, $(LIBRARIES))
-CAMLP4_FLAG = -I +camlp4
 
 BYT_OBJS = $(COBJS) $(CMA_OBJS) $(CMO_OBJS)
 BIN_OBJS = $(COBJS) $(CMXA_OBJS) $(CMX_OBJS)
