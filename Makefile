@@ -23,8 +23,6 @@ BYTCCCOMPOPTS	= -fno-defer-pop -Wall -Wno-unused
 LOCAL_CFLAGS	= $(XINERAMA_CFLAGS) $(X_CFLAGS) -O $(BYTCCCOMPOPTS)
 LOCAL_LIBS	= $(X_LIBS) $(X_PRE_LIBS) $(XINERAMA_LIBS) -lX11 $(X_EXTRA_LIBS)
 
-MLINCDIRS = $(CAMLIMAGESDIR)
-
 MISC	 = config misc timeout ageometry
 OPTIONS	 = options rc userfile
 GRAPHICS = graphicsY11 global_options busy gradient gterm launch \
@@ -58,7 +56,7 @@ CMXA_OBJS = $(addsuffix .cmxa, $(LIBRARIES))
 BYT_OBJS = $(COBJS) $(CMA_OBJS) $(CMO_OBJS)
 BIN_OBJS = $(COBJS) $(CMXA_OBJS) $(CMX_OBJS)
 
-CAMLINCLUDES  = $(addprefix -I , $(MLINCDIRS))
+CAMLINCLUDES  = $(addprefix -I , $(CAMLIMAGESDIR))
 LINK_OPTS = $(addprefix -ccopt -L, $(CLIBDIRS)) \
 	    $(addprefix -cclib -l, $(CLIBS)) \
 	    $(addprefix -cclib , $(LOCAL_LIBS))
