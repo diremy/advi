@@ -286,9 +286,9 @@ CM [1 0 0 -1 0 0] setmatrix
     CP (dvi) print advi@printfloat  (,) print advi@printfloat (\n) print
 setmatrix } def
 /advi@pgfpoint {
- [1 0 0 -1 0 0] setmatrix currentpoint 
+matrix currentmatrix [1 0 0 -1 0 0] setmatrix currentpoint 
 (dvi) print advi@printfloat  (,) print advi@printfloat (\n) print
- } def";;
+setmatrix } def";;
 let advi_noshowpage = " /showpage { } /def"
 let advi_resetmatrix = "[1 0 0 -1 0 0] concat"
 
@@ -536,7 +536,10 @@ let ps_forms =
 
 let setrgbcolor r g b = 
   if get_do_ps () then
-    gv#ps Continue (Printf.sprintf "%d %d %d setrgbcolor" r g b) 0 0;;
+(*     let _ =     Printf.eprintf "%d %d %d setrgbcolor\n%!" r g b in *)
+    let ratio x = float (x * 100 / 255) *. 0.01 in
+    gv#ps Continue (Printf.sprintf "%.2f %.2f %.2f setrgbcolor" 
+                      (ratio r) (ratio g) (ratio b)) 0 0;;
 
 let draw s x y =
   if get_do_ps () then

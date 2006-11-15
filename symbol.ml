@@ -319,6 +319,7 @@ let encodings = [
   "ecti[0-9]+",       accents ecmr_encoding;
   "ecbx[0-9]+",       accents ecmr_encoding;
   "ectt[0-9]+",       accents cmtt_encoding;
+  "ecss[0-9]+",       accents cmr_encoding;
   "lcmssb?[0-9]+",    accents cmr_encoding;
   "lcmssi[0-9]+",     accents cmmi_encoding;
 (* is this correct ? *)

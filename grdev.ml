@@ -583,12 +583,13 @@ let set_forward_get_playing f = forward_get_playing := f;;
 
 let get_playing () = !forward_get_playing ();;
 
+let rgb_of_color c =
+  let b = (c land 0x0000ff) in
+  let g = (c land 0x00ff00) lsr 8 in
+  let r = (c land 0xff0000) lsr 16 in
+  r, g, b;;
+
 let mean_color c c' =
-  let rgb_of_color c =
-    let b = (c land 0x0000ff) in
-    let g = (c land 0x00ff00) lsr 8 in
-    let r = (c land 0xff0000) lsr 16 in
-    r, g, b in
   let r, g, b = rgb_of_color c in
   let r', g', b' = rgb_of_color c' in
   Graphics.rgb ((r + r' + 1) / 2) ((g + g' + 1) / 2) ((b + b' + 1) / 2);;
@@ -677,6 +678,12 @@ let set_bbox bb =
       bbox := {rx = x0; ry = !size_y - y0; rw = w; rh = -h; rd = 0};;
 
 (*** Drawing ***)
+let ps_set_color c = 
+  if !psused then
+  let r, g, b = rgb_of_color c in
+  Gs.setrgbcolor r g b;;
+  
+  
 let get_color, set_color =
  let color = ref (get_fgcolor ()) in
  (fun () -> !color),
@@ -684,7 +691,9 @@ let get_color, set_color =
    if not !opened then failwith "Grdev.set_color: no window";
    (*prerr_endline "set_color";*)
    color := c;
-   Graphics.set_color c);;
+   Graphics.set_color c;
+   ps_set_color c
+ );;
 
 let with_color c f x =
   let cur = get_color () in
