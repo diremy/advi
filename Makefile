@@ -56,7 +56,7 @@ BIN_OBJS = $(COBJS) $(CMXA_OBJS) $(CMX_OBJS)
 LOCAL_CFLAGS	= $(XINERAMA_CFLAGS) $(X_CFLAGS)
 LOCAL_LIBS	= $(X_LIBS) $(X_PRE_LIBS) $(XINERAMA_LIBS) -lX11 $(X_EXTRA_LIBS)
 
-CAMLINCLUDES  = $(addprefix -I , $(CAMLIMAGESDIR))
+LOCAL_COMPFLAGS	= -I $(CAMLIMAGESDIR)
 LOCAL_LINKFLAGS	= $(addprefix -ccopt -L, $(CLIBDIRS)) \
 		  $(addprefix -cclib -l, $(CLIBS)) \
 		  $(addprefix -cclib , $(LOCAL_LIBS))
@@ -67,13 +67,13 @@ all: byt bin doc
 byt: $(EXEC).byt
 
 $(EXEC).byt: $(COBJS) $(CMO_OBJS)
-	$(OCAMLC) $(BYT_COMPFLAGS) -custom $(CAMLINCLUDES) $(BYT_OBJS) \
+	$(OCAMLC) $(COMPFLAGS) $(LOCAL_COMPFLAGS) -custom $(BYT_OBJS) \
 		$(LOCAL_LINKFLAGS) -o $(EXEC).byt
 
 bin: $(EXEC).bin
 
 $(EXEC).bin: $(COBJS) $(CMX_OBJS)
-	$(OCAMLOPT) $(BIN_COMPFLAGS) $(CAMLINCLUDES) $(BIN_OBJS) \
+	$(OCAMLOPT) $(COMPFLAGS) $(LOCAL_COMPFLAGS) $(BIN_OBJS) \
 		$(LOCAL_LINKFLAGS) -o $(EXEC).bin
 
 doc:
@@ -139,12 +139,12 @@ config.ml: config.ml.in Makefile.config
 .SUFFIXES: .ml .mli .cmo .cmi .cmx .c .o
 
 .mli.cmi:
-	$(OCAMLC) $(BYT_COMPFLAGS) $(CAMLINCLUDES) -c $<
+	$(OCAMLC) $(COMPFLAGS) $(LOCAL_COMPFLAGS) -c $<
 
 .ml.cmo:
-	$(OCAMLC) $(BYT_COMPFLAGS) $(CAMLINCLUDES) -c $<
+	$(OCAMLC) $(COMPFLAGS) $(LOCAL_COMPFLAGS) -c $<
 
 .ml.cmx:
-	$(OCAMLOPT) $(BIN_COMPFLAGS) $(CAMLINCLUDES) -c $<
+	$(OCAMLOPT) $(COMPFLAGS) $(LOCAL_COMPFLAGS) -c $<
 
 include .depend
