@@ -209,7 +209,8 @@ if test -n "$GS" ; then
 fi
 AC_SUBST(HAVE_GS)
 
-AC_OUTPUT(Makefile.config)
+AC_CONFIG_FILES([Makefile.config])
+AC_OUTPUT()
 
 cat <<EOF
 Configuration summary
