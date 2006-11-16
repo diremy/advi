@@ -37,6 +37,7 @@ MLMODULES	= $(MISC) $(OPTIONS) $(GRAPHICS) \
 CMODULES  = events grwm grY11
 
 MLFILES = $(addsuffix .ml, $(MLMODULES))
+CFILES	= $(addsuffix .ml, $(CMODULES))
 
 LIBRARIES = graphics unix str $(CAMLIMAGESLIBS)
 CLIBS	  = graphics unix str
@@ -117,7 +118,7 @@ clean:
 
 .depend:: Makefile
 	$(OCAMLDEP) *.mli $(MLFILES) > .depend
-	$(CC) -MM -I$(OCAMLLIB) $(CFLAGS) $(LOCAL_CFLAGS) $(COBJS:.o=.c) \
+	$(CC) -MM -I$(OCAMLLIB) $(CFLAGS) $(LOCAL_CFLAGS) $(CFILES) \
 		| sed -e 's|$(OCAMLLIB)/[^ ]*||' >> .depend
 	chmod a+w .depend
 
