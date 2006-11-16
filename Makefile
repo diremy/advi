@@ -52,8 +52,7 @@ CMXA_OBJS = $(addsuffix .cmxa, $(LIBRARIES))
 BYT_OBJS = $(COBJS) $(CMA_OBJS) $(CMO_OBJS)
 BIN_OBJS = $(COBJS) $(CMXA_OBJS) $(CMX_OBJS)
 
-BYTCCCOMPOPTS	= -fno-defer-pop -Wall -Wno-unused
-LOCAL_CFLAGS	= $(XINERAMA_CFLAGS) $(X_CFLAGS) -O $(BYTCCCOMPOPTS)
+LOCAL_CFLAGS	= $(XINERAMA_CFLAGS) $(X_CFLAGS)
 LOCAL_LIBS	= $(X_LIBS) $(X_PRE_LIBS) $(XINERAMA_LIBS) -lX11 $(X_EXTRA_LIBS)
 
 CAMLINCLUDES  = $(addprefix -I , $(CAMLIMAGESDIR))
@@ -118,7 +117,7 @@ clean:
 
 .depend:: Makefile
 	$(OCAMLDEP) *.mli $(MLFILES) > .depend
-	$(CC) -MM -I$(OCAMLLIB) $(LOCAL_CFLAGS) $(COBJS:.o=.c) \
+	$(CC) -MM -I$(OCAMLLIB) $(CFLAGS) $(LOCAL_CFLAGS) $(COBJS:.o=.c) \
 		| sed -e 's|$(OCAMLLIB)/[^ ]*||' >> .depend
 	chmod a+w .depend
 
@@ -134,7 +133,7 @@ config.ml: config.ml.in Makefile.config
 	mv $@.tmp $@
 
 .c.o:
-	$(OCAMLC) -ccopt "$(LOCAL_CFLAGS)" -c $<
+	$(OCAMLC) -ccopt "$(CFLAGS) $(LOCAL_CFLAGS)" -c $<
 
 .SUFFIXES: .ml .mli .cmo .cmi .cmx .c .o
 
