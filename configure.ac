@@ -13,59 +13,34 @@ AC_SUBST(OCAMLVERSION)
 # Checks other programs
 AC_PROG_CC
 
-# Checking CamlImages
-CAMLIMAGESDIR=$OCAMLLIB/camlimages
-
-AC_MSG_CHECKING(for camlimages)
-AC_ARG_WITH(
-    camlimages,
-    AC_HELP_STRING(
-	[--with-camlimages=dir],
-	[specify camlimages library directory]
-    ),
-    if test "$withval" != "no" ; then  
-	CAMLIMAGESDIR=$withval
-    else
-	AC_MSG_RESULT(no)
-	CAMLIMAGESDIR=nope
-    fi
-)
-
-if test -f $CAMLIMAGESDIR/ci_ps.cma; then
-    AC_MSG_RESULT(found)
-    CAMLIMAGES_VERSION=`grep VERSION $CAMLIMAGESDIR/Makefile.config | sed -e 's/VERSION=//'`
-    if test `expr $CAMLIMAGES_VERSION \>= 2.11` = "1"; then
-	HAVE_CAMLIMAGES="true"
-	CAMLIMAGESCONFIGINCLUDE="include $CAMLIMAGESDIR/Makefile.config"
-	CAMLIMAGESLIBS='$(WITH_CAMLIMAGES:.cma=)'
-    else
-	AC_MSG_RESULT(found, but bit too old)
-	echo "***************** Error *******************"
-	echo "camlimages is found in the directory \"$CAMLIMAGESDIR\"",
-	echo "but bit too old. (make sure install the latest version 2.10)"
-	echo "*******************************************"
-	HAVE_CAMLIMAGES="false"
-	CAMLIMAGESLIBS=""
-	exit 1
-    fi
-else
-    AC_MSG_RESULT(not found, or too old)
-    echo "***************** Error *******************"
-    echo "camlimages is not found or incomplete in the directory \"$CAMLIMAGESDIR\""
-    echo "(make sure install the latest version 2.10)"
-    echo "*******************************************"
-    HAVE_CAMLIMAGES="false"
-    CAMLIMAGESLIBS=""
-    exit 1
+# check for ocamlfind
+AC_PATH_PROG(OCAMLFIND, ocamlfind)
+if test -z "$OCAMLFIND"; then
+    AC_MSG_ERROR([ocamlfind not found, check your PATH])
 fi
-AC_SUBST(CAMLIMAGESDIR)
-AC_SUBST(CAMLIMAGESCONFIGINCLUDE)
-AC_SUBST(HAVE_CAMLIMAGES)
-AC_SUBST(CAMLIMAGESLIBS)
+
+# Checking CamlImages
+AC_MSG_CHECKING([for camlimages])
+CAMLIMAGES_VERSION=`$OCAMLFIND query -format '%v' camlimages`
+if test -z "$CAMLIMAGES_VERSION"; then
+    AC_MSG_RESULT([no])
+    AC_MSG_ERROR([you need camlimages, with minimal 3.0.0 version])
+else
+    AC_MSG_RESULT([yes])
+fi
+
+CAMLIMAGES_INCLUDES=`$OCAMLFIND query -i-format -separator ' ' -recursive camlimages`
+CAMLIMAGES_LIBS_NATIVE=`$OCAMLFIND query -a-format -separator ' ' -recursive -predicates native camlimages`
+CAMLIMAGES_LIBS_BYTE=`$OCAMLFIND query -a-format -separator ' ' -recursive -predicates byte camlimages`
+
+AC_SUBST(CAMLIMAGES_INCLUDES)
+AC_SUBST(CAMLIMAGES_LIBS_NATIVE)
+AC_SUBST(CAMLIMAGES_LIBS_BYTE)
 
 # conditional install target
+AC_MSG_CHECKING([for version of advi to build])
 if test -n "$OCAMLOPT"; then
-    if test -f "$CAMLIMAGESDIR/ci_ps.cmxa"; then
+    if test -n "$CAMLIMAGES_LIBS_NATIVE"; then
 	INSTALLEXEC="installbin"
     else
 	echo "**************** Warning ******************"
