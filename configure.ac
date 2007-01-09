@@ -38,7 +38,6 @@ AC_SUBST(CAMLIMAGES_LIBS_NATIVE)
 AC_SUBST(CAMLIMAGES_LIBS_BYTE)
 
 # conditional install target
-AC_MSG_CHECKING([for version of advi to build])
 if test -n "$OCAMLOPT"; then
     if test -n "$CAMLIMAGES_LIBS_NATIVE"; then
 	INSTALLEXEC="installbin"
@@ -57,25 +56,21 @@ fi
 AC_SUBST(INSTALLEXEC)
 
 # Checking LablTk
-LABLTKDIR=$OCAMLLIB/labltk
-
-AC_MSG_CHECKING(for labltk)
-
-if test -f $LABLTKDIR/cTk.cmi; then
-    AC_MSG_RESULT(found)
-    HAVE_LABLTK="true"
-    LABLTKLIB=$LABLTKDIR/labltk.cma
+AC_MSG_CHECKING([for labltk])
+LABLTK_VERSION=`$OCAMLFIND query -format '%v' labltk`
+if test -z "$LABLTK_VERSION"; then
+    AC_MSG_RESULT([no])
 else
-    AC_MSG_RESULT(no)
-    HAVE_LABLTK="false"
-    echo "***************** Warning *******************"
-    echo "Your labltk library is too old. Use the latest one,"
-    echo "found in the O'Caml CVS tree"
-    echo "*******************************************"
+    AC_MSG_RESULT([yes])
 fi
-AC_SUBST(HAVE_LABLTK)
-AC_SUBST(LABLTKDIR)
-AC_SUBST(LABLTKLIB)
+
+LABLTK_INCLUDES=`$OCAMLFIND query -i-format -separator ' ' -recursive labltk`
+LABLTK_LIBS_NATIVE=`$OCAMLFIND query -a-format -separator ' ' -recursive -predicates native labltk`
+LABLTK_LIBS_BYTE=`$OCAMLFIND query -a-format -separator ' ' -recursive -predicates byte labltk`
+
+AC_SUBST(LABLTK_INCLUDES)
+AC_SUBST(LABLTK_LIBS_NATIVE)
+AC_SUBST(LABLTK_LIBS_BYTE)
 
 # checking for X
 AC_PATH_XTRA
