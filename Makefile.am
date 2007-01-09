@@ -17,7 +17,6 @@
 #*********************************************************************#
 
 # $Id$
-include Makefile.config
 
 MISC	 = config misc timeout ageometry
 OPTIONS	 = options rc userfile
@@ -39,16 +38,16 @@ CMODULES  = events grwm grY11
 MLFILES = $(addsuffix .ml, $(MLMODULES))
 CFILES	= $(addsuffix .ml, $(CMODULES))
 
-LIBRARIES = graphics unix str $(CAMLIMAGESLIBS)
-CLIBS	  = graphics unix str
+MLLIBS = graphics unix str $(CAMLIMAGESLIBS)
+CLIBS  = graphics unix str
 
 COBJS     = $(addsuffix .o, $(CMODULES))
 
 CMO_OBJS  = $(addsuffix .cmo, $(MLMODULES))
 CMX_OBJS  = $(addsuffix .cmx, $(MLMODULES))
 
-CMA_OBJS  = $(addsuffix .cma, $(LIBRARIES))
-CMXA_OBJS = $(addsuffix .cmxa, $(LIBRARIES))
+CMA_OBJS  = $(addsuffix .cma, $(MLLIBS))
+CMXA_OBJS = $(addsuffix .cmxa, $(MLLIBS))
 
 BYT_OBJS = $(COBJS) $(CMA_OBJS) $(CMO_OBJS)
 BIN_OBJS = $(COBJS) $(CMXA_OBJS) $(CMX_OBJS)
@@ -60,6 +59,8 @@ LOCAL_COMPFLAGS	= -I $(CAMLIMAGESDIR)
 LOCAL_LINKFLAGS	= $(addprefix -ccopt -L, $(CLIBDIRS)) \
 		  $(addprefix -cclib -l, $(CLIBS)) \
 		  $(addprefix -cclib , $(LOCAL_LIBS))
+
+SUBDIRS = doc
 
 
 all: byt bin doc
@@ -133,10 +134,8 @@ config.ml: config.ml.in Makefile.config
 		$< > $@.tmp
 	mv $@.tmp $@
 
-.c.o:
-	$(OCAMLC) -ccopt "$(CFLAGS) $(LOCAL_CFLAGS)" -c $<
 
-.SUFFIXES: .ml .mli .cmo .cmi .cmx .c .o
+SUFFIXES = .ml .mli .cmo .cmi .cmx .c .o
 
 .mli.cmi:
 	$(OCAMLC) $(COMPFLAGS) $(LOCAL_COMPFLAGS) -c $<
@@ -147,4 +146,8 @@ config.ml: config.ml.in Makefile.config
 .ml.cmx:
 	$(OCAMLOPT) $(COMPFLAGS) $(LOCAL_COMPFLAGS) -c $<
 
-include .depend
+.c.o:
+	$(OCAMLC) -ccopt "$(CFLAGS) $(LOCAL_CFLAGS)" -c $<
+
+# ugly stuff for make time include
+@AMDEP_TRUE@@am__include@ @am__quote@.depend@am__quo

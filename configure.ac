@@ -3,6 +3,7 @@ AC_PREREQ(2.59)
 AC_INIT(advi, 1.7.0, Pierre.Weis@inria.fr)
 BUILD_DATE=`date +%Y-%m-%d`
 AC_SUBST(BUILD_DATE)
+AM_INIT_AUTOMAKE([foreign])
 
 # Checking ocaml
 AC_PROG_OCAML()
@@ -11,9 +12,6 @@ AC_SUBST(OCAMLVERSION)
 
 # Checks other programs
 AC_PROG_CC
-AC_PROG_MAKE_SET
-AC_PROG_INSTALL
-
 
 # Checking CamlImages
 CAMLIMAGESDIR=$OCAMLLIB/camlimages
@@ -209,7 +207,7 @@ if test -n "$GS" ; then
 fi
 AC_SUBST(HAVE_GS)
 
-AC_CONFIG_FILES([Makefile.config])
+AC_CONFIG_FILES([Makefile])
 AC_OUTPUT()
 
 cat <<EOF
