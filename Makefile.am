@@ -48,15 +48,7 @@ OCAMLBYTOBJS    = $(OCAMLBUILTSOURCES:.ml=.cmo) $(OCAMLSOURCES:.ml=.cmo)
 OCAMLOPTOBJS    = $(OCAMLBUILTSOURCES:.ml=.cmx) $(OCAMLSOURCES:.ml=.cmx)
 COBJS           = $(CSOURCES:.c=.o)
 
-MLLIBS = graphics unix str $(CAMLIMAGESLIBS)
-CLIBS  = graphics unix str
-
-CMA_OBJS  = $(addsuffix .cma, $(MLLIBS))
-CMXA_OBJS = $(addsuffix .cmxa, $(MLLIBS))
-
 AM_CFLAGS	= $(XINERAMA_CFLAGS) $(X_CFLAGS)
-AM_LIBS		= $(X_LIBS) $(X_PRE_LIBS) $(XINERAMA_LIBS) -lX11 $(X_EXTRA_LIBS)
-
 AM_COMPFLAGS	= $(CAMLIMAGES_INCLUDES) $(LABLTK_INCLUDES)
 
 OTHER_LIBS	= unix str
