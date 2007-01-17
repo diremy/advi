@@ -58,9 +58,6 @@ AM_CFLAGS	= $(XINERAMA_CFLAGS) $(X_CFLAGS)
 AM_LIBS		= $(X_LIBS) $(X_PRE_LIBS) $(XINERAMA_LIBS) -lX11 $(X_EXTRA_LIBS)
 
 AM_COMPFLAGS	= $(CAMLIMAGES_INCLUDES) $(LABLTK_INCLUDES)
-AM_LINKFLAGS	= $(addprefix -ccopt -L, $(CLIBDIRS)) \
-		  $(addprefix -cclib -l, $(CLIBS)) \
-		  $(addprefix -cclib , $(AM_LIBS))
 
 OTHER_LIBS	= unix str
 OCAMLLIBS_OPT	= $(CAMLIMAGES_LIBS_NATIVE) $(OTHER_LIBS:=.cmxa)
@@ -75,7 +72,7 @@ opt: advi.opt$(EXEC)
 advi.byt$(EXEEXT): $(COBJS) $(OCAMLBYTOBJS)
 	$(OCAMLC) -o advi.byt$(EXEEXT) \
 		$(COMPFLAGS) $(AM_COMPFLAGS) $(AM_LINKFLAGS) -custom \
-		$(OCAMLLIBS_BYT) $(OCAMLBYTOBJS)
+		$(COBJS) $(OCAMLLIBS_BYT) $(OCAMLBYTOBJS)
 
 advi.opt$(EXEEXT): $(COBJS) $(OCAMLOPTOBJS)
 	$(OCAMLOPT) -o advi.opt$(EXEEXT) \
