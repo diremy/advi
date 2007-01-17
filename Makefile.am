@@ -62,6 +62,10 @@ AM_LINKFLAGS	= $(addprefix -ccopt -L, $(CLIBDIRS)) \
 		  $(addprefix -cclib -l, $(CLIBS)) \
 		  $(addprefix -cclib , $(AM_LIBS))
 
+OTHER_LIBS	= unix str
+OCAMLLIBS_OPT	= $(CAMLIMAGES_LIBS_NATIVE) $(OTHER_LIBS:=.cmxa)
+OCAMLLIBS_BYT	= $(CAMLIMAGES_LIBS_BYTE) $(OTHER_LIBS:=.cma)
+
 all: byt opt
 
 byt: advi.byt$(EXEEXT)
@@ -71,12 +75,12 @@ opt: advi.opt$(EXEC)
 advi.byt$(EXEEXT): $(OCAMLBYTOBJS)
 	$(OCAMLC) -o advi.byt$(EXEEXT) \
 		$(COMPFLAGS) $(AM_COMPFLAGS) $(AM_LINKFLAGS) -custom \
-		$(OCAMLBYTOBJS)
+		$(OCAMLLIBS_BYT) $(OCAMLBYTOBJS)
 
 advi.opt$(EXEEXT): $(OCAMLOPTOBJS)
 	$(OCAMLOPT) -o advi.opt$(EXEEXT) \
 		$(COMPFLAGS) $(AM_COMPFLAGS) $(AM_LINKFLAGS) \
-		$(OCAMLOPTOBJS
+		$(OCAMLLIBS_OPT) $(OCAMLOPTOBJS)
 
 install_hook: $(INSTALLEXEC) installdata
 	- texhash
