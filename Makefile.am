@@ -75,10 +75,10 @@ install_hook: $(INSTALLEXEC) installdata
 	  echo '***********************' ;\
 	fi
 
-.depend: $(OCAMLSOURCES) 
+.depend: $(OCAMLSOURCES) config.status
 	$(OCAMLDEP) $(OCAMLSOURCES) $(OCAMLINTERFACES) > .depend
 
-config.ml: config.ml.in Makefile
+config.ml: config.ml.in config.status
 	rm -f $@ $@.tmp
 	sed \
 		-e 's,@VERSION\@,$(VERSION),g' \
