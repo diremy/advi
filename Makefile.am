@@ -72,15 +72,15 @@ byt: advi.byt$(EXEEXT)
 
 opt: advi.opt$(EXEC)
 
-advi.byt$(EXEEXT): $(OCAMLBYTOBJS)
+advi.byt$(EXEEXT): $(COBJS) $(OCAMLBYTOBJS)
 	$(OCAMLC) -o advi.byt$(EXEEXT) \
 		$(COMPFLAGS) $(AM_COMPFLAGS) $(AM_LINKFLAGS) -custom \
 		$(OCAMLLIBS_BYT) $(OCAMLBYTOBJS)
 
-advi.opt$(EXEEXT): $(OCAMLOPTOBJS)
+advi.opt$(EXEEXT): $(COBJS) $(OCAMLOPTOBJS)
 	$(OCAMLOPT) -o advi.opt$(EXEEXT) \
 		$(COMPFLAGS) $(AM_COMPFLAGS) $(AM_LINKFLAGS) \
-		$(OCAMLLIBS_OPT) $(OCAMLOPTOBJS)
+		$(COBJS) $(OCAMLLIBS_OPT) $(OCAMLOPTOBJS)
 
 install_hook: $(INSTALLEXEC) installdata
 	- texhash
