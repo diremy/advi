@@ -37,24 +37,6 @@ AC_SUBST(CAMLIMAGES_INCLUDES)
 AC_SUBST(CAMLIMAGES_LIBS_NATIVE)
 AC_SUBST(CAMLIMAGES_LIBS_BYTE)
 
-# conditional install target
-if test -n "$OCAMLOPT"; then
-    if test -n "$CAMLIMAGES_LIBS_NATIVE"; then
-	INSTALLEXEC="installbin"
-    else
-	echo "**************** Warning ******************"
-	echo "You have the ocamlopt compiler, but you have no"
-	echo "native-code version of camlimages library installed."
-	echo "Without it, we cannot compile the native-code"
-	echo "version of advi, which we strongly recommend."
-	echo "*******************************************"
-	INSTALLEXEC="installbyte"
-    fi
-else
-    INSTALLEXEC="installbyte"
-fi
-AC_SUBST(INSTALLEXEC)
-
 # Checking LablTk
 AC_MSG_CHECKING([for labltk])
 LABLTK_VERSION=`$OCAMLFIND query -format '%v' labltk`
@@ -71,6 +53,17 @@ LABLTK_LIBS_BYTE=`$OCAMLFIND query -a-format -separator ' ' -recursive -predicat
 AC_SUBST(LABLTK_INCLUDES)
 AC_SUBST(LABLTK_LIBS_NATIVE)
 AC_SUBST(LABLTK_LIBS_BYTE)
+
+# conditional install target
+AC_MSG_CHECKING([wether to build either native or bytecode version])
+if test -n "$OCAMLOPT" && test -n "$CAMLIMAGES_LIBS_NATIVE"; then
+    AC_MSG_RESULT([native])
+    build_opt=true
+else
+    AC_MSG_RESULT([bytecode])
+    build_opt=false
+fi
+AM_CONDITIONAL(BUILD_OPT, test x$build_opt = xtrue)
 
 # checking for X
 AC_PATH_XTRA
