@@ -37,23 +37,6 @@ AC_SUBST(CAMLIMAGES_INCLUDES)
 AC_SUBST(CAMLIMAGES_LIBS_NATIVE)
 AC_SUBST(CAMLIMAGES_LIBS_BYTE)
 
-# Checking LablTk
-AC_MSG_CHECKING([for labltk])
-LABLTK_VERSION=`$OCAMLFIND query -format '%v' labltk`
-if test -z "$LABLTK_VERSION"; then
-    AC_MSG_RESULT([no])
-else
-    AC_MSG_RESULT([yes])
-fi
-
-LABLTK_INCLUDES=`$OCAMLFIND query -i-format -separator ' ' -recursive labltk`
-LABLTK_LIBS_NATIVE=`$OCAMLFIND query -a-format -separator ' ' -recursive -predicates native labltk`
-LABLTK_LIBS_BYTE=`$OCAMLFIND query -a-format -separator ' ' -recursive -predicates byte labltk`
-
-AC_SUBST(LABLTK_INCLUDES)
-AC_SUBST(LABLTK_LIBS_NATIVE)
-AC_SUBST(LABLTK_LIBS_BYTE)
-
 # conditional install target
 AC_MSG_CHECKING([wether to build either native or bytecode version])
 if test -n "$OCAMLOPT" && test -n "$CAMLIMAGES_LIBS_NATIVE"; then
