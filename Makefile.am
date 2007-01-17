@@ -89,20 +89,23 @@ config.ml: config.ml.in config.status
 		$< > $@.tmp
 	mv $@.tmp $@
 
-
 SUFFIXES = .ml .mli .cmo .cmi .cmx .c .o
 
-.mli.cmi:
-	$(OCAMLC) $(COMPFLAGS) $(AM_COMPFLAGS) -c $<
-
 .ml.cmo:
-	$(OCAMLC) $(COMPFLAGS) $(AM_COMPFLAGS) -c $<
+	$(OCAMLC) $(COMPFLAGS) $(AM_COMPFLAGS) -o $@ -c $<
+
+.mli.cmi:
+	$(OCAMLC) $(COMPFLAGS) $(AM_COMPFLAGS) -o $@ -c $<
 
 .ml.cmx:
-	$(OCAMLOPT) $(COMPFLAGS) $(AM_COMPFLAGS) -c $<
+	$(OCAMLOPT) $(COMPFLAGS) $(AM_COMPFLAGS) -o $@ -c $<
 
-.c.o:
-	$(OCAMLC) -ccopt "$(CFLAGS) $(AM_CFLAGS)" -c $<
+.c.o: $(top_srcdir)/config.h
+	$(OCAMLC) -ccopt "-o $@ $(CFLAGS) $(AM_CFLAGS)" -c $< 
+
+# moving to $(srcdir) is needed in case of VPATH build
+.depend: $(OCAMLSOURCES) $(OCAMLINTERFACES) $(top_srcdir)/config.status
+	(cd $(srcdir) && $(OCAMLDEP) $(OCAMLSOURCES) $(OCAMLINTERFACES)) > .depend 
 
 # ugly stuff for make time include
 @AMDEP_TRUE@@am__include@ @am__quote@.depend@am__quote@
