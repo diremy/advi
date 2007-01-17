@@ -18,76 +18,67 @@
 
 # $Id$
 
-MISC	 = config misc timeout ageometry
-OPTIONS	 = options rc userfile
-GRAPHICS = graphicsY11 global_options busy gradient gterm launch \
-	   dvicolor shot laser_pointer
-SYMBOL	 = symbol
-DVI	 = input table pkfont ttfont jfm search \
-	   font glyph devfont units dimension dvi
-EFFECTS	 = drawimage gs transimpl embed grdev addons
-GUI	 = scratch cdvi driver thumbnails dviview main
+bin_PROGRAMS = advi.byt advi.opt
+OCAMLBUILTSOURCES = config.ml
+OCAMLSOURCES = misc.ml timeout.ml ageometry.ml \
+	       options.ml rc.ml userfile.ml \
+	       graphicsY11.ml global_options.ml busy.ml gradient.ml gterm.ml \
+	       launch.ml dvicolor.ml shot.ml laser_pointer.ml \
+	       symbol.ml \
+	       input.ml table.ml pkfont.ml ttfont.ml jfm.ml search.ml \
+	       font.ml glyph.ml devfont.ml units.ml dimension.ml dvi.ml \
+	       drawimage.ml gs.ml transimpl.ml embed.ml grdev.ml addons.ml \
+	       scratch.ml cdvi.ml driver.ml thumbnails.ml dviview.ml main.ml
+CSOURCES = events.c grwm.c grY11.c
+advi_opt_SOURCES = $(OCAMLSOURCES) $(CSOURCES)
+advi_byt_SOURCES = $(OCAMLSOURCES) $(CSOURCES)
 
-MLMODULES	= $(MISC) $(OPTIONS) $(GRAPHICS) \
-		  $(SYMBOL) $(DVI) \
-		  $(EFFECTS) \
-		  $(GUI)
+BUILT_SOURCES = $(OCAMLBUILTSOURCES)
 
-CMODULES  = events grwm grY11
+EXTRA_DIST = config.ml.in
 
-MLFILES = $(addsuffix .ml, $(MLMODULES))
-CFILES	= $(addsuffix .ml, $(CMODULES))
+CLEANFILES = $(OCAMLBYTOBJS) \
+             $(OCAMLOPTOBJS) \
+             $(OCAMLOPTOBJS:.cmx=.o) \
+             $(COBJS) \
+	     config.ml \
+	     .depend
+
+OCAMLBYTOBJS    = $(OCAMLBUILTSOURCES:.ml=.cmo) $(OCAMLSOURCES:.ml=.cmo)
+OCAMLOPTOBJS    = $(OCAMLBUILTSOURCES:.ml=.cmx) $(OCAMLSOURCES:.ml=.cmx)
+COBJS           = $(CSOURCES:.c=.o)
 
 MLLIBS = graphics unix str $(CAMLIMAGESLIBS)
 CLIBS  = graphics unix str
 
-COBJS     = $(addsuffix .o, $(CMODULES))
-
-CMO_OBJS  = $(addsuffix .cmo, $(MLMODULES))
-CMX_OBJS  = $(addsuffix .cmx, $(MLMODULES))
-
 CMA_OBJS  = $(addsuffix .cma, $(MLLIBS))
 CMXA_OBJS = $(addsuffix .cmxa, $(MLLIBS))
 
-BYT_OBJS = $(COBJS) $(CMA_OBJS) $(CMO_OBJS)
-BIN_OBJS = $(COBJS) $(CMXA_OBJS) $(CMX_OBJS)
+AM_CFLAGS	= $(XINERAMA_CFLAGS) $(X_CFLAGS)
+AM_LIBS		= $(X_LIBS) $(X_PRE_LIBS) $(XINERAMA_LIBS) -lX11 $(X_EXTRA_LIBS)
 
-LOCAL_CFLAGS	= $(XINERAMA_CFLAGS) $(X_CFLAGS)
-LOCAL_LIBS	= $(X_LIBS) $(X_PRE_LIBS) $(XINERAMA_LIBS) -lX11 $(X_EXTRA_LIBS)
-
-LOCAL_COMPFLAGS	= -I $(CAMLIMAGESDIR)
-LOCAL_LINKFLAGS	= $(addprefix -ccopt -L, $(CLIBDIRS)) \
+AM_COMPFLAGS	= $(CAMLIMAGES_INCLUDES) $(LABLTK_INCLUDES)
+AM_LINKFLAGS	= $(addprefix -ccopt -L, $(CLIBDIRS)) \
 		  $(addprefix -cclib -l, $(CLIBS)) \
-		  $(addprefix -cclib , $(LOCAL_LIBS))
+		  $(addprefix -cclib , $(AM_LIBS))
 
-SUBDIRS = doc
+all: byt opt
 
+byt: advi.byt$(EXEEXT)
 
-all: byt bin doc
+opt: advi.opt$(EXEC)
 
-byt: $(EXEC).byt
+advi.byt$(EXEEXT): $(OCAMLBYTOBJS)
+	$(OCAMLC) -o advi.byt$(EXEEXT) \
+		$(COMPFLAGS) $(AM_COMPFLAGS) $(AM_LINKFLAGS) -custom \
+		$(OCAMLBYTOBJS)
 
-$(EXEC).byt: $(COBJS) $(CMO_OBJS)
-	$(OCAMLC) $(COMPFLAGS) $(LOCAL_COMPFLAGS) -custom $(BYT_OBJS) \
-		$(LOCAL_LINKFLAGS) -o $(EXEC).byt
+advi.opt$(EXEEXT): $(OCAMLOPTOBJS)
+	$(OCAMLOPT) -o advi.opt$(EXEEXT) \
+		$(COMPFLAGS) $(AM_COMPFLAGS) $(AM_LINKFLAGS) \
+		$(OCAMLOPTOBJS
 
-bin: $(EXEC).bin
-
-$(EXEC).bin: $(COBJS) $(CMX_OBJS)
-	$(OCAMLOPT) $(COMPFLAGS) $(LOCAL_COMPFLAGS) $(BIN_OBJS) \
-		$(LOCAL_LINKFLAGS) -o $(EXEC).bin
-
-doc:
-	cd doc; $(MAKE) all
-
-veryclean: clean
-	rm -f config.cache config.log \
-	config.status config.ml
-
-veryveryclean: veryclean
-	rm -f configure
-
-install: $(INSTALLEXEC) installdata
+install_hook: $(INSTALLEXEC) installdata
 	- texhash
 	@ if test -z "`kpsewhich advi.sty`"; then \
 	  echo '*** NOTE BEFORE USE ***' ;\
@@ -96,37 +87,13 @@ install: $(INSTALLEXEC) installdata
 	  echo '***********************' ;\
 	fi
 
-installdata:
-	- $(INSTALL) -d $(DESTDIR)$(ADVI_LOC)
-	cd doc; $(MAKE) install
-	cd tex; $(MAKE) install
-	cd conf; $(MAKE) install
+.depend: $(OCAMLSOURCES) 
+	$(OCAMLDEP) $(OCAMLSOURCES) $(OCAMLINTERFACES) > .depend
 
-installbyt: $(EXEC).byte
-	- $(INSTALL) -d $(DESTDIR)$(bindir)
-	$(INSTALL) -m 755 $(EXEC).byte $(DESTDIR)$(bindir)/$(EXEC)
-
-installbin: $(EXEC).bin
-	- $(INSTALL) -d $(DESTDIR)$(bindir)
-	$(INSTALL) -m 755 $(EXEC).bin $(DESTDIR)$(bindir)/$(EXEC)
-
-clean:
-	$(RM) $(EXEC).bin $(EXEC).byt
-	$(RM) *.cm[oix] *.o *~ .depend *.log *.aux
-	cd test && $(MAKE) clean
-	cd doc && $(MAKE) clean
-	cd examples && $(MAKE) clean
-
-.depend:: Makefile
-	$(OCAMLDEP) *.mli $(MLFILES) > .depend
-	$(CC) -MM -I$(OCAMLLIB) $(CFLAGS) $(LOCAL_CFLAGS) $(CFILES) \
-		| sed -e 's|$(OCAMLLIB)/[^ ]*||' >> .depend
-	chmod a+w .depend
-
-config.ml: config.ml.in Makefile.config
+config.ml: config.ml.in Makefile
 	rm -f $@ $@.tmp
 	sed \
-		-e 's,@PACKAGE_VERSION\@,$(PACKAGE_VERSION),g' \
+		-e 's,@VERSION\@,$(VERSION),g' \
 		-e 's,@BUILD_DATE\@,$(BUILD_DATE),g' \
 		-e 's,@HAVE_GS\@,$(HAVE_GS),g' \
 		-e 's,@TEXMFMAIN\@,$(TEXMFMAIN),g' \
@@ -138,16 +105,16 @@ config.ml: config.ml.in Makefile.config
 SUFFIXES = .ml .mli .cmo .cmi .cmx .c .o
 
 .mli.cmi:
-	$(OCAMLC) $(COMPFLAGS) $(LOCAL_COMPFLAGS) -c $<
+	$(OCAMLC) $(COMPFLAGS) $(AM_COMPFLAGS) -c $<
 
 .ml.cmo:
-	$(OCAMLC) $(COMPFLAGS) $(LOCAL_COMPFLAGS) -c $<
+	$(OCAMLC) $(COMPFLAGS) $(AM_COMPFLAGS) -c $<
 
 .ml.cmx:
-	$(OCAMLOPT) $(COMPFLAGS) $(LOCAL_COMPFLAGS) -c $<
+	$(OCAMLOPT) $(COMPFLAGS) $(AM_COMPFLAGS) -c $<
 
 .c.o:
-	$(OCAMLC) -ccopt "$(CFLAGS) $(LOCAL_CFLAGS)" -c $<
+	$(OCAMLC) -ccopt "$(CFLAGS) $(AM_CFLAGS)" -c $<
 
 # ugly stuff for make time include
-@AMDEP_TRUE@@am__include@ @am__quote@.depend@am__quo
+@AMDEP_TRUE@@am__include@ @am__quote@.depend@am__quote@
