@@ -30,7 +30,8 @@ OCAMLSOURCES = misc.ml timeout.ml ageometry.ml \
 	       drawimage.ml gs.ml transimpl.ml embed.ml grdev.ml addons.ml \
 	       scratch.ml cdvi.ml driver.ml thumbnails.ml dviview.ml main.ml
 CSOURCES = events.c grwm.c grY11.c
-advi_SOURCES = $(OCAMLSOURCES) $(CSOURCES)
+CHEADERS = grwm.h  image.h  libgraph.h
+advi_SOURCES = $(OCAMLSOURCES) $(CSOURCES) $(CHEADERS)
 
 BUILT_SOURCES = $(OCAMLBUILTSOURCES)
 
