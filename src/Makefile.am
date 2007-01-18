@@ -38,7 +38,7 @@ OCAMLINTERFACES = misc.mli timeout.mli ageometry.mli \
 		  input.mli table.mli pkfont.mli ttfont.mli jfm.mli \
 		  search.mli \
 		  font.mli glyph.mli devfont.mli units.mli dimension.mli \
-		  dvi.mli \
+		  dvi.mli dvicommands.mli \
 		  drawimage.mli gs.mli transitions.mli embed.mli grdev.mli \
 		  addons.mli \
 		  scratch.mli cdvi.mli driver.mli thumbnails.mli dviview.mli
