@@ -17,7 +17,10 @@
 
 # $Id$
 
-include ../Makefile.config
+man_MANS = advi.1
+
+EXTRA_DIST = advi.man
+CLEANFILES = advi.1
 
 # various flags
 TEX_ENV		= TEXINPUTS=.:../tex:$(TEXINPUTS)
@@ -48,19 +51,8 @@ LATEX_FILES	= splash.dvi splash.ps \
 
 ALL_DOC_FILES	= @ALL_DOC_FILES@
 
-all: $(ALL_DOC_FILES) ../Makefile.config
-
-install: $(ALL_DOC_FILES)
-	$(INSTALL) -m 644 $(HELP_FILES) $(DESTDIR)$(ADVI_LOC)
-	- $(INSTALL) -d $(DESTDIR)$(mandir)/man$(MANEXT)
-	$(INSTALL) -m 644 $(MAN_FILES) $(DESTDIR)$(mandir)/man$(MANEXT)
-
-clean:
-	$(RM) $(ALL_DOC_FILES)
-	$(RM) *~ *.out
-	$(RM) *.aux *.log *.dvi *.toc *.ps
-	$(RM) *.pdf *.pdfm
-	$(RM) *.haux *.htoc *.ima
+#install: $(ALL_DOC_FILES)
+#	$(INSTALL) -m 644 $(HELP_FILES) $(DESTDIR)$(ADVI_LOC)
 
 manual.dvi: ../tex/advi.sty manual.sty splash_contents.tex \
        scratch_write_splash_contents.tex scratch_draw_splash_contents.tex
@@ -71,12 +63,11 @@ scratch_draw_splash.dvi: scratch_draw_splash_contents.tex
 manual.html: manual.tex manual.sty macros.hva 
 advi_remote.html: advi_remote.tex manual.sty macros.hva 
 
-.SUFFIXES:
-.SUFFIXES: .tex .dvi .advi .ps .pdf .pdfm .html .htm .ima .man .1
+SUFFIXES = .tex .dvi .advi .ps .pdf .pdfm .html .htm .ima .man .1
 
+# To avoid default hypertex.cfg if it exists.
+# Active-DVI really needs the hypertex driver...
 .tex.dvi:
-	# To avoid default hypertex.cfg if it exists.
-	# Active-DVI really needs the hypertex driver...
 	$(TEX_ENV) $(LATEX) '\def\driver{hypertex}\input' $<
 	$(TEX_ENV) $(LATEX) '\def\driver{hypertex}\input' $<
 	$(TEX_ENV) $(LATEX) '\def\driver{hypertex}\input' $<
@@ -115,5 +106,5 @@ advi_remote.html: advi_remote.tex manual.sty macros.hva
 .htm.html:
 	$(HTMLC) $(HTMLC_FLAGS) -f $< -t $@
 
-.man.1:
+.man.1: $(top_srcdir)/config.status
 	$(HTMLC) $(HTMLC_FLAGS) -f $< -t $@
