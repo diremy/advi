@@ -54,6 +54,10 @@ EXTRA_DIST = config.ml.in
 CLEANFILES = $(OCAMLBYTOBJS) \
 	     $(OCAMLOPTOBJS) \
 	     $(OCAMLOPTOBJS:.cmx=.o) \
+	     $(OCAMLBUILTSOURCES:.ml=.cmi) \
+	     $(OCAMLSOURCES:.ml=.cmi) \
+	     dvicommands.cmi \
+	     transitions.cmi \
 	     $(COBJS) \
 	     config.ml \
 	     .depend
