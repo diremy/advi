@@ -3,6 +3,8 @@ PREREQUISITES
 
 You need Objective Caml 3.04 or higher to compile the sources.
 
+You need camlimages 3.0.0 or higher.
+
 You also need the `kpsewhich' utility of the `kpathsea' library
 provided by many TeX distributions.
 
@@ -19,22 +21,30 @@ drawing of the TeX glyphs and postscript graphics.
 COMPILATION AND INSTALLATION
 ============================
 
-1. Configure using
-   "./configure" (then edit the Makefile if necessary)
+Use the standard procedure:
+./configure && make && sudo make install
 
-2. Compile with "make". It creates a binary file "advi".
-   If your platform supports native compilation, you can also do
-   "make opt", which creates a (faster) binary "advi.opt"
-   (this is highly recommended).
+Use ./configure --help for various options
 
-3. Install the files by running make install.
-   Alternatively:
-   * Install the binary(ies) by hand, by simply copying it (them) to the
+Alternatively:
+* Install the binary by hand, by simply copying it (them) to the
    appropriate directory.
-   * Copy the files advi.sty to a place where it is a visible latex package.
-   (kpsewhich advi.sty should succeed from where LaTeX is run)
-   * Copy the file advi.pro to a place where is it a visible PS header.
+* Copy the files advi.sty to a place where it is a visible latex package.
+  (kpsewhich advi.sty should succeed from where LaTeX is run)
+* Copy the file advi.pro to a place where is it a visible PS header.
    (kpsewhich advi.pro should succeed from where advi is run)
+
+Generating build scripts
+------------------------
+This is only needed if you're using CVS version directly.
+
+  * make sure ocaml autoconf macros, available from bazar-ocaml/autoconf
+   directory, are present in aclocal macro search path, by any of the following 
+   solution:
+   - export ACLOCAL='aclocal -I <directory>' before invoking autoreconf
+   - set up a dirlist file in automake macro directory, as explained in aclocal
+     documentation
+  * run autoreconf -i
 
 JAPANESE USERS
 ==============
