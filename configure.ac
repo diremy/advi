@@ -77,22 +77,27 @@ if test -z "$KPSEXPAND"; then
 fi
 
 AC_MSG_CHECKING([TeX root path])
-TEXMFMAIN=`$KPSEXPAND '$TEXMFMAIN'`
-AC_MSG_RESULT([$TEXMFMAIN])
-if test -z "$TEXMFMAIN"; then
+texdir=`$KPSEXPAND '$TEXMFMAIN'`
+AC_MSG_RESULT([$texdir])
+if test -z "$texdir"; then
     AC_MSG_ERROR([no TeX root path found, check your setup])
 fi
 
 AC_MSG_CHECKING([LaTeX root path])
-if test -d "$TEXMFMAIN/tex/latex"; then
-    AC_MSG_RESULT([$TEXMFMAIN/tex/latex])
-    ADVI_LOC="$TEXMFMAIN/tex/latex/advi"
+if test -d "$texdir/tex/latex"; then
+    AC_MSG_RESULT([$texdir/tex/latex])
+    # this ugly stuff, shamelessly stolen from lispdir computation, is supposed
+    # to find latex resources installation directory expressed in term of prefix
+    # the ugly @<:@^\/@:>@ is meant to express [^\/] regexp
+    latexdir=`echo $texdir/tex/latex | sed -n \
+	-e 's,/$,,' \
+	-e '/.*\/lib\/@<:@^\/@:>@*\/tex\/latex$/{s,.*/lib/\(@<:@^\/@:>@*\/tex\/latex\)$,${libdir}/\1,;p;q;}' \
+	-e '/.*\/share\/@<:@^\/@:>@*\/tex\/latex$/{s,.*/share/\(@<:@^\/@:>@*\/tex\/latex\),${datadir}/\1,;p;q;}'`
 else 
     AC_MSG_RESULT([not found])
     AC_MSG_ERROR([no LaTeX root path found, check your setup])
 fi
-AC_SUBST(TEXMFMAIN)
-AC_SUBST(ADVI_LOC)
+AC_SUBST(latexdir)
 
 # Checking LaTeX
 AC_PATH_PROG([LATEX], [latex])
@@ -153,7 +158,7 @@ if test -n "$GS" ; then
 fi
 AC_SUBST(HAVE_GS)
 
-AC_CONFIG_FILES([Makefile src/Makefile doc/Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile tex/Makefile])
 AC_OUTPUT()
 
 cat <<EOF
