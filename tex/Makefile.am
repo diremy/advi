@@ -17,13 +17,17 @@
 
 # $Id$
 
-include ../Makefile.config
+pkglatexdir = $(latexdir)/advi
+pkglatex_DATA = advi-annot.sty \
+		advi-slides.sty \
+		argv.sty \
+		superpose.sty \
+                advi-graphicx.sty \
+		advi.sty \
+		bubble.sty \
+		xwindows-colors.sty \
+		advilogo.eps \
+		bar.eps \
+		caml.eps
 
-STYFILES = advi-annot.sty advi-slides.sty argv.sty superpose.sty \
-    advi-graphicx.sty advi.sty bubble.sty xwindows-colors.sty
-
-EPSFILES = advilogo.eps bar.eps caml.eps
-
-install:
-	$(INSTALL) -m 644 $(EPSFILES) $(STYFILES) $(DESTDIR)$(ADVI_LOC)
-
+EXTRA_DIST = $(pkglatex_DATA)
