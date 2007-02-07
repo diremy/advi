@@ -42,13 +42,17 @@ HTMSOURCES = index.htm \
 	     faq-eng.htm faq-fra.htm \
 	     screen-shots-fra.htm screen-shots-eng.htm
 
+# distributing produced files remove dependencies
+# on Hevea, HTMLC and dvipdfm
 EXTRA_DIST = advi.man \
 	     manual.sty \
 	     manual.hva \
 	     macros.hva \
 	     $(TEXSOURCES) \
 	     $(HTMSOURCES) \
-	     includes
+	     includes \
+	     $(man_MANS) \
+	     $(html_DATA)
 
 dist-hook:
 	rm -rf $(distdir)/includes/CVS
