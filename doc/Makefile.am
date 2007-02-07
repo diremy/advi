@@ -18,41 +18,65 @@
 # $Id$
 
 man_MANS = advi.1
+dvi_DATA = manual.dvi
+pdf_DATA = manual.pdf
+ps_DATA  = manual.ps
+html_DATA = manual.html \
+	    index.html \
+	    fra.html eng.html \
+	    faq-eng.html faq-fra.html \
+	    screen-shots-fra.html screen-shots-eng.html
 
-EXTRA_DIST = advi.man
-CLEANFILES = advi.1
+TEXSOURCES = advi_remote.tex \
+	     argv.tex \
+	     manual.tex \
+	     scratch_draw_splash.tex \
+	     scratch_write_splash.tex \
+	     scratch_draw_splash_contents.tex \
+	     scratch_write_splash_contents.tex \
+	     splash.tex \
+	     splash_contents.tex
+
+HTMSOURCES = index.htm \
+	     fra.htm eng.htm \
+	     faq-eng.htm faq-fra.htm \
+	     screen-shots-fra.htm screen-shots-eng.htm
+
+EXTRA_DIST = advi.man \
+	     manual.sty \
+	     manual.hva \
+	     macros.hva \
+	     $(TEXSOURCES) \
+	     $(HTMSOURCES) \
+	     includes
+
+dist-hook:
+	rm -rf $(distdir)/includes/CVS
+
+CLEANFILES = $(man_MANS) $(dvi_DATA) $(pdf_DATA) $(ps_DATA) $(html_DATA) \
+	     $(TEXSOURCES:.tex=.log) \
+	     $(TEXSOURCES:.tex=.aux) \
+	     $(TEXSOURCES:.tex=.out) \
+	     manual.idx \
+	     manual.toc \
+	     manual.haux \
+	     manual.htoc \
+	     manual.hind \
+	     manual.image.tex \
+	      manual.bdvi \
+	     manual001.gif \
+	     manual002.gif
+
 
 # various flags
-TEX_ENV		= TEXINPUTS=.:../tex:$(TEXINPUTS)
-DVIPS_ENV	= TEXPSHEADERS=.:../tex:
-HEVEA_FLAGS	= -entities -I ../tex
-HTMLC_FLAGS	= -I includes \
+TEX_ENV		= TEXINPUTS=$(srcdir):$(top_srcdir)/tex:$(TEXINPUTS) \
+		  TEXPSHEADERS=$(srcdir):$(top_srcdir)/tex:$(TEXPSHEADERS)
+HEVEA_FLAGS	= -entities -I $(srcdir) -I $(top_srcdir)/tex
+HTMLC_FLAGS	= -I $(srcdir)/includes \
 		  -D CamlVersion $(OCAMLVERSION) \
-		  -D version $(PACKAGE_VERSION)
+		  -D version $(VERSION)
 
-# The list of HTMLC dependant files
-HTML_SRC_FILES	= index.htm fra.htm eng.htm \
-		  faq-eng.htm faq-fra.htm \
-		  screen-shots-fra.htm screen-shots-eng.htm
-MAN_SRC_FILES	= advi.man
-HTML_FILES	= $(HTML_SRC_FILES:.htm=.html)
-MAN_FILES	= $(MAN_SRC_FILES:.man=.1)
-HTMLC_FILES	= $(HTML_FILES) $(MAN_FILES)
-
-# The list of HEVEA dependant files
-HEVEA_FILES	= manual.dvi manual.ps manual.pdf manual.html advi_remote.html
-
-# the list of LaTeX dependant files
-LATEX_FILES	= splash.dvi splash.ps \
-		  scratch_write_splash.dvi scratch_write_splash.ps \
-		  scratch_draw_splash.dvi scratch_draw_splash.ps \
-		  mathmode.dvi \
-		  advi_remote.dvi
-
-ALL_DOC_FILES	= @ALL_DOC_FILES@
-
-#install: $(ALL_DOC_FILES)
-#	$(INSTALL) -m 644 $(HELP_FILES) $(DESTDIR)$(ADVI_LOC)
+MV		= mv -f
 
 manual.dvi: ../tex/advi.sty manual.sty splash_contents.tex \
        scratch_write_splash_contents.tex scratch_draw_splash_contents.tex
@@ -77,8 +101,8 @@ SUFFIXES = .tex .dvi .advi .ps .pdf .pdfm .html .htm .ima .man .1
 	  $(MV) $*.dvi $*.advi; \
 	fi
 	$(TEX_ENV) $(LATEX) '\def\driver{dvips}\input' $<
-	$(DVIPS_ENV) $(DVIPS) -o $@ $*.dvi
-	  $(MV) $*.dvi $*.bdvi
+	$(TEX_ENV) $(DVIPS) -o $@ $*.dvi
+	$(MV) $*.dvi $*.bdvi
 	if [ -e $*.advi ]; then \
 	  $(MV) $*.advi $*.dvi; \
 	fi
@@ -88,23 +112,23 @@ SUFFIXES = .tex .dvi .advi .ps .pdf .pdfm .html .htm .ima .man .1
 	  $(MV) $*.dvi $*.advi; \
 	fi
 	$(TEX_ENV) $(LATEX) '\def\driver{dvipdfm}\input' $<
-	- $(DVIPDFM) -o $@ $*.dvi
+	$(TEX_ENV) $(DVIPDFM) -o $@ $*.dvi
 	if [ -e $*.advi ]; then \
 	  $(MV) $*.advi $*.dvi; \
 	fi
 
 .advi.dvi:
-	cp -p $< $*.dvi
+	cp -p $< $@
 
 .html.ima:
-	if [ -f $*.image.tex ]; then $(PDFIMAGEN) $*; fi
-	touch $*.ima
+	if [ -f $*.image.tex ]; then $(TEX_ENV) $(PDFIMAGEN) $*; fi
+	touch $@
 
 .tex.html:
-	$(HEVEA) $(HEVEA_FLAGS) -fix macros.hva -o $*.html $*.tex
+	 $(TEX_ENV) $(HEVEA) $(HEVEA_FLAGS) -fix $(srcdir)/macros.hva -o $@ $<
 
 .htm.html:
-	$(HTMLC) $(HTMLC_FLAGS) -f $< -t $@
+	$(HTMLC) $(HTMLC_FLAGS) -f $(srcdir)/$< -t $@
 
 .man.1: $(top_srcdir)/config.status
-	$(HTMLC) $(HTMLC_FLAGS) -f $< -t $@
+	$(HTMLC) $(HTMLC_FLAGS) -f $(srcdir)/$< -t $@
