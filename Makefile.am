@@ -1,1 +1,1 @@
-SUBDIRS = src tex
+SUBDIRS = src doc tex
