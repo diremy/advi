@@ -44,7 +44,7 @@ This is only needed if you're using CVS version directly.
    - export ACLOCAL='aclocal -I <directory>' before invoking autoreconf
    - set up a dirlist file in automake macro directory, as explained in aclocal
      documentation
-  * run autoreconf -i
+  * run autoreconf --install
 
 JAPANESE USERS
 ==============
