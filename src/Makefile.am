@@ -67,7 +67,7 @@ OCAMLOPTOBJS    = $(OCAMLBUILTSOURCES:.ml=.cmx) $(OCAMLSOURCES:.ml=.cmx)
 COBJS           = $(CSOURCES:.c=.o)
 
 AM_CFLAGS	= $(XINERAMA_CFLAGS) $(X_CFLAGS)
-AM_COMPFLAGS	= $(CAMLIMAGES_INCLUDES)
+AM_OCAMLCFLAGS	= $(CAMLIMAGES_INCLUDES)
 
 OTHER_LIBS	= unix str
 OCAMLLIBS_OPT	= $(CAMLIMAGES_LIBS_NATIVE) $(OTHER_LIBS:=.cmxa)
@@ -76,12 +76,12 @@ OCAMLLIBS_BYT	= $(CAMLIMAGES_LIBS_BYTE) $(OTHER_LIBS:=.cma)
 if BUILD_OPT
 advi$(EXEEXT): $(COBJS) $(OCAMLOPTOBJS)
 	$(OCAMLOPT) -o advi$(EXEEXT) \
-		$(COMPFLAGS) $(AM_COMPFLAGS) $(AM_LINKFLAGS) \
+		$(OCAMLCFLAGS) $(AM_OCAMLCFLAGS) $(AM_LINKFLAGS) \
 		$(COBJS) $(OCAMLLIBS_OPT) $(OCAMLOPTOBJS)
 else
 advi.$(EXEEXT): $(COBJS) $(OCAMLBYTOBJS)
 	$(OCAMLC) -o advi$(EXEEXT) \
-		$(COMPFLAGS) $(AM_COMPFLAGS) $(AM_LINKFLAGS) -custom \
+		$(OCAMLCFLAGS) $(AM_OCAMLCFLAGS) $(AM_LINKFLAGS) -custom \
 		$(COBJS) $(OCAMLLIBS_BYT) $(OCAMLBYTOBJS)
 endif
 
@@ -108,13 +108,13 @@ config.ml: config.ml.in $(top_srcdir)/config.status
 SUFFIXES = .ml .mli .cmo .cmi .cmx .c .o
 
 .ml.cmo:
-	$(OCAMLC) $(COMPFLAGS) $(AM_COMPFLAGS) -o $@ -c $<
+	$(OCAMLC) $(OCAMLCFLAGS) $(AM_OCAMLCFLAGS) -o $@ -c $<
 
 .mli.cmi:
-	$(OCAMLC) $(COMPFLAGS) $(AM_COMPFLAGS) -o $@ -c $<
+	$(OCAMLC) $(OCAMLCFLAGS) $(AM_OCAMLCFLAGS) -o $@ -c $<
 
 .ml.cmx:
-	$(OCAMLOPT) $(COMPFLAGS) $(AM_COMPFLAGS) -o $@ -c $<
+	$(OCAMLOPT) $(OCAMLCFLAGS) $(AM_OCAMLCFLAGS) -o $@ -c $<
 
 .c.o: $(top_srcdir)/config.h
 	$(OCAMLC) -ccopt "-o $@ $(CFLAGS) $(AM_CFLAGS)" -c $< 
