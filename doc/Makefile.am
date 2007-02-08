@@ -16,6 +16,11 @@
 #*********************************************************************#
 
 # $Id$
+# needed for autoconf < 2.60
+dvidir = $(datadir)/doc/$(PACKAGE)
+pdfdir = $(datadir)/doc/$(PACKAGE)
+psdir = $(datadir)/doc/$(PACKAGE)
+htmldir = $(datadir)/doc/$(PACKAGE)
 
 man_MANS = advi.1
 dvi_DATA = manual.dvi
