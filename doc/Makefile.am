@@ -26,7 +26,7 @@ man_MANS = advi.1
 dvi_DATA = manual.dvi
 pdf_DATA = manual.pdf
 ps_DATA  = manual.ps
-html_DATA = $(HTMLFILES) $(IMAGES)
+html_DATA = $(HTMLFILES) $(STATICIMAGES) $(BUILTIMAGES)
 
 TEXSOURCES = advi_remote.tex \
 	     argv.tex \
@@ -49,12 +49,13 @@ HTMSOURCES = index.htm \
 	     faq-eng.htm faq-fra.htm \
 	     screen-shots-fra.htm screen-shots-eng.htm
 
-IMAGES = bar.gif \
-	 inria.gif \
-	 advilogo.gif \
-	 advilogo.anim.gif \
-   	 manual001.gif \
-	 manual002.gif
+STATICIMAGES = bar.gif \
+	       inria.gif \
+	       advilogo.gif \
+	       advilogo.anim.gif
+
+BUILTIMAGES = manual001.gif \
+	      manual002.gif
 
 # distributing produced files remove dependencies
 # on Hevea, HTMLC and dvipdfm
@@ -64,15 +65,16 @@ EXTRA_DIST = advi.man \
 	     macros.hva \
 	     $(TEXSOURCES) \
 	     $(HTMSOURCES) \
-	     $(IMAGES) \
 	     $(man_MANS) \
 	     $(html_DATA) \
-	     includes 
+	     includes
 
 dist-hook:
 	rm -rf $(distdir)/includes/CVS
 
-CLEANFILES = $(man_MANS) $(dvi_DATA) $(pdf_DATA) $(ps_DATA) $(HTMLFILES) \
+CLEANFILES = $(man_MANS) $(dvi_DATA) $(pdf_DATA) $(ps_DATA) \
+	     $(HTMLFILES) \
+	     $(BUILTIMAGES) \
 	     $(TEXSOURCES:.tex=.log) \
 	     $(TEXSOURCES:.tex=.aux) \
 	     $(TEXSOURCES:.tex=.out) \
@@ -81,9 +83,7 @@ CLEANFILES = $(man_MANS) $(dvi_DATA) $(pdf_DATA) $(ps_DATA) $(HTMLFILES) \
 	     manual.haux \
 	     manual.htoc \
 	     manual.hind \
-	     manual.image.tex \
-	     manual001.gif \
-	     manual002.gif
+	     manual.image.tex
 
 SUBDIRS = pngs
 
