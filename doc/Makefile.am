@@ -30,7 +30,9 @@ html_DATA = manual.html \
 	    index.html \
 	    fra.html eng.html \
 	    faq-eng.html faq-fra.html \
-	    screen-shots-fra.html screen-shots-eng.html
+	    screen-shots-fra.html screen-shots-eng.html \
+	    bar.gif inria.gif advilogo.gif advilogo.anim.gif \
+	    manual001.gif manual002.gif
 
 TEXSOURCES = advi_remote.tex \
 	     argv.tex \
@@ -47,6 +49,13 @@ HTMSOURCES = index.htm \
 	     faq-eng.htm faq-fra.htm \
 	     screen-shots-fra.htm screen-shots-eng.htm
 
+IMAGES = bar.gif \
+	 inria.gif \
+	 advilogo.gif \
+	 advilogo.anim.gif \
+   	 manual001.gif \
+	 manual002.gif
+
 # distributing produced files remove dependencies
 # on Hevea, HTMLC and dvipdfm
 EXTRA_DIST = advi.man \
@@ -55,6 +64,7 @@ EXTRA_DIST = advi.man \
 	     macros.hva \
 	     $(TEXSOURCES) \
 	     $(HTMSOURCES) \
+	     $(IMAGES) \
 	     includes \
 	     $(man_MANS) \
 	     $(html_DATA)
