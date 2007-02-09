@@ -1,13 +1,13 @@
 PREREQUISITES
 =============
 
-You need Objective Caml 3.04 or higher to compile the sources.
+You need Objective Caml 3.09 or higher to compile the sources.
 
 You also need the `kpsewhich' utility of the `kpathsea' library
 provided by many TeX distributions.
 
 For bitmap based image inclusion using \includegraphics of 
-graphics macro package, you require the camlimages library,
+the graphics macro package, you require the camlimages library,
 with minimal version 3.0.0, available at 
 	http://pauillac.inria.fr/camlimages/
 
@@ -17,7 +17,7 @@ ocaml libraries configuration, available at
 
 To display postscript based drawings by PsTricks macro package,
 you need ghostscript (http://www.ghostscript.com). You need
-the version 6.52 or later for the correct synchronization of
+the version 7.05 or later for the correct synchronization of
 drawing of the TeX glyphs and postscript graphics.
 
 COMPILATION AND INSTALLATION
