@@ -158,7 +158,11 @@ if test -n "$GS" ; then
 fi
 AC_SUBST(HAVE_GS)
 
-AC_CONFIG_FILES([Makefile src/Makefile doc/Makefile tex/Makefile])
+AC_CONFIG_FILES([Makefile
+		 src/Makefile
+		 doc/Makefile
+		 doc/pngs/Makefile
+		 tex/Makefile])
 AC_OUTPUT()
 
 cat <<EOF

@@ -65,9 +65,9 @@ EXTRA_DIST = advi.man \
 	     $(TEXSOURCES) \
 	     $(HTMSOURCES) \
 	     $(IMAGES) \
-	     includes \
 	     $(man_MANS) \
-	     $(html_DATA)
+	     $(html_DATA) \
+	     includes 
 
 dist-hook:
 	rm -rf $(distdir)/includes/CVS
@@ -85,6 +85,7 @@ CLEANFILES = $(man_MANS) $(dvi_DATA) $(pdf_DATA) $(ps_DATA) $(HTMLFILES) \
 	     manual001.gif \
 	     manual002.gif
 
+SUBDIRS = pngs
 
 # various flags
 TEX_ENV		= TEXINPUTS=$(srcdir):$(top_srcdir)/tex:$(TEXINPUTS) \
