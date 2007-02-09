@@ -72,7 +72,6 @@ CLEANFILES = $(man_MANS) $(dvi_DATA) $(pdf_DATA) $(ps_DATA) $(html_DATA) \
 	     manual.htoc \
 	     manual.hind \
 	     manual.image.tex \
-	      manual.bdvi \
 	     manual001.gif \
 	     manual002.gif
 
@@ -106,28 +105,12 @@ SUFFIXES = .tex .dvi .advi .ps .pdf .pdfm .html .htm .ima .man .1
 	$(TEX_ENV) $(LATEX) '\def\driver{hypertex}\input' $<
 
 .tex.ps:
-	if [ -e $*.dvi ]; then \
-	  $(MV) $*.dvi $*.advi; \
-	fi
 	$(TEX_ENV) $(LATEX) '\def\driver{dvips}\input' $<
 	$(TEX_ENV) $(DVIPS) -o $@ $*.dvi
-	$(MV) $*.dvi $*.bdvi
-	if [ -e $*.advi ]; then \
-	  $(MV) $*.advi $*.dvi; \
-	fi
 
 .tex.pdf:
-	if [ -e $*.dvi ]; then \
-	  $(MV) $*.dvi $*.advi; \
-	fi
 	$(TEX_ENV) $(LATEX) '\def\driver{dvipdfm}\input' $<
 	$(TEX_ENV) $(DVIPDFM) -o $@ $*.dvi
-	if [ -e $*.advi ]; then \
-	  $(MV) $*.advi $*.dvi; \
-	fi
-
-.advi.dvi:
-	cp -p $< $@
 
 .html.ima:
 	if [ -f $*.image.tex ]; then $(TEX_ENV) $(PDFIMAGEN) $*; fi
