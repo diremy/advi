@@ -26,13 +26,7 @@ man_MANS = advi.1
 dvi_DATA = manual.dvi
 pdf_DATA = manual.pdf
 ps_DATA  = manual.ps
-html_DATA = manual.html \
-	    index.html \
-	    fra.html eng.html \
-	    faq-eng.html faq-fra.html \
-	    screen-shots-fra.html screen-shots-eng.html \
-	    bar.gif inria.gif advilogo.gif advilogo.anim.gif \
-	    manual001.gif manual002.gif
+html_DATA = $(HTMLFILES) $(IMAGES)
 
 TEXSOURCES = advi_remote.tex \
 	     argv.tex \
@@ -43,6 +37,12 @@ TEXSOURCES = advi_remote.tex \
 	     scratch_write_splash_contents.tex \
 	     splash.tex \
 	     splash_contents.tex
+
+HTMLFILES = manual.html \
+	    index.html \
+	    fra.html eng.html \
+	    faq-eng.html faq-fra.html \
+	    screen-shots-fra.html screen-shots-eng.html
 
 HTMSOURCES = index.htm \
 	     fra.htm eng.htm \
@@ -72,7 +72,7 @@ EXTRA_DIST = advi.man \
 dist-hook:
 	rm -rf $(distdir)/includes/CVS
 
-CLEANFILES = $(man_MANS) $(dvi_DATA) $(pdf_DATA) $(ps_DATA) $(html_DATA) \
+CLEANFILES = $(man_MANS) $(dvi_DATA) $(pdf_DATA) $(ps_DATA) $(HTMLFILES) \
 	     $(TEXSOURCES:.tex=.log) \
 	     $(TEXSOURCES:.tex=.aux) \
 	     $(TEXSOURCES:.tex=.out) \
