@@ -67,25 +67,62 @@ STATICIMAGES = basics/adviwait.png \
 	       test/text_movements.png \
 	       test/yellow_background.png
 
-BUILTIMAGES = f.png
+BUILTIMAGES = f.png $(STATICIMAGES:.png=.small.png)
 
-CLEANFILES = f.png
+CLEANFILES = $(BUILTIMAGES) \
+	     $(STATICIMAGES:.png=.tiny.png) \
+	     bigf.png uf.png cf.png lf.png
 
 EXTRA_DIST = $(nobase_png_DATA)
 
-# Makefile to generate the thumbnails images for the WEB site
-# Pierre Weis
-#
+SMALL_HEIGHT = 170
+SMALL_WIDTH = 230
+TINY_HEIGHT = 85
+TINY_WIDTH = 115
+FRISE_HEIGHT = 85
+FRISE_WIDTH = 1600
 
-MKTHUMBNAIL=TOOLS/mkthumbnail
-MKFRISE=TOOLS/mkfrise
+f.png: bigf.png
+	convert -geometry 800x150! bigf.png f.png
 
-DIRS=basics basics/cash \
-prosper/Join prosper/LL \
-seminar/a14 seminar/clock \
-slitex/advi slitex/caml slitex/simplistic slitex/skin_detection \
-test
+bigf.png: uf.png cf.png lf.png
+	montage -tile 1x3 -geometry $(FRISE_WIDTH)x$(FRISE_HEIGHT)! \
+		uf.png cf.png lf.png bigf.png
 
-f.png:
-	$(MKFRISE)
+uf.png: $(STATICIMAGES:.png=.tiny.png)
+	montage -tile $(FRISE_WIDTH)x$(FRISE_HEIGHT) \
+		-mode Concatenate -background white -adjoin \
+		`find . -regex '.*/[aLO].*\.tiny\.png'` \
+		uf.png
+
+cf.png: $(STATICIMAGES:.png=.tiny.png)
+	montage -tile $(FRISE_WIDTH)x$(FRISE_HEIGHT) \
+		-mode Concatenate -background white -adjoin \
+		`find . -regex '.*/[bcdij].*\.tiny\.png'` \
+		cf.png
+
+lf.png: $(STATICIMAGES:.png=.tiny.png)
+	montage -tile $(FRISE_WIDTH)x$(FRISE_HEIGHT) \
+		-mode Concatenate -background white -adjoin \
+		`find . -regex '.*/[mpsty].*\.tiny\.png'` \
+		lf.png
+
+SUFFIXES = .png .small.png .tiny.png
+
+# the directory check is needed for VPATH build
+.png.small.png:
+	dir=`dirname $@`; \
+	if [ ! -d $$dir ]; then \
+		mkdir -p $$dir; \
+	fi
+	convert -geometry $(SMALL_WIDTH)x$(SMALL_HEIGHT) $< $@
+
+# the directory check is needed for VPATH build
+.png.tiny.png:
+	dir=`dirname $@`; \
+	if [ ! -d $$dir ]; then \
+		mkdir -p $$dir; \
+	fi
+	convert -geometry $(TINY_WIDTH)x$(TINY_HEIGHT) $< $@
+
 
