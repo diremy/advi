@@ -99,37 +99,43 @@ else
 fi
 AC_SUBST(latexdir)
 
-# Checking LaTeX
+# Checking tools needed for building documentation
+# only latex is mandatory, other are optional
+# as documentation is distributed anyway
 AC_PATH_PROG([LATEX], [latex])
 if test -z "$LATEX"; then
-    AC_MSG_ERROR([latex not found, check your PATH])
+    AC_MSG_ERROR([latex not found, you won't be able to rebuild documention])
 fi
-# TODO: check LaTeX environment
-
-# Checking dvips
 AC_PATH_PROG([DVIPS], [dvips])
 if test -z "$DVIPS"; then
-    AC_MSG_ERROR([dvips not found, check your PATH])
+    AC_MSG_WARN([dvips not found, you won't be able to rebuild documention])
 fi
+AM_CONDITIONAL(HAVE_DVIPS, [test -n "$DVIPS"])
 AC_PATH_PROG([DVIPDFM], [dvipdfm])
-
-# Checking hevea
+if test -z "$DVIPDFM"; then
+    AC_MSG_WARN([dvips not found, you won't be able to rebuild documention])
+fi
+AM_CONDITIONAL(HAVE_DVIPDFM, [test -n "$DVIPDFM"])
 AC_PATH_PROG([HEVEA], [hevea])
-AC_PATH_PROG([PDFIMAGEN], [pdfimagen])
-
-# Checking htmlc
+if test -z "$HEVEA"; then
+    AC_MSG_WARN([hevea not found, you won't be able to rebuild documention])
+fi
+AM_CONDITIONAL(HAVE_HEVEA, [test -n "$HEVEA"])
 AC_PATH_PROG([HTMLC], [htmlc])
-
-# conditional documentation targets
-ALL_DOC_FILES="\$(LATEX_FILES)"
-if test -n "$HEVEA"; then
-    ALL_DOC_FILES="$ALL_DOC_FILES \$(HEVEA_FILES)"
+if test -z "$HTMLC"; then
+    AC_MSG_WARN([htmlc not found, you won't be able to rebuild documention])
 fi
-
-if test -n "$HTMLC"; then
-    ALL_DOC_FILES="$ALL_DOC_FILES \$(HTMLC_FILES)"
+AM_CONDITIONAL(HAVE_HTMLC, [test -n "$HTMLC"])
+AC_PATH_PROG([CONVERT], [convert])
+if test -z "$CONVERT"; then
+    AC_MSG_WARN([convert not found, you won't be able to rebuild documention])
 fi
-AC_SUBST(ALL_DOC_FILES)
+AM_CONDITIONAL(HAVE_CONVERT, [test -n "$CONVERT"])
+AC_PATH_PROG([MONTAGE], [montage])
+if test -z "$MONTAGE"; then
+    AC_MSG_WARN([montage not found, you won't be able to rebuild documention])
+fi
+AM_CONDITIONAL(HAVE_MONTAGE, [test -n "$MONTAGE"])
 
 # Checking gs
 HAVE_GS="false"

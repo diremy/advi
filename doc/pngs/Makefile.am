@@ -83,46 +83,76 @@ FRISE_HEIGHT = 85
 FRISE_WIDTH = 1600
 
 f.png: bigf.png
-	convert -geometry 800x150! bigf.png f.png
+if HAVE_CONVERT
+	$(CONVERT) -geometry 800x150! bigf.png f.png
+else
+	@echo "convert required, unable to proceed"
+	@exit 1
+endif
 
 bigf.png: uf.png cf.png lf.png
-	montage -tile 1x3 -geometry $(FRISE_WIDTH)x$(FRISE_HEIGHT)! \
+	$(MONTAGE) -tile 1x3 -geometry $(FRISE_WIDTH)x$(FRISE_HEIGHT)! \
 		uf.png cf.png lf.png bigf.png
 
 uf.png: $(STATICIMAGES:.png=.tiny.png)
-	montage -tile $(FRISE_WIDTH)x$(FRISE_HEIGHT) \
+if HAVE_MONTAGE
+	$(MONTAGE) -tile $(FRISE_WIDTH)x$(FRISE_HEIGHT) \
 		-mode Concatenate -background white -adjoin \
 		`find . -regex '.*/[aLO].*\.tiny\.png'` \
 		uf.png
+else
+	@echo "montage required, unable to proceed"
+	@exit 1
+endif
 
 cf.png: $(STATICIMAGES:.png=.tiny.png)
-	montage -tile $(FRISE_WIDTH)x$(FRISE_HEIGHT) \
+if HAVE_MONTAGE
+	$(MONTAGE) -tile $(FRISE_WIDTH)x$(FRISE_HEIGHT) \
 		-mode Concatenate -background white -adjoin \
 		`find . -regex '.*/[bcdij].*\.tiny\.png'` \
 		cf.png
+else
+	@echo "montage required, unable to proceed"
+	@exit 1
+endif
 
 lf.png: $(STATICIMAGES:.png=.tiny.png)
-	montage -tile $(FRISE_WIDTH)x$(FRISE_HEIGHT) \
+if HAVE_MONTAGE
+	$(MONTAGE) -tile $(FRISE_WIDTH)x$(FRISE_HEIGHT) \
 		-mode Concatenate -background white -adjoin \
 		`find . -regex '.*/[mpsty].*\.tiny\.png'` \
 		lf.png
+else
+	@echo "montage required, unable to proceed"
+	@exit 1
+endif
 
 SUFFIXES = .png .small.png .tiny.png
 
 # the directory check is needed for VPATH build
 .png.small.png:
+if HAVE_CONVERT
 	dir=`dirname $@`; \
 	if [ ! -d $$dir ]; then \
 		mkdir -p $$dir; \
 	fi
-	convert -geometry $(SMALL_WIDTH)x$(SMALL_HEIGHT) $< $@
+	$(CONVERT) -geometry $(SMALL_WIDTH)x$(SMALL_HEIGHT) $< $@
+else
+	@echo "convert required, unable to proceed"
+	@exit 1
+endif
 
 # the directory check is needed for VPATH build
 .png.tiny.png:
+if HAVE_CONVERT
 	dir=`dirname $@`; \
 	if [ ! -d $$dir ]; then \
 		mkdir -p $$dir; \
 	fi
-	convert -geometry $(TINY_WIDTH)x$(TINY_HEIGHT) $< $@
+	$(CONVERT) -geometry $(TINY_WIDTH)x$(TINY_HEIGHT) $< $@
+else
+	@echo "convert required, unable to proceed"
+	@exit 1
+endif
 
 

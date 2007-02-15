@@ -109,27 +109,57 @@ SUFFIXES = .tex .dvi .advi .ps .pdf .pdfm .html .htm .ima .man .1
 # To avoid default hypertex.cfg if it exists.
 # Active-DVI really needs the hypertex driver...
 .tex.dvi:
+if HAVE_HEVEA
 	$(TEX_ENV) $(LATEX) '\def\driver{hypertex}\input' $<
 	$(TEX_ENV) $(LATEX) '\def\driver{hypertex}\input' $<
 	$(TEX_ENV) $(LATEX) '\def\driver{hypertex}\input' $<
+else
+	@echo "hevea required, unable to proceed"
+	@exit 1
+endif
 
 .tex.ps:
+if HAVE_DVIPS
 	$(TEX_ENV) $(LATEX) '\def\driver{dvips}\input' $<
 	$(TEX_ENV) $(DVIPS) -o $@ $*.dvi
+else
+	@echo "dvips required, unable to proceed"
+	@exit 1
+endif
 
 .tex.pdf:
+if HAVE_DVIPDFM
 	$(TEX_ENV) $(LATEX) '\def\driver{dvipdfm}\input' $<
 	$(TEX_ENV) $(DVIPDFM) -o $@ $*.dvi
+else
+	@echo "dvipdfm required, unable to proceed"
+	@exit 1
+endif
 
 .html.ima:
 	if [ -f $*.image.tex ]; then $(TEX_ENV) $(PDFIMAGEN) $*; fi
 	touch $@
 
 .tex.html:
+if HAVE_HEVEA
 	 $(TEX_ENV) $(HEVEA) $(HEVEA_FLAGS) -fix $(srcdir)/macros.hva -o $@ $<
+else
+	@echo "hevea required, unable to proceed"
+	@exit 1
+endif
 
 .htm.html:
+if HAVE_HTMLC
 	$(HTMLC) $(HTMLC_FLAGS) -f $(srcdir)/$< -t $@
+else
+	@echo "htmlc required, unable to proceed"
+	@exit 1
+endif
 
 .man.1: $(top_srcdir)/config.status
+if HAVE_HTMLC
 	$(HTMLC) $(HTMLC_FLAGS) -f $(srcdir)/$< -t $@
+else
+	@echo "htmlc required, unable to proceed"
+	@exit 1
+endif
