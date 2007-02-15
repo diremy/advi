@@ -67,11 +67,11 @@ STATICIMAGES = basics/adviwait.png \
 	       test/text_movements.png \
 	       test/yellow_background.png
 
-BUILTIMAGES = f.png $(STATICIMAGES:.png=.small.png)
+CLEANFILES = $(STATICIMAGES:.png=.tiny.png)
 
-CLEANFILES = $(BUILTIMAGES) \
-	     $(STATICIMAGES:.png=.tiny.png) \
-	     bigf.png uf.png cf.png lf.png
+MAINTAINERCLEANFILES = f.png \
+		       bigf.png uf.png cf.png lf.png \
+		       $(STATICIMAGES:.png=.small.png)
 
 EXTRA_DIST = $(nobase_png_DATA)
 

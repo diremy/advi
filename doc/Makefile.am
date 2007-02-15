@@ -59,31 +59,29 @@ BUILTIMAGES = manual001.gif \
 
 # distributing produced files remove dependencies
 # on Hevea, HTMLC and dvipdfm
-EXTRA_DIST = advi.man \
+EXTRA_DIST = $(man_MANS) $(dvi_DATA) $(pdf_DATA) $(ps_DATA) \
+	     $(HTMLFILES) $(STATICIMAGES) $(BUILTIMAGES) \
 	     manual.sty \
 	     manual.hva \
 	     macros.hva \
 	     $(TEXSOURCES) \
 	     $(HTMSOURCES) \
-	     $(man_MANS) \
-	     $(html_DATA) \
 	     includes
 
 dist-hook:
 	rm -rf $(distdir)/includes/CVS
 
-CLEANFILES = $(man_MANS) $(dvi_DATA) $(pdf_DATA) $(ps_DATA) \
-	     $(HTMLFILES) \
-	     $(BUILTIMAGES) \
-	     $(TEXSOURCES:.tex=.log) \
-	     $(TEXSOURCES:.tex=.aux) \
-	     $(TEXSOURCES:.tex=.out) \
-	     manual.idx \
-	     manual.toc \
-	     manual.haux \
-	     manual.htoc \
-	     manual.hind \
-	     manual.image.tex
+MAINTAINERCLEANFILES = $(man_MANS) $(dvi_DATA) $(pdf_DATA) $(ps_DATA) \
+		       $(HTMLFILES) $(BUILTIMAGES) \
+		       $(TEXSOURCES:.tex=.log) \
+		       $(TEXSOURCES:.tex=.aux) \
+		       $(TEXSOURCES:.tex=.out) \
+		       manual.idx \
+		       manual.toc \
+		       manual.haux \
+		       manual.htoc \
+		       manual.hind \
+		       manual.image.tex
 
 SUBDIRS = pngs
 
