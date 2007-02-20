@@ -77,7 +77,7 @@ AC_ARG_ENABLE(
     esac],
     [enable_bytecode=yes]
 )
-AC_MSG_CHECKING([wether to build bytecode library])
+AC_MSG_CHECKING([wether to build bytecode program])
 build_bytecode=no
 if test -n "$OCAMLC" \
     && test -n "$CAMLIMAGES_LIBS_BYTE" \
