@@ -18,7 +18,14 @@
 
 # $Id$
 
-bin_PROGRAMS = advi
+bin_PROGRAMS =
+if BUILD_NATIVE
+bin_PROGRAMS += advi
+endif
+if BUILD_BYTECODE
+bin_PROGRAMS += advi.byt
+endif
+
 OCAMLBUILTSOURCES = config.ml
 OCAMLSOURCES = misc.ml timeout.ml ageometry.ml \
 	       options.ml rc.ml userfile.ml \
@@ -46,6 +53,7 @@ OCAMLINTERFACES = misc.mli timeout.mli ageometry.mli \
 CSOURCES = events.c grwm.c grY11.c
 CHEADERS = grwm.h image.h libgraph.h
 advi_SOURCES = $(OCAMLSOURCES) $(OCAMLINTERFACES) $(CSOURCES) $(CHEADERS)
+advi_byt_SOURCES = $(OCAMLSOURCES) $(OCAMLINTERFACES) $(CSOURCES) $(CHEADERS)
 
 BUILT_SOURCES = $(OCAMLBUILTSOURCES)
 
@@ -73,17 +81,15 @@ OTHER_LIBS	= unix str
 OCAMLLIBS_OPT	= $(CAMLIMAGES_LIBS_NATIVE) $(OTHER_LIBS:=.cmxa)
 OCAMLLIBS_BYT	= $(CAMLIMAGES_LIBS_BYTE) $(OTHER_LIBS:=.cma)
 
-if BUILD_OPT
 advi$(EXEEXT): $(COBJS) $(OCAMLOPTOBJS)
 	$(OCAMLOPT) -o advi$(EXEEXT) \
 		$(OCAMLCFLAGS) $(AM_OCAMLCFLAGS) $(AM_LINKFLAGS) \
 		$(COBJS) $(OCAMLLIBS_OPT) $(OCAMLOPTOBJS)
-else
-advi.$(EXEEXT): $(COBJS) $(OCAMLBYTOBJS)
-	$(OCAMLC) -o advi$(EXEEXT) \
+
+advi.byt$(EXEEXT): $(COBJS) $(OCAMLBYTOBJS)
+	$(OCAMLC) -o advi.byt$(EXEEXT) \
 		$(OCAMLCFLAGS) $(AM_OCAMLCFLAGS) $(AM_LINKFLAGS) -custom \
 		$(COBJS) $(OCAMLLIBS_BYT) $(OCAMLBYTOBJS)
-endif
 
 install_hook: $(INSTALLEXEC) installdata
 	- texhash

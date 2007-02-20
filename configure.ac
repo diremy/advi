@@ -37,16 +37,62 @@ AC_SUBST(CAMLIMAGES_INCLUDES)
 AC_SUBST(CAMLIMAGES_LIBS_NATIVE)
 AC_SUBST(CAMLIMAGES_LIBS_BYTE)
 
-# conditional install target
-AC_MSG_CHECKING([wether to build either native or bytecode version])
-if test -n "$OCAMLOPT" && test -n "$CAMLIMAGES_LIBS_NATIVE"; then
-    AC_MSG_RESULT([native])
-    build_opt=true
+# Check versions to build
+AC_ARG_ENABLE(
+    [native-program],
+    AC_HELP_STRING(
+	[--enable-native-program],
+	[build native version of program (default)]
+    ),
+    [case "$enableval" in
+	yes) enable_native=$enableval;;
+	no)  enable_native=$enableval;;
+	*)   AC_MSG_ERROR([bad value $enableval for --enable-native-program]);;
+    esac],
+    [enable_native=yes]
+)
+AC_MSG_CHECKING([wether to build native program])
+build_native=no
+if test -n "$OCAMLOPT" \
+    && test -n "$CAMLIMAGES_LIBS_NATIVE" \
+    && test "$enable_native" = yes; then
+    AC_MSG_RESULT([yes])
+    build_native=yes
 else
-    AC_MSG_RESULT([bytecode])
-    build_opt=false
+    AC_MSG_RESULT([no])
+    build_native=no
 fi
-AM_CONDITIONAL(BUILD_OPT, test x$build_opt = xtrue)
+AM_CONDITIONAL([BUILD_NATIVE], [test "$build_native" = yes])
+
+AC_ARG_ENABLE(
+    [bytecode-program],
+    AC_HELP_STRING(
+	[--enable-bytecode-program],
+	[build bytecode version of program]
+    ),
+    [case "$enableval" in
+	yes) enable_bytecode=$enableval;;
+	no)  enable_bytecode=$enableval;;
+	*)   AC_MSG_ERROR([bad value $enableval for --enable-bytecode-program]);;
+    esac],
+    [enable_bytecode=yes]
+)
+AC_MSG_CHECKING([wether to build bytecode library])
+build_bytecode=no
+if test -n "$OCAMLC" \
+    && test -n "$CAMLIMAGES_LIBS_BYTE" \
+    && test "$enable_bytecode" = yes; then
+    AC_MSG_RESULT([yes])
+    build_bytecode=yes
+else
+    AC_MSG_RESULT([no])
+    build_bytecode=no
+fi
+AM_CONDITIONAL([BUILD_BYTECODE], [test "$build_bytecode" = yes])
+
+if test "$build_native" = no && test "$build_bytecode" = no; then
+    AC_MSG_ERROR([neither native nor bytecode program selected])
+fi
 
 # checking for X
 AC_PATH_XTRA
