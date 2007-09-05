@@ -590,7 +590,13 @@ value caml_gr_rebind_keysyms(value unit)
 {
   KeySym modifiers[1] = { 0 };
   XRebindKeysym(caml_gr_display, XK_Next, modifiers, 0, "N", 1);
+  XRebindKeysym(caml_gr_display, XK_Down, modifiers, 0, "N", 1);
   XRebindKeysym(caml_gr_display, XK_Prior, modifiers, 0, "P", 1);
+  XRebindKeysym(caml_gr_display, XK_Up, modifiers, 0, "P", 1);
+  XRebindKeysym(caml_gr_display, XK_Home, modifiers, 0, ",", 1);
+  XRebindKeysym(caml_gr_display, XK_Left, modifiers, 0, ",", 1);
+  XRebindKeysym(caml_gr_display, XK_End, modifiers, 0, ".", 1);
+  XRebindKeysym(caml_gr_display, XK_Right, modifiers, 0, ".", 1);
   return Val_unit;
 }
 
