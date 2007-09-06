@@ -150,7 +150,7 @@ AC_SUBST(latexdir)
 # as documentation is distributed anyway
 AC_PATH_PROG([LATEX], [latex])
 if test -z "$LATEX"; then
-    AC_MSG_ERROR([latex not found, you won't be able to rebuild documention])
+    AC_MSG_WARN([latex not found, you won't be able to rebuild documention])
 fi
 AC_PATH_PROG([DVIPS], [dvips])
 if test -z "$DVIPS"; then
