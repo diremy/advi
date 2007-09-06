@@ -115,18 +115,18 @@ let rec select fd_in fd_out fd_exn timeout =
 class gs () =
   let _ = GraphicsY11.window_id() in
   let gr = {
-      display = 0;
-      window = GraphicsY11.window_id ();
-      pixmap = GraphicsY11.bstore_id ();
-      width = Graphics.size_x ();
-      height = Graphics.size_y ();
-      bwidth = GraphicsY11.bsize_x ();
-      bheight = GraphicsY11.bsize_y ();
-      xdpi = 72.0;
-      ydpi = 72.0;
-      x = 0;
-      y = 0;
-    } in
+    display = 0;
+    window = GraphicsY11.window_id ();
+    pixmap = GraphicsY11.bstore_id ();
+    width = Graphics.size_x ();
+    height = Graphics.size_y ();
+    bwidth = GraphicsY11.bsize_x ();
+    bheight = GraphicsY11.bsize_y ();
+    xdpi = 72.0;
+    ydpi = 72.0;
+    x = 0;
+    y = 0;
+  } in
   let dpi = 72 (* unite utilise par dvi? *) in
   let command = Config.gs_path in
   let command_args =
@@ -143,14 +143,14 @@ class gs () =
     |]] in
 
   let _ = debugs command;
-  Array.iter debugs command_args in
+    Array.iter debugs command_args in
 
   (* Set environment so that ghostscript writes in our window. *)
   let _ =
     Unix.putenv "GHOSTVIEW"
       (if Global_options.get_global_display_mode ()
-       then Printf.sprintf "%lu " gr.window
-       else Printf.sprintf "%lu %lu " gr.window gr.pixmap) in
+      then Printf.sprintf "%lu " gr.window
+      else Printf.sprintf "%lu %lu " gr.window gr.pixmap) in
 
   let iof = Misc.round and foi = float_of_int in
   let lx = iof ( (foi (gr.x * dpi)) /. gr.xdpi)
@@ -174,8 +174,8 @@ class gs () =
       try GraphicsY11.set_named_atom_property  "GHOSTVIEW" content;
       with x -> Misc.fatal_error "Cannot set ``GHOSTVIEW'' property"
     end;
-  (* Ignore signal SIGPIPE. *)
-  Unix.sigprocmask Unix.SIG_BLOCK [ Sys.sigpipe ] in
+    (* Ignore signal SIGPIPE. *)
+    Unix.sigprocmask Unix.SIG_BLOCK [ Sys.sigpipe ] in
 
   let lpd_in, lpd_out = Unix.pipe () in
   let rpd_in, rpd_out = Unix.pipe () in
@@ -191,6 +191,19 @@ class gs () =
     Unix.create_process command command_args lpd_in rpd_out
       (* Unix.stdout *) Unix.stderr
   in
+(*
+  let () = 
+    try 
+      match Unix.waitpid  [ Unix.WNOHANG ] pid with
+      | _, Unix.WEXITED _ -> failwith (command ^ ":EXITED")
+      | _, Unix.WSIGNALED s -> 
+          failwith (command ^ ":KILLED:" ^ (string_of_int s))
+      | _, Unix.WSTOPPED s -> 
+          failwith (command ^ ":STOPPED:" ^ (string_of_int s)) Sys.sigint
+    with Unix.Unix_error (Unix.ECHILD, _, _) -> 
+          () 
+   in
+*)
   object (self)
     val pid = pid
     val mutable ack = 0
@@ -239,12 +252,12 @@ class gs () =
               with
               | Not_found | Failure _ -> Misc.warning s
             end else
-          if Misc.has_prefix err_string s then
-            begin
+            if Misc.has_prefix err_string s then
+              begin
+                Misc.warning s;
+                raise (Killed "Error in Postscript");
+              end else
               Misc.warning s;
-              raise (Killed "Error in Postscript");
-            end else
-          Misc.warning s;
           self # ack
         end;
 

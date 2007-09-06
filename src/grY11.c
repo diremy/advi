@@ -232,14 +232,14 @@ value caml_gr_origin_y(void)
 /* Should be caml_gr_window_id and caml_gr_window should disapear. */
 /* Graphics now uses the name caml_gr_window */
 value caml_gr_get_window_id(void)
-{ unsigned int w; value res;
+{ unsigned int w; 
   caml_gr_check_open();
   w = caml_gr_window.win;
-  return copy_int32 (w); 
+  return copy_int32 (w);
 }
 
 value caml_gr_get_bstore_id(void)
-{ unsigned int w; value res;
+{ unsigned int w; 
   caml_gr_check_open();
   w = caml_gr_bstore.win;
   return copy_int32 (w); 
@@ -376,11 +376,12 @@ value caml_gr_get_geometry(value unit){
 /* get modifiers... */
 value caml_gr_get_modifiers(void)
 {
-  int mouse_x, mouse_y, button, key, keypressed;
+  int button;
+  /* int mouse_x, mouse_y, key, keypressed; */
   Window rootwin, childwin;
   int root_x, root_y, win_x, win_y;
   unsigned int modifiers;
-  unsigned int i;
+  /* unsigned int i; */
 
   caml_gr_check_open();
   if (XQueryPointer(caml_gr_display, caml_gr_window.win,
@@ -492,9 +493,9 @@ value caml_gr_resize_subwindow (value wid, value w, value h)
 
 value caml_gr_reposition (value x, value y, value w, value h, value scr)
 {
-  Window r;
+  /* Window r; */
   int posx, posy, width, height, screen;
-  int xinerama_x=0, xinerama_y=0;
+  /* int xinerama_x=0, xinerama_y=0; */
   Bool fullscreen;
   XWindowAttributes att;
 
@@ -594,9 +595,9 @@ value caml_gr_rebind_keysyms(value unit)
   XRebindKeysym(caml_gr_display, XK_Prior, modifiers, 0, "P", 1);
   XRebindKeysym(caml_gr_display, XK_Up, modifiers, 0, "P", 1);
   XRebindKeysym(caml_gr_display, XK_Home, modifiers, 0, ",", 1);
-  XRebindKeysym(caml_gr_display, XK_Left, modifiers, 0, ",", 1);
   XRebindKeysym(caml_gr_display, XK_End, modifiers, 0, ".", 1);
-  XRebindKeysym(caml_gr_display, XK_Right, modifiers, 0, ".", 1);
+  XRebindKeysym(caml_gr_display, XK_Left, modifiers, 0, "\b", 1);
+  XRebindKeysym(caml_gr_display, XK_Right, modifiers, 0, "\r", 1);
   return Val_unit;
 }
 
