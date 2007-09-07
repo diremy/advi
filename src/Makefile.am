@@ -103,9 +103,10 @@ install_hook: $(INSTALLEXEC) installdata
 config.ml: config.ml.in $(top_srcdir)/config.status
 	rm -f $@ $@.tmp
 	sed \
-		-e 's,@VERSION\@,$(VERSION),g' \
+		-e 's,@PACKAGE_VERSION\@,$(PACKAGE_VERSION),g' \
 		-e 's,@BUILD_DATE\@,$(BUILD_DATE),g' \
 		-e 's,@HAVE_GS\@,$(HAVE_GS),g' \
+		-e 's,@HAVE_CAMLIMAGES\@,$(HAVE_CAMLIMAGES),g' \
 		-e 's,@TEXMFMAIN\@,$(TEXMFMAIN),g' \
 		-e 's,@ADVI_LOC\@,$(ADVI_LOC),g' \
 		$< > $@.tmp

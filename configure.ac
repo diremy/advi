@@ -23,19 +23,24 @@ fi
 AC_MSG_CHECKING([for camlimages])
 CAMLIMAGES_VERSION=`$OCAMLFIND query -format '%v' camlimages`
 if test -z "$CAMLIMAGES_VERSION"; then
-    AC_MSG_RESULT([no])
-    AC_MSG_ERROR([you need camlimages, with minimal 3.0.0 version])
+  AC_MSG_RESULT([no])
+  HAVE_CAMLIMAGES="false"
+  # unquote this if camlimages may be missing
+  # currently, configure will fail below if because neither native not bytecode   # versions will be built
+  AC_MSG_ERROR([you need camlimages, with minimal 3.0.0 version])
 else
-    AC_MSG_RESULT([yes])
+  AC_MSG_RESULT([yes])
+  HAVE_CAMLIMAGES="true"
+  CAMLIMAGES_INCLUDES=`$OCAMLFIND query -i-format -separator ' ' -recursive camlimages`
+  CAMLIMAGES_LIBS_NATIVE=`$OCAMLFIND query -a-format -separator ' ' -recursive -predicates native camlimages`
+  CAMLIMAGES_LIBS_BYTE=`$OCAMLFIND query -a-format -separator ' ' -recursive -predicates byte camlimages`
+  AC_SUBST(CAMLIMAGES_INCLUDES)
+  AC_SUBST(CAMLIMAGES_LIBS_NATIVE)
+  AC_SUBST(CAMLIMAGES_LIBS_BYTE)
 fi
+AC_SUBST(HAVE_CAMLIMAGES)
 
-CAMLIMAGES_INCLUDES=`$OCAMLFIND query -i-format -separator ' ' -recursive camlimages`
-CAMLIMAGES_LIBS_NATIVE=`$OCAMLFIND query -a-format -separator ' ' -recursive -predicates native camlimages`
-CAMLIMAGES_LIBS_BYTE=`$OCAMLFIND query -a-format -separator ' ' -recursive -predicates byte camlimages`
 
-AC_SUBST(CAMLIMAGES_INCLUDES)
-AC_SUBST(CAMLIMAGES_LIBS_NATIVE)
-AC_SUBST(CAMLIMAGES_LIBS_BYTE)
 
 # Check versions to build
 AC_ARG_ENABLE(
@@ -141,7 +146,7 @@ if test -d "$texdir/tex/latex"; then
 	-e '/.*\/share\/@<:@^\/@:>@*\/tex\/latex$/{s,.*/share/\(@<:@^\/@:>@*\/tex\/latex\),${datadir}/\1,;p;q;}'`
 else 
     AC_MSG_RESULT([not found])
-    AC_MSG_ERROR([no LaTeX root path found, check your setup])
+    AC_MSG_WARN([no LaTeX root path found, check your setup])
 fi
 AC_SUBST(latexdir)
 

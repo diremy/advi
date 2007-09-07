@@ -12,7 +12,7 @@
 
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{advi}
-         [2004/17/07 v1.75 LaTeX Package for the advi Previewer]
+         [2007/10/07 v1.75 LaTeX Package for the advi Previewer]
 
 % Which name is ours
 \def \advi@name {Active-DVI}
@@ -48,6 +48,10 @@
 
 \ProcessOptions
 % \@ifundefined {AdviOptions}{}{\ExecuteOptions {\AdviOptions}}
+
+%% \ifadvi@ignore \else
+
+%% \fi
 
 %% More declarations
 
@@ -603,19 +607,8 @@ end
   {\message {Patching PStricks commands...}\advi@pstricks@patch}
 \fi
 
-%%% Patch for pgf
+%%% Patch for PGF
 
-%% \def \advi@pgfsys@hbox #1{%
-%%   \pgfsys@invoke{pgfs}%
-%%     \special{ps::[end]}%
-%%       \wd#1=0pt%
-%%       \ht#1=0pt%
-%%       \dp#1=0pt%
-%% %%    \box#1
-%%       \rlap {\hskip \pgf@x\raise \pgf@y \box#1}
-%%     \special{ps::[begin]}%
-%%   \pgfsys@invoke{pgfr}%
-%% }
 \def \advi@pgfsys@hbox #1{%
   \pgfsys@invoke{pgfs}
   \pgfsys@outerinvoke{advi@pgfpoint}%
@@ -629,18 +622,29 @@ end
 }
 \def \advi@pgfqboxsynced #1{\pgfsys@beginscope \pgflowlevelsyncm \pgfqbox
   #1\pgfsys@endscope} 
-\def \advi@pgf@patch{\@ifundefined {pgfsys@hbox}{}
- {\let \latex@pgfsys@hbox  \pgfsys@hbox
-  \let \pgfsys@hbox \advi@pgfsys@hbox
-%%   \let \pgfqbox \latex@pgfsys@hbox
-%%   \let \pgfqboxsynced \advi@pgfsysqboxsynced
-}}
+\def \advi@pgf@patch{%
+  \@ifundefined {pgfsys@hbox}{}
+   {\message {Patching PGF commands...}%
+    \let \latex@pgfsys@hbox  \pgfsys@hbox
+    \let \pgfsys@hbox \advi@pgfsys@hbox
+    %%   \let \pgfqbox \latex@pgfsys@hbox
+    %%   \let \pgfqboxsynced \advi@pgfsysqboxsynced
+    %% Make invisible material advi invisible
+    \newif \ifpgfsys@visible
+    \pgfsys@visibletrue
+    \def\pgfsys@begininvisible{%
+      \pgfsys@visiblefalse
+      \advi@special {proc=nulldevice record=start}%
+    }%
+    \def\pgfsys@endinvisible{%
+      \advi@special {proc=nulldevice record=end}%
+      \pgfsys@visibletrue
+    }%
+   }}
 
 \ifadvi@ignore \else
-\AtBeginDocument 
-  {\message {Patching PGF commands...}\advi@pgf@patch}
+   \AtBeginDocument {\advi@pgf@patch}
 \fi
-
 
 
 %%% Anchors
@@ -680,6 +684,24 @@ end
            {\advi@record[play]{\the\advi@c@annot}{#2}%
         }}\kern-\fboxsep}}
 \advi@export \adviemphasize \advi@emphasize
+
+%%% Fix a bug in pgfsys-dvips.def 
+
+%% Reimplement invisible material at the advi level
+
+\newif \ifpgfsys@visible
+\pgfsys@visibletrue
+
+\def\pgfsys@begininvisible{%
+  \pgfsys@visiblefalse
+  \advi@special {proc=nulldevice record=start}%
+}
+\def\pgfsys@endinvisible{%
+  \advi@special {proc=nulldevice record=end}%
+  \pgfsys@visibletrue
+}
+
+
 
 %%% Partial patch for overlays -- 0 will be shown > 0 will not be shown
 
