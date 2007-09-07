@@ -28,6 +28,7 @@ pkglatex_DATA = advi-annot.sty \
 		xwindows-colors.sty \
 		advilogo.eps \
 		bar.eps \
-		caml.eps
+		caml.eps \
+		pdfsys-dvips.def
 
 EXTRA_DIST = $(pkglatex_DATA)
