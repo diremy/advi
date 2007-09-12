@@ -44,7 +44,8 @@ HTMLFILES = manual.html \
 	    faq-eng.html faq-fra.html \
 	    screen-shots-fra.html screen-shots-eng.html
 
-HTMSOURCES = index.htm \
+HTMSOURCES = \
+	     index.htm \
 	     fra.htm eng.htm \
 	     faq-eng.htm faq-fra.htm \
 	     screen-shots-fra.htm screen-shots-eng.htm

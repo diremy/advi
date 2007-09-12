@@ -3,7 +3,7 @@ SUBDIRS = src doc tex
 CVSRELEASETAG = Release-$(subst .,_,$(VERSION))
 ANNOUNCEFILE  = Announce-$(VERSION)
 
-WEBSITEDIR = /net/yquem/infosystems/www/$(PACKAGE)
+WEBSITEDIR = /net/yquem/infosystems/www/cristal/cristal/$(PACKAGE)
 FTPSITEDIR = /net/yquem/infosystems/ftp/$(PACKAGE)
 CVSROOTDIR = /net/yquem/devel/caml/repository/
 CVSPKGDIR  = bazar-ocaml/$(PACKAGE)
@@ -18,24 +18,25 @@ announce:
 	mail -n -s "New release $(VERSION) of $(NAME)" \
 		caml-announce@inria.fr < $(ANNOUNCEFILE)
 
-website:
+website: dist
 	if [ -d $(WEBSITEDIR) ]; then     \
-		$(RM) -f $(WEBSITEDIR) *; \
+	: ; \
 	else                              \
-		$(INSTALL) -d -g caml -m g+w $(WEBSITEDIR);
-	done
-	$(INSTALL) -g caml -m g+w doc/*.htm $(WEBSITEDIR)
-	$(INSTALL) -g caml -m g+w doc/*.css $(WEBSITEDIR)
-	$(INSTALL) -g caml -m g+w doc/*.dvi $(WEBSITEDIR)
-	$(INSTALL) -g caml -m g+w doc/*.ps $(WEBSITEDIR)
-	$(INSTALL) -g caml -m g+w doc/*.pdf $(WEBSITEDIR)
-	$(INSTALL) -g caml -m g+w doc/*.gif $(WEBSITEDIR)
-	$(INSTALL) -g caml -m g+w doc/*.jpg $(WEBSITEDIR)
-	$(INSTALL) -g caml -m g+w doc/*.$(MANEXT) $(WEBSITEDIR)
-	cd $(WEBSITEDIR) && ln -sf eng.htm index.html
+		$(INSTALL) -d -g caml -m 775 $(WEBSITEDIR); \
+	fi
+	$(INSTALL) -g caml -m 755 $(DIST_ARCHIVES) $(WEBSITEDIR)
+	$(INSTALL) -g caml -m 755 doc/*.html $(WEBSITEDIR)
+	$(INSTALL) -g caml -m 755 doc/*.css $(WEBSITEDIR)
+	$(INSTALL) -g caml -m 755 doc/*.dvi $(WEBSITEDIR)
+	$(INSTALL) -g caml -m 755 doc/*.ps $(WEBSITEDIR)
+	$(INSTALL) -g caml -m 755 doc/*.pdf $(WEBSITEDIR)
+	$(INSTALL) -g caml -m 755 doc/*.gif $(WEBSITEDIR)
+	$(INSTALL) -g caml -m 755 doc/*.jpg $(WEBSITEDIR)
+	$(INSTALL) -g caml -m 755 doc/advi.1 $(WEBSITEDIR)
+	cd $(WEBSITEDIR) && ln -sf eng.html index.html
 
 ftpsite: dist
 	if [ ! -d $(FTPSITEDIR) ]; then                     \
-		$(INSTALL) -d -g caml -m g+w $(FTPSITEDIR); \
-	done
-	$(INSTALL) -g caml -m g+w $(DISTFILE) $(FTPSITEDIR)
+		$(INSTALL) -d -g caml -m 775 $(FTPSITEDIR); \
+	fi
+	$(INSTALL) -g caml -m 755 $(DIST_ARCHIVES) $(FTPSITEDIR)
