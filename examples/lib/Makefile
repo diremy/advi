@@ -1,5 +1,5 @@
 TEXINPUTS := .:$(TOPDIR)/examples/lib:$(TOPDIR)/tex:$(TOPDIR)/examples/prosper:
-ADVI=TEXPSHEADERS=.:$(TOPDIR)/tex: $(TOPDIR)/advi.opt
+ADVI=TEXPSHEADERS=.:$(TOPDIR)/tex: $(TOPDIR)/src/advi
 LATEX=TEXINPUTS=$(TEXINPUTS) latex 
 STY=advi.sty advi-annot.sty bubble.sty 
 LIBSTY=commandline.sty xprosper.sty

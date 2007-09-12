@@ -24,11 +24,9 @@
 
 SUBDIRS=cash
 
-TEXFILES= simple.tex moderate.tex bubbles.tex
+TEXFILES= simple.tex moderate.tex 
 
 ADVIDIR=../..
-
-include ../../Makefile.config
 
 RM=/bin/rm -f
 

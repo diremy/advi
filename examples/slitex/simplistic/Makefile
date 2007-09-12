@@ -24,7 +24,7 @@
 
 LATEX=latex
 
-#OSTYLES=~/lib/tex/STYLES
+OSTYLES=../../../tex
 
 .SUFFIXES: .dvi .tex
 

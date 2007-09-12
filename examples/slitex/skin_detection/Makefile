@@ -22,6 +22,8 @@
 
 # To view the demos, use ../../../advi.opt file.dvi
 
+OSTYLES=../../../tex
+
 all: skin_detection.dvi see
 
 edit:
@@ -36,7 +38,7 @@ clean:
 .SUFFIXES: .tex .dvi
 
 .tex.dvi:
-	latex $<
+	@ TEXINPUTS=$(OSTYLES):$$TEXINPUTS; export TEXINPUTS; latex $<
 
 skin_detection.dvi: skin_detection.tex
 

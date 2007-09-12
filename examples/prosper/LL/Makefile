@@ -23,7 +23,7 @@
 # To view the demos, use ../../../advi.opt file.dvi
 
 TEXINPUTS := ..:../../lib:../../../tex:$(TEXINPUTS)
-ADVI=../../../advi.opt
+ADVI=../../../src/advi
 LATEX=TEXINPUTS=$(TEXINPUTS) latex 
 
 all: show
