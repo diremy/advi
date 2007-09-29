@@ -643,7 +643,7 @@ end
    }}
 
 \ifadvi@ignore \else
-   \AtBeginDocument {\advi@pgf@patch}
+   \AtBeginDocument {\message {Patching PGF commands...}\advi@pgf@patch}
 \fi
 
 
@@ -735,8 +735,10 @@ end
    \let \end@slide \advi@end@slide
   }
 
+\ifadvi@ignore \else
 \@ifundefined {overlay}{}
-   {\AtBeginDocument {\advi@overlay@patch}}
+   \AtBeginDocument {\message {Patching PGF commands...}\advi@overlay@patch}
+\fi
 
 %%% Patch for hyperrefs
 
