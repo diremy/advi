@@ -643,7 +643,7 @@ end
    }}
 
 \ifadvi@ignore \else
-   \AtBeginDocument {\message {Patching PGF commands...}\advi@pgf@patch}
+   \AtBeginDocument {\advi@pgf@patch}
 \fi
 
 
@@ -684,23 +684,6 @@ end
            {\advi@record[play]{\the\advi@c@annot}{#2}%
         }}\kern-\fboxsep}}
 \advi@export \adviemphasize \advi@emphasize
-
-%%% Fix a bug in pgfsys-dvips.def 
-
-%% Reimplement invisible material at the advi level
-
-\newif \ifpgfsys@visible
-\pgfsys@visibletrue
-
-\def\pgfsys@begininvisible{%
-  \pgfsys@visiblefalse
-  \advi@special {proc=nulldevice record=start}%
-}
-\def\pgfsys@endinvisible{%
-  \advi@special {proc=nulldevice record=end}%
-  \pgfsys@visibletrue
-}
-
 
 
 %%% Partial patch for overlays -- 0 will be shown > 0 will not be shown

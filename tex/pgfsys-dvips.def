@@ -20,12 +20,10 @@
  
 \let \pgf@sys@postscript@object@immediate \pgf@sys@postscript@object
  
-\newbox \pgf@objects
 \def\pgf@sys@postscript@object #1{%
-  \global \setbox \pgf@objects \hbox {\unhbox \pgf@objects \special{! #1}}%
+  \AtBeginDvi{\pgf@sys@postscript@object@immediate {#1}}%
 }
 \AtBeginDocument {%
-  \AtBeginDvi{\box\pgf@objects}%
   \let \pgf@sys@postscript@objects \pgf@sys@postscript@objects@immediate
 }
 
