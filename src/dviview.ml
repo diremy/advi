@@ -62,7 +62,7 @@ let debug_pages =
     "--debug-pages"
     "  debug page motion.";;
 
-let browser = ref "netscape";;
+let browser = ref "firefox";;
 Options.add
   "-browser"
   (Arg.String (fun s -> browser := s))
