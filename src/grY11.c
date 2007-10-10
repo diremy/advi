@@ -495,7 +495,7 @@ value caml_gr_reposition (value x, value y, value w, value h, value scr)
 {
   /* Window r; */
   int posx, posy, width, height, screen;
-  /* int xinerama_x=0, xinerama_y=0; */
+  int xinerama_x=0, xinerama_y=0;
   Bool fullscreen;
   XWindowAttributes att;
 
