@@ -119,6 +119,14 @@ let dummy_symbol = {
   symbol = Line (-1, None)
 };;
 
+
+
+let debug =
+  Options.flag false "--debug-positions"
+  "  Debug positions in source file";;
+
+
+
 let get_global_display_set, set_global_display_set =
   let global_display_set = ref [] in
   (fun () -> !global_display_set),
@@ -525,13 +533,16 @@ let closest history x y =
     let compare i j =
       let x = history.(i) and y = history.(j) in
       let dx = distance x and dy = distance y in
-      if dx = dy then
-        if dx = 0 then max (width x) (height x)
-        else 100 * (i - j)
-      else 10000 * (dx - dy) in
+      let c = 
+       if dx = dy then
+         if dx = 0 then max (width x) (height x)
+         else 100 * (i - j)
+       else 10000 * (dx - dy) in
+      if !debug then Printf.printf "compare %d %d -> %d\n%!" i j c; 
+      c in
     let i = ref 0 in
     Array.iteri (fun j _ -> if compare !i j > 0 then i := j) history;
-    !i
+    (if !debug then Printf.printf "closest %d %d -> %d\n%!" x y !i; !i)
   with Invalid_argument _ -> assert false;;
 
 let nearest r x y =
@@ -554,7 +565,10 @@ let nearest r x y =
   with Invalid_argument _ -> assert false;;
 
 let position x y =
-  let history = Array.of_list (get_global_display_set ()) in
+  let display = get_global_display_set () in 
+  let accept a = match a.symbol with Rule (_,_) -> false | _ -> true in 
+  let cleaned_display = List.filter accept display in
+  let history = Array.of_list cleaned_display in
   if Array.length history > 0 then
     let time = closest history x y in
     { history = history; first = time; last = time; }
@@ -562,9 +576,35 @@ let position x y =
 
 let valid position i = i >= 0 && i < Array.length position.history;;
 
-let around b x y =
+let print_display_symbol n s = 
+  let symbol = match s.symbol with
+  | Glyph g -> Printf.sprintf "Glyph" (* "(%d,%d,%d,%d)" 
+        (g.glyph).G.hoffset
+        g.glyph.G.voffset
+        g.glyph.G.width
+        g.glyph.G.height *)
+  | Space (x,y) -> Printf.sprintf "Space (%d,%d)" x y
+  | Rule (x, y) -> Printf.sprintf "Rule (%d,%d)" x y
+  | Line (x, None) -> Printf.sprintf "Line (%d,-)" x 
+  | Line (x, Some s) -> Printf.sprintf "Line (%d,%s)" x s in
+  Printf.printf "%d:  @(%3d, %3d)  code=%d  %s\n"
+    n s.locx s.locy s.code symbol;;
+
+let last_history = ref []
+
+let around b x y = 
   try
     let position = position x y in
+    if !debug then 
+      begin
+        if !last_history != (get_global_display_set ()) then
+          begin 
+            Array.iteri print_display_symbol position.history; 
+            last_history := (get_global_display_set ());
+          end;
+        Printf.printf "Position at %d %d -> first=%d last=%d\n%!" 
+          x y position.first position.last;
+      end;
     let valid = valid position in
     let rec skip_spaces move i =
       if valid i then
@@ -627,14 +667,24 @@ let rec least l min =
   | [] -> min;;
 
 let lines x y =
+  if !debug then Printf.printf "Lines at %d %d...\n%!" x y;
   match around true x y with
-  | None -> None
+  | None -> 
+      if !debug then Printf.printf "around = None\n%!";
+      None
   | Some (region, left, (i1, w1), (i2, w2), right) ->
+      if !debug then Printf.printf
+          "around = Some ([%d.%d], %s, (%d, %s), (%d, %s), %s)\n%!"
+          region.first region.last left i1 w1 i2 w2 right;           
       let rec find_line move i =
+        if !debug then Printf.printf "find_line: i=%d\n%!" i;
         if valid region i then
           let h = region.history.(i) in
           match h.symbol with
-          | Line(n, f) when n >= 0 -> n, f
+          | Line(n, f) when n >= 0 -> 
+              if !debug then Printf.printf "find_line: n=%d f=%s\n%!" n 
+                  (match f with Some s -> s | None -> "-");
+              n, f
           | _ ->  find_line move (move i)
         else -1, None in
       let space_ref = region.history.(region.first) in
