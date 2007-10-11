@@ -685,23 +685,6 @@ end
         }}\kern-\fboxsep}}
 \advi@export \adviemphasize \advi@emphasize
 
-%%% Fix a bug in pgfsys-dvips.def 
-
-%% Reimplement invisible material at the advi level
-
-\newif \ifpgfsys@visible
-\pgfsys@visibletrue
-
-\def\pgfsys@begininvisible{%
-  \pgfsys@visiblefalse
-  \advi@special {proc=nulldevice record=start}%
-}
-\def\pgfsys@endinvisible{%
-  \advi@special {proc=nulldevice record=end}%
-  \pgfsys@visibletrue
-}
-
-
 
 %%% Partial patch for overlays -- 0 will be shown > 0 will not be shown
 
@@ -735,8 +718,10 @@ end
    \let \end@slide \advi@end@slide
   }
 
+\ifadvi@ignore \else
 \@ifundefined {overlay}{}
-   {\AtBeginDocument {\advi@overlay@patch}}
+   \AtBeginDocument {\message {Patching PGF commands...}\advi@overlay@patch}
+\fi
 
 %%% Patch for hyperrefs
 

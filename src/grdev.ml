@@ -1623,7 +1623,7 @@ let button m =
   Button2;;
 
 let wait_button_up m x y =
-  Printf.printf  "Button %d\n%!" (Obj.magic (Obj.repr (button m)));
+  (*  Printf.printf  "Button %d\n%!" (Obj.magic (Obj.repr (button m))); *)
   let wait_position () =
     match wait_signal_event button_up with
     | Raw e ->
