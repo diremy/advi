@@ -879,7 +879,17 @@ module A : ACTIVE =
         }
     type 'a t = 'a active list
     let empty = []
-    let add a t = a :: t
+    let crop z u l = 
+      if z >= 0 && z + u <= l then z, u 
+      else if z + u < 0 || z > l then -1, 1
+      else if z <= 0 && z + u > l then 0, l
+      else if z <= 0 then 0, u + z
+      else z, l - z 
+      
+    let add a t = 
+      let x, w = crop a.x a.w !size_x in
+      let y, h = crop a.y a.h !size_y in
+      { x = x; y = y; w = w; h = h; action = a.action } :: t
     let inside x y a  =
       a.x <= x && a.y <= y && x <= a.x + a.w && y <= a.y + a.h
     let find x y t = List.find (inside x y) t

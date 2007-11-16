@@ -18,7 +18,8 @@
 (* $Id$ *)
 
 let debugs = Misc.debug_endline;;
-let delaysafer = ref true;;
+(* You may need to make it false for old versions of gs *)
+let delaysafer = ref true;; (* false *)
 
 let get_do_ps, set_do_ps, init_do_ps =
  let has_to_do_ps = ref !Global_options.pson in
@@ -314,6 +315,26 @@ let moveto x y =
   Printf.sprintf "%d %d moveto" x y
 ;;
 
+(* This is sent to the process, so as to fix a bug in gs 8.60... *)
+let dummy_string = 
+"
+/dummydummy {
+aaaaaaaaaa
+aaaaaaaaaa
+aaaaaaaaaa
+aaaaaaaaaa
+aaaaaaaaaa
+aaaaaaaaaa
+aaaaaaaaaa
+aaaaaaaaaa
+aaaaaaaaaa
+aaaaaaaaaa
+aaaaaaaaaa
+aaaaaaaaaa
+aaaaaaaaaa
+} def
+";;
+
 let make_header (b, h) =
   if b then
     String.concat "\n"
@@ -328,7 +349,8 @@ let texc_special_pro gv =
     let l' = Search.true_file_names [] l in
     if List.length l = List.length l' then
       List.map (fun s -> make_header (false, s)) l'
-    else raise Not_found
+        (* Fixes A bug in ack_string, but I don't know how... *)
+     else raise Not_found
   with
     Not_found ->
       Misc.warning "Cannot find Postscript prologues: texc.pro or special.pro";
@@ -445,6 +467,7 @@ class gv =
           showps "%!PS-Adobe-2.0\n%%Creator: Active-DVI\n%!";
           gs # line "[1 0 0 -1 0 0] concat";
           List.iter (gs # line) headers;
+          gs # line dummy_string;
           gs # line advi_pro;
           gs # line "TeXDict begin @landscape end";
           gs # line "/SI save def gsave";

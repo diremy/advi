@@ -242,6 +242,7 @@ type event =
 ;;
 
 external wait_next_event : event list -> status = "caml_gry_wait_event";;
+(* val wait_next_event : event list -> status;; *)
         (* Wait until one of the events specified in the given event list
            occurs, and return the status of the mouse and keyboard at
            that time. If [Poll] is given in the event list, return immediately
