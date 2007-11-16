@@ -1,4 +1,4 @@
-SUBDIRS = src doc tex
+SUBDIRS = src tex
 
 CVSRELEASETAG = Release-$(subst .,_,$(VERSION))
 ANNOUNCEFILE  = Announce-$(VERSION)

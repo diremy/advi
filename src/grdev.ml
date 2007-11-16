@@ -604,8 +604,9 @@ let get_bg_color x y w h =
     if !psused || bkgd_data.bgimg <> None ||
        bkgd_data.bggradient <> None ||
        bkgd_data.bgviewport <> None then
-      let c = point_color (x + 1) (y + 1) in
-      let c' = point_color (x + w - 1) (y + h - 1) in
+      let c = point_color (max 0 x + 1) (max 0 y + 1) in
+      let c' = point_color (min !size_x (x + w) - 1)
+                           (min !size_y (y + h) - 1) in
       if c = c' then c else 
       if get_playing () > 0 then find_bg_color x y w h else
       mean_color c c'
@@ -879,17 +880,21 @@ module A : ACTIVE =
         }
     type 'a t = 'a active list
     let empty = []
+(*
     let crop z u l = 
       if z >= 0 && z + u <= l then z, u 
-      else if z + u < 0 || z > l then -1, 1
+      else if z + u < 0 || z > l then 0, 1
       else if z <= 0 && z + u > l then 0, l
       else if z <= 0 then 0, u + z
       else z, l - z 
-      
+*)      
     let add a t = 
-      let x, w = crop a.x a.w !size_x in
-      let y, h = crop a.y a.h !size_y in
-      { x = x; y = y; w = w; h = h; action = a.action } :: t
+      (*
+        let x, w = crop a.x a.w !size_x in
+        let y, h = crop a.y a.h !size_y in
+        { x = x; y = y; w = w; h = h; action = a.action } 
+      *)
+      a :: t
     let inside x y a  =
       a.x <= x && a.y <= y && x <= a.x + a.w && y <= a.y + a.h
     let find x y t = List.find (inside x y) t

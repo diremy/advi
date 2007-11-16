@@ -576,6 +576,10 @@ let position x y =
 
 let valid position i = i >= 0 && i < Array.length position.history;;
 
+let debug =
+  Options.flag false "--debug-positions"
+  "  Debug positions in source file";;
+
 let print_display_symbol n s = 
   let symbol = match s.symbol with
   | Glyph g -> Printf.sprintf "Glyph" (* "(%d,%d,%d,%d)" 
@@ -589,6 +593,7 @@ let print_display_symbol n s =
   | Line (x, Some s) -> Printf.sprintf "Line (%d,%s)" x s in
   Printf.printf "%d:  @(%3d, %3d)  code=%d  %s\n"
     n s.locx s.locy s.code symbol;;
+
 
 let last_history = ref []
 
