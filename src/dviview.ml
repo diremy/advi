@@ -211,7 +211,7 @@ and state = {
     mutable page_marks : int list;
     mutable exchange_page : int;
     mutable last_command : command;
-    mutable last_modified : float;
+    mutable last_modified : int * int * float;
     mutable button : (int * int) option;
     mutable full_screen : (int * int * int * int * (int * int)) option;
     mutable in_full_screen : bool;
@@ -368,8 +368,10 @@ let init master filename =
   let int = 0 in
   let float = 0. in
   let last_modified =
-    try (Unix.stat filename).Unix.st_mtime
-    with _ -> 0.0 in
+    try 
+      let stat =  Unix.stat filename in
+      stat.Unix.st_dev, stat.Unix.st_ino, stat.Unix.st_mtime
+    with _ -> 0, 0, 0.0 in
   Gs.init_do_ps ();
   let st =
     let npages = Array.length dvi.Cdvi.pages in
@@ -452,11 +454,13 @@ let update_dvi_size all ?dx ?dy st =
 (* Reloading *)
 
 let reload_time st =
-  try let s = Unix.stat st.filename in s.Unix.st_mtime
+  try 
+    let stat =  Unix.stat st.filename in
+    stat.Unix.st_dev, stat.Unix.st_ino, stat.Unix.st_mtime
   with _ -> st.last_modified;;
 
 let changed st =
-  reload_time st > st.last_modified;;
+  reload_time st <>  st.last_modified;;
 
 let rec clear_page_stack max stack =
   let pages = Array.create max false in

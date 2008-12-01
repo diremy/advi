@@ -201,7 +201,8 @@ void caml_gr_origin(int* x, int* y)
 {
   Window win, root, parent, r;
   Window* children;
-  int dx, dy, h, w, b, d; 
+  int dx, dy;
+  unsigned int  w, h, b, d; 
   caml_gr_check_open();
   win = caml_gr_window.win;
   root = DefaultRootWindow(caml_gr_display);
@@ -305,8 +306,9 @@ value caml_gr_set_named_atom_property (value name, value string) {
                    XA_STRING,                   /* xa_string */ 
                    8,       			/* format */
                    PropModeReplace, 		/* mode */
-                   String_val(string), 		/* data */
-                   string_length (string) 	/* nelements */
+                   (unsigned char*) 
+                     String_val(string),	/* data */
+                   string_length (string)       /* nelements */
                    );
   XSync(caml_gr_display, False);
   return Val_unit;
@@ -337,7 +339,7 @@ void get_position_against_root( Window w, int *pos )
 {
   Window root, parent;
   Window *children;
-  int nchildren;
+  unsigned int nchildren;
   XWindowAttributes attr;
 
   caml_gr_check_open();
@@ -590,14 +592,20 @@ value caml_gr_reposition (value x, value y, value w, value h, value scr)
 value caml_gr_rebind_keysyms(value unit)
 {
   KeySym modifiers[1] = { 0 };
-  XRebindKeysym(caml_gr_display, XK_Next, modifiers, 0, "N", 1);
-  XRebindKeysym(caml_gr_display, XK_Down, modifiers, 0, "N", 1);
-  XRebindKeysym(caml_gr_display, XK_Prior, modifiers, 0, "P", 1);
-  XRebindKeysym(caml_gr_display, XK_Up, modifiers, 0, "P", 1);
-  XRebindKeysym(caml_gr_display, XK_Home, modifiers, 0, ",", 1);
-  XRebindKeysym(caml_gr_display, XK_End, modifiers, 0, ".", 1);
-  XRebindKeysym(caml_gr_display, XK_Left, modifiers, 0, "\b", 1);
-  XRebindKeysym(caml_gr_display, XK_Right, modifiers, 0, "\r", 1);
+  unsigned char* str; 
+  str = (unsigned char*) "N";
+  XRebindKeysym(caml_gr_display, XK_Next, modifiers, 0, str, 1);
+  XRebindKeysym(caml_gr_display, XK_Down, modifiers, 0, str, 1);
+  str = (unsigned char*)"P";
+  XRebindKeysym(caml_gr_display, XK_Prior, modifiers, 0, str, 1);
+  XRebindKeysym(caml_gr_display, XK_Up, modifiers, 0, str, 1);
+  str = (unsigned char*)",";
+  XRebindKeysym(caml_gr_display, XK_Home, modifiers, 0, str, 1);
+  XRebindKeysym(caml_gr_display, XK_End, modifiers, 0, str, 1);
+  str = (unsigned char*)"\b";
+  XRebindKeysym(caml_gr_display, XK_Left, modifiers, 0, str, 1);
+  str = (unsigned char*)"\r";
+  XRebindKeysym(caml_gr_display, XK_Right, modifiers, 0, str, 1);
   return Val_unit;
 }
 
