@@ -1126,7 +1126,7 @@ let bkgd_special st s = ();;
 
 (* Support for TPIC specials. *)
 
-let milli_inch_to_sp = Units.from_to Units.IN Units.SP 1e-3;;
+let milli_inch_to_sp = AdviUnits.from_to AdviUnits.IN AdviUnits.SP 1e-3;;
 
 let tpic_milli_inches s = parse_float s *. milli_inch_to_sp;;
 

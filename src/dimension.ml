@@ -58,13 +58,13 @@ let dimen_of_string str =
 
 let normalize = function
   | Px n -> Px n
-  | Pt f -> In (Units.from_to Units.PT Units.IN f)
-  | Pc f -> In (Units.from_to Units.PC Units.IN f)
+  | Pt f -> In (AdviUnits.from_to AdviUnits.PT AdviUnits.IN f)
+  | Pc f -> In (AdviUnits.from_to AdviUnits.PC AdviUnits.IN f)
   | In f -> In f
-  | Bp f -> In (Units.from_to Units.BP Units.IN f)
-  | Cm f -> In (Units.from_to Units.CM Units.IN f)
-  | Mm f -> In (Units.from_to Units.MM Units.IN f)
-  | Dd f -> In (Units.from_to Units.DD Units.IN f)
-  | Cc f -> In (Units.from_to Units.CC Units.IN f)
-  | Sp n -> In (Units.from_to Units.SP Units.IN (float n));;
+  | Bp f -> In (AdviUnits.from_to AdviUnits.BP AdviUnits.IN f)
+  | Cm f -> In (AdviUnits.from_to AdviUnits.CM AdviUnits.IN f)
+  | Mm f -> In (AdviUnits.from_to AdviUnits.MM AdviUnits.IN f)
+  | Dd f -> In (AdviUnits.from_to AdviUnits.DD AdviUnits.IN f)
+  | Cc f -> In (AdviUnits.from_to AdviUnits.CC AdviUnits.IN f)
+  | Sp n -> In (AdviUnits.from_to AdviUnits.SP AdviUnits.IN (float n));;
 

@@ -107,19 +107,20 @@ AC_SUBST(X_EXTRA_LIBS)
 AC_SUBST(X_CFLAGS)
 
 # Checking for xinerama support
-have_xinerama="false"
-AC_CHECK_HEADER(
-    [X11/extensions/Xinerama.h],
-    [AC_CHECK_LIB(
-	[Xinerama],
-	[XineramaQueryScreens],
-	[have_xinerama="true"
-	 XINERAMA_CFLAGS="-DHAVE_XINERAMA"
-	 XINERAMA_LIBS="-lXinerama"]
-    )]
-)
-AC_SUBST(XINERAMA_CFLAGS)
-AC_SUBST(XINERAMA_LIBS)
+# BROKEN, optional ???
+# have_xinerama="false"
+#AC_CHECK_HEADER(
+#    [X11/extensions/Xinerama.h],
+#    [AC_CHECK_LIB(
+#	[Xinerama],
+#	[XineramaQueryScreens],
+#	[have_xinerama="true"
+#	 XINERAMA_CFLAGS="-DHAVE_XINERAMA"
+#	 XINERAMA_LIBS="-lXinerama"]
+#    )]
+#)
+#AC_SUBST(XINERAMA_CFLAGS)
+#AC_SUBST(XINERAMA_LIBS)
 
 # Checking TeX 
 AC_PATH_PROG(KPSEXPAND, kpsexpand)
