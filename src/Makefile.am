@@ -33,7 +33,7 @@ OCAMLSOURCES = misc.ml timeout.ml ageometry.ml \
 	       launch.ml dvicolor.ml shot.ml laser_pointer.ml \
 	       symbol.ml \
 	       input.ml table.ml pkfont.ml ttfont.ml jfm.ml search.ml \
-	       font.ml glyph.ml devfont.ml units.ml dimension.ml dvi.ml \
+	       font.ml glyph.ml devfont.ml adviUnits.ml dimension.ml dvi.ml \
 	       drawimage.ml gs.ml transimpl.ml embed.ml grdev.ml addons.ml \
 	       scratch.ml cdvi.ml driver.ml thumbnails.ml dviview.ml main.ml
 OCAMLINTERFACES = misc.mli timeout.mli ageometry.mli \
@@ -44,7 +44,7 @@ OCAMLINTERFACES = misc.mli timeout.mli ageometry.mli \
 		  symbol.mli \
 		  input.mli table.mli pkfont.mli ttfont.mli jfm.mli \
 		  search.mli \
-		  font.mli glyph.mli devfont.mli units.mli dimension.mli \
+		  font.mli glyph.mli devfont.mli adviUnits.mli dimension.mli \
 		  dvi.mli dvicommands.mli \
 		  drawimage.mli gs.mli transitions.mli embed.mli grdev.mli \
 		  addons.mli \
