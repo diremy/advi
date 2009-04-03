@@ -865,6 +865,7 @@ module type ACTIVE =
     val same_location : 'a active -> 'b active -> bool
     val find : int -> int -> 'a t -> 'a active
     val find_action : ('a -> bool) -> 'a t -> 'a active
+    val find_with_action : ('a -> bool) -> int -> int -> 'a t -> 'a active
     val inside : int -> int -> 'a active -> bool
     val iter : ('a active -> unit) -> 'a t -> unit
   end;;
@@ -897,8 +898,10 @@ module A : ACTIVE =
       a :: t
     let inside x y a  =
       a.x <= x && a.y <= y && x <= a.x + a.w && y <= a.y + a.h
+    let find_with_action f x y t =
+      List.find (fun a -> f a.action && inside x y a) t
     let find x y t = List.find (inside x y) t
-    let find_action f l = List.find (fun x -> f x.action) l
+    let find_action f l = List.find (fun a -> f a.action) l
     let iter = List.iter
     let same_location a b =
 (*
@@ -1047,6 +1050,8 @@ module H =
       anchors := A.add a !anchors
 
     let find x y = A.find x y !anchors
+    let find_with_tag t x y =
+      A.find_with_action (fun x -> t x.tag) x y !anchors
 
     let find_tag t = A.find_action (fun x -> x.tag = t) !anchors
 
@@ -1693,6 +1698,8 @@ let find_key ev =
     if cc >= 1 then char_of_int cc else c in
   Key k;;
 
+let active_tag z = match z with H.Name _ -> false | _ -> true;;
+
 let wait_event () =
   (* We reached a pause. Now we can reset the sleep break *)
   clear_sleep ();
@@ -1703,7 +1710,7 @@ let wait_event () =
     | Final e -> send e
     | Raw ev ->
         if ev.GraphicsY11.keypressed then send (find_key ev) else
-        try match H.find ev.mouse_x ev.mouse_y with
+        try match H.find_with_tag active_tag ev.mouse_x ev.mouse_y with
         | {A.action = {H.tag = H.Href h; H.draw = d}} as act ->
             if ev.button then
               let _ev' = GraphicsY11.wait_next_event button_up in

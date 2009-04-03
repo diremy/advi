@@ -201,8 +201,7 @@ type state = {
     (* PS specials page state *)
     mutable status : Cdvi.known_status;
     mutable headers : (bool * string) list;
-    mutable html : (Dev.H.tag * int) option;
-    mutable draw_html : (int * int * Dev.glyph) list;
+    mutable html : (Dev.H.tag * (int * int * Dev.glyph) list ref) list;
     mutable checkpoint : int;
   };;
 
@@ -378,8 +377,8 @@ let put st code =
     if !visible then
       begin
         begin match st.html with
-        | Some _ -> st.draw_html <- (x, y, glyph) :: st.draw_html
-        | None -> ()
+        | (tag, draw) :: _ -> draw := (x, y, glyph) :: !draw
+        | [] -> ()
         end;
         Dev.draw_glyph (glyph : Dev.glyph) x y;
         add_char st x y code glyph
@@ -1282,20 +1281,34 @@ let header_special st s = ();;
 
 (* Should check that a pause is not in the middle of some html code *)
 let open_html st link tag =
-  match st.html with
-  | Some (t, k) -> st.html <- Some (t, succ k)
-  | None -> st.html <- Some (tag (unquote link), 0);;
+  st.html <- (tag (unquote link), ref []) :: st.html
+(*   match st.html with *)
+(*   | Some (t, k) -> st.html <- Some (t, succ k) *)
+(*   | None -> st.html <- Some (tag (unquote link), 0);; *)
+                                    
 
 let close_html st =
   match st.html with
-  | Some (tag, k) when k > 0 ->
-      st.html <- Some (tag, k - 1)
-  | Some (tag, 0) ->
-      Dev.H.add {Dev.H.tag = tag; Dev.H.draw = List.rev st.draw_html};
-      st.html <- None;
-      st.draw_html <- []
-  | Some (_, k) -> assert false
-  | None -> Misc.warning ("Closing html tag that was not open");;
+  | [] -> Misc.warning ("Closing html tag that was not open")
+  |  (tag, draw) :: rest ->
+      Dev.H.add {Dev.H.tag = tag; Dev.H.draw = List.rev !draw};
+      st.html <- rest;
+      match rest with
+      | (_, draw') :: _ -> draw' := !draw @ !draw'
+      | [] -> ()
+;;
+
+(*   match st.html with *)
+(*   | Some (tag, k) when k > 0 -> *)
+(*       (\* Just added that line *\) *)
+(*       Dev.H.add {Dev.H.tag = tag; Dev.H.draw = List.rev st.draw_html}; *)
+(*       st.html <- Some (tag, k - 1) *)
+(*   | Some (tag, 0) -> *)
+(*       Dev.H.add {Dev.H.tag = tag; Dev.H.draw = List.rev st.draw_html}; *)
+(*       st.html <- None; *)
+(*       st.draw_html <- [] *)
+(*   | Some (_, k) -> assert false *)
+(*   | None -> Misc.warning ("Closing html tag that was not open");; *)
 
 let html_special st html =
   if has_prefix "<A " html || has_prefix "<a " html then
@@ -1692,8 +1705,7 @@ let render_step cdvi num ?trans ?chst dpi xorig yorig =
       tpic_pensize = 0.0; tpic_path = []; tpic_shading = no_shading;
       status = (orid chst) status;
       headers = [];
-      html = None;
-      draw_html = [];
+      html = []; 
       checkpoint = 0;
     } in
   newpage [] st (mag *. dpi) xorig yorig;
