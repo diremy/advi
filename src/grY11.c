@@ -601,11 +601,14 @@ value caml_gr_rebind_keysyms(value unit)
   XRebindKeysym(caml_gr_display, XK_Up, modifiers, 0, str, 1);
   str = (unsigned char*)",";
   XRebindKeysym(caml_gr_display, XK_Home, modifiers, 0, str, 1);
+  str = (unsigned char*)".";
   XRebindKeysym(caml_gr_display, XK_End, modifiers, 0, str, 1);
   str = (unsigned char*)"\b";
   XRebindKeysym(caml_gr_display, XK_Left, modifiers, 0, str, 1);
   str = (unsigned char*)"\r";
   XRebindKeysym(caml_gr_display, XK_Right, modifiers, 0, str, 1);
+  str = (unsigned char*)"t";
+  XRebindKeysym(caml_gr_display, XK_Insert, modifiers, 0, str, 1);
   return Val_unit;
 }
 

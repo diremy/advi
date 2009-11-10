@@ -35,10 +35,10 @@ arbitrary applications within the presentation (hence the Active
 adjective of the presenter :).
 
 Active-DVI is largely based on Mldvi written by Alexandre Miquel
-(http://pauillac.inria.fr/~miquel/).
+(http://www.pps.jussieu.fr/~miquel/).
 
-Version: 1.0
-available at http://pauillac.inria.fr/advi/
+Version: 1.8
+available at http://advi.inria.fr/
 
 CURRENTLY SUPPORTED FEATURES:
 =============================
@@ -216,14 +216,8 @@ This program is distributed under the GNU LGPL.
 See the enclosed file COPYING.
 
 
-AUTHOR
-======
+AUTHORS
+=======
 
-Alexandre Miquel  <Alexandre.Miquel@inria.fr>
-Jun Furuse <Jun.Furuse@inria.fr>
-Didier Remy <Didier.Remy@inria.fr> inlined Postcript, hyperlinks
-Pierre Weis <Pierre.Weis@inria.fr>
-Xavier Leroy <Xavier.Leroy@inria.fr> gpic specials
-Roberto Di Cosmo <dicosmo@pauillac.inria.fr>
-Didier Le Botlan <Didier.Le_Botlan@inria.fr>
-Alan Schmitt <Alan.Schmitt@inria.fr>
+Alexandre Miquel, Jun Furuse Didier Remy, Pierre Weis, Xavier Leroy, Roberto
+Di Cosmo Didier Le Botlan, Alan Schmitt

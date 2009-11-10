@@ -1,3 +1,7 @@
+        Shared the definitions of advi@CP and advi@pgfpoint
+        Increased the length of dummy_string.
+        Added dummy_string to (apparently) fix some bug in gs? 
+Version 1.8
 Version 1.7
 2005/09/02
         Having Active-DVI compatible with the new Graphics library.

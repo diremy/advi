@@ -46,14 +46,13 @@ Play advi on the demonstration presentation demo.dvi that is in the test
 directory of the distribution. Look at source code of various talks in
 the directory ``examples''.
 
-The source code, RPM packages, and information are available at
+The source code and information are available at
 
-    http://pauillac.inria.fr/activedvi/
+    http://advi.inria.fr/
 
 Contributions and comments are warmly welcome.
 
-Mailing list advi-list-request@pauillac.inria.fr
-Bug reports to advi-bugs@pauillac.inria.fr
+Mailing list and bug reports to advi@inria.fr
 
 --
 For the Active-DVI development team, 31th Jan 2003

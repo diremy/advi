@@ -611,7 +611,7 @@ end
 
 \def \advi@pgfsys@hbox #1{%
   \pgfsys@invoke{pgfs}
-  \pgfsys@outerinvoke{advi@pgfpoint}%
+  \pgfsys@outerinvoke{advi@CP}%
     \special{ps::[end]}%
       \wd#1=0pt%
       \ht#1=0pt%

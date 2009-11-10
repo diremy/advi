@@ -213,8 +213,10 @@ class gs () =
     method ack_request =
       try
         ack <- ack + 1;
+        debugs "calling ack_request";
         self # line ack_request;
         flush leftout;
+        debugs "calling ack";
         self # ack;
       with
       | Killed s ->
@@ -229,6 +231,7 @@ class gs () =
     method ack =
       if ack > 0 then
         begin
+          debugs "waiting for input";
           let s =
             try input_line rightin
             with End_of_file ->
@@ -244,7 +247,13 @@ class gs () =
                   end
               | _, _, _ ->
                   input_line rightin in
-          if Misc.has_prefix s ack_string then ack <- ack - 1 else
+          debugs s;
+          if Misc.has_prefix s ack_string then
+            begin
+              ack <- ack - 1;
+              debugs "gotit";
+            end
+          else
           if Misc.has_prefix pos_string s then
             begin
               try
@@ -296,13 +305,10 @@ let advi_pro =
 "/advi@floatstring 20 string def
 /advi@printfloat { advi@floatstring cvs print } def
 /advi@CP {
-CM [1 0 0 -1 0 0] setmatrix
-    CP (dvi) print advi@printfloat  (,) print advi@printfloat (\n) print
-setmatrix } def
-/advi@pgfpoint {
 matrix currentmatrix [1 0 0 -1 0 0] setmatrix currentpoint 
 (dvi) print advi@printfloat  (,) print advi@printfloat (\n) print
-setmatrix } def";;
+setmatrix } def
+";;
 let advi_noshowpage = " /showpage { } /def"
 let advi_resetmatrix = "[1 0 0 -1 0 0] concat"
 
@@ -319,19 +325,14 @@ let moveto x y =
 let dummy_string = 
 "
 /dummydummy {
-aaaaaaaaaa
-aaaaaaaaaa
-aaaaaaaaaa
-aaaaaaaaaa
-aaaaaaaaaa
-aaaaaaaaaa
-aaaaaaaaaa
-aaaaaaaaaa
-aaaaaaaaaa
-aaaaaaaaaa
-aaaaaaaaaa
-aaaaaaaaaa
-aaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 } def
 ";;
 
@@ -466,8 +467,8 @@ class gv =
           (* should take matrix as a parameter ? *)
           showps "%!PS-Adobe-2.0\n%%Creator: Active-DVI\n%!";
           gs # line "[1 0 0 -1 0 0] concat";
-          List.iter (gs # line) headers;
           gs # line dummy_string;
+          List.iter (gs # line) headers;
           gs # line advi_pro;
           gs # line "TeXDict begin @landscape end";
           gs # line "/SI save def gsave";
