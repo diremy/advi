@@ -322,6 +322,7 @@ let encodings = [
   "cmmi[0-9]+",       cmmi_encoding;
   "cmex[0-9]+",       cmex_encoding;
   "cmsy[0-9]+",       cmex_encoding;
+  "cmssi[0-9]+",      cmmi_encoding;
 (* does not seem correct. eg. ff is \027 instead of \011? what else? *)
   "ecrm[0-9]+",       accents ecmr_encoding;
   "ecti[0-9]+",       accents ecmr_encoding;
@@ -337,6 +338,11 @@ let encodings = [
   "msam[0-9]+",       accents ptmr_encoding;
 (* is this correct ? *)
   "rtxptmr.*",        cmr_encoding;
+(* informal maths *)
+  "ifrm[0-9]+cm",     cmr_encoding;
+  "ifro[0-9]+cm",     cmr_encoding;
+  "ifmi[0-9]+",       cmmi_encoding;
+  "ifsy[0-9]+",       cmex_encoding;
 ];;
 
 let compile_regexps source =

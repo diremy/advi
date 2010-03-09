@@ -420,7 +420,7 @@ class gv =
           match process with
           | Some gs ->
               gs # line "grestore SI restore";
-              List.iter (gs # line) l;
+              List.iter (gs # line) l; 
               (* to avoid no-current-point *)
               gs # line "0 0 moveto";
               gs # line "/SI save def gsave";
@@ -430,8 +430,8 @@ class gv =
       self # check_size;
       let l = List.map make_header l in
       let l = List.filter (fun s -> not (List.mem s headers)) l in
-      let gs = self # process in
       if l <> [] then headers <- headers @ l;
+      let gs = self # process in
       dpi <- sdpi;
       mag <- m;
       xorig <- x;

@@ -50,6 +50,25 @@ HTMSOURCES = \
 	     faq-eng.htm faq-fra.htm \
 	     screen-shots-fra.htm screen-shots-eng.htm
 
+HTMINCLUDES = \
+	includes/aftertitle-eng.htm \
+	includes/aprestitre-fra.htm \
+	includes/avanttitre-fra.htm \
+	includes/basdepage-fra.htm \
+	includes/beforetitle-eng.htm \
+	includes/bottomofpage-eng.htm \
+	includes/copyright-eng.htm \
+	includes/copyright-fra.htm \
+	includes/endofpage-eng.htm \
+	includes/findepage-fra.htm \
+	includes/hautdepage-fra.htm \
+	includes/maquette-eng.htm \
+	includes/maquette-fra.htm \
+	includes/topofpage-eng.htm
+
+
+eng.html: $(HTMINCLUDES)
+
 STATICIMAGES = bar.gif \
 	       inria.gif \
 	       advilogo.gif \
@@ -149,7 +168,8 @@ else
 	@exit 1
 endif
 
-.htm.html:
+
+.htm.html: 
 if HAVE_HTMLC
 	$(HTMLC) $(HTMLC_FLAGS) -f $(srcdir)/$< -t $@
 else

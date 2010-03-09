@@ -1697,7 +1697,8 @@ let render_step cdvi num ?trans ?chst dpi xorig yorig =
       alpha = 1.0; alpha_stack = [];
       blend = Drawimage.Normal; blend_stack = [];
       epstransparent = true; epstransparent_stack = [];
-      epsbygs = false; epsbygs_stack = [];
+      epsbygs = Gs.get_do_ps();
+      epsbygs_stack = [];
       epswithantialiasing = true; epswithantialiasing_stack = [];
       direction = trans;
       transition = Transitions.TransNone;

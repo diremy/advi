@@ -24,6 +24,8 @@ Misc.set_forward_debug_endline debug_endline;;
 
 (* Some global options for Active-DVI. *)
 
+(* let try_epsbygs = true;; *)
+
 let pson =
   if Config.have_gs then
     Options.flag true
