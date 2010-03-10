@@ -39,6 +39,8 @@ ADVI=TEXPSHEADERS=$(ADVIDIR)/tex: $(ADVIDIR)/advi
 MLPROG=
 
 all: $(DVIFILES) 
+
+show: $(DVIFILES) 
 	advi simple.dvi && \
 	advi moderate.dvi 
 
