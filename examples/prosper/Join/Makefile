@@ -26,7 +26,7 @@ TOPDIR=../../..
 FILES=join.tex 
 include ../../lib/Makefile
 
-all:: show
+all:: join.dvi
 
 show: join.dvi
 	$(ADVI) join.dvi

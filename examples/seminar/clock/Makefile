@@ -29,6 +29,8 @@ EPS=bar.jpg.eps cameleon.eps cameleon2.eps hump.eps logo.gif.eps ocaml.eps ocaml
 include ../../lib/Makefile
 
 all:: tools.dvi
+
+show:: tools.dvi
 	advi tools.dvi
 
 tools.dvi: $(EPS) tools.tex

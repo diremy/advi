@@ -66,7 +66,6 @@ HTMINCLUDES = \
 	includes/maquette-fra.htm \
 	includes/topofpage-eng.htm
 
-
 eng.html: $(HTMINCLUDES)
 
 STATICIMAGES = bar.gif \
@@ -168,6 +167,8 @@ else
 	@exit 1
 endif
 
+
+$(HTMLFILES): Makefile
 
 .htm.html: 
 if HAVE_HTMLC

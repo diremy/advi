@@ -22,8 +22,6 @@
 
 # To view the demos, use ../advi.opt file.dvi
 
-SUBDIRS=cash
-
 TEXFILES= simple.tex moderate.tex 
 
 ADVIDIR=../..
@@ -58,8 +56,5 @@ clean:
 	$(RM) a.out *.aux *.log *.dvi *~ 
 	$(RM) $(MLPROG) *.cmi *.cmo
 	$(RM) .advi/*
-	for i in $(SUBDIRS); do \
-	  cd $$i; $(MAKE) clean; cd ..; \
-	done
 
 .SUFFIXES: .tex .sty .dvi .eps .advi

@@ -29,6 +29,11 @@ all:
 	  cd $$i; $(MAKE) all; cd ..; \
 	done
 
+show:
+	for i in $(SUBDIRS); do \
+	  cd $$i; $(MAKE) show; cd ..; \
+	done
+
 clean:
 	$(RM) a.out *.aux *.log *.dvi *~ 
 	for i in $(SUBDIRS); do \

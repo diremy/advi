@@ -8,6 +8,8 @@ FTPSITEDIR = /net/yquem/infosystems/ftp/$(PACKAGE)
 CVSROOTDIR = /net/yquem/devel/caml/repository/
 CVSPKGDIR  = bazar-ocaml/$(PACKAGE)
 
+EXTRA_DIST = ocaml.m4
+
 cvstag:
 	cvs tag -c $(CVSRELEASETAG)
 

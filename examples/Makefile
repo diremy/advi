@@ -20,9 +20,33 @@
 
 # $Id$
 
+
+EXPORTFILES = $(shell find -name CVS -prune -o -name '[^.]*' -print)
+
+
 SUBDIRS=basics prosper seminar slitex
 
+
 all:
+	for i in $(SUBDIRS); do \
+	 echo $$i; \
+	 cd $$i; $(MAKE) all; cd ..; \
+	done
+	@echo '*** All examples have been successfully compiled'
+	@echo '*** Run "make show" to view the examples'
+
+show:
+	for i in $(SUBDIRS); do \
+	 echo $$i; \
+	 cd $$i; $(MAKE) show; cd ..; \
+	done
+
+distdir:
+	cvs export -D today -d . advi/examples
+	rmdir $(distdir)
+	mv examples $(distdir) 
+
+test:
 	for i in $(SUBDIRS); do \
 	 echo $$i; \
 	 cd $$i; $(MAKE) all; cd ..; \

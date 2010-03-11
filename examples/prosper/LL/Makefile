@@ -26,7 +26,7 @@ TEXINPUTS := ..:../../lib:../../../tex:$(TEXINPUTS)
 ADVI=../../../src/advi
 LATEX=TEXINPUTS=$(TEXINPUTS) latex 
 
-all: show
+all: ll.dvi
 
 show: ll.dvi
 	$(ADVI) ll.dvi

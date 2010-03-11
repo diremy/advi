@@ -25,6 +25,8 @@
 N=14
 
 all:: a${N}.dvi
+
+show:: a${N}.dvi
 	advi a${N}.dvi
 
 a${N}.dvi: mon-dvipdf.tex a${N}.tex

@@ -31,6 +31,13 @@ all:
 	  fi; \
 	done
 
+show:
+	for i in $(SUBDIRS); do \
+	  if test -d $$i; then \
+	    cd $$i; $(MAKE) show; cd ..; \
+	  fi; \
+	done
+
 clean:
 	$(RM) a.out *.aux *.log *.dvi *~ 
 	for i in $(SUBDIRS); do \

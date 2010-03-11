@@ -29,6 +29,8 @@ OSTYLES=../../../tex
 .SUFFIXES: .dvi .tex
 
 all: talk.dvi
+
+show: talk.dvi
 	advi talk.dvi
 
 clean:

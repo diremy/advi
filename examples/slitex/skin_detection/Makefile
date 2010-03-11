@@ -24,12 +24,12 @@
 
 OSTYLES=../../../tex
 
-all: skin_detection.dvi see
+all: skin_detection.dvi 
 
 edit:
 	emacs skin_detection.tex
 
-see:
+show:
 	advi skin_detection.dvi
 
 clean:
