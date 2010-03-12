@@ -209,38 +209,38 @@
 %  belowskip=0ex,
 
 %------------------------------------------------------------
-%begin latex
- \makeatletter
- \def\bbl@frenchitemize{%
-    \ifFrenchItemizeSpacing
-      \renewenvironment{itemize}%
-%        {\begin{list}{{\blue $\blacktriangleright$}}%
-        {\begin{list}{{\colorItem $\bullet$}}%
-          {\let\@trivlist\@trivlistORI
-             \settowidth{\labelwidth}{$\bullet$}%
-%             \setlength{\leftmargin}{\labelwidth}%
-             \setlength{\leftmargin}{1.5em}%
-             \addtolength{\leftmargin}{\labelsep}%
-             \ifnum\@listdepth=0
-               \setlength{\itemindent}{\parindent}%
-             \else
-               \addtolength{\leftmargin}{\parindent}%
-             \fi
-             \setlength{\itemsep}{1ex}% JJL
-             \setlength{\parsep}{\z@}%
-             \setlength{\topsep}{\z@}%
-             \setlength{\partopsep}{\z@}%
-             \addtolength{\topsep}{-\parskip}%
-             \addtolength{\partopsep}{\parskip}%
-          }%
-        }%
-        {\end{list}}%
-    \else
-      \def\labelitemi{{\colorItem \blacktriangleright}}%
-      \def\labelitemii{\textendash}%
-      \def\labelitemiii{\textendash}%
-      \def\labelitemiv{\textendash}%
-    \fi}
-\makeatother
-%end latex
+%% %begin latex
+%%  \makeatletter
+%%  \def\bbl@frenchitemize{%
+%%     \ifFrenchItemizeSpacing
+%%       \renewenvironment{itemize}%
+%% %        {\begin{list}{{\blue $\blacktriangleright$}}%
+%%         {\begin{list}{{\colorItem $\bullet$}}%
+%%           {\let\@trivlist\@trivlistORI
+%%              \settowidth{\labelwidth}{$\bullet$}%
+%% %             \setlength{\leftmargin}{\labelwidth}%
+%%              \setlength{\leftmargin}{1.5em}%
+%%              \addtolength{\leftmargin}{\labelsep}%
+%%              \ifnum\@listdepth=0
+%%                \setlength{\itemindent}{\parindent}%
+%%              \else
+%%                \addtolength{\leftmargin}{\parindent}%
+%%              \fi
+%%              \setlength{\itemsep}{1ex}% JJL
+%%              \setlength{\parsep}{\z@}%
+%%              \setlength{\topsep}{\z@}%
+%%              \setlength{\partopsep}{\z@}%
+%%              \addtolength{\topsep}{-\parskip}%
+%%              \addtolength{\partopsep}{\parskip}%
+%%           }%
+%%         }%
+%%         {\end{list}}%
+%%     \else
+%%       \def\labelitemi{{\colorItem \blacktriangleright}}%
+%%       \def\labelitemii{\textendash}%
+%%       \def\labelitemiii{\textendash}%
+%%       \def\labelitemiv{\textendash}%
+%%     \fi}
+%% \makeatother
+%% %end latex
 %------------------------------------------------------------
