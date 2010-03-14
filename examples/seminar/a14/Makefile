@@ -22,11 +22,9 @@
 
 # To view the demos, use ../advi.opt file.dvi
 
+N=14
 ADVIDIR=../../..
 LATEX=TEXINPUTS=.:$(ADVIDIR)/tex:$(TEXINPUTS): latex
-
-
-N=14 
 
 all:: a${N}.dvi
 
