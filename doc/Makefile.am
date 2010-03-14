@@ -168,7 +168,7 @@ else
 endif
 
 
-$(HTMLFILES): Makefile
+$(HTMLFILES): ../configure
 
 .htm.html: 
 if HAVE_HTMLC
