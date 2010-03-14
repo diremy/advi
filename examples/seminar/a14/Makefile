@@ -22,7 +22,14 @@
 
 # To view the demos, use ../advi.opt file.dvi
 
-N=14
+ADVIDIR=../../..
+
+LATEX=TEXINPUTS=.:$(ADVIDIR)/tex:$(TEXINPUTS): latex
+PLATEX=TEXINPUTS=.:$(ADVIDIR)/tex:$(TEXINPUTS): platex
+ADVI=TEXPSHEADERS=$(ADVIDIR)/tex: $(ADVIDIR)/advi
+
+
+N=14 
 
 all:: a${N}.dvi
 
