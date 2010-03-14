@@ -23,10 +23,7 @@
 # To view the demos, use ../advi.opt file.dvi
 
 ADVIDIR=../../..
-
 LATEX=TEXINPUTS=.:$(ADVIDIR)/tex:$(TEXINPUTS): latex
-PLATEX=TEXINPUTS=.:$(ADVIDIR)/tex:$(TEXINPUTS): platex
-ADVI=TEXPSHEADERS=$(ADVIDIR)/tex: $(ADVIDIR)/advi
 
 
 N=14 
@@ -38,7 +35,7 @@ show:: a${N}.dvi
 
 a${N}.dvi: mon-dvipdf.tex a${N}.tex
 	./putimage <a${N}.tex | gpic -t > a${N}bis.tex
-	- latex a${N}bis.tex
+	- $(LATEX) a${N}bis.tex
 	mv -f a${N}bis.dvi a${N}.dvi
 
 mon-dvipdf.tex:
