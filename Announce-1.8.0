@@ -1,0 +1,41 @@
+
+                       Active-DVI
+
+
+Active-DVI is a programmable presenter and previewer for texts or slides
+written in LaTeX, hence the presentation tool of choice for the discriminating
+hacker.
+
+Version 1.8.0 is now available. It is mainly an update of the 1.7
+version of Active-DVI that makes it compatible with camlimages version
+3.1.0. 
+
+The Active-DVI previewer features in addition to regular DVI previewers:
+
+   * Encapsulated Postscript File inclusion
+     (using the graphics LaTeX package)
+
+   * Some effects for presentation (pause, delay, text color change) 
+
+   * Embedded applications
+
+   * Support for backpointing to the source file.
+
+   * Support for PStricks, PGF, and beamer.
+
+   * Support for WhizzyTeX
+
+Play advi on the demonstration presentation demo.dvi that is in the test
+directory of the distribution. Look at source code of the various talks in
+the directory ``examples''.
+
+The source code and more information are available at
+
+    http://advi.inria.fr/
+
+Mailing list and bug reports at advi@inria.fr
+
+--
+For the Active-DVI development team, March 2009
+
+Didier Remy 

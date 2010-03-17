@@ -1,4 +1,14 @@
+Makefile
+Makefile.in
+advi.1
 *.htm
+eng.html
+fra.html
+faq-eng.html
+faq-fra.html
+index.html
+screen-shots-eng.html
+screen-shots-fra.html
 manual.html
 *.aux
 *.dvi

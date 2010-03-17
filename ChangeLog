@@ -1,5 +1,8 @@
+Version 1.9 
+	Incorporation of security and documentation patches from Debian distib.
 Version 1.8
 	Rendering EPS files with gs by default.
+	PGF pactches for pstrick support of PDF macros in advi.sty
 	Bug fixes. 
 Version 1.7
 2005/09/02
