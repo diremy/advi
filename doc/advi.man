@@ -18,7 +18,7 @@
 .SH NAME
 .B advi
 \-\- a DVI previewer and presenter
-.UR http://caml.inria.fr/advi/
+.URL http://caml.inria.fr/advi/
 (http://caml.inria.fr/advi/)
 .UE
 with some eye candy effects for presentation.
@@ -34,7 +34,9 @@ The
 program is a viewer for DVI files that also recognizes a new class of
 special's targeted to presentations via laptop computers: various
 visual effects can easily be incorporated to the presentation, via a
-companion advi.sty LaTeX package.
+companion 
+.I advi.sty
+LaTeX package.
 
 .P
 .B advi
@@ -55,9 +57,12 @@ presentation.
 
 \- Embedded applications for interactive demonstration
 
-\- Pictures visualization via gpic specials
+\- Pictures visualization via
+.BR gpic (1)
+specials
 
-\- Display of inlined Postscript using gs
+\- Display of inlined Postscript using 
+.BR gs (1)
 
 \- Font antialiasing that takes background colors into account
 
@@ -96,7 +101,9 @@ table of contents or as small images set up on a page)
 
 Notice that
 .B advi
-needs the `kpsewhich' tool in order to find and
+needs the 
+.BR kpsewhich (1)
+tool in order to find and
 recompile PK fonts.  (This program is part of the `kpathsea' library
 provided by many TeX distributions.)
 
@@ -113,7 +120,9 @@ Debug page motion
 Ignore background for antialiasing
 .TP
 .B \-\-showps
-Print a copy of Postscript sent to gs to stdout
+Print a copy of Postscript sent to 
+.BR gs (1)
+to stdout
 .TP
 .B \-\-verbose\-image\-access
 Change the cursor while loading images
@@ -138,7 +147,8 @@ Set default background color (Named or RGB)
 Command to call the browser (default netscape\-communicator)
 .TP
 .B \-cache\-dir STRING
-Set the cache directory (default /tmp)
+Set the cache directory (default 
+.IR /tmp )
 .TP
 .B \-click\-turn
 Turn pages with mouse clicks (see the doc)
@@ -147,7 +157,7 @@ Turn pages with mouse clicks (see the doc)
 Crop the window to the best size (default)
 .TP
 .B \-disable\-image\-anti\-aliasing
-Disable eps inclusion anti\-aliasing
+Disable EPS inclusion anti\-aliasing
 .TP
 .B \-edit
 Start in edit mode
@@ -162,7 +172,8 @@ Draw in the foreground
 Set default foreground color (Named or RGB)
 .TP
 .B \-film\-viewer STRING
-Command to display film files (default mplayer)
+Command to display film files (default 
+.BR mplayer (1))
 .TP
 .B \-fullwidth
 Adjust size to width
@@ -182,7 +193,7 @@ Horizontal margin (default: 1cm)
 .B \-html STRING
 Make
 .B advi
-start at html reference of name STRING
+start at HTML reference of name STRING
 .TP
 .B \-image\-viewer STRING
 Command to display image files (default xv)
@@ -216,7 +227,11 @@ Don't display a watch when busy
 .TP
 .B \-options\-file STRING
 Load this file when parsing this option to set up options
-(to override the options of the default ~/.advirc or ~/.advi/advirc init file).
+(to override the options of the default 
+.I ~/.advirc 
+or
+.I ~/.advi/advirc 
+init file)
 .TP
 .B \-page INT
 Make
@@ -232,7 +247,7 @@ to write the current page number in a file (default is no)
 Set the name of the file where
 .B advi
 could write the current page number
-(default is file 'advi\_page\_number' in the cache directory).
+(default is file 'advi\_page\_number' in the cache directory)
 .TP
 .B \-pager STRING
 Command to call the pager (default xterm \-e less)
@@ -241,19 +256,21 @@ Command to call the pager (default xterm \-e less)
 Cancel all Active\-DVI effects
 .TP
 .B \-pdf\-viewer STRING
-Command to view PDF files (default xpdf)
+Command to view PDF files (default 
+.BR xpdf (1))
 .TP
 .B \-ps\-viewer STRING
-Command to view PS files (default gv)
+Command to view PS files (default 
+.BR gv (1))
 .TP
 .B \-pstricks
 Show moveto
 .TP
 .B \-resolution REAL
-Dpi resolution of the screen (min 72.27)))
+DPI resolution of the screen (min. 72.27)))
 .TP
 .B \-rv
-Reverse video is simulated by swapping the foreground and background colors.
+Reverse video is simulated by swapping the foreground and background colors
 .TP
 .B \-safer
  Safer mode: external applications are never launched
@@ -277,10 +294,10 @@ Set the width of the pen used when scratching slides (default 2)
 Set the number of thumbname per line and column to INT
 .TP
 .B \-thumbnails
-Create thumbnails for your slides and write them into cachedir.
+Create thumbnails for your slides and write them into cachedir
 .TP
 .B \-thumbnails\-size STRING
-Fix thumbnails size (default 24x32).
+Fix thumbnails size (default 24x32)
 .TP
 .B \-v
 Print the current Active\-DVI version
@@ -302,7 +319,7 @@ Display this list of options
 
 .P
 Geometry GEOM is specified in pixels, using the standard format
-for specifying geometries (i.e: "WIDTHxHEIGHT[+XOFFSET+YOFFSET]").
+for specifying geometries (i.e.,  "WIDTHxHEIGHT[+XOFFSET+YOFFSET]").
 
 Dimensions (for options `-hmargin' and `-vmargin') are specified as
 numbers optionally followed by two letters representing units.
@@ -326,41 +343,41 @@ original TeX source.
 Advi recognizes the following keystrokes when typed in its window.
 Some of them may optionally be preceded by a number, called ARG below,
 whose interpretation is keystroke dependant. If ARG is unset, its
-value is 1, unless specified otherwise.
+value is 1.
 
 Advi maintains an history of previously visited pages organized as a stack.
-Additionnally, the history contains mark pages which are stronger than
+Additionally, the history contains mark pages which are stronger than
 unmarked pages.
 
 .RS 2
 .TP 8
 .B ?
-Quick info and key bindings help
+Quick info and key bindings help.
 
 .TP
 .B q
-Quits the program
+Quits the program.
 
 .TP
 .B ^X\-^C (Control\-X Control\-C)
-Quits the program
+Quits the program.
 
 .TP
 .B ^X\-^F (Control\-X Control\-F)
-Turn to full screen mode
+Turn to full screen mode.
 
 .TP
 .B ^F (Control\-F)
-Toggle to switch from full screen to normal mode and converse
+Toggle to switch from full screen to normal mode and converse.
 
 .TP
 .B ^<button> (Control + left mouse button)
-Allow moving the page into the window (useful in full screen mode)
+Allow moving the page into the window (useful in full screen mode).
 
 .TP
 .B return
 If ARG is non zero, push the current page on the history stack, and move
-forward Arg physical pages.
+forward ARG physical pages.
 
 .TP
 .B n
@@ -381,7 +398,7 @@ Move to the next pause if any, or do as return otherwise.
 .TP
 .B <backspace>
 Move ARG pages backward according to the history.
-The history stack is poped, accordingly.
+The history stack is popped, accordingly.
 
 .TP
 .B <escape>
@@ -409,11 +426,11 @@ Center the page in the window and resets the default resolution.
 
 .TP
 .B <
-Scale the resolution by 1/scalestep (default 1/sqrt (sqrt (sqrt 2.0)))
+Scale the resolution by 1/scalestep (default 1/sqrt (sqrt (sqrt 2.0))).
 
 .TP
 .B >
-Scale the resolution by  scalestep (default sqrt (sqrt (sqrt 2.0)))
+Scale the resolution by  scalestep (default sqrt (sqrt (sqrt 2.0))).
 
 .TP
 .B f
@@ -436,34 +453,34 @@ Reload the file and redraw the current page.
 
 .TP
 .B C
-Erase the image cache
+Erase the image cache.
 
 .TP
 .B T
-Process thumbnails (graphical table of contents for the show)
+Process thumbnails (graphical table of contents for the show).
 
 .TP
 .B t
 Display thumbnails if processed or floating table of contents, or do
-nothing
+nothing.
 
 .TP
 .B ^X\-l (Control\-X l)
-Toggle on or off the laser pointer
+Toggle on or off the laser pointer.
 
 .TP
 .B s
 Turn on the write scratching mode (to interactively write on the
 slide). When in scratching mode press
 .B ? 
-to get help
+to get help.
 
 .TP
 .B S
 Turn on the draw scratching mode (to interactively draw on the
 slide). When in scratching mode press
 .B ? 
-to get help
+to get help.
 
 .TP
 .B ^X\-^S (Control\-X Control\-S)
@@ -489,19 +506,24 @@ window.)
 
 .SH EYE CANDY MACROS
 
-Using the LaTeX style advi.sty provided with the package, you can
-embed some Active dvi specials into your TeX documents.
+Using the LaTeX style
+.I advi.sty
+provided with the package, you can
+embed some Active\-DVI specials into your TeX documents.
 .B Advi
 interprets those specials to provide some eye candy features for your
-presentation. For the casual user, the advi\-slides.sty package gives
-a truely simple way to write a show for
+presentation. For the casual user, the 
+.I advi\-slides.sty
+package gives
+a truly simple way to write a show for
 .B advi
 (see in the examples directory or the documentation inside the
-advi\-slides.sty file for more information).
+.I advi\-slides.sty
+file for more information).
 
 .TP
 .B \eadviwait
-ActiveDvi stops rendering at the point of the document and wait a user key
+Active\-DVI stops rendering at the point of the document and wait a user key
 stroke.
 
 .TP
@@ -529,7 +551,11 @@ Display the texts associated with the tag ``this'', using the color ``col''.
 
 .RE
 The directory examples contains a lot of presentations.
-Please look also at test/demo*.{tex|dvi} and test/macros.{tex|dvi} for
+Please look also at
+.I test/demo*.{tex|dvi} 
+and 
+.I test/macros.{tex|dvi} 
+for
 a rather comprehensive demonstration of Active\-DVI capabilities.
 
 .SH COPYRIGHT
@@ -537,22 +563,25 @@ This program is distributed under the GNU LGPL.
 .SH SEE ALSO
 .BR latex (1),
 .BR kpsewhich (1),
-.BR The Active-DVI user's manual
-.UR http://caml.inria.fr/advi/manual.dvi
-and the FAQ
-.UR http://caml.inria.fr/advi/faq.html
+the Active\-DVI user's 
+.URL http://caml.inria.fr/advi/manual.dvi manual ,
+and the 
+.URL http://caml.inria.fr/advi/faq.html FAQ
 .SH AUTHORS
 Jun Furuse <Jun.Furuse@inria.fr>
 Pierre Weis <Pierre.Weis@inria.fr>
-Didier Remy <Didier.Remy@inria.fr> inlined Postcript, hyperlinks
+Didier Remy <Didier.Remy@inria.fr> inlined Postscript, hyperlinks
 Roberto Di Cosmo <dicosmo@pauillac.inria.fr>
-Xavier Leroy <Xavier.Leroy@inria.fr> gpic specials
+Xavier Leroy <Xavier.Leroy@inria.fr> 
+.BR gpic (1)
+specials
 Didier Le Botlan <Didier.Le_Botlan@inria.fr>
 Alan Schmitt <Alan.Schmitt@inria.fr>
 Alexandre Miquel  <Alexandre.Miquel@inria.fr>
 .P
 The original version of this manual page was written by Sven LUTHER
-<luther@debian.org>, for the Debian GNU/Linux system port of advi
+<luther@debian.org>, for the Debian GNU/Linux system port of 
+.B advi
 version 1.2.  This page has then been enhanced and updated for later
-versions of Active-DVI, and finally rewritten for version 1.6 by
+versions of Active\-DVI, and finally rewritten for version 1.6 by
 Pierre Weis.

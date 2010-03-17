@@ -224,6 +224,12 @@ let get_user_advi_cache_dir () =
 let advi_cache_dir = ref None;;
 
 let set_advi_cache_dir d =
+  let d =
+    if d.[0] = '~' then
+      mk_user_advi_cache_dir (tilde_subst d)
+    else
+      d
+  in
   if can_be_cache_directory d then begin
     Misc.debug_endline (Printf.sprintf "Using %s as cache directory." d);
     advi_cache_dir := Some d end else
