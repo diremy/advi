@@ -48,7 +48,7 @@ let texdir_path = "@TEXMFMAIN@";;
 let database_path = Filename.concat texdir_path "ls-R";;
 
 (* Location of splash.dvi and test/caml.eps *)
-let advi_loc = "@ADVI_LOC@";;
+let advi_loc = "@dvidir@";;
 let splash_screen = Filename.concat advi_loc "splash.dvi";;
 let scratch_draw_splash_screen =
   Filename.concat advi_loc "scratch_draw_splash.dvi";;

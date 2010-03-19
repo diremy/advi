@@ -23,8 +23,8 @@ psdir = $(datadir)/doc/$(PACKAGE)
 htmldir = $(datadir)/doc/$(PACKAGE)
 
 man_MANS = advi.1
-dvi_DATA = manual.dvi
-	splah.dvi \
+dvi_DATA = manual.dvi \
+	splash.dvi \
 	scratch_write_splash.dvi \
 	scratch_draw_splash.dvi 
 pdf_DATA = manual.pdf

@@ -151,15 +151,29 @@ else
 fi
 AC_SUBST(latexdir)
 
-# Checking gunzip bunzip2. not mandatory. 
-AC_PATH_PROG([GUNZIP], [gunzip])
-if test -z "$GUNZIP"; then
-    AC_MSG_WARN([gunzip not found])
+# Checking gunzip and bunzip2. not mandatory. 
+AC_ARG_WITH([GUNZIP],[AS_HELP_STRING([--with-gunzip=ARG],
+                                 [Use gunzip command ARG])],
+            [],[with_GUNZIP=maybe])
+if test "$with_GUNZIP" = maybe
+   then AC_PATH_PROG([GUNZIP], [gunzip])
+   elif  test "$with_GS" = no
+   then GUNZIP=""
+   else GUNZIP="$with_GUNZIP"
 fi
-AC_PATH_PROG([BUNZIP], [bunzip2])
-if test -z "$BUNZIP"; then
-    AC_MSG_WARN([bunzip2 not found])
+AC_SUBST(GUNZIP)
+
+AC_ARG_WITH([BUNZIP],[AS_HELP_STRING([--with-gunzip=ARG],
+                                 [Use bunzip2 command ARG])],
+            [],[with_BUNZIP=maybe])
+if test "$with_BUNZIP" = maybe
+   then AC_PATH_PROG([BUNZIP], [bunzip2])
+   elif  test "$with_GS" = no
+   then BUNZIP=""
+   else BUNZIP="$with_BUNZIP"
 fi
+AC_SUBST(BUNZIP)
+
 
 # Checking tools needed for building documentation
 # only latex is mandatory, other are optional
@@ -200,30 +214,43 @@ fi
 AM_CONDITIONAL(HAVE_MONTAGE, [test -n "$MONTAGE"])
 
 # Checking gs
-AC_PATH_PROG([GS], [gs]) 
-HAVE_GS="false"
-if test -n "$GS" ; then
-    AC_MSG_CHECKING([if gs version >= 6.52]) 
-    gs_version=`$GS -v | awk '/Ghostscript/ {print $3}'`
-    gs_major_version=`echo $gs_version | cut -d. -f1`
-    gs_minor_version=`echo $gs_version | cut -d. -f2`
 
-    if expr                                \
-	\( $gs_major_version \> 6 \)       \
-	\|                                 \
-	\(                                 \
-	    \( $gs_major_version \= 6 \)   \
-	    \&                             \
-	    \( $gs_minor_version \>= 52 \) \
-	\) > /dev/null; then
-	AC_MSG_RESULT([yes])
-	HAVE_GS="true"
-    else
-	AC_MSG_RESULT([no])
-	GS=""
-    fi
+AC_ARG_WITH([GS],[AS_HELP_STRING([--with-gs=ARG],
+                                 [Use ghostscript command ARG])],
+            [],[with_GS=maybe])
+HAVE_GS="false"
+if test "$with_GS" = no
+then :
+elif test "$with_GS" = maybe
+then 
+   AC_PATH_PROG([GS], [gs])
+   if test -n "$GS" ; then
+       AC_MSG_CHECKING([if gs version >= 6.52]) 
+       gs_version=`$GS -v | awk '/Ghostscript/ {print $3}'`
+       gs_major_version=`echo $gs_version | cut -d. -f1`
+       gs_minor_version=`echo $gs_version | cut -d. -f2`
+
+       if expr                                \
+           \( $gs_major_version \> 6 \)       \
+           \|                                 \
+           \(                                 \
+               \( $gs_major_version \= 6 \)   \
+               \&                             \
+               \( $gs_minor_version \>= 52 \) \
+           \) > /dev/null; then
+           AC_MSG_RESULT([yes])
+           HAVE_GS="true"
+       else
+           AC_MSG_RESULT([no])
+           with_GS=""
+       fi
+   fi
+else 
+   GS="$with_GS"
+   HAVE_GS=true
 fi
 AC_SUBST(HAVE_GS)
+AC_SUBST(GS)
 
 AC_CONFIG_FILES([Makefile
 		 src/Makefile
@@ -238,8 +265,11 @@ Configuration summary
 Language:    $OCAMLC version $OCAMLVERSION
 Camlimages:  $HAVE_CAMLIMAGES
 LablTk:      $HAVE_LABLTK
-GS:          $HAVE_GS
-Resources:   $ADVI_LOC/
+Resources:   $dvidir
 Hevea:       $HEVEA
 Xinerama:    $have_xinerama
+HAVE_GS:     $HAVE_GS
+GS:          $GS  
+gunzip:      $GUNZIP
+bunzip2:     $BUNZIP
 EOF

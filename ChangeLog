@@ -1,8 +1,11 @@
 Version 1.9 
-	gunzip, bunzip2 (and now gs) are full paths set during configuration. 
-	Added support for gzip and bzip2 compressed files. 
-	Fixed advi.man  (provided mostly by Debian managers).
-	Included security patches (provided by Debian managers).
+	- splash.dvi is now distributed and correctly installed  
+	- examples are distributed but not compiled by default
+	- added conf/jpfonts.conf in the disbribution
+	- gunzip, bunzip2 (and now gs) are set in configure
+	- Added support for gzip and bzip2 compressed files. 
+	- Fixed advi.man  (provided mostly by Debian managers).
+	- Included security patches (provided by Debian managers).
 Version 1.8
 	Rendering EPS files with gs by default.
 	PGF pactches for pstrick support of PDF macros in advi.sty
