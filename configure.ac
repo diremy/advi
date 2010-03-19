@@ -151,6 +151,16 @@ else
 fi
 AC_SUBST(latexdir)
 
+# Checking gunzip bunzip2. not mandatory. 
+AC_PATH_PROG([GUNZIP], [gunzip])
+if test -z "$GUNZIP"; then
+    AC_MSG_WARN([gunzip not found])
+fi
+AC_PATH_PROG([BUNZIP], [bunzip2])
+if test -z "$BUNZIP"; then
+    AC_MSG_WARN([bunzip2 not found])
+fi
+
 # Checking tools needed for building documentation
 # only latex is mandatory, other are optional
 # as documentation is distributed anyway
@@ -190,9 +200,8 @@ fi
 AM_CONDITIONAL(HAVE_MONTAGE, [test -n "$MONTAGE"])
 
 # Checking gs
+AC_PATH_PROG([GS], [gs]) 
 HAVE_GS="false"
-AC_PATH_PROG(GS, gs) 
-
 if test -n "$GS" ; then
     AC_MSG_CHECKING([if gs version >= 6.52]) 
     gs_version=`$GS -v | awk '/Ghostscript/ {print $3}'`

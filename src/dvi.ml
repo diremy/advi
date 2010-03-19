@@ -515,10 +515,57 @@ let input_dvi ch =
     font_map = font_map }
 ;;
 
+let magic_number len magic_string ch = 
+  try 
+    seek_in ch 0;
+    let magic_number = input_string ch len in
+(*     let convert s =  *)
+(*       let l = [s.[0]; s.[1]; s.[2] ] in *)
+(*       let l = List.map Char.code l in *)
+(*       let l = List.map (Printf.sprintf "\\%03d") l in *)
+(*       let s = String.concat " " l in *)
+(*       s *)
+(*     in *)
+(*     Printf.eprintf "number:%s string:%s\n" *)
+(*       (convert magic_number) (convert magic_string); *)
+    magic_number = magic_string
+  with
+    End_of_file -> false
+
+let gzipped ch = magic_number 3 "\031\139\008" ch
+let bzipped ch = magic_number 3 "BZh" ch
+
+
+let open_DVI filename =
+  let ch = open_in_bin filename in
+  let decompress = 
+    if
+      gzipped ch && Config.gunzip_path <> "" then
+      Some (Printf.sprintf "%s -c" Config.gunzip_path)
+    else if
+      bzipped ch && Config.bunzip2_path <> "" then 
+      Some (Printf.sprintf "%s -c" Config.bunzip2_path)
+    else None in
+  match decompress with
+  | None ->
+      ch
+  | Some command ->
+      close_in ch;
+      let tmp_filename = Filename.temp_file filename ".dvi" in
+      let cmd = Printf.sprintf "%s %s > %s" command filename tmp_filename in
+      let ret = Sys.command cmd in
+      if ret <> 0 then
+        let () = Sys.remove tmp_filename in
+        raise (Error "non DVI file cannot be decompressed")
+      else
+        let ch = open_in tmp_filename in
+        let () = Sys.remove tmp_filename in
+        ch
+
 (*** Loading a DVI file ***)
 
 let load filename =
-  let ch = open_in_bin filename in
+  let ch = open_DVI filename in
   try
     let dvi = input_dvi ch in
     close_in ch;

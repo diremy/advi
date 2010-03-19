@@ -34,8 +34,10 @@ let have_camlimages = @HAVE_CAMLIMAGES@;;
 
 (* Various commands paths. *)
 let kpsewhich_path = "kpsewhich";;
-let gs_path = "gs";;
+let gs_path = "@GS@";;
 let gzip_path = "gzip";;
+let gunzip_path = "@GUNZIP@";;
+let bunzip2_path = "@BUNZIP@";;
 
 (* Various configurations for PS and TeX *)
 let texpicts_kind = "graphic/figure";;

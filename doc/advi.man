@@ -34,9 +34,16 @@ The
 program is a viewer for DVI files that also recognizes a new class of
 special's targeted to presentations via laptop computers: various
 visual effects can easily be incorporated to the presentation, via a
-companion 
+companion
 .I advi.sty
 LaTeX package.
+If the input 
+.I dvifile 
+is a DVI file that has been compressed with 
+.BR gzip (1)
+or
+.BR bzip2 (1)
+it will be automatically decompressed.
 
 .P
 .B advi

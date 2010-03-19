@@ -1,4 +1,5 @@
-SUBDIRS = src tex doc examples
+SUBDIRS = src tex doc 
+DIST_SUBDIRS = $(SUBDIRS) examples
 
 CVSRELEASETAG = Release-$(subst .,_,$(VERSION))
 ANNOUNCEFILE  = Announce-$(VERSION)
@@ -8,7 +9,7 @@ FTPSITEDIR = /net/yquem/infosystems/ftp/$(PACKAGE)
 CVSROOTDIR = /net/yquem/devel/caml/repository/
 CVSPKGDIR  = bazar-ocaml/$(PACKAGE)
 
-EXTRA_DIST = ocaml.m4
+EXTRA_DIST = ocaml.m4 conf/jpfonts.conf
 
 cvstag:
 	cvs tag -c $(CVSRELEASETAG)

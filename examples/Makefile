@@ -42,9 +42,11 @@ show:
 	done
 
 distdir:
-	cvs export -D today -d . advi/examples
+	rm -rf distexamples
+	cvs export -D today -d distexamples advi/examples
 	rmdir $(distdir)
-	mv examples $(distdir) 
+	mv distexamples/examples $(distdir) 
+	rmdir distexamples
 
 test:
 	for i in $(SUBDIRS); do \

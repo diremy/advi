@@ -24,6 +24,9 @@ htmldir = $(datadir)/doc/$(PACKAGE)
 
 man_MANS = advi.1
 dvi_DATA = manual.dvi
+	splah.dvi \
+	scratch_write_splash.dvi \
+	scratch_draw_splash.dvi 
 pdf_DATA = manual.pdf
 ps_DATA  = manual.ps
 html_DATA = $(HTMLFILES) $(STATICIMAGES) $(BUILTIMAGES)
