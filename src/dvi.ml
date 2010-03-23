@@ -535,7 +535,6 @@ let magic_number len magic_string ch =
 let gzipped ch = magic_number 3 "\031\139\008" ch
 let bzipped ch = magic_number 3 "BZh" ch
 
-
 let open_DVI filename =
   let ch = open_in_bin filename in
   let decompress = 

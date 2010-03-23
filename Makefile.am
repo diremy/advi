@@ -9,7 +9,7 @@ FTPSITEDIR = /net/yquem/infosystems/ftp/$(PACKAGE)
 CVSROOTDIR = /net/yquem/devel/caml/repository/
 CVSPKGDIR  = bazar-ocaml/$(PACKAGE)
 
-EXTRA_DIST = ocaml.m4 conf/jpfonts.conf
+EXTRA_DIST = ocaml.m4 conf/jpfonts.conf LGPL
 
 cvstag:
 	cvs tag -c $(CVSRELEASETAG)

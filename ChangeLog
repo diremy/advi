@@ -2,7 +2,7 @@ Version 1.9
 	- splash.dvi is now distributed and correctly installed  
 	- examples are distributed but not compiled by default
 	- added conf/jpfonts.conf in the disbribution
-	- gunzip, bunzip2 (and now gs) are set in configure
+	- gs path is now set by configure
 	- Added support for gzip and bzip2 compressed files. 
 	- Fixed advi.man  (provided mostly by Debian managers).
 	- Included security patches (provided by Debian managers).

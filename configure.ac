@@ -152,28 +152,28 @@ else
 fi
 AC_SUBST(latexdir)
 
-# Checking gunzip and bunzip2. not mandatory. 
-AC_ARG_WITH([GUNZIP],[AS_HELP_STRING([--with-gunzip=ARG],
-                                 [Use gunzip command ARG])],
-            [],[with_GUNZIP=maybe])
-if test "$with_GUNZIP" = maybe
-   then AC_PATH_PROG([GUNZIP], [gunzip])
-   elif  test "$with_GS" = no
-   then GUNZIP=""
-   else GUNZIP="$with_GUNZIP"
-fi
-AC_SUBST(GUNZIP)
+# # Checking gunzip and bunzip2. not mandatory. 
+# AC_ARG_WITH([GUNZIP],[AS_HELP_STRING([--with-gunzip=ARG],
+#                                  [Use gunzip command ARG])],
+#             [],[with_GUNZIP=maybe])
+# if test "$with_GUNZIP" = maybe
+#    then AC_PATH_PROG([GUNZIP], [gunzip])
+#    elif  test "$with_GS" = no
+#    then GUNZIP=""
+#    else GUNZIP="$with_GUNZIP"
+# fi
+# AC_SUBST(GUNZIP)
 
-AC_ARG_WITH([BUNZIP],[AS_HELP_STRING([--with-gunzip=ARG],
-                                 [Use bunzip2 command ARG])],
-            [],[with_BUNZIP=maybe])
-if test "$with_BUNZIP" = maybe
-   then AC_PATH_PROG([BUNZIP], [bunzip2])
-   elif  test "$with_GS" = no
-   then BUNZIP=""
-   else BUNZIP="$with_BUNZIP"
-fi
-AC_SUBST(BUNZIP)
+# AC_ARG_WITH([BUNZIP],[AS_HELP_STRING([--with-gunzip=ARG],
+#                                  [Use bunzip2 command ARG])],
+#             [],[with_BUNZIP=maybe])
+# if test "$with_BUNZIP" = maybe
+#    then AC_PATH_PROG([BUNZIP], [bunzip2])
+#    elif  test "$with_GS" = no
+#    then BUNZIP=""
+#    else BUNZIP="$with_BUNZIP"
+# fi
+# AC_SUBST(BUNZIP)
 
 
 # Checking tools needed for building documentation
