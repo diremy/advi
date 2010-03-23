@@ -1,9 +1,10 @@
-# Process this file with autoconf to produce a configure script.
+?i# Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.59)
 AC_INIT(advi, 1.9, Didier.Remy@inria.fr)
 BUILD_DATE=`date +%Y-%m-%d`
 AC_SUBST(BUILD_DATE)
 AM_INIT_AUTOMAKE([foreign])
+AM_MAINTAINER_MODE
 
 # Checking ocaml
 AC_PROG_OCAML()
