@@ -280,7 +280,8 @@ class gs () =
 
     method input f =
       let fd = open_in f in
-      try
+      try 
+        showps ("%% PSfile: " ^ f);
         while true do
           output_string leftout (input_line fd);
           output_char leftout '\n';
