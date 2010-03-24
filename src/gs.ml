@@ -193,18 +193,18 @@ class gs () =
       (* Unix.stdout *) Unix.stderr
   in
 (*
-  let () = 
-    try 
-      match Unix.waitpid  [ Unix.WNOHANG ] pid with
-      | _, Unix.WEXITED _ -> failwith (command ^ ":EXITED")
-      | _, Unix.WSIGNALED s -> 
-          failwith (command ^ ":KILLED:" ^ (string_of_int s))
-      | _, Unix.WSTOPPED s -> 
-          failwith (command ^ ":STOPPED:" ^ (string_of_int s)) Sys.sigint
-    with Unix.Unix_error (Unix.ECHILD, _, _) -> 
-          () 
+   let () = 
+   try 
+   match Unix.waitpid  [ Unix.WNOHANG ] pid with
+   | _, Unix.WEXITED _ -> failwith (command ^ ":EXITED")
+   | _, Unix.WSIGNALED s -> 
+   failwith (command ^ ":KILLED:" ^ (string_of_int s))
+   | _, Unix.WSTOPPED s -> 
+   failwith (command ^ ":STOPPED:" ^ (string_of_int s)) Sys.sigint
+   with Unix.Unix_error (Unix.ECHILD, _, _) -> 
+   () 
    in
-*)
+ *)
   object (self)
     val pid = pid
     val mutable ack = 0
@@ -254,20 +254,20 @@ class gs () =
               debugs "gotit";
             end
           else
-          if Misc.has_prefix pos_string s then
-            begin
-              try
-                let x, y = parse_pos s in
-                current_x := x; current_y := y
-              with
-              | Not_found | Failure _ -> Misc.warning s
-            end else
-            if Misc.has_prefix err_string s then
+            if Misc.has_prefix pos_string s then
               begin
-                Misc.warning s;
-                raise (Killed "Error in Postscript");
+                try
+                  let x, y = parse_pos s in
+                  current_x := x; current_y := y
+                with
+                | Not_found | Failure _ -> Misc.warning s
               end else
-              Misc.warning s;
+              if Misc.has_prefix err_string s then
+                begin
+                  Misc.warning s;
+                  raise (Killed "Error in Postscript");
+                end else
+                Misc.warning s;
           self # ack
         end;
 
@@ -277,6 +277,22 @@ class gs () =
         let _, _ = Unix.waitpid [] pid in
         close_all ();
       with Unix.Unix_error (_, _, _) -> ()
+
+    method input f =
+      let fd = open_in f in
+      try
+        while true do
+          output_string leftout (input_line fd);
+          output_char leftout '\n';
+        done
+      with
+      | End_of_file ->
+          close_in fd
+      | exc ->
+          close_in fd;
+          Misc.warning (Printexc.to_string exc);
+          self # kill;
+          Misc.warning "GS Terminated"
 
     method line l =
       try
@@ -359,6 +375,10 @@ let texc_special_pro gv =
       gv # kill;
       set_do_ps false;
       [];;
+
+let parent_dir_regexp = Str.regexp (Str.quote Filename.parent_dir_name)
+let parent_dir_in_path f = Str.string_match parent_dir_regexp f 0
+
 
 class gv =
   object (self)
@@ -492,6 +512,7 @@ class gv =
       (* in fact b should have already be loaded through *)
       self # send [ ]
 
+
     method ps action b (x : int) (y : int) =
       (* prerr_endline (Printf.sprintf "Calling gv#PS with\n\t\t %s" b); *)
       self # send
@@ -531,19 +552,47 @@ class gv =
       (* insert into postscript into user dictionnary, typically with '!'
          should not change graphic parameters *)
       (* does not draw---no flushpage *)
-      let ri z s = if z <> 0 then Printf.sprintf "%d %s" z s else "" in
-      self # send [ texbegin;
-                    self # moveto x y;
-                    "@beginspecial";
-                    Printf.sprintf "%d @llx %d @lly %d @urx %d @ury"
-                      llx lly urx ury;
-                    ri rwi "@rwi"; ri rhi "@rhi";
-                    "@setspecial";
-                    Printf.sprintf"(%s) run" name;
-                    "@endspecial";
-                    texend;
-                  ] ;
-      sync <- false
+      try
+        let truename = Search.true_file_name [] name in 
+        try
+          Unix.access truename [ Unix.R_OK ];
+          (*
+             if Filename.is_relative truename then
+             if parent_dir_in_path truename then
+             Misc.warning
+             (Printf.sprintf "Cannot load PS file (%s in path): %s"
+             Filename.parent_dir_name 
+             truename) 
+             else *)
+          let ri z s = if z <> 0 then Printf.sprintf "%d %s" z s else "" in
+          self # send [ texbegin;
+                        self # moveto x y;
+                        "@beginspecial";
+                        Printf.sprintf "%d @llx %d @lly %d @urx %d @ury"
+                          llx lly urx ury;
+                        ri rwi "@rwi"; ri rhi "@rhi";
+                        "@setspecial";
+                      ];
+          (* self # send [ Printf.sprintf"(%s) run" truename; ]; *)
+          self # process # input  truename;
+          self # send [ "@endspecial";
+                        texend;
+                      ];
+          sync <- false
+              (*
+                 else
+                 Misc.warning
+                 (Printf.sprintf "Cannot load PS file (absolute path): %s"
+                 truename)  *)
+        with
+        | Unix.Unix_error ((Unix.EACCES | Unix.ENOENT as err), _, _) -> 
+            Misc.warning
+              (Printf.sprintf "Cannot load PS file (%s): %s"
+                 (if err = Unix.ENOENT then "nonexistent" else "access")
+                 truename)
+      with 
+      | Not_found -> ()
+
 
     method kill =
       showps "showpage";

@@ -1,4 +1,5 @@
 Version 1.9 
+	- EPS files are read by advi and sent to gs
 	- splash.dvi is now distributed and correctly installed  
 	- examples are distributed but not compiled by default
 	- added conf/jpfonts.conf in the disbribution
