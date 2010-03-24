@@ -110,6 +110,7 @@ config.ml: config.ml.in $(top_srcdir)/config.status
 		-e 's,@HAVE_CAMLIMAGES\@,$(HAVE_CAMLIMAGES),g' \
 		-e 's,@TEXMFMAIN\@,$(TEXMFMAIN),g' \
 		-e 's,@dvidir\@,$(dvidir),g' \
+		-e 's,@etcdvidir\@,$(sysconfdir)/advi,g' \
 		-e 's,@GUNZIP\@,$(GUNZIP),g' \
 		-e 's,@BUNZIP\@,$(BUNZIP),g' \
 		-e 's,@GS\@,$(GS),g' \

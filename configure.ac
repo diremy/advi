@@ -253,6 +253,9 @@ fi
 AC_SUBST(HAVE_GS)
 AC_SUBST(GS)
 
+AC_SUBST(dvidir)
+AC_SUBST(sysconfdir)
+
 AC_CONFIG_FILES([Makefile
 		 src/Makefile
 		 doc/Makefile
