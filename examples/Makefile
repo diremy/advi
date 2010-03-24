@@ -44,6 +44,7 @@ show:
 distdir:
 	rm -rf distexamples
 	cvs export -D today -d distexamples advi/examples
+	find distexamples -name .cvsignore  -exec rm '{}' ';'
 	rmdir $(distdir)
 	mv distexamples/examples $(distdir) 
 	rmdir distexamples
