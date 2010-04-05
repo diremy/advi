@@ -550,7 +550,8 @@ let open_DVI filename =
       ch
   | Some command ->
       close_in ch;
-      let tmp_filename = Filename.temp_file filename ".dvi" in
+      let basename = Filename.basename filename in 
+      let tmp_filename = Filename.temp_file basename ".dvi" in
       let cmd = Printf.sprintf "%s %s > %s" command filename tmp_filename in
       let ret = Sys.command cmd in
       if ret <> 0 then
