@@ -19,7 +19,9 @@ cvsuntag:
 
 announce:
 	mail -n -s "New release $(VERSION) of $(NAME)" \
-		caml-announce@inria.fr < $(ANNOUNCEFILE)
+		advi@inria.fr \
+		caml-announce@inria.fr \
+	 < $(ANNOUNCEFILE)
 
 website: dist
 	if [ -d $(WEBSITEDIR) ]; then     \
