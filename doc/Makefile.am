@@ -112,6 +112,8 @@ TEX_ENV		= TEXINPUTS=$(srcdir):$(top_srcdir)/tex:$(TEXINPUTS) \
 		  TEXPSHEADERS=$(srcdir):$(top_srcdir)/tex:$(TEXPSHEADERS)
 HEVEA_FLAGS	= -entities -I $(srcdir) -I $(top_srcdir)/tex
 HTMLC_FLAGS	= -I $(srcdir)/includes \
+		  -D USER 'USER' \
+		  -D HOSTNAME 'HOSTNAME' \
 		  -D CamlVersion '$(OCAMLVERSION)' \
 		  -D version '$(VERSION)'
 

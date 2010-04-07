@@ -2,34 +2,40 @@
                        Active-DVI
 
 
+Version 1.9.0 is now available. 
+
 Active-DVI is a programmable presenter and previewer for texts or slides
 written in LaTeX. 
 
-Version 1.9.0 is now available. 
-It is mainly an update of the 1.8.0 version of Active-DVI with only few
-improvements: 
+It can display files in DVI format and is thus a possible replacement for
+other DVI previewers. 
 
-   * Better configuration script.
+It also commes with a package advi.sty that provided new macros and generate
+new DVI-specials understood by Active-DVI that enables:
 
-   * Source files may be compressed with gzip or bzip2.
+   * Image file inclusions in a variety of different formats 
 
-   * The default rendering of Encapsulated PS images is with GS,
-     instead of camlimages, which is usually faster.
+   * Some effects for presentation: pause, delay,  background images,
+     transitions, etc.
 
-The Active-DVI previewer features in addition to regular DVI previewers:
+   * Embedded applications.
 
-   * Encapsulated Postscript File inclusion
-     (using the graphics LaTeX package)
+   * Special Support for WhizzyTeX including
 
-   * Some effects for presentation (pause, delay, text color change) 
+      - Backpointing to the source file. 
+      - (Rudimentary) support for moving or resizing objects with the mouse.
 
-   * Embedded applications
+This release is mostly for maintainance, with only a few new features:
 
-   * Support for backpointing to the source file.
+   * Improved configuration.
 
-   * Support for PStricks, PGF, and beamer.
+   * Default previewing of embedded postscript images with ghostscript, 
+     (usually faster than with camlimages).
 
-   * Support for WhizzyTeX
+   * Source files may be in gzip or bzip2 format.
+
+This version of advi also supports the pgf package and the beamer document
+class. 
 
 Play advi on the demonstration presentation demo.dvi that is in the test
 directory of the distribution. Look at source code of the various talks in

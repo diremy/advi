@@ -1,4 +1,4 @@
-SUBDIRS = src tex doc 
+SUBDIRS = src tex doc
 DIST_SUBDIRS = $(SUBDIRS) examples
 
 CVSRELEASETAG = Release-$(subst .,_,$(VERSION))
