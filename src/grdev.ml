@@ -1352,7 +1352,7 @@ type status = GraphicsY11.status = {
 type area =
    | Bottom_right | Bottom_left | Top_right | Top_left | Middle;;
 type button =
-   | Button1 | Button2 | Button3 | Button4 | Button5;;
+   | Button1 | Button2 | Button3 | Button4 | Button5 | NoButton 
 
 type event =
    | Resized of int * int
@@ -1649,57 +1649,62 @@ let mouse_area near x y =
     else Middle
   else Middle;;
 
-let pressed m b = m land b <> 0;;
-let released m b = m land b = 0;;
+let modifier m b = m land b <> 0;;
 
 module G = GraphicsY11;;
 
-let button b =
-  if pressed b G.button1 then Button1 else
-  if pressed b G.button3 then Button3 else
-  if pressed b G.button4 then Button4 else
-  if pressed b G.button4 then Button4 else
-  if pressed b G.button5 then Button5 else
-  Button2 
-;;
+(* let button b = *)
+(*   if pressed b G.button1 then Button1 else *)
+(*   if pressed b G.button3 then Button3 else *)
+(*   if pressed b G.button4 then Button4 else *)
+(*   if pressed b G.button4 then Button4 else *)
+(*   if pressed b G.button5 then Button5 else *)
+(*   NoButton  *)
+(* ;; *)
 
-let get_button ev =
-  match G.get_button ev.modifiers with
+let get_button m =
+  Misc.debug_endline (Printf.sprintf "get_button %x" m);
+  match G.get_button m with
   | 1 -> Button1
   | 2 -> Button2
   | 3 -> Button3
   | 4 -> Button4
   | 5 -> Button5
-  | _ -> failwith "get_button"
+  | _ -> NoButton
 ;;
+
+let button_pressed m b = get_button m = b
 
 let wait_button_up m x y =
   (*  Printf.printf  "Button %d\n%!" (Obj.magic (Obj.repr (button m))); *)
   let wait_position () =
     match wait_signal_event button_up with
     | Raw e ->
-        Misc.debug_endline (Printf.sprintf "Final: %x" e.modifiers); 
-        if !editing || pressed m G.shift then begin
+        Misc.debug_endline (Printf.sprintf "Final: %x (m=%x)" e.modifiers m); 
+        if (!editing || modifier e.modifiers G.shift)
+           && button_pressed e.modifiers Button1 then begin
           match mouse_area close x y with
-          | Middle -> Final (Position (x, !size_y - y))
-          | c -> Final (Click (c, get_button e, x, !size_y - y))
+          | Middle ->
+              Final (Position (x, !size_y - y))
+          | c -> Final (Click (c, get_button e.modifiers, x, !size_y - y))
         end
-        else Final (Click (mouse_area near x y, get_button e, x, !size_y - y))
+        else Final (Click (mouse_area near x y,
+                           get_button e.modifiers, x, !size_y - y))
     | x -> x in
-  if !editing && pressed m G.button1 then wait_position () else
-  if !editing || pressed m G.control then begin
+  if !editing && button_pressed m Button1 then wait_position () else
+  if !editing || modifier m G.control then begin
     try
       let p = E.find x y in
       let rect = p.E.rect in
       let info = p.E.info in
       let action = info.E.action in
-      if pressed m G.button2 && (action.rx || action.ry) then
+      if button_pressed m Button2 && (action.rx || action.ry) then
         let event dx dy = Edit (p, E.Move (dx, dy)) in
         let action = { action with rw = false; rh = false; rd = false} in
         wait_move_button_up rect action event x y
-      else if (pressed m G.button3 || pressed m G.button1)
+      else if (button_pressed m Button3 || button_pressed m Button1)
           && (action.rh || action.rd || action.rw) then
-        let b = pressed m G.shift in
+        let b = modifier m G.shift in
         let action_h = action.rh && (not action.rd || not b) in
         let action_d = action.rd && (not action.rh || b) in
         let event dx dy = Edit (p, E.Resize (action_h, dx, dy)) in
@@ -1710,14 +1715,14 @@ let wait_button_up m x y =
       else Final Nil
     with
     | Not_found ->
-        if pressed m G.control then
+        if modifier m G.control then
           let event dx dy = Move (dx, 0-dy) in
           let move =
             { rx = true; ry = true; rw = false; rh = false; rd = false } in
           wait_move_button_up !bbox move event x y
         else wait_position ()
   end else
-    if pressed m G.shift && released m G.button1
+    if modifier m G.shift && not (button_pressed m Button1)
     then wait_select_button_up m x y
     else wait_position ();;
 
@@ -1763,7 +1768,7 @@ let wait_event () =
               in
               (* This would not work with rolling button *)
               send (Click (area, 
-                           get_button _ev', 
+                           get_button _ev'.modifiers, 
                            _ev'.mouse_x, 
                            _ev'.mouse_y))
             else
@@ -1801,6 +1806,7 @@ let wait_event () =
           if ev.button then
             (* let m = GraphicsY11.get_modifiers () in *)
             let m = ev.modifiers in
+            Misc.debug_endline (Printf.sprintf "Button %x" m);
             match wait_button_up m ev.mouse_x ev.mouse_y with
             | Final (Region (x, y, dx, dy) as e) -> send e
             | Final (Selection s as e) -> send e
@@ -1817,7 +1823,7 @@ let wait_event () =
             | Raw _ -> rescan ()
           else
             let m = GraphicsY11.get_modifiers () in
-            if m land GraphicsY11.shift <> 0
+            if not (modifier m G.shift)
             then Busy.temp_set Busy.Selection
             else Busy.restore_cursor ();
             rescan () in

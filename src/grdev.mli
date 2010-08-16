@@ -285,7 +285,7 @@ module H :
     end;;
 
 type area = Bottom_right | Bottom_left | Top_right | Top_left | Middle;;
-type button = Button1 | Button2 | Button3 | Button4 | Button5;;
+type button = Button1 | Button2 | Button3 | Button4 | Button5 | NoButton;;
 type event =
    | Resized of int * int
    | Refreshed

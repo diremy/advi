@@ -1631,6 +1631,7 @@ let main_loop mastername clients =
         | Grdev.Click (_, Grdev.Button3, _, _) ->
             if !click_turn_page then B.next_pause st
         | Grdev.Nil -> ()
+        | Grdev.Click (_, Grdev.NoButton, _, _)  -> assert false
       done with
       | Exit -> Grdev.close_dev ()
       | Duplex (action, st') -> duplex action st' in
