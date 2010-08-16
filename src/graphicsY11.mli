@@ -333,3 +333,4 @@ external anti_synchronize : unit -> unit = "caml_gr_anti_synchronize";;
 (** Synchronize the backing store drawings from the window display:
   performs the inverse operation as the regular [synchronize] function. *)
 
+external get_button: int -> int = "caml_gr_get_button";;

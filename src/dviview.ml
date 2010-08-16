@@ -824,6 +824,8 @@ let find_xref tag default st =
 
 let redisplay st =
   st.pause_number <- 0;
+  Grdev.toggle_syncing ();
+  Misc.debug_endline "SYNCING<>";
   redraw st;;
 
 let show_thumbnails st r page =
@@ -1608,8 +1610,8 @@ let main_loop mastername clients =
         | Grdev.Position (x, y) ->
             st.last_command <- Position;
             position st x y
-        | Grdev.Click (pos, Grdev.Button4, _, _)  -> B.previous_page st
-        | Grdev.Click (pos, Grdev.Button5, _, _)  -> B.next_page st
+        | Grdev.Click (_, Grdev.Button4, _, _)  -> B.previous_page st
+        | Grdev.Click (_, Grdev.Button5, _, _)  -> B.next_page st
         | Grdev.Click (pos, but, _, _) when Grdev.E.editing () ->
             begin match pos, but with
             | Grdev.Top_left, Grdev.Button1 -> B.previous_slice st

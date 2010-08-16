@@ -82,16 +82,35 @@ let flush_ps () =
   psused := true;
   Gs.flush ();;
 
-let flush_dvi () = GraphicsY11.flush ();;
-let flush_last () = if !last_is_dvi then flush_dvi () else flush_ps ();;
+let flush_dvi () =
+  GraphicsY11.flush ();;
+
+type syncing = Immediately | Later | Never
+let syncing_status = ref Never (* Immediately *)
+let toggle_syncing () =
+  match !syncing_status with 
+  | Immediately -> syncing_status := Never
+  | Never -> syncing_status := Immediately 
+  | x -> ()
+
+let syncing() = !syncing_status = Immediately
+
+let flush_last () =
+  if syncing() then 
+    if  !last_is_dvi then flush_dvi () else flush_ps ();;
 
 let sync b =
-  if !last_is_dvi <> b then begin flush_last (); last_is_dvi := b end;;
+  if syncing() then
+    if !last_is_dvi <> b then begin flush_last (); last_is_dvi := b end;;
+
+let dosync_ps() =
+  if !last_is_dvi <> true then begin flush_ps (); last_is_dvi := true end;;
 
 let title = ref "Advi";;
 let set_title s = title := s;;
 
 let synchronize () =
+  if syncing() then () else dosync_ps ();
   Gs.flush ();
   Transimpl.synchronize_transition ();
   GraphicsY11.synchronize ();
@@ -1334,6 +1353,7 @@ type area =
    | Bottom_right | Bottom_left | Top_right | Top_left | Middle;;
 type button =
    | Button1 | Button2 | Button3 | Button4 | Button5;;
+
 type event =
    | Resized of int * int
    | Refreshed
@@ -1443,7 +1463,6 @@ let resized () =
       Some (x, y)
     end
   else None;;
-
 
 let rec wait_signal_event events =
   match resized (), !usr1_status,  event_waiting (), !usr2_status with
@@ -1635,24 +1654,37 @@ let released m b = m land b = 0;;
 
 module G = GraphicsY11;;
 
-let button m =
-  if pressed m G.button1 then Button1 else
-  if pressed m G.button3 then Button3 else
-  if pressed m G.button4 then Button4 else
-  if pressed m G.button5 then Button5 else
-  Button2;;
+let button b =
+  if pressed b G.button1 then Button1 else
+  if pressed b G.button3 then Button3 else
+  if pressed b G.button4 then Button4 else
+  if pressed b G.button4 then Button4 else
+  if pressed b G.button5 then Button5 else
+  Button2 
+;;
+
+let get_button ev =
+  match G.get_button ev.modifiers with
+  | 1 -> Button1
+  | 2 -> Button2
+  | 3 -> Button3
+  | 4 -> Button4
+  | 5 -> Button5
+  | _ -> failwith "get_button"
+;;
 
 let wait_button_up m x y =
   (*  Printf.printf  "Button %d\n%!" (Obj.magic (Obj.repr (button m))); *)
   let wait_position () =
     match wait_signal_event button_up with
     | Raw e ->
+        Misc.debug_endline (Printf.sprintf "Final: %x" e.modifiers); 
         if !editing || pressed m G.shift then begin
           match mouse_area close x y with
           | Middle -> Final (Position (x, !size_y - y))
-          | c -> Final (Click (c, button m, x, !size_y - y))
+          | c -> Final (Click (c, get_button e, x, !size_y - y))
         end
-        else Final (Click (mouse_area near x y, button m, x, !size_y - y))
+        else Final (Click (mouse_area near x y, get_button e, x, !size_y - y))
     | x -> x in
   if !editing && pressed m G.button1 then wait_position () else
   if !editing || pressed m G.control then begin
@@ -1721,7 +1753,7 @@ let wait_event () =
         | {A.action = {H.tag = H.Item s; H.draw = d}} as act ->
             if ev.button then
               let _ev' = GraphicsY11.wait_next_event button_up in
-              let area = 
+              let area =
                 match s with 
                 | "Bottom_left" -> Bottom_left
                 | "Bottom_right" -> Bottom_right
@@ -1729,8 +1761,9 @@ let wait_event () =
                 | "Top_right" -> Top_right 
                 | _ -> Middle
               in
+              (* This would not work with rolling button *)
               send (Click (area, 
-                           button (GraphicsY11.get_modifiers()), 
+                           get_button _ev', 
                            _ev'.mouse_x, 
                            _ev'.mouse_y))
             else
@@ -1764,29 +1797,30 @@ let wait_event () =
                   H.deemphasize true emph;
                   event (H.emphasize_and_flash href_emphasize_color act) b end
         | _ -> rescan ()
-                   with Not_found ->
-                     if ev.button then
-                       let m = GraphicsY11.get_modifiers () in
-                       match wait_button_up m ev.mouse_x ev.mouse_y with
-                       | Final (Region (x, y, dx, dy) as e) -> send e
-                       | Final (Selection s as e) -> send e
-                       | Final (Position (x, y) as e) -> send e
-                       | Final (Move (dx, dy) as e) -> send e
-                       | Final (Click (_, _, _, _) as e) -> send e
-                       | Final (Edit (_, _) as e) -> send e
-                       | Final Nil -> send Nil
-                       | Final
-                           (Resized (_, _) | Refreshed |
-                           Key _ | Stdin _ | Href _ | Advi (_, _) as e) ->
-                             push_back_event ev;
-                             send e
-                       | Raw _ -> rescan ()
-                     else
-                       let m = GraphicsY11.get_modifiers () in
-                       if m land GraphicsY11.shift <> 0
-                       then Busy.temp_set Busy.Selection
-                       else Busy.restore_cursor ();
-                       rescan () in
+        with Not_found ->
+          if ev.button then
+            (* let m = GraphicsY11.get_modifiers () in *)
+            let m = ev.modifiers in
+            match wait_button_up m ev.mouse_x ev.mouse_y with
+            | Final (Region (x, y, dx, dy) as e) -> send e
+            | Final (Selection s as e) -> send e
+            | Final (Position (x, y) as e) -> send e
+            | Final (Move (dx, dy) as e) -> send e
+            | Final (Click (_, _, _, _) as e) -> send e
+            | Final (Edit (_, _) as e) -> send e
+            | Final Nil -> send Nil
+            | Final
+                (Resized (_, _) | Refreshed |
+                Key _ | Stdin _ | Href _ | Advi (_, _) as e) ->
+                  push_back_event ev;
+                  send e
+            | Raw _ -> rescan ()
+          else
+            let m = GraphicsY11.get_modifiers () in
+            if m land GraphicsY11.shift <> 0
+            then Busy.temp_set Busy.Selection
+            else Busy.restore_cursor ();
+            rescan () in
   event H.Nil false;;
 
 (* To be changed *)
@@ -1805,7 +1839,7 @@ let continue () =
 (* Calling GS *)
 
 let current_pos () =
-  if not !last_is_dvi then flush_ps ();
+  if syncing() && not !last_is_dvi then flush_ps ();
   let x, y = Gs.current_point() in
   x, !size_y - y;;
 

@@ -657,7 +657,7 @@ let newpage x =
 
 let flush () =
   if get_do_ps () then
-    try  gv#sync
+    try  gv # sync
     with
     | Terminated ->
         Misc.warning "Continuing without Postscript";

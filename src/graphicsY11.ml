@@ -346,6 +346,7 @@ and mod4 = 0x2000
 and mod5 = 0x4000
 and nomod = 0x0;;
 
+
 external cut : string -> unit = "caml_gr_cut";;
         (* store string in the cut buffer *)
 
@@ -490,3 +491,5 @@ let init () =
   rebind_keysyms();
   (* we disable the original Graphics event retrieveing system *)
   Sys.set_signal (sigio_signal ()) Sys.Signal_ignore;;
+
+external get_button: int -> int = "caml_gr_get_button";;

@@ -391,7 +391,7 @@ value caml_gr_get_modifiers(void)
                     &root_x, &root_y, &win_x, &win_y,
                     &modifiers)) {
     button = 0;
-/*     fprintf(stderr,"C modifiers = %u\n", modifiers); */
+    /*     fprintf(stderr,"C modifiers = %u\n", modifiers); */
     if (modifiers & Button1Mask) button = button | 0x1;
     if (modifiers & Button2Mask) button = button | 0x2;
     if (modifiers & Button3Mask) button = button | 0x4;
@@ -612,3 +612,15 @@ value caml_gr_rebind_keysyms(value unit)
   return Val_unit;
 }
 
+
+value caml_gr_get_button(value m)
+{
+  int modifiers = Int_val(m);
+  int button = 0;
+  if (modifiers & Button1Mask) button = 1;
+  else if (modifiers & Button2Mask) button = 2;
+  else if (modifiers & Button3Mask) button = 3;
+  else if (modifiers & Button4Mask) button = 4;
+  else if (modifiers & Button5Mask) button = 5;
+  return Val_int(button);
+}
