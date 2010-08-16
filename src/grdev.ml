@@ -1663,7 +1663,6 @@ module G = GraphicsY11;;
 (* ;; *)
 
 let get_button m =
-  Misc.debug_endline (Printf.sprintf "get_button %x" m);
   match G.get_button m with
   | 1 -> Button1
   | 2 -> Button2
@@ -1680,7 +1679,6 @@ let wait_button_up m x y =
   let wait_position () =
     match wait_signal_event button_up with
     | Raw e ->
-        Misc.debug_endline (Printf.sprintf "Final: %x (m=%x)" e.modifiers m); 
         if (!editing || modifier e.modifiers G.shift)
            && button_pressed e.modifiers Button1 then begin
           match mouse_area close x y with
@@ -1806,7 +1804,6 @@ let wait_event () =
           if ev.button then
             (* let m = GraphicsY11.get_modifiers () in *)
             let m = ev.modifiers in
-            Misc.debug_endline (Printf.sprintf "Button %x" m);
             match wait_button_up m ev.mouse_x ev.mouse_y with
             | Final (Region (x, y, dx, dy) as e) -> send e
             | Final (Selection s as e) -> send e
