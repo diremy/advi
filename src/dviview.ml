@@ -646,7 +646,12 @@ let rec redraw ?trans ?chst st =
   synchronize st;
   Busy.set (if st.cont = None then Busy.Free else Busy.Pause);
   if not st.aborted &&  !postsyncing && not (Grdev.syncing()) then
-    Grdev.with_syncing (redraw ?trans ?chst) st;
+    begin
+      match st.dvi.Cdvi.pages.(st.page_number).Cdvi.page_status with
+      | Cdvi.Known { Cdvi.hasps = true } -> 
+          Grdev.with_syncing (redraw ?trans ?chst) st
+      | _ -> ()
+    end;
   Misc.debug_stop "Page has been drawn\n";;
 
 let goto_previous_pause n st =
@@ -1644,7 +1649,7 @@ let main_loop mastername clients =
         | Grdev.Click (_, Grdev.Button3, _, _) ->
             if !click_turn_page then B.next_pause st
         | Grdev.Nil -> ()
-        | Grdev.Click (_, Grdev.NoButton, _, _)  -> assert false
+        | Grdev.Click (_, Grdev.NoButton, _, _)  -> ()
       done with
       | Exit -> Grdev.close_dev ()
       | Duplex (action, st') -> duplex action st' in

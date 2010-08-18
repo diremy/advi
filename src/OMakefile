@@ -2,6 +2,8 @@
 # These files depend on the interfaces in ../lib
 # OCAMLINCLUDES += ../graph +site-lib/camlimages
 OCAMLINCLUDES += +site-lib/camlimages
+CFLAGS += -I /opt/local/lib/ocaml
+
 
 ############################################################################
 
