@@ -316,3 +316,18 @@ value caml_gry_retrieve_events(void)
   }
   return Val_unit;
 }
+
+value caml_gr_poll_button_pressed(void)
+{
+  value button = Val_false;
+  unsigned int i;
+  /* Look inside event queue for pending ButtonPress events */
+  for (i = caml_gr_y_head; i != caml_gr_y_tail; i = (i + 1) % SIZE_QUEUE) {
+    if (caml_gr_y_queue[i].kind == ButtonPress) {
+      button = Val_true;
+      break;
+    }
+  }
+  return button; 
+}
+

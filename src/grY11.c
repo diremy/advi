@@ -638,23 +638,7 @@ struct event_data {
   unsigned char key;
 };
 
-struct event_data caml_gr_queue[SIZE_QUEUE];
-unsigned int caml_gr_head;       /* position of next read */
-unsigned int caml_gr_tail;       /* position of next write */
-
-value caml_gr_poll_button_pressed(void)
-{
-  value button = Val_false;
-  unsigned int i;
-  /* Look inside event queue for pending ButtonPress events */
-  for (i = caml_gr_head; i != caml_gr_tail; i = (i + 1) % SIZE_QUEUE) {
-    fprintf(stderr,"kind = %x\n", caml_gr_queue[i].kind); 
-    if (caml_gr_queue[i].kind == ButtonPress) {
-      button = Val_true;
-      break;
-    }
-  }
-  fprintf(stderr,"Button pressed = %s\n", button == Val_true? "Y" : "N"); 
-  return button; 
-}
+extern struct event_data caml_gr_queue[SIZE_QUEUE];
+extern unsigned int caml_gr_head;       /* position of next read */
+extern unsigned int caml_gr_tail;       /* position of next write */
 

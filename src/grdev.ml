@@ -1863,7 +1863,7 @@ let continue () =
     resized () || (*  !usr1_status || *)
     GraphicsY11.key_pressed () ||
     (* button pressed cannot be implemented as an extension to Graphics *)
-    (* GraphicsY11.button_pressed () || *)
+    GraphicsY11.button_pressed () ||
     !usr2_status (* input from stdin *)
   then begin Gs.flush (); raise Stop end;;
 
