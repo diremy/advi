@@ -334,3 +334,5 @@ external anti_synchronize : unit -> unit = "caml_gr_anti_synchronize";;
   performs the inverse operation as the regular [synchronize] function. *)
 
 external get_button: int -> int = "caml_gr_get_button";;
+
+external button_pressed: unit -> bool = "caml_gr_poll_button_pressed";;

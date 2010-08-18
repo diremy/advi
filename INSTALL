@@ -43,7 +43,8 @@ This is only needed if you're using CVS version directly.
   * make sure ocaml autoconf macros, available from bazar-ocaml/autoconf
    directory, are present in aclocal macro search path, by any of the following 
    solution:
-   - export ACLOCAL='aclocal -I <directory>' before invoking autoreconf
+   - exec before invoking autoreconf:
+       export ACLOCAL='aclocal -I <directory>' 
    - set up a dirlist file in automake macro directory, as explained in aclocal
      documentation
   * run autoreconf --install

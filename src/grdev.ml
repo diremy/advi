@@ -85,15 +85,41 @@ let flush_ps () =
 let flush_dvi () =
   GraphicsY11.flush ();;
 
-type syncing = Immediately | Later | Never
+type syncing = Always | Page | Now | Later | Never
 let syncing_status = ref Never (* Immediately *)
+let reset_syncing () =
+  match !syncing_status with
+  | Page -> syncing_status := Never
+  | Now -> syncing_status := Later
+  | _ -> ()
+
 let toggle_syncing () =
   match !syncing_status with 
-  | Immediately -> syncing_status := Never
-  | Never -> syncing_status := Immediately 
-  | x -> ()
+  | Always -> syncing_status := Never
+  | Never -> syncing_status := Always 
+  | _ -> ()
 
-let syncing() = !syncing_status = Immediately
+let try_finalize f x finally y =
+  let res = try f x with exn -> finally y; raise exn in 
+  finally y; 
+  res
+
+let with_syncing f x =
+  let old = !syncing_status in
+  let cur = 
+  match old with
+  | Always | Page | Now as x -> x
+  | Later -> Now
+  | Never -> Page in
+  syncing_status := cur;
+  let res = try f x with exn -> syncing_status := old; raise exn in
+  syncing_status := old;
+  res 
+
+let syncing() =
+  match !syncing_status with
+  | Always | Page | Now -> true
+  | Later | Never -> false
 
 let flush_last () =
   if syncing() then 
@@ -1834,8 +1860,10 @@ let resized () =
 
 let continue () =
   if
-    resized () || 
-    GraphicsY11.key_pressed () (*  || !usr1_status *) ||
+    resized () || (*  !usr1_status || *)
+    GraphicsY11.key_pressed () ||
+    (* button pressed cannot be implemented as an extension to Graphics *)
+    (* GraphicsY11.button_pressed () || *)
     !usr2_status (* input from stdin *)
   then begin Gs.flush (); raise Stop end;;
 

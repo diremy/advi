@@ -493,3 +493,5 @@ let init () =
   Sys.set_signal (sigio_signal ()) Sys.Signal_ignore;;
 
 external get_button: int -> int = "caml_gr_get_button";;
+
+external button_pressed: unit -> bool = "caml_gr_poll_button_pressed";;

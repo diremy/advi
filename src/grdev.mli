@@ -324,3 +324,5 @@ val cut : string -> unit;;
 val wait_button_up : unit -> unit;;
 
 val toggle_syncing : unit -> unit;;
+val with_syncing : ('a -> 'b) -> 'a -> 'b;;
+val syncing : unit -> bool

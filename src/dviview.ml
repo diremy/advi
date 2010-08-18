@@ -22,6 +22,10 @@ let pauses =
   "  switch pauses off,\
   \n\t (the default is to wait for specified pauses).";;
 
+let postsyncing =
+  Options.flag false "--postsyncing"
+  "  redraw with syncing if needed \n\t.";;
+
 let without_pauses f x =
   let p = !pauses in
   try pauses := false; let v = f x in pauses := p; v
@@ -591,7 +595,9 @@ let move_within_margins_x st movex =
     end in
   if st.orig_x <> new_orig_x then Some new_orig_x else None;;
 
-let redraw ?trans ?chst st =
+
+
+let rec redraw ?trans ?chst st =
   (* Draws until the current pause_number or page end. *)
   (* The pauses and waits that appear before are ignored. *)
   Busy.set Busy.Busy;
@@ -639,6 +645,8 @@ let redraw ?trans ?chst st =
   end;
   synchronize st;
   Busy.set (if st.cont = None then Busy.Free else Busy.Pause);
+  if not st.aborted &&  !postsyncing && not (Grdev.syncing()) then
+    Grdev.with_syncing (redraw ?trans ?chst) st;
   Misc.debug_stop "Page has been drawn\n";;
 
 let goto_previous_pause n st =
@@ -825,8 +833,11 @@ let find_xref tag default st =
 let redisplay st =
   st.pause_number <- 0;
   Grdev.toggle_syncing ();
-  Misc.debug_endline "SYNCING<>";
   redraw st;;
+
+let resyncing st =
+  st.pause_number <- 0;
+  Grdev.with_syncing redraw st;;
 
 let show_thumbnails st r page =
   let size_x = Graphics.size_x () in
@@ -1279,6 +1290,7 @@ module B =
 
     let reload = reload true
     let redisplay = redisplay
+    let resyncing = resyncing
 
     let toggle_full_screen st =
       let b = (st.full_screen = None) in
@@ -1467,6 +1479,7 @@ let bind_default_keys () =
    'r', B.redraw;
    'R', B.reload;
    '', B.redisplay;
+   '/', B.resyncing;
 
    (* Control-f, c, to handle the advi window. *)
    '', B.toggle_full_screen;

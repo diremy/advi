@@ -23,6 +23,12 @@
 #include "libgraph.h"
 #include "image.h"
 
+#include <sys/types.h>
+#include <sys/time.h>
+#include <string.h>
+#include <unistd.h>
+
+
 #include "grwm.h"
 /* the HAVE_XINERAMA variable should be defined by configure */
 /* #define HAVE_XINERAMA */
@@ -624,3 +630,31 @@ value caml_gr_get_button(value m)
   else if (modifiers & Button5Mask) button = 5;
   return Val_int(button);
 }
+
+struct event_data {
+  short kind;
+  short mouse_x, mouse_y;
+  unsigned char button;
+  unsigned char key;
+};
+
+struct event_data caml_gr_queue[SIZE_QUEUE];
+unsigned int caml_gr_head;       /* position of next read */
+unsigned int caml_gr_tail;       /* position of next write */
+
+value caml_gr_poll_button_pressed(void)
+{
+  value button = Val_false;
+  unsigned int i;
+  /* Look inside event queue for pending ButtonPress events */
+  for (i = caml_gr_head; i != caml_gr_tail; i = (i + 1) % SIZE_QUEUE) {
+    fprintf(stderr,"kind = %x\n", caml_gr_queue[i].kind); 
+    if (caml_gr_queue[i].kind == ButtonPress) {
+      button = Val_true;
+      break;
+    }
+  }
+  fprintf(stderr,"Button pressed = %s\n", button == Val_true? "Y" : "N"); 
+  return button; 
+}
+
