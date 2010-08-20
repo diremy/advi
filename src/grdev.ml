@@ -70,15 +70,43 @@ let update_device_geometry () =
   xmin := 0; xmax := !size_x;
   ymin := 0; ymax := !size_y;;
 
+(* For refreshed signal on usr1 *)
+exception Usr1;;
+exception Usr2;;
+
+let waiting = ref false;;
+let usr1 = Sys.sigusr1;;
+let usr2 = Sys.sigusr2;;
+let usr1_status = ref false;;
+let usr2_status = ref false;;
+let clear_usr1 () = usr1_status := false;;
+let clear_usr2 () = usr2_status := false;;
+
 (* Communication with GS *)
-exception Stop;;
 
 let dvi = true;;
 let ps = false;;
 let psused = ref false;;
 let last_is_dvi = ref true;;
 
+(* To be changed *)
+exception Stop;;
+exception GS = Gs.Terminated;;
+
+let resized () =
+  Graphics.size_x () <> !size_x || Graphics.size_y () <> !size_y;;
+
+let continue () =
+  if
+    resized () || (*  !usr1_status || *)
+    GraphicsY11.key_pressed () ||
+    (* button pressed cannot be implemented as an extension to Graphics *)
+    GraphicsY11.button_pressed () ||
+    !usr2_status (* input from stdin *)
+  then begin (* Gs.flush (); *) raise Stop end;;
+
 let flush_ps () =
+  continue();
   psused := true;
   Gs.flush ();;
 
@@ -141,18 +169,6 @@ let synchronize () =
   Transimpl.synchronize_transition ();
   GraphicsY11.synchronize ();
   Launch.launch_embedded_apps ();;
-
-(* For refreshed signal on usr1 *)
-exception Usr1;;
-exception Usr2;;
-
-let waiting = ref false;;
-let usr1 = Sys.sigusr1;;
-let usr2 = Sys.sigusr2;;
-let usr1_status = ref false;;
-let usr2_status = ref false;;
-let clear_usr1 () = usr1_status := false;;
-let clear_usr2 () = usr2_status := false;;
 
 exception Watch_file;;
 exception Input;;
@@ -1850,21 +1866,6 @@ let wait_event () =
             else Busy.restore_cursor ();
             rescan () in
   event H.Nil false;;
-
-(* To be changed *)
-exception GS = Gs.Terminated;;
-
-let resized () =
-  Graphics.size_x () <> !size_x || Graphics.size_y () <> !size_y;;
-
-let continue () =
-  if
-    resized () || (*  !usr1_status || *)
-    GraphicsY11.key_pressed () ||
-    (* button pressed cannot be implemented as an extension to Graphics *)
-    GraphicsY11.button_pressed () ||
-    !usr2_status (* input from stdin *)
-  then begin Gs.flush (); raise Stop end;;
 
 (* Calling GS *)
 

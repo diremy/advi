@@ -17,6 +17,7 @@
 
 (* $Id$ *)
 
+
 let debugs = Misc.debug_endline;;
 (* You may need to make it false for old versions of gs *)
 let delaysafer = ref true;; (* false *)
@@ -233,6 +234,7 @@ class gs () =
         begin
           debugs "waiting for input";
           let s =
+            
             try input_line rightin
             with End_of_file ->
               match select [ rpd_in ] [] [] 1.0 with
