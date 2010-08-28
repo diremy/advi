@@ -21,6 +21,9 @@
 #include <sys/select.h>
 #endif
 
+
+#include <unistd.h>
+
 /* from byterun/signals.h */
 extern void enter_blocking_section (void);
 extern void leave_blocking_section (void);
@@ -119,6 +122,7 @@ void caml_gr_y_handle_event(XEvent * event)
       char keytxt[256];
       int nchars;
       char * p;
+     /* fprintf (stderr, "Key: %x\n", event->xkey.state);  */
       nchars = XLookupString(&(event->xkey), keytxt, sizeof(keytxt),
                              &thekey, 0);
       for (p = keytxt; nchars > 0; p++, nchars--)
@@ -130,12 +134,17 @@ void caml_gr_y_handle_event(XEvent * event)
 
   case ButtonPress:
   case ButtonRelease:
+    /* fprintf (stderr, "Button: %x - %x => %x\n", */
+    /*          event->xbutton.button, event->xbutton.state, */
+    /*          (event->xbutton.state | ((1<<7)<<(event->xbutton.button)))); */
     caml_gr_y_enqueue_event(event->type, event->xbutton.x, event->xbutton.y,
-                      event->type == ButtonPress, 0,
-                      event->xbutton.state);
+                            event->type == ButtonPress, 0,
+                            (event->xbutton.state |
+                             ((1<<7)<<(event->xbutton.button))));
     break;
 
   case MotionNotify:
+    /* fprintf (stderr, "Motion: %x\n", event->xmotion.state);  */
     caml_gr_y_enqueue_event(event->type, event->xmotion.x, event->xmotion.y,
                       BUTTON_STATE(event->xmotion.state), 0,
                       event->xmotion.state);
@@ -159,6 +168,24 @@ static value caml_gr_y_wait_allocate_result (int mouse_x, int mouse_y, int butto
   Field(res, 4) = Val_int(key & 0xFF);
   Field(res, 5) = Val_int(state);
   return res;
+}
+
+static int caml_gr_modifiers (int modifiers) {
+  int bm = 0;
+  if (modifiers & Button1Mask) bm = bm | 0x100;
+  if (modifiers & Button2Mask) bm = bm | 0x200;
+  if (modifiers & Button3Mask) bm = bm | 0x400;
+  if (modifiers & Button4Mask) bm = bm | 0x800;
+  if (modifiers & Button5Mask) bm = bm | 0x1000;
+  if (modifiers & ShiftMask) bm = bm | 0x1;
+  if (modifiers & LockMask) bm = bm | 0x2;
+  if (modifiers & ControlMask) bm = bm | 0x4;
+  if (modifiers & Mod1Mask) bm = bm | 0x8;
+  if (modifiers & Mod2Mask) bm = bm | 0x10;
+  if (modifiers & Mod3Mask) bm = bm | 0x20;
+  if (modifiers & Mod4Mask) bm = bm | 0x40;
+  if (modifiers & Mod5Mask) bm = bm | 0x80;
+  return bm; 
 }
 
 static value caml_gr_y_wait_event_poll(void)
@@ -191,9 +218,9 @@ static value caml_gr_y_wait_event_poll(void)
       break;
     }
   }
-  return caml_gr_y_wait_allocate_result (mouse_x, mouse_y, button,
-                                   keypressed, key,
-                                   modifiers);
+  return caml_gr_y_wait_allocate_result 
+    (mouse_x, mouse_y, button, keypressed, key,
+     caml_gr_modifiers(modifiers));
 }
 
 static value caml_gr_y_wait_event_in_queue(long mask)
@@ -207,9 +234,10 @@ static value caml_gr_y_wait_event_in_queue(long mask)
         || (ev->kind == ButtonPress && (mask & ButtonPressMask))
         || (ev->kind == ButtonRelease && (mask & ButtonReleaseMask))
         || (ev->kind == MotionNotify && (mask & PointerMotionMask)))
-      return caml_gr_y_wait_allocate_result(ev->mouse_x, ev->mouse_y, ev->button,
-                                      ev->kind == KeyPress, ev->key,
-                                      ev->state);
+      return caml_gr_y_wait_allocate_result
+        (ev->mouse_x, ev->mouse_y, ev->button,
+         ev->kind == KeyPress, ev->key,
+         caml_gr_modifiers(ev->state));
   }
   return Val_false;
 }

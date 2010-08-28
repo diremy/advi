@@ -70,43 +70,15 @@ let update_device_geometry () =
   xmin := 0; xmax := !size_x;
   ymin := 0; ymax := !size_y;;
 
-(* For refreshed signal on usr1 *)
-exception Usr1;;
-exception Usr2;;
-
-let waiting = ref false;;
-let usr1 = Sys.sigusr1;;
-let usr2 = Sys.sigusr2;;
-let usr1_status = ref false;;
-let usr2_status = ref false;;
-let clear_usr1 () = usr1_status := false;;
-let clear_usr2 () = usr2_status := false;;
-
 (* Communication with GS *)
+exception Stop;;
 
 let dvi = true;;
 let ps = false;;
 let psused = ref false;;
 let last_is_dvi = ref true;;
 
-(* To be changed *)
-exception Stop;;
-exception GS = Gs.Terminated;;
-
-let resized () =
-  Graphics.size_x () <> !size_x || Graphics.size_y () <> !size_y;;
-
-let continue () =
-  if
-    resized () || (*  !usr1_status || *)
-    GraphicsY11.key_pressed () ||
-    (* button pressed cannot be implemented as an extension to Graphics *)
-    GraphicsY11.button_pressed () ||
-    !usr2_status (* input from stdin *)
-  then begin (* Gs.flush (); *) raise Stop end;;
-
 let flush_ps () =
-  continue();
   psused := true;
   Gs.flush ();;
 
@@ -169,6 +141,18 @@ let synchronize () =
   Transimpl.synchronize_transition ();
   GraphicsY11.synchronize ();
   Launch.launch_embedded_apps ();;
+
+(* For refreshed signal on usr1 *)
+exception Usr1;;
+exception Usr2;;
+
+let waiting = ref false;;
+let usr1 = Sys.sigusr1;;
+let usr2 = Sys.sigusr2;;
+let usr1_status = ref false;;
+let usr2_status = ref false;;
+let clear_usr1 () = usr1_status := false;;
+let clear_usr2 () = usr2_status := false;;
 
 exception Watch_file;;
 exception Input;;
@@ -1695,24 +1679,18 @@ let modifier m b = m land b <> 0;;
 
 module G = GraphicsY11;;
 
-(* let button b = *)
-(*   if pressed b G.button1 then Button1 else *)
-(*   if pressed b G.button3 then Button3 else *)
-(*   if pressed b G.button4 then Button4 else *)
-(*   if pressed b G.button4 then Button4 else *)
-(*   if pressed b G.button5 then Button5 else *)
-(*   NoButton  *)
-(* ;; *)
+let pressed m b = m land b = b
 
-let get_button m =
-  match G.get_button m with
-  | 1 -> Button1
-  | 2 -> Button2
-  | 3 -> Button3
-  | 4 -> Button4
-  | 5 -> Button5
-  | _ -> NoButton
+let get_button b =
+  if pressed b G.button1 then Button1 else
+  if pressed b G.button2 then Button2 else
+  if pressed b G.button3 then Button3 else
+  if pressed b G.button4 then Button4 else
+  if pressed b G.button5 then Button5 else
+  NoButton
 ;;
+
+let shift_or_control = G.shift lor G.control
 
 let button_pressed m b = get_button m = b
 
@@ -1720,19 +1698,22 @@ let wait_button_up m x y =
   let wait_position () =
     match wait_signal_event button_up with
     | Raw e ->
-        if (!editing || modifier e.modifiers G.shift)
-           && button_pressed e.modifiers Button1 then begin
+        let m = e.modifiers in
+        let () = Misc.debug_endline (Printf.sprintf "wait_position %x" m) in
+        if modifier m G.button1 && not (modifier m shift_or_control) then begin
           match mouse_area close x y with
-          | Middle ->
-              Final (Position (x, !size_y - y))
+          | Middle -> Final (Position (x, !size_y - y))
           | c -> Final (Click (c, get_button e.modifiers, x, !size_y - y))
         end
-        else Final (Click (mouse_area near x y,
-                           get_button e.modifiers, x, !size_y - y))
+        else
+          let c = mouse_area near x y  in
+          Final (Click (c, get_button e.modifiers, x, !size_y - y))
     | x -> x in
-  if !editing && button_pressed m Button1 then wait_position () else
-  if !editing || modifier m G.control then begin
+  if modifier m G.button1 && not (modifier m shift_or_control) then
+    wait_position () else
+  if modifier m G.control || modifier m G.shift then begin
     try
+      let () = Misc.debug_endline (Printf.sprintf "Control?") in
       let p = E.find x y in
       let rect = p.E.rect in
       let info = p.E.info in
@@ -1754,6 +1735,7 @@ let wait_button_up m x y =
       else Final Nil
     with
     | Not_found ->
+        let () = Misc.debug_endline (Printf.sprintf "Control not found?") in
         if modifier m G.control then
           let event dx dy = Move (dx, 0-dy) in
           let move =
@@ -1769,7 +1751,7 @@ let wait_button_up m x y =
 let find_key ev =
   let c = ev.GraphicsY11.key in
   let k =
-    if ev.GraphicsY11.modifiers != GraphicsY11.control then c else
+    if ev.modifiers != G.control then c else
     let cc = 1 + int_of_char c - int_of_char 'A' in
     if cc >= 1 then char_of_int cc else c in
   Key k;;
@@ -1785,7 +1767,7 @@ let wait_event () =
     match wait_signal_event all_events with
     | Final e -> send e
     | Raw ev ->
-        if ev.GraphicsY11.keypressed then send (find_key ev) else
+        if ev.G.keypressed then send (find_key ev) else
         try match H.find_with_tag active_tag ev.mouse_x ev.mouse_y with
         | {A.action = {H.tag = H.Href h; H.draw = d}} as act ->
             if ev.button then
@@ -1843,7 +1825,6 @@ let wait_event () =
         | _ -> rescan ()
         with Not_found ->
           if ev.button then
-            (* let m = GraphicsY11.get_modifiers () in *)
             let m = ev.modifiers in
             match wait_button_up m ev.mouse_x ev.mouse_y with
             | Final (Region (x, y, dx, dy) as e) -> send e
@@ -1866,6 +1847,21 @@ let wait_event () =
             else Busy.restore_cursor ();
             rescan () in
   event H.Nil false;;
+
+(* To be changed *)
+exception GS = Gs.Terminated;;
+
+let resized () =
+  Graphics.size_x () <> !size_x || Graphics.size_y () <> !size_y;;
+
+let continue () =
+  if
+    resized () || (*  !usr1_status || *)
+    GraphicsY11.key_pressed () ||
+    (* button pressed cannot be implemented as an extension to Graphics *)
+    GraphicsY11.button_pressed () ||
+    !usr2_status (* input from stdin *)
+  then begin Gs.flush (); raise Stop end;;
 
 (* Calling GS *)
 

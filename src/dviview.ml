@@ -22,6 +22,13 @@ let pauses =
   "  switch pauses off,\
   \n\t (the default is to wait for specified pauses).";;
 
+let events =
+  Options.add
+  "-pushkeys"
+    (Arg.String (String.iter Misc.push_char_event))
+  "<string>: push string chars as events\n\t";;
+
+
 let postsyncing =
   Options.flag false "--postsyncing"
   "  redraw with syncing if needed \n\t.";;

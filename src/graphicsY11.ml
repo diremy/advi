@@ -332,18 +332,19 @@ external get_geometry : unit -> int * int * int * int = "caml_gr_get_geometry";;
 external get_modifiers : unit -> int = "caml_gr_get_modifiers";;
         (* returns modifiers as an integer *)
 
-let button1 = 0x1
-and button2 = 0x2
-and button3 = 0x4
-and button4 = 0x8
-and button5 = 0x10
-and shift = 0x100
-and control = 0x200
-and mod1 = 0x400
-and mod2 = 0x800
-and mod3 = 0x1000
-and mod4 = 0x2000
-and mod5 = 0x4000
+let button1 = 0x100
+and button2 = 0x200
+and button3 = 0x400
+and button4 = 0x800
+and button5 = 0x1000
+and shift = 0x1
+and lock = 0x2
+and control = 0x4
+and mod1 = 0x8
+and mod2 = 0x10
+and mod3 = 0x20
+and mod4 = 0x40
+and mod5 = 0x80
 and nomod = 0x0;;
 
 
