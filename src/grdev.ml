@@ -1680,6 +1680,7 @@ let modifier m b = m land b <> 0;;
 module G = GraphicsY11;;
 
 let pressed m b = m land b = b
+let button123 = G.button1 lor G.button2 lor G.button3
 
 let get_button b =
   if pressed b G.button1 then Button1 else
@@ -1772,8 +1773,11 @@ let wait_event () =
         | {A.action = {H.tag = H.Href h; H.draw = d}} as act ->
             if ev.button then
               let _ev' = GraphicsY11.wait_next_event button_up in
-              send (Href h) else
-              if H.up_to_date act emph then event emph b else begin
+              if  pressed ev.modifiers button123
+              then send (Href h)
+              else send (Click (Middle, get_button _ev'.modifiers,
+                                _ev'.mouse_x, _ev'.mouse_y))
+            else if H.up_to_date act emph then event emph b else begin
                 H.deemphasize true emph;
                 event (H.emphasize_and_flash href_emphasize_color act) b end
         | {A.action = {H.tag = H.Item s; H.draw = d}} as act ->
