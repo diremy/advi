@@ -1679,7 +1679,7 @@ let modifier m b = m land b <> 0;;
 
 module G = GraphicsY11;;
 
-let pressed m b = m land b = b
+let pressed m b = m land b <> 0
 let button123 = G.button1 lor G.button2 lor G.button3
 
 let get_button b =
