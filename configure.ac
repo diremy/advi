@@ -28,16 +28,19 @@ if test -z "$CAMLIMAGES_VERSION"; then
   HAVE_CAMLIMAGES="false"
   # unquote this if camlimages may be missing
   # currently, configure will fail below if because neither native not bytecode   # versions will be built
-  AC_MSG_ERROR([you need camlimages, with minimal 3.0.0 version])
+  AC_MSG_ERROR([you need camlimages, with minimal 4.0.0 version])
 else
   AC_MSG_RESULT([yes])
   HAVE_CAMLIMAGES="true"
-  CAMLIMAGES_INCLUDES=`$OCAMLFIND query -i-format -separator ' ' -recursive camlimages`
-  CAMLIMAGES_LIBS_NATIVE=`$OCAMLFIND query -a-format -separator ' ' -recursive -predicates native camlimages`
-  CAMLIMAGES_LIBS_BYTE=`$OCAMLFIND query -a-format -separator ' ' -recursive -predicates byte camlimages`
+  CAMLIMAGES_PACKAGES="camlimages.core camlimages.graphics camlimages.ps camlimages.freetype"
+  CAMLIMAGES_INCLUDES=`$OCAMLFIND query -i-format -separator ' ' camlimages`
+  CAMLIMAGES_LIBS_NATIVE=`$OCAMLFIND query -a-format -separator ' ' -recursive -predicates native $CAMLIMAGES_PACKAGES`
+  CAMLIMAGES_LIBS_BYTE=`$OCAMLFIND query -a-format -separator ' ' -recursive -predicates byte $CAMLIMAGES_PACKAGES`
+  CAMLIMAGES_LIBS_LINK="-cclib -lcamlimages_freetype"
   AC_SUBST(CAMLIMAGES_INCLUDES)
   AC_SUBST(CAMLIMAGES_LIBS_NATIVE)
   AC_SUBST(CAMLIMAGES_LIBS_BYTE)
+  AC_SUBST(CAMLIMAGES_LIBS_LINK)
 fi
 AC_SUBST(HAVE_CAMLIMAGES)
 

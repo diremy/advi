@@ -75,14 +75,10 @@ OCAMLOPTOBJS    = $(OCAMLBUILTSOURCES:.ml=.cmx) $(OCAMLSOURCES:.ml=.cmx)
 COBJS           = $(CSOURCES:.c=.o)
 
 AM_CFLAGS	= $(XINERAMA_CFLAGS) $(X_CFLAGS)
-AM_LINKFLAGS	= $(XINERAMA_LIBS)
+AM_LINKFLAGS	= $(XINERAMA_LIBS) $(CAMLIMAGES_LIBS_LINK)
 AM_OCAMLCFLAGS	= $(CAMLIMAGES_INCLUDES)
 
-OTHER_LIBS	= unix str graphics \
-		  camlimages_core \
-		  camlimages_graphics \
-	          camlimages_freetype \
-	          camlimages_ps 
+OTHER_LIBS	= unix str 
 
 OCAMLLIBS_OPT	= $(CAMLIMAGES_LIBS_NATIVE) $(OTHER_LIBS:=.cmxa)
 OCAMLLIBS_BYT	= $(CAMLIMAGES_LIBS_BYTE) $(OTHER_LIBS:=.cma)
