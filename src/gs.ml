@@ -21,6 +21,9 @@
 let debugs = Misc.debug_endline;;
 (* You may need to make it false for old versions of gs *)
 let delaysafer = ref true;; (* false *)
+let gslibincwd = Options.flag false "-gs-P" 
+  "Passes -P or -P- to look (or not) in the . first when loading libraries";; 
+
 
 let get_do_ps, set_do_ps, init_do_ps =
  let has_to_do_ps = ref !Global_options.pson in
@@ -135,7 +138,7 @@ class gs () =
     Array.concat [
     [|
       command; 
-      "-dNOPLATFONTS"; "-dNOPAUSE";
+      "-dNOPLATFONTS"; "-dNOPAUSE"; (if !gslibincwd then "-P" else "-P-");
     |];
     (if !antialias then x11alpha_device else x11_device);
     [|

@@ -1,3 +1,7 @@
+Version 1.10
+	- Changed de la configuration pour utiliser version 4.0 of camlimages
+	- Dynamics libraries loaded last (provided by Stefan Potyra)
+
 Version 1.9 
 	- EPS files are read by advi and sent to gs
 	- splash.dvi is now distributed and correctly installed  

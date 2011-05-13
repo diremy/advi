@@ -33,6 +33,10 @@ let postsyncing =
   Options.flag false "--postsyncing"
   "  redraw with syncing if needed \n\t.";;
 
+let scroll_fast =
+  Options.flag false "--scrollfast"
+  "  scroll to next page instead of page_down \n\t.";;
+
 let without_pauses f x =
   let p = !pauses in
   try pauses := false; let v = f x in pauses := p; v
@@ -880,7 +884,12 @@ let rec show_toc st =
       let roll = st.num mod n in
       st.next_num <- succ st.num;
       begin match rolls.(roll) with
-      | Page p -> redraw { st' with page_number = p }
+      | Page p -> redraw
+            { st' with
+              page_number = p;
+              orig_x = 0;
+              orig_y = top_of_page st;
+            }
       | Thumbnails (r, page) -> show_thumbnails st' r page
       end;
       synchronize st;
@@ -1175,9 +1184,10 @@ let set_keymap, get_keymap =
 
 module B =
   struct
-    let nop c st =
+    let nop st = ()
+    let unbound c st =
       Misc.warning (Printf.sprintf "Unbound key %C" c)
-    let control_x_nop c st =
+    let control_x_unbound c st =
       set_keymap Default_keymap;
       Misc.warning (Printf.sprintf "Unbound Control-x key %C" c)
     let set_control_x_keymap st =
@@ -1209,6 +1219,7 @@ module B =
           (st.page_number - max 1 st.num) (st.last_pause_number) st
     let pop_page st =
       pop_page true 1 st
+
     let first_page st =
       goto_page 0 st
     let last_page st =
@@ -1295,6 +1306,13 @@ module B =
           end
       | None -> none ()
 
+    let scroll_down st =
+      if !scroll_fast then next_page st else page_down st
+    let scroll_up st =
+      if !scroll_fast then previous_page st else page_up st
+
+    let scroll_switch st = scroll_fast := not !scroll_fast
+
     let redraw = redraw ?trans:(Some Transitions.DirNone) ?chst:None
 
     let toggle_active st =
@@ -1341,10 +1359,10 @@ module B =
       Grdev.clean_ps_cache ()
     let help st =
       ignore (
-        Launch.fork_me
-          (Printf.sprintf "-g %dx%d"
-             attr.geom.Ageometry.width
-             attr.geom.Ageometry.height)
+      Launch.fork_me
+        (Printf.sprintf "-g %dx%d"
+           attr.geom.Ageometry.width
+           attr.geom.Ageometry.height)
         Config.splash_screen)
 
     let toggle_antialiasing st =
@@ -1352,7 +1370,7 @@ module B =
 
     let scratch_draw st =
       Scratch.draw ()
- 
+        
     let scratch_write st =
       Scratch.write ()
 
@@ -1364,7 +1382,7 @@ module B =
     let make_thumbnails st =
       Launch.without_launching
         (Busy.busy_exec
-          (fun () ->
+           (fun () ->
              make_thumbnails st;
              if not st.aborted then show_toc st))
         ()
@@ -1375,26 +1393,26 @@ module B =
     let ask_to_search =
       let prefill = ref "" in
       (fun message ->
-         let minibuff =
-           let nlines = 1 in
-           let xc, yc = 2, 2 in
-           let sx, sy = Graphics.text_size "X" in
-           let wt, ht = Graphics.size_x () - 2 * xc, sy * nlines in
-           let ncol = wt / sx in
-           let bw = 0 in
-           Gterm.make_term_gen
-             Graphics.black (Graphics.rgb 180 220 220) (* Grounds colors *)
-             bw Graphics.black (* Border *)
-             (Graphics.rgb 220 150 120) (* Title color *)
-             (Graphics.black) (* Cursor color *)
-             xc yc (* Where on the screen *)
-             ncol nlines (* Size in columns and lines *) in
-         Gterm.draw_term minibuff;
-         let re = Gterm.ask_prefill minibuff message !prefill in
-         (* Forces future redisplay. *)
-         Misc.push_key_event '' GraphicsY11.control;
-         prefill := re;
-         re)
+        let minibuff =
+          let nlines = 1 in
+          let xc, yc = 2, 2 in
+          let sx, sy = Graphics.text_size "X" in
+          let wt, ht = Graphics.size_x () - 2 * xc, sy * nlines in
+          let ncol = wt / sx in
+          let bw = 0 in
+          Gterm.make_term_gen
+            Graphics.black (Graphics.rgb 180 220 220) (* Grounds colors *)
+            bw Graphics.black (* Border *)
+            (Graphics.rgb 220 150 120) (* Title color *)
+            (Graphics.black) (* Cursor color *)
+            xc yc (* Where on the screen *)
+            ncol nlines (* Size in columns and lines *) in
+        Gterm.draw_term minibuff;
+        let re = Gterm.ask_prefill minibuff message !prefill in
+        (* Forces future redisplay. *)
+        Misc.push_key_event '' GraphicsY11.control;
+        prefill := re;
+        re)
 
     let search_forward st =
       let re_string = ask_to_search "Search Forward (re): " in
@@ -1429,7 +1447,7 @@ module B =
 
 let bind_key tbl (key, action) = tbl.(int_of_char key) <- action;;
 
-let default_keymap = Array.init 256 (fun i -> B.nop (char_of_int i));;
+let default_keymap = Array.init 256 (fun i -> B.unbound (char_of_int i));;
 let bind_default_key = bind_key default_keymap;;
 
 let bind_default_keys () =
@@ -1450,6 +1468,7 @@ let bind_default_keys () =
    'j', B.page_down;
    'k', B.page_up;
    'l', B.page_right;
+   '\010', B.scroll_switch;
 
    (* m, i are reserved for scrolling
      'm', B.scroll_one_line_down;
@@ -1458,8 +1477,9 @@ let bind_default_keys () =
 
    (* return, tab, backspace, escape, and x
       to handle the page marks stack. *)
-   '\t' (* tab *), B.push_page;
-   '' (* Escape *), B.pop_page;
+   (* '\t' (* tab *), B.push_page; *)
+   '\t' (* tab *), B.show_toc;
+   '' (* Escape *), (*B.nop *) B.pop_page; 
 
    '\b' (* backspace *), B.pop_previous_page;
    '\r' (* return *), B.push_next_page;
@@ -1538,7 +1558,7 @@ let bind_default_keys () =
   ];;
 
 let control_x_keymap =
-  Array.init 256 (fun i -> B.control_x_nop (char_of_int i));;
+  Array.init 256 (fun i -> B.control_x_unbound (char_of_int i));;
 let bind_control_x_key = bind_key control_x_keymap;;
 
 (* Bindings for ^X-prefixed keys. *)
@@ -1635,8 +1655,8 @@ let main_loop mastername clients =
         | Grdev.Position (x, y) ->
             st.last_command <- Position;
             position st x y
-        | Grdev.Click (_, Grdev.Button4, _, _)  -> B.previous_page st
-        | Grdev.Click (_, Grdev.Button5, _, _)  -> B.next_page st
+        | Grdev.Click (_, Grdev.Button4, _, _)  -> B.scroll_up st
+        | Grdev.Click (_, Grdev.Button5, _, _)  -> B.scroll_down st
         | Grdev.Click (pos, but, _, _) when Grdev.E.editing () ->
             begin match pos, but with
             | Grdev.Top_left, Grdev.Button1 -> B.previous_slice st
