@@ -89,10 +89,17 @@ advi$(EXEEXT): $(COBJS) $(OCAMLOPTOBJS)
 		$(OCAMLCFLAGS) $(AM_OCAMLCFLAGS) $(AM_LINKFLAGS) \
 		$(COBJS) $(OCAMLLIBS_OPT) $(OCAMLOPTOBJS) $(LD_ADD)
 
-advi.byt$(EXEEXT): $(COBJS) $(OCAMLBYTOBJS)
+dlladvi.so: $(COBJS) Makefile
+	ocamlmklib -o advi \
+		$(OCAMLCFLAGS) $(AM_OCAMLCFLAGS) $(AM_LINKFLAGS) \
+		$(COBJS) -lXinerama -lcamlimages_freetype \
+		-L/usr/local/lib/ocaml/site-lib/camlimages 
+
+advi.byt$(EXEEXT): dlladvi.so $(OCAMLBYTOBJS)
 	$(OCAMLC) -o advi.byt$(EXEEXT) \
-		$(OCAMLCFLAGS) $(AM_OCAMLCFLAGS) $(AM_LINKFLAGS) -custom \
-		$(COBJS) $(OCAMLLIBS_BYT) $(OCAMLBYTOBJS) $(LD_ADD)
+		$(OCAMLCFLAGS) $(AM_OCAMLCFLAGS) $(AM_LINKFLAGS) \
+		$(OCAMLLIBS_BYT) $(OCAMLBYTOBJS) -dllib -ladvi -dllpath .
+
 
 install_hook: $(INSTALLEXEC) installdata
 	- texhash
