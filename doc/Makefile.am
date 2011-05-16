@@ -76,8 +76,9 @@ STATICIMAGES = bar.gif \
 	       advilogo.gif \
 	       advilogo.anim.gif
 
-BUILTIMAGES = manual001.png \
-	      manual002.png
+# Don't know what this was used for
+# BUILTIMAGES = manual001.png \
+# 	      manual002.png
 
 # distributing produced files remove dependencies
 # on Hevea, HTMLC and dvipdfm

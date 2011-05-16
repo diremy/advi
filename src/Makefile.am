@@ -18,13 +18,18 @@
 
 # $Id$
 
+stubdir = $(libdir)/ocaml/stublibs
+stub_DATA = 
+
 bin_PROGRAMS =
 if BUILD_NATIVE
 bin_PROGRAMS += advi
 endif
 if BUILD_BYTECODE
+stub_DATA += dlladvi.so
 bin_PROGRAMS += advi.byt
 endif
+
 
 OCAMLBUILTSOURCES = config.ml
 OCAMLSOURCES = misc.ml timeout.ml ageometry.ml \
@@ -76,7 +81,7 @@ COBJS           = $(CSOURCES:.c=.o)
 
 AM_CFLAGS	= $(XINERAMA_CFLAGS) $(X_CFLAGS)
 # AM_LINKFLAGS = $(XINERAMA_LIBS) $(CAMLIMAGES_LIBS_LINK)
-LD_ADD		= $(XINERAMA_LIBS) $(CAMLIMAGES_LIBS_LINK)
+LD_ADD		= $(XINERAMA_CCLIB) $(CAMLIMAGES_CCLIBS)
 AM_OCAMLCFLAGS	= $(CAMLIMAGES_INCLUDES)
 
 OTHER_LIBS	= unix str 
@@ -84,22 +89,25 @@ OTHER_LIBS	= unix str
 OCAMLLIBS_OPT	= $(CAMLIMAGES_LIBS_NATIVE) $(OTHER_LIBS:=.cmxa)
 OCAMLLIBS_BYT	= $(CAMLIMAGES_LIBS_BYTE) $(OTHER_LIBS:=.cma)
 
+# In native mode no need to dynamically link with dlladvi
 advi$(EXEEXT): $(COBJS) $(OCAMLOPTOBJS)
 	$(OCAMLOPT) -o advi$(EXEEXT) \
 		$(OCAMLCFLAGS) $(AM_OCAMLCFLAGS) $(AM_LINKFLAGS) \
 		$(COBJS) $(OCAMLLIBS_OPT) $(OCAMLOPTOBJS) $(LD_ADD)
 
+# In bytecode mode create stubcode in dlladvi
+DLLADVI = dlladvi.so
 dlladvi.so: $(COBJS) Makefile
-	ocamlmklib -o advi \
+	$(OCAMLMKLIB) -o advi \
 		$(OCAMLCFLAGS) $(AM_OCAMLCFLAGS) $(AM_LINKFLAGS) \
-		$(COBJS) -lXinerama -lcamlimages_freetype \
-		-L/usr/local/lib/ocaml/site-lib/camlimages 
+		$(COBJS) $(CAMLIMAGES_MKLIBS) $(XINERAMA_MKLIB) \
+		$(CAMLIMAGES_LPATH)
 
 advi.byt$(EXEEXT): dlladvi.so $(OCAMLBYTOBJS)
 	$(OCAMLC) -o advi.byt$(EXEEXT) \
 		$(OCAMLCFLAGS) $(AM_OCAMLCFLAGS) $(AM_LINKFLAGS) \
-		$(OCAMLLIBS_BYT) $(OCAMLBYTOBJS) -dllib -ladvi -dllpath .
-
+		$(OCAMLLIBS_BYT) $(OCAMLBYTOBJS) \
+		-dllib -ladvi
 
 install_hook: $(INSTALLEXEC) installdata
 	- texhash

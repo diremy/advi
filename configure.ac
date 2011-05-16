@@ -19,6 +19,13 @@ AC_PATH_PROG(OCAMLFIND, ocamlfind)
 if test -z "$OCAMLFIND"; then
     AC_MSG_ERROR([ocamlfind not found, check your PATH])
 fi
+AC_SUBST(OCAMLFIND)
+
+# check for ocamlfind
+AC_PATH_PROG(OCAMLMKLIB, ocamlmklib)
+if test -z "$OCAMLMKLIB"; then
+    AC_MSG_ERROR([ocamlmklib not found, check your PATH])
+fi
 
 # Checking CamlImages
 AC_MSG_CHECKING([for camlimages])
@@ -36,15 +43,20 @@ else
   CAMLIMAGES_INCLUDES=`$OCAMLFIND query -i-format -separator ' ' camlimages`
   CAMLIMAGES_LIBS_NATIVE=`$OCAMLFIND query -a-format -separator ' ' -recursive -predicates native $CAMLIMAGES_PACKAGES`
   CAMLIMAGES_LIBS_BYTE=`$OCAMLFIND query -a-format -separator ' ' -recursive -predicates byte $CAMLIMAGES_PACKAGES`
-  CAMLIMAGES_LIBS_LINK="-cclib -lcamlimages_freetype"
+  CAMLIMAGES_LPATH=`$OCAMLFIND query -format -L%d camlimages`
+  CAMLIMAGES_MKLIBS="-lcamlimages_freetype"
+  CAMLIMAGES_CCLIBS="-cclib -lcamlimages_freetype"
   AC_SUBST(CAMLIMAGES_INCLUDES)
   AC_SUBST(CAMLIMAGES_LIBS_NATIVE)
   AC_SUBST(CAMLIMAGES_LIBS_BYTE)
-  AC_SUBST(CAMLIMAGES_LIBS_LINK)
+  AC_SUBST(CAMLIMAGES_MKLIBS)
+  AC_SUBST(CAMLIMAGES_CCLIBS)
+  AC_SUBST(CAMLIMAGES_LPATH)
 fi
 AC_SUBST(HAVE_CAMLIMAGES)
 
-
+# Whether to build a dynamic library for advi
+AM_CONDITIONAL([BUILD_ADVI_LIB], true)
 
 # Check versions to build
 AC_ARG_ENABLE(
@@ -112,19 +124,21 @@ AC_SUBST(X_CFLAGS)
 
 # Checking for xinerama support
 # BROKEN, optional ???
-have_xinerama="false"
+HAVE_XINERAMA="false"
 AC_CHECK_HEADER(
    [X11/extensions/Xinerama.h],
    [AC_CHECK_LIB(
 	[Xinerama],
 	[XineramaQueryScreens],
-	[have_xinerama="true"
+	[HAVE_XINERAMA="true"
 	 XINERAMA_CFLAGS="-DHAVE_XINERAMA"
-	 XINERAMA_LIBS="-cclib -lXinerama"]
-   )]
+	 XINERAMA_MKLIB="-lXinerama"
+	 XINERAMA_CCLIB="-cclib -lXinerama"])]
 )
+AC_SUBST(HAVE_XINERAMA)
 AC_SUBST(XINERAMA_CFLAGS)
-AC_SUBST(XINERAMA_LIBS)
+AC_SUBST(XINERAMA_MKLIB)
+AC_SUBST(XINERAMA_CCLIB)
 
 # Checking TeX 
 AC_PATH_PROG(KPSEXPAND, kpsexpand)
@@ -274,7 +288,7 @@ Camlimages:  $HAVE_CAMLIMAGES
 LablTk:      $HAVE_LABLTK
 Resources:   $dvidir
 Hevea:       $HEVEA
-Xinerama:    $have_xinerama
+Xinerama:    $HAVE_XINERAMA
 HAVE_GS:     $HAVE_GS
 GS:          $GS  
 gunzip:      $GUNZIP
