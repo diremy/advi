@@ -1511,6 +1511,72 @@ let scan_find_location cdvi page (line, filename) =
   | [] -> 0;;
 
 exception Found of (int * string option) option;;
+exception Position of int * int * int * int * int;;
+
+let scan_find_anchor_position cdvi dpi page anchor =
+  let dvi = cdvi.base_dvi in
+  let mag = float dvi.Cdvi.preamble.Dvicommands.pre_mag /. 1000.0 in
+  let conv = mag *. dpi /. cdvi.dvi_res /. 65536.0 in
+  let st =
+    { cdvi = cdvi;
+      sdpi = 0;
+      conv = conv;
+      x_origin = 0; y_origin = 0;
+      cur_mtable = dummy_mtable;
+      cur_gtable = dummy_gtable;
+      cur_font = dummy_font;
+      h = 0; v = 0; w = 0; x = 0; y = 0; z = 0; put = [];
+      stack = []; color = Dev.get_fgcolor (); color_stack = [];
+      alpha = 1.0; alpha_stack = [];
+      blend = Drawimage.Normal; blend_stack = [];
+      epstransparent = true; epstransparent_stack = [];
+      epsbygs = false;
+      epsbygs_stack = [];
+      epswithantialiasing = true; epswithantialiasing_stack = [];
+      direction = None;
+      transition = Transitions.TransNone;
+      transition_stack = [];
+      tpic_pensize = 0.0; tpic_path = []; tpic_shading = no_shading;
+      status = Obj.magic (); 
+      headers = [];
+      html = []; 
+      checkpoint = 0;
+    } in
+   let eval =
+     function
+   | Dvicommands.C_xxx s when 
+        has_prefix "html:<A name=\"" s 
+          && String.sub s 14 (String.length s - 16) = anchor -> 
+            raise (Position (st.h, st.v, 0, 0, 0))
+  | Dvicommands.C_set code -> 
+      begin try
+        let (dx, dy) = Table.get st.cur_mtable code in
+        st.h <- st.h + dx;
+        st.v <- st.v + dy
+      with _ -> ()
+      end;
+  | Dvicommands.C_set_rule (a, b) -> st.h <- st.h + b
+  | Dvicommands.C_push -> push st
+  | Dvicommands.C_pop -> pop st
+  | Dvicommands.C_right k -> st.h <- st.h + k
+  | Dvicommands.C_w0 ->  st.h <- st.h + st.w
+  | Dvicommands.C_w k -> st.w <- k; st.h <- st.h + st.w
+  | Dvicommands.C_x0 ->  st.h <- st.h + st.x
+  | Dvicommands.C_x k -> st.x <- k; st.h <- st.h + st.x
+  | Dvicommands.C_down k -> st.v <- st.v + k
+  | Dvicommands.C_y0 -> st.v <- st.v + st.y
+  | Dvicommands.C_y k -> st.y <- k; st.v <- st.v + st.y
+  | Dvicommands.C_z0 -> st.v <- st.v + st.z
+  | Dvicommands.C_z k -> st.z <- k; st.v <- st.v + st.z
+  | Dvicommands.C_fnt n -> fnt st n
+  | Dvicommands.C_xxx s -> () (* Should catch displacements *)
+  | _ -> () in
+  let page_dvi =  cdvi.base_dvi.Cdvi.pages.(page) in
+  try Cdvi.page_iter eval page_dvi; raise Not_found
+  with Position (h, v, _, _, _) ->
+    let x = Misc.round (st.conv *. float h) in
+    let y = Misc.round (st.conv *. float v) in
+    (x, y, 0, 0, 0);;
 
 let scan_find_anchor_location cdvi page anchor =
    let last = ref None in

@@ -33,6 +33,10 @@ let postsyncing =
   Options.flag false "--postsyncing"
   "  redraw with syncing if needed \n\t.";;
 
+let center_on_cursor =
+  Options.flag false "--center-on-cursor"
+  "  redraw so that cursor is displayed\n\t.";;
+
 let scroll_fast =
   Options.flag false "--scrollfast"
   "  scroll to next page instead of page_down \n\t.";;
@@ -606,7 +610,33 @@ let move_within_margins_x st movex =
     end in
   if st.orig_x <> new_orig_x then Some new_orig_x else None;;
 
-
+let make_visible st x y =
+  let hskip = 15 in
+  let vskip = 15 in
+  let movex =
+    let move_within_margins_x st dx = move_within_margins_x st dx in
+    let posx = x + st.orig_x in
+    if posx < 0 then
+      (* move far left to make x visible *)
+      (* move_within_margins_x st (attr.geom.Ageometry.width - 10) *)
+      move_within_margins_x st (attr.geom.Ageometry.width - hskip - posx)
+    else if posx > attr.geom.Ageometry.width then
+      (* move far right to make x visible *)
+      (* move_within_margins_x st (10 - attr.geom.Ageometry.width) *)
+      move_within_margins_x st (hskip - posx)
+    else None in
+  let movey = 
+    let posy = st.orig_y + y in
+    if posy < 0 then
+      move_within_margins_y st (attr.geom.Ageometry.height - vskip - posy)
+    else if posy > attr.geom.Ageometry.height then
+      move_within_margins_y st (vskip - posy)
+    else None  in
+  let r = false in
+  let r = match movex with | None -> r | Some dx -> st.orig_x <- dx; true in
+  let r = match movey with | None -> r | Some dy -> st.orig_y <- dy; true in
+  if r then set_bbox st;
+  r
 
 let rec redraw ?trans ?chst st =
   (* Draws until the current pause_number or page end. *)
@@ -777,13 +807,25 @@ let find_xref_here tag st =
   with Misc.Match ->
     Hashtbl.find (xrefs st) tag;;
 
+let scan_find_anchor_position st page html =
+  try
+    let  (x, y, _z, _w, _h) =
+      Driver.scan_find_anchor_position st.cdvi (st.base_dpi *. st.ratio)
+        page html in
+    Some (x, y)
+  with Not_found -> None 
+
 let page_start default st =
   match !start_html with
-  | None -> default
+  | None -> default, None
   | Some html ->
       Driver.scan_special_pages st.cdvi max_int;
-      try find_xref_here html st
-      with Not_found -> default;;
+      try
+        let page = find_xref_here html st in
+        let pos = scan_find_anchor_position st page html in
+        page, pos
+      with Not_found -> default, None;;
+
 
 (* foreground if drawing is needed after reloading *)
 let rec reload foreground st =
@@ -798,16 +840,21 @@ let rec reload foreground st =
     st.num_pages <- npages;
     st.toc <- None;
     st.page_stack <- clear_page_stack npages st.page_stack;
-    let npage = page_start (min st.page_number (st.num_pages - 1)) st in
+    let npage, pos = page_start (min st.page_number (st.num_pages - 1)) st in
     if npage <> st.page_number then
       begin
         st.pause_number <- 0;
         st.exchange_page <- st.page_number;
       end;
     set_page_number st npage;
+    begin if !center_on_cursor then
+      match pos with
+      | Some (x, y) -> ignore (make_visible st x y)
+      | None -> ()
+    end;
     st.frozen <- true;
     st.aborted <- true;
-    match st.duplex with
+    begin match st.duplex with
     | Client st' when not (compatible st st') ->
         Misc.warning
           (Printf.sprintf
@@ -825,6 +872,8 @@ let rec reload foreground st =
         update_dvi_size false st;
         Gs.init_do_ps ();
         if foreground then redraw ?trans:(Some Transitions.DirTop) st
+    end;
+    ()
   with x ->
     Misc.warning
       (Printf.sprintf "exception while reloading %s" (Printexc.to_string x));
@@ -1016,24 +1065,32 @@ let find_page_before_position (pos, filename as location) st =
   | [] -> raise Not_found
   | (p, _)::_ -> p
 
+let start_anchor = "Start-Document"
+
 let duplex_switch sync st =
   let find_sync_page master client =
-   let anchor = "Start-Document" in
-   match
-   (* master.dvi.Cdvi.pages.(master.page_number).Cdvi.line *)
-     Driver.scan_find_anchor_location master.cdvi 
-        (Hashtbl.find (xrefs master) anchor) anchor 
-   with
-    | None -> raise Not_found
-    | Some pos -> 
-   find_page_before_position pos client 
-  in
+    match
+      (* master.dvi.Cdvi.pages.(master.page_number).Cdvi.line *)
+      Driver.scan_find_anchor_location master.cdvi 
+        (Hashtbl.find (xrefs master) start_anchor) start_anchor 
+    with
+    | Some (pos, _) -> pos
+    | None -> raise Not_found in
 
   match st.duplex with
   | Alone -> ()
   | (Client st' | Master st') when not sync -> raise (Duplex (redraw, st'))
   | Client master ->
-      (try goto_page (find_sync_page master st) st with Not_found -> ())
+      (try
+        let page  = find_sync_page master st in
+        begin
+          (* should only be done if not all window shown *)
+          match scan_find_anchor_position st page start_anchor 
+          with
+          | Some (x, y) -> ignore (make_visible st x y); 
+          | None -> ()
+        end;
+      with Not_found -> ())
   | Master client ->
       try
         if changed client then reload false client;
@@ -1607,7 +1664,7 @@ let main_loop mastername clients =
       Graphics.set_window_title  ("Advi: " ^ st.filename);
       if st.page_number > 0 && Gs.get_do_ps () then
         Driver.scan_special_pages st.cdvi st.page_number
-      else set_page_number st (page_start 0 st);
+      else set_page_number st (fst (page_start 0 st));
       if changed st then reload false st;
       idraw st;
       (* num is the current number entered by keyboard *)

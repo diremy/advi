@@ -36,4 +36,7 @@ val scan_find_location :
     cooked_dvi -> int -> (int * string option) -> int;;
 val scan_find_anchor_location : 
     cooked_dvi -> int -> string -> (int * string option) option;;
+val scan_find_anchor_position : 
+    cooked_dvi -> float -> int -> string -> (int * int * int * int * int) 
+;;
 val clear_symbols : unit -> unit;;
