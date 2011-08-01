@@ -2,7 +2,9 @@
 AC_PREREQ(2.59)
 AC_INIT(advi, 1.10.0, Didier.Remy@inria.fr)
 BUILD_DATE=`date +%Y-%m-%d`
+BUILD_YEAR=`date +%Y`
 AC_SUBST(BUILD_DATE)
+AC_SUBST(BUILD_YEAR)
 AM_INIT_AUTOMAKE([foreign])
 AM_MAINTAINER_MODE
 
@@ -215,11 +217,6 @@ if test -z "$HEVEA"; then
     AC_MSG_WARN([hevea not found, you won't be able to rebuild documention])
 fi
 AM_CONDITIONAL(HAVE_HEVEA, [test -n "$HEVEA"])
-AC_PATH_PROG([HTMLC], [htmlc])
-if test -z "$HTMLC"; then
-    AC_MSG_WARN([htmlc not found, you won't be able to rebuild documention])
-fi
-AM_CONDITIONAL(HAVE_HTMLC, [test -n "$HTMLC"])
 AC_PATH_PROG([CONVERT], [convert])
 if test -z "$CONVERT"; then
     AC_MSG_WARN([convert not found, you won't be able to rebuild documention])

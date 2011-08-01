@@ -24,7 +24,7 @@
 with some eye candy effects for presentation.
 
 .SH VERSION
-Active\-DVI version $version
+Active\-DVI version @VERSION@
 .SH SYNOPSIS
 .B advi
 .RI [ options ] " dvifile " ...

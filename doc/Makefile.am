@@ -41,33 +41,12 @@ TEXSOURCES = advi_remote.tex \
 	     splash.tex \
 	     splash_contents.tex
 
-HTMLFILES = manual.html \
-	    index.html \
-	    fra.html eng.html \
-	    faq-eng.html faq-fra.html \
-	    screen-shots-fra.html screen-shots-eng.html
-
 HTMSOURCES = \
-	     index.htm \
-	     fra.htm eng.htm \
-	     faq-eng.htm faq-fra.htm \
-	     screen-shots-fra.htm screen-shots-eng.htm
+	eng.htm screen-shots-eng.htm faq-eng.htm 
 
-HTMINCLUDES = \
-	includes/aftertitle-eng.htm \
-	includes/aprestitre-fra.htm \
-	includes/avanttitre-fra.htm \
-	includes/basdepage-fra.htm \
-	includes/beforetitle-eng.htm \
-	includes/bottomofpage-eng.htm \
-	includes/copyright-eng.htm \
-	includes/copyright-fra.htm \
-	includes/endofpage-eng.htm \
-	includes/findepage-fra.htm \
-	includes/hautdepage-fra.htm \
-	includes/maquette-eng.htm \
-	includes/maquette-fra.htm \
-	includes/topofpage-eng.htm
+HTMLFILES = manual.html \
+	    $(HTMSOURCES:.htm=.html)
+
 
 eng.html: $(HTMINCLUDES)
 
@@ -177,17 +156,13 @@ endif
 $(HTMLFILES): ../configure
 
 .htm.html: 
-if HAVE_HTMLC
-	$(HTMLC) $(HTMLC_FLAGS) -f $(srcdir)/$< -t $@
-else
-	@echo "htmlc required, unable to proceed"
-	@exit 1
-endif
+	sed \
+	 -e 's,@VERSION\@,@VERSION@,' \
+	 -e 's,@COPYRIGHT\@,@BUILT_YEAR@,' \
+	 $< > $@ 
 
 .man.1: $(top_srcdir)/config.status
-if HAVE_HTMLC
-	$(HTMLC) $(HTMLC_FLAGS) -f $(srcdir)/$< -t $@
-else
-	@echo "htmlc required, unable to proceed"
-	@exit 1
-endif
+	sed \
+	 -e 's,@VERSION\@,@VERSION@,' \
+	 -e 's,@COPYRIGHT\@,@BUILT_YEAR@,' \
+	 $< > $@ 
