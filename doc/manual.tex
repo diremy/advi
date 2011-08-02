@@ -31,6 +31,8 @@
 
 % For splash inclusion
 \usepackage{color}
+\definecolor{red}{rgb}{1.0,0.0,0.0}
+\definecolor{blue}{rgb}{0.0,0.0,1.0}
 \usepackage{graphicx}
 \usepackage{tabularx}
 %\usepackage{pst-all}
@@ -38,12 +40,6 @@
 \usepackage[\driver]{hyperref}
 
 
-% Macros specific to splash.tex
-\definecolor{red}{rgb}{1.0,0.0,0.0}
-\def\key#1{\textcolor{red}{#1}}
-\def\ikey#1#2#3{\key{#1} & #2 & -- & #3\\}
-\definecolor{blue}{rgb}{0.0,0.0,1.0}
-\def\arg{\textcolor{blue}{arg }}
 
 % End of splash specific stuff
 
@@ -90,7 +86,7 @@ Reference manual\\
 various visual effects can easily be incorporated to the presentation,
 via a companion \doctt{advi.sty} {\LaTeX} package. 
 
-\bigskip
+\ifhevea\else\bigskip\fi
 {\ActiveDVI} is copyright \copyright 2001--{\adviyear} INRIA
 and distributed under the Gnu Library General Public License ---see the LGPL
 file included in the distribution.
@@ -99,14 +95,23 @@ file included in the distribution.
 \vfill
 \section*{Acknowledgments and contributors}
 
-{\ActiveDVI} is based on Mldvi which constitutes its core rendering
-engine. \\
-Alexandre~Miquel wrote Mldvi and distributes it under the LGPL
-license at URL\\ {\url{http://www.pps.jussieu.fr/~miquel/soft.html}}.
+{\ActiveDVI} is based on Mldvi, written and 
+\ahref{http://www.pps.jussieu.fr/~miquel/soft.html}{distributed}
+by \ahref{http://www.pps.jussieu.fr/~miquel/}{Alexandre~Miquel}
+under the LGPL license\footnote {At the url
+\url{http://www.pps.jussieu.fr/~miquel/soft.html}.}.
+This constitutes the core rendering engine.  
+{\ActiveDVI} has then been developed by 
 
-{\ActiveDVI} has been developed by Jun~Furuse, Didier~R{\'{e}}my, and
-Pierre~Weis, with contributions by Roberto~Di~Cosmo, Didier~Le~Botlan,
-Xavier~Leroy, and Alan~Schmitt.
+\ahref{http://jun.furuse.info/}{Jun Furuse}
+\ahref{http://gallium.inria.fr/\home{remy}/}{Didier R{\'e}my}, and
+\ahref{http://gallium.inria.fr/\home{weis}/}{Pierre Weis},
+with contributions by 
+\ahref{http://wwwdgeinew.insa-toulouse.fr/\home{lebotlan}/}{Didier Le Botlan},
+\ahref{http://www.dicosmo.org/}{Roberto Di Cosmo},
+\ahref{http://gallium.inria.fr/\home{xleroy}/}{Xavier Leroy},
+\ahref{http://www.pps.jussieu.fr/\home{miquel}/}{Alexandre Miquel}, and
+\ahref{http://sardes.inrialpes.fr/\home{aschmitt}/}{Alan Schmitt}.
 
 \clearpage
 %\advitoc
@@ -123,32 +128,32 @@ look at example presentations provided with the distribution, in the
 directories:
 
 \begin{itemize}
-
+%
  \item {\tt test}: a lot of demonstration presentations. From the main
 {\ActiveDVI} directory, just type {\tt {cd test; make all}}, and
 launch {\tt advi} on files {\tt *.dvi}.
-
+%
  \item {\tt examples}: examples to get inspiration from to easily
 write your own talks. A full range of examples, from the simplest one
 to the most involved.
-
+%
   \begin{itemize}
-
+%
     \item {\tt basics}: very simple presentations (slightly longer
 presentation in sub-directory {\tt cash}).
-
+%
     \item {\tt slitex}: presentations using the {\tt advi-slides}
 package. Each presentation has its own directory with a {\tt Makefile}
 to automate the process of keeping the presentation up-to-date with
 the sources. Nothing difficult here.
-
+%
     \item {\tt seminar}: one presentation using the popular {\tt
 seminar} {\LaTeX} package in the {\tt clock} sub-directory.
-
+%
     \item {\tt prosper}: two example presentations using the {\tt
 prosper} {\LaTeX} package in sub-directories {\tt LL} and {\tt
 Join}. Quite impressive and involved.
-
+%
   \end{itemize}
 \end{itemize}
 
@@ -161,9 +166,9 @@ procedure to download, compile, and install the software.
 In any other case, you have to install {\ActiveDVI} manually.
 
 \subsection{Manual installation}
-
+%
 \subsubsection*{Manual installation in two steps}
-
+%
 To compile {\ActiveDVI}, you must install the {\tt camlimages} library
 first, including its native code version.
 
@@ -173,7 +178,7 @@ source files, move to the new source directory of {\ActiveDVI},
 and compile {\ActiveDVI} itself.
 
 \subsubsection*{Manual installation in one step}
-
+%
 This is the ``Manual installation in two steps'' that has been
 packaged for you in one single step by the {\ActiveDVI} development kit.
 
@@ -195,14 +200,14 @@ configuration process before launching {\tt make} again.
 \section{{\ActiveDVI} for the impatient}
 
 \begin{itemize}
-
+%
 \item As a previewer, {\ActiveDVI} can preview any correct DVI file.
-
+%
 \item As a presenter, {\ActiveDVI} provides some {\LaTeX} packages to
 facilitate animations and interaction with the presenter from within
 your {\LaTeX} source text. The {\tt advi-slides.sty} package is
 designed to be a simple way to build a presentation for {\ActiveDVI}.
-
+%
 \end{itemize}
 
 See {\tt examples/slitex/simplistic/} for a simplistic talk example.  There,
@@ -275,14 +280,10 @@ order listed below, the following initialization files (nothing
 happens if any of them does not exist):
 
 \begin{itemize}
-
 \item system wide initialization file: \doctt{/etc/advirc},
-
 \item user specific initialization files: \doctt{\char126/.advirc} then
 \doctt{\char126/.advi/advirc},
-
 \item directory specific initialization file: \doctt{./.advirc}.
-
 \end{itemize}
 
 \subsection{Automatic setting of options}
@@ -314,38 +315,35 @@ When two file names are provided {\ActiveDVI} displays them both: see
 section~\ref{multiplex} for details on the use of a secondary DVI file.
 
 \subsection{Command line options}
-
-\noindent The \doctt{advi} commands recognized the following options:
-
+%
+\noindent 
+The \doctt{advi} commands recognized the following options:
+%
 \subsubsection*{Help and info options}
-
-\medskip\noindent\begin{tabular}{ll}
+%
+\Medskip\noindent\begin{tabular}{ll}
 \verb"-v"         & Prints the \doctt{advi} current version and exits \\
 \verb"--version"  & Prints the full \doctt{advi} current version and
 exits \\
 \verb"-help"      & Short command line options help
 \end{tabular}
-
 \subsubsection*{Window and display specifications}
-
-\medskip\noindent\begin{tabular}{ll}
+%
+\Medskip\noindent\begin{tabular}{ll}
 \verb"-geometry geom"      & Geometry of \ActiveDVI's window specification
 \end{tabular}
-
+%
 Geometry \verb"geom" is specified in pixels, using the standard format
 for X-Window geometry specifications (i.e:
 \verb"WIDTHxHEIGHT[+XOFFSET+YOFFSET]").
-
-\medskip\noindent\begin{tabular}{ll}
+\Medskip\noindent\begin{tabular}{ll}
 \verb"-fullwidth"          & Adjust the size of the window to the width of the screen
 \end{tabular}
-
-\medskip\noindent\begin{tabular}{ll}
+\Medskip\noindent\begin{tabular}{ll}
 \verb"-nomargins"          & Cancel horizontal and vertical margins \\
 \verb"-hmargin dimen"      & Horizontal margin specification (default: 1cm) \\
 \verb"-vmargin dimen"      & Vertical margin specification   (default: 1cm) \\
 \end{tabular}
-
 Dimensions are specified as numbers optionally followed by two letters
 representing units. When no units are given, dimensions are treated
 as numbers of pixels. Currently supported units are the standard TeX
@@ -358,60 +356,59 @@ Note that dimensions are specified w.r.t the original TeX document,
 and do not correspond to what is actually shown on the screen, which
 can be displayed at a different resolution than specified in the
 original TeX source.
-
-\medskip\noindent\begin{tabular}{ll}
+\Medskip\noindent\begin{tabular}{ll}
 \verb"-crop"               & Crop the window to the best size (default) \\
 \verb"-nocrop"             & Disable cropping
 \end{tabular}
-
+%
 \subsubsection*{Color specifications}
-\medskip\noindent\begin{tabular}{ll}
+\Medskip\noindent\begin{tabular}{ll}
 \verb"-fgcolor <color>" & Specify the color of the foreground color \\
 \verb"-bgcolor <color>" & Specify the color of the background color \\
 \verb"-rv" & Specify that reverse video should be simulated by exchanging \\
 & the background and foreground colors \\
 \verb"-gamma <float>" & Specify gamma correction ($>0.0$) of glyphs\\
 \end{tabular}
-
+%
 \subsubsection*{Helpers specification}
-
-\medskip\noindent\begin{tabular}{ll}
+%
+\Medskip\noindent\begin{tabular}{ll}
 \verb"-pager" & Specify the name of the pager to launch on a \verb"txt" link\\
 \verb"-browser" & Specify the name of the browser to a \verb"html" link\\
 \end{tabular}
 
 \subsubsection*{Debugging options}
-
-\medskip\noindent\begin{tabular}{ll}
+%
+\Medskip\noindent\begin{tabular}{ll}
 \verb"--debug" & General debug option \\
 \verb"--debug_pages" & Debug page motion \\
 \verb"--show_ps" & Print a copy of Postscript sent to gs to stdout \\
 \verb"--verbose_image_access" & Change the cursor while loading images\\
 \end{tabular}
-
+%
 \subsubsection*{Rendering options}
-
-\medskip\noindent\begin{tabular}{ll}
+%
+\Medskip\noindent\begin{tabular}{ll}
 \verb"-A" & Toggle Postscript anti-aliasing \\
 \verb"-passive" & Inhibit effects that are visible when redrawing the page
 \\ & (Transitions, delays, embedded applications) \\
 \end{tabular}
-
+%
 \subsubsection*{Safety options}
-\medskip\noindent\begin{tabular}{ll}
+\Medskip\noindent\begin{tabular}{ll}
 \verb"-exec" & Set safety policy to ``always execute embedded applications'' \\
 \verb"-ask" & Set safety policy to ``ask user before execution of embedded applications'' \\
 \verb"-safer" & Set safety policy to ``never execute embedded applications''
 \end{tabular}
-
+%
 \subsubsection*{Option files option}
-\medskip\noindent\begin{tabular}{ll}
+\Medskip\noindent\begin{tabular}{ll}
 \verb"-option-file <filename>" & Load {\tt filename} as a file containing a list of options \\
 & as given on the command line to \doctt{advi}. \\
 \end{tabular}
-
+%
 \subsubsection*{Miscelleanous options}
-\medskip\noindent\begin{tabular}{ll}
+\Medskip\noindent\begin{tabular}{ll}
 \doctt{-autoswitch} & Set the {\tt autoswitch} flag, which allows
 implicit switch to master \\& on \texttt{usr1} signal (default is off).\\
 \end{tabular}
@@ -675,8 +672,8 @@ second argument otherwise.
 display of the current page is complete. The corresponding state is
 named a {\em pause}. Upon reaching a pause, {\ActiveDVI} may wait for
 a specified delay, or for user input.
-
-\medskip\noindent
+%
+\Medskip\noindent
 \docdef \adviwait\docopt{seconds}
 \begin{quote}
 Wait for \docid{seconds}. If no argument is provided, waits until the
@@ -698,8 +695,8 @@ bind the recorded {\LaTeX} code to a name (called a {\em tag}): this
 to the writer of the document.
 
 The command defining an {\ActiveDVI} record is as follows:
-
-\medskip\noindent
+%
+\Medskip\noindent
 \docdef \advirecord \doctt{[play]}\docarg{tag}\docarg{latex code}
 \\
 \docdef \begin\doctt{\{advirecording\}}%
@@ -725,8 +722,8 @@ To play an {\ActiveDVI} record, the corresponding DVI must have been
 recorded on the current DVI page and before issuing the play command.
 With the proviso that these requirements are satisfied, the syntax of
 the command to display an {\ActiveDVI} record is as follows:
-
-\medskip\noindent
+%
+\Medskip\noindent
 \docdef \adviplay\docopt{color}\docarg{tag}
 \begin{quote}
 This command plays the DVI code previously recorded and bound to \docid{tag}.
@@ -756,8 +753,8 @@ conversely, the anchor is de-activated when the mouse leaves the
 anchor area. If the activation method is \doctt{click}, the anchor is
 activated whenever the button is pressed inside the anchor area;
 conversely, the anchor is de-activated when the button is released.
-
-\medskip\noindent
+%
+\Medskip\noindent
 \docdef \advianchor\docopt{activation}\docarg{tag}\docarg{text}
 \\
 \docdef \begin\doctt{\{advianchoring\}}\docopt{activation}\docarg{tag}%
@@ -799,13 +796,13 @@ unset).
     {\includegraphics[width = 0.7\textwidth]{bar.eps}}}}
 \end{verbatim}
 
-{\setblend{difference}
+{\setblend{burn}
   {\setalpha{0.5}
     {\includegraphics[width = 0.7\textwidth]{bar.eps}}}}
 
-{\setblend{normal}
-  {\setalpha{0.5}
-    {\includegraphics[width = 0.7\textwidth]{bar.eps}}}}
+%% {\setblend{normal}
+%%   {\setalpha{0.5}
+%%     {\includegraphics[width = 0.7\textwidth]{bar.eps}}}}
 
 \subsection{Colors}
 
@@ -972,8 +969,8 @@ If these options are used \emph{together}, they are applied in this
 order: first the solid background color is drawn, then the gradient
 function is applied, finally the image is drawn on the resulting
 background.
-
-\medskip\noindent
+%
+\Medskip\noindent
 \docdef \advibg \doctt {[global]}\docarg{decl}
 \begin{quote}
 where \docid{decl} is a list of settings of the following from:
@@ -1171,8 +1168,8 @@ as well as the current page.
 
 By default, the transition definitions affect the current page only. 
 \end{quote}
-
-\medskip\noindent
+%
+\Medskip\noindent
 \docdef \advitransbox \docarg {key=val list}\docarg{hbox material}
 \begin{quote}
 where \docid {key=val list} is as above and \docarg{hbox material} is
@@ -1195,8 +1192,8 @@ you need.
 \subsubsection{Launching embedded applications}
 
 The {\LaTeX} command to launch an application during the presentation is 
-
-\medskip\noindent
+%
+\Medskip\noindent
 \docdef \adviembed\docopt{key=value list}\docarg{command} 
 
 \begin{quote}
@@ -1268,8 +1265,8 @@ applications is unspecified, since it may interfere in a non trivial
 way with {\ActiveDVI}'s automatic treatment of those applications.
 
 \subsubsection*{Monitoring a single application}
-
-\medskip\noindent
+%
+\Medskip\noindent
 \docdef \advikillembed \docarg{name}
 \begin{quote}
 Kill the embedded application named \docid{name}.
@@ -1280,14 +1277,14 @@ will send the {\tt SIGUSR1} signal to the embedded application named
 
 Signal value defaults to -9.
 \end{quote}
-
-\medskip\noindent
+%
+\Medskip\noindent
 \docdef \advimapembed \docarg{name}
 \begin{quote}
 Map the window of the (\doctt{raw}) embedded application named \docid{name}.
 \end{quote}
-
-\medskip\noindent
+%
+\Medskip\noindent
 \docdef \adviunmapembed \docarg{name}
 \begin{quote}
 Un-map the window of the (\doctt{raw}) embedded application named \docid{name}.
@@ -1299,34 +1296,34 @@ The primitives \doctt{advikillallembed}, \doctt{advimapallembed}, and
 \doctt{adviunmapallembed} behave the same as their non-{\tt all}
 counterparts, except that they operate on all the applications that
 have been launched with the given name.
-
-\medskip\noindent
+%
+\Medskip\noindent
 \docdef \advikillallembed \docarg{name}
 \begin{quote}
 Similar to \doctt{advikillembed}
 but kill all the embedded applications named \docid{name}.
 \end{quote}
-
-\medskip\noindent
+%
+\Medskip\noindent
 \docdef \advimapallembed \docarg{name}
 \begin{quote}
 Map the windows of all the (\doctt{raw}) embedded applications named
 \docid{name}.
 \end{quote}
-
-\medskip\noindent
+%
+\Medskip\noindent
 \docdef \adviunmapallembed \docarg{name}
 \begin{quote}
 Un-map the windows of all the (\doctt{raw}) embedded applications named
 \docid{name}.
 \end{quote}
-
+%
 \subsection{Active anchors}
-
+%
 Active anchors are annotated pieces of text that get associated
 activation records. To define an active anchor, the command is
-
-\medskip\noindent
+%
+\Medskip\noindent
 \docdef \advianchor \docopt{decl}\docarg{tag}\docarg {text}
 \\
 \docdef \begin\doctt{\{advianchor\}}\docopt{decl}\docarg{tag}%
@@ -1351,8 +1348,8 @@ The default style is \doctt{box}.
 \end{description}
 In the environment form, \docid{text} may contain fragile commands. 
 \end{quote}
-
-\medskip\noindent
+%
+\Medskip\noindent
 \docdef \adviemphasize \docopt{color}\docarg {text}
 \begin{quote}
 This makes an invisible anchor around \docid{text}, which when activated
@@ -1428,8 +1425,8 @@ the smallest horizontal box that fits all of the superpositions.
 \usepackage{superpose}
 \end{verbatim}
 The package defines a single environment:
-
-\medskip\noindent
+%
+\Medskip\noindent
 \docdef\begin\doctt{\{superpose\}}\docopt{alignment}\docid {list}%
 \docdef\end\doctt{\{superpose\}}
 \begin{quote}
@@ -1454,8 +1451,8 @@ package of the PStricks collection. This is what the \doctt{ps} option
 is designed for.
 
 The package defines a single command:
-
-\medskip\noindent
+%
+\Medskip\noindent
 \docdef \bubble \docopt{key=value list}\docarg{anchor}%
     \docopt{ps options}\docpar {pos}\docarg{text}
 \begin{quote}
@@ -1510,8 +1507,8 @@ in \doctt{ps} mode and ignored otherwise.
 \end{quote}
 Parameters (color and tabular columns specifications) can also 
 be set globally using the command:
-
-\medskip \noindent
+%
+\Medskip \noindent
 \docdef \bubbleset\docarg{key=value list}
 
 \subsection{The \texttt{advi-annot} package}
@@ -1520,8 +1517,8 @@ This package uses active anchors and the bubbles package to
 provide annotations by raising a bubble when the cursor is over the anchor.
 
 The package defines a single command
-
-\medskip\noindent
+%
+\Medskip\noindent
 \docdef \adviannot \docopt{key=value list}\docarg{anchor}%
     \docopt{ps options}\docpar {pos}\docarg{text}
 \begin{quote}
@@ -1591,6 +1588,8 @@ See \url{http://gallium.inria.fr/advi} for up to date information.
 \let \Newpage \newpage
 
 \def \newpage {}
+
+\input{splash_header.tex}
 
 \input{splash_contents.tex}
 

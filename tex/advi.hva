@@ -13,9 +13,9 @@
 % Which name is ours
 \def \advi@name {Active-DVI}
 % Which year of development are we (used for various copyrights message) ?
-\def \advi@year {2005}
+\def \advi@year {2011}
 % Which version is it ?
-\def \advi@version {1.70}
+\def \advi@version {1.10}
 
 %% End of administrative definitions that need updating.
 
@@ -53,7 +53,7 @@
 \newenvironment{cenumerate}%
 {\begin{list}{-}{\itemsep 0pt \topsep 5pt}}{\end{list}}
 
-\let \setblend \@Ignore
-\let \setalpha \@Ignore
+\let \setblend \@Ignore@
+\let \setalpha \@Ignore@
 
 \def \driver {hypertex}

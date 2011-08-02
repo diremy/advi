@@ -1,19 +1,3 @@
-{\ActiveDVI} recognizes the keystrokes listed below when typed in its window.
-Some keystrokes may optionally be preceded by a number, called \arg
-below, whose interpretation is keystroke dependant. If \arg is unset,
-its value is 1, unless specified otherwise.
-
-{\ActiveDVI} maintains an history of previously visited pages
-organized as a stack.
-Additionnally, the history contains marked pages which are stronger than
-unmarked pages. 
-
-\vspace{\stretch{1}}
-
-\newpage
-
-\vspace{\stretch{1}}
-
 \subsection*{Survival command kit}
 
 \noindent
@@ -25,30 +9,24 @@ unmarked pages.
 \ikey{\char94 X-\char94 C}{quit}{End of show.}
 \end{tabularx}
 
-\vspace{\stretch{1}}
-
+\Stretch
 \subsection*{Moving between pages}
 
 \noindent
 \begin{tabularx}{\linewidth}{clcX}
-\ikey{n}{next}
-{Move \arg physical pages forward, leaving the history unchanged.}
-\ikey{p}{previous}
-{Move \arg physical pages backward, leaving the history unchanged.}
+\ikey{n}{next}{Move \arg physical pages forward, leaving the history unchanged.}
+\ikey{p}{previous}{Move \arg physical pages backward, leaving the history unchanged.}
 \ikey{,}{begin}{Move to the first page.}
 \ikey{.}{end}{Move to the last page.}
-\ikey{g}{go}
-{If \arg is unset move to the last page.
+\ikey{g}{go}{If \arg is unset move to the last page.
  If \arg is the current page do nothing.
  Otherwise, push the current page on the history as marked, and move
  to physical page \arg.}
 \end{tabularx}
 
-\vspace{\stretch{1}}
-
+\Stretch
 \newpage
-
-\vspace{\stretch{1}}
+\Stretch
 
 \subsection*{Moving between pauses}
 
@@ -58,7 +36,7 @@ unmarked pages.
 \ikey{P}{previous pause}{Move \arg pauses backward.}
 \end{tabularx}
 
-\vspace{\stretch{1}}
+\Stretch
 
 \subsection*{Adjusting the page size}
 
@@ -79,11 +57,11 @@ the resolution accordingly.}
 resolution.}
 \end{tabularx}
 
-\vspace{\stretch{1}}
+\Stretch
 
 \newpage
 
-\vspace{\stretch{1}}
+\Stretch
 
 \subsection*{Moving the page in the window}
 
@@ -109,15 +87,15 @@ resolution.}
 
 \noindent
 \begin{tabularx}{\linewidth}{clcX}
-\ikey{\char94 left-button}{move page}
+\ikey{\begin{tabular}[t]{@{}l@{}}\char94 left\\button\end{tabular}}{move page}
 {A black line draws the page borders; moving the mouse then moves the
 page in the window.}
-\ikey{\char94 C}{\begin{tabular}[t]{@{}l@{}}toggle\\ center-on-cursor\end{tabular}}
+\ikey{\char94 C}{\begin{tabular}[t]{@{}l@{}}toggle\\center on\\cursor\end{tabular}}
 {Toggles \texttt{center-on-cursor} flag, which when sets moves the screen 
 automatically so that the cursor appears on the screen.}
 \end{tabularx}
 
-\vspace{\stretch{1}}
+\Stretch
 
 \subsection*{Switching views}
 
@@ -128,11 +106,11 @@ automatically so that the cursor appears on the screen.}
 \ikey{\char94 W}{autoswitch}{Toggle autoswitch flag.}
 \end{tabularx}
 
-\vspace{\stretch{1}}
+\Stretch
 
 \newpage
 
-\vspace{\stretch{1}}
+\Stretch
 
 \subsection*{Redisplay commands}
 
@@ -145,26 +123,22 @@ pause of the page.}
 \ikey{a}{active/passive}{toggle advi effects (so that reloading is silent).}
 \end{tabularx}
 
-\vspace{\stretch{1}}
+\Stretch
 
 \subsection*{Using the navigation history stack}
 
 \noindent
 \begin{tabularx}{\linewidth}{clcX}
-\ikey{return}{forward}
-{Push the current page on the history stack, and move forward n physical pages.}
-\ikey{tab}{mark and next}
-{Push the current page on the history as marked, and move forward n
-physical pages.}
-\ikey{backspace}{back}
-{Move \arg pages backward according to the history. The history stack
-is poped, accordingly.}
-\ikey{escape}{find mark}
-{Move \arg marked pages backward according to the history.
- Do nothing if the history does no contain any marked page.}
+\ikey{return}{forward}{Push the current page on the history stack, and move forward n physical pages.}
+\ikey{tab}{mark and next}{Push the current page on the history as marked,
+and move forward n physical pages.}
+\ikey{backspace}{back}{Move \arg pages backward according to the
+history. The history stack is poped, accordingly.}
+\ikey{escape}{find mark} {Move \arg marked pages backward according to the
+history.  Do nothing if the history does no contain any marked page.}
 \end{tabularx}
 
-\vspace{\stretch{1}}
+\Stretch
 
 \subsection*{Table of contents}
 
@@ -175,11 +149,11 @@ is poped, accordingly.}
 if available, or else do nothing.}
 \end{tabularx}
 
-\vspace{\stretch{1}}
+\Stretch
 
 \newpage
 
-\vspace{\stretch{1}}
+\Stretch
 
 \subsection*{Writing and drawing on the page}
 
@@ -190,7 +164,7 @@ if available, or else do nothing.}
 \ikey{?}{info}{While in scratch mode, press \key{?} for more info.}
 \end{tabularx}
 
-\vspace{\stretch{1}}
+\Stretch
 
 \subsection*{Using the laser pointer}
 
@@ -200,7 +174,7 @@ if available, or else do nothing.}
 \ikey{\char94 G}{laser off}{When laser is on turn it off.}
 \end{tabularx}
 
-\vspace{\stretch{1}}
+\Stretch
 
 \subsection*{Saving the current page}
 
@@ -222,4 +196,4 @@ This takes more time than loading the fonts, but the pages are drawn faster.}
 \ikey{C}{clear}{Erase the image cache.}
 \end{tabularx}
 
-\vspace{\stretch{1}}
+\Stretch

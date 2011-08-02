@@ -19,33 +19,31 @@ cvsuntag:
 	cvs tag -d $(CVSRELEASETAG)
 
 announce:
-	mail -n -s "New release $(VERSION) of $(NAME)" \
+	mail -n -s "[ANN] New release $(VERSION) of $(NAME)" \
 		advi@inria.fr \
 		caml-announce@inria.fr \
 	 < $(ANNOUNCEFILE)
 
-PERMS = -g cristal -m 755
-WEBFILES = README INSTALL LICENSE
+FILEPERMS = -g cristal -m 644
+DIRERMS = -g cristal -m 755
+ROOTFILES = README INSTALL LICENSE
 website: dist
 	if [ -d $(WEBSITEDIR) ]; then     \
 	: ; \
 	else                              \
-		$(INSTALL) -d -g caml -m 775 $(WEBSITEDIR); \
+		$(INSTALL) -d $(DIRPERMS) $(WEBSITEDIR); \
+		$(INSTALL) -d $(DIRPERMS) $(WEBSITEDIR)/archives/; \
 	fi
-	$(INSTALL) $(PERMS) $(DIST_ARCHIVES) $(WEBSITEDIR)
-	$(INSTALL) $(PERMS) $(WEBFILES) $(WEBSITEDIR)
-	$(INSTALL) $(PERMS) doc/*.html $(WEBSITEDIR)
-	$(INSTALL) $(PERMS) doc/*.css $(WEBSITEDIR)
-	$(INSTALL) $(PERMS) doc/*.dvi $(WEBSITEDIR)
-	$(INSTALL) $(PERMS) doc/*.ps $(WEBSITEDIR)
-	$(INSTALL) $(PERMS) doc/*.pdf $(WEBSITEDIR)
-	$(INSTALL) $(PERMS) doc/*.gif $(WEBSITEDIR)
-	$(INSTALL) $(PERMS) doc/*.jpg $(WEBSITEDIR)
-	$(INSTALL) $(PERMS) doc/advi.1 $(WEBSITEDIR)
-	cd $(WEBSITEDIR) && ln -sf eng.html index.html
+	$(INSTALL) $(FILEPERMS) $(DIST_ARCHIVES) $(WEBSITEDIR)
+	$(INSTALL) $(FILEPERMS) $(DIST_ARCHIVES) $(WEBSITEDIR)/archive/
+	$(INSTALL) $(FILEPERMS) $(ROOTFILES) $(WEBSITEDIR)
+	$(INSTALL) $(FILEPERMS) doc/*.html $(WEBSITEDIR)
+	$(INSTALL) $(FILEPERMS) doc/manual*.png $(WEBSITEDIR)
+	$(INSTALL) $(FILEPERMS) doc/*.css $(WEBSITEDIR)
+	$(INSTALL) $(FILEPERMS) doc/*.dvi $(WEBSITEDIR)
+	$(INSTALL) $(FILEPERMS) doc/*.ps $(WEBSITEDIR)
+	$(INSTALL) $(FILEPERMS) doc/*.pdf $(WEBSITEDIR)
+	$(INSTALL) $(FILEPERMS) doc/*.gif $(WEBSITEDIR)
+	$(INSTALL) $(FILEPERMS) doc/*.jpg $(WEBSITEDIR)
+	$(INSTALL) $(FILEPERMS) doc/advi.1 $(WEBSITEDIR)
 
-ftpsite: dist
-	if [ ! -d $(FTPSITEDIR) ]; then                     \
-		$(INSTALL) -d -g caml -m 775 $(FTPSITEDIR); \
-	fi
-	$(INSTALL) $(PERMS) $(DIST_ARCHIVES) $(FTPSITEDIR)

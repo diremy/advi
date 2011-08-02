@@ -39,6 +39,7 @@ TEXSOURCES = advi_remote.tex \
 	     scratch_draw_splash_contents.tex \
 	     scratch_write_splash_contents.tex \
 	     splash.tex \
+	     splash_header.tex
 	     splash_contents.tex
 
 HTMSOURCES = \
@@ -101,11 +102,12 @@ MV		= mv -f
 
 manual.dvi: ../tex/advi.sty manual.sty splash_contents.tex \
        scratch_write_splash_contents.tex scratch_draw_splash_contents.tex
-splash.dvi: splash_contents.tex
+splash.dvi: splash.tex splash_header.tex splash_contents.tex
 scratch_write_splash.dvi: scratch_write_splash_contents.tex
 scratch_draw_splash.dvi: scratch_draw_splash_contents.tex
 
-manual.html: manual.tex manual.sty macros.hva 
+manual.html: manual.tex manual.sty manual.hva macros.hva ../tex/advi.hva \
+       scratch_write_splash_contents.tex scratch_draw_splash_contents.tex
 advi_remote.html: advi_remote.tex manual.sty macros.hva 
 
 SUFFIXES = .tex .dvi .advi .ps .pdf .pdfm .html .htm .ima .man .1
@@ -147,6 +149,17 @@ endif
 .tex.html:
 if HAVE_HEVEA
 	 $(TEX_ENV) $(HEVEA) $(HEVEA_FLAGS) -fix $(srcdir)/macros.hva -o $@ $<
+else
+	@echo "hevea required, unable to proceed"
+	@exit 1
+endif
+
+bindings.html: bindings.tex splash_contents.tex
+
+bindings.txt: bindings.tex splash_contents.tex
+if HAVE_HEVEA
+	 $(TEX_ENV) $(HEVEA) $(HEVEA_FLAGS) -text \
+		-fix $(srcdir)/macros.hva -o $@ $<
 else
 	@echo "hevea required, unable to proceed"
 	@exit 1

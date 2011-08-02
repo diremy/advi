@@ -14,12 +14,12 @@ Active-DVI
  <TD ALIGN=CENTER><IMG SRC="advilogo.gif"></TD>
  <TD ALIGN=RIGHT>
  <TABLE>
-   <TR><TD><A HREF="screen-shots.html">Screen shots</A></TD></TR>
    <TR><TD><A HREF="#features">Description</A></TD></TR>
-   <TR><TD><A HREF="#requirements">Requirements for installation</A></TD></TR>
+   <TR><TD><A HREF="screen-shots.html">Screen shots</A></TD></TR>
+   <TR><TD><A HREF="#requirements">Requirements</A></TD></TR>
    <TR><TD><A HREF="#download">Download</A></TD></TR>
    <TR><TD><A HREF="faq.html">Frequently asked questions</A></TD></TR>
-   <TR><TD><A HREF="#manual">Manual</A></TD></TR>
+   <TR><TD><A HREF="manual.html">Manual</A></TD></TR>
    <TR><TD><A HREF="#lists">Mailing list</A></TD></TR>
    <TR><TD><A HREF="#lists">Bug reports</A></TD></TR>
    <TR><TD><A HREF="#authors">Authors and Copyright</A></TD></TR>
@@ -79,6 +79,11 @@ LaTeX package provided by the distribution.
 <P>In addition, Caml hackers can program new and fancy Active-DVI effects in the
 source code of the presenter.
 
+<P><font size=+1>
+<strong>Warning!</strong>
+See the security warning in the enclosed file <A href="README">README</a>.
+</font>
+
 <H2 ALIGN=LEFT><A name="screenshots">Screen shots</A></H2>
 
 <P>Click on the image to have a look on the screen shots of Active-DVI
@@ -86,55 +91,41 @@ presentations.
 
 <P ALIGN=CENTER><A HREF="screen-shots.html"><IMG SRC="pngs/f.png"></A>
 
-<H2 ALIGN=LEFT><A name="manual">User's manual</A></H2>
 
-<P>The Active-DVI user's manual is available in format <A
-HREF="manual.dvi">DVI</A>, <A HREF="manual.ps">PS</A>, and <A
-HREF="manual.pdf">PDF</A>. (The manual only exists in English version:
-volunteers to translate it are warmly welcomed...)
+<H2 ALIGN=LEFT>Requirements</H2>
 
-<H2 ALIGN=LEFT><A name="FAQ"></A>
-<A HREF="faq.html">Frequently asked questions</A></H2>
+To install Active-DVI, you need
+<ul>
+<li>a Unix platform running the X11 window system.
 
-<H2 ALIGN=LEFT>Installation of Active-DVI</H2>
+<li>an OCaml compile, version 3.11 or later with  the latest version (4.0) of
+  the <A   HREF="http://gallium.inria.fr/camlimages/">Camlimages</A>
+  library. 
 
-<H3 ALIGN=LEFT><A name="requirements">Requirements</A></H3>
-
-<P>You need a Unix platform running the X11 window system.
-
-<P>You need the OCaml version 3.11 or later and  the latest version (4.0) of
-  the <A   HREF="http://gallium.inria.fr/camlimages/">Camlimages</A> library
-  to compile the sources. 
-
-<P>You also need the `kpsewhich' utility of the `kpathsea' library
+<li>the `kpsewhich' utility of the `kpathsea' library
 provided by the TeX distributions.
-
-<p> For more details see the enclosed file <A href="INSTALL">INSTALL</a>.
+</ul>
+For more details see the enclosed file <A href="INSTALL">INSTALL</a>.
 
 
 <H2 ALIGN=LEFT><A name="download">Download</A></H2>
 
 
-<STRONG>Tha latest version (@VERSION@):</STRONG>
-of Active-DVI is only available as a source version
+The latest version <STRONG>(@VERSION@)</STRONG>
+of Active-DVI is only available as a source tar ball
 <A HREF="advi-@VERSION@.tar.gz">. 
 
-Some <A HREF="archives">older versions</a> are still avaliable in 
-. 
+Some older versions are still avaliable in the <A HREF="archives">archive</a>.
 
 
+<H2 ALIGN=LEFT><A name="manual">User's manual</A></H2>
 
-  <!--<DT><STRONG>Development version</STRONG></DT>
-  <DD><A 
-  HREF="http://camlcvs.inria.fr/cgi-bin/cvsweb.cgi/bazar-ocaml/advi/">
-  The current CVS version of Active-DVI </A> is available at the
-  <A HREF="http://camlcvs.inria.fr/">Caml Anonymous CVS repository</A>.
-  -->
- </DL>
+<P> The Active-DVI user's manual is available
+<A HREF="manual.html">online</A> but with a few typesetting glitches.  It is
+also available in <A HREF="manual.dvi">DVI</A>, <A HREF="manual.ps">PS</A>,
+and <A HREF="manual.pdf">PDF</A> formats.  <p> See also the
+<A HREF="faq.html">Frequently asked questions (FAQ)</A></H2>
 
-      
-<H2 ALIGN=LEFT><A NAME="lists">Warning</A></H2>
-See the security warning in the enclosed file <A href="README">README</a>.
 
 <H2 ALIGN=LEFT><A NAME="lists">Bug reports and mailing list</A></H2>
 
@@ -149,39 +140,32 @@ solution, even for bug reports, so as to avoid spam).
 
 <H2 ALIGN=LEFT><A NAME="authors">Authors</A></H2>
 
-<A HREF="http://pauillac.inria.fr/~furuse/">Jun Furuse</A>,
-<A HREF="http://pauillac.inria.fr/~weis/">Pierre Weis</A>,
-<A HREF="http://pauillac.inria.fr/~remy/">Didier Rémy</A>,
-<A HREF="http://pauillac.inria.fr/~xleroy/">Xavier Leroy</A>,
-<A HREF="http://pauillac.inria.fr/~lebotlan/">Didier Le Botlan</A>,
-<A HREF="http://pauillac.inria.fr/~aschmitt/">Alan Schmitt</A>,
-<A HREF="http://pauillac.inria.fr/~dicosmo/">Roberto Di Cosmo</A>,
-<A HREF="http://pauillac.inria.fr/~miquel/">Alexandre Miquel</A>
+<A HREF="http://jun.furuse.info/">Jun Furuse</A>,
+<A HREF="http://gallium.inria.fr/~weis/">Pierre Weis</A>,
+<A HREF="http://gallium.inria.fr/~remy/">Didier Rémy</A>,
+<A HREF="http://gallium.inria.fr/~xleroy/">Xavier Leroy</A>,
+<A HREF="http://wwwdgeinew.insa-toulouse.fr/~lebotlan/">Didier Le Botlan</A>,
+<A HREF="http://sardes.inrialpes.fr/~aschmitt/">Alan Schmitt</A>,
+<A HREF="http://www.dicosmo.org/">Roberto Di Cosmo</A>,
+<A HREF="http://www.pps.jussieu.fr/~miquel/">Alexandre Miquel</A>.
+
 
 <H2 ALIGN=LEFT>Acknowledgments</H2>
 
 <P>Active-DVI's graphical engine to display DVI files is based on
 Mldvi version 1.0, written by <A
-HREF="http://pauillac.inria.fr/~miquel/">Alexandre Miquel</A>.
+HREF="http://www.pps.jussieu.fr/~miquel/">Alexandre Miquel</A>.
 
-<P>Active-DVI is entirely written in <A
-HREF="http://caml.inria.fr/ocaml/">Objective Caml</A>.
+<P>Active-DVI is written in <A HREF="http://caml.inria.fr/ocaml/">OCaml</A>.
 
 <H2 ALIGN=LEFT><A NAME="copyright">COPYRIGHT</A></H2>
 
-This program is distributed under the GNU LGPL.
-See the enclosed file <A href="LICENSE">LICENSE</a>.
-
-<TABLE WIDTH="100%">
- <TR>
-
+This program is distributed under the GNU LGPL.  See the enclosed file
+<A href="LICENSE">LICENSE</a>.
+<TABLE WIDTH="100%"><TR> 
   <TD>Copyright &#169; 2001 - @COPYRIGHT@ INRIA all rights reserved.</TD>
-
   <TD><IMG SRC="inria.gif"></TD>
-
- </TR>
-</TABLE>
-
+</TR></TABLE>
 
 <P ALIGN=LEFT><IMG SRC="bar.gif"></P>
 <ADDRESS>Contact <A
