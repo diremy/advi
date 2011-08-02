@@ -6,7 +6,9 @@
 \else \ifx \driver \dvipdfmdriver 
 \else \let \advidriver \empty \fi \fi
 
-\def \docdef #1{{\tt \string #1}}
+\def \cmdindex #1{\index{\string\cmdtt \string #1}}
+\def \cmdtt #1{\texttt{\string #1}}
+\def \docdef #1{\cmdindex{#1}{\tt \string #1}}
 \def \docid #1{$\langle\hbox{\rm\em#1}\rangle$}
 \def \doctt #1{\texttt{#1}}
 \def \docarg #1{{\texttt {\{\docid{#1}\}}}}

@@ -202,6 +202,10 @@ AC_PATH_PROG([LATEX], [latex])
 if test -z "$LATEX"; then
     AC_MSG_WARN([latex not found, you won't be able to rebuild documention])
 fi
+AC_PATH_PROG([MAKEINDEX], [makeindex])
+if test -z "$MAKEINDEX"; then
+    AC_MSG_WARN([makeindex not found, you won't be able to rebuild the index])
+fi
 AC_PATH_PROG([DVIPS], [dvips])
 if test -z "$DVIPS"; then
     AC_MSG_WARN([dvips not found, you won't be able to rebuild documention])

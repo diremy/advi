@@ -115,18 +115,16 @@ SUFFIXES = .tex .dvi .advi .ps .pdf .pdfm .html .htm .ima .man .1
 # To avoid default hypertex.cfg if it exists.
 # Active-DVI really needs the hypertex driver...
 .tex.dvi:
-if HAVE_HEVEA
 	$(TEX_ENV) $(LATEX) '\def\driver{hypertex}\input' $<
+	if [ -f $*.idx ]; then $(MAKEINDEX) $*; fi
 	$(TEX_ENV) $(LATEX) '\def\driver{hypertex}\input' $<
+	if [ -f $*.idx ]; then $(MAKEINDEX) $*; fi
 	$(TEX_ENV) $(LATEX) '\def\driver{hypertex}\input' $<
-else
-	@echo "hevea required, unable to proceed"
-	@exit 1
-endif
 
 .tex.ps:
 if HAVE_DVIPS
 	$(TEX_ENV) $(LATEX) '\def\driver{dvips}\input' $<
+	if [ -f $*.idx ]; then $(MAKEINDEX) $*; fi
 	$(TEX_ENV) $(DVIPS) -o $@ $*.dvi
 else
 	@echo "dvips required, unable to proceed"
@@ -136,6 +134,7 @@ endif
 .tex.pdf:
 if HAVE_DVIPDFM
 	$(TEX_ENV) $(LATEX) '\def\driver{dvipdfm}\input' $<
+	if [ -f $*.idx ]; then $(MAKEINDEX) $*; fi
 	$(TEX_ENV) $(DVIPDFM) -o $@ $*.dvi
 else
 	@echo "dvipdfm required, unable to proceed"
