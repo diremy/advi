@@ -221,6 +221,11 @@ if test -z "$HEVEA"; then
     AC_MSG_WARN([hevea not found, you won't be able to rebuild documention])
 fi
 AM_CONDITIONAL(HAVE_HEVEA, [test -n "$HEVEA"])
+AC_PATH_PROG([HACHA], [hacha])
+if test -z "$HACHA"; then
+    AC_MSG_WARN([hacha not found, you won't be able to rebuild all documention])
+fi
+AM_CONDITIONAL(HAVE_HACHA, [test -n "$HACHA"])
 AC_PATH_PROG([CONVERT], [convert])
 if test -z "$CONVERT"; then
     AC_MSG_WARN([convert not found, you won't be able to rebuild documention])

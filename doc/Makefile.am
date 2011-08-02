@@ -45,7 +45,7 @@ TEXSOURCES = advi_remote.tex \
 HTMSOURCES = \
 	index.htm screen-shots.htm faq.htm 
 
-HTMLFILES = manual.html \
+HTMLFILES = manual.html manualxxx.html \
 	    $(HTMSOURCES:.htm=.html)
 
 
@@ -152,6 +152,14 @@ if HAVE_HEVEA
 	 $(TEX_ENV) $(HEVEA) $(HEVEA_FLAGS) -fix $(srcdir)/macros.hva -o $@ $<
 else
 	@echo "hevea required, unable to proceed"
+	@exit 1
+endif
+
+manualxxx.html: manual.html
+if HAVE_HACHA
+	 $(TEX_ENV) $(HACHA) -o $@ $<
+else
+	@echo "hacha required, unable to proceed"
 	@exit 1
 endif
 
