@@ -24,25 +24,26 @@ announce:
 		caml-announce@inria.fr \
 	 < $(ANNOUNCEFILE)
 
+PERMS = -g cristal -m 755
 website: dist
 	if [ -d $(WEBSITEDIR) ]; then     \
 	: ; \
 	else                              \
 		$(INSTALL) -d -g caml -m 775 $(WEBSITEDIR); \
 	fi
-	$(INSTALL) -g caml -m 755 $(DIST_ARCHIVES) $(WEBSITEDIR)
-	$(INSTALL) -g caml -m 755 doc/*.html $(WEBSITEDIR)
-	$(INSTALL) -g caml -m 755 doc/*.css $(WEBSITEDIR)
-	$(INSTALL) -g caml -m 755 doc/*.dvi $(WEBSITEDIR)
-	$(INSTALL) -g caml -m 755 doc/*.ps $(WEBSITEDIR)
-	$(INSTALL) -g caml -m 755 doc/*.pdf $(WEBSITEDIR)
-	$(INSTALL) -g caml -m 755 doc/*.gif $(WEBSITEDIR)
-	$(INSTALL) -g caml -m 755 doc/*.jpg $(WEBSITEDIR)
-	$(INSTALL) -g caml -m 755 doc/advi.1 $(WEBSITEDIR)
+	$(INSTALL) $(PERMS) $(DIST_ARCHIVES) $(WEBSITEDIR)
+	$(INSTALL) $(PERMS) doc/*.html $(WEBSITEDIR)
+	$(INSTALL) $(PERMS) doc/*.css $(WEBSITEDIR)
+	$(INSTALL) $(PERMS) doc/*.dvi $(WEBSITEDIR)
+	$(INSTALL) $(PERMS) doc/*.ps $(WEBSITEDIR)
+	$(INSTALL) $(PERMS) doc/*.pdf $(WEBSITEDIR)
+	$(INSTALL) $(PERMS) doc/*.gif $(WEBSITEDIR)
+	$(INSTALL) $(PERMS) doc/*.jpg $(WEBSITEDIR)
+	$(INSTALL) $(PERMS) doc/advi.1 $(WEBSITEDIR)
 	cd $(WEBSITEDIR) && ln -sf eng.html index.html
 
 ftpsite: dist
 	if [ ! -d $(FTPSITEDIR) ]; then                     \
 		$(INSTALL) -d -g caml -m 775 $(FTPSITEDIR); \
 	fi
-	$(INSTALL) -g caml -m 755 $(DIST_ARCHIVES) $(FTPSITEDIR)
+	$(INSTALL) $(PERMS) $(DIST_ARCHIVES) $(FTPSITEDIR)

@@ -157,12 +157,12 @@ $(HTMLFILES): ../configure
 
 .htm.html: 
 	sed \
-	 -e 's,@VERSION\@,@VERSION@,' \
-	 -e 's,@COPYRIGHT\@,@BUILT_YEAR@,' \
+	 -e 's,@VERSION\@,$(VERSION),' \
+	 -e 's,@COPYRIGHT\@,$(BUILD_YEAR),' \
 	 $< > $@ 
 
 .man.1: $(top_srcdir)/config.status
 	sed \
-	 -e 's,@VERSION\@,@VERSION@,' \
-	 -e 's,@COPYRIGHT\@,@BUILT_YEAR@,' \
+	 -e 's,@VERSION\@,$(VERSION),' \
+	 -e 's,@COPYRIGHT\@,$(BUILD_YEAR),' \
 	 $< > $@ 
