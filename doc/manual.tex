@@ -19,7 +19,6 @@
 
 \usepackage {manual}
 \usepackage {fullpage}
-\usepackage {makeidx}
 
 \usepackage {graphicx}
 \usepackage [\advidriver]{advi}
@@ -704,9 +703,8 @@ The command defining an {\ActiveDVI} record is as follows:
 \Medskip\noindent
 \docdef \advirecord \doctt{[play]}\docarg{tag}\docarg{latex code}
 \\
-\docdef \begin\doctt{\{advirecording\}}%
-\doctt{[play]}\docarg{tag}\docarg{latex code}%
-\docid {text}\docdef \end\doctt{\{advirecording\}}
+\docenv{advirecording}{\doctt{[play]}\docarg{tag}\docarg{latex code}%
+\docid {text}}
 
 \begin{quote}
 This command processes \docid{latex code} and records the
@@ -762,8 +760,8 @@ conversely, the anchor is de-activated when the button is released.
 \Medskip\noindent
 \docdef \advianchor\docopt{activation}\docarg{tag}\docarg{text}
 \\
-\docdef \begin\doctt{\{advianchoring\}}\docopt{activation}\docarg{tag}%
-\docid {text}\docdef \end\doctt{\{advianchoring\}}
+\docenv{advianchoring}{\docopt{activation}\docarg{tag}%
+\docid {text}}
 
 \begin{quote}
 This command defines the DVI rendering of \docarg{text} as an
@@ -1331,8 +1329,7 @@ activation records. To define an active anchor, the command is
 \Medskip\noindent
 \docdef \advianchor \docopt{decl}\docarg{tag}\docarg {text}
 \\
-\docdef \begin\doctt{\{advianchor\}}\docopt{decl}\docarg{tag}%
-\docid {text}\docdef \end\doctt{\{advianchor\}}
+\docenv{advianchor}{\docopt{decl}\docarg{tag} \docid {text}}
 \begin{quote}
 The text is first displayed as usual, then the anchor is drawn
 according to the style given by \docid{decl}, and made active. 
@@ -1432,13 +1429,13 @@ the smallest horizontal box that fits all of the superpositions.
 The package defines a single environment:
 %
 \Medskip\noindent
-\docdef\begin\doctt{\{superpose\}}\docopt{alignment}\docid {list}%
-\docdef\end\doctt{\{superpose\}}
+\docenv{superpose}{\docopt{alignment}\docid {list}}
 \begin{quote}
 The \docid{alignment} can be one the letters \doctt c (default value), \doctt
 l, or \doctt r.
 
-Items of the list are separated by \verb"\\" as in tabular environments.
+Items of the \docid{list} are separated by \verb"\\" as in tabular
+environments. 
 Each item should be a horizontal material.
 \end{quote}
 
@@ -1610,7 +1607,8 @@ See \url{http://gallium.inria.fr/advi} for up to date information.
 
 \def \newpage{\Newpage}
 
-%% \section{Index}
+%To make the \section*{Index} behave as \section{Index}
+\let \Section \section\def \section*{\Section}
 \printindex
 
 \end{document}

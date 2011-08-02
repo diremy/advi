@@ -125,6 +125,7 @@ SUFFIXES = .tex .dvi .advi .ps .pdf .pdfm .html .htm .ima .man .1
 if HAVE_DVIPS
 	$(TEX_ENV) $(LATEX) '\def\driver{dvips}\input' $<
 	if [ -f $*.idx ]; then $(MAKEINDEX) $*; fi
+	$(TEX_ENV) $(LATEX) '\def\driver{dvips}\input' $<
 	$(TEX_ENV) $(DVIPS) -o $@ $*.dvi
 else
 	@echo "dvips required, unable to proceed"
@@ -135,6 +136,7 @@ endif
 if HAVE_DVIPDFM
 	$(TEX_ENV) $(LATEX) '\def\driver{dvipdfm}\input' $<
 	if [ -f $*.idx ]; then $(MAKEINDEX) $*; fi
+	$(TEX_ENV) $(LATEX) '\def\driver{dvipdfm}\input' $<
 	$(TEX_ENV) $(DVIPDFM) -o $@ $*.dvi
 else
 	@echo "dvipdfm required, unable to proceed"
