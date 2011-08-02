@@ -42,13 +42,13 @@ TEXSOURCES = advi_remote.tex \
 	     splash_contents.tex
 
 HTMSOURCES = \
-	eng.htm screen-shots-eng.htm faq-eng.htm 
+	index.htm screen-shots.htm faq.htm 
 
 HTMLFILES = manual.html \
 	    $(HTMSOURCES:.htm=.html)
 
 
-eng.html: $(HTMINCLUDES)
+index.html: index.htm Makefile.am
 
 STATICIMAGES = bar.gif \
 	       inria.gif \

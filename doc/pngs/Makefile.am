@@ -67,13 +67,11 @@ STATICIMAGES = basics/adviwait.png \
 	       test/text_movements.png \
 	       test/yellow_background.png
 
-BUILTIMAGES = f.png bigf.png \
-		$(STATICIMAGES:.png=.small.png)
+BUILTIMAGES = f.png $(STATICIMAGES:.png=.small.png)
 
 CLEANFILES = $(STATICIMAGES:.png=.tiny.png)
 
-MAINTAINERCLEANFILES = f.png bigf.png \
-		       $(STATICIMAGES:.png=.small.png)
+MAINTAINERCLEANFILES = f.png bigf.png $(STATICIMAGES:.png=.small.png)
 
 EXTRA_DIST = $(nobase_png_DATA)
 
@@ -98,37 +96,6 @@ bigf.png: $(STATICIMAGES:.png=.tiny.png)
 		`find . -regex '.*/.*\.tiny\.png'` \
 	bigf.png
 
-
-uf.png: $(STATICIMAGES:.png=.tiny.png)
-if HAVE_MONTAGE
-	$(MONTAGE) -tile x1 \
-		uf.png
-else
-	@echo "montage required, unable to proceed"
-	@exit 1
-endif
-
-cf.png: $(STATICIMAGES:.png=.tiny.png)
-if HAVE_MONTAGE
-	$(MONTAGE) -tile x1 \
-		-mode Concatenate -background white -adjoin \
-		`find . -regex '.*/[bcdij].*\.tiny\.png'` \
-		cf.png
-else
-	@echo "montage required, unable to proceed"
-	@exit 1
-endif
-
-lf.png: $(STATICIMAGES:.png=.tiny.png)
-if HAVE_MONTAGE
-	$(MONTAGE) -tile x1 \
-		-mode Concatenate -background white -adjoin \
-		`find . -regex '.*/[mpsty].*\.tiny\.png'` \
-		lf.png
-else
-	@echo "montage required, unable to proceed"
-	@exit 1
-endif
 
 SUFFIXES = .png .small.png .tiny.png
 
