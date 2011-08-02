@@ -37,18 +37,17 @@ adjective of the presenter :).
 Active-DVI is largely based on Mldvi written by Alexandre Miquel
 (http://www.pps.jussieu.fr/~miquel/).
 
-Version: 1.8
+Version: 1.10
 available at http://advi.inria.fr/
 
 CURRENTLY SUPPORTED FEATURES:
 =============================
 
++ Comparitble with the pgf package and beamer class. 
 + Encapsulated Postscript File inclusion (using graphics package)
 + Effects for presentation (pause, delay, text color change) 
 + Embedded applications for interactive demonstration
-
 + Pictures visualization via gpic specials
-
 + Display of inlined Postscript using gs
 + Font antialiasing that takes background colors into account
 + Page display is interrupted on user input

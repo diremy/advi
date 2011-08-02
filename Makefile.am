@@ -25,6 +25,7 @@ announce:
 	 < $(ANNOUNCEFILE)
 
 PERMS = -g cristal -m 755
+WEBFILES = README INSTALL LICENSE
 website: dist
 	if [ -d $(WEBSITEDIR) ]; then     \
 	: ; \
@@ -32,6 +33,7 @@ website: dist
 		$(INSTALL) -d -g caml -m 775 $(WEBSITEDIR); \
 	fi
 	$(INSTALL) $(PERMS) $(DIST_ARCHIVES) $(WEBSITEDIR)
+	$(INSTALL) $(PERMS) $(WEBFILES) $(WEBSITEDIR)
 	$(INSTALL) $(PERMS) doc/*.html $(WEBSITEDIR)
 	$(INSTALL) $(PERMS) doc/*.css $(WEBSITEDIR)
 	$(INSTALL) $(PERMS) doc/*.dvi $(WEBSITEDIR)

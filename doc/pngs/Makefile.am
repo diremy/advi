@@ -67,10 +67,12 @@ STATICIMAGES = basics/adviwait.png \
 	       test/text_movements.png \
 	       test/yellow_background.png
 
+BUILTIMAGES = f.png bigf.png \
+		$(STATICIMAGES:.png=.small.png)
+
 CLEANFILES = $(STATICIMAGES:.png=.tiny.png)
 
-MAINTAINERCLEANFILES = f.png \
-		       bigf.png uf.png cf.png lf.png \
+MAINTAINERCLEANFILES = f.png bigf.png \
 		       $(STATICIMAGES:.png=.small.png)
 
 EXTRA_DIST = $(nobase_png_DATA)
@@ -90,15 +92,16 @@ else
 	@exit 1
 endif
 
-bigf.png: uf.png cf.png lf.png
-	$(MONTAGE) -tile 1x3 -geometry $(FRISE_WIDTH)x$(FRISE_HEIGHT)! \
-		uf.png cf.png lf.png bigf.png
+bigf.png: $(STATICIMAGES:.png=.tiny.png)
+	$(MONTAGE) -tile x3 \
+		-mode Concatenate -background white -adjoin \
+		`find . -regex '.*/.*\.tiny\.png'` \
+	bigf.png
+
 
 uf.png: $(STATICIMAGES:.png=.tiny.png)
 if HAVE_MONTAGE
-	$(MONTAGE) -tile $(FRISE_WIDTH)x$(FRISE_HEIGHT) \
-		-mode Concatenate -background white -adjoin \
-		`find . -regex '.*/[aLO].*\.tiny\.png'` \
+	$(MONTAGE) -tile x1 \
 		uf.png
 else
 	@echo "montage required, unable to proceed"
@@ -107,7 +110,7 @@ endif
 
 cf.png: $(STATICIMAGES:.png=.tiny.png)
 if HAVE_MONTAGE
-	$(MONTAGE) -tile $(FRISE_WIDTH)x$(FRISE_HEIGHT) \
+	$(MONTAGE) -tile x1 \
 		-mode Concatenate -background white -adjoin \
 		`find . -regex '.*/[bcdij].*\.tiny\.png'` \
 		cf.png
@@ -118,7 +121,7 @@ endif
 
 lf.png: $(STATICIMAGES:.png=.tiny.png)
 if HAVE_MONTAGE
-	$(MONTAGE) -tile $(FRISE_WIDTH)x$(FRISE_HEIGHT) \
+	$(MONTAGE) -tile x1 \
 		-mode Concatenate -background white -adjoin \
 		`find . -regex '.*/[mpsty].*\.tiny\.png'` \
 		lf.png
