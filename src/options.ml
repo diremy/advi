@@ -33,8 +33,11 @@ let flag init option_name message =
     message;
   r;;
 
+let toggle flag x = flag := !flag
+
 (* Another special case: debug options (init value is false). *)
 let debug option_name message =
   let r = ref false in
   add option_name (Arg.Set r) message;
   (fun s -> if !r then prerr_endline s);;
+

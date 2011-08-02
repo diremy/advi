@@ -38,3 +38,6 @@ val flag : bool -> string -> string -> bool ref;;
    The flag has initial value [init] and the option sets the flag
    (resp. clears the flag) if the initial value is [false]
    (resp. is [true]). *)
+
+val toggle : bool ref -> 'a -> unit;;
+(** [toggle flag ()] change toggle the state of flag *)

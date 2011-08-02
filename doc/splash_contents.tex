@@ -89,9 +89,6 @@ resolution.}
 
 \noindent
 \begin{tabularx}{\linewidth}{clcX}
-\ikey{\char94 left button}{move page}
-{A black line draws the page borders; moving the mouse then moves the
-page in the window.}
 \ikey{h}{page left}
 {Moves one screen width toward the left of the page. Does nothing if the
   left part of the page is already displayed}
@@ -106,6 +103,18 @@ page in the window.}
 {Moves one screen height toward the top of the page. Jumps to the bottom
  previous page, if there is one, and if the top of the page is already
  displayed.}
+\end{tabularx}
+
+\medskip
+
+\noindent
+\begin{tabularx}{\linewidth}{clcX}
+\ikey{\char94 left-button}{move page}
+{A black line draws the page borders; moving the mouse then moves the
+page in the window.}
+\ikey{\char94 C}{\begin{tabular}[t]{@{}l@{}}toggle\\ center-on-cursor\end{tabular}}
+{Toggles \texttt{center-on-cursor} flag, which when sets moves the screen 
+automatically so that the cursor appears on the screen.}
 \end{tabularx}
 
 \vspace{\stretch{1}}

@@ -36,6 +36,7 @@ let postsyncing =
 let center_on_cursor =
   Options.flag false "--center-on-cursor"
   "  redraw so that cursor is displayed\n\t.";;
+  
 
 let scroll_fast =
   Options.flag false "--scrollfast"
@@ -1367,6 +1368,7 @@ module B =
       if !scroll_fast then next_page st else page_down st
     let scroll_up st =
       if !scroll_fast then previous_page st else page_up st
+    let toggle_center_on_cursor = Options.toggle center_on_cursor
 
     let scroll_switch st = scroll_fast := not !scroll_fast
 
@@ -1525,6 +1527,8 @@ let bind_default_keys () =
    'j', B.page_down;
    'k', B.page_up;
    'l', B.page_right;
+   '', B.toggle_center_on_cursor; 
+   (* toggle scroll fast *)
    '\010', B.scroll_switch;
 
    (* m, i are reserved for scrolling

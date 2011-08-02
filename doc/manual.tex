@@ -15,8 +15,6 @@
 %  Based on Mldvi by Alexandre Miquel.                                %
 %*********************************************************************%
 
-% $Id$
-
 \documentclass[12pt]{article}
 
 \usepackage {manual}
@@ -38,6 +36,15 @@
 %\usepackage{pst-all}
 \usepackage{xwindows-colors}
 \usepackage[\driver]{hyperref}
+
+
+% Macros specific to splash.tex
+\definecolor{red}{rgb}{1.0,0.0,0.0}
+\def\key#1{\textcolor{red}{#1}}
+\def\ikey#1#2#3{\key{#1} & #2 & -- & #3\\}
+\definecolor{blue}{rgb}{0.0,0.0,1.0}
+\def\arg{\textcolor{blue}{arg }}
+
 % End of splash specific stuff
 
 % We use Hevea to create the HTML version
@@ -84,7 +91,7 @@ various visual effects can easily be incorporated to the presentation,
 via a companion \doctt{advi.sty} {\LaTeX} package. 
 
 \bigskip
-{\ActiveDVI} is copyright \copyright\space 2001, {\adviyear} INRIA
+{\ActiveDVI} is copyright \copyright 2001--{\adviyear} INRIA
 and distributed under the Gnu Library General Public License ---see the LGPL
 file included in the distribution.
 \end{abstract}
@@ -95,7 +102,7 @@ file included in the distribution.
 {\ActiveDVI} is based on Mldvi which constitutes its core rendering
 engine. \\
 Alexandre~Miquel wrote Mldvi and distributes it under the LGPL
-license at URL\\ {\url{http://pauillac.inria.fr/~miquel/}}.
+license at URL\\ {\url{http://www.pps.jussieu.fr/~miquel/soft.html}}.
 
 {\ActiveDVI} has been developed by Jun~Furuse, Didier~R{\'{e}}my, and
 Pierre~Weis, with contributions by Roberto~Di~Cosmo, Didier~Le~Botlan,
@@ -289,7 +296,7 @@ the default \doctt{\char126/.advirc}, \doctt{\char126/.advi/advirc}, or
 \doctt{./.advirc}, initialization files).
 
 {\softtarget{otherpage}{%
-\section{Using the {\ActiveDVI} presenter}}}
+ \section{Using the {\ActiveDVI} presenter}}}
 
 \subsection{Launching {\ActiveDVI}}
 
@@ -621,7 +628,7 @@ the master, whenever {\ActiveDVI} receives signal \doctt{usr1} (to mean
 immediate refresh). 
 
 \softtarget{advistyle}{%
-\section{The {\doctt{advi.sty}} {\LaTeX} package}}
+ \section{The {\doctt{advi.sty}} {\LaTeX} package}}
 
 {\ActiveDVI} provides some {\LaTeX} packages to facilitate animations and
 interaction with the presenter from within your {\LaTeX} source text.
@@ -1405,7 +1412,7 @@ Other PStricks may or may not work.
 
 
 \softtarget{advi-slides}{%
-\section{The {\doctt{advi-slides.sty}} {\LaTeX} package}}
+ \section{The {\doctt{advi-slides.sty}} {\LaTeX} package}}
 
 {\ActiveDVI} provides this specialized {\LaTeX} package to facilitate
 writing presentation slides in the spirit of SliTeX. See examples in
@@ -1578,14 +1585,8 @@ See \url{http://gallium.inria.fr/advi} for up to date information.
 
 
 \softtarget{activedvikeys}{%
-\section{{Key bindings}}}
+ \section{{Key bindings}}}
 
-% Macros specific to splash.tex
-\definecolor{red}{rgb}{1.0,0.0,0.0}
-\def\key#1{\textcolor{red}{#1}}
-\def\ikey#1#2#3{\key{#1} & #2 & -- & #3\\}
-\definecolor{blue}{rgb}{0.0,0.0,1.0}
-\def\arg{\textcolor{blue}{arg }}
 
 \let \Newpage \newpage
 
@@ -1594,12 +1595,12 @@ See \url{http://gallium.inria.fr/advi} for up to date information.
 \input{splash_contents.tex}
 
 \softtarget{writingkeys}{%
-\section{{Key bindings for scratch writings}}}
+ \section{{Key bindings for scratch writings}}}
 
 \input{scratch_write_splash_contents.tex}
 
 \softtarget{drawingkeys}{%
-\section{{Key bindings for scratch drawings}}}
+ \section{{Key bindings for scratch drawings}}}
 
 \input{scratch_draw_splash_contents.tex}
 
