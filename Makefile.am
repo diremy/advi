@@ -27,7 +27,9 @@ announce:
 FILEPERMS = -g cristal -m 644
 DIRERMS = -g cristal -m 755
 ROOTFILES = README INSTALL LICENSE
-webdist: dist website
+website: webdist webonly
+
+webdist: dist 
 	if [ -d $(WEBSITEDIR) ]; then     \
 	: ; \
 	else                              \
@@ -37,7 +39,7 @@ webdist: dist website
 	$(INSTALL) $(FILEPERMS) $(DIST_ARCHIVES) $(WEBSITEDIR)
 	$(INSTALL) $(FILEPERMS) $(DIST_ARCHIVES) $(WEBSITEDIR)/archive/
 
-website: tex doc
+webonly: tex doc
 	$(INSTALL) $(FILEPERMS) $(ROOTFILES) $(WEBSITEDIR)
 	$(INSTALL) $(FILEPERMS) doc/*.html $(WEBSITEDIR)
 	$(INSTALL) $(FILEPERMS) doc/manual*.png $(WEBSITEDIR)
