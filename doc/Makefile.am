@@ -157,7 +157,9 @@ endif
 
 manualxxx.html: manual.html
 if HAVE_HACHA
-	 $(TEX_ENV) $(HACHA) -o $@ $<
+	$(TEX_ENV) $(HACHA) -o $@ $<
+	sed -e 's,"manualxxx.html">several HTML files<,"manual.html">a single HTML file<,' $@ > $@.tmp
+	mv $@.tmp $@
 else
 	@echo "hacha required, unable to proceed"
 	@exit 1
