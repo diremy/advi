@@ -39,7 +39,7 @@ webdist: dist
 	$(INSTALL) $(FILEPERMS) $(DIST_ARCHIVES) $(WEBSITEDIR)
 	$(INSTALL) $(FILEPERMS) $(DIST_ARCHIVES) $(WEBSITEDIR)/archive/
 
-webonly: tex doc
+webonly: dist
 	$(INSTALL) $(FILEPERMS) $(ROOTFILES) $(WEBSITEDIR)
 	$(INSTALL) $(FILEPERMS) doc/*.html $(WEBSITEDIR)
 	$(INSTALL) $(FILEPERMS) doc/manual*.png $(WEBSITEDIR)
