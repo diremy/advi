@@ -45,7 +45,8 @@ let psheaders_kind = "PostScript header";;
 
 (* Data files directory paths. *)
 let texdir_path = "@TEXMFMAIN@";;
-let database_path = Filename.concat texdir_path "ls-R";;
+let database_name = "ls-R"
+let database_path = Filename.concat texdir_path database_name;;
 
 (* Location of splash.dvi and test/caml.eps *)
 let advi_loc = "@dvidir@";;
