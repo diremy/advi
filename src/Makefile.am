@@ -18,7 +18,7 @@
 
 # $Id$
 
-stubdir = $(libdir)/ocaml/stublibs
+stubdir = @OCAMLLIB@/stublibs
 stub_DATA = 
 
 bin_PROGRAMS =

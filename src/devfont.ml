@@ -40,7 +40,7 @@ module Make (Dev : DEVICE) = struct
       let dpi = ldexp (float sdpi) (-16) in
       try Hashtbl.find htable (fontname, sdpi)
       with Not_found ->
-	let font = Font.find fontname base_dpi
+	let font = Font.find fontname base_dpi (* always 600 *)
 	and ratio = dpi /. float base_dpi in
 	let build code =
 	  let cdef = Font.find_char_def font code in

@@ -42,20 +42,34 @@ let close_process_in (pid, inchan) =
 
 exception Command;;
 
-let command_string com opt =
+let input_lines chan =
+  let lines = ref [] in
+  try while true do lines :=  (input_line chan) :: !lines done; []
+  with  End_of_file ->
+    List.rev !lines
+
+let command_strings com opt =
+  let t = ref 0.0 in
+  Misc.debug_endline (t := Unix.gettimeofday(); "BEGIN");
   let command = Printf.sprintf "%s %s" com opt in
   Misc.debug_endline (Printf.sprintf "command_string: launching %s" command);
   try
     let pid, chan as pidchan = open_process_in command in
-    unwind_protect input_line chan close_process_in pidchan 
+    let s = unwind_protect input_lines chan close_process_in pidchan
+        in
+    Misc.debug_endline (Printf.sprintf "END %f" (Unix.gettimeofday() -. !t));
+s
   with
   | Unix.Unix_error (c, _, _) ->
       Misc.warning
         (Printf.sprintf "Error %s while executing %s %s"
           (Unix.error_message c) com opt);
       raise Command
-  | End_of_file -> ""
+  | End_of_file -> []
 ;;
+
+let command_string cmd opt =
+  match command_strings cmd opt with h:: t -> h | [] -> ""
 
 (* Add local path to search environment. *)
 let addpath elem var kind =
@@ -86,70 +100,132 @@ let remove_spaces line =
   String.sub line !p (!q - !p)
 ;;
 
-let reload_database () =
-  let ch = open_in Config.database_path in
-  Hashtbl.clear database_table;
-  let curr_dir = ref "" in
-  try while true do
-    let line = remove_spaces (input_line ch) in
-    let len = String.length line in
-    if len > 0 && line.[0] <> '%' then begin
-      if line.[len - 1] = ':'
-      then curr_dir := String.sub line 0 (len - 1)
-      else Hashtbl.add database_table line (Filename.concat !curr_dir line)
+let data_base_path_delim = Str.regexp ":";;
+let last_modified path =
+  try
+    let stats = Unix.stat path in
+    Some stats.Unix.st_mtime
+  with _ ->
+    None
+
+let data_base_paths =
+  lazy 
+    begin
+      let args = String.concat " " ["-show-path"; Config.database_name ] in
+      let paths = command_string Config.kpsewhich_path args in
+      let path_list = Str.split_delim data_base_path_delim paths in
+      let database_name path = Filename.concat path Config.database_name in
+      let bases = List.map database_name path_list in
+      List.map (fun p -> p, ref None) bases
     end
-  done with
-  | End_of_file -> close_in ch
-  | e -> close_in ch; raise e
+
+let load_data_base path =
+  try
+    let ch = open_in path in
+    let dir = Filename.dirname path in
+    let curr_dir = ref "." in
+    try while true do
+      let line = remove_spaces (input_line ch) in
+      let len = String.length line in
+      if len > 0 && line.[0] <> '%' then begin
+        if line.[len - 1] = ':'
+        then curr_dir := Filename.concat dir (String.sub line 0 (len - 1))
+        else
+          let fullpath = Filename.concat !curr_dir line in 
+          Hashtbl.add database_table line fullpath
+      end
+    done with
+    | End_of_file -> close_in ch
+    | e -> close_in ch; raise e
+  with Sys_error _ -> ()
+;;
+
+let reload_database paths =
+  Hashtbl.clear database_table; 
+  List.iter load_data_base (List.rev_map fst paths)
 ;;
 
 let reload_if_changed_database () =
-  try
-    let stats = Unix.stat Config.database_path in
-    let mtime = stats.Unix.st_mtime in
-    if mtime > !database_mtime then begin
-      database_mtime := mtime;
-      reload_database ()
+  let lazy paths = data_base_paths in
+  if List.exists (function path, m -> last_modified path <> !m) paths then
+    begin
+      List.iter (function path, m -> m := last_modified path) paths;
+      reload_database paths
     end
-  with _ -> ()
-;;
+
+let font_filename dpi fontname = 
+  Printf.sprintf "%s.%dpk" fontname dpi
 
 let database_font_path fontname dpi =
   reload_if_changed_database ();
-  let name = Printf.sprintf "%s.%dpk" fontname dpi in
-  let path = Hashtbl.find database_table name in
-  Filename.concat Config.texdir_path path
+  let name = font_filename dpi fontname in
+  Hashtbl.find database_table name 
 ;;
 
 let true_file_name options file =
   let args = String.concat " " (options @ [file]) in
-  try
+  try 
     let s = command_string Config.kpsewhich_path args in
-    if s = "" then raise Command;
-    s
+    if s = "" then raise Command; s
   with
   | Command ->
       Misc.warning (Printf.sprintf "file %s is not found" file);
       raise Not_found
 ;;
 
-let true_file_names options files =
+let slow_true_file_names options files =
   List.fold_right
     (fun file st ->
       try true_file_name options file :: st with Not_found -> st)
     files []
 ;;
 
+let true_file_names options files =
+  let arg_string = String.concat " " (options @ files) in
+  let truenames =
+    try command_strings Config.kpsewhich_path arg_string with Command -> [] in
+  if List.length truenames = List.length files then truenames
+  else slow_true_file_names options files
+;;
+
+let rec iter2_safe f l1 l2 =
+  match l1, l2 with
+  | [], [] -> ()
+  | h1::t1, h2::t2 -> iter2_safe f t1 t2; f h1 h2
+  | _, _ -> ()
+
+let kpsewhich_cache = Hashtbl.create 13
+let prefetch filenames dpi =
+  let filenames = List.map (font_filename dpi) filenames in
+  let uncached = 
+    List.fold_left
+      (fun all filename ->
+        try let _ = Hashtbl.find kpsewhich_cache filename in all
+        with Not_found -> filename :: all) [] filenames in
+  let truenames =
+    true_file_names  ["-dpi=" ^ string_of_int dpi; "-mktex=pk"] uncached in
+  let cache filename fullname =
+    Hashtbl.add kpsewhich_cache filename fullname in
+  assert (List.length uncached = List.length truenames);
+  iter2_safe cache uncached truenames
+;;
+
 let kpsewhich_font_path fontname dpi =
-  match true_file_names ["-dpi=" ^ string_of_int dpi; "-mktex=pk"]
-                        [fontname ^ ".pk"] with
-  | name :: _ when name <> "" -> name
-  | _ -> raise Not_found
+  let fontname =  (font_filename dpi fontname) in
+  let truename =
+    try Hashtbl.find  kpsewhich_cache fontname
+    with Not_found -> 
+      true_file_name ["-dpi=" ^ string_of_int dpi; "-mktex=pk"] fontname in
+  if truename = "" then raise Not_found
+  else truename
 ;;
 
 let unix_font_path fontname dpi =
-  try database_font_path fontname dpi
-  with _ -> kpsewhich_font_path fontname dpi
+  (* Not sound---as "." is not "ls-R". We should not reimplement
+     kpsewhich, but instead cache its results cross-session. *)
+  (* try database_font_path fontname dpi *)
+  (* with _ -> *)
+    kpsewhich_font_path fontname dpi
 ;;
 
 let msdos_font_path fontname dpi =

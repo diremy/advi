@@ -20,15 +20,15 @@
 #ifdef HAS_SYS_SELECT_H
 #include <sys/select.h>
 #endif
-
-
+#include <string.h>
 #include <unistd.h>
 
-/* from byterun/signals.h */
+#define XXL_QUEUE 2048
+
+
 extern void enter_blocking_section (void);
 extern void leave_blocking_section (void);
-extern void (*enter_blocking_section_hook)(void);
-extern void (*leave_blocking_section_hook)(void);
+
 
 struct event_data {
   short kind;
@@ -38,20 +38,17 @@ struct event_data {
   unsigned int state;
 };
 
-static struct event_data caml_gr_y_queue[SIZE_QUEUE];
+static struct event_data caml_gr_y_queue[XXL_QUEUE];
 static unsigned int caml_gr_y_head = 0;       /* position of next read */
 static unsigned int caml_gr_y_tail = 0;       /* position of next write */
 
 #define QueueIsEmpty (caml_gr_y_tail == caml_gr_y_head)
-#define QueueIsFull  ((caml_gr_y_tail + 1) % SIZE_QUEUE == caml_gr_y_head)
 
 static void caml_gr_y_enqueue_event(int kind, int mouse_x, int mouse_y,
                               int button, int key,
                               unsigned int state)
 {
   struct event_data * ev;
-
-  if (QueueIsFull) return;
   ev = &(caml_gr_y_queue[caml_gr_y_tail]);
   ev->kind = kind;
   ev->mouse_x = mouse_x;
@@ -59,7 +56,9 @@ static void caml_gr_y_enqueue_event(int kind, int mouse_x, int mouse_y,
   ev->button = (button != 0);
   ev->key = key;
   ev->state = state;
-  caml_gr_y_tail = (caml_gr_y_tail + 1) % SIZE_QUEUE;
+  caml_gr_y_tail = (caml_gr_y_tail + 1) % XXL_QUEUE;
+  /* If queue was full, it now appears empty; drop oldest entry from queue. */
+  if (QueueIsEmpty) caml_gr_y_head = (caml_gr_y_head + 1) % SIZE_QUEUE;
 }
 
 #define BUTTON_STATE(state) \
@@ -211,7 +210,7 @@ static value caml_gr_y_wait_event_poll(void)
   /* Look inside event queue for pending KeyPress events */
   key = 0;
   keypressed = False;
-  for (i = caml_gr_y_head; i != caml_gr_y_tail; i = (i + 1) % SIZE_QUEUE) {
+  for (i = caml_gr_y_head; i != caml_gr_y_tail; i = (i + 1) % XXL_QUEUE) {
     if (caml_gr_y_queue[i].kind == KeyPress) {
       keypressed = True;
       key = caml_gr_y_queue[i].key;
@@ -229,7 +228,7 @@ static value caml_gr_y_wait_event_in_queue(long mask)
   /* Pop events in queue until one matches mask. */
   while (caml_gr_y_head != caml_gr_y_tail) {
     ev = &(caml_gr_y_queue[caml_gr_y_head]);
-    caml_gr_y_head = (caml_gr_y_head + 1) % SIZE_QUEUE;
+    caml_gr_y_head = (caml_gr_y_head + 1) % XXL_QUEUE;
     if ((ev->kind == KeyPress && (mask & KeyPressMask))
         || (ev->kind == ButtonPress && (mask & ButtonPressMask))
         || (ev->kind == ButtonRelease && (mask & ButtonReleaseMask))
@@ -244,11 +243,6 @@ static value caml_gr_y_wait_event_in_queue(long mask)
 
 static value caml_gr_y_wait_event_blocking(long mask)
 {
-#ifdef POSIX_SIGNALS
-  sigset_t sigset;
-#else
-  void (*oldsig)();
-#endif
   XEvent event;
   fd_set readfds;
   value res = Val_false;
@@ -263,16 +257,8 @@ static value caml_gr_y_wait_event_blocking(long mask)
     XSelectInput(caml_gr_display, caml_gr_window.win, caml_gr_selected_events);
   }
 
-  /* Block or deactivate the EVENT signal */
-#ifdef POSIX_SIGNALS
-  sigemptyset(&sigset);
-  sigaddset(&sigset, EVENT_SIGNAL);
-  sigprocmask(SIG_BLOCK, &sigset, NULL);
-#else
-  oldsig = signal(EVENT_SIGNAL, SIG_IGN);
-#endif
-
   /* Replenish our event queue from that of X11 */
+  caml_gr_ignore_sigio = True;
   while (1) {
     if (XCheckMaskEvent(caml_gr_display, -1 /*all events*/, &event)) {
       /* One event available: add it to our queue */
@@ -290,12 +276,7 @@ static value caml_gr_y_wait_event_blocking(long mask)
     }
   }
 
-  /* Restore the EVENT signal to its initial state */
-#ifdef POSIX_SIGNALS
-  sigprocmask(SIG_UNBLOCK, &sigset, NULL);
-#else
-  signal(EVENT_SIGNAL, oldsig);
-#endif
+  caml_gr_ignore_sigio = False;
 
   /* Return result */
   return res;
@@ -330,17 +311,18 @@ value caml_gry_wait_event(value eventlist) /* ML */
     return caml_gr_y_wait_event_blocking(mask);
 }
 
-/* In Graphics, XEvents are retrieved from the sever 
+/* In original Graphics, XEvents are retrieved from the sever 
    by calling caml_gr__sigio_handler periodically using interval timer.
    Instead, here we have the following function, which manually
    retrieves X11 events.
 */
 value caml_gry_retrieve_events(void)
 {
-  XEvent caml_gr_event;
-
-  while (XCheckMaskEvent(caml_gr_display, -1 /*all events*/, &caml_gr_event)) {
-    caml_gr_y_handle_event(&caml_gr_event);
+  XEvent grevent;
+  if (!caml_gr_ignore_sigio) {
+    while (XCheckMaskEvent(caml_gr_display, -1 /*all events*/, &grevent)) {
+      caml_gr_y_handle_event(&grevent);
+    }
   }
   return Val_unit;
 }
@@ -350,7 +332,7 @@ value caml_gr_poll_button_pressed(void)
   value button = Val_false;
   unsigned int i;
   /* Look inside event queue for pending ButtonPress events */
-  for (i = caml_gr_y_head; i != caml_gr_y_tail; i = (i + 1) % SIZE_QUEUE) {
+  for (i = caml_gr_y_head; i != caml_gr_y_tail; i = (i + 1) % XXL_QUEUE) {
     if (caml_gr_y_queue[i].kind == ButtonPress) {
       button = Val_true;
       break;
@@ -359,3 +341,29 @@ value caml_gr_poll_button_pressed(void)
   return button; 
 }
 
+/* Check whether the two next events are button k down and up when k in */
+value caml_gr_button_enqueued(value m) 
+{
+  XEvent event;
+  long mask = Int_val(m);
+  int next;
+    /* Replenish our event queue from that of X11 */
+    caml_gr_ignore_sigio = True;
+    while (XCheckMaskEvent(caml_gr_display, -1 /*all events*/, &event)) {
+      caml_gr_handle_event(&event);
+    }
+    caml_gr_ignore_sigio = False;
+
+  value res = Val_false;
+  if ((caml_gr_y_tail - caml_gr_y_head) % XXL_QUEUE > 1) {
+    next = (caml_gr_y_head + 1) % XXL_QUEUE;
+    if (caml_gr_y_queue[caml_gr_y_head].kind == ButtonPress &&
+        caml_gr_y_queue[next].kind == ButtonRelease &&
+        caml_gr_y_queue[caml_gr_y_head].state == caml_gr_y_queue[next].state &&
+        (caml_gr_y_queue[caml_gr_y_head].state & mask))
+      res = Val_true;
+  }
+
+  /* Return result */
+  return res;
+}

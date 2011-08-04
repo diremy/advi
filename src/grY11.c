@@ -503,7 +503,9 @@ value caml_gr_reposition (value x, value y, value w, value h, value scr)
 {
   /* Window r; */
   int posx, posy, width, height, screen;
+#ifdef HAVE_XINERAMA
   int xinerama_x=0, xinerama_y=0;
+#endif
   Bool fullscreen;
   XWindowAttributes att;
 
@@ -630,15 +632,4 @@ value caml_gr_get_button(value m)
   else if (modifiers & Button5Mask) button = 5;
   return Val_int(button);
 }
-
-struct event_data {
-  short kind;
-  short mouse_x, mouse_y;
-  unsigned char button;
-  unsigned char key;
-};
-
-extern struct event_data caml_gr_queue[SIZE_QUEUE];
-extern unsigned int caml_gr_head;       /* position of next read */
-extern unsigned int caml_gr_tail;       /* position of next write */
 

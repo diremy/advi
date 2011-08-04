@@ -193,15 +193,24 @@ let set_usr2 () =
        ));;
 set_usr2 ();;
 
+let buttons45 = GraphicsY11.button4 lor GraphicsY11.button5
+let preemptive_click() =
+  GraphicsY11.button_enqueued buttons45
+
 let sleep_broken = ref false;;
-let clear_sleep () = sleep_broken := GraphicsY11.key_pressed ();;
+let clear_sleep () =
+  sleep_broken := GraphicsY11.key_pressed () || preemptive_click ()
+;;
 
 (* returns false if sleep is fully performed. returns true if interrupted *)
 let sleep_watch breakable sync n =
   let start = Unix.gettimeofday () in
   let interrupted () =
     if breakable &&
-       (!usr1_status || !sleep_broken || GraphicsY11.key_pressed ())
+      begin
+        !usr1_status || !sleep_broken ||
+        GraphicsY11.key_pressed () || preemptive_click() 
+      end
     then begin
       if GraphicsY11.key_pressed () then ignore (GraphicsY11.read_key ());
       sleep_broken := true;
@@ -1323,7 +1332,7 @@ let open_dev geom =
   GraphicsY11.init ();
   Timeout.init ();
   (* Fill the event queue *)
-  Timeout.repeat 0.25 GraphicsY11.retrieve_events;
+  Timeout.repeat 0.02 (* was 0.25s!! *) GraphicsY11.retrieve_events;
   (* Watch if the DVI file is modified *)
   if !watch_file_interval > 0 then
     Timeout.repeat (float !watch_file_interval) watch_file_check; 
@@ -1862,10 +1871,13 @@ let continue () =
   if
     resized () || (*  !usr1_status || *)
     GraphicsY11.key_pressed () ||
-    (* button pressed cannot be implemented as an extension to Graphics *)
+    (* (\* button 4 and 5 down and up is on the queue of events *\) *)
+    (* preemptive_buttons() || *)
+    (* Some button is currently pressed *)
     GraphicsY11.button_pressed () ||
     !usr2_status (* input from stdin *)
-  then begin Gs.flush (); raise Stop end;;
+  then
+    begin Gs.flush (); raise Stop end;;
 
 (* Calling GS *)
 

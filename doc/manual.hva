@@ -4,8 +4,8 @@
 \def \cmdtt #1{\texttt{\string #1}}
 
 \def \docdef #1{\cmdindex{#1}{\tt \string #1}}
-\def \docenv #1#2{\index{#1}{\cmdtt \begin\{\doctt{#1}\}#2%
-                             \cmdtt \end \{\doctt{#1}\}}}
+\def \docenv #1#2{\index{#1}{\cmdtt\begin\{\doctt{#1}\}#2%
+                             \cmdtt\end\{\doctt{#1}\}}}
 \def \docid #1{$\langle \mbox {\rm\em #1}\rangle$}
 \def \doctt #1{{\tt #1}}
 \def \docarg #1{{\tt \{\docid {#1}\}}}

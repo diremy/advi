@@ -138,13 +138,23 @@ type cooked_dvi = {
     font_table : cooked_font Table.t
   };;
 
+let base_dpi = 600 
+let prefetch_fonts dvi = 
+  let font_map = dvi.Cdvi.font_map in
+  let cfont n = let f = List.assoc n font_map in f.Dvicommands.name in
+  let fontnames = List.map (fun (n, _) -> (cfont n)) font_map in
+  Search.prefetch fontnames base_dpi
+;;
+
 let cook_dvi dvi =
   let dvi_res = 72.27 in
   let build n =
     cook_font (List.assoc n dvi.Cdvi.font_map) dvi_res in
+  let () = prefetch_fonts dvi in
   { base_dvi = dvi;
     dvi_res = dvi_res;
-    font_table = Table.make build };;
+    font_table = Table.make build }
+;;
 
 (*** The rendering state ***)
 
@@ -1799,9 +1809,11 @@ let unfreeze_font cdvi n =
     ignore (Table.get cfont.mtable (Char.code 'A'))
   with _ -> ();;
 
+
 let unfreeze_fonts cdvi =
-  List.iter (fun (n, _) -> unfreeze_font cdvi n)
-    cdvi.base_dvi.Cdvi.font_map;;
+  let font_map = cdvi.base_dvi.Cdvi.font_map in
+  List.iter (fun (n, _) -> unfreeze_font cdvi n) font_map
+    
 
 let scan_special_pages cdvi lastpage =
   let headers = ref []

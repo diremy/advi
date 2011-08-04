@@ -30,17 +30,17 @@ let events =
 
 
 let postsyncing =
-  Options.flag false "--postsyncing"
-  "  redraw with syncing if needed \n\t.";;
+  Options.flag true "--postsyncing"
+  "  do not automatically redraw with syncing if needed \n\t";;
 
 let center_on_cursor =
   Options.flag false "--center-on-cursor"
-  "  redraw so that cursor is displayed\n\t.";;
+  "  redraw so that cursor is displayed\n\t";;
   
 
 let scroll_fast =
   Options.flag false "--scrollfast"
-  "  scroll to next page instead of page_down \n\t.";;
+  "  scroll to next page instead of page_down \n\t";;
 
 let without_pauses f x =
   let p = !pauses in
@@ -1380,6 +1380,7 @@ module B =
     let reload = reload true
     let redisplay = redisplay
     let resyncing = resyncing
+    let toggle_postsyncing st = postsyncing := !postsyncing
 
     let toggle_full_screen st =
       let b = (st.full_screen = None) in
@@ -1573,6 +1574,7 @@ let bind_default_keys () =
    'R', B.reload;
    '', B.redisplay;
    '/', B.resyncing;
+   '\\', B.toggle_postsyncing;
 
    (* Control-f, c, to handle the advi window. *)
    '', B.toggle_full_screen;

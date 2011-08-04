@@ -496,3 +496,12 @@ let init () =
 external get_button: int -> int = "caml_gr_get_button";;
 
 external button_pressed: unit -> bool = "caml_gr_poll_button_pressed";;
+
+external button_enqueued: int -> bool = "caml_gr_button_enqueued";;
+
+let button_enqueued m =
+  let b = button_enqueued m in
+  Misc.debug_endline (if b then "Queue => Full" else "Queue => Empty");
+  b
+              
+

@@ -24,7 +24,9 @@
    Note that there is no warranty that the returned path corresponds
    to a real file, or that the corresponding file is a valid PK file
    for the given font at the given resolution. *)
-val font_path : string -> int -> string;;
+val font_path : string -> int -> string
+
+val prefetch : string list -> int -> unit
 
 (* [true_file_name OPTIONS FILE] return the true FILE name
    for a file (call kpsewitch)  under OPTIONS *)
