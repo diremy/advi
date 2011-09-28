@@ -30,8 +30,8 @@ let events =
 
 
 let postsyncing =
-  Options.flag true "--postsyncing"
-  "  do not automatically redraw with syncing if needed \n\t";;
+  Options.flag true "--nopostsyncing"
+  "  do not automatically redraw when syncing if needed \n\t";;
 
 let center_on_cursor =
   Options.flag false "--center-on-cursor"
@@ -1380,7 +1380,7 @@ module B =
     let reload = reload true
     let redisplay = redisplay
     let resyncing = resyncing
-    let toggle_postsyncing st = postsyncing := !postsyncing
+    let toggle_postsyncing st = postsyncing := not !postsyncing
 
     let toggle_full_screen st =
       let b = (st.full_screen = None) in
@@ -1574,7 +1574,7 @@ let bind_default_keys () =
    'R', B.reload;
    '', B.redisplay;
    '/', B.resyncing;
-   '\\', B.toggle_postsyncing;
+   '|', B.toggle_postsyncing;
 
    (* Control-f, c, to handle the advi window. *)
    '', B.toggle_full_screen;

@@ -27,3 +27,5 @@
 \newcommand{\Stretch}{}
 \let \Medskip \relax
 \renewcommand{\@footer}{}
+
+\newenvironment{citemize}{\begin{itemize}}{\end{itemize}}

@@ -1,4 +1,4 @@
-	- Fixed postsyncing flag and its documentation.
+	- Fixed postsyncing flag, key, and documentation.
 
 Version 1.10.2
 	- Fixed packaging of documentation
@@ -15,9 +15,9 @@ Version 1.10
 	- Changed configuration to use 4.0 of camlimages
 	- Dynamics libraries loaded last (provided by Stefan Potyra)
 
-Version 1.9 
+Version 1.9
 	- EPS files are read by advi and sent to gs
-	- splash.dvi is now distributed and correctly installed  
+	- splash.dvi is now distributed and correctly installed
 	- examples are distributed but not compiled by default
 	- added conf/jpfonts.conf in the disbribution
 	- gs path is now set by configure
