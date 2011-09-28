@@ -1,3 +1,5 @@
+	- Fixed postsyncing flag and its documentation.
+
 Version 1.10.2
 	- Fixed packaging of documentation
 
