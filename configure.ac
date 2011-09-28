@@ -1,6 +1,6 @@
 ?i# Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.59)
-AC_INIT(advi, 1.10.1, Didier.Remy@inria.fr)
+AC_INIT(advi, 1.10.2, Didier.Remy@inria.fr)
 BUILD_DATE=`date +%Y-%m-%d`
 BUILD_YEAR=`date +%Y`
 AC_SUBST(BUILD_DATE)

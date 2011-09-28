@@ -24,9 +24,20 @@ announce:
 		caml-announce@inria.fr \
 	 < $(ANNOUNCEFILE)
 
+.PHONY: test test.keep
+
+test: test.keep
+	rm -r test
+
+test.keep: dist
+	rm -rf test
+	mkdir test
+	cd test && tar -xf ../$(DIST_ARCHIVES) && \
+	cd $(distdir) && configure &&  make
+
 FILEPERMS = -g cristal -m 644
 DIRERMS = -g cristal -m 755
-ROOTFILES = README INSTALL LICENSE
+ROOTFILES = README INSTALL LICENSE ChangeLog
 website: webdist webonly
 
 webdist: dist 

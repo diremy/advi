@@ -1,8 +1,11 @@
+Version 1.10.2
+	- Fixed packaging of documentation
+
 Version 1.10.1
 	- Prefetching fonts to group calls to kpsewhich (starts faster)
 	- Made scroll buttons preemptive (stop displaying)
-	- Fix install path of dlladvi
-	- Fix compatibility of event loop with new version of graphics
+	- Fixed install path of dlladvi
+	- Fixed compatibility of event loop with new version of graphics
 
 Version 1.10
 	- Updated the doc

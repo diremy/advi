@@ -39,7 +39,7 @@ TEXSOURCES = advi_remote.tex \
 	     scratch_draw_splash_contents.tex \
 	     scratch_write_splash_contents.tex \
 	     splash.tex \
-	     splash_header.tex
+	     splash_header.tex \
 	     splash_contents.tex
 
 HTMSOURCES = \

@@ -24,6 +24,7 @@ pkglatex_DATA = advi-annot.sty \
 		superpose.sty \
                 advi-graphicx.sty \
 		advi.sty \
+		advi.hva \
 		bubble.sty \
 		xwindows-colors.sty \
 		advilogo.eps \
