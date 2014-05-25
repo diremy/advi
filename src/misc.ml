@@ -138,8 +138,8 @@ let string_suffix char s =
 
 let filename_extension = string_suffix '.';;
 
-(* Check if string s contains string p at occurrence i,
-   or, equivalently, if we have:
+(* Check if string [s] contains string [p] at occurrence [i],
+   or, equivalently, test if we have:
    String.sub s i (String.length p) = p. *)
 let contains_string_from s i p =
  let lp = String.length p
@@ -176,7 +176,8 @@ let rec split_string s p start =
   let len = String.length s
   and i = ref start in
   while !i < len && p s.[!i] do incr i done;
-  if !i >= len then [] else begin
+  if !i >= len then [] else
+  begin
     let i0 = !i in
     while !i < len && not (p s.[!i]) do incr i done;
     let i1 = !i in

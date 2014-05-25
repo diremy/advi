@@ -27,54 +27,54 @@ let is_absolute path = not (Filename.is_relative path);;
 
 let normalize path =
   let full = is_absolute path in
-  let finalslash = path.[String.length path - 1] = '/' in
-  let tks = Misc.split_string path (function '/' -> true | _ -> false) 0 in
+  let final_slash = path.[String.length path - 1] = '/' in
+  let tokens = Misc.split_string path (function '/' -> true | _ -> false) 0 in
   let rec remove = function
     | x :: xs ->
-        begin match x :: remove xs with
-        | x :: [] -> [x]
-        | "." :: xs -> xs (* remove "." *)
-        | x :: ".." :: xs when x <> ".." -> xs (* remove "dir/.." *)
-        | l -> l
-        end
+      begin match x :: remove xs with
+      | x :: [] -> [x]
+      | "." :: xs -> xs (* remove "." *)
+      | x :: ".." :: xs when x <> ".." -> xs (* remove "dir/.." *)
+      | l -> l
+      end
     | [] -> [] in
-  let path = String.concat "/" (remove tks) in
+  let path = String.concat "/" (remove tokens) in
   Printf.sprintf "%s%s%s"
-    (if full then "/" else "") path (if finalslash then "/" else "")
+    (if full then "/" else "") path (if final_slash then "/" else "")
 ;;
 
-let fullpath fromdir path =
+let fullpath from_dir path =
   (* get full path (weaker than Junix.realpath) *)
-  if is_absolute path then path else normalize (Filename.concat fromdir path)
+  if is_absolute path then path else normalize (Filename.concat from_dir path)
 ;;
 
 (* Tilde substitution *)
 
 (* skip to next / *)
 let rec next_slash s n =
-  if  n >= String.length s || s.[n] = '/' then n else
+  if n >= String.length s || s.[n] = '/' then n else
   next_slash s (succ n)
 ;;
 
 let user_home_dir = try Sys.getenv "HOME" with _ -> "~";;
 
 let tilde_subst fname =
- try
-  if fname = "" || fname.[0] <> '~' then fname else
-  let len = String.length fname in
-  if len = 1 then user_home_dir else
-  match fname.[1] with
-  | '/' ->
-     Filename.concat user_home_dir (String.sub fname 2 (len - 2))
-  | _ ->
-     let final = next_slash fname 1 in
-     let user = String.sub fname 1 (pred final) in
-     let pwnam = Unix.getpwnam user in
-     if succ final >= len then pwnam.Unix.pw_dir else
-      Filename.concat pwnam.Unix.pw_dir
-        (String.sub fname (succ final) (len - succ final))
- with
- | Unix.Unix_error (_, _, _) | Sys_error _ | Not_found -> fname
+  try
+    if fname = "" || fname.[0] <> '~' then fname else
+    let len = String.length fname in
+    if len = 1 then user_home_dir else
+    match fname.[1] with
+    | '/' ->
+      Filename.concat user_home_dir (String.sub fname 2 (len - 2))
+    | _ ->
+      let final = next_slash fname 1 in
+      let user = String.sub fname 1 (pred final) in
+      let pwnam = Unix.getpwnam user in
+      if succ final >= len then pwnam.Unix.pw_dir else
+       Filename.concat pwnam.Unix.pw_dir
+         (String.sub fname (succ final) (len - succ final))
+  with
+  | Unix.Unix_error (_, _, _) | Sys_error _ | Not_found -> fname
 ;;
 
 let rec digdir dir perm =
@@ -97,8 +97,8 @@ let prepare_file fname =
   if not (Sys.file_exists dirname) then begin
     try cautious_perm_digdir dirname with
     | Unix.Unix_error (e, _, _) ->
-        Misc.warning (Unix.error_message e)
-    end
+      Misc.warning (Unix.error_message e)
+  end
 ;;
 
 (* Prepare a file access and clear it before use. *)
@@ -109,7 +109,7 @@ let prepare_and_clear_file fname =
     close_out oc
   with
   | Unix.Unix_error (e, _, _) ->
-      Misc.warning (Unix.error_message e)
+    Misc.warning (Unix.error_message e)
 ;;
 
 (* Part II

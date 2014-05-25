@@ -45,7 +45,7 @@ val digdir : Misc.dir_name -> Unix.file_perm -> unit;;
 (* Same as [Unix.mkdir], but it also creates parent directories as needed *) 
 
 val prepare_file : Misc.file_name -> unit;;
-(* [prepare_file file] prepares the directory for [file]: if
+(* [prepare_file file] prepares the directory for creation of [file]: if
    necessary, sub-directories are created as required to create [file]. *)
 
 val save_page_number : int -> unit;;
