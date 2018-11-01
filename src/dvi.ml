@@ -363,9 +363,9 @@ let input_int32 =
   | _ -> assert false;;
 
 let input_string ch len =
-  let str = String.create len in
+  let str = Bytes.create len in
   really_input ch str 0 len ;
-  str;;
+  Bytes.to_string str;;
 
 (*** Parsing commands ***)
 

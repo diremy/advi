@@ -41,13 +41,13 @@ if test -z "$CAMLIMAGES_VERSION"; then
 else
   AC_MSG_RESULT([yes])
   HAVE_CAMLIMAGES="true"
-  CAMLIMAGES_PACKAGES="camlimages.core camlimages.graphics camlimages.ps camlimages.freetype"
-  CAMLIMAGES_INCLUDES=`$OCAMLFIND query -i-format -separator ' ' camlimages`
+  CAMLIMAGES_PACKAGES="camlimages.core camlimages.graphics camlimages.freetype"
+  CAMLIMAGES_INCLUDES=`$OCAMLFIND query -i-format -separator ' ' $CAMLIMAGES_PACKAGES`
   CAMLIMAGES_LIBS_NATIVE=`$OCAMLFIND query -a-format -separator ' ' -recursive -predicates native $CAMLIMAGES_PACKAGES`
   CAMLIMAGES_LIBS_BYTE=`$OCAMLFIND query -a-format -separator ' ' -recursive -predicates byte $CAMLIMAGES_PACKAGES`
   CAMLIMAGES_LPATH=`$OCAMLFIND query -format -L%d camlimages`
-  CAMLIMAGES_MKLIBS="-lcamlimages_freetype"
-  CAMLIMAGES_CCLIBS="-cclib -lcamlimages_freetype"
+  dnl CAMLIMAGES_MKLIBS="-lcamlimages_freetype"
+  CAMLIMAGES_CCLIBS="-cclib -lcamlimages_freetype_stubs"
   AC_SUBST(CAMLIMAGES_INCLUDES)
   AC_SUBST(CAMLIMAGES_LIBS_NATIVE)
   AC_SUBST(CAMLIMAGES_LIBS_BYTE)

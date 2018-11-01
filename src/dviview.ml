@@ -483,7 +483,7 @@ let changed st =
   reload_time st <>  st.last_modified;;
 
 let rec clear_page_stack max stack =
-  let pages = Array.create max false in
+  let pages = Array.make max false in
   let rec clear = function
     | p :: stack ->
         let s = clear stack in

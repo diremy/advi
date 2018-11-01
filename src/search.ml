@@ -181,11 +181,13 @@ let slow_true_file_names options files =
 ;;
 
 let true_file_names options files =
-  let arg_string = String.concat " " (options @ files) in
-  let truenames =
-    try command_strings Config.kpsewhich_path arg_string with Command -> [] in
-  if List.length truenames = List.length files then truenames
-  else slow_true_file_names options files
+  match files with [] -> [] | _ ->
+    let arg_string = String.concat " " (options @ files) in
+    let truenames =
+      try command_strings Config.kpsewhich_path arg_string
+      with Command -> [] in
+    if List.length truenames = List.length files then truenames
+    else slow_true_file_names options files
 ;;
 
 let rec iter2_safe f l1 l2 =

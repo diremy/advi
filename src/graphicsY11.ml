@@ -17,7 +17,7 @@
 
 (* Re-imported from graphicsX11 *)
 
-type color = Graphics.color;;
+type color = Graphics.color;;  
 
 type window_geometry = string;;
 

@@ -603,9 +603,11 @@ value caml_gr_rebind_keysyms(value unit)
   unsigned char* str; 
   str = (unsigned char*) "N";
   XRebindKeysym(caml_gr_display, XK_Next, modifiers, 0, str, 1);
+  str = (unsigned char*) "j";
   XRebindKeysym(caml_gr_display, XK_Down, modifiers, 0, str, 1);
   str = (unsigned char*)"P";
   XRebindKeysym(caml_gr_display, XK_Prior, modifiers, 0, str, 1);
+  str = (unsigned char*) "k";
   XRebindKeysym(caml_gr_display, XK_Up, modifiers, 0, str, 1);
   str = (unsigned char*)",";
   XRebindKeysym(caml_gr_display, XK_Home, modifiers, 0, str, 1);

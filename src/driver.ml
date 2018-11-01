@@ -471,7 +471,7 @@ let alpha_special st s =
   | _ -> ill_formed_special s;;
 
 let parse_blend s =
-  match String.lowercase s with
+  match String.lowercase_ascii s with
   | "none" -> Drawimage.Normal
   | "normal" -> Drawimage.Normal
   | "multiply" -> Drawimage.Multiply
@@ -496,7 +496,7 @@ let blend_special st s =
   | _ -> ill_formed_special s;;
 
 let parse_bool s =
-  match String.lowercase s with
+  match String.lowercase_ascii s with
   | "true" -> true
   | "false" -> false
   | _ -> failwith "invalid boolean";;
@@ -526,7 +526,7 @@ let epswithantialiasing_special st s =
   | _ -> ill_formed_special s;;
 
 let get_records s =
-  List.map (fun (k, v) -> String.lowercase k, v) (split_record s);;
+  List.map (fun (k, v) -> String.lowercase_ascii k, v) (split_record s);;
 
 let psfile_special st s =
   try
@@ -755,7 +755,7 @@ let parse_transition dir mode record =
   in
   let parse_direction key default =
     try
-      match String.lowercase (List.assoc key record) with
+      match String.lowercase_ascii (List.assoc key record) with
       | "left" -> Transitions.DirLeft
       | "right" -> Transitions.DirRight
       | "top" | "up" -> Transitions.DirTop
@@ -771,7 +771,7 @@ let parse_transition dir mode record =
          raise Exit
     with _ -> default (* Transitions.DirNone *)
   in
-  match String.lowercase mode with
+  match String.lowercase_ascii mode with
   | "slide" ->
       Transitions.TransSlide (parse_steps, parse_direction "from" default_dir)
   | "wipe" ->

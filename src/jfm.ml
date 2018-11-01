@@ -76,14 +76,14 @@ let input_preamble ic =
     ni=ni; nl=nl; nk=nk; ng=ng; np=np };;
 
 let input_floats ic num =
-  let array = Array.create num 0.0 in
+  let array = Array.make num 0.0 in
   for i = 0 to num - 1 do
     array.(i) <- input_int32_as_float ic
   done;
   array;;
 
 let input_words ic num =
-  let array = Array.create num 0 in
+  let array = Array.make num 0 in
   for i = 0 to num - 1 do
     array.(i) <- input_int32 ic
   done;

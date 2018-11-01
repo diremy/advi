@@ -169,12 +169,12 @@ let inputp fdins =
   | _, _, _ -> true
 
 let get_input () =
-  let buf = String.create 1 in
+  let buf = Bytes.create 1 in
   if inputp [ Unix.stdin ] then
     let _ = Unix.read Unix.stdin buf 0 1 in 
     if inputp [ Unix.stdin ] then () 
     else clear_usr2();
-    buf.[0]
+    Bytes.get buf 0
   else assert false;;
 
 let watch_file_check () = 
@@ -417,10 +417,10 @@ let get_fgcolor, set_fgcolor =
   (fun c -> advi_fgcolor := c);;
 
 let set_bgcolor_string s =
-  set_bgcolor (Dvicolor.parse_color (String.lowercase s));;
+  set_bgcolor (Dvicolor.parse_color (String.lowercase_ascii s));;
 
 let set_fgcolor_string s =
-  set_fgcolor (Dvicolor.parse_color (String.lowercase s));;
+  set_fgcolor (Dvicolor.parse_color (String.lowercase_ascii s));;
 
 Options.add
   "-bgcolor"

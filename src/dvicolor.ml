@@ -19,6 +19,8 @@
 
 open Graphics;;
 
+module Color = Color
+
 type color = GraphicsY11.color;;
 
 let cmyk c m y k = 
@@ -135,12 +137,12 @@ let gr_named_color = [
 let named_colors =
   let color_htable = Hashtbl.create 83 in
   let add_named_color (n, c) =
-    Hashtbl.add color_htable (String.lowercase n) c in
+    Hashtbl.add color_htable (String.lowercase_ascii n) c in
   List.iter add_named_color gr_named_color;
   List.iter add_named_color dvips_named_colors;
   color_htable;;
 
-let find_named_color n = Hashtbl.find named_colors (String.lowercase n);;
+let find_named_color n = Hashtbl.find named_colors (String.lowercase_ascii n);;
 
 let default_color = find_named_color "gray";;
 

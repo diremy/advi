@@ -161,9 +161,10 @@ let after f g = try let x = f () in  g (); x with exc -> g (); raise exc;;
 
 let cache_path file whitetransp psbbox ratiopt antialias (w, h) =
   let file' = Userfile.fullpath (Unix.getcwd ()) file in
-  let file' = if file == file' then String.copy file' else file' in
-  for i = 0 to String.length file' - 1 do
-    if file'.[i] = '/' then file'.[i] <- '-'
+  (* let file' = if file == file' then Bytes.of_string file' else file' in *)
+  let file' = Bytes.of_string file' in
+  for i = 0 to Bytes.length file' - 1 do
+    if Bytes.get file' i = '/' then Bytes.set file' i '-'
   done;
   let geom_string x =
     if x >= 0 then "+" ^ string_of_int x else string_of_int x
@@ -195,7 +196,7 @@ let cache_path file whitetransp psbbox ratiopt antialias (w, h) =
   Filename.concat (Userfile.get_advi_cache_dir ())
     (Printf.sprintf "%s%s-%dx%d%s%s%s%s"
        cache_prefix
-       file'
+       (Bytes.to_string file')
        w h
        bbox_str
        ratiopt_str
@@ -206,9 +207,9 @@ let cache_path file whitetransp psbbox ratiopt antialias (w, h) =
 let cache_load file =
   debugs ("cache_load " ^ file);
   let load ic =
-    let s = String.create (String.length cache_key) in
+    let s = Bytes.create (String.length cache_key) in
     ignore (input ic s 0 (String.length cache_key));
-    if s <> cache_key then failwith (file ^ " has no proper header");
+    if Bytes.to_string s <> cache_key then failwith (file ^ " has no proper header");
     let rgba = input_value ic in (* bool *)
     let width = input_value ic in
     let height = input_value ic in
@@ -237,7 +238,8 @@ let cache_load file =
 let cache_save file img =
   debugs ("cache_save " ^ file);
   let save oc =
-    output oc cache_key 0 (String.length cache_key);
+    (* output oc cache_key 0 (String.length cache_key); *)
+    output_string oc cache_key;
     match img with
     | Rgba32 image ->
         output_value oc true;
@@ -245,7 +247,7 @@ let cache_save file img =
         output_value oc image.Rgba32.height;
         debugs (Printf.sprintf "(%dx%d) %d bytes written"
                   image.Rgba32.width image.Rgba32.height
-                  (String.length (Rgba32.dump image)));
+                  (Bytes.length (Rgba32.dump image)));
         output_value oc (Rgba32.dump image);
     | Rgb24 image ->
         output_value oc false;
