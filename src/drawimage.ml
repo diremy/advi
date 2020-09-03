@@ -263,7 +263,7 @@ let cache_save file img =
           Printf.sprintf "%s > %s" Config.gzip_path (Filename.quote file) in
         debugs ("cache_save " ^ command);
         Unix.open_process_out command),
-      (fun oc -> Pervasives.flush oc; ignore (Unix.close_process_out oc))
+      (fun oc -> Stdlib.flush oc; ignore (Unix.close_process_out oc))
   in
   let oc = opener file in
   after (fun () -> save oc) (fun () -> try closer oc with _ -> ())
@@ -324,9 +324,9 @@ let resize_and_make_transparent image whitetransp ratiopt (ow, oh) =
     | ScaleOriginal -> iw, ih
     | ScaleAuto     -> ow, oh
     | ScaleTop | ScaleBottom ->
-        ow, Pervasives.truncate (float ih *. float ow /. float iw)
+        ow, Stdlib.truncate (float ih *. float ow /. float iw)
     | ScaleLeft | ScaleRight ->
-        Pervasives.truncate (float iw *. float oh /. float ih), oh
+        Stdlib.truncate (float iw *. float oh /. float ih), oh
     | ScaleCenter | ScaleTopLeft | ScaleBottomLeft
     | ScaleTopRight | ScaleBottomRight ->
        (* In all these cases, we need to resize the image just enough
@@ -335,8 +335,8 @@ let resize_and_make_transparent image whitetransp ratiopt (ow, oh) =
           according to these directives *)
        let ratiow = float ow /. float iw
        and ratioh = float oh /. float ih in
-       if ratiow > ratioh then ow, Pervasives.truncate (float ih *. ratiow)
-       else Pervasives.truncate (float iw *. ratioh), oh in
+       if ratiow > ratioh then ow, Stdlib.truncate (float ih *. ratiow)
+       else Stdlib.truncate (float iw *. ratioh), oh in
   let blitinfo =
   (* compute the blitting information for the image        *)
   (* None means do not blit the image                      *)

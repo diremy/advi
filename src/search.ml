@@ -21,8 +21,8 @@ let database_mtime = ref 0.0;;
 let database_table = Hashtbl.create 257;;
 
 let unwind_protect f x g y =
-  try let v = f x in g y; v with
-  | exc -> g y; raise exc;;
+  try let v = f x in let _ = g y in v with
+  | exc -> let _ = g y in raise exc;;
 
 let open_process_in cmd =
   let (in_read, in_write) = Unix.pipe () in
@@ -55,17 +55,17 @@ let command_strings com opt =
   Misc.debug_endline (Printf.sprintf "command_string: launching %s" command);
   try
     let pid, chan as pidchan = open_process_in command in
-    let s = unwind_protect input_lines chan close_process_in pidchan
-        in
+    let s = unwind_protect input_lines chan close_process_in pidchan in
     Misc.debug_endline (Printf.sprintf "END %f" (Unix.gettimeofday() -. !t));
-s
+    s
   with
   | Unix.Unix_error (c, _, _) ->
-      Misc.warning
+     Misc.warning
         (Printf.sprintf "Error %s while executing %s %s"
           (Unix.error_message c) com opt);
-      raise Command
-  | End_of_file -> []
+     raise Command
+  | End_of_file ->
+     []
 ;;
 
 let command_string cmd opt =

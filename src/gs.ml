@@ -133,7 +133,7 @@ class gs () =
     y = 0;
   } in
   let dpi = 72 (* unite utilise par dvi? *) in
-  let command = Config.gs_path in
+  let command = !Config.gs_path in
   let command_args =
     Array.concat [
     [|

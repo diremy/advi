@@ -19,3 +19,5 @@ val pson : bool ref;;
 val get_global_display_mode : unit -> bool;;
 val set_global_display_mode : bool -> unit;;
 (** Get and set the value of the [global_display_mode]. *)
+
+val loaded : unit

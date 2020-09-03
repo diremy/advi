@@ -188,7 +188,7 @@ module Japanese = struct
         (* metrics *)
         let width = Jfm.find_width jfm jiscode in
         let dx =
-          Pervasives.truncate (float width *. float pt *. float dpi
+          Stdlib.truncate (float width *. float pt *. float dpi
                                    /. 1152.0) (* 72x16 *)
         in
         let x_fix, y_fix =
@@ -201,10 +201,10 @@ module Japanese = struct
           in
           (* width min10 (mincho 10pt) is 9.62216pt
              (http://www.matsusaka-u.ac.jp/~okumura/jsclasses/jfm.html) *)
-          Pervasives.truncate (float pt *. 0.962216 *.
+          Stdlib.truncate (float pt *. 0.962216 *.
                                float dpi /. 72.0 *. fix /. 1000.0),
           (* baseline fix is quite ad-hoc. I took 10% without reason *)
-          Pervasives.truncate (float pt *. float dpi /. 72.0 *. 0.10)
+          Stdlib.truncate (float pt *. float dpi /. 72.0 *. 0.10)
           in
 
           (* drawing using ttfont.build *)

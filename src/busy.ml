@@ -17,6 +17,9 @@
 
 (* $Id$ *)
 
+(** To force dependencies and loading *)
+let () = Global_options.loaded
+
 let show_busy =
     Options.flag true
     "-nowatch"

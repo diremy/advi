@@ -20,7 +20,7 @@
 let debug_endline = Options.debug "--debug" " General debug";;
 
 (* Setting the forward in Misc. *)
-Misc.set_forward_debug_endline debug_endline;;
+let loaded = Misc.set_forward_debug_endline debug_endline;;
 
 (* Some global options for Active-DVI. *)
 
@@ -55,3 +55,5 @@ Options.add "-w"
  "<flags>  Enable/disable warnings according to <flags>,\
  \n\t A/a enable/disable all warnings\
  \n\t (the default is \"A\", to enable all warnings).";;
+
+let loaded = ()

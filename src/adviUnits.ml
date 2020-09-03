@@ -82,7 +82,7 @@ let units_of_int = function
   | 6 -> DD | 7 -> CC | 8 -> SP
   | _ -> assert false ;;
 
-let matrix = Array.create_matrix 9 9 (0, 0) ;;
+let matrix = Array.make_matrix 9 9 (0, 0) ;;
 
 for i = 0 to 8 do
   for j = 0 to 8 do

@@ -82,13 +82,13 @@ let parse_args progname argv speclist anonfun errmsg =
         | Int f when !current + 1 < l ->
             let arg = argv.(!current + 1) in
             begin try f (int_of_string arg) with
-            | Failure "int_of_string" -> stop (Wrong (s, arg, "an integer"))
+            | Failure _ -> stop (Wrong (s, arg, "an integer"))
             end;
             incr current;
         | Float f when !current + 1 < l ->
             let arg = argv.(!current + 1) in
             begin try f (float_of_string arg) with
-            | Failure "float_of_string" -> stop (Wrong (s, arg, "a float"))
+            | Failure _ -> stop (Wrong (s, arg, "a float"))
             end;
             incr current;
         | Rest f ->

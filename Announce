@@ -1,59 +1,53 @@
 
-
                        Active-DVI
 
 
-Active-DVI is a presenter and previewer for texts or slides written in LaTeX,
-hence the presentation tool of choice for the discriminating hacker.
+Version 1.9.0 is now available. 
 
-Version 1.4.0 is now available. As the release number shows, this is a
-major improvement w.r.t version 1.2.0 of Active-DVI.
+Active-DVI is a programmable presenter and previewer for texts or slides
+written in LaTeX. 
 
-This new version has been developed by Jun Furuse, Didier Rémy and
-Pierre Weis with also contributions by Didier Le Botlan, Roberto Di
-Cosmo, Xavier Leroy, and Alan Schmitt.
+It can display files in DVI format and is thus a possible replacement for
+other DVI previewers. 
 
-In addition to the regular features of the Active-DVI previewer:
+It also commes with a package advi.sty that provided new macros and generate
+new DVI-specials understood by Active-DVI that enables:
 
-   * Encapsulated Postscript File inclusion
-     (using the graphics LaTeX package)
+   * Image file inclusions in a variety of different formats 
 
-   * Some effects for presentation (pause, delay, text color change) 
+   * Some effects for presentation: pause, delay,  background images,
+     transitions, etc.
 
-this release introduces a lot of new features
+   * Embedded applications.
 
-   * Improved API for embedded applications.
+   * Special Support for WhizzyTeX including
 
-   * Support for X colors via an additional xcolor.sty LaTeX package.
+      - Backpointing to the source file. 
+      - (Rudimentary) support for moving or resizing objects with the mouse.
 
-   * Thumbnails to see the entire presentation at a glance (press T to
-     build the thumbnails, then t to toggle from thumbnails to your
-     presentation).
+This release is mostly for maintainance, with only a few new features:
 
-   * Hyper references can now be made invisible.
+   * Improved configuration.
 
-   * Enhanced background possibilities.
+   * Default previewing of embedded postscript images with ghostscript, 
+     (usually faster than with camlimages).
 
-   * An additional advi-slides.sty package for the impatient and/or
-     the beginner facilitates easy presentations. (Comments on this
-     new package warmly welcome.)
+   * Source files may be in gzip or bzip2 format.
 
-   * Additional examples, including simple ones for the slitex LaTeX package.
-
-   * An improved manual.
+This version of advi also supports the pgf package and the beamer document
+class. 
 
 Play advi on the demonstration presentation demo.dvi that is in the test
-directory of the distribution. Look at source code of various talks in
+directory of the distribution. Look at source code of the various talks in
 the directory ``examples''.
 
-The source code and information are available at
+The source code and more information are available at
 
     http://advi.inria.fr/
 
-Contributions and comments are warmly welcome.
-
-Mailing list and bug reports to advi@inria.fr
+Mailing list and bug reports at advi@inria.fr
 
 --
-For the Active-DVI development team, 31th Jan 2003
-Jun Furuse (Jun.Furuse@inria.fr) && Pierre Weis (Pierre.Weis@inria.fr)
+For the Active-DVI development team, April 2010
+
+Didier Remy 

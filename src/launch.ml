@@ -64,7 +64,7 @@ let exit code =
   (* at_exit code must be called only by the ADVI process.
      If it is one of the forked processes, it must DIE IMMEDIATELY:
      no cleaning is allowed. *)
-  if Unix.getpid () = advi_process then Pervasives.exit code
+  if Unix.getpid () = advi_process then Stdlib.exit code
   else (* SUICIDE *) Unix.kill (Unix.getpid ()) 9;;
 
 (* The safety policy to launch applications. *)
