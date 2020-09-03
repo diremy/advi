@@ -1,0 +1,10 @@
+(executable
+ (name main)
+ (flags (:standard -w +YXD -warn-error +S -w -KZ -w -50 -w -9 -w -6 -w -27))
+ (libraries str unix graphics camlimages.core camlimages.freetype)
+ (foreign_stubs (language c) (names grY11 events grwm))
+ (modules_without_implementation
+  dvicommands
+  transitions
+  )
+)
