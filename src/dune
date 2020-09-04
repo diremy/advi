@@ -1,5 +1,8 @@
 (executable
  (name main)
+ (public_name advi)
+ (depend config.ml)
+ (package advi)
  (flags (:standard -w +YXD -warn-error +S -w -KZ -w -50 -w -9 -w -6 -w -27))
  (libraries str unix graphics camlimages.core camlimages.freetype)
  (foreign_stubs (language c) (names grY11 events grwm))
@@ -7,4 +10,20 @@
   dvicommands
   transitions
   )
-)
+ )
+
+(rule
+ (target config.def)
+ (deps discover.sh)
+ (action (run bash %{deps} %{target})))
+
+(rule
+  (target config.ml)
+  (deps config.def config.cppo.ml)
+  (action
+   (run %{bin:cppo} %{deps} -o %{target})
+   ))
+
+;; (install
+;;  (files advi)
+;;  (section bin))

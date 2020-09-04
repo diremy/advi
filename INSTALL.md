@@ -15,7 +15,7 @@ with version 4.0.0, available at
 You need the findlib utility to automatically detect installed
 ocaml libraries configuration, available at
 
-        http://www.camlcity.org/archive/programming/findlib.html
+    http://www.camlcity.org/archive/programming/findlib.html
 
 To display postscript based drawings by PsTricks macro package,
 you need ghostscript (http://www.ghostscript.com). You need
@@ -26,7 +26,8 @@ COMPILATION AND INSTALLATION
 ============================
 
 Use the standard procedure:
-./configure && make && sudo make install
+
+    ./configure && make && sudo make install
 
 Use ./configure --help for various options
 
@@ -46,10 +47,16 @@ This is only needed if you're using CVS version directly.
    directory, are present in aclocal macro search path, by any of the following 
    solution:
    - exec before invoking autoreconf:
-       export ACLOCAL='aclocal -I <directory>' 
+   
+        export ACLOCAL='aclocal -I <directory>' 
+   
    - set up a dirlist file in automake macro directory, as explained in aclocal
      documentation
+     
   * run autoreconf --install
+
+        autoreconf --install
+
 
 JAPANESE USERS
 ==============

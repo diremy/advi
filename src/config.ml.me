@@ -17,6 +17,8 @@
 
 (* $Id: config.ml.in,v 1.7 2011-08-04 13:38:22 remy Exp $ *)
 
+#include config.h
+
 (* The current version of Active-DVI *)
 let advi_version_number = "1.10.2";;
 let advi_build_date = "2020-09-03";;
@@ -30,7 +32,7 @@ let have_gs = true;;
 
 (* Can we use camlimages ? Not used anymore? What happens if camlimages 
    is not there? *) 
-let have_camlimages = true;;
+(* let have_camlimages = true;; *)
 
 (* Various commands paths. *)
 let kpsewhich_path = "kpsewhich";;
