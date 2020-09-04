@@ -1,5 +1,7 @@
 (lang dune 2.5)
 
+(name advi)
+
 (generate_opam_files true)
 
 (package
