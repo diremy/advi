@@ -31,4 +31,5 @@ arbitrary applications within the presentation.
 Active-DVI is very well suited for use in combination with WhizzyTeX
 (http://cristal.inria.fr/whizzytex/)
 ")
+ (depends (camlimages (>= v5.0)))
 )

@@ -48,8 +48,8 @@ let database_name = "ls-R"
 let database_path = Filename.concat texdir_path database_name;;
 
 (* Location of splash.dvi and test/caml.eps *)
-let advi_loc = "ADVI_TEXDIR";;
-let etc_advi_loc = "ADVI_TEXDIR";;
+let advi_loc = ADVI_DOCDIR;;
+let etc_advi_loc = ADVI_TEXDIR;;
 let splash_screen = Filename.concat advi_loc "splash.dvi";;
 let scratch_draw_splash_screen =
   Filename.concat advi_loc "scratch_draw_splash.dvi";;
