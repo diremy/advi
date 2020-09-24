@@ -15,7 +15,7 @@
 
 - Fixed packaging of documentation
 
-## ## Version 1.10.1
+## Version 1.10.1
 - Prefetching fonts to group calls to kpsewhich (starts faster)
 - Made scroll buttons preemptive (stop displaying)
 - Fixed install path of dlladvi
