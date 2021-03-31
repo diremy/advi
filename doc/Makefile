@@ -52,4 +52,7 @@ install: $(DOCTARGETS) $(MANTARGETS)
 	install $(MANTARGETS) $(advi_mandir)/man1/
 	install $(DOCTARGETS) $(advi_docdir)/
 
+uninstall: 
+	rm -vf $(advi_mandir)/man1/advi.1
+	for i in $(DOCTARGETS); do rm -vf $(advi_docdir)/$$i; done
 

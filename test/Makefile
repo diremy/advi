@@ -70,4 +70,6 @@ clean::
 
 install:
 
+uninstall:
+
 .SUFFIXES: .tex .sty .dvi .ps .eps .advi

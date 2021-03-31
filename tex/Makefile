@@ -1,5 +1,7 @@
 CONFIG = ../_build/default/src/Makefile.config
 
+advi_latexdir = $(advi_texdir)/tex/latex
+
 SOURCES = \
   advi-annot.sty \
   advi-graphicx.sty \
@@ -28,7 +30,10 @@ clean:
 	rm -rf $(TARGETS) _build
 
 install: $(SOURCES) 
-	install -d $(advi_texdir)/tex/latex/
-	install  $(SOURCES) $(advi_texdir)/tex/latex/
+	install -d $(advi_latexdir)
+	install  $(SOURCES) $(advi_latexdir)
 
+uninstall: 
+	for i in $(SOURCES); do rm -vf $(advi_latexdir)/$$i; done
+	if test -d $(advi_latexdir); then rmdir $(advi_latexdir); fi
 
