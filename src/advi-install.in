@@ -48,6 +48,7 @@ check () {
 
 doinstall () {    
     echo "install ${src}/* ${dest}" && \
+        install -d ${dest}/ && \
         install ${src}/* ${dest}/ && \
         echo mktexlsr && \
         mktexlsr && \
