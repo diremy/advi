@@ -1,3 +1,5 @@
+\providecommand{\driver}{}
+
 \usepackage{index}
 
 \def \cmdindex #1{\index{\cmdtt #1}}

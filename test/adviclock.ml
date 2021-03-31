@@ -9,7 +9,7 @@
 (*                                                                     *)
 (***********************************************************************)
 
-open Camltk;;
+open Camltk
 
 (** Diameter of the clock. *)
 let diametre = ref 200;;
@@ -123,7 +123,7 @@ let opencamltk () =
   opentk ();;
 
 type clock = {
-    widget : Widget.widget;
+    widget : Widget.widget; 
     mutable major : tagOrId;
     mutable minor : tagOrId;
     mutable major_elapsed : float;

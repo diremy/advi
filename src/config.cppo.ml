@@ -18,7 +18,7 @@
 (* $Id$ *)
 
 (* The current version of Active-DVI *)
-let advi_version_number = PACKAGE_VERSION;;
+let advi_version_number = "PACKAGE_VERSION";;
 (* let advi_build_date = BUILD_DATE;; *)
 
 let advi_full_version = advi_version_number
@@ -33,7 +33,7 @@ let have_camlimages = HAVE_CAMLIMAGES;;
 
 (* Various commands paths. *)
 let kpsewhich_path = "kpsewhich";;
-let gs_path = ref GS_PATH;;
+let gs_path = ref GS_PATH_STR;;
 let gzip_path = "gzip";;
 let gunzip_path = "gunzip";;
 let bunzip2_path = "bunzip2";;
@@ -43,13 +43,16 @@ let texpicts_kind = "graphic/figure";;
 let psheaders_kind = "PostScript header";;
 
 (* Data files directory paths. *)
-let texdir_path = "";;
+let texdir_path = TEXDIR_STR;;
+let latexdir_path = LATEXDIR_STR;;
 let database_name = "ls-R"
 let database_path = Filename.concat texdir_path database_name;;
 
 (* Location of splash.dvi and test/caml.eps *)
-let advi_loc = ADVI_DOCDIR;;
-let etc_advi_loc = ADVI_TEXDIR;;
+let advi_loc = ADVI_DOCDIR_STR;;
+let advi_texdir = ADVI_TEXDIR_STR;;
+let etc_advi_loc = ADVI_TEXDIR_STR;;
+
 let splash_screen = Filename.concat advi_loc "splash.dvi";;
 let scratch_draw_splash_screen =
   Filename.concat advi_loc "scratch_draw_splash.dvi";;

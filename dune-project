@@ -6,6 +6,7 @@
 
 (package
  (name advi)
+ (version 2.0.0)
  (synopsis "Active DVI Dune package!")
  (license <name>)
  (authors

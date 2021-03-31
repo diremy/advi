@@ -13,12 +13,14 @@
 /*                                                                        */
 /**************************************************************************/
 
-/**************************************************************************
-/*   This file is copied from the Graphics package distribution: 
-
-https://raw.githubusercontent.com/ocaml/graphics/master/src/unix/libgraph.h 
-
-**************************************************************************/
+/**************************************************************************/
+/*   This file is copied from the Graphics package distribution:          */
+/*                                                                        */
+/*    https://raw.githubusercontent.com                                   */
+/*              /ocaml/graphics/master/src/unix/libgraph.h                */
+/*                                                                        */
+/*                                                                        */
+/**************************************************************************/
 
 #include <stdio.h>
 #include <X11/Xlib.h>

@@ -509,7 +509,7 @@ value caml_gr_reposition (value x, value y, value w, value h, value scr)
   Bool fullscreen;
   XWindowAttributes att;
 
-  caml_gr_check_open();
+  caml_gr_check_open(); 
 
   posx = Int_val(x);
   posy = Int_val(y);

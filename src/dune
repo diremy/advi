@@ -2,10 +2,16 @@
  (name main)
  (public_name advi)
  (package advi)
- (flags (:standard -w +YXD -warn-error +S -w -KZ -w -50 -w -9 -w -6 -w -27))
+ (flags (:standard -w +YXD -warn-error +S -w -KZ -w -50 -w -9 -w -6 -w -27)
+ ;; (-cclib  -lXinerama)
+ )
  (libraries str unix graphics camlimages.core camlimages.graphics
-  camlimages.freetype)
- (foreign_stubs (language c) (names grY11 events grwm))
+            camlimages.freetype)
+ (foreign_stubs (language c)
+                (names grY11 events grwm)
+                ;; Does not compile on Mac osx, even when Xinerama is present
+                ;; (flags :standard -D HAVE_XINERAMA)
+                )
  (modules_without_implementation
   dvicommands
   transitions
@@ -13,17 +19,30 @@
  )
 
 (rule
- (target config.def)
+ (target configure.sh)
  (deps discover.sh)
- (action (run bash %{deps} %{target})))
+ (action (run bash discover.sh %{target}))
+)
 
 (rule
   (target config.ml)
-  (deps config.def config.cppo.ml)
-  (action
-   (run %{bin:cppo} %{deps} -o %{target})
-   ))
+  (deps configure.sh (:src config.in.ml))
+  (action (run bash configure.sh %{src} %{target}))
+)
 
-;; (install
-;;  (files advi)
-;;  (section bin))
+(rule
+  (target Makefile.config)
+  (deps configure.sh (:src Makefile.in.config))
+  (action (run bash configure.sh %{src} %{target}))
+)
+
+(rule
+  (target advi-install)
+  (deps configure.sh (:src advi-install.in))
+  (action (run bash configure.sh %{src} %{target}))
+)
+
+(install
+ (section bin)
+ (files advi-install))
+ 

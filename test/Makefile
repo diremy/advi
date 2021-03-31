@@ -1,6 +1,7 @@
 #*********************************************************************#
 #                                                                     #
 #                             Active-DVI                              #
+#*********************************************************************#
 #                                                                     #
 #                   Projet Cristal, INRIA Rocquencourt                #
 #                                                                     #
@@ -18,75 +19,55 @@
 # $Id$
 
 # To view the demo, use ../advi demo.dvi
-include ../Makefile.config
+# include ../Makefile.config
+
+# OUTDIR = ../_build/default/test/
+OUTDIR = _build/
+
+LATEX = latexmk -output-directory=$(OUTDIR)
+
+PLATEX = latexmk -latex=platex -output-directory=$(OUTDIR)
 
 # binaries
-ADVI	= ../advi
+ADVI = ../advi
 
 # flags
-TEX_ENV	= TEXINPUTS=.:../tex:$$TEXINPUTS
-ADVI_ENV= TEXPSHEADERS=../tex:
+TEXINPUTS = .:../tex:
+TEXPSHEADERS = ../tex:
 
 # sources
 TEXFILES= demo.tex demo2.tex trigo_source.tex \
 	  trans.tex trans2.tex trans3.tex background.tex \
 	  color.tex demo_raw.tex macros.tex test_events.tex
+
 DVIFILES= $(TEXFILES:%.tex=%.dvi)
 
-ifeq ($(HAVE_LABLTK),true)
-MLPROG=taquin adviclock
-else
-MLPROG=
-endif
+# Those example do not compile anymore (not maintained)
+# include Makefile.more
 
-all: $(DVIFILES) $(MLPROG) 
+all :: $(DVIFILES) $(MLPROG)
+
 
 $(DVIFILES): bar.eps demo.sty ../tex/advi.sty ../tex/advi-annot.sty
 
-.dvi.advi:
-	$(ADVI_ENV) $(ADVI) $<
+%.advi: %.dvi 
+	$(ADVI) $<
 
-.tex.dvi:
-	$(TEX_ENV) $(LATEX) $<
+%.dvi: %.tex bar.eps
+	$(LATEX) $<
+	ln -f $(OUTDIR)/$@ .
 
 jpdemo.dvi: jpdemo.tex
-	$(TEX_ENV) $(PLATEX) $<
-
-background.dvi: background.tex
-	$(TEX_ENV) $(LATEX) $<
-	$(TEX_ENV) $(LATEX) $<
-
-taquin: taquin_embed.ml
-	ocamlc -o taquin -I $(LABLTKDIR) $(LABLTKLIB) taquin_embed.ml
-
-adviclock: adviclock.ml
-	ocamlc -o adviclock unix.cma -I $(LABLTKDIR) $(LABLTKLIB) adviclock.ml
+	$(PLATEX) $<
+	ln -f $(OUTDIR)/$@ .
 
 bar.eps: ../tex/bar.eps
 	cp -p ../tex/bar.eps .
 
 clean::
-	$(RM) a.out *.toc *.aux *.log *.dvi *~ 
-	$(RM) $(MLPROG) *.cmi *.cmo
-	$(RM) .advi/*
-	$(RM) test_gpic.tex
+	rm -rf _build
+	rm -f $(DVIFILES)
 
-test_subwindow: test_subwindow.ml
-	ocamlc -custom -I .. unix.cma graphics.cma -ccopt -L.. ../grY11.o ../events.o ../graphicsY11.cmo test_subwindow.ml 
-
-clean::
-	$(RM) test_cursors
-
-test_cursors: test_cursors.ml
-	ocamlc -custom -I .. unix.cma graphics.cma -ccopt \
-	-L.. ../grY11.o ../events.o ../misc.cmo ../grwm.o \
-	../graphicsY11.cmo test_cursors.ml -cclib "$(WITH_X)" \
-	-o test_cursors 
-
-trigo.tex: trigo.pic
-	gpic -t trigo.pic > trigo.tex
-
-test_gpic.tex: test_gpic.pic
-	gpic -t test_gpic.pic > test_gpic.tex
+install:
 
 .SUFFIXES: .tex .sty .dvi .ps .eps .advi

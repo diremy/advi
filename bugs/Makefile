@@ -17,7 +17,8 @@
 
 # $Id Exp $
 
-include ../Makefile.config
+# include ../Makefile.config
+LATEX=latex
 
 # binaries
 ADVI	=../advi

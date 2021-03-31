@@ -1,7 +1,7 @@
 PREREQUISITES
 =============
 
-You need Objective Caml 3.11 or higher to compile the sources.
+You need Objective Caml 4.11 or higher to compile the sources.
 
 You also need the `kpsewhich' utility of the `kpathsea' library
 provided by many TeX distributions.
@@ -22,6 +22,13 @@ you need ghostscript (http://www.ghostscript.com). You need
 the version 7.05 or later for the correct synchronization of
 drawing of the TeX glyphs and postscript graphics.
 
+COMPILATION UNDER OPAM
+======================
+
+This should install automatically as an opam package.
+
+
+
 COMPILATION AND INSTALLATION
 ============================
 
@@ -38,24 +45,6 @@ Alternatively:
   (kpsewhich advi.sty should succeed from where LaTeX is run)
 * Copy the file advi.pro to a place where is it a visible PS header.
    (kpsewhich advi.pro should succeed from where advi is run)
-
-Generating build scripts
-------------------------
-This is only needed if you're using CVS version directly.
-
-  * make sure ocaml autoconf macros, available from bazar-ocaml/autoconf
-   directory, are present in aclocal macro search path, by any of the following 
-   solution:
-   - exec before invoking autoreconf:
-   
-        export ACLOCAL='aclocal -I <directory>' 
-   
-   - set up a dirlist file in automake macro directory, as explained in aclocal
-     documentation
-     
-  * run autoreconf --install
-
-        autoreconf --install
 
 
 JAPANESE USERS
