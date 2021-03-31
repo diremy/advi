@@ -29,19 +29,24 @@ doc: "https://gitlab.inria.fr/remy/advi"
 bug-reports: "Didier.Remy@inria.fr"
 depends: [
   "dune" {>= "2.5"}
+  "graphics" {>= "5.1.1"}
   "camlimages" {>= "v5.0"}
 ]
 build: [
-  ["dune" "subst"] {pinned}
-  [
-    "dune"
-    "build"
-    "-p"
-    name
-    "-j"
-    jobs
-    "@install"
-    "@runtest" {with-test}
-    "@doc" {with-doc}
-  ]
+    ["dune" "subst"] {pinned}
+    [ "make"
+      "all"
+      "install"
+    ]
+  # [
+  #   "dune"
+  #   "build"
+  #   "-p"
+  #   name
+  #   "-j"
+  #   jobs
+  #   "@install"
+  #   "@runtest" {with-test}
+  #   "@doc" {with-doc}
+  # ]
 ]
