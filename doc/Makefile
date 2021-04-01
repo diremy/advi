@@ -53,14 +53,13 @@ install: $(DOCTARGETS) $(MANTARGETS)
 	install $(DOCTARGETS) $(advi_docdir)/
 
 install.html: manualxxx.html
-	install -d $(advi_docdir)/html/
-	install manualxxx.html $(advi_docdir)/html/index.html
-	install _build/manual???.html $(advi_docdir)/html/
+	install -d $(advi_docdir)/
+	install manualxxx.html $(advi_docdir)/index.html
+	install _build/manual???.html $(advi_docdir)/
 
 uninstall: 
 	rm -vf $(advi_mandir)/man1/advi.1
-	rm -vf $(advi_docdir)/html/index.html 
-	rm -vf $(advi_docdir)/html/manual???.html 
-	rmdir $(advi_docdir)/html/ || true
+	rm -vf $(advi_docdir)/index.html 
+	rm -vf $(advi_docdir)/manual???.html 
 	for i in $(DOCTARGETS); do rm -vf $(advi_docdir)/$$i; done
 

@@ -1,6 +1,6 @@
 SUBDIRS = tex doc 
 
-SRC = src/Makefile.config src/advi-latex-sources src/main.exe
+SRC = src/Makefile.config src/advi-latex-files src/main.exe
 
 all: $(SRC)
 	for dir in $(SUBDIRS); do make -C $$dir; done
@@ -19,9 +19,10 @@ install: all
 	dune build @install
 	dune install
 	for dir in $(SUBDIRS); do make -C $$dir install; done
-	echo "This installed the 'advi' command. "
-	echo "For advanced features of advi you also need to install latex-sources."
-	echo "To do thus, run the command 'advi-latex-sources'."
+	@echo 
+	@echo 'WARNING:'
+	@echo "  You still need to run the command 'advi-latex-files'"
+	@echo "  to install some LaTeX files needed for advanced features."
 
 uninstall:
 	for dir in $(SUBDIRS); do make -C $$dir uninstall; done

@@ -6,7 +6,7 @@ latexdir='@LATEXDIR@'
 advi_latexdir=${advi_texdir}/tex/latex
 dest=${latexdir}/advi
 
-cmd=advi-latex-sources
+cmd=advi-latex-files
 
 
 warn () {
@@ -23,6 +23,7 @@ usage () {
     warn '    ' ${cmd} --install default
     warn '    ' ${cmd} --install '<PATH>'
     warn '    ' ${cmd} --uninstall
+    warn '    ' ${cmd} --list
     error
 }
 
@@ -45,6 +46,10 @@ case "${command}" in
         then
             error 'Unknown installation directory: cannot uninstall.'
         fi
+        ;;
+    --list)
+        ls "${advi_latexdir}"
+        exit 0
         ;;
     *) usage
        ;;
