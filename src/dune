@@ -37,12 +37,12 @@
 )
 
 (rule
-  (target advi-install)
-  (deps configure.sh (:src advi-install.in))
+  (target advi-latex-sources)
+  (deps configure.sh (:src advi-latex-sources.in))
   (action (run bash configure.sh %{src} %{target}))
 )
 
 (install
  (section bin)
- (files advi-install))
+ (files advi-latex-sources))
  

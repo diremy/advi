@@ -12,10 +12,14 @@ function strdef () {
     echo "  -e 's|@${name}@|${value}|g' \\"
 }
 
-function error () {
+function warn () {
     echo $* 1>&2
+}    
+function error () {
+    warn $*
     exit 1
 }    
+
 
 package_version='%%VERSION%%'
 
@@ -48,31 +52,55 @@ case "$#" in
         exec >${target} ;;
 esac
 
+exec_prefix=undefined
 libdir=${exec_prefix}/lib
 datadir=${prefix}/share
 
-# TEX ROOTS 
-texdir=$(kpsexpand '$TEXMFMAIN')
-if test -z "$texdir"
-then error 'no TeX root path found, check your setup'
+# kpsewhich
+if kpsewhich_path=$(which kpsewhich)
+then
+    if
+        article=$(${kpsewhich_path} article.cls) &&
+            test ! -z ${article}
+    then
+        :
+    else
+         warn 'kpsewhich command:'
+         warn "    ${kpsewhiich_path} arcticle.cls"
+         error  'failed, check your setup!'
+    fi
+else
+    error 'No kpsewhich command found, check your setup!'
 fi
 
-# LATEX ROOTS 
-if test -d "$texdir/tex/latex"; then
-    # this ugly stuff, shamelessly stolen from lispdir computation, is supposed
-    # to find latex resources installation directory expressed in term of prefix
-    # the ugly @<:@^\/@:>@ Is meant to express [^\/] regexp
-    latexdir=`echo $texdir/tex/latex | sed -n \
-	-e 's,/$,,' \
-        -e '/.*\/lib\/[^\/]*\/tex\/latex$/{s,.*/lib/\([^\/]*\/tex\/latex\)$,${libdir}/\1,;p;q;}' \
-        -e '/.*\/share\/[^\/]*\/tex\/latex$/{s,.*/share/\([^\/]*\/tex\/latex\),${datadir}/\1,;p;q;}'`
+# TEX ROOTS
+texdir=''
+if which kpsexpand > /dev/null
+then
+    texdir=$(kpsexpand '$TEXMFMAIN')
 else 
-    error 'no LaTeX root path found, check your setup'
+    texdir=$(expr "${article}" : '\(.*\)/tex/latex/base/*$')
 fi
 
-if test -z "$latexdir"
-then error 'No LaTeX root path found, check your setup'
+if test -z ${texdir}
+then
+    warn 'No TeX root path found, check your setup'
+    texdir=undefined
+    latexdir=undefined
+else
+    latexdir="${texdir}/tex/latex"
 fi
+
+
+if test ! -d "${latexdir}"
+then
+    latexdir=undefined
+    warn 'no LaTeX root path found, check your setup'
+    warn 'We can compile advi, but it may not find latex files'
+    warn "and we won't know where to install sty files"
+fi
+
+#### Producing configure.sh
 
 echo '#/bin/bash'
 echo
@@ -86,6 +114,7 @@ opamvar ADVI_ETCDIR etc advi
 opamvar ADVI_DOCDIR doc advi
 opamvar ADVI_TEXDIR share advi
 
+strdef "KPSEWHICH" ${kpsewhich_path}
 strdef "TEXDIR" ${texdir}
 strdef "LATEXDIR" ${latexdir}
 

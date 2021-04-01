@@ -33,7 +33,7 @@ let have_gs = @HAVE_GS@;;
 let have_camlimages = @HAVE_CAMLIMAGES@;;
 
 (* Various commands paths. *)
-let kpsewhich_path = "kpsewhich";;
+let kpsewhich_path = "@KPSEWHICH@";;
 let gs_path = "@GS@";;
 let gzip_path = "gzip";;
 let gunzip_path = "gunzip";;
@@ -44,9 +44,9 @@ let texpicts_kind = "graphic/figure";;
 let psheaders_kind = "PostScript header";;
 
 (* Data files directory paths. *)
-let texdir_path = "@TEXMFMAIN@";;
 let database_name = "ls-R"
-let database_path = Filename.concat texdir_path database_name;;
+(* let texdir_path = "@TEXMFMAIN@";; *)
+(* let database_path = Filename.concat texdir_path database_name;; *)
 
 (* Location of splash.dvi and test/caml.eps *)
 let advi_loc = "@dvidir@";;

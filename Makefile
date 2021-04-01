@@ -1,6 +1,6 @@
 SUBDIRS = tex doc 
 
-SRC = src/Makefile.config src/advi-install src/main.exe
+SRC = src/Makefile.config src/advi-latex-sources src/main.exe
 
 all: $(SRC)
 	for dir in $(SUBDIRS); do make -C $$dir; done
