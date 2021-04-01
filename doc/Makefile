@@ -13,7 +13,7 @@ OUTDIR = _build
 LATEX= latexmk -outdir=$(OUTDIR)
 
 MANTARGETS = advi.1
-DOCTARGETS = splash.dvi manual.pdf manual.html 
+DOCTARGETS = splash.dvi 
 
 TARGETS = $(MANTARGETS) $(DOCTARGETS) manualxxx.html
 
@@ -52,7 +52,15 @@ install: $(DOCTARGETS) $(MANTARGETS)
 	install $(MANTARGETS) $(advi_mandir)/man1/
 	install $(DOCTARGETS) $(advi_docdir)/
 
+install.html: manualxxx.html
+	install -d $(advi_docdir)/html/
+	install manualxxx.html $(advi_docdir)/html/index.html
+	install _build/manual???.html $(advi_docdir)/html/
+
 uninstall: 
 	rm -vf $(advi_mandir)/man1/advi.1
+	rm -vf $(advi_docdir)/html/index.html 
+	rm -vf $(advi_docdir)/html/manual???.html 
+	rmdir $(advi_docdir)/html/ || true
 	for i in $(DOCTARGETS); do rm -vf $(advi_docdir)/$$i; done
 
