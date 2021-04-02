@@ -15,8 +15,13 @@ src/%:
 test:
 	make -C test
 
-install: all
+
+INSTALL = _build/default/advi.install
+
+$(INSTALL):
 	dune build @install
+
+install: all $(INSTALL)
 	dune install
 	for dir in $(SUBDIRS); do make -C $$dir install; done
 	@echo 
@@ -24,7 +29,7 @@ install: all
 	@echo "  You still need to run the command 'advi-latex-files'"
 	@echo "  to install some LaTeX files needed for advanced features."
 
-uninstall:
+uninstall: $(INSTALL)
 	for dir in $(SUBDIRS); do make -C $$dir uninstall; done
 	dune uninstall
 
