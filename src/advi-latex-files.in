@@ -24,6 +24,7 @@ usage () {
     warn '    ' ${cmd} --install '<PATH>'
     warn '    ' ${cmd} --uninstall
     warn '    ' ${cmd} --list
+    warn '    ' ${cmd} --path
     error
 }
 
@@ -49,6 +50,10 @@ case "${command}" in
         ;;
     --list)
         ls "${advi_latexdir}"
+        exit 0
+        ;;
+    --path)
+        echo "${advi_latexdir}"
         exit 0
         ;;
     *) usage
