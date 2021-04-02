@@ -13,7 +13,7 @@ OUTDIR = _build
 LATEX= latexmk -outdir=$(OUTDIR)
 
 MANTARGETS = advi.1
-DOCTARGETS = splash.dvi 
+DOCTARGETS = splash.dvi scratch_draw_splash.dvi scratch_write_splash.dvi manual.pdf manual.html 
 
 TARGETS = $(MANTARGETS) $(DOCTARGETS) manualxxx.html
 
@@ -24,7 +24,7 @@ $(CONFIG):
 
 include $(CONFIG)
 
-splash.dvi: splash.tex $(DEPS)
+%.dvi: %.tex $(DEPS)
 	$(LATEX) -dvi $<
 	ln -f $(OUTDIR)/$@ .
 

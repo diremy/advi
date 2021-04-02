@@ -33,7 +33,7 @@ adjective of the presenter :).
 Active-DVI is largely based on Mldvi written by Alexandre Miquel
 (http://www.pps.jussieu.fr/~miquel/).
 
-Version: 1.10
+Version: 2.0.0
 available at http://advi.inria.fr/
 
 CURRENTLY SUPPORTED FEATURES:

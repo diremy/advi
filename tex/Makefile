@@ -19,7 +19,7 @@ SOURCES = \
 
 OLDSOURCES =  advi.pro
 
-all: $(TARGETS)
+all: 
 
 $(CONFIG):
 	(cd ../src && dune build Makefile.config)
@@ -27,7 +27,6 @@ $(CONFIG):
 include $(CONFIG)
 
 clean:  
-	rm -rf $(TARGETS) _build
 
 install: $(SOURCES) 
 	install -d $(advi_latexdir)

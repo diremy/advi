@@ -83,8 +83,8 @@ let addpath elem var kind =
   Unix.putenv var newv
 ;;
 
-addpath Config.advi_loc "PSHEADERS" Config.psheaders_kind;
-addpath Config.advi_loc "TEXPICTS"  Config.texpicts_kind;;
+addpath Config.advi_texdir "PSHEADERS" Config.psheaders_kind;
+addpath Config.advi_texdir "TEXPICTS"  Config.texpicts_kind;;
 
 let is_space = function
   | ' ' | '\n' | '\r' | '\t' -> true

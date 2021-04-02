@@ -91,7 +91,7 @@ module Japanese = struct
  ;;
 
   let japanese_fontfiles =
-    let sys_conffile = Filename.concat Config.etc_advi_loc "jpfonts.conf" in
+    let sys_conffile = Filename.concat Config.advi_confdir "jpfonts.conf" in
     let user_conffile =
       Filename.concat Userfile.user_advi_dir "jpfonts.conf" in
     try

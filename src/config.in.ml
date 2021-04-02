@@ -32,29 +32,30 @@ let have_gs = @HAVE_GS@;;
 let have_camlimages = @HAVE_CAMLIMAGES@;;
 
 (* Various commands paths. *)
-let kpsewhich_path = "kpsewhich";;
-let gs_path = ref "@GS_PATH@";;
-let gzip_path = "gzip";;
-let gunzip_path = "gunzip";;
-let bunzip2_path = "bunzip2";;
+let kpsewhich_path = "kpsewhich"
+let gs_path = ref "@GS_PATH@"
+let gzip_path = "gzip"
+let gunzip_path = "gunzip"
+let bunzip2_path = "bunzip2"
 
 (* Various configurations for PS and TeX *)
-let texpicts_kind = "graphic/figure";;
-let psheaders_kind = "PostScript header";;
+let texpicts_kind = "graphic/figure"
+let psheaders_kind = "PostScript header"
 
 (* Data files directory paths. *)
-let texdir_path = "@TEXDIR_STR@";;
-let latexdir_path = "@LATEXDIR@";;
+let texdir_path = "@TEXDIR@"
+let latexdir_path = "@LATEXDIR@"
 let database_name = "ls-R"
 let database_path = Filename.concat texdir_path database_name;;
 
 (* Location of splash.dvi and test/caml.eps *)
-let advi_loc = "@ADVI_DOCDIR@";;
-let advi_texdir = "@ADVI_TEXDIR@";;
-let etc_advi_loc = "@ADVI_TEXDIR@";;
+let advi_docdir = "@ADVI_DOCDIR@"
+let advi_texdir = "@ADVI_TEXDIR@"
+let advi_confdir = advi_texdir
 
-let splash_screen = Filename.concat advi_loc "splash.dvi";;
+let splash_screen =
+  Filename.concat advi_docdir "splash.dvi"
 let scratch_draw_splash_screen =
-  Filename.concat advi_loc "scratch_draw_splash.dvi";;
+  Filename.concat advi_docdir "scratch_draw_splash.dvi"
 let scratch_write_splash_screen =
-  Filename.concat advi_loc "scratch_write_splash.dvi";;
+  Filename.concat advi_docdir "scratch_write_splash.dvi"
