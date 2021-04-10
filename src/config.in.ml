@@ -51,6 +51,7 @@ let database_path = Filename.concat texdir_path database_name;;
 (* Location of splash.dvi and test/caml.eps *)
 let advi_docdir = "@ADVI_DOCDIR@"
 let advi_texdir = "@ADVI_TEXDIR@"
+let advi_latexdir = Filename.concat advi_texdir "tex/latex"
 let advi_confdir = advi_texdir
 
 let splash_screen =

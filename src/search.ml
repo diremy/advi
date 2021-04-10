@@ -93,8 +93,8 @@ let addpath elem var kind =
 ;;
 
 let () =
-  addpath Config.advi_texdir "TEXINPUTS" Config.psheaders_kind
-  
+  addpath Config.advi_latexdir "TEXINPUTS" Config.psheaders_kind
+
   (* addpath Config.advi_texdir "PSHEADERS" Config.psheaders_kind;
    * addpath Config.advi_texdir "TEXPICTS"  Config.texpicts_kind;; *)
 
