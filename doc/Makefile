@@ -9,7 +9,7 @@ EPS = $(shell ls ../tex/*.eps)
 DEPS = $(TEX) $(STY) $(EPS)
 
 OUTDIR = _build
-
+ 
 LATEX = TEXINPUTS=$(TEXINPUTS) latexmk -outdir=$(OUTDIR)
 
 MANFILE = advi.1

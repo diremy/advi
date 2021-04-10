@@ -73,18 +73,30 @@ let command_string cmd opt =
 
 (* Add local path to search environment. *)
 let addpath elem var kind =
-  let oldv =
-    try Unix.getenv var with
-    | Not_found ->
-        try command_string Config.kpsewhich_path
-              (Printf.sprintf "-show-path='%s'" kind) with
-        | Command -> "" in
-  let newv = oldv ^ ":" ^ elem in
+  (* let newv = 
+   *   try Unix.getenv var
+   *   with Not_found ->
+   *         try command_string Config.kpsewhich_path
+   *             (Printf.sprintf "-show-path='%s'" kind) with
+   *       | Command -> "" in
+   * let newv = oldv ^ ":" ^ elem in *)
+  let newv = 
+    try
+      let oldv = Unix.getenv var in
+      let suff = 
+        if String.ends_with ~suffix:":" oldv then oldv ^ elem ^ ":"
+        else ":" ^ elem in
+      oldv ^ suff 
+    with Not_found ->
+      elem ^ ":" in
   Unix.putenv var newv
 ;;
 
-addpath Config.advi_texdir "PSHEADERS" Config.psheaders_kind;
-addpath Config.advi_texdir "TEXPICTS"  Config.texpicts_kind;;
+let () =
+  addpath Config.advi_texdir "TEXINPUTS" Config.psheaders_kind
+  
+  (* addpath Config.advi_texdir "PSHEADERS" Config.psheaders_kind;
+   * addpath Config.advi_texdir "TEXPICTS"  Config.texpicts_kind;; *)
 
 let is_space = function
   | ' ' | '\n' | '\r' | '\t' -> true
