@@ -38,6 +38,7 @@ install: all $(INSTALL)
 	@echo 'WARNING:'
 	@echo "  You still need to run the command 'advi-latex-files'"
 	@echo "  to install some LaTeX files needed for advanced features."
+	@echo 
 
 uninstall: $(INSTALL)
 	for dir in $(SUBDIRS); do make -C $$dir uninstall; done

@@ -41,4 +41,5 @@ install:
 post-messages:
     [ "This installed the 'advi' command. 
 For advanced features of advi you also need to install latex-sources.
-To do thus, run the command 'advi-latex-files'." ]
+To do thus, run the command 'advi-latex-files'.
+" ]
