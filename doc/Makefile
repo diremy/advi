@@ -10,51 +10,67 @@ DEPS = $(TEX) $(STY) $(EPS)
 
 OUTDIR = _build
 
-LATEX= latexmk -outdir=$(OUTDIR)
+LATEX = TEXINPUTS=$(TEXINPUTS) latexmk -outdir=$(OUTDIR)
 
-MANTARGETS = advi.1
-DOCTARGETS = splash.dvi scratch_draw_splash.dvi scratch_write_splash.dvi manual.pdf manual.html 
+MANFILE = advi.1
+SPLASHFILES = splash.dvi scratch_draw_splash.dvi scratch_write_splash.dvi 
 
-TARGETS = $(MANTARGETS) $(DOCTARGETS) manualxxx.html
+DISTFILES = $(MANFILE) $(SPLASHFILES)
+DISTBUILD = $(patsubst %, $(OUTDIR)/%, $(DISTFILES))
 
-all: $(TARGETS)
+MANUALFILES = manual.pdf manual.html manualxxx.html
+MANUALBUILD = $(patsubst %, $(OUTDIR)/%, $(MANUALFILES))
 
-$(CONFIG):
-	(cd ../src && dune build src/Makefile.config)
+
+all: $(DISTFILES)
+
+manual: $(MANUALBUILD)
+
+$(OUTDIR):
+	mkdir -p $(OUTDIR)
+
+
+$(CONFIG): 
+	make -C .. src/Makefile.config
 
 include $(CONFIG)
 
-%.dvi: %.tex $(DEPS)
+$(OUTDIR)/%.dvi: %.tex $(DEPS)
 	$(LATEX) -dvi $<
-	ln -f $(OUTDIR)/$@ .
 
-manual.pdf: manual.tex $(DEPS)
+$(OUTDIR)/manual.pdf: manual.tex $(DEPS)
 	$(LATEX) -ps $<
-	ps2pdf $(OUTDIR)/manual.ps $(OUTDIR)/$@
-	ln -f $(OUTDIR)/$@ .
+	ps2pdf $(OUTDIR)/manual.ps $@
 
-manual.html: manual.tex manual.hva $(DEPS)
-	hevea -entities -I . -I ../tex -I $(OUTDIR) -o $(OUTDIR)/$@ -fix manual.hva $<
-	ln -f $(OUTDIR)/$@ .
+$(OUTDIR)/manual.html: manual.tex manual.hva $(DEPS) $(OUTDIR)
+	hevea -entities -I . -I ../tex -I $(OUTDIR) -o $@ -fix manual.hva $<
 
-manualxxx.html: manual.html
+$(OUTDIR)/manualxxx.html: manual.html 
 	cd $(OUTDIR) && hacha -o manualxxx.html manual.html
-	ln -f $(OUTDIR)/$@ .
 
-advi.1: advi.md
+$(OUTDIR)/advi.1: advi.md  $(OUTDIR)
 	pandoc --standalone --from markdown $< --to man --output $@
 
+distbuild: $(DISTBUILD)
+
+promote: $(DISTBUILD)
+	for i in $(DISTFILES); do ln -f $(OUTDIR)/$$i .; done
+
 clean:  
-	rm -rf $(TARGETS) _build
+	rm -rf _build
 
-install: $(DOCTARGETS) $(MANTARGETS)
+distclean:
+	rm -f $(DISTFILES)
+
+install: $(MANFILE) $(SPLASHFILES)
 	install -d $(advi_mandir)/man1/ $(advi_docdir)/
-	install $(MANTARGETS) $(advi_mandir)/man1/
-	install $(DOCTARGETS) $(advi_docdir)/
+	install $(MANFILE) $(advi_mandir)/man1/
+	install $(SPLASHFILES) $(advi_docdir)/
 
-install.html: manualxxx.html
+install.manual: $(MANUALBUILD)
 	install -d $(advi_docdir)/
-	install manualxxx.html $(advi_docdir)/index.html
+	install $(OUTDIR)/manual.pdf $(OUTDIR)/manual.html $(advi_docdir)/
+	install $(OUTDIR)/manualxxx.html $(advi_docdir)/index.html
 	install _build/manual???.html $(advi_docdir)/
 
 uninstall: 

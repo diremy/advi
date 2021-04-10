@@ -24,16 +24,15 @@
 # OUTDIR = ../_build/default/test/
 OUTDIR = _build/
 
-LATEX = latexmk -output-directory=$(OUTDIR)
-
-PLATEX = latexmk -latex=platex -output-directory=$(OUTDIR)
-
 # binaries
 ADVI = ../advi
 
 # flags
 TEXINPUTS = .:../tex:
-TEXPSHEADERS = ../tex:
+
+LATEX = TEXINPUTS=$(TEXINPUTS) latexmk -output-directory=$(OUTDIR)
+PLATEX = TEXINPUTS=$(TEXINPUTS) latexmk -latex=platex -output-directory=$(OUTDIR)
+
 
 # sources
 TEXFILES= demo.tex demo2.tex trigo_source.tex \

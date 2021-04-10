@@ -64,3 +64,21 @@ to Japanese True Type fonts called "jpfonts.conf". It is placed in
 the advi library directory (under opam prefix). 
 If you want to use different TrueType fonts, you can edit this file,
 or put your own jpfonts.conf in ~/.advi/ .
+
+DOCUMENTATION
+=============
+
+If you wish to rebuild the documentation, you will need the following latex
+latex packages:
+
+        eepic
+        pstricks
+        graphics
+        babel
+        graphicx
+        hyperref
+        makeidx
+        manual
+        tabularx
+
+as well as hevea http://hevea.inria.fr/, which is available under opam.
