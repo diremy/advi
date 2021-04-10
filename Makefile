@@ -11,10 +11,20 @@ advi: src/main.exe
 src/%: 
 	dune build $@
 
-.PHONE: test
+.PHONY: test
 test:
 	make -C test
 
+CONFIG = _build/src/Makefile.config
+
+$(CONFIG): src/Makefile.config
+
+.PHONY: doc doc.manual
+doc: $(CONFIG)
+	make -C doc
+
+doc.manual: $(CONFIG)
+	make -C doc manual
 
 INSTALL = _build/default/advi.install
 

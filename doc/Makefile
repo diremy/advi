@@ -22,12 +22,15 @@ MANUALFILES = manual.pdf manual.html manualxxx.html
 MANUALBUILD = $(patsubst %, $(OUTDIR)/%, $(MANUALFILES))
 
 
+.PHONY: all manual distbuild distclean promote clean install install.manual uninstall
+
 all: $(DISTFILES)
 
 manual: $(MANUALBUILD)
 
-$(OUTDIR):
+$(OUTDIR)/.exists:
 	mkdir -p $(OUTDIR)
+	touch $(@)
 
 
 $(CONFIG): 
@@ -42,16 +45,19 @@ $(OUTDIR)/manual.pdf: manual.tex $(DEPS)
 	$(LATEX) -ps $<
 	ps2pdf $(OUTDIR)/manual.ps $@
 
-$(OUTDIR)/manual.html: manual.tex manual.hva $(DEPS) $(OUTDIR)
+$(OUTDIR)/manual.html: manual.tex manual.hva $(DEPS) $(OUTDIR)/.exists
 	hevea -entities -I . -I ../tex -I $(OUTDIR) -o $@ -fix manual.hva $<
 
 $(OUTDIR)/manualxxx.html: manual.html 
 	cd $(OUTDIR) && hacha -o manualxxx.html manual.html
 
-$(OUTDIR)/advi.1: advi.md  $(OUTDIR)
+$(OUTDIR)/advi.1: advi.md  $(OUTDIR)/.exists
 	pandoc --standalone --from markdown $< --to man --output $@
 
 distbuild: $(DISTBUILD)
+
+distclean:
+	rm -f $(DISTFILES)
 
 promote: $(DISTBUILD)
 	for i in $(DISTFILES); do ln -f $(OUTDIR)/$$i .; done
@@ -59,8 +65,6 @@ promote: $(DISTBUILD)
 clean:  
 	rm -rf _build
 
-distclean:
-	rm -f $(DISTFILES)
 
 install: $(MANFILE) $(SPLASHFILES)
 	install -d $(advi_mandir)/man1/ $(advi_docdir)/
