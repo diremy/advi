@@ -4,8 +4,8 @@
 %                                                                     %
 %                   Projet Cristal, INRIA Rocquencourt                %
 %                                                                     %
-%  Copyright 2002 Institut National de Recherche en Informatique et   %
-%  en Automatique.  All rights reserved.  This file is distributed    %
+%  Copyright 2002,2021 Institut National de Recherche en Informatique %
+%  et en Automatique.  All rights reserved. This file is distributed  %
 %  under the terms of the GNU Lesser General Public License.          %
 %                                                                     %
 %  Jun Furuse, Didier Rémy and Pierre Weis.                           %
@@ -26,8 +26,10 @@
 \usepackage {advi-annot}
 \usepackage {bubble}
 
-\def \ActiveDVI {Active-DVI}
-
+\usepackage {xspace}
+\def \ActiveDVI {Active-DVI\xspace}
+\def \advi {\texttt{advi}\xspace}
+\def \latex {\LaTeX\xspace}
 
 % For splash inclusion
 \usepackage{color}
@@ -85,10 +87,10 @@ Reference manual\\
 {\bf\ActiveDVI} is a viewer for DVI files that also recognizes a new class of 
 \docdef\special's targeted to presentations via laptop computers:
 various visual effects can easily be incorporated to the presentation,
-via a companion \doctt{advi.sty} {\LaTeX} package. 
+via a companion \doctt{advi.sty} {\latex} package. 
 
 \ifhevea\else\bigskip\fi
-{\ActiveDVI} is copyright \copyright 2001--{\adviyear} INRIA
+{\ActiveDVI} is copyright \copyright 2001--{\adviyear},2021 INRIA
 and distributed under the Gnu Library General Public License ---see the LGPL
 file included in the distribution.
 
@@ -109,8 +111,8 @@ under the LGPL license\footnote {At the url
 \url{http://www.pps.jussieu.fr/~miquel/soft.html}.}.
 This constitutes the core rendering engine.  
 {\ActiveDVI} has then been developed by 
-
-\ahref{http://jun.furuse.info/}{Jun Furuse}
+%
+\ahref{http://jun.furuse.info/}{Jun Furuse},
 \ahref{http://gallium.inria.fr/\home{remy}/}{Didier R{\'e}my}, and
 \ahref{http://gallium.inria.fr/\home{weis}/}{Pierre Weis},
 with contributions by 
@@ -130,7 +132,110 @@ with contributions by
 
 \section{Installation}
 
-After successful installation of {\ActiveDVI}, don't forget to have a
+\ActiveDVI may be available as a package of your linux or macOS distribution.
+
+Otherwise, starting with version 2.0.0 you need an \verb"opam"-based
+installation of \verb"ocaml" (see \url {https://opam.ocaml.org/} and \url
+{https://ocaml.org/index.fr.html}).
+
+\subsection{Installation of the \advi executable}
+
+The simpliest is to run:
+\begin{verbatim}
+        opam install advi
+\end{verbatim}
+this should tell you and install the missing dependencies. 
+
+You may also retreive the github sources from \url
+{https://github.com/diremy/advi} either by cloning sources or by retreiving
+a tar ball.  In both cases, you must ensure that the following \verb"opam"
+packages
+\begin{verbatim}
+        "dune" {>= "2.5"}
+        "graphics" {>= "5.1.1"}
+        "camlimages" {>= "5.0.4"}
+\end{verbatim}
+are installed.  Then just run in the root distribution directory:
+\begin{verbatim}
+        make all
+        make install
+\end{verbatim}
+This will only install the \verb"advi" executable in the opam hierarchy as
+well as a command \verb"advi-latex-files" which you must run as described
+below. 
+
+\subsection{Installation of the \advi \latex source files}
+
+As explained above, you also need to install additional \latex sources
+to  benefit from advanced features of \advi.
+The command:
+\begin{verbatim}
+        advi-latex-files --install
+\end{verbatim}
+will tell you what to do. In particular, you may install \latex source file
+at the default path in your \latex installation hierarchy:
+\begin{verbatim}
+        advi-latex-files --install default
+\end{verbatim}
+Alternatively, you may specify explicitly where to install those files:
+\begin{verbatim}
+        advi-latex-files --install <DESTINATION>
+\end{verbatim}
+The \verb"<DESTINATION>" path should then be included in to your \verb"TEXINPUTS" 
+environment variable.
+
+You may also install these additional \latex source files manually. 
+The command
+\begin{verbatim}
+        advi-latex-files --path
+\end{verbatim}
+tells you where to find those files 
+(and you may actually add this path  in your \verb"TEXINPUTS" environment
+variable), while the the command: 
+\begin{verbatim}
+        advi-latex-files --list
+\end{verbatim}
+will them the files that will be installed.
+
+Finally, you may run
+\begin{verbatim}
+        advi-latex-files --uninstall
+\end{verbatim}
+to deinstall the \latex source files, but only if you installed them at the
+default location.
+
+\subsection {Rebuilding the documentation}
+
+The documentation, available at \url {http://advi.inria.fr/manual.html}, is
+not installed by default.
+
+You may rebuild the document from the sources:
+\begin{verbatim}
+        make doc.manual
+\end{verbatim}
+and install it in you \verb"opam" hierarchy:
+\begin{verbatim}
+        make install.manual
+\end{verbatim}
+
+Building the documnentation requires several \latex packages to be installed
+\begin{verbatim}
+        eepic
+        pstricks
+        graphics
+        babel
+        graphicx
+        hyperref
+        makeidx
+        manual
+        tabularx
+\end{verbatim}
+as well as some extra tools: \verb"latexmk", \verb"pandoc", and \verb"hevea"
+(see \url {http://hevea.inria.fr/}, also available under opam).
+
+\subsection {Tests and examples}
+
+After successful installation of {\ActiveDVI}, you may have a
 look at example presentations provided with the distribution, in the
 directories:
 
@@ -155,54 +260,15 @@ to automate the process of keeping the presentation up-to-date with
 the sources. Nothing difficult here.
 %
     \item {\tt seminar}: one presentation using the popular {\tt
-seminar} {\LaTeX} package in the {\tt clock} sub-directory.
+seminar} {\latex} package in the {\tt clock} sub-directory.
 %
     \item {\tt prosper}: two example presentations using the {\tt
-prosper} {\LaTeX} package in sub-directories {\tt LL} and {\tt
+prosper} {\latex} package in sub-directories {\tt LL} and {\tt
 Join}. Quite impressive and involved.
 %
   \end{itemize}
 \end{itemize}
 
-\subsection{Automatic installation}
-
-In some cases, your Unix system provider will ensure an up-to-date
-port of the {\ActiveDVI} binaries; in such a case, use the recommended
-procedure to download, compile, and install the software.
-
-In any other case, you have to install {\ActiveDVI} manually.
-
-\subsection{Manual installation}
-%
-\subsubsection*{Manual installation in two steps}
-%
-To compile {\ActiveDVI}, you must install the {\tt camlimages} library
-first, including its native code version.
-
-Hence, download and install {\tt camlimages} first. After successful
-installation of this library, download and extract the {\ActiveDVI}
-source files, move to the new source directory of {\ActiveDVI},
-and compile {\ActiveDVI} itself.
-
-\subsubsection*{Manual installation in one step}
-%
-This is the ``Manual installation in two steps'' that has been
-packaged for you in one single step by the {\ActiveDVI} development kit.
-
-Download and install the entire {\ActiveDVI} development kit
-(a.k.a. {\tt adk}) source tree provided by the distribution: it
-contains {\ActiveDVI} sources {\em and} the {\tt camlimages} library
-sources, plus a set of {\tt Makefile}s to automate the installation
-procedure. Then, just type {\tt make} in the directory where the
-{\ActiveDVI} Development Kit has been extracted from the archive. If
-everything goes well, it automatically compiles and installs the
-necessary libraries and {\ActiveDVI} for you. Some fine tuning may be
-necessary, if you are not running a standard Linux distribution, such
-as RedHat, Mandrake, or Debian.
-
-If you have to install some other software to solve installation
-problems, you should type {\tt make reconfigure} to re-perform the
-configuration process before launching {\tt make} again.
 
 \section{{\ActiveDVI} for the impatient}
 
@@ -210,9 +276,9 @@ configuration process before launching {\tt make} again.
 %
 \item As a previewer, {\ActiveDVI} can preview any correct DVI file.
 %
-\item As a presenter, {\ActiveDVI} provides some {\LaTeX} packages to
+\item As a presenter, {\ActiveDVI} provides some {\latex} packages to
 facilitate animations and interaction with the presenter from within
-your {\LaTeX} source text. The {\tt advi-slides.sty} package is
+your {\latex} source text. The {\tt advi-slides.sty} package is
 designed to be a simple way to build a presentation for {\ActiveDVI}.
 %
 \end{itemize}
@@ -456,7 +522,7 @@ close enough to the position.
 
 \subsection{Hyper-text references}
 
-{\ActiveDVI} supports the {\LaTeX} {\tt hyperref} package with both
+{\ActiveDVI} supports the {\latex} {\tt hyperref} package with both
 internal and cross-file references. For cross-file references, it
 launches a new \doctt{advi} process to view the target.
 
@@ -571,10 +637,10 @@ You can save a snapshot of the current slide at any time by pressing
 \verb"^X-^S" (Control-X then Control-S). An image file is written
 (by default a {\tt png} file). The name of the file produced can be
 set via the command line (see {\tt advi -help} for details) or
-directly from within the {\LaTeX} source file with commands
+directly from within the {\latex} source file with commands
 \verb"\advisavepageimage" and \verb"\advisavepageimagefile{filename}").
 
-\subsection{Creating events from the {\LaTeX} source file}
+\subsection{Creating events from the {\latex} source file}
 
 {\ActiveDVI} provides the command \verb"\advipushkeys" that provides
 key presses to the presenter as if you had pressed it when viewing the
@@ -602,10 +668,10 @@ source code and copy the effects they provide.
 
 {\ActiveDVI} can be used as is, but will shine when driven by a user
 with a bias towards programming: special effects can easily be realized
-by using the {\LaTeX} packages provided with the distribution.
+by using the {\latex} packages provided with the distribution.
 
 Creative advanced users may program the presenter at various levels, either
-using or defining simple {\LaTeX} macros, writing new {\LaTeX} package
+using or defining simple {\latex} macros, writing new {\latex} package
 files, or by implementing extensions to the previewer itself.
 
 % If you ever succeed at adding a nice special effect that could be of
@@ -632,10 +698,10 @@ the master, whenever {\ActiveDVI} receives signal \doctt{usr1} (to mean
 immediate refresh). 
 
 \softtarget{advistyle}{%
- \section{The {\doctt{advi.sty}} {\LaTeX} package}}
+ \section{The {\doctt{advi.sty}} {\latex} package}}
 
-{\ActiveDVI} provides some {\LaTeX} packages to facilitate animations and
-interaction with the presenter from within your {\LaTeX} source text.
+{\ActiveDVI} provides some {\latex} packages to facilitate animations and
+interaction with the presenter from within your {\latex} source text.
 
 The \doctt{advi.sty} package is the main package to include when writing
 a presentation for {\ActiveDVI}. It defines the main set of interactive
@@ -690,11 +756,11 @@ change page).
 
 \subsection{{\ActiveDVI} records}
 
-{\ActiveDVI} allows (almost) any piece of {\LaTeX} code to be
+{\ActiveDVI} allows (almost) any piece of {\latex} code to be
 recorded, and the corresponding DVI code to be rendered later upon
 request. To be able to render the code in any order we choose, we must
-bind the recorded {\LaTeX} code to a name (called a {\em tag}): this
-{\LaTeX} code together with its tag defines the notion of an {\em
+bind the recorded {\latex} code to a name (called a {\em tag}): this
+{\latex} code together with its tag defines the notion of an {\em
 {\ActiveDVI} record}.
 
 \paragraph{Warning!} The entire DVI image of an {\ActiveDVI} record
@@ -740,7 +806,7 @@ The optional argument changes the text color to \docid{color} during replay.
 \subsection{{\ActiveDVI} anchors}
 
 {\ActiveDVI} gives the ability to define {\em {\ActiveDVI}
-anchors}: an anchor is specified by (1) an {\ActiveDVI} record, (2) a {\LaTeX}
+anchors}: an anchor is specified by (1) an {\ActiveDVI} record, (2) a {\latex}
 piece of code that defines the area of the page where the anchor is
 active, and (3) an activation method.
 
@@ -812,10 +878,10 @@ unset).
 
 \subsection{Colors}
 
-\subsubsection*{The \doctt{color} {\LaTeX} package}
+\subsubsection*{The \doctt{color} {\latex} package}
 
 In {\ActiveDVI}, colors can be specified with the conventions of the
-{\LaTeX} package \doctt{color.sty}, that is, it should either be a
+{\latex} package \doctt{color.sty}, that is, it should either be a
 previously defined color or a specification of the form
 \docopt{model} \docarg{model color specification}.
 
@@ -841,7 +907,7 @@ file, generally at location\\
 {\tt /usr/share/texmf/tex/latex/graphics/dvipsnam.def}.
 
 To give an idea, the names and colors available on a standard installation of
-{\LaTeX} are:
+{\latex} are:
 
 {\color[named]{GreenYellow}{GreenYellow}} $\quad$
 {\color[named]{Yellow}{Yellow}} $\quad$
@@ -953,7 +1019,7 @@ directory {\tt tex} of the distribution.
 
 \subsection{Background}
 
-You can modify the background of your presentation in the {\LaTeX}
+You can modify the background of your presentation in the {\latex}
 source of the pages. Background can be defined either as a plain
 color, as an image, or as a gradient (or as a combination of these!).
 
@@ -1197,7 +1263,7 @@ you need.
 
 \subsubsection{Launching embedded applications}
 
-The {\LaTeX} command to launch an application during the presentation is 
+The {\latex} command to launch an application during the presentation is 
 %
 \Medskip\noindent
 \docdef \adviembed\docopt{key=value list}\docarg{command} 
@@ -1252,7 +1318,7 @@ facilities for \doctt{raw} applications described below.
 
 \begin{quote}
 The application takes \docid{dim} width (respectively height) space in 
-{\LaTeX}. Both values default to 0pt.
+{\latex}. Both values default to 0pt.
 
 These dimensions are also substituted for all occurrences of \verb"@g" in
 the command string.
@@ -1414,13 +1480,13 @@ Other PStricks may or may not work.
 
 
 \softtarget{advi-slides}{%
- \section{The {\doctt{advi-slides.sty}} {\LaTeX} package}}
+ \section{The {\doctt{advi-slides.sty}} {\latex} package}}
 
-{\ActiveDVI} provides this specialized {\LaTeX} package to facilitate
+{\ActiveDVI} provides this specialized {\latex} package to facilitate
 writing presentation slides in the spirit of SliTeX. See examples in
 the directory {\tt examples/slitex}.
 
-\section{Auxiliary {\LaTeX} packages}
+\section{Auxiliary {\latex} packages}
 
 \subsection{The \texttt{superpose} package}
 
@@ -1533,7 +1599,7 @@ the bubble appears within an active anchor.
 
 %Annotation location can also be invisible \advi{C}{\tt{ }}instead of visible.
 
-\subsection{The {\doctt{advi-graphicx}} {\LaTeX} package}
+\subsection{The {\doctt{advi-graphicx}} {\latex} package}
 \label {advi-graphicx}
 
 This 3-lines long package loads the {\tt graphicx.sty} package and provides

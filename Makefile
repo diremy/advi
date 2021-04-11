@@ -1,19 +1,38 @@
-SUBDIRS = tex doc 
+MAINDIRS = tex doc 
+
+ALLDIRS = $(MAINDIRS) test examples
 
 SRC = src/Makefile.config src/advi-latex-files src/main.exe
 
-all: $(SRC)
-	for dir in $(SUBDIRS); do make -C $$dir; done
+.PHONY: default 
+default: $(SRC)
+	for dir in $(MAINDIRS); do make -C $$dir; done
+
+.PHONY: help
+help:
+	@echo 'Usage:'
+	@echo '    make'
+	@echo '    make install'
+	@echo '    make [ uninstall | clean ]'
+	@echo '    make [ doc.manual | install.manual ]'
+	@echo '    make [ advi | doc | test | examples | all ]'
+
 
 .PHONY: advi
 advi: src/main.exe
 
 src/%: 
-	dune build $@
+	dune --root=. build $@
 
-.PHONY: test
+.PHONY: test examples all
 test:
 	make -C test
+
+examples:
+	make -C examples
+
+.PHONY: all
+all: default test examples
 
 CONFIG = _build/src/Makefile.config
 
@@ -31,19 +50,24 @@ INSTALL = _build/default/advi.install
 $(INSTALL):
 	dune build @install
 
+.PHONY: install install.manual uinstall
 install: all $(INSTALL)
 	dune install
-	for dir in $(SUBDIRS); do make -C $$dir install; done
+	for dir in $(MAINDIRS); do make -C $$dir install; done
 	@echo 
 	@echo 'WARNING:'
 	@echo "  You still need to run the command 'advi-latex-files'"
 	@echo "  to install some LaTeX files needed for advanced features."
-	@echo 
+	@echo
+
+install.manual: 
+	make -C doc $@
 
 uninstall: $(INSTALL)
-	for dir in $(SUBDIRS); do make -C $$dir uninstall; done
+	for dir in $(MAINDIRS); do make -C $$dir uninstall; done
 	dune uninstall
 
+.PHONY: clean 
 clean: 
-	for dir in $(SUBDIRS) test; do make -C $$dir clean; done
+	for dir in $(ALLDIRS); do make -C $$dir clean; done
 	dune clean

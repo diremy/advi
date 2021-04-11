@@ -30,9 +30,9 @@ This should install automatically as an opam package.
 The default installation, does not install the latex style files.
 To do so you need to run the command
 
-        advi-latex-files --install
+        advi-latex-files --install 
     
-after the opam package installation. 
+after the opam package installation to see what to do.
 
 
 COMPILATION AND INSTALLATION
@@ -44,16 +44,16 @@ Use the standard procedure:
     
 Then you also need to install the latex source files: 
 
-        make install-latex-files
+        advi-latex-files --install
     
 Alternatively, you may:
 
 - Install the binary by hand, by simply copying it (them) to the
-   appropriate directory.
+  appropriate directory.
 - Copy the files advi.sty to a place where it is a visible latex package.
   (kpsewhich advi.sty should succeed from where LaTeX is run)
 - Copy the file advi.pro to a place where is it a visible PS header.
-   (kpsewhich advi.pro should succeed from where advi is run)
+  (kpsewhich advi.pro should succeed from where advi is run)
 
 
 JAPANESE USERS
@@ -81,4 +81,5 @@ latex packages:
         manual
         tabularx
 
-as well as hevea http://hevea.inria.fr/, which is available under opam.
+as well as some latex tools: `latexmk`, `pandoc`, and `hevea`
+(http://hevea.inria.fr/) also available under opam.

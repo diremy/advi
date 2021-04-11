@@ -1,10 +1,12 @@
 FILES = Makefile.config advi-latex-files main.exe
 
+DUNE = dune --root=..
+
 all: $(FILES)
 
 $(FILES):
-	dune build $@
+	$(DUNE) build $@
 
 install:
-	dune build @install
-	dune install
+	$(DUNE) build @install
+	$(DUNE) install

@@ -1,6 +1,9 @@
-# Version 2
+# Version 2.0.0
 
-- Building an opam package from dune
+- latex-source files not installed by default; requires runninig a post-installation
+  command 
+- The documentation is not built and installed by default, to avoid dependencies
+- Available as an opam package
 - Compilation via dune 
 - Moved from CVS to git
 
