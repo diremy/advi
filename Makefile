@@ -4,6 +4,8 @@ ALLDIRS = $(MAINDIRS) test examples
 
 SRC = src/Makefile.config src/advi-latex-files src/main.exe
 
+DUNEROOT = --root=.
+
 .PHONY: default 
 default: $(SRC)
 	for dir in $(MAINDIRS); do make -C $$dir; done
@@ -22,7 +24,7 @@ help:
 advi: src/main.exe
 
 src/%: 
-	dune --root=. build $@
+	dune build $(DUNEROOT) $@
 
 .PHONY: test examples all
 test:
@@ -48,11 +50,11 @@ doc.manual: $(CONFIG)
 INSTALL = _build/default/advi.install
 
 $(INSTALL):
-	dune build @install
+	dune build $(DUNEROOT) @install
 
 .PHONY: install install.manual uinstall
 install: all $(INSTALL)
-	dune install
+	dune install $(DUNEROOT)
 	for dir in $(MAINDIRS); do make -C $$dir install; done
 	@echo 
 	@echo 'WARNING:'
@@ -65,9 +67,9 @@ install.manual:
 
 uninstall: $(INSTALL)
 	for dir in $(MAINDIRS); do make -C $$dir uninstall; done
-	dune uninstall
+	dune uninstall $(DUNEROOT)
 
 .PHONY: clean 
 clean: 
 	for dir in $(ALLDIRS); do make -C $$dir clean; done
-	dune clean
+	dune clean $(DUNEROOT)
