@@ -84,7 +84,9 @@ let addpath elem var kind =
     try
       let oldv = Unix.getenv var in
       let suff = 
-        if String.ends_with ~suffix:":" oldv then oldv ^ elem ^ ":"
+        (* if String.ends_with ~suffix:":" oldv *)
+        if String.get oldv (String.length oldv -1) = ':'
+        then oldv ^ elem ^ ":"
         else ":" ^ elem in
       oldv ^ suff 
     with Not_found ->
