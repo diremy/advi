@@ -53,7 +53,7 @@ $(INSTALL):
 	dune build $(DUNEROOT) @install
 
 .PHONY: install install.manual uinstall
-install: all $(INSTALL)
+install: default $(INSTALL)
 	dune install $(DUNEROOT)
 	for dir in $(MAINDIRS); do make -C $$dir install; done
 	@echo 
