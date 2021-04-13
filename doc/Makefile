@@ -2,13 +2,10 @@ CONFIG = ../_build/default/src/Makefile.config
 
 TEXINPUTS = .:../tex/:
 
-TEX = $(shell ls *.tex)
-STY = $(shell ls ../tex/*.sty *.sty) 
-
-DEPS = $(TEX) $(STY) $(EPS)
+DEPS = $(shell ls *.tex ../tex/*.hva ../tex/*.eps *.sty *.hva) 
 
 OUTDIR = _build
- 
+
 LATEX = TEXINPUTS=$(TEXINPUTS) latexmk -outdir=$(OUTDIR)
 
 MANFILE = advi.1
@@ -21,7 +18,8 @@ MANUALFILES = advi.pdf advi_remote.pdf advi.html advixxx.html
 MANUALBUILD = $(patsubst %, $(OUTDIR)/%, $(MANUALFILES))
 
 
-.PHONY: all manual distbuild distclean promote clean install install.manual uninstall
+.PHONY: all manual distbuild distclean promote \
+	install install.manual uninstall clean
 
 all: $(DISTFILES)
 
@@ -80,7 +78,7 @@ install.manual: $(MANUALBUILD)
 	for i in $(MANUALFILES) $(MANUALEXTRA); \
 	  do install $(OUTDIR)/$$i $(advi_docdir)/; done
 	install $(OUTDIR)/advi0??.html $(advi_docdir)/
-	install $(OUTDIR)/advi.html $(advi_docdir)/index.html
+	install $(OUTDIR)/advixxx.html $(advi_docdir)/index.html
 
 uninstall: 
 	rm -vf $(advi_mandir)/man1/advi.1

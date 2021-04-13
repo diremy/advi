@@ -222,6 +222,7 @@ let prefetch filenames dpi =
     true_file_names  ["-dpi=" ^ string_of_int dpi; "-mktex=pk"] uncached in
   let cache filename fullname =
     Hashtbl.add kpsewhich_cache filename fullname in
+  (* assert failed for CB... ??? *)
   assert (List.length uncached = List.length truenames);
   iter2_safe cache uncached truenames
 ;;

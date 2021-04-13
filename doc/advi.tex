@@ -51,9 +51,11 @@
 % We use Hevea to create the HTML version
 \usepackage{hevea}
 
-\ifhevea\title{
+\ifhevea
+\title{
 {\bf\ActiveDVI}\\
-\imgsrc{bar.gif}\\
+\includegraphics{bar.eps}\\
+%% \imgsrc{advi\theimage.png}\\
 Reference manual\\
 {\small Version {\adviversion}}
 }
@@ -97,38 +99,38 @@ via a companion \doctt{advi.sty} {\latex} package.
 and distributed under the Gnu Library General Public License ---see the LGPL
 file included in the distribution.
 
-\ifhevea
-This manual is  available as
-\ahref {manualxxx.html}{several HTML files}
-or in \ahref {manual.pdf}{PDF format}.
-\fi
-
-\bigskip
-
+\ifhevea\else\bigskip\fi
 \ActiveDVI is available at \githuburl.
 This documentation and additional information are available at \homeurl.
+
+\ifhevea
+This manual is  available as a
+a \ahref {advi.html}{single} or 
+\ahref {advixxx.html}{several} HTML files, 
+or in \ahref {advi.pdf}{PDF format}.
+
+\bigskip
+\fi
 \end{abstract}
 
 \vfill
+
 \section*{Acknowledgments and contributors}
 
-{\ActiveDVI} is based on Mldvi, written and 
-\ahref{http://www.pps.jussieu.fr/~miquel/soft.html}{distributed}
-by \ahref{http://www.pps.jussieu.fr/~miquel/}{Alexandre~Miquel}
-under the LGPL license\footnote {At the url
-\url{http://www.pps.jussieu.fr/~miquel/soft.html}.}.
-This constitutes the core rendering engine.  
-{\ActiveDVI} has then been developed by 
+{\ActiveDVI} is based on Mldvi, written by
+\ahref{https://www.fing.edu.uy/\home{amiquel}/}{Alexandre~Miquel},
+which constituted the core rendering engine.  {\ActiveDVI} has then
+been developed by 
 %
-\ahref{http://jun.furuse.info/}{Jun Furuse},
+\ahref{https://camlspotter.gitlab.io/page/about/}{Jun Furuse},
 \ahref{http://gallium.inria.fr/\home{remy}/}{Didier R{\'e}my}, and
 \ahref{http://gallium.inria.fr/\home{weis}/}{Pierre Weis},
 with contributions by 
-\ahref{http://wwwdgeinew.insa-toulouse.fr/\home{lebotlan}/}{Didier Le Botlan},
+\ahref{http://wwwperso.insa-toulouse.fr/\home{lebotlan}/}{Didier Le Botlan},
 \ahref{http://www.dicosmo.org/}{Roberto Di Cosmo},
 \ahref{http://gallium.inria.fr/\home{xleroy}/}{Xavier Leroy},
-\ahref{http://www.pps.jussieu.fr/\home{miquel}/}{Alexandre Miquel}, and
-\ahref{http://sardes.inrialpes.fr/\home{aschmitt}/}{Alan Schmitt}.
+\ahref{https://www.fing.edu.uy/\home{amiquel}/}{Alexandre~Miquel}, and
+\ahref{http://people.rennes.inria.fr/Alan.Schmitt/}{Alan Schmitt}.
 
 \clearpage
 %\advitoc
@@ -213,7 +215,7 @@ default location.
 
 \subsection {Rebuilding the documentation}
 
-The documentation, available at \url {http://advi.inria.fr/manual.html}, is
+The documentation, available at \url {http://advi.inria.fr/advi.html}, is
 not installed by default.
 
 You may rebuild the document from the sources:
