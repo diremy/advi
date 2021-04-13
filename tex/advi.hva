@@ -13,9 +13,9 @@
 % Which name is ours
 \def \advi@name {Active-DVI}
 % Which year of development are we (used for various copyrights message) ?
-\def \advi@year {2011}
+\def \advi@year {2021}
 % Which version is it ?
-\def \advi@version {1.10}
+\def \advi@version {2.0.0}
 
 %% End of administrative definitions that need updating.
 

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+package_version='2.0.0'
+
 function valdef () {
     name="$1"
     value="$2"
@@ -20,8 +22,15 @@ function error () {
     exit 1
 }    
 
+# FIXED by calling opam exex dune -- in Makefiles
+# if test "$(opam exec which -- dune)" != "$(which dune)"
+# then
+#     warn 'Your PATH disagree with your opam switches'
+#     warn 'Run eval $(opam env) to update the current shell environment'
+#     warn 'Or wrap your <COMMAND> with `opam exec <COMMAND> --'
+#     error 
+# fi    
 
-package_version='%%VERSION%%'
 
 build_date=$(date +%Y-%m-%d)
 

@@ -41,6 +41,9 @@
 \usepackage{xwindows-colors}
 \usepackage[\driver]{hyperref}
 
+\newcommand{\githuburl}{\url{https://github.com/diremy/advi}\xspace}
+\newcommand{\homeurl}{\url{http://advi.inria.fr/}\xspace}
+
 
 
 % End of splash specific stuff
@@ -99,6 +102,11 @@ This manual is  available as
 \ahref {manualxxx.html}{several HTML files}
 or in \ahref {manual.pdf}{PDF format}.
 \fi
+
+\bigskip
+
+\ActiveDVI is available at \githuburl.
+This documentation and additional information are available at \homeurl.
 \end{abstract}
 
 \vfill
@@ -146,10 +154,9 @@ The simpliest is to run:
 \end{verbatim}
 this should tell you and install the missing dependencies. 
 
-You may also retreive the github sources from \url
-{https://github.com/diremy/advi} either by cloning sources or by retreiving
-a tar ball.  In both cases, you must ensure that the following \verb"opam"
-packages
+You may also retreive the github sources from \githuburl either by cloning
+sources or by retreiving a tar ball.  In both cases, you must ensure that
+the following \verb"opam" packages
 \begin{verbatim}
         "dune" {>= "2.5"}
         "graphics" {>= "5.1.1"}
@@ -157,7 +164,7 @@ packages
 \end{verbatim}
 are installed.  Then just run in the root distribution directory:
 \begin{verbatim}
-        make all
+        make
         make install
 \end{verbatim}
 This will only install the \verb"advi" executable in the opam hierarchy as
@@ -172,7 +179,7 @@ The command:
 \begin{verbatim}
         advi-latex-files --install
 \end{verbatim}
-will tell you what to do. In particular, you may install \latex source file
+will tell you what to do. In particular, you may install \latex source files
 at the default path in your \latex installation hierarchy:
 \begin{verbatim}
         advi-latex-files --install default
@@ -184,8 +191,8 @@ Alternatively, you may specify explicitly where to install those files:
 The \verb"<DESTINATION>" path should then be included in to your \verb"TEXINPUTS" 
 environment variable.
 
-You may also install these additional \latex source files manually. 
-The command
+You may also install these additional \latex source files manually.
+Then, the command
 \begin{verbatim}
         advi-latex-files --path
 \end{verbatim}
@@ -195,7 +202,7 @@ variable), while the the command:
 \begin{verbatim}
         advi-latex-files --list
 \end{verbatim}
-will them the files that will be installed.
+will list the files that should be installed.
 
 Finally, you may run
 \begin{verbatim}

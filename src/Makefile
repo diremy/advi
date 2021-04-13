@@ -1,12 +1,13 @@
 FILES = Makefile.config advi-latex-files main.exe
 
+DUNE = opam exec dune --
 DUNEROOT = --root=..
 
 all: $(FILES)
 
 $(FILES):
-	dune build $(DUNEROOT) $@
+	$(DUNE) build $(DUNEROOT) $@
 
 install:
-	dune build $(DUNEROOT) @install
-	dune install $(DUNEROOT)
+	$(DUNE) build $(DUNEROOT) @install
+	$(DUNE) install $(DUNEROOT)  --display=short

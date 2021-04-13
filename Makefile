@@ -4,6 +4,7 @@ ALLDIRS = $(MAINDIRS) test examples
 
 SRC = src/Makefile.config src/advi-latex-files src/main.exe
 
+DUNE = opam exec dune --
 DUNEROOT = --root=.
 
 .PHONY: default 
@@ -24,7 +25,7 @@ help:
 advi: src/main.exe
 
 src/%: 
-	dune build $(DUNEROOT) $@
+	$(DUNE) build $(DUNEROOT) $@
 
 .PHONY: test examples all
 test:
@@ -44,20 +45,21 @@ $(CONFIG): src/Makefile.config
 doc: $(CONFIG)
 	make -C doc
 
-doc.manual: $(CONFIG)
+doc.manual: $(CONFIG) 
 	make -C doc manual
 
 INSTALL = _build/default/advi.install
 
 $(INSTALL):
-	dune build $(DUNEROOT) @install
+	$(DUNE) build $(DUNEROOT) @install
 
 .PHONY: install install.manual uinstall
 install: default $(INSTALL)
-	dune install $(DUNEROOT)
+	$(DUNE) install $(DUNEROOT) --display=short
 	for dir in $(MAINDIRS); do make -C $$dir install; done
 	@echo 
 	@echo 'WARNING:'
+	@echo 
 	@echo "  You still need to run the command 'advi-latex-files'"
 	@echo "  to install some LaTeX files needed for advanced features."
 	@echo
@@ -67,9 +69,9 @@ install.manual:
 
 uninstall: $(INSTALL)
 	for dir in $(MAINDIRS); do make -C $$dir uninstall; done
-	dune uninstall $(DUNEROOT)
+	$(DUNE) uninstall $(DUNEROOT)
 
 .PHONY: clean 
 clean: 
 	for dir in $(ALLDIRS); do make -C $$dir clean; done
-	dune clean $(DUNEROOT)
+	$(DUNE) clean $(DUNEROOT)

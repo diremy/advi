@@ -14,7 +14,7 @@ with some eye candy effects for presentation.
 
 # VERSION
 
-Active-DVI version 1.10.0
+Active-DVI version @@VERSION@@
 
 # SYNOPSIS
 

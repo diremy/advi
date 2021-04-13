@@ -3,8 +3,7 @@ CONFIG = ../_build/default/src/Makefile.config
 TEXINPUTS = .:../tex/:
 
 TEX = $(shell ls *.tex)
-STY = $(shell ls ../tex/*.sty)
-EPS = $(shell ls ../tex/*.eps)
+STY = $(shell ls ../tex/*.sty *.sty) 
 
 DEPS = $(TEX) $(STY) $(EPS)
 
@@ -13,12 +12,12 @@ OUTDIR = _build
 LATEX = TEXINPUTS=$(TEXINPUTS) latexmk -outdir=$(OUTDIR)
 
 MANFILE = advi.1
-SPLASHFILES = splash.dvi scratch_draw_splash.dvi scratch_write_splash.dvi 
+SPLASHFILES = splash.dvi scratch_draw_splash.dvi scratch_write_splash.dvi
 
 DISTFILES = $(MANFILE) $(SPLASHFILES)
 DISTBUILD = $(patsubst %, $(OUTDIR)/%, $(DISTFILES))
 
-MANUALFILES = manual.pdf manual.html manualxxx.html
+MANUALFILES = advi.pdf advi_remote.pdf advi.html advixxx.html 
 MANUALBUILD = $(patsubst %, $(OUTDIR)/%, $(MANUALFILES))
 
 
@@ -41,17 +40,20 @@ include $(CONFIG)
 $(OUTDIR)/%.dvi: %.tex $(DEPS)
 	$(LATEX) -dvi $<
 
-$(OUTDIR)/manual.pdf: manual.tex $(DEPS)
+$(OUTDIR)/%.pdf: %.tex $(DEPS)
 	$(LATEX) -ps $<
-	ps2pdf $(OUTDIR)/manual.ps $@
+	ps2pdf $(OUTDIR)/advi.ps $@
 
-$(OUTDIR)/manual.html: manual.tex manual.hva $(DEPS) $(OUTDIR)/.exists
+$(OUTDIR)/advi.html: advi.tex manual.hva $(DEPS) $(OUTDIR)/.exists
 	hevea -entities -I . -I ../tex -I $(OUTDIR) -o $@ -fix manual.hva $<
 
-$(OUTDIR)/manualxxx.html: manual.html 
-	cd $(OUTDIR) && hacha -o manualxxx.html manual.html
+$(OUTDIR)/advixxx.html: $(OUTDIR)/advi.html 
+	cd $(OUTDIR) && hacha -o advixxx.html advi.html
 
-$(OUTDIR)/advi.1: advi.md  $(OUTDIR)/.exists
+$(OUTDIR)/%.md: %.in.md $(OUTDIR)/.exists
+	LC_CTYPE=C sed -e 's,@@VERSION@@,$(package_version),' $< > $@ 
+
+$(OUTDIR)/advi.1: $(OUTDIR)/advi.md  $(OUTDIR)/.exists
 	pandoc --standalone --from markdown $< --to man --output $@
 
 distbuild: $(DISTBUILD)
@@ -71,15 +73,25 @@ install: $(MANFILE) $(SPLASHFILES)
 	install $(MANFILE) $(advi_mandir)/man1/
 	install $(SPLASHFILES) $(advi_docdir)/
 
+MANUALEXTRA = advi.css contents_motif.svg next_motif.svg previous_motif.svg
+
 install.manual: $(MANUALBUILD)
 	install -d $(advi_docdir)/
-	install $(OUTDIR)/manual.pdf $(OUTDIR)/manual.html $(advi_docdir)/
-	install $(OUTDIR)/manualxxx.html $(advi_docdir)/index.html
-	install _build/manual???.html $(advi_docdir)/
+	for i in $(MANUALFILES) $(MANUALEXTRA); \
+	  do install $(OUTDIR)/$$i $(advi_docdir)/; done
+	install $(OUTDIR)/advi0??.html $(advi_docdir)/
+	install $(OUTDIR)/advi.html $(advi_docdir)/index.html
 
 uninstall: 
 	rm -vf $(advi_mandir)/man1/advi.1
 	rm -vf $(advi_docdir)/index.html 
-	rm -vf $(advi_docdir)/manual???.html 
-	for i in $(DOCTARGETS); do rm -vf $(advi_docdir)/$$i; done
+	rm -vf $(advi_docdir)/advi???.html 
+	for i in $(SPLASHFILES) $(MANUALFILES) $(MANUALEXTRA); \
+	  do rm -vf $(advi_docdir)/$$i; done
 
+RSYNC = rsync --chmod=u+w,o-w,o+rX 
+
+include ../web/Makefile.website
+
+website: $(MANUALBUILD)
+	$(RSYNC) $(MANUALBUILD) $(patsubst %, $(OUTDIR)/%, $(MANIALEXTRA)) $(WEBSITEDIR)
