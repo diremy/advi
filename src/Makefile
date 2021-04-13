@@ -1,6 +1,6 @@
 FILES = Makefile.config advi-latex-files main.exe
 
-DUNE = opam exec dune --
+DUNE = dune
 DUNEROOT = --root=..
 
 all: $(FILES)

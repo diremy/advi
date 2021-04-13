@@ -4,7 +4,7 @@ ALLDIRS = $(MAINDIRS) test examples
 
 SRC = src/Makefile.config src/advi-latex-files src/main.exe
 
-DUNE = opam exec dune --
+DUNE = dune
 DUNEROOT = --root=.
 
 .PHONY: default 
