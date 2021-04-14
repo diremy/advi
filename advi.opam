@@ -24,7 +24,7 @@ authors: [
 ]
 license: "<name>"
 homepage: "http://advi.inria.fr"
-dev-repo: "https://github.com/diremy/advi"
+dev-repo: "git@github.com:diremy/advi.git"
 doc: "https://gitlab.inria.fr/remy/advi"
 bug-reports: "Didier.Remy@inria.fr"
 depends: [
