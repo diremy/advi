@@ -22,7 +22,7 @@ authors: [
   "Didier Le Botlan"
   "Alan Schmitt"
 ]
-license: "GNU LGPL 2.1"
+license: "LGPL-2.1-or-later"
 homepage: "http://advi.inria.fr"
 dev-repo: "git+https://github.com:diremy/advi.git"
 doc: "http://advi.inria.fr"
