@@ -19,42 +19,46 @@ error () {
 }
 
 usage () {
-    warn Usage:
-    warn '    ' ${cmd} --install 
-    warn '    ' ${cmd} --install default
-    warn '    ' ${cmd} --install '<PATH>'
-    warn '    ' ${cmd} --uninstall
-    warn '    ' ${cmd} --list
-    warn '    ' ${cmd} --path
+    cat<<EOF
+Usage:
+    ${cmd} --install help
+    ${cmd} --install default
+    ${cmd} --install <DESTPATH>
+    ${cmd} --uninstall
+    ${cmd} --list
+    ${cmd} --path
+EOF
     error
 }
 
 help () {
-    warn Usage:
-    warn 
-    warn '        ' ${cmd} --install '<DEST>'
     cat <<EOF
+Usage:
 
- - If <DEST> may be equal to 'default', this will attempt to find the
-   default path for latex style files in your latex distributoin hierarchy
-   and install the files there.
+        ${cmd} --install <DESTPATH>
+
+ - If <DESTPATH> is equal to "help", print this message.
+
+ - If <DESTPATH> is equal to "default", this will attempt to find
+   the default path for latex style files in your latex distribution
+   hierarchy and install the files there.
 
    This command must then probably be run as root.
    You may actually need to provide the full path:
 
-EOF
-    warn '        sudo' $(which advi-latex-files) --install default
-    cat <<EOF
-   or 
-        sudo' $(which advi-latex-files) --install default
+        sudo $(which ${cmd}) --install default
 
- - Otherwise, <DEST> must be a valid directory. This will attempt to install
-   the files in this directory, which should exist and be writable.
+ - Otherwise, <DESTPATH> must be a valid directory. 
 
-   You will them must ensure that <DEST> is included in your latex source 
-   path environment variable "TEXINPUTS". You may then have to run 
+   This will attempt to install the files in this directory, which should
+   exist and be writable.
+
+   You then must ensure that <DESTPATH> is included in your latex source
+   path environment variable "TEXINPUTS". You may also have to run
 
         mktexlsr
+
+   manually to rebuild filename databases used by TeX.
 
 EOF
     exit 0
@@ -67,7 +71,7 @@ path="$2"
 case "${command}" in
     --install)
         case "${path}" in
-            "") help ;;
+            ""|help) help ;;
             default) ;;
             /*) dest="${path}";;
             *) error 'You give a full path' ;;
