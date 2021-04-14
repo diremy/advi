@@ -35,7 +35,7 @@ DIST = advi-$(VERSION).tar.gz
 
 # $(DIST): check
 $(DIST): 
-	git archive --prefix=advi/ -o $(DIST) $(VERSION)
+	git archive --prefix=advi/ -o $(DIST) advi-$(VERSION)
 
 RSYNC = rsync --chmod=u+w,o-w,o+rX 
 
