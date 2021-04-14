@@ -22,10 +22,10 @@ authors: [
   "Didier Le Botlan"
   "Alan Schmitt"
 ]
-license: "<name>"
+license: "GNU LGPL 2.1"
 homepage: "http://advi.inria.fr"
 dev-repo: "git+https://github.com:diremy/advi.git"
-doc: "https://gitlab.inria.fr/remy/advi"
+doc: "http://advi.inria.fr"
 bug-reports: "Didier.Remy@inria.fr"
 depends: [
   "ocaml-base-compiler" {>= "4.11.1"}
@@ -33,6 +33,7 @@ depends: [
   "graphics" {>= "5.1.1"}
   "camlimages" {>= "5.0.4"}
   "conf-texlive"
+  "conf-which"
 ]
 build: [
     ["dune" "subst"] {pinned}
