@@ -10,10 +10,12 @@ WEBFILES = $(patsubst %, $(OUTDIR)/%l, $(HTM))
 
 include Makefile.website
 
+ROOTFILES = README.md INSTALL.md LICENSE.md CHANGES.md
+HTMLROOTFILES = $(patsubst %.md, $(OUTDIR)/%.html, $(ROOTFILES))
 
 .PHONY: default website clean
 
-default: $(WEBFILES) pngs/.small
+default: $(WEBFILES) pngs/.small $(HTMLROOTFILES)
 
 pngs/.small:
 	make -C pngs 
@@ -32,6 +34,9 @@ $(OUTDIR)/%.html: %.htm $(OUTDIR)/.exists
 	LC_CTYPE=C sed -e 's,@@VERSION@@,$(package_version),' $< > $@ 
 
 
+$(OUTDIR)/%.html: ../%.md
+	pandoc -o $@ $<
+
 clean:  
 	rm -rf _build
 	make -C pngs clean
@@ -39,7 +44,7 @@ clean:
 RSYNC = rsync --chmod=u+w,o-w,o+rX 
 
 website: default
-	$(RSYNC)  $(ROOTFILES) \
+	$(RSYNC)  $(HTMLROOTFILES) \
 	          _build/*.html \
                   style.css \
 	          *.gif \

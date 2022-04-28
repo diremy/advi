@@ -1377,6 +1377,7 @@ module B =
     let toggle_active st =
       Driver.toggle_active (); redraw st
 
+    let restart = let () = Gs.restart() in reload true
     let reload = reload true
     let redisplay = redisplay
     let resyncing = resyncing
@@ -1572,6 +1573,7 @@ let bind_default_keys () =
    (* r, Control-l, R, to redraw, redisplay, or reload. *)
    'r', B.redraw;
    'R', B.reload;
+   '', B.restart;
    '', B.redisplay;
    '/', B.resyncing;
    '|', B.toggle_postsyncing;

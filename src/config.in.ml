@@ -18,7 +18,7 @@
 (* $Id$ *)
 
 (* The current version of Active-DVI *)
-let advi_version_number = "@PACKAGE_VERSION@";;
+let advi_version_number = "@VERSION@";;
 (* let advi_build_date = "@BUILD_DATE@";; *)
 
 let advi_full_version = advi_version_number

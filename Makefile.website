@@ -29,7 +29,6 @@ check.tmp: $(DIST)
 FILEPERMS = -g cristal -m 644
 DIRERMS = -g cristal -m 755
 
-ROOTFILES = README.md INSTALL.md LICENSE.md CHANGES.md
 
 DIST = advi-$(VERSION).tar.gz
 
@@ -54,3 +53,4 @@ webdist: $(DIST)
 webonly: web
 	make -C doc website
 	make -C web website
+ 

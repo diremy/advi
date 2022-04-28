@@ -673,3 +673,5 @@ let toggle_antialiasing () =
   antialias := not !antialias;
   kill ();;
 
+let restart () =
+  kill ();;

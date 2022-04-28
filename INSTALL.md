@@ -139,3 +139,19 @@ latex packages:
 
 as well as some latex tools: `latexmk`, `pandoc`, and `hevea`
 (http://hevea.inria.fr/) also available under opam.
+
+
+RECOMMEDNED
+===========
+
+`advi` uses the `kpsewhich` command from TeX basic distribution to search
+for fonts. This may indirectly attemp to build DVI fonts at missing
+resolution, call other commands of the TeX distribution, which may not be
+available in a basic installation.  
+
+Therefore, we recommend a full installation of TeX, and in particular to
+have the following commands:
+
+        gsftopk
+        ghostscript
+        kpsepath

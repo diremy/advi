@@ -31,10 +31,11 @@ arbitrary applications within the presentation (hence the Active
 adjective of the presenter :).
 
 Active-DVI is largely based on Mldvi written by Alexandre Miquel
-(http://www.pps.jussieu.fr/~miquel/).
+(https://www.fing.edu.uy/~amiquel). 
 
 Version: 2.0.0
 available at http://advi.inria.fr/
+and on https://github.com/diremy/advi/
 
 CURRENTLY SUPPORTED FEATURES:
 =============================

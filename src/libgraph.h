@@ -29,26 +29,27 @@
 #include <caml/misc.h>
 
 struct canvas {
-  int w, h;                     /* Dimensions of the drawable */
-  Drawable win;                 /* The drawable itself */
-  GC gc;                        /* The associated graphics context */
+  int w, h;                              /* Dimensions of the drawable */
+  Drawable win;                          /* The drawable itself */
+  GC gc;                                 /* The associated graphics context */
 };
 
-extern Display * caml_gr_display;     /* The display connection */
-extern int caml_gr_screen;            /* The screen number */
-extern Colormap caml_gr_colormap;     /* The color map */
-extern struct canvas caml_gr_window;  /* The graphics window */
-extern struct canvas caml_gr_bstore;  /* The pixmap used for backing store */
-extern int caml_gr_white, caml_gr_black;    /* Black and white pixels for X */
-extern int caml_gr_background;        /* Background color for X
-                                     (used for CAML color -1) */
-extern Bool caml_gr_display_modeflag;     /* Display-mode flag */
-extern Bool caml_gr_remember_modeflag;    /* Remember-mode flag */
-extern int caml_gr_x, caml_gr_y;      /* Coordinates of the current point */
-extern int caml_gr_color;        /* Current *CAML* drawing color (can be -1) */
-extern XFontStruct * caml_gr_font;    /* Current font */
-extern long caml_gr_selected_events;  /* Events we are interested in */
-extern Bool caml_gr_ignore_sigio;     /* Whether to consume events on sigio */
+extern Display * caml_gr_display;        /* The display connection */
+extern int caml_gr_screen;               /* The screen number */
+extern Colormap caml_gr_colormap;        /* The color map */
+extern struct canvas caml_gr_window;     /* The graphics window */
+extern struct canvas caml_gr_bstore;     /* The pixmap used for backing store */
+extern int caml_gr_white, caml_gr_black; /* Black and white pixels for X */
+extern int caml_gr_background;           /* Background color for X
+                                            (used for CAML color -1) */
+extern Bool caml_gr_display_modeflag;    /* Display-mode flag */
+extern Bool caml_gr_remember_modeflag;   /* Remember-mode flag */
+extern int caml_gr_x, caml_gr_y;         /* Coordinates of the current point */
+extern int caml_gr_color;                /* Current *CAML* drawing color 
+                                            (can be -1) */ 
+extern XFontStruct * caml_gr_font;       /* Current font */
+extern long caml_gr_selected_events;     /* Events we are interested in */
+extern Bool caml_gr_ignore_sigio;        /* Whether to consume events on sigio */
 
 extern Bool caml_gr_direct_rgb;
 extern int caml_gr_byte_order;

@@ -242,14 +242,14 @@ value caml_gr_get_window_id(void)
 { unsigned int w; 
   caml_gr_check_open();
   w = caml_gr_window.win;
-  return copy_int32 (w);
+  return caml_copy_int32 (w);
 }
 
 value caml_gr_get_bstore_id(void)
 { unsigned int w; 
   caml_gr_check_open();
   w = caml_gr_bstore.win;
-  return copy_int32 (w); 
+  return caml_copy_int32 (w); 
 }
 
 value caml_gr_flush(void)
@@ -296,7 +296,7 @@ value caml_gr_cut (value string) {
                    String_length (string)
                    );
   */
-  XStoreBytes (caml_gr_display, String_val (string), string_length (string)); 
+  XStoreBytes (caml_gr_display, String_val (string), caml_string_length (string)); 
   XSetSelectionOwner (caml_gr_display,
                       XA_PRIMARY,
                       None,
@@ -314,7 +314,7 @@ value caml_gr_set_named_atom_property (value name, value string) {
                    PropModeReplace, 		/* mode */
                    (unsigned char*) 
                      String_val(string),	/* data */
-                   string_length (string)       /* nelements */
+                   caml_string_length (string)  /* nelements */
                    );
   XSync(caml_gr_display, False);
   return Val_unit;
@@ -326,7 +326,7 @@ value caml_gr_set_cursor(value glyphid) {
   gid = Int_val(glyphid);
   caml_gr_check_open();
   if (gid < 0 || gid >= XC_num_glyphs) {
-    invalid_argument("set_cursor");
+    caml_invalid_argument("set_cursor");
   }
   c = XCreateFontCursor(caml_gr_display, gid);
   XDefineCursor(caml_gr_display, caml_gr_window.win, c);
@@ -373,7 +373,7 @@ value caml_gr_get_geometry(value unit){
   XGetWindowAttributes(caml_gr_display, caml_gr_window.win, &attr);
   get_position_against_root( caml_gr_window.win, pos );
 
-  res = alloc_tuple(4);
+  res = caml_alloc_tuple(4);
   Field(res,0) = Val_int(attr.width);
   Field(res,1) = Val_int(attr.height);
   Field(res,2) = Val_int(pos[0]);

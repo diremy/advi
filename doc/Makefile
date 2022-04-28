@@ -92,4 +92,8 @@ RSYNC = rsync --chmod=u+w,o-w,o+rX
 include ../web/Makefile.website
 
 website: $(MANUALBUILD)
-	$(RSYNC) $(MANUALBUILD) $(patsubst %, $(OUTDIR)/%, $(MANIALEXTRA)) $(WEBSITEDIR)
+	$(RSYNC) \
+	  $(MANUALBUILD) \
+	  $(patsubst %, $(OUTDIR)/%, $(MANUALEXTRA)) \
+	  $(OUTDIR)/advi0??.html \
+	$(WEBSITEDIR)
