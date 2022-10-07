@@ -1501,9 +1501,27 @@ module B =
       set_keymap Default_keymap;
       Laser_pointer.laser_beam ()
 
-    let abort_key st =
-      set_keymap Default_keymap
+    let abort_key st = set_keymap Default_keymap
 
+    (* We have two different bindings for arrows: by default simple arrows
+       move pages and not the text withing the page *)
+    let arrows_move_inside_page = ref false
+    let arrow_switch st =
+      arrows_move_inside_page := not !arrows_move_inside_page
+          
+    let arrow outside inside st =
+      if !arrows_move_inside_page then inside st else outside st
+        
+    let arrow_left  = arrow previous_page    page_left  
+    let arrow_down  = arrow next_pause       page_down   
+    let arrow_up    = arrow previous_pause   page_up  
+    let arrow_right = arrow next_page        page_right 
+                                             
+    let arrow_home  = arrow first_page       first_page 
+    let arrow_next  = arrow page_down        page_down  
+    let arrow_prior = arrow page_up          page_up
+    let arrow_end   = arrow last_page        last_page  
+        
   end;;
 
 let bind_key tbl (key, action) = tbl.(int_of_char key) <- action;;
@@ -1521,17 +1539,33 @@ let bind_default_keys () =
    (* General purpose keys. *)
    'A', B.toggle_antialiasing;
    'a', B.toggle_active;
-   'q', B.exit;
+   'Q', B.exit;
    '?', B.help;
 
-   (* hjkl to move the page around *)
-   'h', B.page_left;
-   'j', B.page_down;
-   'k', B.page_up;
-   'l', B.page_right;
+   '\b' (* backspace *), B.pop_previous_page;   
+   '\r' (* return *), B.push_next_page;
+   
+   (* equivalent of arrows *)
+   '^', B.arrow_switch;
+   
+   (* hjkl == Left-Down-Up-Right *)
+   'h', B.arrow_left;
+   'j', B.arrow_down;
+   'k', B.arrow_up;
+   'l', B.arrow_right;
+   
+   (* HJKL == Home-Next-Prior-End *)
+   'H', B.arrow_home;
+   'J', B.arrow_next;
+   'K', B.arrow_prior;  
+   'L', B.arrow_end;  
+
+   ',', B.first_page;           
+   '.', B.last_page;            
+
    '', B.toggle_center_on_cursor; 
    (* toggle scroll fast *)
-   '\010', B.scroll_switch;
+   '\n', B.scroll_switch;
 
    (* m, i are reserved for scrolling
      'm', B.scroll_one_line_down;
@@ -1544,9 +1578,6 @@ let bind_default_keys () =
    '\t' (* tab *), B.show_toc;
    '' (* Escape *), (*B.nop *) B.pop_page; 
 
-   '\b' (* backspace *), B.pop_previous_page;
-   '\r' (* return *), B.push_next_page;
-
    'x', B.exchange_page;
    'M', B.mark_page;
    'm', B.goto_mark;
@@ -1557,16 +1588,12 @@ let bind_default_keys () =
    '', B.next_page;
    'p', B.previous_page;
    '\246' (* o'' *), B.previous_page;
-   'P', B.previous_pause;
-   'N', B.next_pause;
 
    (* ^P, ^N in edit mode means previous -or next- slice *)
    '', B.next_slice;
    '', B.previous_slice;
 
    (* comma, ., g, to go to a page. *)
-   ',', B.first_page;
-   '.', B.last_page;
    'g', B.goto;
    'G', B.goto_pageref;
 

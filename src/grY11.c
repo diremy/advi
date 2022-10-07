@@ -600,26 +600,29 @@ value caml_gr_reposition (value x, value y, value w, value h, value scr)
 value caml_gr_rebind_keysyms(value unit)
 {
   KeySym modifiers[1] = { 0 };
-  unsigned char* str; 
-  str = (unsigned char*) "N";
-  XRebindKeysym(caml_gr_display, XK_Next, modifiers, 0, str, 1);
+  unsigned char* str;
+  /* hjkl */
+  str = (unsigned char*)"h";
+  XRebindKeysym(caml_gr_display, XK_Left, modifiers, 0, str, 1);
   str = (unsigned char*) "j";
   XRebindKeysym(caml_gr_display, XK_Down, modifiers, 0, str, 1);
-  str = (unsigned char*)"P";
-  XRebindKeysym(caml_gr_display, XK_Prior, modifiers, 0, str, 1);
   str = (unsigned char*) "k";
   XRebindKeysym(caml_gr_display, XK_Up, modifiers, 0, str, 1);
-  str = (unsigned char*)",";
-  XRebindKeysym(caml_gr_display, XK_Home, modifiers, 0, str, 1);
-  str = (unsigned char*)".";
-  XRebindKeysym(caml_gr_display, XK_End, modifiers, 0, str, 1);
-  str = (unsigned char*)"\b";
-  XRebindKeysym(caml_gr_display, XK_Left, modifiers, 0, str, 1);
-  str = (unsigned char*)"\r";
+  str = (unsigned char*)"l";
   XRebindKeysym(caml_gr_display, XK_Right, modifiers, 0, str, 1);
+  
+  str = (unsigned char*)"H";
+  XRebindKeysym(caml_gr_display, XK_Home, modifiers, 0, str, 1);
+  str = (unsigned char*) "J";
+  XRebindKeysym(caml_gr_display, XK_Next, modifiers, 0, str, 1);
+  str = (unsigned char*)"K";
+  XRebindKeysym(caml_gr_display, XK_Prior, modifiers, 0, str, 1);
+  str = (unsigned char*)"L";
+  XRebindKeysym(caml_gr_display, XK_End, modifiers, 0, str, 1);
+  
   str = (unsigned char*)"t";
   XRebindKeysym(caml_gr_display, XK_Insert, modifiers, 0, str, 1);
-  return Val_unit;
+  return Val_unit; 
 }
 
 

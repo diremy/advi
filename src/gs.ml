@@ -138,6 +138,7 @@ class gs () =
     Array.concat [
     [|
       command; 
+      "-dALLOWPSTRANSPARENCY"; (* Should this be configured? *)
       "-dNOPLATFONTS"; "-dNOPAUSE"; (if !gslibincwd then "-P" else "-P-");
     |];
     (if !antialias then x11alpha_device else x11_device);
