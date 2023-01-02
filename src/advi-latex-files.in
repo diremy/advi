@@ -37,7 +37,7 @@ Usage:
 
         ${cmd} --install <DESTPATH>
 
- - If <DESTPATH> is equal to "help", print this message.
+ - If <DESTPATH> is equal to "help", prints this message.
 
  - If <DESTPATH> is equal to "default", this will attempt to find
    the default path for latex style files in your latex distribution
@@ -54,11 +54,18 @@ Usage:
    exist and be writable.
 
    You then must ensure that <DESTPATH> is included in your latex source
-   path environment variable "TEXINPUTS". You may also have to run
+   path environment variable "TEXINPUTS" and have precedence over the
+   distribution environment (for pgfsys-dvips.def). You may check this with
+
+        kpwewhich pdgsys-dvips.def
+
+   which should return the path of the version installed by advi.
+   You may also have to run
 
         mktexlsr
 
    manually to rebuild filename databases used by TeX.
+  
 
 EOF
     exit 0

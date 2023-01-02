@@ -16,7 +16,12 @@
 \def\pgf@sys@postscript@object#1{\special{! #1}}
 
 %%% BUG FIX
-%% generation of \specials should be delayed...
+%% Generation of \specials should be delayed...
+
+%% This needed for dumping formats, such as done by whizzytex
+%% for some reason I did not understand.
+
+%% This patch should still work for older distributions of tex.
  
 \let \pgf@sys@postscript@object@immediate \pgf@sys@postscript@object
  

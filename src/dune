@@ -5,8 +5,9 @@
  (flags (:standard -w +Y+X+D -warn-error +S -w -KZ -w -50 -w -9 -w -6 -w -27)
  ;; (-cclib  -lXinerama)
  )
- (libraries str unix graphics camlimages.core camlimages.graphics
-            camlimages.freetype)
+ (libraries str unix graphics
+            camlimages.core camlimages.graphics camlimages.freetype
+            )
  (foreign_stubs (language c)
                 (names grY11 events grwm)
                 ;; Does not compile on Mac osx, even when Xinerama is present

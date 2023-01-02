@@ -1377,8 +1377,8 @@ module B =
     let toggle_active st =
       Driver.toggle_active (); redraw st
 
-    let restart = let () = Gs.restart() in reload true
     let reload = reload true
+    let restart st = let () = Gs.restart() in reload st
     let redisplay = redisplay
     let resyncing = resyncing
     let toggle_postsyncing st = postsyncing := not !postsyncing
