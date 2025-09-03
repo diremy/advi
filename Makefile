@@ -1,10 +1,9 @@
 MAINDIRS = tex doc 
 
 ALLDIRS = $(MAINDIRS) test examples
-
 SRC = src/Makefile.config src/advi-latex-files src/main.exe
 
-DUNE = dune
+DUNE = opam exec dune --
 DUNEROOT = --root=.
 
 .PHONY: default 

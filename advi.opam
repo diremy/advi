@@ -1,5 +1,5 @@
 opam-version: "2.0"
-version: "2.0.0"
+version: "2.1.0"
 synopsis: "An alternative to xdvi with special support for WhizzyTeX"
 description: """
 Active-DVI is a DVI previewer and presenter written in OCaml with some eye
@@ -26,11 +26,12 @@ dev-repo: "git+https://github.com/diremy/advi.git"
 doc: "http://advi.inria.fr"
 bug-reports: "Didier.Remy@inria.fr"
 depends: [
-  "ocaml" {>= "4.11.1"}
+  "ocaml" {>= "5.3.0"}
   "dune" {>= "2.5"}
-  "graphics" {>= "5.1.1"}
-  "camlimages" {>= "5.0.4"}
+  "graphics" {>= "5.2.0"}
+  "camlimages" {>= "5.0.5"}
   "conf-texlive" {build}
+  "conf-freetype" {build}
   "conf-ghostscript" {build}
   "conf-which" {build}
 ]

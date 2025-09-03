@@ -1388,6 +1388,8 @@ type area =
    | Bottom_right | Bottom_left | Top_right | Top_left | Middle;;
 type button =
    | Button1 | Button2 | Button3 | Button4 | Button5 | NoButton 
+type modifier = 
+   { button : button; shift : bool; control : bool; }
 
 type event =
    | Resized of int * int
@@ -1401,7 +1403,7 @@ type event =
    | Position of int * int
    | Href of string
    | Advi of string * (unit -> unit)
-   | Click of area * button * int * int
+   | Click of area * modifier * int * int
    | Nil;;
 
 type option_event =
@@ -1684,25 +1686,27 @@ let mouse_area near x y =
     else Middle
   else Middle;;
 
-let modifier m b = m land b <> 0;;
 
 module G = GraphicsY11;;
 
-let pressed m b = m land b <> 0
+let modifier m b = m land b <> 0;;
 let button123 = G.button1 lor G.button2 lor G.button3
-
-let get_button b =
-  if pressed b G.button1 then Button1 else
-  if pressed b G.button2 then Button2 else
-  if pressed b G.button3 then Button3 else
-  if pressed b G.button4 then Button4 else
-  if pressed b G.button5 then Button5 else
-  NoButton
-;;
-
 let shift_or_control = G.shift lor G.control
 
+let get_button b =
+  if modifier b G.button1 then Button1 else
+  if modifier b G.button2 then Button2 else
+  if modifier b G.button3 then Button3 else
+  if modifier b G.button4 then Button4 else
+  if modifier b G.button5 then Button5 else
+  NoButton
+;;
+let get_modifiers m =
+  { button = get_button m;
+    shift = modifier m G.shift;
+    control = modifier m G.control; }
 let button_pressed m b = get_button m = b
+
 
 let wait_button_up m x y =
   let wait_position () =
@@ -1713,11 +1717,11 @@ let wait_button_up m x y =
         if modifier m G.button1 && not (modifier m shift_or_control) then begin
           match mouse_area close x y with
           | Middle -> Final (Position (x, !size_y - y))
-          | c -> Final (Click (c, get_button e.modifiers, x, !size_y - y))
+          | c -> Final (Click (c, get_modifiers e.modifiers, x, !size_y - y))
         end
         else
           let c = mouse_area near x y  in
-          Final (Click (c, get_button e.modifiers, x, !size_y - y))
+          Final (Click (c, get_modifiers e.modifiers, x, !size_y - y))
     | x -> x in
   if modifier m G.button1 && not (modifier m shift_or_control) then
     wait_position () else
@@ -1782,9 +1786,9 @@ let wait_event () =
         | {A.action = {H.tag = H.Href h; H.draw = d}} as act ->
             if ev.button then
               let _ev' = GraphicsY11.wait_next_event button_up in
-              if  pressed ev.modifiers button123
+              if  modifier ev.modifiers button123
               then send (Href h)
-              else send (Click (Middle, get_button _ev'.modifiers,
+              else send (Click (Middle, get_modifiers _ev'.modifiers,
                                 _ev'.mouse_x, _ev'.mouse_y))
             else if H.up_to_date act emph then event emph b else begin
                 H.deemphasize true emph;
@@ -1802,7 +1806,7 @@ let wait_event () =
               in
               (* This would not work with rolling button *)
               send (Click (area, 
-                           get_button _ev'.modifiers, 
+                           get_modifiers _ev'.modifiers, 
                            _ev'.mouse_x, 
                            _ev'.mouse_y))
             else

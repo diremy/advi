@@ -34,6 +34,10 @@ It will download and install the package.
 The default installation, does not install the latex style files.
 See the section *INSTALLATION OF LATEX SOURCE FILES* below. 
 
+Note: 
+
+The X library is not always found by OCaml.
+
 
 COMPILATION AND INSTALLATION USING MAKE
 ========================================

@@ -1157,11 +1157,11 @@ let goto_mark n st =
   | Invalid_argument _ -> ();;
 
 let previous_slice st =
-  print_string "#line 0, 0 <<<<>><<>>Next-Slice>> ";
+  print_string "#line 0, 0 <<Previous-Slice<<>><<>>>> ";
   print_newline ();;
 
 let next_slice st =
-  print_string "#line 0, 0 <<Previous-Slice<<>><<>>>> ";
+  print_string "#line 0, 0 <<<<>><<>>Next-Slice>> ";
   print_newline ();;
 
 (* goto hyperref link *)
@@ -1747,28 +1747,44 @@ let main_loop mastername clients =
         | Grdev.Position (x, y) ->
             st.last_command <- Position;
             position st x y
-        | Grdev.Click (_, Grdev.Button4, _, _)  -> B.scroll_up st
-        | Grdev.Click (_, Grdev.Button5, _, _)  -> B.scroll_down st
-        | Grdev.Click (pos, but, _, _) when Grdev.E.editing () ->
-            begin match pos, but with
-            | Grdev.Top_left, Grdev.Button1 -> B.previous_slice st
-            | Grdev.Top_left, Grdev.Button2 -> B.reload st
-            | Grdev.Top_left, Grdev.Button3 -> B.next_slice st
-            | Grdev.Top_right, Grdev.Button1 -> B.previous_page st
-            | Grdev.Top_right, Grdev.Button2 -> B.last_page st
-            | Grdev.Top_right, Grdev.Button3 -> B.next_page st
-            | _, _ -> ()
+        | Grdev.Click (_, {button = Grdev.Button4; _}, _, _)  ->
+          B.scroll_up st
+        | Grdev.Click (_, {button = Grdev.Button5; _}, _, _)  ->
+          B.scroll_down st
+        | Grdev.Click (pos, modifier, _, _) when Grdev.E.editing () ->
+          let shift_control =
+            let shift = if modifier.shift then 01 else 0 in
+            let control = if modifier.control then 10 else 0 in
+            shift + control in
+            begin match pos, modifier.button, shift_control with
+            (* | Grdev.Top_left, Grdev.Button1, _ -> B.previous_slice st
+               | Grdev.Top_left, Grdev.Button2, _ -> B.reload st
+               | Grdev.Top_left, Grdev.Button3, _ -> B.next_slice st
+               | Grdev.Top_right, Grdev.Button1, _ -> B.previous_page st
+               | Grdev.Top_right, Grdev.Button2, _ -> B.last_page st
+               | Grdev.Top_right, Grdev.Button3, _ -> B.next_page st *)
+            | Grdev.Top_left, Grdev.Button1, 00 -> B.previous_page st
+            | Grdev.Top_left, Grdev.Button1, 01 -> B.first_page st
+            | Grdev.Top_left, Grdev.Button1, 10 -> B.previous_slice st
+            | Grdev.Top_right, Grdev.Button1, 00 -> B.next_page st
+            | Grdev.Top_right, Grdev.Button1, 01 -> B.last_page st
+            | Grdev.Top_right, Grdev.Button1, 10 -> B.next_slice st
+
+            | Grdev.Bottom_left, Grdev.Button1, _ -> B.first_page st
+            | Grdev.Bottom_right, Grdev.Button1, _ -> B.last_page st
+                  
+            | _, _, _ -> ()
             end
         | Grdev.Click (Grdev.Top_left, _, _, _) ->
             if !click_turn_page then B.pop_page st
-        | Grdev.Click (_, Grdev.Button1, _, _) ->
+        | Grdev.Click (_, {button = Grdev.Button1; _}, _, _) ->
             if !click_turn_page then B.previous_pause st
-        | Grdev.Click (_, Grdev.Button2, _, _) ->
+        | Grdev.Click (_, {button = Grdev.Button2; _}, _, _) ->
             if !click_turn_page then B.pop_previous_page st
-        | Grdev.Click (_, Grdev.Button3, _, _) ->
+        | Grdev.Click (_, {button = Grdev.Button3; _}, _, _) ->
             if !click_turn_page then B.next_pause st
         | Grdev.Nil -> ()
-        | Grdev.Click (_, Grdev.NoButton, _, _)  -> ()
+        | Grdev.Click (_, {button = Grdev.NoButton; _}, _, _)  -> ()
       done with
       | Exit -> Grdev.close_dev ()
       | Duplex (action, st') -> duplex action st' in

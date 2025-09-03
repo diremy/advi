@@ -1,3 +1,7 @@
+# Not yet committed to opam
+
+- added two bindings for arrow keys an a switch between the two.
+
 # Version 2.0.0
 
 - latex-source files not installed by default; requires runninig a post-installation

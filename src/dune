@@ -2,7 +2,8 @@
  (name main)
  (public_name advi)
  (package advi)
- (flags (:standard -w +Y+X+D -warn-error +S -w -KZ -w -50 -w -9 -w -6 -w -27)
+ (flags
+   (:standard -w +Y+X+D -warn-error +S -w -KZ -w -50 -w -9 -w -6 -w -27)
  ;; (-cclib  -lXinerama)
  )
  (libraries str unix graphics

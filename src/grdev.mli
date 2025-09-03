@@ -287,6 +287,8 @@ module H :
 
 type area = Bottom_right | Bottom_left | Top_right | Top_left | Middle;;
 type button = Button1 | Button2 | Button3 | Button4 | Button5 | NoButton;;
+type modifier = 
+   { button : button; shift : bool; control : bool; }
 type event =
    | Resized of int * int
    | Refreshed
@@ -299,7 +301,7 @@ type event =
    | Position of int * int
    | Href of string
    | Advi of string * (unit -> unit)
-   | Click of area * button * int * int
+   | Click of area * modifier * int * int
    | Nil;;
 val wait_event : unit -> event;;
 
